@@ -340,7 +340,7 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             _write(os.path.join(rd, "AREA-A-001.md"),
                    REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
             _write(os.path.join(rd, "_planning.json"), json.dumps({
-                "scores": {"health": 95, "design": 80},
+                "scores": {"health": 95, "design": 80},   # removed keys: ignored, not exported
                 "lanes": ["Tech"],
                 "bars": [{"title": "Ship planning", "lane": "Tech", "start": "2026-10-01", "end": "2026-10-15"}],
                 "milestones": {"v2.0": {
@@ -353,12 +353,12 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             with redirect_stdout(buf):
                 R.cmd_map(R.Workspace(R.load_requirements(rd), {}, rd), d)
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
-            self.assertEqual(doc["planning"]["scores"]["health"], 95)
+            self.assertNotIn("scores", doc["planning"])
             self.assertEqual(doc["planning"]["milestones"]["v2.0"]["due"], "2026-12-31")
-            self.assertEqual(doc["planning"]["milestones"]["v2.0"]["items"], ["Future panel"])
+            self.assertNotIn("items", doc["planning"]["milestones"]["v2.0"])
             self.assertEqual(doc["planning"]["bars"][0]["start"], "2026-10-01")
             self.assertEqual(doc["planning"]["lanes"], ["Tech"])
-            self.assertEqual(doc["targets"]["scores"]["health"], 95)
+            self.assertEqual(doc["targets"]["lanes"], ["Tech"])
 
     def test_hostile_title_roundtrips_as_data_not_injection(self):  # bug: id-js-string-breakout-xss  # verifies: REQ-MAP-870#CASE-6  # verifies: ARCH-MAP-007#CASE-3
         doc = _export_doc_for({"id": "a</script><img src=x>", "title": "x\");alert(1)//"})
@@ -2600,6 +2600,11 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
         self.assertNotIn("cadence", got)
         self.assertNotIn("releases", got)
 
+    def test_a_cadence_naming_no_period_is_weekly_on_friday(self):  # verifies: REQ-PLANCADENCE-1000#CASE-7
+        got = self._load(cadence={})
+        self.assertEqual(("week", "friday"), (got["cadence"]["every"], got["cadence"]["on"]))
+        self.assertEqual(["2026-09-18", "2026-09-25"], got["releases"])
+
     def test_the_weekday_is_chosen_and_from_narrows_the_span(self):  # verifies: REQ-PLANCADENCE-1000#CASE-4
         got = self._load(
             bars=[{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-10-05"}],
@@ -2679,6 +2684,63 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
         self.assertEqual(["2026-09-18", "2026-09-25"], payload["planning"]["releases"])
 
 
+class PlanStale(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-PLANSTALE-1013 @unit
+    """A plan that schedules a version already declared is reported, read-only."""
+
+    def _stale(self, milestones=(), bars=(), plugin=None, changelog=None):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = os.path.join(d, "requirements")
+            os.makedirs(reqs)
+            plan = {"milestones": {m: {"due": "2026-09-30"} for m in milestones},
+                    "bars": [{"title": "b", "start": "2026-09-21", "milestone": m}
+                             for m in bars]}
+            _write(os.path.join(reqs, "_planning.json"), json.dumps(plan))
+            if plugin:
+                _write(os.path.join(d, ".claude-plugin", "plugin.json"),
+                       json.dumps({"version": plugin}))
+            if changelog:
+                _write(os.path.join(d, "CHANGELOG.md"),
+                       "# Changelog\n\n## plugin `{}` — 2026-09-16\n\n**x.**\n"
+                       .format(changelog))
+            return (R.stale_plan_milestones(reqs, d),
+                    [ln for ln in [R._plan_stale_line(d, reqs)] if ln])
+
+    def test_a_milestone_equal_to_the_declared_version_is_stale(self):  # verifies: REQ-PLANSTALE-1013#CASE-1
+        got, lines = self._stale(milestones=["v7.19.0", "v7.20.0"], plugin="7.19.0")
+        self.assertEqual({"baseline": "v7.19.0", "source": "plugin.json",
+                          "milestones": ["v7.19.0"]}, got)
+        self.assertEqual(1, sum("_planning.json schedules v7.19.0 " in ln for ln in lines))
+
+    def test_a_milestone_past_the_baseline_is_silent(self):  # verifies: REQ-PLANSTALE-1013#CASE-2
+        got, lines = self._stale(milestones=["v7.20.0"], plugin="7.19.0")
+        self.assertIsNone(got)
+        self.assertFalse([ln for ln in lines if "_planning.json schedules" in ln])
+
+    def test_a_patch_past_the_baseline_is_silent_and_a_short_key_is_padded(self):  # verifies: REQ-PLANSTALE-1013#CASE-3
+        got, _ = self._stale(milestones=["v7.19.1"], changelog="v7.19.0")
+        self.assertIsNone(got)
+        got, _ = self._stale(milestones=["v7.19"], changelog="v7.19.0")
+        self.assertEqual(["v7.19"], got["milestones"])
+
+    def test_no_baseline_source_means_no_signal(self):  # verifies: REQ-PLANSTALE-1013#CASE-4
+        got, _ = self._stale(milestones=["v0.1.0"])
+        self.assertIsNone(got)
+
+    def test_the_highest_source_wins_and_bars_count(self):  # verifies: REQ-PLANSTALE-1013#CASE-5
+        # The manifest trails the CHANGELOG here; a baseline read from one source only
+        # would pass a bar planned on the line the CHANGELOG already shipped.
+        got, _ = self._stale(bars=["v7.19.0", "later"], plugin="7.18.0", changelog="v7.19.0")
+        self.assertEqual({"baseline": "v7.19.0", "source": "CHANGELOG.md",
+                          "milestones": ["v7.19.0"]}, got)
+
+    def test_the_signal_is_not_a_gate_rule(self):  # verifies: REQ-PLANSTALE-1013#CASE-6
+        # Precedent (Senate run 2026-09-14_225939): roadmap coherence is reported, never
+        # gated, so the planning module registers no rule and the gate stays green.
+        self.assertFalse([r.id for r in R.GATE_RULES if r.fn.__module__.endswith("targets")])
+        with open(R.targets.__file__, encoding="utf-8") as f:
+            self.assertNotIn("@gate_rule", f.read())
+
+
 class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-HISTORY-1003
     """What already shipped, read from CHANGELOG.md and grouped by calendar month."""
 
@@ -2736,6 +2798,10 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         self.assertEqual("v2.0.0", row["landmark"])
         self.assertEqual("2026-06-02", row["first"])
         self.assertEqual("2026-06-20", row["last"])
+        # every release in the month, newest first, so selecting it shows what was done
+        self.assertEqual(["v2.1.1", "v2.1.0", "v2.0.0"], [e["version"] for e in row["entries"]])
+        self.assertEqual("The breaking rename of every verb",
+                         next(e for e in row["entries"] if e["version"] == "v2.0.0")["headline"])
 
     def test_a_repo_with_no_changelog_yields_nothing(self):  # verifies: REQ-HISTORY-1003#CASE-5
         with tempfile.TemporaryDirectory() as d:

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.5",
+  "engine_version": "2026-09-16.6",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -633,87 +633,91 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3159"
+          "loc": "plugin/scripts/test_reqmap_report.py:3225"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3318"
+          "loc": "plugin/scripts/test_reqmap_report.py:3384"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5237"
+          "loc": "plugin/scripts/test_reqmap_report.py:5303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:26"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:44"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:45"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:54"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:55"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:81"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:101"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:102"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:123"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:139"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:140"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:155"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:156"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:165"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:174"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:175"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:196"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:186"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:232"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:208"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:258"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:245"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:288"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:272"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:317"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:328"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:332"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:351"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:343"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:382"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:366"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:397"
         },
         {
           "role": "implements",
@@ -826,43 +830,43 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3159"
+          "loc": "plugin/scripts/test_reqmap_report.py:3225"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5237"
+          "loc": "plugin/scripts/test_reqmap_report.py:5303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:26"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:196"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:208"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:258"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:272"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:288"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:317"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:332"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:328"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:343"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:351"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:366"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:382"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:397"
         }
       ],
       "test_exempt": null,
@@ -909,7 +913,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3159"
+          "loc": "plugin/scripts/test_reqmap_report.py:3225"
         },
         {
           "role": "implements",
@@ -966,7 +970,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3159"
+          "loc": "plugin/scripts/test_reqmap_report.py:3225"
         },
         {
           "role": "implements",
@@ -1029,47 +1033,47 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3159"
+          "loc": "plugin/scripts/test_reqmap_report.py:3225"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:44"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:45"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:54"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:55"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:81"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:101"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:102"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:123"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:139"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:140"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:155"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:156"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:165"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:174"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:186"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:232"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:245"
         }
       ],
       "test_exempt": null,
@@ -1119,7 +1123,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3318"
+          "loc": "plugin/scripts/test_reqmap_report.py:3384"
         },
         {
           "role": "implements",
@@ -2726,11 +2730,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4097"
+          "loc": "plugin/scripts/test_reqmap_report.py:4163"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5025"
+          "loc": "plugin/scripts/test_reqmap_report.py:5091"
         },
         {
           "role": "implements",
@@ -2814,7 +2818,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4097"
+          "loc": "plugin/scripts/test_reqmap_report.py:4163"
         },
         {
           "role": "implements",
@@ -2884,7 +2888,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5025"
+          "loc": "plugin/scripts/test_reqmap_report.py:5091"
         },
         {
           "role": "implements",
@@ -2952,7 +2956,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "implements",
@@ -3015,7 +3019,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "implements",
@@ -3092,7 +3096,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4078"
+          "loc": "plugin/scripts/test_reqmap_report.py:4144"
         },
         {
           "role": "implements",
@@ -3156,7 +3160,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4078"
+          "loc": "plugin/scripts/test_reqmap_report.py:4144"
         },
         {
           "role": "implements",
@@ -3234,7 +3238,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:242"
+          "loc": "plugin/scripts/reqmap_engine/health.py:243"
         },
         {
           "role": "implements",
@@ -3304,11 +3308,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4610"
+          "loc": "plugin/scripts/test_reqmap_report.py:4676"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:243"
+          "loc": "plugin/scripts/reqmap_engine/health.py:244"
         },
         {
           "role": "implements",
@@ -3361,11 +3365,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5271"
+          "loc": "plugin/scripts/test_reqmap_report.py:5337"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:55"
+          "loc": "plugin/scripts/reqmap_engine/health.py:56"
         },
         {
           "role": "implements",
@@ -3475,7 +3479,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -3896,15 +3900,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4883"
+          "loc": "plugin/scripts/test_reqmap_report.py:4949"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -3973,7 +3977,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4042,7 +4046,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4115,7 +4119,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4167,7 +4171,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4230,7 +4234,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4238,7 +4242,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:256"
+          "loc": "plugin/scripts/reqmap_engine/health.py:257"
         },
         {
           "role": "implements",
@@ -4294,7 +4298,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4361,7 +4365,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4427,7 +4431,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4484,7 +4488,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4543,7 +4547,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3414"
+          "loc": "plugin/scripts/test_reqmap_report.py:3480"
         },
         {
           "role": "implements",
@@ -4596,7 +4600,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4883"
+          "loc": "plugin/scripts/test_reqmap_report.py:4949"
         },
         {
           "role": "implements",
@@ -5240,7 +5244,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4536"
+          "loc": "plugin/scripts/test_reqmap_report.py:4602"
         },
         {
           "role": "implements",
@@ -5304,7 +5308,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4536"
+          "loc": "plugin/scripts/test_reqmap_report.py:4602"
         },
         {
           "role": "implements",
@@ -6052,7 +6056,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4129"
+          "loc": "plugin/scripts/test_reqmap_report.py:4195"
         },
         {
           "role": "implements",
@@ -6133,7 +6137,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4129"
+          "loc": "plugin/scripts/test_reqmap_report.py:4195"
         },
         {
           "role": "implements",
@@ -6544,43 +6548,43 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4274"
+          "loc": "plugin/scripts/test_reqmap_report.py:4340"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:16"
+          "loc": "plugin/scripts/reqmap_engine/health.py:17"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:127"
+          "loc": "plugin/scripts/reqmap_engine/health.py:128"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:157"
+          "loc": "plugin/scripts/reqmap_engine/health.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:187"
+          "loc": "plugin/scripts/reqmap_engine/health.py:188"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:233"
+          "loc": "plugin/scripts/reqmap_engine/health.py:234"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:276"
+          "loc": "plugin/scripts/reqmap_engine/health.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:295"
+          "loc": "plugin/scripts/reqmap_engine/health.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:342"
+          "loc": "plugin/scripts/reqmap_engine/health.py:346"
         }
       ],
       "test_exempt": null,
@@ -6627,23 +6631,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4274"
+          "loc": "plugin/scripts/test_reqmap_report.py:4340"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:233"
+          "loc": "plugin/scripts/reqmap_engine/health.py:234"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:276"
+          "loc": "plugin/scripts/reqmap_engine/health.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:295"
+          "loc": "plugin/scripts/reqmap_engine/health.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:342"
+          "loc": "plugin/scripts/reqmap_engine/health.py:346"
         }
       ],
       "test_exempt": null,
@@ -6704,23 +6708,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4274"
+          "loc": "plugin/scripts/test_reqmap_report.py:4340"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:234"
+          "loc": "plugin/scripts/reqmap_engine/health.py:235"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:277"
+          "loc": "plugin/scripts/reqmap_engine/health.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:296"
+          "loc": "plugin/scripts/reqmap_engine/health.py:300"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:343"
+          "loc": "plugin/scripts/reqmap_engine/health.py:347"
         }
       ],
       "test_exempt": null,
@@ -6780,23 +6784,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4274"
+          "loc": "plugin/scripts/test_reqmap_report.py:4340"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:234"
+          "loc": "plugin/scripts/reqmap_engine/health.py:235"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:277"
+          "loc": "plugin/scripts/reqmap_engine/health.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:296"
+          "loc": "plugin/scripts/reqmap_engine/health.py:300"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:343"
+          "loc": "plugin/scripts/reqmap_engine/health.py:347"
         }
       ],
       "test_exempt": null,
@@ -6845,15 +6849,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:127"
+          "loc": "plugin/scripts/reqmap_engine/health.py:128"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:157"
+          "loc": "plugin/scripts/reqmap_engine/health.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:187"
+          "loc": "plugin/scripts/reqmap_engine/health.py:188"
         },
         {
           "role": "implements",
@@ -6924,11 +6928,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:170"
+          "loc": "plugin/scripts/reqmap_engine/health.py:171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:181"
+          "loc": "plugin/scripts/reqmap_engine/health.py:182"
         }
       ],
       "test_exempt": null,
@@ -7168,7 +7172,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -7176,11 +7180,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:155"
+          "loc": "plugin/scripts/reqmap_engine/init.py:156"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:198"
+          "loc": "plugin/scripts/reqmap_engine/init.py:199"
         }
       ],
       "test_exempt": null,
@@ -7237,7 +7241,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:155"
+          "loc": "plugin/scripts/reqmap_engine/init.py:156"
         }
       ],
       "test_exempt": null,
@@ -7302,7 +7306,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:198"
+          "loc": "plugin/scripts/reqmap_engine/init.py:199"
         }
       ],
       "test_exempt": null,
@@ -8484,7 +8488,7 @@
         "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]",
         "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]",
         "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]",
-        "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]"
+        "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan, and a month opens to every release in it. [[REQ-HISTORY-1003]]"
       ],
       "verify": [],
       "notes": [
@@ -8586,15 +8590,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2682"
+          "loc": "plugin/scripts/test_reqmap_report.py:2744"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4058"
+          "loc": "plugin/scripts/test_reqmap_report.py:4124"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "tested-by",
@@ -9000,6 +9004,8 @@
       "contract": [
         "`_planning.json` may carry a `cadence` block; absent, nothing changes and no release marker is emitted.",
         "A cadence runs every `week` or every `month`; `on:` names a weekday for a week and a day-of-month (or `last`) for a month, defaulting to Friday and to the month's last day.",
+        "A cadence that names no period runs every week, on Friday — the end of the working week. An author who releases on another rhythm says so with `every` and `on`.",
+        "The chart marks each release date with a tick on its ruler, never with a line through the lanes. A milestone is a version, so when the lane the cadence names exists its pill is drawn there, at its due date; selecting it opens its due date, label and the bars planned on it.",
         "The release dates run across the span the plan's own bars and milestone dues already cover, from the first to the last, unless `from:`/`until:` narrow it.",
         "A cadence naming a period the engine does not implement yields no cadence at all, rather than a series computed on a guess.",
         "At most `CADENCE_MAX` dates are emitted, so a decade-long plan truncates its tail instead of drawing an unreadable rule per week.",
@@ -9014,9 +9020,10 @@
         "CASE-2 — — no cadence block means no releases Given  a plan carrying bars and milestones and no `cadence` key When   the planning sidecar is loaded Then   the result carries neither `cadence` nor `releases`",
         "CASE-3 — — an unimplemented period yields nothing rather than a guess Given  a `cadence` of `every: fortnight` When   the planning sidecar is loaded Then   the result carries neither `cadence` nor `releases`",
         "CASE-4 — — the weekday is chosen, and `from:` narrows the span Given  a `cadence` of `on: monday` with `from: 2026-09-21` on a plan ending 2026-10-05 When   the planning sidecar is loaded Then   every emitted date is a Monday and none is earlier than 2026-09-21",
-        "CASE-5 — — a plan covering no dates still emits its calendar Given  a `cadence` block on a sidecar with no bars and no milestone due When   the planning sidecar is loaded Then   it carries `cadence` and a non-empty `releases` running to the shared horizon --------------------"
+        "CASE-5 — — a plan covering no dates still emits its calendar Given  a `cadence` block on a sidecar with no bars and no milestone due When   the planning sidecar is loaded Then   it carries `cadence` and a non-empty `releases` running to the shared horizon",
+        "CASE-7 — — a cadence that names no period is weekly, on Friday Given  a `cadence` block with no `every` and no `on` When   the planning sidecar is loaded Then   `cadence.every` is `week`, `cadence.on` is `friday`, and every release is a Friday --------------------"
       ],
-      "accept": "CASE-1 — a weekly cadence lands on its weekday across the plan's span\n  Given  a plan whose bars run 2026-09-13 to 2026-09-30 and a `cadence` of `every: week`\n  When   the planning sidecar is loaded\n  Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`\n\nCASE-6 — a monthly cadence lands on each month's end\n  Given  a plan whose bars run 2026-09-13 to 2026-12-05 and a `cadence` of `every: month`\n  When   the planning sidecar is loaded\n  Then   `releases` is the last day of September, October and November, and `cadence.on`\n         is `last`\n\nCASE-2 — no cadence block means no releases\n  Given  a plan carrying bars and milestones and no `cadence` key\n  When   the planning sidecar is loaded\n  Then   the result carries neither `cadence` nor `releases`\n\nCASE-3 — an unimplemented period yields nothing rather than a guess\n  Given  a `cadence` of `every: fortnight`\n  When   the planning sidecar is loaded\n  Then   the result carries neither `cadence` nor `releases`\n\nCASE-4 — the weekday is chosen, and `from:` narrows the span\n  Given  a `cadence` of `on: monday` with `from: 2026-09-21` on a plan ending 2026-10-05\n  When   the planning sidecar is loaded\n  Then   every emitted date is a Monday and none is earlier than 2026-09-21\n\nCASE-5 — a plan covering no dates still emits its calendar\n  Given  a `cadence` block on a sidecar with no bars and no milestone due\n  When   the planning sidecar is loaded\n  Then   it carries `cadence` and a non-empty `releases` running to the shared horizon\n\n--------------------",
+      "accept": "CASE-1 — a weekly cadence lands on its weekday across the plan's span\n  Given  a plan whose bars run 2026-09-13 to 2026-09-30 and a `cadence` of `every: week`\n  When   the planning sidecar is loaded\n  Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`\n\nCASE-6 — a monthly cadence lands on each month's end\n  Given  a plan whose bars run 2026-09-13 to 2026-12-05 and a `cadence` of `every: month`\n  When   the planning sidecar is loaded\n  Then   `releases` is the last day of September, October and November, and `cadence.on`\n         is `last`\n\nCASE-2 — no cadence block means no releases\n  Given  a plan carrying bars and milestones and no `cadence` key\n  When   the planning sidecar is loaded\n  Then   the result carries neither `cadence` nor `releases`\n\nCASE-3 — an unimplemented period yields nothing rather than a guess\n  Given  a `cadence` of `every: fortnight`\n  When   the planning sidecar is loaded\n  Then   the result carries neither `cadence` nor `releases`\n\nCASE-4 — the weekday is chosen, and `from:` narrows the span\n  Given  a `cadence` of `on: monday` with `from: 2026-09-21` on a plan ending 2026-10-05\n  When   the planning sidecar is loaded\n  Then   every emitted date is a Monday and none is earlier than 2026-09-21\n\nCASE-5 — a plan covering no dates still emits its calendar\n  Given  a `cadence` block on a sidecar with no bars and no milestone due\n  When   the planning sidecar is loaded\n  Then   it carries `cadence` and a non-empty `releases` running to the shared horizon\n\nCASE-7 — a cadence that names no period is weekly, on Friday\n  Given  a `cadence` block with no `every` and no `on`\n  When   the planning sidecar is loaded\n  Then   `cadence.every` is `week`, `cadence.on` is `friday`, and every release is a Friday\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -9034,7 +9041,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:192"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:126"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:282"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:497"
         },
         {
           "role": "tested-by",
@@ -9042,15 +9057,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:278"
+          "loc": "plugin/scripts/reqmap_engine/targets.py:266"
         }
       ],
       "test_exempt": null,
       "milestone": "v7.7",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "REQ-HISTORY-1003",
@@ -9064,9 +9079,9 @@
         "`CHANGELOG.md` is read for `## plugin \\`vX.Y.Z\\` — YYYY-MM-DD` headings, newest first, each carrying its version, its date and a one-line headline; a repo with no such file yields nothing and no chart band.",
         "A heading carrying no date is skipped rather than dated by guesswork, because a version that never shipped has no place on a timeline of what shipped.",
         "The headline is the entry's opening bold sentence; a bold run that ends in a colon is a lead-in to the list under it, so the next standalone line is used instead.",
-        "`_map.json` carries `history`: one row per calendar month with its release count, its first and last date, every version in it, and the headline of its landmark release.",
+        "`_map.json` carries `history`: one row per calendar month with its release count, its first and last date, every version in it, the headline of its landmark release, and `entries`: each release's version, date and headline, newest first.",
         "The landmark is the month's biggest step — a major over a minor over a patch, newest among equals — never simply its first or last release.",
-        "The viewer places the rows the engine emitted, on the same timeline as the plan, and derives none of its own."
+        "The viewer places the rows the engine emitted, on the same timeline as the plan, and derives none of its own. Selecting a month opens its `entries` below the chart."
       ],
       "verify": [],
       "notes": [],
@@ -9076,9 +9091,10 @@
         "CASE-2 — — an undated heading is skipped Given  a heading reading `## plugin \\`v3.5.0\\` — superseded, never released` When   the history is parsed Then   it is not returned, and the dated entry above it keeps its own body",
         "CASE-3 — — a colon-terminated bold run is a lead-in, not a headline Given  an entry opening `**First release. Highlights:**` followed by a prose line When   its headline is taken Then   it is the prose line, not the lead-in",
         "CASE-4 — — months group, and the landmark is the biggest step Given  one month holding `v2.0.0`, `v2.1.0` and `v2.1.1` When   the history is grouped Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark",
-        "CASE-5 — — a repo with no CHANGELOG yields nothing Given  a code root holding no `CHANGELOG.md` When   the history is read Then   it is empty and the chart draws no shipped band"
+        "CASE-5 — — a repo with no CHANGELOG yields nothing Given  a code root holding no `CHANGELOG.md` When   the history is read Then   it is empty and the chart draws no shipped band",
+        "CASE-6 — — a shipped month opens to what was done in it Given  a month holding two releases, each with a headline When   the reader selects that month on the chart Then   a note lists both releases, newest first, each with its date and headline"
       ],
-      "accept": "CASE-1 — dated headings are read, newest first\n  Given  a `CHANGELOG.md` with two dated `## plugin` headings\n  When   the history is parsed\n  Then   both are returned with their version, date and headline, newest first\n\nCASE-2 — an undated heading is skipped\n  Given  a heading reading `## plugin \\`v3.5.0\\` — superseded, never released`\n  When   the history is parsed\n  Then   it is not returned, and the dated entry above it keeps its own body\n\nCASE-3 — a colon-terminated bold run is a lead-in, not a headline\n  Given  an entry opening `**First release. Highlights:**` followed by a prose line\n  When   its headline is taken\n  Then   it is the prose line, not the lead-in\n\nCASE-4 — months group, and the landmark is the biggest step\n  Given  one month holding `v2.0.0`, `v2.1.0` and `v2.1.1`\n  When   the history is grouped\n  Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark\n\nCASE-5 — a repo with no CHANGELOG yields nothing\n  Given  a code root holding no `CHANGELOG.md`\n  When   the history is read\n  Then   it is empty and the chart draws no shipped band",
+      "accept": "CASE-1 — dated headings are read, newest first\n  Given  a `CHANGELOG.md` with two dated `## plugin` headings\n  When   the history is parsed\n  Then   both are returned with their version, date and headline, newest first\n\nCASE-2 — an undated heading is skipped\n  Given  a heading reading `## plugin \\`v3.5.0\\` — superseded, never released`\n  When   the history is parsed\n  Then   it is not returned, and the dated entry above it keeps its own body\n\nCASE-3 — a colon-terminated bold run is a lead-in, not a headline\n  Given  an entry opening `**First release. Highlights:**` followed by a prose line\n  When   its headline is taken\n  Then   it is the prose line, not the lead-in\n\nCASE-4 — months group, and the landmark is the biggest step\n  Given  one month holding `v2.0.0`, `v2.1.0` and `v2.1.1`\n  When   the history is grouped\n  Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark\n\nCASE-5 — a repo with no CHANGELOG yields nothing\n  Given  a code root holding no `CHANGELOG.md`\n  When   the history is read\n  Then   it is empty and the chart draws no shipped band\n\nCASE-6 — a shipped month opens to what was done in it\n  Given  a month holding two releases, each with a headline\n  When   the reader selects that month on the chart\n  Then   a note lists both releases, newest first, each with its date and headline",
       "input": "",
       "output": "",
       "desc": "",
@@ -9100,11 +9116,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:133"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:104"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:223"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2682"
+          "loc": "plugin/scripts/test_reqmap_report.py:2744"
         },
         {
           "role": "implements",
@@ -9139,8 +9159,8 @@
       "milestone": "v7.8",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-MAPDIAGRAMS-055",
@@ -9203,7 +9223,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4560"
+          "loc": "plugin/scripts/test_reqmap_report.py:4626"
         },
         {
           "role": "implements",
@@ -9284,7 +9304,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4560"
+          "loc": "plugin/scripts/test_reqmap_report.py:4626"
         },
         {
           "role": "implements",
@@ -9461,7 +9481,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "implements",
@@ -9530,7 +9550,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4560"
+          "loc": "plugin/scripts/test_reqmap_report.py:4626"
         },
         {
           "role": "implements",
@@ -10169,7 +10189,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10260,7 +10280,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10354,7 +10374,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10433,7 +10453,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10517,11 +10537,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10596,7 +10616,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3851"
+          "loc": "plugin/scripts/test_reqmap_report.py:3917"
         },
         {
           "role": "implements",
@@ -10860,7 +10880,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "tested-by",
@@ -11411,7 +11431,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2766"
+          "loc": "plugin/scripts/test_reqmap_report.py:2832"
         },
         {
           "role": "implements",
@@ -11470,7 +11490,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2766"
+          "loc": "plugin/scripts/test_reqmap_report.py:2832"
         },
         {
           "role": "implements",
@@ -12425,11 +12445,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:101"
+          "loc": "plugin/scripts/reqmap_engine/health.py:102"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:249"
+          "loc": "plugin/scripts/reqmap_engine/health.py:250"
         }
       ],
       "test_exempt": null,
@@ -12484,11 +12504,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4684"
+          "loc": "plugin/scripts/test_reqmap_report.py:4750"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:101"
+          "loc": "plugin/scripts/reqmap_engine/health.py:102"
         }
       ],
       "test_exempt": null,
@@ -12551,11 +12571,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4684"
+          "loc": "plugin/scripts/test_reqmap_report.py:4750"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:252"
+          "loc": "plugin/scripts/reqmap_engine/health.py:253"
         }
       ],
       "test_exempt": null,
@@ -12750,7 +12770,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5139"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -13262,14 +13282,17 @@
         "`health --json` reads `TODO.md` from the code root, or its parent when absent there, and reports three read-only signals. [[REQ-ROADMAP-907]]",
         "The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]",
         "The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]",
-        "A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]"
+        "A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]",
+        "A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]"
       ],
       "verify": [],
       "notes": [
         "Both signals compare against requirement `milestone:` fields, not against a package version. The engine owns the former in every repo; the latter is project-specific. A repo that leaves `milestone:` unset gets neither.",
         "Only ONE direction was checked from v2.17 to v5.10, and the unchecked one is the one that happened: 27 requirements written across six minors carried no `milestone:`, so the chart's newest column read v4.0 while the product shipped 5.10. The signal that would have said so did not exist.",
         "Neither signal is a gate. The v1.35 roadmap-hygiene note chose manual upkeep over automation when demand was n=1; this is the read-only middle ground after n=2.",
-        "Un singur izvor pentru plan (ROADMAP.md și `_planning.json` topite într-unul, docs/plan-source-audit.html) a fost respins pe 2026-09-14: 5 din 6 bare se potrivesc deja cu un item, deci divergența măsurată e 1, nu 10. Se redeschide numai la ≥ 2 divergențe item/bară și ≥ 1 recurență de prospețime (o bară rămasă în urma item-ului ei după ce a fost corectată o dată). Dacă pe 2027-03-14 cele două numere citesc sub 2 și zero, propunerea se marchează respinsă — nu re-argumentată."
+        "Un singur izvor pentru plan (ROADMAP.md și `_planning.json` topite într-unul, docs/plan-source-audit.html) a fost respins pe 2026-09-14: 5 din 6 bare se potrivesc deja cu un item, deci divergența măsurată e 1, nu 10. Se redeschide numai la ≥ 2 divergențe item/bară și ≥ 1 recurență de prospețime (o bară rămasă în urma item-ului ei după ce a fost corectată o dată). Dacă pe 2027-03-14 cele două numere citesc sub 2 și zero, propunerea se marchează respinsă — nu re-argumentată.",
+        "Precedente: Senate `2026-06-21_122415-reqmap-todo-roadmap-coherence` (MODIFY, outcome OK: semnal read-only la n=2, niciodată gate) și `2026-09-14_225939-senate-reqmap-plan-single-source` (MODIFY, outcome OVR: ștergerea `scores` nu fusese livrată). Auditul `2026-09-16_160109-rm-planning-audit` (MODIFY 9-0) a cerut REQ-PLANSTALE-1013.",
+        "Citirea condiției de redeschidere la 2026-09-16: recurențe de prospețime a planului = 2 (v7.9 în 830df0f, v7.19 cu `plugin.json` deja la 7.19.0), după prima (v7.4); divergențe item/bară măsurate = 1 (bara „Server MCP” era planificată pe v7.19 în timp ce item-ul ei stă în `Later` cu `unpark:`). Sub pragul de ≥ 2 divergențe: condiția NU e îndeplinită, merge-ul rămâne respins."
       ],
       "current_impl": [
         "`_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by `cmd_health` and `_audit_summary`.",
@@ -13304,7 +13327,8 @@
         "REQ-ROADMAP-983",
         "REQ-ROADMAP-998",
         "REQ-PLANHORIZON-1010",
-        "REQ-PLANBRANCH-1011"
+        "REQ-PLANBRANCH-1011",
+        "REQ-PLANSTALE-1013"
       ],
       "members": [
         {
@@ -13317,15 +13341,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2891"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4519"
+          "loc": "plugin/scripts/test_reqmap_report.py:2957"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:4585"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:255"
+          "loc": "plugin/scripts/reqmap_engine/health.py:256"
         },
         {
           "role": "implements",
@@ -13357,7 +13385,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:162"
+          "loc": "plugin/scripts/reqmap_engine/targets.py:160"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:304"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:330"
         }
       ],
       "test_exempt": null,
@@ -13415,7 +13451,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4519"
+          "loc": "plugin/scripts/test_reqmap_report.py:4585"
         },
         {
           "role": "implements",
@@ -13530,7 +13566,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2891"
+          "loc": "plugin/scripts/test_reqmap_report.py:2957"
         },
         {
           "role": "implements",
@@ -13603,7 +13639,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:162"
+          "loc": "plugin/scripts/reqmap_engine/targets.py:160"
         }
       ],
       "test_exempt": null,
@@ -13671,6 +13707,81 @@
       "risks": [],
       "clauses": 4,
       "covered": 4
+    },
+    {
+      "id": "REQ-PLANSTALE-1013",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A plan that schedules a version already declared is reported",
+      "intent": "The plan scheduled a version that had already shipped three times — v7.4, v7.9, then v7.19 while `plugin.json` already said 7.19.0 — and each time a human found it by rereading the file. The one comparison the engine had read `TODO.md`, which this repo archived, so it went silent exactly when the plan moved to `_planning.json`.",
+      "contract": [
+        "The baseline is the highest of three versions: `version` in a `.claude-plugin/plugin.json` beside the requirements directory or at the code root, the newest `v*` git tag, and the newest dated `vX.Y.Z` heading in `CHANGELOG.md`. With none of them, nothing is reported.",
+        "Every version is compared in one form, `vX.Y.Z`, the form tags and CHANGELOG headings use: `plugin.json`'s `7.19.0` is `v7.19.0`, and a short key `vX.Y` is read as `vX.Y.0`. A milestone equal to the baseline is stale, because that version has been declared. A name that is not a version is never compared.",
+        "Every milestone key in `_planning.json` and every bar `milestone` at or below the baseline is named in one `gate --audit` line and in `health --json` under `plan_shipped`, together with the baseline and the source it came from.",
+        "The signal is read-only: no gate rule reads it, and the gate's exit code never depends on it.",
+        "The planned set is `bars`: the Versions view lists each bar in the column of its `milestone`, the same list the Plan chart draws, and reads no `milestones[].items[]`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a milestone equal to the declared version is stale Given  `plugin.json` at 7.19.0 and milestones `v7.19.0` and `v7.20.0` When   the audit runs Then   exactly one line names `v7.19.0`, against `v7.19.0` from `plugin.json`",
+        "CASE-2 — — a milestone past the baseline is silent Given  `plugin.json` at 7.19.0 and milestone `v7.20.0` When   the audit runs Then   no plan line is reported",
+        "CASE-3 — — a patch past the baseline is silent, and a short key is padded Given  a CHANGELOG whose newest heading is `v7.19.0` When   milestone `v7.19.1`, then milestone `v7.19`, is checked Then   the first is silent and the second is stale",
+        "CASE-4 — — no baseline, no signal Given  a plan with milestones and no manifest, tag or CHANGELOG When   the audit runs Then   nothing is reported",
+        "CASE-5 — — the highest source wins, and bars count Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0` When   the audit runs Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`",
+        "CASE-6 — — reported, never gated Given  the registered gate rules When   they are listed Then   none of them comes from the planning module",
+        "CASE-7 — — a bar appears in its version's column Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8` When   the Versions view renders Then   the `v99.7` column lists the bar, and the `items` text appears nowhere"
+      ],
+      "accept": "CASE-1 — a milestone equal to the declared version is stale\n  Given  `plugin.json` at 7.19.0 and milestones `v7.19.0` and `v7.20.0`\n  When   the audit runs\n  Then   exactly one line names `v7.19.0`, against `v7.19.0` from `plugin.json`\n\nCASE-2 — a milestone past the baseline is silent\n  Given  `plugin.json` at 7.19.0 and milestone `v7.20.0`\n  When   the audit runs\n  Then   no plan line is reported\n\nCASE-3 — a patch past the baseline is silent, and a short key is padded\n  Given  a CHANGELOG whose newest heading is `v7.19.0`\n  When   milestone `v7.19.1`, then milestone `v7.19`, is checked\n  Then   the first is silent and the second is stale\n\nCASE-4 — no baseline, no signal\n  Given  a plan with milestones and no manifest, tag or CHANGELOG\n  When   the audit runs\n  Then   nothing is reported\n\nCASE-5 — the highest source wins, and bars count\n  Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0`\n  When   the audit runs\n  Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`\n\nCASE-6 — reported, never gated\n  Given  the registered gate rules\n  When   they are listed\n  Then   none of them comes from the planning module\n\nCASE-7 — a bar appears in its version's column\n  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`\n  When   the Versions view renders\n  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-ROADMAP-038"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:175"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/health.py:274"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:281"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:290"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:304"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:330"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "ARCH-RULES-059",
@@ -13830,7 +13941,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:16"
+          "loc": "plugin/scripts/reqmap_engine/health.py:17"
         },
         {
           "role": "implements",
@@ -14502,7 +14613,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "tested-by",
@@ -14611,11 +14722,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4144"
+          "loc": "plugin/scripts/test_reqmap_report.py:4210"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5060"
+          "loc": "plugin/scripts/test_reqmap_report.py:5126"
         },
         {
           "role": "implements",
@@ -14692,7 +14803,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4144"
+          "loc": "plugin/scripts/test_reqmap_report.py:4210"
         },
         {
           "role": "implements",
@@ -14757,7 +14868,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4144"
+          "loc": "plugin/scripts/test_reqmap_report.py:4210"
         },
         {
           "role": "implements",
@@ -14820,7 +14931,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4144"
+          "loc": "plugin/scripts/test_reqmap_report.py:4210"
         },
         {
           "role": "implements",
@@ -14881,7 +14992,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4144"
+          "loc": "plugin/scripts/test_reqmap_report.py:4210"
         },
         {
           "role": "implements",
@@ -14955,7 +15066,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5060"
+          "loc": "plugin/scripts/test_reqmap_report.py:5126"
         },
         {
           "role": "implements",
@@ -15261,7 +15372,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4768"
+          "loc": "plugin/scripts/test_reqmap_report.py:4834"
         },
         {
           "role": "implements",
@@ -15416,11 +15527,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap_report.py:4768"
+          "loc": "plugin/scripts/test_reqmap_report.py:4834"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4768"
+          "loc": "plugin/scripts/test_reqmap_report.py:4834"
         }
       ],
       "test_exempt": null,
@@ -15549,7 +15660,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3997"
+          "loc": "plugin/scripts/test_reqmap_report.py:4063"
         },
         {
           "role": "implements",
@@ -15616,7 +15727,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3997"
+          "loc": "plugin/scripts/test_reqmap_report.py:4063"
         },
         {
           "role": "implements",
@@ -15738,7 +15849,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3997"
+          "loc": "plugin/scripts/test_reqmap_report.py:4063"
         },
         {
           "role": "implements",
@@ -15831,7 +15942,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4401"
+          "loc": "plugin/scripts/test_reqmap_report.py:4467"
         },
         {
           "role": "implements",
@@ -15909,7 +16020,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4401"
+          "loc": "plugin/scripts/test_reqmap_report.py:4467"
         },
         {
           "role": "implements",
@@ -15983,11 +16094,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3031"
+          "loc": "plugin/scripts/test_reqmap_report.py:3097"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4401"
+          "loc": "plugin/scripts/test_reqmap_report.py:4467"
         },
         {
           "role": "implements",
@@ -16056,7 +16167,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4401"
+          "loc": "plugin/scripts/test_reqmap_report.py:4467"
         },
         {
           "role": "implements",
@@ -16127,7 +16238,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4401"
+          "loc": "plugin/scripts/test_reqmap_report.py:4467"
         },
         {
           "role": "implements",
@@ -16188,7 +16299,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2954"
+          "loc": "plugin/scripts/test_reqmap_report.py:3020"
         },
         {
           "role": "implements",
@@ -16271,7 +16382,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:238"
+          "loc": "plugin/scripts/reqmap_engine/init.py:239"
         },
         {
           "role": "implements",
@@ -17815,7 +17926,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:236"
+          "loc": "app/src/lib/i18n.jsx:235"
         },
         {
           "role": "implements",
@@ -17946,7 +18057,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:264"
+          "loc": "app/src/lib/i18n.jsx:263"
         },
         {
           "role": "tested-by",
@@ -18503,7 +18614,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4342"
+          "loc": "plugin/scripts/test_reqmap_report.py:4408"
         },
         {
           "role": "implements",
@@ -18577,7 +18688,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4342"
+          "loc": "plugin/scripts/test_reqmap_report.py:4408"
         },
         {
           "role": "implements",
@@ -18651,7 +18762,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4342"
+          "loc": "plugin/scripts/test_reqmap_report.py:4408"
         },
         {
           "role": "implements",
@@ -18801,11 +18912,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:225"
+          "loc": "app/src/lib/i18n.jsx:224"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:271"
+          "loc": "app/src/lib/i18n.jsx:270"
         }
       ],
       "test_exempt": null,
@@ -18994,11 +19105,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:197"
+          "loc": "app/src/lib/i18n.jsx:196"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:283"
+          "loc": "app/src/lib/i18n.jsx:282"
         },
         {
           "role": "implements",
@@ -19354,7 +19465,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/components/Rail.jsx:42"
+          "loc": "app/src/components/Rail.jsx:35"
         },
         {
           "role": "implements",
@@ -19370,7 +19481,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:78"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:165"
         },
         {
           "role": "implements",
@@ -19400,7 +19511,7 @@
         "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
         "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
         "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
-        "The full-height vertical guides mark the work: a solid rule at each bar's start and a dotted one at its end. `today` and the milestones keep their header pills and rule no line through the lanes.",
+        "The vertical guides mark the work: a solid rule at each bar's start and a dotted one at its end, drawn only through that bar's own lane. `today` keeps its pill on the ruler, the milestones keep theirs there or in the release lane, and neither rules a line through the lanes.",
         "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport.",
         "A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.",
         "The lane column stays in place while the chart scrolls sideways, which means no ancestor of it may declare an overflow: an ancestor that does becomes its scrollport, and a scrollport that never scrolls never lets its sticky child stick."
@@ -19428,7 +19539,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:684"
+          "loc": "app/scripts/ssr-smoke.jsx:698"
         },
         {
           "role": "implements",
@@ -19440,11 +19551,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:250"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:344"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:430"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:477"
         }
       ],
       "test_exempt": null,
@@ -21484,6 +21595,10 @@
       "ARCH-ROADMAP-038"
     ],
     [
+      "REQ-PLANSTALE-1013",
+      "ARCH-ROADMAP-038"
+    ],
+    [
       "ARCH-RULES-059",
       "SYS-GATE-102"
     ],
@@ -22069,7 +22184,59 @@
         "v2.8.1"
       ],
       "landmark": "v2.0.0",
-      "headline": "Breaking — intent-verb CLI"
+      "headline": "Breaking — intent-verb CLI",
+      "entries": [
+        {
+          "version": "v2.8.1",
+          "date": "2026-06-26",
+          "headline": "Fix: member-hash line-ending normalization (CRLF/Windows)"
+        },
+        {
+          "version": "v2.8.0",
+          "date": "2026-06-26",
+          "headline": "Gate hardening — close the stale-map / uncommitted-lock blind spot"
+        },
+        {
+          "version": "v2.3.1",
+          "date": "2026-06-16",
+          "headline": "License correction"
+        },
+        {
+          "version": "v2.3.0",
+          "date": "2026-06-15",
+          "headline": "excalidraw-diagram — text-overflow gates"
+        },
+        {
+          "version": "v2.2.0",
+          "date": "2026-06-15",
+          "headline": "excalidraw-diagram — ISO 5807 shapes, C4 helpers, poster helpers"
+        },
+        {
+          "version": "v2.1.1",
+          "date": "2026-06-15",
+          "headline": "Audit follow-up (Consilium Trias)"
+        },
+        {
+          "version": "v2.1.0",
+          "date": "2026-06-15",
+          "headline": "excalidraw-diagram CLI"
+        },
+        {
+          "version": "v2.0.0",
+          "date": "2026-06-15",
+          "headline": "Breaking — intent-verb CLI"
+        },
+        {
+          "version": "v1.35.0",
+          "date": "2026-06-14",
+          "headline": "Re-seed consumer repos with `scripts/reqmap.py` only — the scaffold page is an inline template, so no new vendored file…"
+        },
+        {
+          "version": "v1.11.0",
+          "date": "2026-06-04",
+          "headline": "Re-seed consumer repos with both `scripts/reqmap.py` **and** `scripts/_map_viewer.html` — the viewer template is new and…"
+        }
+      ]
     },
     {
       "month": "2026-07",
@@ -22083,7 +22250,29 @@
         "v2.13.0"
       ],
       "landmark": "v2.13.0",
-      "headline": "Ranked requirement search — a `search` command and a shared viewer model"
+      "headline": "Ranked requirement search — a `search` command and a shared viewer model",
+      "entries": [
+        {
+          "version": "v2.13.0",
+          "date": "2026-07-05",
+          "headline": "Ranked requirement search — a `search` command and a shared viewer model"
+        },
+        {
+          "version": "v2.12.0",
+          "date": "2026-07-04",
+          "headline": "`health` now reports registry lag — commits since the requirements dir was last touched (RM-6, part 2)"
+        },
+        {
+          "version": "v2.11.1",
+          "date": "2026-07-03",
+          "headline": "Repos can declare extra scannable extensions (`REQMAP_EXTRA_CODE_EXTS`)"
+        },
+        {
+          "version": "v2.11.0",
+          "date": "2026-07-03",
+          "headline": "`health` can no longer read 100/clean while `gate` has link-sync errors (RM-6)"
+        }
+      ]
     },
     {
       "month": "2026-08",
@@ -22115,11 +22304,123 @@
         "v2.29.2"
       ],
       "landmark": "v2.29.0",
-      "headline": "Ten findings from a consumer session on a 55-requirement corpus, fixed"
+      "headline": "Ten findings from a consumer session on a 55-requirement corpus, fixed",
+      "entries": [
+        {
+          "version": "v2.29.2",
+          "date": "2026-08-31",
+          "headline": "A consumer ran two subagents and the gate reported 1,829 members and 43 errors in a repo that has 493 members and none"
+        },
+        {
+          "version": "v2.29.1",
+          "date": "2026-08-31",
+          "headline": "A consumer's System Map drew its edges as endless horizontal lines. The cause was a dependency cycle meeting a ranking l…"
+        },
+        {
+          "version": "v2.29.0",
+          "date": "2026-08-31",
+          "headline": "Ten findings from a consumer session on a 55-requirement corpus, fixed"
+        },
+        {
+          "version": "v2.28.1",
+          "date": "2026-08-27",
+          "headline": "`dupes` reported a requirement and its own test suite as probable duplicates"
+        },
+        {
+          "version": "v2.28.0",
+          "date": "2026-08-25",
+          "headline": "The rest of the scan-evidence matrix, run the same day: five foreign repositories, five language families, ten engine fi…"
+        },
+        {
+          "version": "v2.27.0",
+          "date": "2026-08-25",
+          "headline": "First scan-evidence run on a real consumer (Management_Dashboard: NestJS + Next.js, 288 tracked files — TS/TSX, SQL, she…"
+        },
+        {
+          "version": "v2.26.0",
+          "date": "2026-08-25",
+          "headline": "A committed `_findings.md` that said \"0 open\" for eleven weeks — and two smaller lies the tooling told during the same a…"
+        },
+        {
+          "version": "v2.25.1",
+          "date": "2026-08-25",
+          "headline": "Two engine releases told every consumer they were up to date"
+        },
+        {
+          "version": "v2.25.0",
+          "date": "2026-08-25",
+          "headline": "A consumer's viewer speaks Romanian and refuses to translate your requirements — until every requirement is in the reade…"
+        },
+        {
+          "version": "v2.24.0",
+          "date": "2026-08-24",
+          "headline": "A Contract section written in Romanian had \"shall\" in it — nothing caught that"
+        },
+        {
+          "version": "v2.23.0",
+          "date": "2026-08-21",
+          "headline": "The viewer speaks Romanian, and refuses to translate your requirements"
+        },
+        {
+          "version": "v2.22.0",
+          "date": "2026-08-20",
+          "headline": "A consumer's engine could rot for a year and CI would never say so"
+        },
+        {
+          "version": "v2.21.0",
+          "date": "2026-08-20",
+          "headline": "The gate read every file three times"
+        },
+        {
+          "version": "v2.20.0",
+          "date": "2026-08-20",
+          "headline": "Two ways hostile-looking text broke the map, and a number for \"does this scale\""
+        },
+        {
+          "version": "v2.19.0",
+          "date": "2026-08-20",
+          "headline": "The portability claim gets evidence"
+        },
+        {
+          "version": "v2.18.1",
+          "date": "2026-08-20",
+          "headline": "The published Action stops rotting"
+        },
+        {
+          "version": "v2.18.0",
+          "date": "2026-08-19",
+          "headline": "The engine can finally see its own supply chain"
+        },
+        {
+          "version": "v2.17.0",
+          "date": "2026-08-17",
+          "headline": "The engine now notices when its own roadmap drifts"
+        },
+        {
+          "version": "v2.16.1",
+          "date": "2026-08-17",
+          "headline": "A clause-group label is decided by where it sits, not by the markers around it"
+        },
+        {
+          "version": "v2.16.0",
+          "date": "2026-08-17",
+          "headline": "The V-model's right side gets levels, and a reserved role is redefined"
+        },
+        {
+          "version": "v2.15.0",
+          "date": "2026-08-17",
+          "headline": "Requirements are now written in plain present tense, and the linter enforces the reading level"
+        },
+        {
+          "version": "v2.14.0",
+          "date": "2026-08-08",
+          "headline": "Requirement clarity is now enforced, not just documented"
+        }
+      ]
     },
     {
       "month": "2026-09",
-      "count": 77,
+      "count": 78,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -22199,10 +22500,403 @@
         "v7.16.0",
         "v7.17.0",
         "v7.18.0",
-        "v7.19.0"
+        "v7.19.0",
+        "v7.20.0"
       ],
       "landmark": "v7.0.0",
-      "headline": "The engine is a package behind a thin CLI"
+      "headline": "The engine is a package behind a thin CLI",
+      "entries": [
+        {
+          "version": "v7.20.0",
+          "date": "2026-09-16",
+          "headline": "A plan that schedules a version already declared is now reported"
+        },
+        {
+          "version": "v7.19.0",
+          "date": "2026-09-16",
+          "headline": "And the gap beside the sticky lane names is plugged"
+        },
+        {
+          "version": "v7.18.0",
+          "date": "2026-09-15",
+          "headline": "Four numbers in this repo's own front page were wrong, and every check passed"
+        },
+        {
+          "version": "v7.17.0",
+          "date": "2026-09-15",
+          "headline": "A Gantt bar was a title and two dates"
+        },
+        {
+          "version": "v7.16.0",
+          "date": "2026-09-15",
+          "headline": "**`clarify` counts; it does not read — and until now nothing told the assistant to do"
+        },
+        {
+          "version": "v7.15.0",
+          "date": "2026-09-15",
+          "headline": "Two freshness verdicts could come back green after measuring nothing"
+        },
+        {
+          "version": "v7.14.0",
+          "date": "2026-09-15",
+          "headline": "The stale-instruction guard was a member of a requirement that said nothing about it"
+        },
+        {
+          "version": "v7.13.0",
+          "date": "2026-09-15",
+          "headline": "**A sentence in `CLAUDE.md` said the engine reported three design findings on itself. It"
+        },
+        {
+          "version": "v7.9.0",
+          "date": "2026-09-14",
+          "headline": "The level retrofit writes the whole pyramid, in `init`'s shape"
+        },
+        {
+          "version": "v7.8.1",
+          "date": "2026-09-14",
+          "headline": "**Fix: `loadData` dropped `roadmap` and `history` on the floor, so the Horizons mode and"
+        },
+        {
+          "version": "v7.8.0",
+          "date": "2026-09-14",
+          "headline": "A monthly release cadence, and the past on the same timeline as the plan"
+        },
+        {
+          "version": "v7.12.0",
+          "date": "2026-09-14",
+          "headline": "**The Gantt header now says which week of the year it is, and two dead things stopped"
+        },
+        {
+          "version": "v7.11.0",
+          "date": "2026-09-14",
+          "headline": "**What a nine-senator audit of three open items actually returned: one of them was a"
+        },
+        {
+          "version": "v7.10.0",
+          "date": "2026-09-14",
+          "headline": "**Five gaps the Dashboard_Sync feedback found, each one a place where two parts of the"
+        },
+        {
+          "version": "v7.7.0",
+          "date": "2026-09-13",
+          "headline": "Plan drift: which planned items cite code that has moved on without them"
+        },
+        {
+          "version": "v7.6.0",
+          "date": "2026-09-13",
+          "headline": "A Horizons tab, a weekly release cadence, and one tab fewer"
+        },
+        {
+          "version": "v7.5.0",
+          "date": "2026-09-13",
+          "headline": "**The Specification Hierarchy diagram is gone, `--suggest-verifies` is gone, and the"
+        },
+        {
+          "version": "v7.4.0",
+          "date": "2026-09-13",
+          "headline": "ADR-0037 pass 2: `gate --implement` is retired"
+        },
+        {
+          "version": "v7.3.4",
+          "date": "2026-09-13",
+          "headline": "Planning Gantt in Planificare, plus map zoom and a viewer split"
+        },
+        {
+          "version": "v7.3.3",
+          "date": "2026-09-13",
+          "headline": "Planning sidecar in the viewer"
+        },
+        {
+          "version": "v7.3.2",
+          "date": "2026-09-13",
+          "headline": "Map zoom and viewer refactor"
+        },
+        {
+          "version": "v7.3.1",
+          "date": "2026-09-09",
+          "headline": "A milestone whose work has all shipped is a finished column, not a missing one"
+        },
+        {
+          "version": "v7.3.0",
+          "date": "2026-09-08",
+          "headline": "Pass 1 of the command-surface cut: `sync --suggest-verifies` is retired"
+        },
+        {
+          "version": "v7.2.1",
+          "date": "2026-09-08",
+          "headline": "**The stale-instruction guard learns flags, reads the consumer, and finds fifteen live"
+        },
+        {
+          "version": "v7.2.0",
+          "date": "2026-09-07",
+          "headline": "five detectors over the `level:` axis — a `satisfies:` group's children split off its"
+        },
+        {
+          "version": "v7.1.1",
+          "date": "2026-09-07",
+          "headline": "made `gate --design`'s candidates `WARN` rows of the viewer's inbox, so each appeared"
+        },
+        {
+          "version": "v7.1.0",
+          "date": "2026-09-07",
+          "headline": "The pyramid is built upward, and the gate says when a rung is empty"
+        },
+        {
+          "version": "v7.0.0",
+          "date": "2026-09-07",
+          "headline": "The engine is a package behind a thin CLI"
+        },
+        {
+          "version": "v6.5.0",
+          "date": "2026-09-07",
+          "headline": "The Roadmap has one lane: Implementations"
+        },
+        {
+          "version": "v6.4.0",
+          "date": "2026-09-07",
+          "headline": "A repository declares its requirements language"
+        },
+        {
+          "version": "v6.3.0",
+          "date": "2026-09-06",
+          "headline": "The Roadmap has two lanes: Bugs and Features"
+        },
+        {
+          "version": "v6.2.0",
+          "date": "2026-09-06",
+          "headline": "A tagged corpus can now reach the code rung"
+        },
+        {
+          "version": "v6.1.0",
+          "date": "2026-09-06",
+          "headline": "<https://github.com/alxmax/excalidraw-diagram>"
+        },
+        {
+          "version": "v6.0.0",
+          "date": "2026-09-06",
+          "headline": "`sync` no longer writes `docs/map.html`. `requirements/_map.html` is the only rendered"
+        },
+        {
+          "version": "v5.9.0",
+          "date": "2026-09-06",
+          "headline": "The member hash now keys on the definition a tag sits in, not the whole file"
+        },
+        {
+          "version": "v5.8.0",
+          "date": "2026-09-06",
+          "headline": "**`sync` now reports readability, and how much of the pyramid is still the engine's"
+        },
+        {
+          "version": "v5.7.0",
+          "date": "2026-09-06",
+          "headline": "**The skill contract now says the specification-level axis exists — and that a flat"
+        },
+        {
+          "version": "v5.6.2",
+          "date": "2026-09-06",
+          "headline": "Three deep-nesting findings gone, and one silent inconsistency with them"
+        },
+        {
+          "version": "v5.19.1",
+          "date": "2026-09-06",
+          "headline": "The regression suite is five files"
+        },
+        {
+          "version": "v5.19.0",
+          "date": "2026-09-06",
+          "headline": "One section reader instead of nine"
+        },
+        {
+          "version": "v5.18.0",
+          "date": "2026-09-06",
+          "headline": "One runner for every git question"
+        },
+        {
+          "version": "v5.17.0",
+          "date": "2026-09-06",
+          "headline": "Four bugs found by reading the engine rather than running it. Three of them made a check"
+        },
+        {
+          "version": "v5.16.0",
+          "date": "2026-09-06",
+          "headline": "`gate` could exit 1 on a purely advisory metric"
+        },
+        {
+          "version": "v5.15.0",
+          "date": "2026-09-06",
+          "headline": "Three of the five prescriptions from an external competitive review, taken after a"
+        },
+        {
+          "version": "v5.14.0",
+          "date": "2026-09-06",
+          "headline": "**Retiring a class of requirements cost one commit per member, or `--force` on every"
+        },
+        {
+          "version": "v5.13.0",
+          "date": "2026-09-06",
+          "headline": "A corpus that was already tagged had no path to the three rungs"
+        },
+        {
+          "version": "v5.12.1",
+          "date": "2026-09-06",
+          "headline": "`v5.12.0`'s roadmap controls, written down and asserted"
+        },
+        {
+          "version": "v5.12.0",
+          "date": "2026-09-06",
+          "headline": "The Roadmap chart was 15,600px wide and showed three versions at a time"
+        },
+        {
+          "version": "v5.11.0",
+          "date": "2026-09-06",
+          "headline": "The roadmap check watched one direction, and the drift ran the other way"
+        },
+        {
+          "version": "v5.10.1",
+          "date": "2026-09-06",
+          "headline": "A second audit pass, landed on top of `v5.10.0`"
+        },
+        {
+          "version": "v5.10.0",
+          "date": "2026-09-06",
+          "headline": "A full audit of the engine, and the fixes it was safe to land in one change"
+        },
+        {
+          "version": "v5.6.1",
+          "date": "2026-09-05",
+          "headline": "The published Action was broken, and the guard that exists to catch this said OK"
+        },
+        {
+          "version": "v5.6.0",
+          "date": "2026-09-05",
+          "headline": "RM031 — the guard that left with the `confirm` verb"
+        },
+        {
+          "version": "v5.5.0",
+          "date": "2026-09-05",
+          "headline": "`lint_requirement` was 241 lines and is now 26"
+        },
+        {
+          "version": "v5.4.0",
+          "date": "2026-09-05",
+          "headline": "**The metrics pillar was calibrated, independently reviewed, and is now one metric"
+        },
+        {
+          "version": "v5.3.0",
+          "date": "2026-09-05",
+          "headline": "The C&K metrics pillar went through a nine-senator audit and came back MODIFY"
+        },
+        {
+          "version": "v5.2.0",
+          "date": "2026-09-05",
+          "headline": "**A `metrics` pillar: the half of Chidamber & Kemerer that says something about this"
+        },
+        {
+          "version": "v5.1.0",
+          "date": "2026-09-05",
+          "headline": "The design candidates are in the map, in a tab of their own"
+        },
+        {
+          "version": "v5.0.0",
+          "date": "2026-09-05",
+          "headline": "Breaking: the CLI is six verbs"
+        },
+        {
+          "version": "v4.2.2",
+          "date": "2026-09-05",
+          "headline": "No more line-ending diff on `SKILL.md` after every `sync` on Windows"
+        },
+        {
+          "version": "v4.2.1",
+          "date": "2026-09-05",
+          "headline": "`SKILL.md`'s command list is generated from the registry"
+        },
+        {
+          "version": "v4.2.0",
+          "date": "2026-09-04",
+          "headline": "`audit`: every pass that discovers a problem, in one report"
+        },
+        {
+          "version": "v4.1.0",
+          "date": "2026-09-04",
+          "headline": "The two numbers `next` opens with now travel with the map"
+        },
+        {
+          "version": "v4.0.4",
+          "date": "2026-09-04",
+          "headline": "`cmd_export` is gone"
+        },
+        {
+          "version": "v4.0.3",
+          "date": "2026-09-04",
+          "headline": "RM029: a cached translation may not carry a field the requirement does not emit"
+        },
+        {
+          "version": "v4.0.2",
+          "date": "2026-09-04",
+          "headline": "A requirement document leads with what it obliges"
+        },
+        {
+          "version": "v4.0.1",
+          "date": "2026-09-04",
+          "headline": "The Action's major alias tracks the plugin's major"
+        },
+        {
+          "version": "v4.0.0",
+          "date": "2026-09-04",
+          "headline": "Breaking: 25 commands become 17, and three of them are new"
+        },
+        {
+          "version": "v3.4.0",
+          "date": "2026-09-04",
+          "headline": "New command `design`: an advisory review of the repo's code, in any program-logic language, against the four OOP pillars…"
+        },
+        {
+          "version": "v3.3.0",
+          "date": "2026-09-04",
+          "headline": "The gate is a rule registry, the engine has a config file, and one walk serves every scan"
+        },
+        {
+          "version": "v3.2.0",
+          "date": "2026-09-03",
+          "headline": "The corpus is folded from 644 to 197 requirements on three levels, in a lean form"
+        },
+        {
+          "version": "v3.1.1",
+          "date": "2026-09-03",
+          "headline": "The `architecture` level is promoted into `system`"
+        },
+        {
+          "version": "v3.1.0",
+          "date": "2026-09-03",
+          "headline": "`next` and `lint` could report a different set of oversize requirements for the same corpus, and `lint --decompose` only…"
+        },
+        {
+          "version": "v3.0.1",
+          "date": "2026-09-03",
+          "headline": "The architecture poster describes the `v3.0.0` corpus again"
+        },
+        {
+          "version": "v3.0.0",
+          "date": "2026-09-03",
+          "headline": "How a requirement is written changed shape"
+        },
+        {
+          "version": "v2.31.0",
+          "date": "2026-09-02",
+          "headline": "A word-count heuristic for over-long Contract clauses, plus an opt-in scaffold that splits one out — with the atomicity…"
+        },
+        {
+          "version": "v2.30.0",
+          "date": "2026-09-02",
+          "headline": "A nine-senator Senate audit on \"make requirements simpler, more objective, clearer\" split into two decisions — one shipp…"
+        },
+        {
+          "version": "v2.29.3",
+          "date": "2026-09-02",
+          "headline": "A full-repo code review turned up ten latent bugs and inefficiencies, none yet reported by a consumer"
+        }
+      ]
     }
   ],
   "commands": [
@@ -22389,11 +23083,11 @@
     "score": 73,
     "candidates": {
       "encapsulation": 9,
-      "abstraction": 7,
+      "abstraction": 8,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 23
+      "standards": 24
     },
     "findings": [
       {
@@ -22402,7 +23096,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "857 lines (over 500)"
+        "detail": "925 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -22410,7 +23104,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "78 line(s) wider than 100 columns, first at line 1"
+        "detail": "91 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -22426,7 +23120,7 @@
         "file": "app/src/components/Rail.jsx",
         "line": 3,
         "name": "Rail.jsx",
-        "detail": "18 line(s) wider than 100 columns, first at line 3"
+        "detail": "15 line(s) wider than 100 columns, first at line 3"
       },
       {
         "pillar": "standards",
@@ -22448,9 +23142,9 @@
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/lib/i18n.jsx",
-        "line": 91,
+        "line": 90,
         "name": "i18n.jsx",
-        "detail": "20 line(s) wider than 100 columns, first at line 91"
+        "detail": "20 line(s) wider than 100 columns, first at line 90"
       },
       {
         "pillar": "standards",
@@ -22570,7 +23264,7 @@
         "file": "app/src/views/RoadmapView.jsx",
         "line": 152,
         "name": "RoadmapView",
-        "detail": "`RoadmapView` is 257 lines (over 80)"
+        "detail": "`RoadmapView` is 261 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
@@ -22646,17 +23340,33 @@
       },
       {
         "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "app/src/views/roadmap/PlanGantt.jsx",
+        "line": 1,
+        "name": "PlanGantt.jsx",
+        "detail": "579 lines (over 500)"
+      },
+      {
+        "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
         "line": 30,
         "name": "PlanGantt.jsx",
-        "detail": "10 line(s) wider than 100 columns, first at line 30"
+        "detail": "18 line(s) wider than 100 columns, first at line 30"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 122,
+        "line": 127,
+        "name": "VersionNote",
+        "detail": "`VersionNote` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/roadmap/PlanGantt.jsx",
+        "line": 209,
         "name": "PlanGantt",
         "detail": "`PlanGantt` nests 7 levels deep (over 4)"
       },
@@ -22664,15 +23374,15 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 122,
+        "line": 209,
         "name": "PlanGantt",
-        "detail": "`PlanGantt` is 341 lines (over 80)"
+        "detail": "`PlanGantt` is 370 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 122,
+        "line": 209,
         "name": "PlanGantt",
         "detail": "`PlanGantt` takes 8 parameters (over 6)"
       },
@@ -22722,11 +23432,11 @@
   },
   "health": {
     "score": 97,
-    "total": 268,
-    "healthy": 260,
-    "confirmed": 260,
-    "implemented": 251,
-    "tested": 248,
+    "total": 269,
+    "healthy": 261,
+    "confirmed": 261,
+    "implemented": 252,
+    "tested": 249,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
@@ -22736,21 +23446,17 @@
     "gate_link_sync_clean": true
   },
   "planning": {
-    "scores": {
-      "health": 95,
-      "design": 85
-    },
     "milestones": {
-      "v7.19": {
-        "due": "2026-09-30",
+      "v7.21.0": {
+        "due": "2026-10-02",
         "label": "Server MCP + suprafata CLI"
       },
-      "v7.20": {
-        "due": "2026-10-31",
+      "v7.22.0": {
+        "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
       },
-      "v8.0": {
-        "due": "2026-11-30",
+      "v8.0.0": {
+        "due": "2026-11-27",
         "label": "Datoria de viewer: split + init vorbaret"
       }
     },
@@ -22765,48 +23471,54 @@
         "start": "2026-09-21",
         "end": "2026-09-27",
         "lane": "Feature",
-        "milestone": "v7.19",
+        "milestone": "v7.21.0",
         "progress": 0
       },
       {
         "title": "CD: deploy automat pe git",
         "start": "2026-09-28",
-        "end": "2026-10-04",
+        "end": "2026-10-02",
         "lane": "Feature",
-        "milestone": "v7.19",
+        "milestone": "v7.21.0",
         "req": "ARCH-SELFGATE-039",
         "progress": 0
       }
     ],
     "cadence": {
-      "every": "month",
-      "on": "last",
+      "every": "week",
+      "on": "friday",
       "lane": "Release",
       "until": "2026-12-31"
     },
     "releases": [
-      "2026-09-30",
-      "2026-10-31",
-      "2026-11-30",
-      "2026-12-31"
+      "2026-09-25",
+      "2026-10-02",
+      "2026-10-09",
+      "2026-10-16",
+      "2026-10-23",
+      "2026-10-30",
+      "2026-11-06",
+      "2026-11-13",
+      "2026-11-20",
+      "2026-11-27",
+      "2026-12-04",
+      "2026-12-11",
+      "2026-12-18",
+      "2026-12-25"
     ]
   },
   "targets": {
-    "scores": {
-      "health": 95,
-      "design": 85
-    },
     "milestones": {
-      "v7.19": {
-        "due": "2026-09-30",
+      "v7.21.0": {
+        "due": "2026-10-02",
         "label": "Server MCP + suprafata CLI"
       },
-      "v7.20": {
-        "due": "2026-10-31",
+      "v7.22.0": {
+        "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
       },
-      "v8.0": {
-        "due": "2026-11-30",
+      "v8.0.0": {
+        "due": "2026-11-27",
         "label": "Datoria de viewer: split + init vorbaret"
       }
     },
@@ -22821,30 +23533,40 @@
         "start": "2026-09-21",
         "end": "2026-09-27",
         "lane": "Feature",
-        "milestone": "v7.19",
+        "milestone": "v7.21.0",
         "progress": 0
       },
       {
         "title": "CD: deploy automat pe git",
         "start": "2026-09-28",
-        "end": "2026-10-04",
+        "end": "2026-10-02",
         "lane": "Feature",
-        "milestone": "v7.19",
+        "milestone": "v7.21.0",
         "req": "ARCH-SELFGATE-039",
         "progress": 0
       }
     ],
     "cadence": {
-      "every": "month",
-      "on": "last",
+      "every": "week",
+      "on": "friday",
       "lane": "Release",
       "until": "2026-12-31"
     },
     "releases": [
-      "2026-09-30",
-      "2026-10-31",
-      "2026-11-30",
-      "2026-12-31"
+      "2026-09-25",
+      "2026-10-02",
+      "2026-10-09",
+      "2026-10-16",
+      "2026-10-23",
+      "2026-10-30",
+      "2026-11-06",
+      "2026-11-13",
+      "2026-11-20",
+      "2026-11-27",
+      "2026-12-04",
+      "2026-12-11",
+      "2026-12-18",
+      "2026-12-25"
     ]
   }
 }

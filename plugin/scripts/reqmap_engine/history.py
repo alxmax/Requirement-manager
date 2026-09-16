@@ -104,15 +104,18 @@ def by_month(entries):  # implements: REQ-HISTORY-1003
     One row per calendar month, because 100 releases across four months is a wall of ticks
     and the question it answers is "what happened since we started", not "when exactly did
     v5.12.1 land". `landmark` and `headline` come from the month's biggest step, not its
-    first or last release — see `_weight`. `versions` keeps every version in it, so the
-    detail is one hover away and nothing is lost by grouping."""
+    first or last release — see `_weight`. `versions` keeps every version in it, and
+    `entries` each one's date and headline, newest first, so selecting the month shows what
+    was done in it and nothing is lost by grouping."""
     months = {}
     for e in sorted(entries, key=lambda x: (x["date"], x["version"])):
         key = e["date"][:7]
         row = months.setdefault(key, {"month": key, "count": 0, "first": e["date"],
                                       "last": e["date"], "versions": [],
-                                      "landmark": "", "headline": ""})
+                                      "landmark": "", "headline": "", "entries": []})
         row["count"] += 1
+        row["entries"].insert(0, {"version": e["version"], "date": e["date"],
+                                  "headline": e["headline"]})
         row["last"] = e["date"]
         row["versions"].append(e["version"])
         if not row["landmark"] or _weight(e["version"]) > _weight(row["landmark"]):

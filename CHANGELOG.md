@@ -1,5 +1,52 @@
 # Changelog
 
+## plugin `v7.20.0` — 2026-09-16
+
+**A plan that schedules a version already declared is now reported.** `_planning.json`
+had scheduled a shipped version three times (v7.4, v7.9, and v7.19 while `plugin.json`
+already said 7.19.0), each found by rereading the file. The only comparison the engine had
+read `TODO.md`, which this repo archived. `gate --audit` and `health --json`
+(`plan_shipped`) now name every milestone key or bar `milestone` at or below the highest of
+`plugin.json`, the newest `v*` tag and the newest CHANGELOG heading. Every version is
+compared in one form, `vX.Y.Z`: `plugin.json`'s `7.19.0` reads as `v7.19.0` and a short
+key `vX.Y` as `vX.Y.0`. It is read-only and registers no gate rule (REQ-PLANSTALE-1013). This was the
+blocking finding of the Senate audit `2026-09-16_160109-rm-planning-audit`, 9-0 MODIFY.
+
+**Plan and Versions read one list.** A bar planned for a version created that version's
+column and never appeared in it, because the column read `milestones[].items[]`, a second
+list no milestone in this repo carried. Versions now lists `bars` by `milestone`, skipping
+a bar whose `req:` or title is already in the column, and `items` is no longer parsed.
+
+**Releases default to the end of the week, and the chart stops ruling through the
+lanes.** A `cadence` that names no period now runs every week on Friday, in the engine, in
+the plan `init` seeds and in this repo's plan; `every` and `on` still choose another
+rhythm. Each release date was also drawn as a full-height line through every lane, which
+at a weekly cadence is a rule through the bars every five working days. The date stays as
+a tick on the ruler. The version pills (`v7.21.0`, …) moved down into the lane the cadence
+names, at their due dates: a version is a release, and the ruler above every lane now
+carries only `today` and the ticks.
+
+**Shipped months and versions open like bars do.** Selecting a month in the shipped band
+lists every release in it, newest first, with its date and CHANGELOG headline (`history`
+rows now carry `entries`). Selecting a version lists its due date, its label and the bars
+planned on it; a bar in that list opens its own note. The solid and dotted guides at a bar's
+start and end are drawn through that bar's own lane only, instead of across the shipped
+band and every empty lane. This repo's milestones now fall on Fridays (2 Oct, 30 Oct,
+27 Nov), and the CD bar ends by its milestone's due date instead of two days after it.
+The design ring on the rail is drawn in one neutral ink, as REQ-VIEWER-969 always said:
+it is advice the gate never enforces, and a red ring read as a failure.
+
+**The hand-typed `scores` targets are gone.** The Senate run of 2026-09-14 accepted their
+deletion, and it had not shipped. Nothing calibrated 95 and 85 against a measured reading.
+The rail's rings show the engine's numbers without a target mark.
+
+**This repo's plan moved past the release line, and names versions in full**: v7.19 →
+`v7.21.0`, v7.20 → `v7.22.0`, v8.0 → `v8.0.0`, the same form as tags and CHANGELOG
+headings; the plan `init` seeds says to write them that way. `until` stays pinned, and the
+file's comment now says why: the computed horizon only applies to a plan with no dates.
+Once bars exist, the calendar ends at the last of them. The seeded comment no longer
+promises otherwise.
+
 ## plugin `v7.19.0` — 2026-09-16
 
 **And the gap beside the sticky lane names is plugged.** The scroller pads itself 20px

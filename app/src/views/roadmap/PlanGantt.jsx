@@ -75,6 +75,93 @@ export function matchItem(bar, roadmap) {  // implements: REQ-VIEWER-999
   return roadmap.find((it) => it && it.req === req) || null;
 }
 
+const NOTE_BOX = {
+  marginTop: 12, padding: "14px 16px", borderRadius: 6,
+  background: "var(--surface)", border: "1px solid var(--border-soft)",
+  borderLeft: "3px solid var(--accent-2)", maxWidth: 760,
+};
+
+function NoteHead({ title, meta, t, onClose }) {
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+      <strong style={{ fontSize: 14 }}>{title}</strong>
+      <span style={{ fontSize: 11, color: "var(--fg-faint)" }}>{meta}</span>
+      <button type="button" onClick={onClose} style={{
+        marginLeft: "auto", background: "none", border: "none", cursor: "pointer",
+        color: "var(--fg-faint)", fontSize: 16, lineHeight: 1, padding: 0,
+      }} aria-label={t ? t("Close") : "Close"}>×</button>
+    </div>
+  );
+}
+
+const NOTE_LIST = { margin: "10px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 6 };
+const NOTE_ROW = { fontSize: 12.5, lineHeight: 1.5, display: "flex", gap: 10 };
+const LINK = {
+  background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit",
+};
+
+/** A shipped month, opened: every release in it with its CHANGELOG headline, newest first.
+ *  implements: REQ-HISTORY-1003 */
+export function ShippedNote({ month, t, onClose }) {
+  const entries = Array.isArray(month.entries) && month.entries.length
+    ? month.entries : (month.versions || []).map((v) => ({ version: v }));
+  return (
+    <div style={NOTE_BOX} data-note="month">
+      <NoteHead title={month.month} t={t} onClose={onClose}
+        meta={`${month.count} ${t ? t("releases") : "releases"} · ${month.first} → ${month.last}`} />
+      <ul style={NOTE_LIST}>
+        {entries.map((e) => (
+          <li key={e.version} style={NOTE_ROW}>
+            <strong style={{ minWidth: 64, fontVariantNumeric: "tabular-nums" }}>{e.version}</strong>
+            {e.date && <span style={{ color: "var(--fg-faint)", minWidth: 78 }}>{e.date}</span>}
+            <span>{e.headline || ""}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** A planned version, opened: its due date, its label and the bars planned on it.
+ *  implements: REQ-PLANCADENCE-1000 */
+export function VersionNote({ version, bars, t, openSpec, onClose, onPickBar }) {
+  const planned = bars.filter((b) => b.milestone === version.ms);
+  return (
+    <div style={NOTE_BOX} data-note="version">
+      <NoteHead title={version.ms} t={t} onClose={onClose}
+        meta={`${version.due}${version.label ? ` · ${version.label}` : ""}`} />
+      {planned.length
+        ? <ul style={NOTE_LIST}>
+            {planned.map((b) => (
+              <li key={b.key} style={NOTE_ROW}>
+                <button type="button" onClick={() => onPickBar(b)}
+                  style={{ ...LINK, color: "var(--fg)", textAlign: "left", fontWeight: 600 }}>
+                  {b.title}
+                </button>
+                <span style={{ color: "var(--fg-faint)" }}>{b.start} → {b.end}</span>
+                {b.reqId && openSpec && (
+                  <button type="button" onClick={() => openSpec(b.reqId)}
+                    style={{ ...LINK, color: "var(--accent-2)", textDecoration: "underline" }}>
+                    {b.reqId}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        : <div style={{ marginTop: 10, fontSize: 12, color: "var(--fg-faint)" }}>
+            {t ? t("Nothing planned on this version yet.") : "Nothing planned on this version yet."}
+          </div>}
+    </div>
+  );
+}
+
+/** Enter and Space open a selectable element, as a click does. */
+function onActivate(fn) {
+  return (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); }
+  };
+}
+
 function BarNote({ bar, roadmap, t, openSpec, onClose }) {  // implements: REQ-VIEWER-999
   const item = matchItem(bar, roadmap);
   const note = noteText(item?.context);
@@ -121,6 +208,9 @@ function BarNote({ bar, roadmap, t, openSpec, onClose }) {  // implements: REQ-V
 
 export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom, openSpec }) {
   const [picked, setPicked] = useState(null);
+  // One selection for bars, shipped months and versions alike; selecting the open one
+  // again closes its note.
+  const toggle = (item) => setPicked((cur) => (cur && cur.key === item.key ? null : item));
   const todayD = parseIso(isoLocal(new Date()));
   const raw = buildPlanBars(planning);
   const dueList = Object.entries(planning?.milestones || {})
@@ -194,6 +284,10 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
     .map((iso) => ({ iso, idx: dayIndex(origin, parseIso(iso)) }))
     .filter((r) => r.idx >= 0 && r.idx < totalDays);
   const loc = locale === "ro" ? "ro-RO" : "en-GB";
+  /* A version is a release, so it is drawn where the releases are: in the lane the cadence
+   * names, not on the ruler above every lane. With no such lane the pill stays on the
+   * ruler, where a plan without a cadence has always shown it. */
+  const releaseLane = lanes.includes(planning?.cadence?.lane) ? planning.cadence.lane : null;
 
   return (
     <div style={{ zoom: zoom / 100, width: "max-content", minWidth: "100%" }}>
@@ -269,7 +363,7 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
                   width: 1, height: 6, background: "var(--fg-faint)", zIndex: 1,
                 }} />
               ))}
-              {flags.map((f) => (
+              {!releaseLane && flags.map((f) => (
                 <div key={f.ms} title={f.label || `${f.ms} · ${f.at.toLocaleDateString(loc)}`} style={{
                   position: "absolute", top: 4, left: f.idx * PX + PX / 2 - 28,
                   width: 56, textAlign: "center", fontSize: 9, fontWeight: 800,
@@ -330,6 +424,9 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
                 return (
                   <div
                     key={h.month}
+                    data-month={h.month} role="button" tabIndex={0}
+                    onClick={() => toggle({ kind: "month", key: `month-${h.month}`, ...h })}
+                    onKeyDown={onActivate(() => toggle({ kind: "month", key: `month-${h.month}`, ...h }))}
                     title={`${h.month} · ${h.count} ${t("releases")} · ${h.versions[0]} → ${h.versions[h.versions.length - 1]}
 ${h.headline}`}
                     style={{
@@ -340,7 +437,9 @@ ${h.headline}`}
                       borderLeft: "3px solid var(--fg-muted)",
                       color: "var(--fg-muted)", fontSize: 11, fontWeight: 600,
                       padding: "0 8px", display: "flex", alignItems: "center",
-                      gap: 6, overflow: "hidden", whiteSpace: "nowrap",
+                      gap: 6, overflow: "hidden", whiteSpace: "nowrap", cursor: "pointer",
+                      outline: picked && picked.key === `month-${h.month}` ? "2px solid var(--accent-2)" : "none",
+                      outlineOffset: 1,
                     }}
                   >
                     <span style={{ fontWeight: 700 }}>{h.landmark}</span>
@@ -370,12 +469,48 @@ ${h.headline}`}
                     width: 1, background: "var(--border-soft)", pointerEvents: "none",
                   }} />
                 ))}
-                {releaseIdx.map((r) => (
-                  <div key={r.iso} style={{
-                    position: "absolute", top: 0, bottom: 0, left: r.idx * PX + PX / 2,
-                    width: 1, background: "color-mix(in oklch, var(--fg-faint) 45%, transparent)",
-                    pointerEvents: "none",
-                  }} />
+                {/* Guides mark the WORK, not the dates, and only in the bar's own lane.
+                    `today` and the milestones keep their header pills; a rule drawn the
+                    full height of the chart crossed the shipped band and every empty lane
+                    to say something about one bar. A start is solid and an end dotted,
+                    because a start is a commitment and an end an estimate.
+                    implements: REQ-PLANSTACK-1012 */}
+                {laneBars.map((b) => {
+                  const { left, width } = extent(b);
+                  return (
+                    <Fragment key={`guide-${b.key}`}>
+                      <div data-guide="start" style={{
+                        position: "absolute", top: 0, bottom: 0, left, width: 0,
+                        borderLeft: "2px solid var(--fg-muted)", opacity: 0.5,
+                        pointerEvents: "none", zIndex: 1,
+                      }} />
+                      <div data-guide="end" style={{
+                        position: "absolute", top: 0, bottom: 0, left: left + width, width: 0,
+                        borderLeft: "2px dotted var(--fg-muted)", opacity: 0.38,
+                        pointerEvents: "none", zIndex: 1,
+                      }} />
+                    </Fragment>
+                  );
+                })}
+                {/* A version is a release: its pill sits in the cadence's lane at its due
+                    date, and selecting it opens what is planned on it below the chart.
+                    implements: REQ-PLANCADENCE-1000 */}
+                {ln === releaseLane && flags.map((f) => (
+                  <div key={`ms-${f.ms}`} data-version={f.ms} role="button" tabIndex={0}
+                    title={`${f.ms} · ${f.label ? `${f.label} · ` : ""}${f.at.toLocaleDateString(loc)}`}
+                    onClick={() => toggle({ kind: "version", key: `ms-${f.ms}`, ...f })}
+                    onKeyDown={onActivate(() => toggle({ kind: "version", key: `ms-${f.ms}`, ...f }))}
+                    style={{
+                      cursor: "pointer", outlineOffset: 1,
+                      outline: picked && picked.key === `ms-${f.ms}` ? "2px solid var(--accent-2)" : "none",
+                      position: "absolute", top: heights[i] / 2 - 11, left: f.idx * PX + PX / 2 - 34,
+                      width: 68, height: 22, boxSizing: "border-box", textAlign: "center",
+                      fontSize: 11, fontWeight: 800, lineHeight: "20px",
+                      color: "var(--indigo-500)", background: "var(--indigo-tint)",
+                      border: "1px solid var(--indigo-400)", borderRadius: 4, zIndex: 3,
+                    }}>
+                    {f.ms}
+                  </div>
                 ))}
                 {laneBars.map((bar) => {
                   const { left, width } = extent(bar);
@@ -384,8 +519,7 @@ ${h.headline}`}
                     <div
                       key={bar.key}
                       title={`${bar.title}\n${bar.start} → ${bar.end}${bar.milestone ? `\n${bar.milestone}` : ""}`}
-                      onClick={() => setPicked(
-                        picked && picked.key === bar.key ? null : bar)}
+                      onClick={() => toggle(bar)}
                       style={{
                         position: "absolute", left, top, width, height: ROW_H - 6,
                         background: tone.bg, color: tone.fg, borderRadius: 4,
@@ -423,29 +557,6 @@ ${h.headline}`}
             );
           })}
 
-          {/* Guides mark the WORK, not the dates. `today` and the milestones keep their
-              header pills — the reader still finds them on the ruler — but a rule drawn
-              the full height of the chart was ruling a line through the bars it was
-              meant to help read. A start is solid and an end dotted, because a start is
-              a commitment and an end an estimate.  implements: REQ-PLANSTACK-1012 */}
-          {bars.map((b) => {
-            const { left, width } = extent(b);
-            return (
-              <Fragment key={`guide-${b.key}`}>
-                <div style={{
-                  position: "absolute", top: HEAD_H, height: bodyH, left, width: 0,
-                  borderLeft: "2px solid var(--fg-muted)", opacity: 0.5,
-                  pointerEvents: "none", zIndex: 1,
-                }} />
-                <div style={{
-                  position: "absolute", top: HEAD_H, height: bodyH,
-                  left: left + width, width: 0,
-                  borderLeft: "2px dotted var(--fg-muted)", opacity: 0.38,
-                  pointerEvents: "none", zIndex: 1,
-                }} />
-              </Fragment>
-            );
-          })}
         </div>
       </div>
       {/* Sticky too, and for the same reason: the note belongs to the reader, not to
@@ -453,8 +564,13 @@ ${h.headline}`}
           the chart, clipping its own first words. */}
       {picked && (
         <div style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
-          <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
-                   onClose={() => setPicked(null)} />
+          {picked.kind === "month"
+            ? <ShippedNote month={picked} t={t} onClose={() => setPicked(null)} />
+            : picked.kind === "version"
+              ? <VersionNote version={picked} bars={bars} t={t} openSpec={openSpec}
+                             onClose={() => setPicked(null)} onPickBar={setPicked} />
+              : <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
+                         onClose={() => setPicked(null)} />}
         </div>
       )}
     </div>

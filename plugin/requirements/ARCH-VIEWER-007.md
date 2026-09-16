@@ -932,9 +932,9 @@ Every bullet below is binding.
   where their dates do not.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
   the lane grows only where it must.
-- The full-height vertical guides mark the work: a solid rule at each bar's start and a
-  dotted one at its end. `today` and the milestones keep their header pills and rule no
-  line through the lanes.
+- The vertical guides mark the work: a solid rule at each bar's start and a dotted one at
+  its end, drawn only through that bar's own lane. `today` keeps its pill on the ruler, the
+  milestones keep theirs there or in the release lane, and neither rules a line through the lanes.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.
 - A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.

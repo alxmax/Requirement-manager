@@ -23,7 +23,7 @@ Every bullet below is binding.
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
-- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
+- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan, and a month opens to every release in it. [[REQ-HISTORY-1003]]
 
 ## Cases
 CASE-1
@@ -352,6 +352,11 @@ Every bullet below is binding.
   marker is emitted.
 - A cadence runs every `week` or every `month`; `on:` names a weekday for a week and a
   day-of-month (or `last`) for a month, defaulting to Friday and to the month's last day.
+- A cadence that names no period runs every week, on Friday — the end of the working week.
+  An author who releases on another rhythm says so with `every` and `on`.
+- The chart marks each release date with a tick on its ruler, never with a line through the
+  lanes. A milestone is a version, so when the lane the cadence names exists its pill is drawn
+  there, at its due date; selecting it opens its due date, label and the bars planned on it.
 - The release dates run across the span the plan's own bars and milestone dues already
   cover, from the first to the last, unless `from:`/`until:` narrow it.
 - A cadence naming a period the engine does not implement yields no cadence at all, rather
@@ -392,6 +397,11 @@ CASE-5 — a plan covering no dates still emits its calendar
   When   the planning sidecar is loaded
   Then   it carries `cadence` and a non-empty `releases` running to the shared horizon
 
+CASE-7 — a cadence that names no period is weekly, on Friday
+  Given  a `cadence` block with no `every` and no `on`
+  When   the planning sidecar is loaded
+  Then   `cadence.every` is `week`, `cadence.on` is `friday`, and every release is a Friday
+
 --------------------
 
 
@@ -424,11 +434,12 @@ Every bullet below is binding.
 - The headline is the entry's opening bold sentence; a bold run that ends in a colon is a
   lead-in to the list under it, so the next standalone line is used instead.
 - `_map.json` carries `history`: one row per calendar month with its release count, its first
-  and last date, every version in it, and the headline of its landmark release.
+  and last date, every version in it, the headline of its landmark release, and `entries`:
+  each release's version, date and headline, newest first.
 - The landmark is the month's biggest step — a major over a minor over a patch, newest among
   equals — never simply its first or last release.
 - The viewer places the rows the engine emitted, on the same timeline as the plan, and
-  derives none of its own.
+  derives none of its own. Selecting a month opens its `entries` below the chart.
 
 ## Cases
 CASE-1 — dated headings are read, newest first
@@ -455,3 +466,8 @@ CASE-5 — a repo with no CHANGELOG yields nothing
   Given  a code root holding no `CHANGELOG.md`
   When   the history is read
   Then   it is empty and the chart draws no shipped band
+
+CASE-6 — a shipped month opens to what was done in it
+  Given  a month holding two releases, each with a headline
+  When   the reader selects that month on the chart
+  Then   a note lists both releases, newest first, each with its date and headline
