@@ -9056,7 +9056,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:5"
+          "loc": "app/scripts/smoke/views.jsx:8"
         },
         {
           "role": "implements",
@@ -9127,7 +9127,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:6"
+          "loc": "app/scripts/smoke/views.jsx:9"
         },
         {
           "role": "implements",
@@ -15429,7 +15429,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:2"
+          "loc": "app/scripts/smoke/views.jsx:4"
         },
         {
           "role": "implements",
@@ -15510,7 +15510,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:148"
+          "loc": "app/scripts/smoke/views.jsx:138"
         },
         {
           "role": "implements",
@@ -15773,7 +15773,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:3"
+          "loc": "app/scripts/smoke/views.jsx:5"
         },
         {
           "role": "implements",
@@ -18641,7 +18641,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:1"
+          "loc": "app/scripts/smoke/views.jsx:1"
         },
         {
           "role": "implements",
@@ -18764,11 +18764,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:4"
+          "loc": "app/scripts/smoke/views.jsx:7"
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:101"
+          "loc": "app/scripts/smoke/views.jsx:88"
         },
         {
           "role": "implements",
@@ -19197,12 +19197,20 @@
           "loc": "app/scripts/run-ssr-smoke.mjs:1"
         },
         {
-          "role": "tested-by",
+          "role": "implements",
           "loc": "app/scripts/ssr-smoke.jsx:1"
         },
         {
           "role": "implements",
           "loc": "app/scripts/sync-data.mjs:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/scripts/smoke/harness.jsx:1"
+        },
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/views.jsx:2"
         },
         {
           "role": "implements",
@@ -19569,7 +19577,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:1"
+          "loc": "app/scripts/smoke/views.jsx:1"
         },
         {
           "role": "implements",
@@ -19648,7 +19656,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:1"
+          "loc": "app/scripts/smoke/views.jsx:1"
         },
         {
           "role": "implements",
@@ -19716,7 +19724,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:2"
+          "loc": "app/scripts/smoke/views.jsx:3"
         },
         {
           "role": "implements",
@@ -19778,7 +19786,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:2"
+          "loc": "app/scripts/smoke/views.jsx:3"
         },
         {
           "role": "implements",
@@ -19845,7 +19853,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:3"
+          "loc": "app/scripts/smoke/views.jsx:6"
         },
         {
           "role": "implements",
@@ -19913,7 +19921,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:2"
+          "loc": "app/scripts/smoke/views.jsx:3"
         },
         {
           "role": "implements",
@@ -19974,7 +19982,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:3"
+          "loc": "app/scripts/smoke/views.jsx:5"
         },
         {
           "role": "implements",
@@ -20033,7 +20041,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:3"
+          "loc": "app/scripts/smoke/views.jsx:5"
         },
         {
           "role": "implements",
@@ -20090,7 +20098,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:4"
+          "loc": "app/scripts/smoke/views.jsx:7"
         },
         {
           "role": "implements",
@@ -20146,11 +20154,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:4"
+          "loc": "app/scripts/smoke/views.jsx:7"
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:69"
+          "loc": "app/scripts/smoke/views.jsx:56"
         },
         {
           "role": "implements",
@@ -20205,7 +20213,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:5"
+          "loc": "app/scripts/smoke/views.jsx:8"
         },
         {
           "role": "implements",
@@ -20284,7 +20292,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:698"
+          "loc": "app/scripts/smoke/plan.jsx:78"
         },
         {
           "role": "implements",
@@ -20343,7 +20351,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:816"
+          "loc": "app/scripts/smoke/plan.jsx:209"
         },
         {
           "role": "implements",
@@ -23956,34 +23964,18 @@
     }
   ],
   "design": {
-    "files": 100,
-    "clean_files": 94,
-    "score": 94,
+    "files": 106,
+    "clean_files": 101,
+    "score": 95,
     "candidates": {
       "encapsulation": 3,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 4
+      "standards": 2
     },
     "findings": [
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "app/scripts/ssr-smoke.jsx",
-        "line": 1,
-        "name": "ssr-smoke.jsx",
-        "detail": "950 lines (over 500)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/scripts/ssr-smoke.jsx",
-        "line": 1,
-        "name": "ssr-smoke.jsx",
-        "detail": "93 line(s) wider than 100 columns, first at line 1"
-      },
       {
         "pillar": "standards",
         "kind": "line-too-long",
@@ -24027,7 +24019,6 @@
     ],
     "advice": {
       "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
-      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
       "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",

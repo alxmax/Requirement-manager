@@ -29,8 +29,10 @@ update the vendored viewer. Only `build:viewer` does.
 
 `app/` is inside the widened reqmap scan (`--code ..`). Every file under `src/` starts with a
 `// implements: <ID>` line (`/* ... */` in CSS) — add one to any new file, or the gate
-warns once it passes 150 lines. `scripts/ssr-smoke.jsx` is the `tested-by` member; keep its
-`test(label, ok)` helper, it is the idiom the gate's test-link check recognizes.
+warns once it passes 150 lines. `scripts/ssr-smoke.jsx` is the entry: it imports the parts under
+`scripts/smoke/` in order (several swap the adopted dataset and put it back, so the order is
+part of the test). The parts carry the `tested-by` tags and call the `test(label, ok)` helper
+from `smoke/harness.jsx`; that call is the idiom the gate's test-link check recognizes.
 
 A vendored-viewer change is a shipped change: bump the plugin semver and add a
 CHANGELOG entry (see root `CLAUDE.md`).

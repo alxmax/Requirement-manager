@@ -128,6 +128,8 @@
     },
     "ARCH-VIEWER-007": {
       "app/scripts/run-ssr-smoke.mjs": "189b80bff7f50c386c85eeab72ffdeed6c952757d16ff219e0b721e38542a975",
+      "app/scripts/smoke/harness.jsx": "b734928ba38ccf14b5c423df4adcf448315bca26d6100c22a54d594661dc2737",
+      "app/scripts/ssr-smoke.jsx": "9fc94292899d9be328c04cb5121095da7d0bef07ebc6bcdd35397d701f44992f",
       "app/scripts/sync-data.mjs": "29ce9672c824f6fca5e03532dbfb49bb242ebbb97d6b5ee72e0590144f486959",
       "app/src/components/TopBar.jsx": "a22bb9cf2f95a2b038c0378ee14d1e609bd19c9146f73cc4c437bd50b8922cdd",
       "app/src/lib/canvasZoom.jsx": "5d14b0cc184efa1bf5c0d4ab4ebe9046654bede7be941ef90ac6ffade5403acf",

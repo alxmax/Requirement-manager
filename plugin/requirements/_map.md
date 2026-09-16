@@ -3,7 +3,7 @@ generated: 2026-09-16
 engine: 2026-09-16.8
 nodes: 281
 edges: 120
-design pass-rate: 94% (94/100 source files without a design candidate)
+design pass-rate: 95% (101/106 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -769,8 +769,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_scan_py_73_207["plugin/scripts/reqmap_engine/scan.py:73-207"]
   ARCH_SCANCACHE_023 -->|implements| f_plugin_scripts_reqmap_engine_scan_py_73_207
   ARCH_SEARCH_036["Free-text requirement search<br><small>ARCH-SEARCH-036</small>"]
-  f_app_scripts_ssr_smoke_jsx_2["app/scripts/ssr-smoke.jsx:2"]
-  ARCH_SEARCH_036 -->|tested-by| f_app_scripts_ssr_smoke_jsx_2
+  f_app_scripts_smoke_views_jsx_4["app/scripts/smoke/views.jsx:4"]
+  ARCH_SEARCH_036 -->|tested-by| f_app_scripts_smoke_views_jsx_4
   f_app_src_lib_search_js_1["app/src/lib/search.js:1"]
   ARCH_SEARCH_036 -->|implements| f_app_src_lib_search_js_1
   f_plugin_scripts_test_reqmap_report_py_1238_5126["plugin/scripts/test_reqmap_report.py:1238-5126"]
@@ -903,9 +903,13 @@ graph LR
   f_app_scripts_run_ssr_smoke_mjs_1["app/scripts/run-ssr-smoke.mjs:1"]
   ARCH_VIEWER_007 -->|implements| f_app_scripts_run_ssr_smoke_mjs_1
   f_app_scripts_ssr_smoke_jsx_1["app/scripts/ssr-smoke.jsx:1"]
-  ARCH_VIEWER_007 -->|tested-by| f_app_scripts_ssr_smoke_jsx_1
+  ARCH_VIEWER_007 -->|implements| f_app_scripts_ssr_smoke_jsx_1
   f_app_scripts_sync_data_mjs_1["app/scripts/sync-data.mjs:1"]
   ARCH_VIEWER_007 -->|implements| f_app_scripts_sync_data_mjs_1
+  f_app_scripts_smoke_harness_jsx_1["app/scripts/smoke/harness.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_scripts_smoke_harness_jsx_1
+  f_app_scripts_smoke_views_jsx_2["app/scripts/smoke/views.jsx:2"]
+  ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_views_jsx_2
   f_app_src_App_jsx_1["app/src/App.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_App_jsx_1
   f_app_src_main_jsx_1["app/src/main.jsx:1"]
