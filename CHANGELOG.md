@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v7.21.14` — 2026-09-16
+
+**`SKILL.md` says when to use the MCP tools.** Both `requirement-manager` skill files gain a
+section on `reqmap.py mcp`: ask the corpus through the `reqmap_*` tools when a session has
+them, a table from each question to its tool and the CLI it runs, attaching
+`reqmap://requirement/<id>` before implementing a requirement, that the writing tools exist
+only with `--allow-writes` and that confirming, the drift reason and retiring stay a person's
+call, and how `init` sets the client configs up.
+
 ## plugin `v7.21.13` — 2026-09-16
 
 **`gate --show`, `--search` and `--dupes` emit JSON, and the MCP server offers resources.**
