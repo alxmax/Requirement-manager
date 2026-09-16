@@ -117,9 +117,9 @@ LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — spl
                                # its own `Then` line or 'atomic-bullet-then-mismatch' fires
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
                                # is the composite 'over-scoped' cohesion signal (warn)
-LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
-                               # 'file-spread' diffuseness signal (warn) — auto-off below it,
-                               # so silent in single-file repos (near-zero false positive)
+LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct DIRECTORIES
+                               # is a 'file-spread' diffuseness signal (warn) — auto-off below
+                               # it; the name predates ADR-0042, which moved it off files
 LINT_BUS_FANOUT_MIN = 3        # a `layer: bus` with ZERO dependents and this many dependencies
 
 

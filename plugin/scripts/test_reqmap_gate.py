@@ -2787,7 +2787,7 @@ class DocClaims(unittest.TestCase):  # tested-by: ARCH-DOCCLAIMS-071  # tested-b
         _errors, warns = R.run_gate_rules(R.GateContext(R.Workspace(reqs, members, rdir, d)))
         return [str(w) for w in warns if w["rule"] == "RM035"]
 
-    def test_a_stale_marked_count_warns_with_both_numbers(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-1
+    def test_a_stale_marked_count_warns_with_both_numbers(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-1  # verifies: ARCH-DOCCLAIMS-071#CASE-1
         with tempfile.TemporaryDirectory() as d:
             found = self._rm035(d, "This repo has <!--reqmap:total-->5 requirements.\n")
         self.assertEqual(1, len(found), found)
@@ -2807,9 +2807,14 @@ class DocClaims(unittest.TestCase):  # tested-by: ARCH-DOCCLAIMS-071  # tested-b
         self.assertIn("unknown claim kind", found[0])
         self.assertIn("total", found[0])
 
-    def test_a_document_with_no_marker_produces_nothing(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-4
+    def test_a_document_with_no_marker_produces_nothing(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-4  # verifies: ARCH-DOCCLAIMS-071#CASE-2
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual([], self._rm035(d, "This repo has 5 requirements, unmarked.\n"))
+
+    def test_a_document_the_config_does_not_name_is_not_read(self):  # verifies: ARCH-DOCCLAIMS-071#CASE-3
+        R.config.DOC_CLAIM_FILES = ["OTHER.md"]
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual([], self._rm035(d, "This repo has <!--reqmap:total-->5 requirements.\n"))
 
     def test_a_missing_document_is_skipped_without_a_finding(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-4
         with tempfile.TemporaryDirectory() as d:

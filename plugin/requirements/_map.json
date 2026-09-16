@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.11",
+  "engine_version": "2026-09-16.12",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -400,19 +400,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1574"
+          "loc": "plugin/scripts/test_reqmap_author.py:1577"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2038"
+          "loc": "plugin/scripts/test_reqmap_author.py:2041"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:128"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:129"
         }
       ],
       "test_exempt": null,
@@ -472,19 +472,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1574"
+          "loc": "plugin/scripts/test_reqmap_author.py:1577"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2038"
+          "loc": "plugin/scripts/test_reqmap_author.py:2041"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:128"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:129"
         }
       ],
       "test_exempt": null,
@@ -544,19 +544,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1574"
+          "loc": "plugin/scripts/test_reqmap_author.py:1577"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2038"
+          "loc": "plugin/scripts/test_reqmap_author.py:2041"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:119"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:120"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:129"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:130"
         }
       ],
       "test_exempt": null,
@@ -1262,11 +1262,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1512"
+          "loc": "plugin/scripts/test_reqmap_author.py:1515"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2238"
+          "loc": "plugin/scripts/test_reqmap_author.py:2241"
         },
         {
           "role": "tested-by",
@@ -1393,7 +1393,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1512"
+          "loc": "plugin/scripts/test_reqmap_author.py:1515"
         },
         {
           "role": "tested-by",
@@ -1502,11 +1502,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1512"
+          "loc": "plugin/scripts/test_reqmap_author.py:1515"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2238"
+          "loc": "plugin/scripts/test_reqmap_author.py:2241"
         },
         {
           "role": "implements",
@@ -1578,7 +1578,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3345"
+          "loc": "plugin/scripts/test_reqmap_author.py:3348"
         },
         {
           "role": "implements",
@@ -1632,7 +1632,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3345"
+          "loc": "plugin/scripts/test_reqmap_author.py:3348"
         },
         {
           "role": "implements",
@@ -1685,7 +1685,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3345"
+          "loc": "plugin/scripts/test_reqmap_author.py:3348"
         },
         {
           "role": "implements",
@@ -1872,7 +1872,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2850"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2855"
         },
         {
           "role": "tested-by",
@@ -2442,15 +2442,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2328"
+          "loc": "plugin/scripts/test_reqmap_author.py:2331"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2862"
+          "loc": "plugin/scripts/test_reqmap_author.py:2865"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2927"
+          "loc": "plugin/scripts/test_reqmap_author.py:2930"
         },
         {
           "role": "implements",
@@ -2526,11 +2526,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2328"
+          "loc": "plugin/scripts/test_reqmap_author.py:2331"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2927"
+          "loc": "plugin/scripts/test_reqmap_author.py:2930"
         },
         {
           "role": "implements",
@@ -2597,7 +2597,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2328"
+          "loc": "plugin/scripts/test_reqmap_author.py:2331"
         },
         {
           "role": "implements",
@@ -2649,7 +2649,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2862"
+          "loc": "plugin/scripts/test_reqmap_author.py:2865"
         },
         {
           "role": "implements",
@@ -3204,7 +3204,8 @@
       "intent": "reqmap links code to requirements by tags, but nothing reported how much code is linked to nothing — code traceable to no requirement was only visible by running `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at a glance whether code is drifting ahead of the spec. A Senate audit (2026-06-21) rejected enforcing coverage as a hard gate — it is gameable with hollow tags and conflicts with the model where a requirement is a behavior, not a file — and approved only this non-blocking visibility signal.",
       "contract": [
         "`health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour.",
-        "The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files and name one list, and the ratio states what it excluded. [[REQ-UNTAGGEDSET-1007]]"
+        "The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files, named in one list. [[REQ-UNTAGGEDSET-1007]]",
+        "The coverage ratio states which files it excluded. [[REQ-UNTAGGEDSET-1007]]"
       ],
       "verify": [],
       "notes": [
@@ -3463,31 +3464,31 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1652"
+          "loc": "plugin/scripts/test_reqmap_author.py:1655"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1738"
+          "loc": "plugin/scripts/test_reqmap_author.py:1741"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1832"
+          "loc": "plugin/scripts/test_reqmap_author.py:1835"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1926"
+          "loc": "plugin/scripts/test_reqmap_author.py:1929"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2078"
+          "loc": "plugin/scripts/test_reqmap_author.py:2081"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2666"
+          "loc": "plugin/scripts/test_reqmap_author.py:2669"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3048"
+          "loc": "plugin/scripts/test_reqmap_author.py:3051"
         },
         {
           "role": "tested-by",
@@ -3535,7 +3536,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:17"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:18"
         }
       ],
       "test_exempt": null,
@@ -3580,11 +3581,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1652"
+          "loc": "plugin/scripts/test_reqmap_author.py:1655"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2078"
+          "loc": "plugin/scripts/test_reqmap_author.py:2081"
         },
         {
           "role": "implements",
@@ -3641,7 +3642,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1652"
+          "loc": "plugin/scripts/test_reqmap_author.py:1655"
         },
         {
           "role": "implements",
@@ -3709,15 +3710,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1652"
+          "loc": "plugin/scripts/test_reqmap_author.py:1655"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1738"
+          "loc": "plugin/scripts/test_reqmap_author.py:1741"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2666"
+          "loc": "plugin/scripts/test_reqmap_author.py:2669"
         },
         {
           "role": "implements",
@@ -3775,7 +3776,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3048"
+          "loc": "plugin/scripts/test_reqmap_author.py:3051"
         },
         {
           "role": "implements",
@@ -4798,9 +4799,10 @@
       ],
       "acc": [
         "CASE-1 — Given  a document marking a corpus count that disagrees with the corpus When   `gate` runs Then   it warns naming the document, the line, the stated number and the measured one, and the exit code is unchanged",
-        "CASE-2 — Given  a repository whose documents carry no marker When   `gate` runs Then   no finding is produced and the run is byte-identical to one from before this requirement existed"
+        "CASE-2 — Given  a repository whose documents carry no marker When   `gate` runs Then   no finding is produced and the run is byte-identical to one from before this requirement existed",
+        "CASE-3 — Given  a stale marked count in a document `DOC_CLAIM_FILES` does not name When   `gate` runs Then   no finding is produced for it"
       ],
-      "accept": "CASE-1\n  Given  a document marking a corpus count that disagrees with the corpus\n  When   `gate` runs\n  Then   it warns naming the document, the line, the stated number and the measured one,\n         and the exit code is unchanged\n\nCASE-2\n  Given  a repository whose documents carry no marker\n  When   `gate` runs\n  Then   no finding is produced and the run is byte-identical to one from before this\n         requirement existed",
+      "accept": "CASE-1\n  Given  a document marking a corpus count that disagrees with the corpus\n  When   `gate` runs\n  Then   it warns naming the document, the line, the stated number and the measured one,\n         and the exit code is unchanged\n\nCASE-2\n  Given  a repository whose documents carry no marker\n  When   `gate` runs\n  Then   no finding is produced and the run is byte-identical to one from before this\n         requirement existed\n\nCASE-3\n  Given  a stale marked count in a document `DOC_CLAIM_FILES` does not name\n  When   `gate` runs\n  Then   no finding is produced for it",
       "input": "",
       "output": "",
       "desc": "",
@@ -4832,7 +4834,9 @@
       "test_exempt": null,
       "milestone": "v7.15",
       "priority": "",
-      "risks": []
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-DOCCLAIMS-1012",
@@ -5415,11 +5419,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1552"
+          "loc": "plugin/scripts/test_reqmap_author.py:1555"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2090"
+          "loc": "plugin/scripts/test_reqmap_author.py:2093"
         },
         {
           "role": "tested-by",
@@ -5527,7 +5531,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2090"
+          "loc": "plugin/scripts/test_reqmap_author.py:2093"
         },
         {
           "role": "implements",
@@ -5600,7 +5604,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2090"
+          "loc": "plugin/scripts/test_reqmap_author.py:2093"
         },
         {
           "role": "implements",
@@ -5673,11 +5677,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1552"
+          "loc": "plugin/scripts/test_reqmap_author.py:1555"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2090"
+          "loc": "plugin/scripts/test_reqmap_author.py:2093"
         },
         {
           "role": "implements",
@@ -5742,7 +5746,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1964"
+          "loc": "plugin/scripts/test_reqmap_author.py:1967"
         },
         {
           "role": "implements",
@@ -5828,7 +5832,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3475"
+          "loc": "plugin/scripts/test_reqmap_author.py:3478"
         },
         {
           "role": "implements",
@@ -5908,11 +5912,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1852"
+          "loc": "plugin/scripts/test_reqmap_author.py:1855"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2051"
+          "loc": "plugin/scripts/test_reqmap_author.py:2054"
         },
         {
           "role": "implements",
@@ -5983,11 +5987,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1852"
+          "loc": "plugin/scripts/test_reqmap_author.py:1855"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2051"
+          "loc": "plugin/scripts/test_reqmap_author.py:2054"
         },
         {
           "role": "implements",
@@ -7268,7 +7272,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2294"
+          "loc": "plugin/scripts/test_reqmap_author.py:2297"
         },
         {
           "role": "implements",
@@ -7333,7 +7337,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2294"
+          "loc": "plugin/scripts/test_reqmap_author.py:2297"
         },
         {
           "role": "implements",
@@ -7554,7 +7558,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1102"
+          "loc": "plugin/scripts/test_reqmap_author.py:1105"
         },
         {
           "role": "implements",
@@ -7629,7 +7633,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1102"
+          "loc": "plugin/scripts/test_reqmap_author.py:1105"
         },
         {
           "role": "implements",
@@ -7679,7 +7683,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1102"
+          "loc": "plugin/scripts/test_reqmap_author.py:1105"
         },
         {
           "role": "implements",
@@ -7724,10 +7728,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — the default run changes nothing on disk Given  a corpus with requirements that declare no `level:` When   `clarify --levels` runs without `--apply` Then   every proposal is printed, no requirement file changes, and the exit code is 0",
-        "CASE-2 — — the upper rungs and the edges are written with the rungs, in `init`'s shape Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub When   `clarify --levels --apply` runs Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing",
+        "CASE-2 — — the upper rungs and the edges are written with the rungs, in `init`'s shape Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub When   `clarify --levels --apply` runs Then   a draft `ARCH-JS-001` exists and the three point at it; the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`; both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`; the stub is unchanged, as is a requirement that already satisfied something; a second run writes nothing",
         "CASE-3 — — a requirement with contract groups is told which command builds its code rung Given  a requirement whose Description carries two bold contract groups When   `clarify --levels` runs Then   it is proposed `architecture` and the output names `clarify --decompose --apply`"
       ],
-      "accept": "CASE-1 — the default run changes nothing on disk\n  Given  a corpus with requirements that declare no `level:`\n  When   `clarify --levels` runs without `--apply`\n  Then   every proposal is printed, no requirement file changes, and the exit code is 0\n\nCASE-2 — the upper rungs and the edges are written with the rungs, in `init`'s shape\n  Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub\n  When   `clarify --levels --apply` runs\n  Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing\n\nCASE-3 — a requirement with contract groups is told which command builds its code rung\n  Given  a requirement whose Description carries two bold contract groups\n  When   `clarify --levels` runs\n  Then   it is proposed `architecture` and the output names `clarify --decompose --apply`",
+      "accept": "CASE-1 — the default run changes nothing on disk\n  Given  a corpus with requirements that declare no `level:`\n  When   `clarify --levels` runs without `--apply`\n  Then   every proposal is printed, no requirement file changes, and the exit code is 0\n\nCASE-2 — the upper rungs and the edges are written with the rungs, in `init`'s shape\n  Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub\n  When   `clarify --levels --apply` runs\n  Then   a draft `ARCH-JS-001` exists and the three point at it;\n         the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`;\n         both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`;\n         the stub is unchanged, as is a requirement that already satisfied something;\n         a second run writes nothing\n\nCASE-3 — a requirement with contract groups is told which command builds its code rung\n  Given  a requirement whose Description carries two bold contract groups\n  When   `clarify --levels` runs\n  Then   it is proposed `architecture` and the output names `clarify --decompose --apply`",
       "input": "",
       "output": "",
       "desc": "",
@@ -7741,7 +7745,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1102"
+          "loc": "plugin/scripts/test_reqmap_author.py:1105"
         },
         {
           "role": "implements",
@@ -7854,7 +7858,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2883"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2888"
         },
         {
           "role": "implements",
@@ -7874,11 +7878,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:88"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:89"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:112"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:113"
         }
       ],
       "test_exempt": null,
@@ -7941,11 +7945,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2256"
+          "loc": "plugin/scripts/test_reqmap_author.py:2259"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2883"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2888"
         },
         {
           "role": "implements",
@@ -7961,27 +7965,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:173"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:174"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:194"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:255"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:256"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:313"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:314"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:372"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:373"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:414"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:415"
         }
       ],
       "test_exempt": null,
@@ -8045,15 +8049,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2256"
+          "loc": "plugin/scripts/test_reqmap_author.py:2259"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:88"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:89"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:112"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:113"
         }
       ],
       "test_exempt": null,
@@ -8081,7 +8085,7 @@
       "intent": "The linter's rulebook: the individual checks that catch hard-to-read or overloaded requirement prose — sentences that run long, lines that stack conditions, bloated or skimpy acceptance lists, contracts that bundle several capabilities, vague quality words, code spread across too many files, and an atomic-form leaf that lists more facts than its Scenario proves. The framework that runs them, scopes them and decides exit codes is [[ARCH-LINT-014]]; this is what each check flags.",
       "contract": [
         "`statement-too-long` and `stacked-conditions` warn on a normative line that runs too long or stacks too many conditions; `anonymous-subject` warns on a Contract clause opening with a bare \"It\". [[REQ-LINTCHECKS-865]] details the behaviour.",
-        "`ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many files. [[REQ-LINTCHECKS-866]] details the behaviour.",
+        "`ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many directories. [[REQ-LINTCHECKS-866]] details the behaviour.",
         "`atomic-bullet-then-mismatch` and `atomic-story-overlong` warn on an atomic-form story quote whose fact count disagrees with its Scenario; `layer-mismatch` warns on a fan-out `bus` requirement nothing depends on. [[REQ-LINTCHECKS-867]] details the behaviour.",
         "`vague-term` warns on a Contract bullet using an untestable quality word from the closed `LINT_VAGUE_TERMS` set. [[REQ-LINTCHECKS-868]] details the behaviour.",
         "`redundant-modal` warns on a Contract bullet using `shall` or `must` — the closed `LINT_MODAL_WORDS` set. [[REQ-LINTCHECKS-869]] details the behaviour."
@@ -8108,14 +8112,14 @@
         "CASE-4 — Given  an Acceptance section with one criterion When   `gate` runs Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither",
         "CASE-5 — Given  a requirement over both ceilings (more than ten contract scope units and more than seven acceptance criteria) When   `gate` runs Then   it reports `over-scoped`; over only one ceiling, none",
         "CASE-6 — Given  a Contract holding thirty clauses under three bold group labels, plus eight acceptance criteria When   `gate` runs Then   it reports no `over-scoped`, because three groups is under the ceiling; the same thirty clauses ungrouped do report it",
-        "CASE-7 — Given  a requirement whose `implements` members span three or more distinct files When   `gate` runs with member data Then   it reports `file-spread`; a single file or no member data produce none",
+        "CASE-7 — Given  a requirement whose `implements` members span three or more distinct directories When   `gate` runs with member data Then   it reports `file-spread`; three files in one directory, or no member data, produce none",
         "CASE-8 — Given  a Contract bullet containing \"appropriate\" and \"user-friendly\" When   `gate` runs Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none",
         "CASE-9 — Given  a Contract bullet reading \"It creates the folder.\" When   `gate` runs Then   it reports an `anonymous-subject` warning; \"`init` creates the folder.\" reports none, and the same bare \"It\" in an Acceptance criterion reports none",
         "CASE-10 — Given  a Contract bullet reading \"The system shall log the event and must retry once.\" When   `gate` runs Then   it reports two `redundant-modal` warnings (\"shall\" + \"must\"); a backticked `shall_retry` identifier and a plain present-tense bullet report none",
         "CASE-11 — Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line When   `gate` runs Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under `--strict`; the same story with 3 matching `Then` lines reports none",
         "CASE-12 — Given  an atomic-form story quote listing 4 `- ` facts, one over `LINT_ATOMIC_STORY_BULLETS_MAX` When   `gate` runs Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, regardless of how many `Then` lines the Scenario carries"
       ],
-      "accept": "CASE-1\n  Given  a confirmed requirement whose Contract bullet uses the word \"appropriate\"\n  When   `gate` runs\n  Then   it reports a `vague-term` warning naming that term\n\nCASE-2\n  Given  a normative line joining four clauses with conjunctions, carrying no modal verb\n  When   `gate` runs\n  Then   it reports a `stacked-conditions` warning\n\nCASE-3\n  Given  a Contract bullet spanning four sentences\n  When   `gate` runs\n  Then   it reports `statement-too-long`; the same bullet cut to three sentences reports\n         none, and a single 40-word sentence reports nothing, however long it runs\n\nCASE-4\n  Given  an Acceptance section with one criterion\n  When   `gate` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nCASE-5\n  Given  a requirement over both ceilings (more than ten contract scope units and more\n         than seven acceptance criteria)\n  When   `gate` runs\n  Then   it reports `over-scoped`; over only one ceiling, none\n\nCASE-6\n  Given  a Contract holding thirty clauses under three bold group labels, plus eight\n         acceptance criteria\n  When   `gate` runs\n  Then   it reports no `over-scoped`, because three groups is under the ceiling; the same\n         thirty clauses ungrouped do report it\n\nCASE-7\n  Given  a requirement whose `implements` members span three or more distinct files\n  When   `gate` runs with member data\n  Then   it reports `file-spread`; a single file or no member data produce none\n\nCASE-8\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `gate` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none\n\nCASE-9\n  Given  a Contract bullet reading \"It creates the folder.\"\n  When   `gate` runs\n  Then   it reports an `anonymous-subject` warning; \"`init` creates the folder.\" reports\n         none, and the same bare \"It\" in an Acceptance criterion reports none\n\nCASE-10\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` warnings (\"shall\" + \"must\"); a backticked\n         `shall_retry` identifier and a plain present-tense bullet report none\n\nCASE-11\n  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line\n  When   `gate` runs\n  Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under\n         `--strict`; the same story with 3 matching `Then` lines reports none\n\nCASE-12\n  Given  an atomic-form story quote listing 4 `- ` facts, one over `LINT_ATOMIC_STORY_BULLETS_MAX`\n  When   `gate` runs\n  Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, regardless of\n         how many `Then` lines the Scenario carries",
+      "accept": "CASE-1\n  Given  a confirmed requirement whose Contract bullet uses the word \"appropriate\"\n  When   `gate` runs\n  Then   it reports a `vague-term` warning naming that term\n\nCASE-2\n  Given  a normative line joining four clauses with conjunctions, carrying no modal verb\n  When   `gate` runs\n  Then   it reports a `stacked-conditions` warning\n\nCASE-3\n  Given  a Contract bullet spanning four sentences\n  When   `gate` runs\n  Then   it reports `statement-too-long`; the same bullet cut to three sentences reports\n         none, and a single 40-word sentence reports nothing, however long it runs\n\nCASE-4\n  Given  an Acceptance section with one criterion\n  When   `gate` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nCASE-5\n  Given  a requirement over both ceilings (more than ten contract scope units and more\n         than seven acceptance criteria)\n  When   `gate` runs\n  Then   it reports `over-scoped`; over only one ceiling, none\n\nCASE-6\n  Given  a Contract holding thirty clauses under three bold group labels, plus eight\n         acceptance criteria\n  When   `gate` runs\n  Then   it reports no `over-scoped`, because three groups is under the ceiling; the same\n         thirty clauses ungrouped do report it\n\nCASE-7\n  Given  a requirement whose `implements` members span three or more distinct directories\n  When   `gate` runs with member data\n  Then   it reports `file-spread`; three files in one directory, or no member data, produce none\n\nCASE-8\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `gate` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none\n\nCASE-9\n  Given  a Contract bullet reading \"It creates the folder.\"\n  When   `gate` runs\n  Then   it reports an `anonymous-subject` warning; \"`init` creates the folder.\" reports\n         none, and the same bare \"It\" in an Acceptance criterion reports none\n\nCASE-10\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` warnings (\"shall\" + \"must\"); a backticked\n         `shall_retry` identifier and a plain present-tense bullet report none\n\nCASE-11\n  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line\n  When   `gate` runs\n  Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under\n         `--strict`; the same story with 3 matching `Then` lines reports none\n\nCASE-12\n  Given  an atomic-form story quote listing 4 `- ` facts, one over `LINT_ATOMIC_STORY_BULLETS_MAX`\n  When   `gate` runs\n  Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, regardless of\n         how many `Then` lines the Scenario carries",
       "input": "",
       "output": "",
       "desc": "",
@@ -8145,7 +8149,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1307"
+          "loc": "plugin/scripts/test_reqmap_author.py:1310"
         },
         {
           "role": "tested-by",
@@ -8161,31 +8165,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:106"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:107"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:173"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:174"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:194"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:255"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:256"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:313"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:314"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:372"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:373"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:414"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:415"
         }
       ],
       "test_exempt": null,
@@ -8193,15 +8197,7 @@
       "priority": "",
       "risks": [],
       "clauses": 12,
-      "covered": 12,
-      "i18n": {
-        "ro": {
-          "title": "Verificări de lizibilitate și domeniu",
-          "intent": "Cartea de reguli a linter-ului: verificările individuale care prind proza de cerințe greu de citit sau supraîncărcată — propoziții care se lungesc, linii care stivuiesc condiții, liste de acceptare umflate sau firave, contracte care înglobează mai multe capabilități, cuvinte de calitate vagi, cod răspândit pe prea multe fișiere, și o frunză de formă atomică care listează mai multe fapte decât dovedește Scenario-ul ei. Cadrul care le rulează, le limitează domeniul și decide codurile de ieșire este [[ARCH-LINT-014]]; aceasta este ceea ce marchează fiecare verificare.",
-          "contract": "> Cartea de reguli a linter-ului: verificările individuale care prind proza de cerințe\n> greu de citit sau supraîncărcată — propoziții care se lungesc, linii care stivuiesc\n> condiții, liste de acceptare umflate sau firave, contracte care înglobează mai multe\n> capabilități, cuvinte de calitate vagi, cod răspândit pe prea multe fișiere, și o\n> frunză de formă atomică care listează mai multe fapte decât dovedește Scenario-ul ei.\n> Cadrul care le rulează, le limitează domeniul și decide codurile de ieșire este\n> [[ARCH-LINT-014]]; aceasta este ceea ce marchează fiecare verificare.\n\nFiecare punct de mai jos este obligatoriu.\n- `statement-too-long` și `stacked-conditions` avertizează pentru o linie normativă care se lungește prea mult sau stivuiește prea multe condiții; `anonymous-subject` avertizează pentru o clauză Contract care se deschide cu un simplu \"It\". [[REQ-LINTCHECKS-865]] detaliază comportamentul.\n- `ac-count-low`/`ac-count-high`/`over-scoped` avertizează pentru prea puține sau prea multe criterii de acceptare sau unități de domeniu de contract; `file-spread` avertizează pentru o implementare răspândită pe prea multe fișiere. [[REQ-LINTCHECKS-866]] detaliază comportamentul.\n- `atomic-bullet-then-mismatch` și `atomic-story-overlong` avertizează pentru un citat-poveste de formă atomică al cărui număr de fapte nu corespunde Scenario-ului său; `layer-mismatch` avertizează pentru o cerință `bus` cu fan-out de care nimic nu depinde. [[REQ-LINTCHECKS-867]] detaliază comportamentul.\n- `vague-term` avertizează pentru un punct Contract care folosește un cuvânt de calitate netestabil din setul închis `LINT_VAGUE_TERMS`. [[REQ-LINTCHECKS-868]] detaliază comportamentul.\n- `redundant-modal` avertizează pentru un punct Contract care folosește `shall` sau `must` — setul închis `LINT_MODAL_WORDS`. [[REQ-LINTCHECKS-869]] detaliază comportamentul.",
-          "acceptance": "CASE-1\n  Given  o cerință confirmată al cărei punct Contract folosește cuvântul \"appropriate\"\n  When   `gate` rulează\n  Then   raportează un avertisment `vague-term` care numește acel termen\n\nCASE-2\n  Given  o linie normativă care unește patru clauze prin conjuncții, fără niciun verb modal\n  When   `gate` rulează\n  Then   raportează un avertisment `stacked-conditions`\n\nCASE-3\n  Given  un punct Contract care se întinde pe patru propoziții\n  When   `gate` rulează\n  Then   raportează `statement-too-long`; același punct redus la trei propoziții nu\n         raportează nimic, iar o singură propoziție de 40 de cuvinte nu raportează nimic, oricât de lungă ar fi\n\nCASE-4\n  Given  o secțiune Acceptance cu un criteriu\n  When   `gate` rulează\n  Then   raportează `ac-count-low`; cu opt criterii, `ac-count-high`; cu patru, niciunul\n\nCASE-5\n  Given  o cerință peste ambele plafoane (mai mult de zece unități de domeniu de contract și mai\n         mult de șapte criterii de acceptare)\n  When   `gate` rulează\n  Then   raportează `over-scoped`; peste doar un plafon, niciunul\n\nCASE-6\n  Given  un Contract care conține treizeci de clauze sub trei etichete de grup îngroșate, plus opt\n         criterii de acceptare\n  When   `gate` rulează\n  Then   nu raportează niciun `over-scoped`, deoarece trei grupuri este sub plafon; aceleași\n         treizeci de clauze negrupate o raportează\n\nCASE-7\n  Given  o cerință ai cărei membri `implements` se întind pe trei sau mai multe fișiere distincte\n  When   `gate` rulează cu date de membru\n  Then   raportează `file-spread`; un singur fișier sau lipsa datelor de membru nu produc niciunul\n\nCASE-8\n  Given  un punct Contract care conține \"appropriate\" și \"user-friendly\"\n  When   `gate` rulează\n  Then   raportează două avertismente `vague-term`; un segment încadrat cu backtick și un punct precis nu raportează niciunul\n\nCASE-9\n  Given  un punct Contract care citește \"It creates the folder.\"\n  When   `gate` rulează\n  Then   raportează un avertisment `anonymous-subject`; \"`init` creates the folder.\" nu\n         raportează niciunul, iar același \"It\" simplu într-un criteriu Acceptance nu raportează niciunul\n\nCASE-10\n  Given  un punct Contract care citește \"The system shall log the event and must retry once.\"\n  When   `gate` rulează\n  Then   raportează două avertismente `redundant-modal` (\"shall\" + \"must\"); un identificator\n         `shall_retry` încadrat cu backtick și un punct simplu la timpul prezent nu raportează niciunul\n\nCASE-11\n  Given  un citat-poveste de formă atomică ce listează 3 fapte `- ` și un Scenario cu 1 linie `Then`\n  When   `gate` rulează\n  Then   raportează un avertisment `atomic-bullet-then-mismatch`, promovat la eroare sub\n         `--strict`; aceeași poveste cu 3 linii `Then` corespunzătoare nu raportează niciunul\n\nCASE-12\n  Given  un citat-poveste de formă atomică ce listează 4 fapte `- `, unul peste `LINT_ATOMIC_STORY_BULLETS_MAX`\n  When   `gate` rulează\n  Then   raportează `atomic-story-overlong`, nu `atomic-bullet-then-mismatch`, indiferent de\n         câte linii `Then` poartă Scenario-ul"
-        }
-      }
+      "covered": 12
     },
     {
       "id": "REQ-LINTCHECKS-865",
@@ -8250,7 +8246,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:106"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:107"
         }
       ],
       "test_exempt": null,
@@ -8281,7 +8277,7 @@
         "The `ac-count-high` check warns on more than `LINT_AC_MAX`, default 7, criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
         "The `over-scoped` check warns on a requirement over both ceilings at once: more than `LINT_CONTRACT_MAX` scope units, default 10, with more than `LINT_AC_MAX` criteria.",
         "`over-scoped` counts clause groups when the Contract carries bold group labels, and counts clauses when it does not. Writing one obligation per bullet multiplies clauses without widening scope, so counting clauses alone would punish the authoring voice.",
-        "The `file-spread` check warns on a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX`, default 3, distinct files.",
+        "The `file-spread` check warns on a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX`, default 3, distinct directories; files in one directory count once.",
         "`file-spread` is an architectural-diffuseness signal and is skipped when no member data is supplied."
       ],
       "verify": [],
@@ -8292,10 +8288,10 @@
         "CASE-2 — — ac-count-high fires over the maximum, either counting style Given  an Acceptance section holding eight `AC-N` blocks, one over `LINT_AC_MAX` When   `gate` runs Then   it reports `ac-count-high`; eight `- ` bullets trigger the same warning",
         "CASE-3 — — over-scoped fires only when both ceilings are crossed Given  a Contract with eleven scope units and an Acceptance section with eight criteria When   `gate` runs Then   it reports `over-scoped`; crossing only one ceiling reports none",
         "CASE-4 — — over-scoped counts bold groups, not raw clauses Given  a Contract holding thirty clauses under three bold group labels When   `gate` runs Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty",
-        "CASE-5 — — file-spread fires at the distinct-file ceiling Given  a requirement whose `implements:` members name three distinct files When   `gate` runs with member data Then   it reports a `file-spread` warning",
+        "CASE-5 — — file-spread fires at the distinct-directory ceiling Given  a requirement whose `implements:` members name files in three distinct directories When   `gate` runs with member data Then   it reports a `file-spread` warning",
         "CASE-6 — — file-spread is silent without member data Given  a requirement whose members span three files, but `gate` runs with no member data When   `gate` runs Then   it reports no `file-spread` warning --------------------"
       ],
-      "accept": "CASE-1 — ac-count-low fires under the minimum\n  Given  an Acceptance section holding two criteria, one under `LINT_AC_MIN`\n  When   `gate` runs\n  Then   it reports an `ac-count-low` warning\n\nCASE-2 — ac-count-high fires over the maximum, either counting style\n  Given  an Acceptance section holding eight `AC-N` blocks, one over `LINT_AC_MAX`\n  When   `gate` runs\n  Then   it reports `ac-count-high`; eight `- ` bullets trigger the same warning\n\nCASE-3 — over-scoped fires only when both ceilings are crossed\n  Given  a Contract with eleven scope units and an Acceptance section with eight criteria\n  When   `gate` runs\n  Then   it reports `over-scoped`; crossing only one ceiling reports none\n\nCASE-4 — over-scoped counts bold groups, not raw clauses\n  Given  a Contract holding thirty clauses under three bold group labels\n  When   `gate` runs\n  Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty\n\nCASE-5 — file-spread fires at the distinct-file ceiling\n  Given  a requirement whose `implements:` members name three distinct files\n  When   `gate` runs with member data\n  Then   it reports a `file-spread` warning\n\nCASE-6 — file-spread is silent without member data\n  Given  a requirement whose members span three files, but `gate` runs with no member data\n  When   `gate` runs\n  Then   it reports no `file-spread` warning\n\n\n--------------------",
+      "accept": "CASE-1 — ac-count-low fires under the minimum\n  Given  an Acceptance section holding two criteria, one under `LINT_AC_MIN`\n  When   `gate` runs\n  Then   it reports an `ac-count-low` warning\n\nCASE-2 — ac-count-high fires over the maximum, either counting style\n  Given  an Acceptance section holding eight `AC-N` blocks, one over `LINT_AC_MAX`\n  When   `gate` runs\n  Then   it reports `ac-count-high`; eight `- ` bullets trigger the same warning\n\nCASE-3 — over-scoped fires only when both ceilings are crossed\n  Given  a Contract with eleven scope units and an Acceptance section with eight criteria\n  When   `gate` runs\n  Then   it reports `over-scoped`; crossing only one ceiling reports none\n\nCASE-4 — over-scoped counts bold groups, not raw clauses\n  Given  a Contract holding thirty clauses under three bold group labels\n  When   `gate` runs\n  Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty\n\nCASE-5 — file-spread fires at the distinct-directory ceiling\n  Given  a requirement whose `implements:` members name files in three distinct directories\n  When   `gate` runs with member data\n  Then   it reports a `file-spread` warning\n\nCASE-6 — file-spread is silent without member data\n  Given  a requirement whose members span three files, but `gate` runs with no member data\n  When   `gate` runs\n  Then   it reports no `file-spread` warning\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -8321,15 +8317,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Verificări de scope: numărul acceptance, over-scoping, răspândirea pe fișiere",
-          "intent": "O cerință poate fi sub-specificată (prea puține criterii ca să fie de încredere) sau un grab-bag (prea multe obligații, sau cod împrăștiat pe prea multe fișiere ca să fie un singur lucru). Aceste verificări limitează ambele capete: plafoane și praguri minime pe numărul acceptance, un semnal combinat over-scoped pentru contract+acceptance, și un semnal de răspândire pe fișiere pentru implementări difuzate pe prea multe fișiere.",
-          "contract": "> O cerință poate fi sub-specificată (prea puține criterii ca să fie de încredere) sau\n> un grab-bag (prea multe obligații, sau cod împrăștiat pe prea multe fișiere ca să fie un\n> singur lucru). Aceste verificări limitează ambele capete: plafoane și praguri minime pe\n> numărul acceptance, un semnal combinat over-scoped pentru contract+acceptance, și un\n> semnal de răspândire pe fișiere pentru implementări difuzate pe prea multe fișiere.\n\nFiecare bullet de mai jos este obligatoriu.\n- Verificarea `ac-count-low` avertizează pe o secțiune Acceptance care conține mai puțin de\n  `LINT_AC_MIN`, implicit 3, criterii.\n- Verificarea `ac-count-high` avertizează pe mai mult de `LINT_AC_MAX`, implicit 7, criterii,\n  numărate ca bullets `- ` sau blocuri etichetate `AC-N`.\n- Verificarea `over-scoped` avertizează pe o cerință care depășește ambele plafoane deodată: mai mult\n  de `LINT_CONTRACT_MAX` unități de scope, implicit 10, cu mai mult de `LINT_AC_MAX` criterii.\n- `over-scoped` numără grupurile de clauze când Contract-ul poartă etichete de grup bold, și numără\n  clauzele când nu poartă. Scrierea unei obligații per bullet multiplică clauzele fără a lărgi\n  scope-ul, deci a număra doar clauzele ar pedepsi vocea de redactare.\n- Verificarea `file-spread` avertizează pe o cerință ai cărei membri `implements` se întind pe cel puțin\n  `LINT_FILE_SPREAD_MAX`, implicit 3, fișiere distincte.\n- `file-spread` este un semnal de difuzitate arhitecturală și este omisă când nu sunt furnizate date de membri.",
-          "acceptance": "CASE-1 — ac-count-low se declanșează sub minim\n  Given  o secțiune Acceptance care conține două criterii, unul sub `LINT_AC_MIN`\n  When   rulează `gate`\n  Then   raportează un avertisment `ac-count-low`\n\nCASE-2 — ac-count-high se declanșează peste maxim, în oricare stil de numărare\n  Given  o secțiune Acceptance care conține opt blocuri `AC-N`, unul peste `LINT_AC_MAX`\n  When   rulează `gate`\n  Then   raportează `ac-count-high`; opt bullets `- ` declanșează același avertisment\n\nCASE-3 — over-scoped se declanșează doar când ambele plafoane sunt depășite\n  Given  un Contract cu unsprezece unități de scope și o secțiune Acceptance cu opt criterii\n  When   rulează `gate`\n  Then   raportează `over-scoped`; depășirea doar unui plafon nu raportează niciunul\n\nCASE-4 — over-scoped numără grupurile bold, nu clauzele brute\n  Given  un Contract care conține treizeci de clauze sub trei etichete de grup bold\n  When   rulează `gate`\n  Then   nu raportează niciun `over-scoped`, deoarece numărul de unități de scope este trei grupuri, nu treizeci\n\nCASE-5 — file-spread se declanșează la plafonul de fișiere distincte\n  Given  o cerință ai cărei membri `implements:` numesc trei fișiere distincte\n  When   rulează `gate` cu date de membri\n  Then   raportează un avertisment `file-spread`\n\nCASE-6 — file-spread este tăcut fără date de membri\n  Given  o cerință ai cărei membri se întind pe trei fișiere, dar `gate` rulează fără date de membri\n  When   rulează `gate`\n  Then   nu raportează niciun avertisment `file-spread`\n\n\n--------------------"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "REQ-LINTCHECKS-867",
@@ -8369,7 +8357,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1307"
+          "loc": "plugin/scripts/test_reqmap_author.py:1310"
         },
         {
           "role": "implements",
@@ -9116,7 +9104,9 @@
         "The viewer places the rows the engine emitted, on the same timeline as the plan, and derives none of its own. Selecting a month opens its `entries` below the chart."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the engine reads the CHANGELOG, the viewer's data layer adopts the rows, and the Plan draws them: three directories because the capability is one payload crossing the engine/viewer boundary, which is the shape every map feature has."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — dated headings are read, newest first Given  a `CHANGELOG.md` with two dated `## plugin` headings When   the history is parsed Then   both are returned with their version, date and headline, newest first",
@@ -9965,11 +9955,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1486"
+          "loc": "plugin/scripts/test_reqmap_author.py:1489"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2965"
+          "loc": "plugin/scripts/test_reqmap_author.py:2968"
         },
         {
           "role": "implements",
@@ -10040,7 +10030,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2965"
+          "loc": "plugin/scripts/test_reqmap_author.py:2968"
         },
         {
           "role": "implements",
@@ -10099,7 +10089,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1486"
+          "loc": "plugin/scripts/test_reqmap_author.py:1489"
         },
         {
           "role": "implements",
@@ -10193,7 +10183,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1738"
+          "loc": "plugin/scripts/test_reqmap_author.py:1741"
         },
         {
           "role": "tested-by",
@@ -10229,7 +10219,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:17"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:18"
         },
         {
           "role": "implements",
@@ -11629,11 +11619,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2160"
+          "loc": "plugin/scripts/test_reqmap_author.py:2163"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2781"
+          "loc": "plugin/scripts/test_reqmap_author.py:2784"
         },
         {
           "role": "tested-by",
@@ -11705,7 +11695,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2160"
+          "loc": "plugin/scripts/test_reqmap_author.py:2163"
         },
         {
           "role": "implements",
@@ -11761,7 +11751,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2781"
+          "loc": "plugin/scripts/test_reqmap_author.py:2784"
         },
         {
           "role": "implements",
@@ -11829,11 +11819,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1339"
+          "loc": "plugin/scripts/test_reqmap_author.py:1342"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2187"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         },
         {
           "role": "tested-by",
@@ -11901,11 +11891,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1339"
+          "loc": "plugin/scripts/test_reqmap_author.py:1342"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2187"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         },
         {
           "role": "implements",
@@ -11966,11 +11956,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1339"
+          "loc": "plugin/scripts/test_reqmap_author.py:1342"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2187"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         },
         {
           "role": "implements",
@@ -12027,11 +12017,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1339"
+          "loc": "plugin/scripts/test_reqmap_author.py:1342"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2187"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         },
         {
           "role": "implements",
@@ -12644,7 +12634,8 @@
       "contract": [
         "The engine reads the version a repository declares from the usual version files, or from the files `_config.json` names. [[REQ-VERSIONFILES-1014]]",
         "A CHANGELOG is read in the dated heading forms its ecosystem uses, and `init` seeds one when the repository has none. [[REQ-CHANGELOGFORMS-1015]]",
-        "`sync`, `gate --audit` and `health` report where the version files, the CHANGELOG and the tags disagree, and never fail on it. [[REQ-VERSIONALIGN-1016]]",
+        "`sync`, `gate --audit` and `health` report where the version files, the CHANGELOG and the tags disagree. [[REQ-VERSIONALIGN-1016]]",
+        "A disagreement between the version sources never fails a command. [[REQ-VERSIONALIGN-1016]]",
         "The next release's number is the lowest planned milestone above the highest version already declared. [[REQ-NEXTVERSION-1017]]",
         "`sync --release` prints the release it would cut and writes the version files and the CHANGELOG entry only with `--apply`. [[REQ-RELEASECMD-1018]]",
         "`init` gives a GitHub repository a workflow that tags and releases the declared version once. [[REQ-RELEASEWORKFLOW-1019]]",
@@ -12658,9 +12649,11 @@
       ],
       "current_impl": [],
       "acc": [
-        "CASE-1 — Given  a fresh repository with a `package.json` at 0.1.0 When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry"
+        "CASE-1 — Given  a fresh repository with a `package.json` at 0.1.0 When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry",
+        "CASE-2 — Given  a fresh repository with nothing planned above its declared version When   `sync --release --apply` runs Then   it exits 2 and the version file is unchanged",
+        "CASE-3 — Given  a repository whose version file was bumped by hand with no CHANGELOG entry When   `gate --audit` runs Then   it names the disagreement and exits 0"
       ],
-      "accept": "CASE-1\n  Given  a fresh repository with a `package.json` at 0.1.0\n  When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs\n  Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry",
+      "accept": "CASE-1\n  Given  a fresh repository with a `package.json` at 0.1.0\n  When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs\n  Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry\n\nCASE-2\n  Given  a fresh repository with nothing planned above its declared version\n  When   `sync --release --apply` runs\n  Then   it exits 2 and the version file is unchanged\n\nCASE-3\n  Given  a repository whose version file was bumped by hand with no CHANGELOG entry\n  When   `gate --audit` runs\n  Then   it names the disagreement and exits 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -12692,7 +12685,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3834"
+          "loc": "plugin/scripts/test_reqmap_author.py:3844"
         },
         {
           "role": "implements",
@@ -12739,8 +12732,8 @@
       "milestone": "v7.21.0",
       "priority": "",
       "risks": [],
-      "clauses": 1,
-      "covered": 1
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-VERSIONFILES-1014",
@@ -12779,7 +12772,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3583"
+          "loc": "plugin/scripts/test_reqmap_author.py:3586"
         },
         {
           "role": "implements",
@@ -12837,7 +12830,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3623"
+          "loc": "plugin/scripts/test_reqmap_author.py:3626"
         },
         {
           "role": "implements",
@@ -12888,7 +12881,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3657"
+          "loc": "plugin/scripts/test_reqmap_author.py:3660"
         },
         {
           "role": "implements",
@@ -12952,7 +12945,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3687"
+          "loc": "plugin/scripts/test_reqmap_author.py:3690"
         },
         {
           "role": "implements",
@@ -12982,7 +12975,7 @@
         "`sync --release` prints the version it would release, the version-file changes, the CHANGELOG entry and the plan change, and writes nothing.",
         "With `--apply` it rewrites every version file, and writes the dated entry — headed by the milestone's label in bold, then one bullet per bar planned on that version — directly under `Unreleased` when the file has one, otherwise above the newest release.",
         "A version named after `--release` is released instead of the planned one.",
-        "It refuses with exit 2, writing nothing, when nothing is planned above the baseline, when the version is not above it, or when the gate reports errors.",
+        "`sync --release --apply` refuses with exit 2 and writes nothing in three cases: nothing is planned above the baseline, the version is not above it, or the gate reports errors.",
         "An entry for the version that already exists is never written a second time."
       ],
       "verify": [],
@@ -13009,7 +13002,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3709"
+          "loc": "plugin/scripts/test_reqmap_author.py:3712"
         },
         {
           "role": "implements",
@@ -13088,7 +13081,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3782"
+          "loc": "plugin/scripts/test_reqmap_author.py:3792"
         },
         {
           "role": "implements",
@@ -13131,9 +13124,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — the plan drops the released version and keeps the rest Given  a plan holding `v1.5.0` and `v1.6.0`, a bar on each, and lanes When   `v1.5.0` is released Then   only `v1.6.0`, its bar and the lanes remain",
-        "CASE-2 — — after a release the plan is current and names the next Given  that release applied When   the plan and version sources are checked Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next"
+        "CASE-2 — — after a release the plan is current and names the next Given  that release applied When   the plan and version sources are checked Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next",
+        "CASE-3 — — a dry run leaves the plan as it was Given  a plan holding `v1.5.0` and a bar on it When   `sync --release` runs without `--apply` Then   `_planning.json` is byte-identical"
       ],
-      "accept": "CASE-1 — the plan drops the released version and keeps the rest\n  Given  a plan holding `v1.5.0` and `v1.6.0`, a bar on each, and lanes\n  When   `v1.5.0` is released\n  Then   only `v1.6.0`, its bar and the lanes remain\n\nCASE-2 — after a release the plan is current and names the next\n  Given  that release applied\n  When   the plan and version sources are checked\n  Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next",
+      "accept": "CASE-1 — the plan drops the released version and keeps the rest\n  Given  a plan holding `v1.5.0` and `v1.6.0`, a bar on each, and lanes\n  When   `v1.5.0` is released\n  Then   only `v1.6.0`, its bar and the lanes remain\n\nCASE-2 — after a release the plan is current and names the next\n  Given  that release applied\n  When   the plan and version sources are checked\n  Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next\n\nCASE-3 — a dry run leaves the plan as it was\n  Given  a plan holding `v1.5.0` and a bar on it\n  When   `sync --release` runs without `--apply`\n  Then   `_planning.json` is byte-identical",
       "input": "",
       "output": "",
       "desc": "",
@@ -13147,7 +13141,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3709"
+          "loc": "plugin/scripts/test_reqmap_author.py:3712"
         },
         {
           "role": "implements",
@@ -13162,8 +13156,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 2,
-      "covered": 2
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-PLANDATES-1022",
@@ -13202,7 +13196,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3857"
+          "loc": "plugin/scripts/test_reqmap_author.py:3885"
         },
         {
           "role": "implements",
@@ -13241,9 +13235,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — the items a release's bars carry out Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share When   the items for the bars are asked for Then   the first two are named and neither of the two sharing a `req:` is",
-        "CASE-2 — — the release plan names the items and writes none Given  a release whose bar is titled like an open Now item When   `sync --release --apply` runs Then   it names the item to tick and `ROADMAP.md` is unchanged"
+        "CASE-2 — — the release plan names the items and writes none Given  a release whose bar is titled like an open Now item When   `sync --release --apply` runs Then   it names the item to tick and `ROADMAP.md` is unchanged",
+        "CASE-3 — — a done item is never suggested Given  a bar titled like an item already ticked When   the items for the bars are asked for Then   none is named"
       ],
-      "accept": "CASE-1 — the items a release's bars carry out\n  Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share\n  When   the items for the bars are asked for\n  Then   the first two are named and neither of the two sharing a `req:` is\n\nCASE-2 — the release plan names the items and writes none\n  Given  a release whose bar is titled like an open Now item\n  When   `sync --release --apply` runs\n  Then   it names the item to tick and `ROADMAP.md` is unchanged",
+      "accept": "CASE-1 — the items a release's bars carry out\n  Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share\n  When   the items for the bars are asked for\n  Then   the first two are named and neither of the two sharing a `req:` is\n\nCASE-2 — the release plan names the items and writes none\n  Given  a release whose bar is titled like an open Now item\n  When   `sync --release --apply` runs\n  Then   it names the item to tick and `ROADMAP.md` is unchanged\n\nCASE-3 — a done item is never suggested\n  Given  a bar titled like an item already ticked\n  When   the items for the bars are asked for\n  Then   none is named",
       "input": "",
       "output": "",
       "desc": "",
@@ -13257,7 +13252,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3895"
+          "loc": "plugin/scripts/test_reqmap_author.py:3923"
         },
         {
           "role": "implements",
@@ -13268,8 +13263,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 2,
-      "covered": 2
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-REPRO-041",
@@ -13436,15 +13431,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1926"
+          "loc": "plugin/scripts/test_reqmap_author.py:1929"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2458"
+          "loc": "plugin/scripts/test_reqmap_author.py:2461"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2993"
+          "loc": "plugin/scripts/test_reqmap_author.py:2996"
         },
         {
           "role": "tested-by",
@@ -13529,7 +13524,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2458"
+          "loc": "plugin/scripts/test_reqmap_author.py:2461"
         },
         {
           "role": "implements",
@@ -13594,7 +13589,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2458"
+          "loc": "plugin/scripts/test_reqmap_author.py:2461"
         },
         {
           "role": "implements",
@@ -13682,11 +13677,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2458"
+          "loc": "plugin/scripts/test_reqmap_author.py:2461"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2993"
+          "loc": "plugin/scripts/test_reqmap_author.py:2996"
         },
         {
           "role": "implements",
@@ -13760,7 +13755,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2458"
+          "loc": "plugin/scripts/test_reqmap_author.py:2461"
         },
         {
           "role": "implements",
@@ -13850,7 +13845,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1425"
+          "loc": "plugin/scripts/test_reqmap_author.py:1428"
         },
         {
           "role": "implements",
@@ -13922,7 +13917,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1425"
+          "loc": "plugin/scripts/test_reqmap_author.py:1428"
         },
         {
           "role": "implements",
@@ -13961,7 +13956,8 @@
         "The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]",
         "The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]",
         "A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]",
-        "A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]",
+        "A planned milestone in `_planning.json` at or below the highest version the repo has already declared is reported by `gate --audit` and `health`. [[REQ-PLANSTALE-1013]]",
+        "That report covers milestone keys as well as bar milestones, and is never a gate rule. [[REQ-PLANSTALE-1013]]",
         "An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]",
         "`init` seeds a plan a new repository can plan on, and a plan with no dates still carries a calendar to its horizon. [[REQ-PLANHORIZON-1010]]",
         "The export carries the branch git is on, and the plan's shipped band is labelled with it. [[REQ-PLANBRANCH-1011]]"
@@ -14487,9 +14483,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — Now and Next items without a bar are counted Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither When   the unplanned items are asked for Then   only the one matched by neither is counted and named",
-        "CASE-2 — — everything scheduled is silent Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all When   the line is asked for Then   there is none"
+        "CASE-2 — — everything scheduled is silent Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all When   the line is asked for Then   there is none",
+        "CASE-3 — — done and Later items are never counted Given  a ROADMAP with open Now/Next items, a done item and a Later item, and no bars When   the unplanned items are asked for Then   only the open Now and Next items are counted"
       ],
-      "accept": "CASE-1 — Now and Next items without a bar are counted\n  Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither\n  When   the unplanned items are asked for\n  Then   only the one matched by neither is counted and named\n\nCASE-2 — everything scheduled is silent\n  Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all\n  When   the line is asked for\n  Then   there is none",
+      "accept": "CASE-1 — Now and Next items without a bar are counted\n  Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither\n  When   the unplanned items are asked for\n  Then   only the one matched by neither is counted and named\n\nCASE-2 — everything scheduled is silent\n  Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all\n  When   the line is asked for\n  Then   there is none\n\nCASE-3 — done and Later items are never counted\n  Given  a ROADMAP with open Now/Next items, a done item and a Later item, and no bars\n  When   the unplanned items are asked for\n  Then   only the open Now and Next items are counted",
       "input": "",
       "output": "",
       "desc": "",
@@ -14503,7 +14500,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3895"
+          "loc": "plugin/scripts/test_reqmap_author.py:3923"
         },
         {
           "role": "implements",
@@ -14518,8 +14515,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 2,
-      "covered": 2
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-RULES-059",
@@ -15832,7 +15829,8 @@
       "intent": "A requirement file is read by nine different things — the drift hash, the linter, the map, `show`, `dupes`, the case counter — and each one has to answer the same two questions first: where does this section start, and is this line inside a fenced example. When each answered for itself they disagreed, and the disagreement was invisible: a `## Description` inside a ```-block satisfied the presence check while every reader of that section came back empty, and the drift hash treated the fenced example as part of the contract.",
       "contract": [
         "One reader answers where a section begins and ends, and every consumer of a requirement body — the drift hash included — asks it rather than scanning the body itself. [[REQ-SECTIONS-994]]",
-        "`## Description` and `## Cases` are the section names, and every older spelling still parses and still anchors a `# verifies:` tag. [[REQ-DESCRIPTION-057]]"
+        "`## Description` and `## Cases` are the section names. [[REQ-DESCRIPTION-057]]",
+        "Every older spelling of either section still parses, and still anchors a `# verifies:` tag. [[REQ-DESCRIPTION-057]]"
       ],
       "verify": [],
       "notes": [],
@@ -16800,9 +16798,9 @@
         "CASE-4 — — stopwords and pure numbers never count as shared terms Given  two unrelated requirements sharing only stopwords and a number like \"2026\" When   `dupes` runs Then   neither is listed among the pair's shared terms",
         "CASE-5 — — an unauthored draft is skipped and counted Given  a requirement whose Contract bullets are all still `TODO: …` When   `dupes` runs Then   that requirement is excluded from comparison and the skip count includes it",
         "CASE-6 — — a tested-by-linked pair is skipped and counted Given  requirement A whose `tested-by` file is requirement B's `implements` file, with overlapping wording When   `dupes` runs with the member map Then   the pair is excluded from the report and the linked-pairs count includes it",
-        "CASE-7 — — a parent and its child, or two children of one parent, are never a duplicate finding Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent When   `dupes` runs Then   the parent-child and sibling pairs are skipped and counted in the linked-pairs line, and the pair across parents is still reported --------------------"
+        "CASE-7 — — a parent and its child, or two children of one parent, are never a duplicate finding Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent When   `dupes` runs Then   the parent-child and sibling pairs are skipped, counted in the linked-pairs line; the pair across parents is still reported --------------------"
       ],
-      "accept": "CASE-1 — the bag of words comes from title, intent and Contract only\n  Given  two requirements sharing wording only in their titles and Contract bullets\n  When   `dupes` builds each requirement's bag of words\n  Then   that shared wording is included and drives the comparison\n\nCASE-2 — text unique to the Notes section is left out of the bag\n  Given  two unrelated requirements whose Notes sections happen to share several words\n  When   `dupes` runs\n  Then   that shared Notes wording does not raise their pair's score\n\nCASE-3 — tokens shorter than three characters are dropped\n  Given  two requirements whose only shared wording is two-letter tokens\n  When   `dupes` tokenizes their text\n  Then   those tokens are absent from either bag of words\n\nCASE-4 — stopwords and pure numbers never count as shared terms\n  Given  two unrelated requirements sharing only stopwords and a number like \"2026\"\n  When   `dupes` runs\n  Then   neither is listed among the pair's shared terms\n\nCASE-5 — an unauthored draft is skipped and counted\n  Given  a requirement whose Contract bullets are all still `TODO: …`\n  When   `dupes` runs\n  Then   that requirement is excluded from comparison and the skip count includes it\n\nCASE-6 — a tested-by-linked pair is skipped and counted\n  Given  requirement A whose `tested-by` file is requirement B's `implements` file, with overlapping wording\n  When   `dupes` runs with the member map\n  Then   the pair is excluded from the report and the linked-pairs count includes it\n\nCASE-7 — a parent and its child, or two children of one parent, are never a duplicate finding\n  Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent\n  When   `dupes` runs\n  Then   the parent-child and sibling pairs are skipped and counted in the linked-pairs line, and the pair across parents is still reported\n\n\n--------------------",
+      "accept": "CASE-1 — the bag of words comes from title, intent and Contract only\n  Given  two requirements sharing wording only in their titles and Contract bullets\n  When   `dupes` builds each requirement's bag of words\n  Then   that shared wording is included and drives the comparison\n\nCASE-2 — text unique to the Notes section is left out of the bag\n  Given  two unrelated requirements whose Notes sections happen to share several words\n  When   `dupes` runs\n  Then   that shared Notes wording does not raise their pair's score\n\nCASE-3 — tokens shorter than three characters are dropped\n  Given  two requirements whose only shared wording is two-letter tokens\n  When   `dupes` tokenizes their text\n  Then   those tokens are absent from either bag of words\n\nCASE-4 — stopwords and pure numbers never count as shared terms\n  Given  two unrelated requirements sharing only stopwords and a number like \"2026\"\n  When   `dupes` runs\n  Then   neither is listed among the pair's shared terms\n\nCASE-5 — an unauthored draft is skipped and counted\n  Given  a requirement whose Contract bullets are all still `TODO: …`\n  When   `dupes` runs\n  Then   that requirement is excluded from comparison and the skip count includes it\n\nCASE-6 — a tested-by-linked pair is skipped and counted\n  Given  requirement A whose `tested-by` file is requirement B's `implements` file, with overlapping wording\n  When   `dupes` runs with the member map\n  Then   the pair is excluded from the report and the linked-pairs count includes it\n\nCASE-7 — a parent and its child, or two children of one parent, are never a duplicate finding\n  Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent\n  When   `dupes` runs\n  Then   the parent-child and sibling pairs are skipped, counted in the linked-pairs line;\n         the pair across parents is still reported\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -18513,15 +18511,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1013"
+          "loc": "plugin/scripts/test_reqmap_author.py:1016"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2726"
+          "loc": "plugin/scripts/test_reqmap_author.py:2729"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3237"
+          "loc": "plugin/scripts/test_reqmap_author.py:3240"
         },
         {
           "role": "implements",
@@ -18598,7 +18596,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1013"
+          "loc": "plugin/scripts/test_reqmap_author.py:1016"
         },
         {
           "role": "implements",
@@ -18664,7 +18662,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1013"
+          "loc": "plugin/scripts/test_reqmap_author.py:1016"
         },
         {
           "role": "implements",
@@ -18718,7 +18716,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2726"
+          "loc": "plugin/scripts/test_reqmap_author.py:2729"
         },
         {
           "role": "implements",
@@ -18791,7 +18789,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3237"
+          "loc": "plugin/scripts/test_reqmap_author.py:3240"
         },
         {
           "role": "implements",
@@ -19790,7 +19788,9 @@
         "The scope applies to the first render, not only after one — the outline is never painted unfiltered when a scope was requested."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the tally lives in the rail, the scope in the app shell and the chip in the outline: one click travels through the three components it connects."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — a tally row narrows the outline Given  the outline rendered with the `draft` slice requested When   its rows are counted Then   fewer rows are shown than with no slice requested",
@@ -20215,7 +20215,9 @@
         "Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and the Plan's note panel renders it: one payload crossing the engine/viewer boundary."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — selecting a bar shows the note written under its roadmap item Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose context reads `two sentences of why` When   the reader selects that bar Then   a panel below the chart shows the bar's title and `two sentences of why`",
@@ -20285,9 +20287,10 @@
       "title": "Bars are stacked by what is drawn, not by what is scheduled",
       "intent": "Two bars a week apart do not overlap as dates, so they were put on one row — and then painted 23px on top of each other, the first one's title vanishing under the second. The chart floors a bar at a readable width, and at 7px a day a week drew 43px and was floored to 72: nearly three days of borrowed room. A wider day gives a week 71px of its own and takes it out of the floor entirely, which leaves the floor to the bars that have no label room at any scale. The row chooser still has to know what the renderer will draw, because the renderer cannot know what the chooser meant — it draws what it is given.",
       "contract": [
-        "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
+        "One function answers where a bar is drawn and how wide.",
+        "The renderer reads that function, as does the row chooser; neither computes its own.",
         "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
-        "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
+        "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where two bars would otherwise overlap.",
         "The vertical guides mark the work: a solid rule from the centre of each bar's start day on the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the milestones keep theirs there or in the release lane, and neither rules a line through the lanes.",
         "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport.",
         "A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.",
@@ -20316,7 +20319,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:78"
+          "loc": "app/scripts/smoke/plan.jsx:79"
         },
         {
           "role": "implements",
@@ -20358,9 +20361,11 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — each day under the weeks is labelled day/month Given  a chart that covers Monday 14 September 2026 through the following Sunday When   the Plan renders Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days"
+        "CASE-1 — — each day under the weeks is labelled day/month Given  a chart that covers Monday 14 September 2026 through the following Sunday When   the Plan renders Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days",
+        "CASE-2 — — today stands out and a weekend recedes Given  a Friday that is today, a Friday that is not, and a Saturday When   each day's label is styled Then   today is in the accent colour, the other Friday is not, and the Saturday is fainter than the other Friday",
+        "CASE-3 — — the day row spans the chart Given  a plan whose chart covers several weeks When   the Plan renders Then   it draws one labelled day cell per day the chart covers"
       ],
-      "accept": "CASE-1 — each day under the weeks is labelled day/month\n  Given  a chart that covers Monday 14 September 2026 through the following Sunday\n  When   the Plan renders\n  Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days",
+      "accept": "CASE-1 — each day under the weeks is labelled day/month\n  Given  a chart that covers Monday 14 September 2026 through the following Sunday\n  When   the Plan renders\n  Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days\n\nCASE-2 — today stands out and a weekend recedes\n  Given  a Friday that is today, a Friday that is not, and a Saturday\n  When   each day's label is styled\n  Then   today is in the accent colour, the other Friday is not, and the Saturday is fainter\n         than the other Friday\n\nCASE-3 — the day row spans the chart\n  Given  a plan whose chart covers several weeks\n  When   the Plan renders\n  Then   it draws one labelled day cell per day the chart covers",
       "input": "",
       "output": "",
       "desc": "",
@@ -20374,7 +20379,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:222"
+          "loc": "app/scripts/smoke/plan.jsx:223"
         },
         {
           "role": "implements",
@@ -20389,8 +20394,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 1,
-      "covered": 1
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-VLEVEL-037",
@@ -23307,7 +23312,7 @@
     },
     {
       "month": "2026-09",
-      "count": 84,
+      "count": 85,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23394,11 +23399,17 @@
         "v7.21.2",
         "v7.21.3",
         "v7.21.4",
-        "v7.21.5"
+        "v7.21.5",
+        "v7.21.6"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.6",
+          "date": "2026-09-16",
+          "headline": "**The corpus's readability report is empty: `file-spread` counts directories, and the rest"
+        },
         {
           "version": "v7.21.5",
           "date": "2026-09-16",

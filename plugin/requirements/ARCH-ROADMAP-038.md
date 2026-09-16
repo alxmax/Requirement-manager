@@ -24,7 +24,8 @@ Every bullet below is binding.
 - The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]
 - The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]
 - A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]
-- A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]
+- A planned milestone in `_planning.json` at or below the highest version the repo has already declared is reported by `gate --audit` and `health`. [[REQ-PLANSTALE-1013]]
+- That report covers milestone keys as well as bar milestones, and is never a gate rule. [[REQ-PLANSTALE-1013]]
 - An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]
 - `init` seeds a plan a new repository can plan on, and a plan with no dates still carries a calendar to its horizon. [[REQ-PLANHORIZON-1010]]
 - The export carries the branch git is on, and the plan's shipped band is labelled with it. [[REQ-PLANBRANCH-1011]]
@@ -503,4 +504,9 @@ CASE-2 — everything scheduled is silent
   Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all
   When   the line is asked for
   Then   there is none
+
+CASE-3 — done and Later items are never counted
+  Given  a ROADMAP with open Now/Next items, a done item and a Later item, and no bars
+  When   the unplanned items are asked for
+  Then   only the open Now and Next items are counted
 

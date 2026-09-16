@@ -92,7 +92,7 @@ const fade = (pct) => `color-mix(in oklch, var(--fg-faint) ${pct}%, transparent)
 /* The day of the month under each week, `day/month`. Today is marked in the accent colour
    and a weekend is fainter, so a Friday reads as the end of the week.
    implements: REQ-PLANDAYS-1021 */
-function dayStyle(dd, todayIdx) {
+export function dayStyle(dd, todayIdx) {
   const today = dd.start === todayIdx;
   return {
     ...CELL, width: PX, flexShrink: 0, overflow: "hidden", whiteSpace: "nowrap",

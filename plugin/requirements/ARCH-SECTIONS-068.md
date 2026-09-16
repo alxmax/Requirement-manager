@@ -23,7 +23,8 @@ Every bullet below is binding.
 - One reader answers where a section begins and ends, and every consumer of a requirement
   body — the drift hash included — asks it rather than scanning the body itself.
   [[REQ-SECTIONS-994]]
-- `## Description` and `## Cases` are the section names, and every older spelling still parses and still anchors a `# verifies:` tag. [[REQ-DESCRIPTION-057]]
+- `## Description` and `## Cases` are the section names. [[REQ-DESCRIPTION-057]]
+- Every older spelling of either section still parses, and still anchors a `# verifies:` tag. [[REQ-DESCRIPTION-057]]
 ## Cases
 CASE-1 — a heading inside a fence is not a section
   Given  a body whose only `## Description` is inside a fenced example

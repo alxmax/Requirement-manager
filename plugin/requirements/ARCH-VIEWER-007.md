@@ -475,6 +475,7 @@ layer: feature
 owner: Alex
 milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
+lint_exempt: [file-spread]
 ---
 
 # Scoping the outline from the registry tally
@@ -510,6 +511,11 @@ CASE-3 — the applied scope is visible and clearable
   Given  the outline rendered with a slice requested
   When   its filter row is drawn
   Then   the chip naming that slice is drawn active
+
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the tally lives in the rail, the scope in the app shell and
+  the chip in the outline: one click travels through the three components it connects.
 
 ---
 id: REQ-VIEWER-964
@@ -854,6 +860,7 @@ layer: feature
 owner: Alex
 milestone: v7.7
 satisfies: [ARCH-VIEWER-007]
+lint_exempt: [file-spread]
 ---
 
 # A plan bar opens the note its author wrote in ROADMAP.md
@@ -907,6 +914,11 @@ CASE-5 — the roadmap payload survives the mode's removal
   When   `sync` writes the export
   Then   `_map.json` still carries that item under `roadmap`, with its context
 
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and
+  the Plan's note panel renders it: one payload crossing the engine/viewer boundary.
+
 ---
 id: REQ-PLANSTACK-1012
 status: confirmed
@@ -928,12 +940,12 @@ satisfies: [ARCH-VIEWER-007]
 > draw, because the renderer cannot know what the chooser meant — it draws what it is given.
 
 Every bullet below is binding.
-- One function answers where a bar is drawn and how wide, and both the renderer and the
-  row chooser read it — neither computes its own.
+- One function answers where a bar is drawn and how wide.
+- The renderer reads that function, as does the row chooser; neither computes its own.
 - `stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even
   where their dates do not.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
-  the lane grows only where it must.
+  the lane grows only where two bars would otherwise overlap.
 - The vertical guides mark the work: a solid rule from the centre of each bar's start day on
   the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a
   version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the
@@ -991,4 +1003,15 @@ CASE-1 — each day under the weeks is labelled day/month
   Given  a chart that covers Monday 14 September 2026 through the following Sunday
   When   the Plan renders
   Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days
+
+CASE-2 — today stands out and a weekend recedes
+  Given  a Friday that is today, a Friday that is not, and a Saturday
+  When   each day's label is styled
+  Then   today is in the accent colour, the other Friday is not, and the Saturday is fainter
+         than the other Friday
+
+CASE-3 — the day row spans the chart
+  Given  a plan whose chart covers several weeks
+  When   the Plan renders
+  Then   it draws one labelled day cell per day the chart covers
 

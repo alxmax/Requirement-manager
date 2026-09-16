@@ -22,7 +22,7 @@ lint_exempt: [ac-count-high]
 
 Every bullet below is binding.
 - `statement-too-long` and `stacked-conditions` warn on a normative line that runs too long or stacks too many conditions; `anonymous-subject` warns on a Contract clause opening with a bare "It". [[REQ-LINTCHECKS-865]] details the behaviour.
-- `ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many files. [[REQ-LINTCHECKS-866]] details the behaviour.
+- `ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many directories. [[REQ-LINTCHECKS-866]] details the behaviour.
 - `atomic-bullet-then-mismatch` and `atomic-story-overlong` warn on an atomic-form story quote whose fact count disagrees with its Scenario; `layer-mismatch` warns on a fan-out `bus` requirement nothing depends on. [[REQ-LINTCHECKS-867]] details the behaviour.
 - `vague-term` warns on a Contract bullet using an untestable quality word from the closed `LINT_VAGUE_TERMS` set. [[REQ-LINTCHECKS-868]] details the behaviour.
 - `redundant-modal` warns on a Contract bullet using `shall` or `must` — the closed `LINT_MODAL_WORDS` set. [[REQ-LINTCHECKS-869]] details the behaviour.
@@ -63,9 +63,9 @@ CASE-6
          thirty clauses ungrouped do report it
 
 CASE-7
-  Given  a requirement whose `implements` members span three or more distinct files
+  Given  a requirement whose `implements` members span three or more distinct directories
   When   `gate` runs with member data
-  Then   it reports `file-spread`; a single file or no member data produce none
+  Then   it reports `file-spread`; three files in one directory, or no member data, produce none
 
 CASE-8
   Given  a Contract bullet containing "appropriate" and "user-friendly"
@@ -245,7 +245,7 @@ Every bullet below is binding.
   clauses when it does not. Writing one obligation per bullet multiplies clauses without
   widening scope, so counting clauses alone would punish the authoring voice.
 - The `file-spread` check warns on a requirement whose `implements` members span at least
-  `LINT_FILE_SPREAD_MAX`, default 3, distinct files.
+  `LINT_FILE_SPREAD_MAX`, default 3, distinct directories; files in one directory count once.
 - `file-spread` is an architectural-diffuseness signal and is skipped when no member data is
   supplied.
 
@@ -270,8 +270,8 @@ CASE-4 — over-scoped counts bold groups, not raw clauses
   When   `gate` runs
   Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty
 
-CASE-5 — file-spread fires at the distinct-file ceiling
-  Given  a requirement whose `implements:` members name three distinct files
+CASE-5 — file-spread fires at the distinct-directory ceiling
+  Given  a requirement whose `implements:` members name files in three distinct directories
   When   `gate` runs with member data
   Then   it reports a `file-spread` warning
 

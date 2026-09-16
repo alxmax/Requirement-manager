@@ -22,7 +22,8 @@ satisfies: [SYS-REPORT-105]
 
 Every bullet below is binding.
 - `health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour.
-- The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files and name one list, and the ratio states what it excluded. [[REQ-UNTAGGEDSET-1007]]
+- The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files, named in one list. [[REQ-UNTAGGEDSET-1007]]
+- The coverage ratio states which files it excluded. [[REQ-UNTAGGEDSET-1007]]
 
 ## Cases
 CASE-1
