@@ -1,5 +1,5 @@
 """`gate --audit`: the corpus-shape report."""
-import contextlib, io, json
+import contextlib, datetime, io, json
 
 from . import MAP_ENGINE_VERSION, config as cfg
 from .design_report import _design_summary, cmd_design
@@ -12,8 +12,11 @@ from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
 from .mapdata import (
     _read_roadmap, _roadmap_behind, _roadmap_plan_problems, _roadmap_signals
 )
-from .plandrift import plan_drift, plan_drift_lines
-from .targets import stale_plan_milestones
+from .plandrift import (
+    bar_date_lines, bar_date_suggestions, plan_drift, plan_drift_lines, unplanned_line
+)
+from .targets import load_targets
+from .versions import stale_plan_milestones, version_alignment_lines
 from .model import _as_list
 from .orphans import _scan_untagged
 from .relevel import relevel_residue_lines
@@ -182,6 +185,24 @@ def _plan_stale_line(code_root, reqs_dir):
                                       stale["source"]))
 
 
+def _version_lines(code_root, reqs_dir):
+    # implements: ARCH-AUDIT-065  # implements: REQ-VERSIONALIGN-1016
+    """The plan-versus-release line plus every place the version sources disagree."""
+    if not reqs_dir:
+        return []
+    stale = _plan_stale_line(code_root, reqs_dir)
+    return ([stale] if stale else []) + version_alignment_lines(reqs_dir, code_root)
+
+
+def _bar_date_lines(bars, reqs, members, code_root):
+    # implements: ARCH-AUDIT-065  # implements: REQ-PLANDATES-1022
+    """The dates `sync` suggests changing on bars whose work finished, or ran over."""
+    if not (bars and code_root):
+        return []
+    return bar_date_lines(bar_date_suggestions(bars, reqs, members, code_root,
+                                               datetime.date.today().isoformat()))
+
+
 def _roadmap_lag_lines(reqs, code_root):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """Zero or more lines describing how TODO.md's roadmap and the requirements
@@ -217,7 +238,7 @@ def _print_audit_roadmap(reqs, code_root, reqs_dir=None):
     Deliberately here and not in the bare `gate`: the commit hook runs `gate` on every
     commit and ADR-0020 draws that line for corpus-shape signals. `--audit` is a question
     a reader asks on purpose."""
-    lines = [ln for ln in [_plan_stale_line(code_root, reqs_dir)] if ln]
+    lines = _version_lines(code_root, reqs_dir)
     lines += _roadmap_lag_lines(reqs, code_root)
     # Only here, never in `sync`'s tail: this one walks the tree a second time and shells
     # to git once per cited file. `--audit` is asked for on purpose; `sync` runs on every
@@ -256,8 +277,13 @@ def _audit_summary(reqs, members, reqs_dir, code_root):
         _auto_level_line(shape),
         _design_candidate_line(code_root, reqs_dir),
         _untagged_files_line(code_root, reqs_dir),
-        _plan_stale_line(code_root, reqs_dir),
     ) if text]
+    lines.extend(_version_lines(code_root, reqs_dir))
+    bars = load_targets(reqs_dir).get("bars", []) if reqs_dir else []
+    lines.extend(_bar_date_lines(bars, reqs, members, code_root))
+    unplanned = unplanned_line(_read_roadmap(code_root), bars) if code_root else None
+    if unplanned:
+        lines.append(unplanned)
     lines.extend(_roadmap_lag_lines(reqs, code_root))
     lines.extend(relevel_residue_lines(reqs))
     if not lines:
@@ -286,7 +312,7 @@ def _json_audit_report(ws, signals, strict):
         out["untagged"] = len(untagged)
     # Same lines the console report prints under "Roadmap" — a JSON consumer that could
     # not see them would be back in the position REQ-AUDIT-973's reporter was in.
-    roadmap = [ln for ln in [_plan_stale_line(ws.code_root, ws.reqs_dir)] if ln]
+    roadmap = _version_lines(ws.code_root, ws.reqs_dir)
     roadmap += _roadmap_lag_lines(reqs, ws.code_root)
     if roadmap:
         out["roadmap"] = roadmap

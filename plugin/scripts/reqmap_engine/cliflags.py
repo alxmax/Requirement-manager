@@ -93,8 +93,8 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
-                    help="sync --retire: actually write the change (without it, the run is a "
-                         "dry report)")
+                    help="sync --retire / --release: actually write the change (without it, "
+                         "the run is a dry report)")
     # Mode flags: the read-only queries that used to be their own verbs. The work
     # they do is unchanged — only the entry point moved, so `gate` is the one place
     # a reader asks the corpus anything and `sync` the one place a write happens.
@@ -129,3 +129,7 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
                     help="sync: take one or more requirements out of service; prints the blast "
                          "radius first")
+    ap.add_argument("--release", dest="mode_release", metavar="VERSION", nargs="?", const=True,
+                    default=None,
+                    help="sync: cut the next planned version (or the vX.Y.Z named); prints "
+                         "the plan first")

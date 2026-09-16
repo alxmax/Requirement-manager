@@ -169,6 +169,11 @@ DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it cal
 # turn the rule off outright; a file that carries no marker already costs one failed open.
 DOC_CLAIM_FILES = ["CLAUDE.md"]
 
+# The files a repository declares its version in, relative to the code root. Empty means
+# probe the usual names (`versions.VERSION_FILE_CANDIDATES`); a repo whose version lives
+# anywhere else names it here. A LIST for the same reason as DOC_CLAIM_FILES.
+VERSION_FILES = []
+
 # ---------- per-repo configuration ----------
 # Every threshold above is a module constant, and a consumer could change none of them
 # without forking the engine. `requirements/_config.json` overrides the named ones —
@@ -185,7 +190,8 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE", "DOC_CLAIM_FILES")
+               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE", "DOC_CLAIM_FILES",
+               "VERSION_FILES")
 
 # A string-valued config key names a behaviour, so its accepted spellings are declared
 # here and a value outside them is reported rather than applied. Without this, a repo
@@ -236,6 +242,15 @@ def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: R
                     key, ", ".join(allowed) or "a string"), file=out)
                 continue
             g[key] = value
+            applied.append(key)
+            continue
+        if isinstance(default, list):
+            # A list default was declared for exactly this (see DOC_CLAIM_FILES) and then
+            # fell through to the numeric branch, which rejected every override.
+            if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
+                print("config: ignoring {} (expected a list of strings)".format(key), file=out)
+                continue
+            g[key] = list(value)
             applied.append(key)
             continue
         if isinstance(default, dict):

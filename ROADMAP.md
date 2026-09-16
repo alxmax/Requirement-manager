@@ -55,7 +55,11 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
       liste care se intampla sa semene? Daca e prima, `items[]` ar trebui sters, nu
       alimentat.
 
-- [ ] CD: deploy automat pe git | req: ARCH-SELFGATE-039
+- [x] CD: deploy automat pe git | req: ARCH-RELEASE-072
+      <!-- v7.21.0, ADR-0040. Numărul vine din plan: `sync --release --apply` ia cel mai mic
+           milestone planificat peste versiunea declarată, face bump-ul, scrie intrarea de
+           CHANGELOG și scoate milestone-ul din plan. Tag-ul rămâne în CI. Nota de mai jos
+           e starea de dinainte. -->
       Jumatate exista deja: la push pe `main`, jobul `release` taie tag-ul din
       `plugin.json`, creeaza release-ul cu notele extrase din CHANGELOG si muta
       aliasul `check@vN` pe commit-ul tagged. E idempotent, deci un push care nu

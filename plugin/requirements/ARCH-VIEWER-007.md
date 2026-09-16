@@ -932,8 +932,10 @@ Every bullet below is binding.
   where their dates do not.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
   the lane grows only where it must.
-- The vertical guides mark the work: a solid rule at each bar's start and a dotted one at
-  its end, drawn only through that bar's own lane. `today` keeps its pill on the ruler, the
+- Under the week row, every day carries its `day/month` label. [[REQ-PLANDAYS-1021]]
+- The vertical guides mark the work: a solid rule from the centre of each bar's start day on
+  the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a
+  version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the
   milestones keep theirs there or in the release lane, and neither rules a line through the lanes.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.
@@ -962,3 +964,30 @@ CASE-3 — the guides mark the work, not the dates
   Given  a plan carrying a bar and a milestone due date
   When   the Plan renders
   Then   the milestone keeps its header pill and no dashed full-height rule is drawn
+
+---
+id: REQ-PLANDAYS-1021
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Each day on the Plan is labelled
+
+## Description
+> A week band says which week a bar falls in; placing a one-day bar or a Friday release
+> needs the day itself, and counting ticks from a week's edge is how a reader gets it wrong.
+
+Every bullet below is binding.
+- Under the week row the Plan draws one cell per day, labelled `day/month` with no leading
+  zero, written across within the width of one day.
+- Today's label is drawn in the accent colour, and a Saturday or Sunday is fainter.
+
+## Cases
+CASE-1 — each day under the weeks is labelled day/month
+  Given  a chart that covers Monday 14 September 2026 through the following Sunday
+  When   the Plan renders
+  Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days
+

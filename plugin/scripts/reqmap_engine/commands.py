@@ -274,6 +274,19 @@ COMMANDS = {
                 ),
             },
             {
+                "name": "mode_release",
+                "flag": "--release",
+                "type": "str",
+                "help": (
+                    "Cut a release instead of syncing: the next version planned in "
+                    "_planning.json above what is already declared, or the vX.Y.Z named "
+                    "here. Prints the plan - version files to bump, the CHANGELOG entry, "
+                    "the milestone the plan drops - and writes nothing without --apply. "
+                    "With --json it also reports the declared version, whether its tag "
+                    "exists and its notes, which is what a release workflow reads."
+                ),
+            },
+            {
                 "name": "delete",
                 "flag": "--delete",
                 "type": "bool",
@@ -287,8 +300,8 @@ COMMANDS = {
                 "flag": "--apply",
                 "type": "bool",
                 "help": (
-                    "With --retire: actually write the change. Without it, the run is a "
-                    "dry report."
+                    "With --retire or --release: actually write the change. Without it, "
+                    "the run is a dry report."
                 ),
             },
             {

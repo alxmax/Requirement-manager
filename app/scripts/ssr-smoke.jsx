@@ -19,7 +19,7 @@ import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { PlanGantt, noteText, matchItem, ShippedNote, VersionNote } from "../src/views/roadmap/PlanGantt.jsx";
-import { stackBars } from "../src/lib/timeline.js";
+import { stackBars, buildDayBands } from "../src/lib/timeline.js";
 import { SpecDoc } from "../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../src/lib/data.js";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
@@ -696,10 +696,11 @@ test("roadmap: the shipped band is named by the branch",  // verifies: REQ-PLANB
 
 // ---- overlapping short bars ------------------------------------------------
 // tested-by: REQ-PLANSTACK-1012 @unit
-// Two ONE-DAY bars on consecutive days. Widening the day to 11px took week-long bars out
-// of the floor entirely (a week is 71px of its own, starts are 77px apart), so the case
-// that remains is the short one: a single day draws 5px and is floored to 30, while the
-// next day starts 11px along. Dates say no overlap; pixels say 19px of it.
+// Two ONE-DAY bars on consecutive days. Widening the day took week-long bars out of the
+// floor entirely, so the case that remains is the short one: a single day draws PX - 6 and
+// is floored to 30, while the next day starts PX along — 22px at today's scale, so dates
+// say no overlap and pixels say 8px of it. The two helper checks below pin stackBars at
+// the older 11px scale, where the same pair overlaps by 19px.
 const stackPlan = {
   lanes: ["Feature"],
   bars: [
@@ -753,14 +754,27 @@ test("gantt: the guides mark the work, not today or the milestones",  // verifie
     return html.includes("v9.9") && !html.includes("dashed var(--indigo-400)");
   })());
 
-test("gantt: a guide stays in its bar's lane",  // verifies: REQ-PLANSTACK-1012#CASE-3
+test("gantt: a guide runs from its day on the ruler down to its bar, and stops there",  // verifies: REQ-PLANSTACK-1012#CASE-3
   (() => {
-    // Drawn from the chart's top, a guide crossed the shipped band and every empty lane.
-    // Inside the lane it is positioned top:0, bottom:0 and never at the header's height.
+    // Drawn the full height of the chart, a guide crossed every lane below its bar. It now
+    // starts at the ruler's bottom edge (HEAD_H = 22 + 26 + 16 + 16) and ends at the bar's
+    // top: PAD 10 into the first lane, so a guide in the second lane (Fix) would be longer.
     const html = renderToString(<PlanGantt planning={{ ...stackPlan, lanes: ["Feature", "Fix"] }}
       history={[]} locale="en" t={(x) => x} zoom={100} />);
     const guides = html.match(/data-guide="(start|end)" style="[^"]*"/g) || [];
-    return guides.length === 4 && guides.every((g) => g.includes("top:0;bottom:0"));
+    return guides.length === 4
+      && guides.every((g) => g.includes("top:80px") && /height:(10|68)px/.test(g));
+  })());
+
+test("gantt: a version's guide runs from its due day to its pill",  // verifies: REQ-PLANSTACK-1012#CASE-3
+  (() => {
+    const html = renderToString(<PlanGantt planning={{ lanes: ["Feature", "Release"], bars: [],
+      cadence: { every: "week", on: "friday", lane: "Release" }, releases: ["2026-09-25"],
+      milestones: { "v9.8.0": { due: "2026-09-25" } } }}
+      history={[]} locale="en" t={(x) => x} zoom={100} />);
+    const g = (html.match(/data-guide="version" style="[^"]*"/g) || [])[0] || "";
+    // Feature lane 78px, then half the Release lane (39) minus half the pill (11)
+    return g.includes("top:80px") && g.includes("height:106px");
   })());
 
 const cadencePlan = {
@@ -798,6 +812,17 @@ const cadenceChecks = [
       .includes("release · 2026-09-20")],
 ];
 for (const [label, ok] of cadenceChecks) test(label, ok);
+
+// tested-by: REQ-PLANDAYS-1021 @unit
+test("gantt: each day under the weeks is labelled day/month",  // verifies: REQ-PLANDAYS-1021#CASE-1
+  (() => {
+    const bands = buildDayBands(new Date(2026, 8, 14, 12), 7);   // Monday 14 September
+    const html = renderToString(<PlanGantt planning={cadencePlan} locale="en" t={(s) => s}
+                                           zoom={100} openSpec={noop} />);
+    return bands.map((b) => b.label).join(" ") === "14/9 15/9 16/9 17/9 18/9 19/9 20/9"
+      && bands[5].weekend && bands[6].weekend && !bands[4].weekend
+      && html.includes('data-day="15/9"') && html.includes('data-day="16/9"');
+  })());
 
 // ---- selecting a shipped month or a version opens what is in it -----------
 test("gantt: a shipped month and a version are selectable",  // verifies: REQ-HISTORY-1003#CASE-6

@@ -27,24 +27,11 @@
       "lane": "Feature",
       "start": "2026-09-21",
       "end": "2026-09-27",
-      "milestone": "v7.21.0",
-      "progress": 0
-    },
-    {
-      "title": "CD: deploy automat pe git",
-      "lane": "Feature",
-      "start": "2026-09-28",
-      "end": "2026-10-02",
-      "milestone": "v7.21.0",
-      "req": "ARCH-SELFGATE-039",
+      "milestone": "v7.22.0",
       "progress": 0
     }
   ],
   "milestones": {
-    "v7.21.0": {
-      "due": "2026-10-02",
-      "label": "Server MCP + suprafata CLI"
-    },
     "v7.22.0": {
       "due": "2026-10-30",
       "label": "README onest + health pe o singura pagina"

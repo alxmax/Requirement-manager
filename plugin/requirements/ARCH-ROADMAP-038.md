@@ -25,6 +25,7 @@ Every bullet below is binding.
 - The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]
 - A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]
 - A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]
+- An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]
 
 ## Cases
 CASE-1
@@ -467,3 +468,37 @@ CASE-7 — a bar appears in its version's column
                     both read it; `milestones` carries only a due date and a label.
 - a numbered milestone  valid only for the NEXT release. At about five releases a day
                     (20 in 2026-09-13..16), a number further out is overtaken within hours.
+
+---
+id: REQ-UNPLANNED-1024
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# A Now or Next item with no bar is counted
+
+## Description
+> Now and Next say the work is coming; a bar says when. An item in either with no bar is a
+> commitment with no date, and nothing said so. The two files stay two (Senate run
+> 2026-09-14_225939); this is a read-only line between them.
+
+Every bullet below is binding.
+- An open item under Now or Next is scheduled when a bar's title equals its name or a bar
+  carries its `req:`; otherwise it is unplanned.
+- `sync` prints one line counting unplanned items and naming the first; done items and
+  Later items are never counted, and a repo with no ROADMAP.md sees nothing.
+
+## Cases
+CASE-1 — Now and Next items without a bar are counted
+  Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither
+  When   the unplanned items are asked for
+  Then   only the one matched by neither is counted and named
+
+CASE-2 — everything scheduled is silent
+  Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all
+  When   the line is asked for
+  Then   there is none
+

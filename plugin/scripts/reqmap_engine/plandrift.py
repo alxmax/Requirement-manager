@@ -241,3 +241,97 @@ def plan_drift_lines(result):
         lines.append("{} open plan item(s) cite a file committed after the item's own date "
                      "- worth re-reading, not closing".format(len(result["rederive"])))
     return lines
+
+
+# ---------- bar dates against the work they name ----------
+DONE_STATUSES = ("implemented", "confirmed")
+
+
+def bar_date_suggestions(bars, reqs, members, code_root, today):
+    # implements: ARCH-RELEASE-072  # implements: REQ-PLANDATES-1022
+    """Bars whose planned end the work behind them no longer matches, as suggestions.
+
+    A bar that names a `req:` whose requirement is done — confirmed or implemented, with
+    code implementing it — finished on the last commit to that code. When that day is not
+    the planned `end`, and not before the bar's `start` (a bar extending code that already
+    existed), it is suggested as the new `end`. A bar whose `end` has passed while its
+    requirement is not done is suggested to move. Nothing is written: the plan's dates are
+    the author's, and a date a check invented would erase what was planned."""
+    out = []
+    for bar in bars:
+        req = reqs.get(bar.get("req") or "")
+        if req is None:
+            continue
+        files = sorted({path for role, path, _ in members.get(bar["req"], [])
+                        if role == "implements"})
+        if req["meta"].get("status") in DONE_STATUSES and files:
+            finished = max((d for d in (_last_touched(code_root, f) for f in files) if d),
+                           default=None)
+            if finished and finished >= bar["start"] and finished != bar["end"]:
+                out.append({"title": bar["title"], "req": bar["req"], "kind": "done",
+                            "planned": bar["end"], "actual": finished})
+        elif bar["end"] < today:
+            out.append({"title": bar["title"], "req": bar["req"], "kind": "overdue",
+                        "planned": bar["end"], "actual": None})
+    return out
+
+
+def bar_date_lines(suggestions):
+    # implements: REQ-PLANDATES-1022
+    """One line per suggestion, naming the date to write."""
+    lines = []
+    for s in suggestions:
+        if s["kind"] == "done":
+            lines.append("_planning.json: bar '{}' ({}) looks done on {}, planned to end {} "
+                         "- set its `end` to {} if so".format(
+                             s["title"], s["req"], s["actual"], s["planned"], s["actual"]))
+        else:
+            lines.append("_planning.json: bar '{}' ({}) was planned to end {} and {} is not "
+                         "done - move its `end`".format(
+                             s["title"], s["req"], s["planned"], s["req"]))
+    return lines
+
+
+# ---------- ROADMAP items against the bars that schedule them ----------
+def _open_items(items, horizons=("now", "next")):
+    return [it for it in (items or []) if not it.get("done") and it.get("horizon") in horizons]
+
+
+def items_for_bars(items, bars):
+    # implements: ARCH-RELEASE-072  # implements: REQ-RELEASEROADMAP-1023
+    """The open ROADMAP items the given bars carry out: the item named exactly like a bar,
+    or else the one open item that carries the bar's `req:`. A requirement several items
+    share names none of them, because suggesting a tick on all of them would be a guess."""
+    found = []
+    for bar in bars:
+        title = (bar.get("title") or "").strip().lower()
+        named = [it for it in _open_items(items, ("now", "next", "later"))
+                 if it["name"].strip().lower() == title]
+        by_req = [it for it in _open_items(items, ("now", "next", "later"))
+                  if bar.get("req") and it.get("req") == bar.get("req")]
+        for it in named or (by_req if len(by_req) == 1 else []):
+            if it not in found:
+                found.append(it)
+    return found
+
+
+def unplanned_items(items, bars):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-UNPLANNED-1024
+    """Open Now and Next items no bar schedules — by the item's name, or by its `req:`."""
+    titles = {(b.get("title") or "").strip().lower() for b in bars}
+    reqs = {b.get("req") for b in bars if b.get("req")}
+    return [it for it in _open_items(items)
+            if it["name"].strip().lower() not in titles and it.get("req") not in reqs]
+
+
+def unplanned_line(items, bars):
+    # implements: REQ-UNPLANNED-1024
+    """One line counting Now/Next items with no bar, naming the first, or None."""
+    left = unplanned_items(items, bars)
+    if not left:
+        return None
+    first = left[0]["name"]
+    return ("{} Now/Next ROADMAP item(s) have no bar in _planning.json (first: {}{}) - give "
+            "them dates, or move them to Later".format(
+                len(left), first[:60], "..." if len(first) > 60 else ""))
+
