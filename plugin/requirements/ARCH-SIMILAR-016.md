@@ -21,6 +21,7 @@ Every bullet below is binding.
 - `dupes` reports pairs of requirements whose contracts overlap, and never writes any file. [[REQ-SIMILAR-920]]
 - Each requirement's comparison text is a bag of words from its title, intent line and Contract bullets, tokenized to lowercase words of 3+ letters. [[REQ-SIMILAR-921]]
 - An unauthored draft or a tested-by-linked pair is skipped and counted rather than compared. [[REQ-SIMILAR-921]]
+- Requirement ids and the link syntax around them are left out of the text `dupes` compares. [[REQ-SIMILARIDS-1025]]
 - Terms are weighted by a smoothed TF-IDF and pairs are scored by cosine similarity in the range zero to one. [[REQ-SIMILAR-922]]
 - Only pairs at or above the threshold (default `0.35`, overridable with `--threshold`) are reported, most-similar-first with their shared terms; `dupes` always exits zero. [[REQ-SIMILAR-923]]
 - Requirements whose clauses are byte-identical once normalised are reported as one redundancy group by `sync` and `next`, never by the gate. [[REQ-REDUNDANCY-058]]
@@ -314,6 +315,48 @@ CASE-6 — --top truncates with a count
   Given  three mutually similar requirements and `--top 1`
   When   `dupes` runs
   Then   one pair is printed followed by `... 2 more pair(s)`
+
+--------------------
+
+
+---
+id: REQ-SIMILARIDS-1025
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SIMILAR-016]
+---
+
+# An id is not a word two requirements share
+
+## Description
+> An architecture requirement ends each clause with the `[[REQ-...]]` it delegates to, so the
+> token `req` sat in 80 of 281 bags of words, and an id's stem repeats the topic word the
+> prose already carries. Neither says what a requirement does, and both raised the score of
+> pairs that share nothing but the link syntax.
+
+Every bullet below is binding.
+- Before `dupes` tokenizes a requirement, it removes every requirement id, every `[[ID]]`
+  link and every `req: ID` field from the compared text.
+- The prose around an id is still compared.
+- `search` keeps the ids in its own text, which stays identical to the viewer's port.
+
+## Cases
+CASE-1 — two requirements that share only ids are not a pair
+  Given  two requirements whose contracts share only `[[REQ-X-001]]` and `req: REQ-X-001`
+  When   `dupes` runs
+  Then   no pair is reported
+
+CASE-2 — the prose around an id is still compared
+  Given  two requirements with the same clause, each ending in a different `[[ID]]`
+  When   `dupes` runs
+  Then   the pair is reported, and neither id's stem is among its shared terms
+
+CASE-3 — search keeps the ids
+  Given  a contract ending in `[[REQ-X-001]]`
+  When   the text `search` compares is built
+  Then   it still contains `REQ-X-001`
 
 --------------------
 
