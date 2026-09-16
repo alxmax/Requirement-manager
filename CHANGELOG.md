@@ -1,5 +1,27 @@
 # Changelog
 
+## plugin `v7.21.1` — 2026-09-16
+
+**The viewer's largest components are split, and every structural design finding outside
+the engine is gone.** `gate --design` had flagged the viewer for a 401-line `PlanGantt`
+nested seven deep in a 614-line file, a 261-line `RoadmapView`, 105- and 108-line `MapView`
+and `ExplorerView`, components taking 8 to 14 parameters, and a Design panel nested five
+deep. None of that is left:
+
+- `PlanGantt.jsx` is now a 50-line composition over `ganttLayout.js` (every position, computed
+  once), `GanttRuler.jsx` (lane names and ruler), `GanttLanes.jsx` (shipped band, lanes,
+  guides) and `PlanNotes.jsx` (the notes). The old exports are re-exported.
+- `RoadmapView.jsx` keeps the controls; the Versions data is `versionsData.js` and its table
+  `VersionsTable.jsx`.
+- `MapView`, `MapParts`, `ExplorerView`, `ExplorerFilters` and the Design panel take grouped
+  objects (`sel`, `marks`, `size`, `pan`, `filters`, `tree`) and smaller parts.
+
+Rendering is unchanged: every SSR smoke check passes as before. `ZoomedCanvas` took a
+`codeCounts` prop no caller ever passed, so code counts were never drawn on the map; the
+prop is gone and nothing visible changed. The engine's four documented design findings
+are untouched, and what remains elsewhere is lines over 100 columns and the length of the
+smoke test file.
+
 ## plugin `v7.21.0` — 2026-09-16
 
 **A release is cut from the plan, and this entry was written by it.** `sync --release`

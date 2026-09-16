@@ -3,7 +3,7 @@ generated: 2026-09-16
 engine: 2026-09-16.8
 nodes: 281
 edges: 120
-design pass-rate: 72% (68/94 source files without a design candidate)
+design pass-rate: 81% (81/100 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -960,8 +960,20 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_map_MapParts_jsx_1
   f_app_src_views_problems_ProblemsPanels_jsx_1["app/src/views/problems/ProblemsPanels.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_problems_ProblemsPanels_jsx_1
+  f_app_src_views_roadmap_GanttLanes_jsx_1["app/src/views/roadmap/GanttLanes.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_GanttLanes_jsx_1
+  f_app_src_views_roadmap_GanttRuler_jsx_1["app/src/views/roadmap/GanttRuler.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_GanttRuler_jsx_1
   f_app_src_views_roadmap_PlanGantt_jsx_1["app/src/views/roadmap/PlanGantt.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_PlanGantt_jsx_1
+  f_app_src_views_roadmap_PlanNotes_jsx_1["app/src/views/roadmap/PlanNotes.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_PlanNotes_jsx_1
+  f_app_src_views_roadmap_VersionsTable_jsx_1["app/src/views/roadmap/VersionsTable.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_VersionsTable_jsx_1
+  f_app_src_views_roadmap_ganttLayout_js_1["app/src/views/roadmap/ganttLayout.js:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_ganttLayout_js_1
+  f_app_src_views_roadmap_versionsData_js_1["app/src/views/roadmap/versionsData.js:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_versionsData_js_1
   f_app_src_views_spec_SpecParts_jsx_1["app/src/views/spec/SpecParts.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_spec_SpecParts_jsx_1
   f_plugin_scripts_test_reqmap_report_py_430_4408["plugin/scripts/test_reqmap_report.py:430-4408"]

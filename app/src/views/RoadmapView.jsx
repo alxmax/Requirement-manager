@@ -1,19 +1,22 @@
 // implements: ARCH-VIEWER-007
-/* RoadmapView — Gantt-style chart: semver milestones on X, one lane on Y.
-   Requirements with `milestone:` field + TODO.md items via TODOS.
+/* RoadmapView — two pictures of the plan: the dated Plan (PlanGantt) and one column per
+   version (VersionsTable).
 
-   One column per milestone and a chip carrying the full title made the table as
-   wide as its longest title times its column count: 42 columns ran past 9000px,
-   so a reader saw three versions at a time and panned for the rest. Two
-   independent controls answer that, because they trade different things away —
-   zoom shrinks everything including the type, density narrows the chip and
-   keeps the type crisp. Both are remembered per reader. */
+   One column per milestone and a chip carrying the full title made the table as wide as
+   its longest title times its column count: 42 columns ran past 9000px, so a reader saw
+   three versions at a time and panned for the rest. Two independent controls answer that,
+   because they trade different things away — zoom shrinks everything including the type,
+   density narrows the chip and keeps the type crisp. Both are remembered per reader. */
 import { useEffect, useState } from "react";
 import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY, BRANCH } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
-import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
+import {
+  ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX,
+} from "../lib/canvasZoom.jsx";
 import { PlanGantt } from "./roadmap/PlanGantt.jsx";
+import { buildVersions } from "./roadmap/versionsData.js";
+import { DENSITY, VersionsTable, formatDue } from "./roadmap/VersionsTable.jsx";
 
 const ZOOM_KEY = "reqmap.roadmap.zoom";
 const DENSITY_KEY = "reqmap.roadmap.density";
@@ -29,116 +32,53 @@ function readStored(key, parse, fallback) {
   } catch { return fallback; }
 }
 
-function semverCmp(a, b) {
-  const num = v => v.replace(/^v/i, "").split(".").map(n => parseInt(n, 10) || 0);
-  const pa = num(a), pb = num(b);
-  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-    const d = (pa[i] || 0) - (pb[i] || 0);
-    if (d !== 0) return d;
-  }
-  return 0;
+/** A value kept in localStorage under `key`, written back whenever it changes. */
+function useStored(key, initial) {
+  const [value, setValue] = useState(initial);
+  useEffect(() => {
+    try { window.localStorage.setItem(key, value); } catch { /* not fatal */ }
+  }, [key, value]);
+  return [value, setValue];
 }
 
-function barVariant(status) {
-  if (status === "confirmed")   return "done";
-  if (status === "in-progress") return "progress";
-  if (status === "draft")       return "draft";
-  return "planned";
-}
-
-// One lane. The Y axis carried four rows (bus/feature/need/ops — the ENGINE's taxonomy,
-// a requirement's position in the graph), then two, Bugs and Features. Bugs rendered
-// empty: nothing on this roadmap was a defect. The items are work that was not specified
-// up front, which is not the same thing, and an axis with one populated value sorts
-// nothing while still costing a row. So the lane stops classifying and names what the
-// chips are. Every open TODO item and every milestoned requirement lands in it, whatever
-// `lane:` says — the field still parses and is still emitted, it just no longer splits
-// the chart.
-const LANE_LABEL = "Implementations";   // implements: REQ-VIEWER-995
-
-const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)";
-
-/* The two densities differ only in numbers a reader can see the effect of.
- * `titleMax` is the one that reclaims width: a chip stops growing with its
- * title, and the full text moves to the tooltip `Bar` already carries. */
-const DENSITY = {  // implements: REQ-VIEWER-984
-  comfy:   { barH: 24, barPadL: 9, barGap: 5, font: 11, idFont: 9,
-             cellPad: "6px 10px", headPad: "10px 14px", lanePad: "0 14px", titleMax: null },
-  compact: { barH: 18, barPadL: 7, barGap: 4, font: 10, idFont: 9,
-             cellPad: "3px 5px",  headPad: "6px 8px",   lanePad: "0 8px",  titleMax: 108 },
+// A reader whose last choice was Horizons, or the old Timeline, lands on the Plan rather
+// than on a mode with no matching option.
+const parseMode = (v) => (v === "versions" || v === "plan" ? v
+  : v === "horizons" || v === "timeline" ? "plan" : null);
+const parseZoom = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : null;
 };
+const parseDensity = (v) => (v === "comfy" || v === "compact" ? v : null);
 
-function formatDue(iso, locale) {
-  try {
-    const d = new Date(`${iso}T12:00:00`);
-    return d.toLocaleDateString(locale === "ro" ? "ro-RO" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
-  } catch { return iso; }
+/* The Plan draws something from bars, milestone dues, shipped history alone, or a cadence
+   alone: a repo that has planned NOTHING is the one that most needs a calendar to plan on
+   (REQ-PLANHORIZON-1010). */
+function hasPlanFor(history) {
+  return !!(TARGETS?.bars?.length)
+    || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
+    || !!history.length
+    || !!(TARGETS?.releases?.length);
 }
 
-function dueTone(iso) {
-  const today = new Date().toISOString().slice(0, 10);
-  if (iso < today) return "past";
-  if (iso === today) return "today";
-  return "future";
-}
-
-const VARIANT = {
-  done:     { background: "var(--cov-tested-bg)",  color: "var(--cov-tested)",   dot: "var(--cov-tested)",   clipPath: ARROW, arrow: true },
-  progress: { background: "var(--indigo-tint)",    color: "var(--indigo-500)",   dot: "var(--indigo-400)",   clipPath: ARROW, arrow: true },
-  draft:    { background: "var(--amber-tint)",     color: "var(--amber-700)",    dot: "var(--amber-600)",    border: "1.5px dashed var(--amber-400)" },
-  planned:  { background: "var(--surface-hov)",    color: "var(--fg-muted)",     dot: "var(--fg-faint)",     clipPath: ARROW, arrow: true },
-  todo:     { background: "var(--amber-tint)",     color: "var(--amber-700)",    dot: "var(--amber-600)",    border: "1.5px dashed var(--amber-400)" },
-};
-
-function Bar({ variant, id, label, onClick, d }) {
-  const v = VARIANT[variant] || VARIANT.planned;
-  // The arrow clip eats the right edge, so an arrow chip needs the padding back.
-  const padR = v.arrow ? d.barPadL + 11 : d.barPadL + 3;
-  return (
-    <span
-      title={label}
-      onClick={onClick}
-      style={{
-        display: "inline-flex", alignItems: "center", gap: d.barGap,
-        height: d.barH, borderRadius: 5, padding: `0 ${padR}px 0 ${d.barPadL}px`,
-        fontSize: d.font, fontWeight: 500, whiteSpace: "nowrap",
-        cursor: onClick ? "pointer" : "default",
-        clipPath: v.clipPath,
-        background: v.background, color: v.color,
-        border: v.border,
-        maxWidth: d.titleMax ? d.titleMax + 60 : undefined,
-      }}
-    >
-      <span style={{ width: 5, height: 5, borderRadius: "50%", flexShrink: 0, background: v.dot }} />
-      {id && <span style={{ fontSize: d.idFont, opacity: 0.5, fontWeight: 600, letterSpacing: "0.3px", flexShrink: 0 }}>{id}</span>}
-      <span style={d.titleMax
-        ? { maxWidth: d.titleMax, overflow: "hidden", textOverflow: "ellipsis" }
-        : undefined}>{label}</span>
-    </span>
-  );
-}
-
-function Segmented({ label, options, value, onChange, optionKey, optionLabel }) {
-  const keyOf = (o) => (optionKey ? o[optionKey] : o);
-  const labelOf = (o) => (optionLabel ? o[optionLabel] : o);
+function Segmented({ label, options, value, onChange }) {
+  const labelStyle = { fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
+                       textTransform: "uppercase", color: "var(--fg-faint)" };
+  const group = { display: "inline-flex", border: "1px solid var(--border)", borderRadius: 6,
+                  overflow: "hidden" };
+  const optionStyle = (on) => ({
+    ...ctrlBtn, fontSize: 11, fontWeight: on ? 700 : 500,
+    background: on ? "var(--surface-hov)" : "transparent",
+    color: on ? "var(--fg)" : "var(--fg-muted)",
+  });
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
-                     textTransform: "uppercase", color: "var(--fg-faint)" }}>{label}</span>
-      <span style={{ display: "inline-flex", border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden" }}>
-        {options.map(o => (
-          <button
-            key={keyOf(o)}
-            onClick={() => onChange(keyOf(o))}
-            aria-pressed={keyOf(o) === value}
-            style={{
-              ...ctrlBtn, fontSize: 11,
-              fontWeight: keyOf(o) === value ? 700 : 500,
-              background: keyOf(o) === value ? "var(--surface-hov)" : "transparent",
-              color: keyOf(o) === value ? "var(--fg)" : "var(--fg-muted)",
-            }}
-          >
-            {labelOf(o)}
+      <span style={labelStyle}>{label}</span>
+      <span style={group}>
+        {options.map((o) => (
+          <button key={o.id} onClick={() => onChange(o.id)} aria-pressed={o.id === value}
+                  style={optionStyle(o.id === value)}>
+            {o.label}
           </button>
         ))}
       </span>
@@ -146,266 +86,93 @@ function Segmented({ label, options, value, onChange, optionKey, optionLabel }) 
   );
 }
 
-/* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
- * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
- * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory, initialBranch }) {  // implements: REQ-VIEWER-984
+function Summary({ data, mode, t, locale }) {
+  const { nextDue, plannedCount } = data;
+  return (
+    <span style={{ fontSize: 11, color: "var(--fg-faint)", marginLeft: "auto" }}>
+      {nextDue && (
+        <span style={{ marginRight: 12 }}>
+          {t("next {ms} · due {date}", { ms: nextDue.ms, date: formatDue(nextDue.due, locale) })}
+        </span>
+      )}
+      {mode === "versions" && (
+        <>
+          {data.milestones.length} {t("milestones")} · {data.maxRows} {t("rows")}
+          {plannedCount > 0 && ` · ${t("{n} planned", { n: plannedCount })}`}
+        </>
+      )}
+    </span>
+  );
+}
+
+const TOOLBAR = {
+  display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap",
+  padding: "10px 20px", borderBottom: "1px solid var(--border)",
+  background: "var(--bg-raised)", flexShrink: 0,
+};
+
+function Toolbar({ controls, data, hasPlan, t, locale }) {
+  const { zoom, setZoom, mode, setMode, density, setDensity } = controls;
+  const modes = [{ id: "plan", label: t("Plan") }, { id: "versions", label: t("Versions") }];
+  const densities = [{ id: "compact", label: "compact" }, { id: "comfy", label: "comfy" }];
+  return (
+    <div style={TOOLBAR}>
+      <ZoomControl zoom={zoom} setZoom={setZoom} />
+      {hasPlan && <Segmented label={t("View")} options={modes} value={mode} onChange={setMode} />}
+      {mode === "versions" && (
+        <Segmented label="Density" options={densities} value={density} onChange={setDensity} />
+      )}
+      <Summary data={data} mode={mode} t={t} locale={locale} />
+    </div>
+  );
+}
+
+const EMPTY = { padding: 40, color: "var(--fg-faint)", fontSize: 13 };
+
+/* `initialZoom` / `initialDensity` / `initialMode` let a host (or a render test) preset the
+ * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise the chart
+ * remembers the reader's last choice. The roadmap items are carried for the Plan's detail
+ * panel, which looks up a selected bar's note by `req` (REQ-VIEWER-999).
+ * implements: REQ-VIEWER-984 */
+export function RoadmapView(props) {
+  const { openSpec, initialZoom, initialDensity, initialMode } = props;
   const { t, locale } = useI18n();
-  const hasPlan = !!(TARGETS?.bars?.length)
-    || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
-    // Shipped history alone is a timeline worth drawing: a repo that has released
-    // for months and planned nothing yet still has something to show on the Plan.
-    || !!(initialHistory || HISTORY).length
-    // And a cadence alone is too. A repo that has planned NOTHING is the one that most
-    // needs a calendar to plan on, which is why `init` seeds one (REQ-PLANHORIZON-1010);
-    // requiring a bar first made the empty case the one with nothing to look at.
-    || !!(TARGETS?.releases?.length);
-  // The roadmap items are still carried and still read — by the Plan's detail panel,
-  // which looks up a selected bar's note by `req`. What is gone is the Horizons MODE:
-  // a plan with dates and a plan with horizons were two pictures of one file, and the
-  // dated one is the one people read (REQ-VIEWER-999).
-  const roadmapItems = initialRoadmap || ROADMAP;
-  const [mode, setMode] = useState(() => {
-    const stored = readStored(MODE_KEY, (v) => {
-      if (v === "versions" || v === "plan") return v;
-      // A reader whose last choice was Horizons — here or in another repo — must land
-      // somewhere that exists rather than on a mode with no matching option.
-      if (v === "horizons") return "plan";
-      if (v === "timeline") return "plan"; // renamed
-      return null;
-    }, null);
-    return initialMode || stored || (hasPlan ? "plan" : "versions");
-  });
-  const [showUnscheduled, setShowUnscheduled] = useState(false);
+  const history = props.initialHistory || HISTORY;
+  const hasPlan = hasPlanFor(history);
+  const [mode, setMode] = useStored(MODE_KEY, () =>
+    initialMode || readStored(MODE_KEY, parseMode, null) || (hasPlan ? "plan" : "versions"));
   const { zoom, setZoom, canvasRef } = useCanvasZoom({
     storageKey: ZOOM_KEY,
-    initialZoom: initialZoom != null ? clampZoom(initialZoom) : readStored(ZOOM_KEY, (v) => {
-      const n = Number(v);
-      return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : null;
-    }, ZOOM_DEFAULT),
+    initialZoom: initialZoom != null ? clampZoom(initialZoom)
+      : readStored(ZOOM_KEY, parseZoom, ZOOM_DEFAULT),
   });
-  const [density, setDensity] = useState(() => initialDensity || readStored(
-    DENSITY_KEY, (v) => (v === "comfy" || v === "compact" ? v : null), "comfy"));
+  const [density, setDensity] = useStored(DENSITY_KEY, () =>
+    initialDensity || readStored(DENSITY_KEY, parseDensity, "comfy"));
   const { onMouseDown, onClickCapture } = useDragPan(canvasRef);
+  const data = buildVersions(REQUIREMENTS, TODOS, TARGETS);
 
-  useEffect(() => {
-    try { window.localStorage.setItem(DENSITY_KEY, density); } catch { /* not fatal */ }
-  }, [density]);
-  useEffect(() => {
-    try { window.localStorage.setItem(MODE_KEY, mode); } catch { /* not fatal */ }
-  }, [mode]);
-
-  const d = DENSITY[density] || DENSITY.comfy;
-
-  // A milestone whose every TODO item shipped (and no requirement cites it)
-  // used to have no signal at all reaching this Set — the column vanished
-  // and the chart jumped straight to the next one, reading as a skipped
-  // version rather than a finished one. A milestone is real once TODO.md
-  // groups anything under it, done or not.
-  const msSet = new Set();
-  REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
-  TODOS.forEach(item => { if (item.milestone) msSet.add(item.milestone); });
-  const msMeta = TARGETS?.milestones || {};
-  Object.keys(msMeta).forEach(ms => msSet.add(ms));
-  const planBars = Array.isArray(TARGETS?.bars) ? TARGETS.bars : [];
-  planBars.forEach(bar => { if (bar?.milestone) msSet.add(bar.milestone); });
-  const milestones = Array.from(msSet).sort(semverCmp);
-
-  const current =
-    milestones.find(ms => REQUIREMENTS.some(r => r.milestone === ms && r.status === "in-progress")) ||
-    [...milestones].reverse().find(ms => REQUIREMENTS.some(r => r.milestone === ms && r.status === "confirmed"));
-
-  // Unscheduled is a planning bucket, so it holds only what is planned AT the
-  // planning levels. A `level: code` requirement is a decomposed clause of an
-  // architecture requirement and inherits that parent's milestone; listing all
-  // 618 of them here produced a wall of chips that said nothing about the plan.
-  const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated" && r.level !== "code");
-
-  if (!milestones.length && !unscheduled.length && !hasPlan) {
+  if (!data.milestones.length && !data.unscheduled.length && !hasPlan) {
     return (
-      <div className="main" style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
+      <div className="main" style={EMPTY}>
         No milestones yet. Add <code>milestone: v1.x</code> to requirement frontmatter
         or create a <code>TODO.md</code> with <code>## v1.x</code> sections.
       </div>
     );
   }
-
-  const byMs = Object.fromEntries(milestones.map(ms => [ms, []]));
-  REQUIREMENTS.filter(r => r.milestone && r.status !== "deprecated")
-    .forEach(r => { if (byMs[r.milestone]) byMs[r.milestone].push({ type: "req", r }); });
-  TODOS.filter(t => !t.done)
-    .forEach(t => { if (byMs[t.milestone]) byMs[t.milestone].push({ type: "todo", t }); });
-  // Planned work is `bars`, the same list the Plan chart draws (REQ-PLANSTALE-1013's
-  // "planned set"). `milestones[].items[]` was a second list nobody wrote, which is why
-  // a bar planned for a version created that column and never appeared in it. A bar
-  // whose `req:` or title is already in the column is not listed twice.
-  planBars.forEach(bar => {
-    if (!bar?.title || !byMs[bar.milestone]) return;
-    const col = byMs[bar.milestone];
-    const dup = col.some(item =>
-      (item.type === "req" && (item.r.id === bar.req
-        || item.r.title.toLowerCase() === bar.title.toLowerCase()))
-      || (item.type === "todo" && item.t.name.toLowerCase() === bar.title.toLowerCase()));
-    if (!dup) col.push({ type: "plan", text: bar.title });
-  });
-  const plannedCount = Object.values(byMs).flat().filter(i => i.type === "plan").length;
-  const today = new Date().toISOString().slice(0, 10);
-  const nextDue = milestones
-    .map(ms => ({ ms, due: msMeta[ms]?.due }))
-    .filter(x => x.due && x.due >= today)
-    .sort((a, b) => a.due.localeCompare(b.due))[0];
-  const maxRows = Math.max(1, ...Object.values(byMs).map(a => a.length));
-  const rows = Array.from({ length: maxRows }, (_, i) => ({ rowIdx: i, maxRows, byMs }));
-
-  const thBase = {
-    background: "var(--bg-raised)", color: "var(--fg-muted)", fontSize: 11, fontWeight: 600,
-    letterSpacing: "0.4px", padding: d.headPad, textAlign: "center",
-    borderBottom: "1px solid var(--border)", borderRight: "1px solid var(--border)", whiteSpace: "nowrap",
-  };
-
+  const controls = { zoom, setZoom, mode, setMode, density, setDensity };
+  const view = { d: DENSITY[density] || DENSITY.comfy, zoom, t, locale, openSpec };
   return (
     <div className="main" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      <div style={{
-        display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap",
-        padding: "10px 20px", borderBottom: "1px solid var(--border)",
-        background: "var(--bg-raised)", flexShrink: 0,
-      }}>
-        <ZoomControl zoom={zoom} setZoom={setZoom} />
-        {hasPlan && (
-          <Segmented
-            label={t("View")}
-            options={[
-              ...(hasPlan ? [{ id: "plan", label: t("Plan") }] : []),
-              { id: "versions", label: t("Versions") },
-            ]}
-            value={mode}
-            onChange={setMode}
-            optionKey="id"
-            optionLabel="label"
-          />
-        )}
-        {mode === "versions" && (
-          <Segmented label="Density" options={["compact", "comfy"]} value={density} onChange={setDensity} />
-        )}
-        <span style={{ fontSize: 11, color: "var(--fg-faint)", marginLeft: "auto" }}>
-          {nextDue && (
-            <span style={{ marginRight: 12 }}>
-              {t("next {ms} · due {date}", {
-                ms: nextDue.ms,
-                date: formatDue(nextDue.due, locale),
-              })}
-            </span>
-          )}
-          {mode === "versions" && (
-            <>
-              {milestones.length} {t("milestones")} · {rows.length} {t("rows")}
-              {plannedCount > 0 && ` · ${t("{n} planned", { n: plannedCount })}`}
-            </>
-          )}
-        </span>
-      </div>
-
+      <Toolbar controls={controls} data={data} hasPlan={hasPlan} t={t} locale={locale} />
       <div ref={canvasRef} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
-           className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
-        {mode === "plan" ? (
-          <PlanGantt planning={TARGETS} history={initialHistory || HISTORY}
-                     roadmap={roadmapItems} branch={initialBranch || BRANCH}
-                     locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
-        ) : (
-        /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with
-            the content — a transform leaves the container at full size and the
-            reader pans across empty space to reach the last column. */
-        <div style={{ zoom: zoom / 100, width: "max-content" }}>
-          <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "max-content", minWidth: 560 }}>
-            <thead>
-              <tr>
-                <th style={{ ...thBase, background: "transparent", border: "none", width: 60 }} />
-                {milestones.map(ms => {
-                  const meta = msMeta[ms] || {};
-                  const due = meta.due;
-                  const tone = due ? dueTone(due) : null;
-                  const dueColor = tone === "past" ? "var(--status-error)"
-                    : tone === "today" ? "var(--status-drift)" : "var(--fg-faint)";
-                  return (
-                    <th key={ms} style={{ ...thBase, ...(ms === current ? { background: "var(--surface-hov)", color: "var(--fg)", fontWeight: 700 } : {}) }}>
-                      <div>{ms}{ms === current && (
-                        <span style={{ display: "inline-block", width: 6, height: 6, background: "var(--accent-2)",
-                          borderRadius: "50%", marginLeft: 5, verticalAlign: "middle", position: "relative", top: -1 }} />
-                      )}</div>
-                      {due && (
-                        <div style={{ fontSize: 9, fontWeight: 500, color: dueColor, marginTop: 3 }}>
-                          {t("due {date}", { date: formatDue(due, locale) })}
-                        </div>
-                      )}
-                      {meta.label && (
-                        <div style={{ fontSize: 9, fontWeight: 400, color: "var(--fg-faint)", marginTop: 2, maxWidth: 140,
-                          overflow: "hidden", textOverflow: "ellipsis" }} title={meta.label}>
-                          {meta.label}
-                        </div>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ rowIdx }) => (
-                <tr key={rowIdx}>
-                  {rowIdx === 0 && (
-                    <td rowSpan={maxRows} style={{
-                      fontSize: 10, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase",
-                      color: "var(--fg-faint)", padding: d.lanePad, textAlign: "right", verticalAlign: "middle",
-                      borderRight: "1px solid var(--border)", whiteSpace: "nowrap", background: "var(--bg-raised)", minWidth: 60,
-                    }}>
-                      {LANE_LABEL}
-                    </td>
-                  )}
-                  {milestones.map(ms => {
-                    const item = byMs[ms][rowIdx];
-                    return (
-                      <td key={ms} style={{
-                        padding: d.cellPad, borderBottom: "1px solid var(--border-soft)", borderRight: "1px solid var(--border-soft)",
-                        background: "var(--surface)", verticalAlign: "middle",
-                      }}>
-                        {item?.type === "req" && (
-                          <Bar variant={barVariant(item.r.status)} id={item.r.id} label={item.r.title}
-                               onClick={() => openSpec(item.r.id)} d={d} />
-                        )}
-                        {item?.type === "todo" && (
-                          <Bar variant="todo" label={item.t.name} onClick={() => {}} d={d} />
-                        )}
-                        {item?.type === "plan" && (
-                          <Bar variant="planned" label={item.text} onClick={() => {}} d={d} />
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {unscheduled.length > 0 && (
-            <div style={{ marginTop: 16 }}>
-              <button
-                onClick={() => setShowUnscheduled(s => !s)}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 0",
-                         color: "var(--fg-faint)", fontSize: 12, fontFamily: "inherit" }}
-              >
-                {showUnscheduled ? "▾" : "▸"} Unscheduled ({unscheduled.length})
-              </button>
-              {showUnscheduled && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8, padding: "0 4px" }}>
-                  {unscheduled.map(r => (
-                    <Bar key={r.id} variant={barVariant(r.status)} id={r.id} label={r.title}
-                         onClick={() => openSpec(r.id)} d={d} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        )}
+           className="canvas pan"
+           style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
+        {mode === "plan"
+          ? <PlanGantt planning={TARGETS} history={history}
+                       roadmap={props.initialRoadmap || ROADMAP}
+                       branch={props.initialBranch || BRANCH}
+                       locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
+          : <VersionsTable data={data} view={view} />}
       </div>
     </div>
   );
