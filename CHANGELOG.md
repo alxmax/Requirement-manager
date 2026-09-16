@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v7.21.4` — 2026-09-16
+
+**Two of the engine's four design findings are fixed; the other two are kept on the record
+(ADR-0041).** `cmd_check` takes six parameters: the reason for accepting drift travels in
+`accept_drift` itself (`True`, `False` or the reason), read by one `_drift_acceptance` with
+`is not False`, so `--accept-drift ""` still accepts. `_map_check` and `_stale_artifacts`
+take the workspace instead of `reqs`, `reqs_dir` and a root. `apply_config`'s module write
+and `rules.py`'s 32 definitions stay: one IS the configuration design, the other IS the rule
+registry, and rewriting either to satisfy the detector would hide the finding without
+changing the code. `gate --design` reports two findings on the engine, and CLAUDE.md says so.
+
 ## plugin `v7.21.3` — 2026-09-16
 
 **The viewer's fallback fixture is JSON, and the gate reads it as data.** The demo

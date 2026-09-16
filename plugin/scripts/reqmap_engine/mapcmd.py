@@ -32,7 +32,7 @@ def cmd_map(ws, root=".", check=False):
     data = ws.map_data(root)
 
     if check:
-        return _map_check(data, reqs_dir, root, reqs)
+        return _map_check(data, ws, root)
 
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
@@ -180,12 +180,14 @@ def _absent_tracked_artifacts(reqs_dir, root="."):
     return absent
 
 
-def _stale_artifacts(data, reqs_dir, root=".", reqs=None):
+def _stale_artifacts(data, ws, root="."):
     # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-871
     """Names of the committed generated artifacts that no longer match a fresh
     render of `data` — the whole of the freshness verdict, with no printing and no
     exit code, so `map --check` (which fails) and `gate` (which warns) read the same
-    answer instead of implementing it twice."""
+    answer instead of implementing it twice. `ws` supplies the requirements directory
+    and, when it carries them, the requirements the findings report is rendered from."""
+    reqs, reqs_dir = ws.reqs, ws.reqs_dir
     stale = []
     for name, fresh in (("_map.md", _build_md_text(data)),
                         ("_map.json", _build_json_text(data))):
@@ -226,7 +228,7 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):
     return stale
 
 
-def _map_check(data, reqs_dir, root=".", reqs=None):
+def _map_check(data, ws, root="."):
     # implements: ARCH-MAP-007  # implements: REQ-MAP-871
     """Freshness gate: regenerate the map in memory and compare to the committed
     files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
@@ -235,12 +237,13 @@ def _map_check(data, reqs_dir, root=".", reqs=None):
     The `generated:` timestamp is ignored so an unchanged map never trips on time.
     A file git TRACKS but that is missing fails instead, and a run that compared no
     artifact at all says so rather than reporting freshness it did not measure."""
+    reqs_dir = ws.reqs_dir
     absent = _absent_tracked_artifacts(reqs_dir, root)
     if absent:
         print("FAIL  committed map is missing from the working tree: {} — git tracks "
               "it; restore it or run `reqmap.py sync`.".format(", ".join(absent)))
         return 1
-    stale = _stale_artifacts(data, reqs_dir, root, reqs)
+    stale = _stale_artifacts(data, ws, root)
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py sync` and commit the result."
               .format(", ".join(stale)))

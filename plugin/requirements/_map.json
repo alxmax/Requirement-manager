@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.9",
+  "engine_version": "2026-09-16.10",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1037,7 +1037,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:255"
+          "loc": "plugin/scripts/reqmap.py:251"
         },
         {
           "role": "tested-by",
@@ -1900,7 +1900,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:178"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/gate.py:191"
         },
         {
           "role": "implements",
@@ -2302,7 +2306,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:191"
         }
       ],
       "test_exempt": null,
@@ -2375,7 +2379,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:180"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:192"
         }
       ],
       "test_exempt": null,
@@ -2960,7 +2964,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:289"
+          "loc": "plugin/scripts/reqmap.py:285"
         },
         {
           "role": "tested-by",
@@ -6084,7 +6088,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:202"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:204"
         },
         {
           "role": "implements",
@@ -8649,7 +8653,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:230"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:232"
         },
         {
           "role": "implements",
@@ -8878,7 +8882,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:230"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:232"
         }
       ],
       "test_exempt": null,
@@ -11339,11 +11343,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:342"
+          "loc": "plugin/scripts/reqmap.py:338"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:360"
+          "loc": "plugin/scripts/reqmap.py:356"
         },
         {
           "role": "tested-by",
@@ -11391,7 +11395,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:360"
+          "loc": "plugin/scripts/reqmap.py:356"
         },
         {
           "role": "tested-by",
@@ -11753,6 +11757,10 @@
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/gate.py:138"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/gate.py:178"
         }
       ],
       "test_exempt": null,
@@ -12390,7 +12398,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:271"
+          "loc": "plugin/scripts/reqmap.py:267"
         },
         {
           "role": "tested-by",
@@ -14584,7 +14592,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:191"
         },
         {
           "role": "implements",
@@ -14750,7 +14758,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:180"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:192"
         },
         {
           "role": "implements",
@@ -17008,7 +17016,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:245"
+          "loc": "plugin/scripts/reqmap.py:241"
         },
         {
           "role": "tested-by",
@@ -17103,7 +17111,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:215"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:217"
         },
         {
           "role": "implements",
@@ -23290,7 +23298,7 @@
     },
     {
       "month": "2026-09",
-      "count": 82,
+      "count": 83,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23375,11 +23383,17 @@
         "v7.21.0",
         "v7.21.1",
         "v7.21.2",
-        "v7.21.3"
+        "v7.21.3",
+        "v7.21.4"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.4",
+          "date": "2026-09-16",
+          "headline": "**Two of the engine's four design findings are fixed; the other two are kept on the record"
+        },
         {
           "version": "v7.21.3",
           "date": "2026-09-16",
@@ -23977,10 +23991,10 @@
   ],
   "design": {
     "files": 106,
-    "clean_files": 102,
-    "score": 96,
+    "clean_files": 104,
+    "score": 98,
     "candidates": {
-      "encapsulation": 3,
+      "encapsulation": 1,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
@@ -23997,22 +24011,6 @@
         "detail": "`apply_config` writes module state: CODE_EXTS"
       },
       {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/scripts/reqmap_engine/gate.py",
-        "line": 177,
-        "name": "cmd_check",
-        "detail": "`cmd_check` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/scripts/reqmap_engine/mapcmd.py",
-        "line": 50,
-        "name": "_assemble_map_data",
-        "detail": "reqs, reqs_dir, root travel together through 3 functions: _assemble_map_data, _map_check, _stale_artifacts"
-      },
-      {
         "pillar": "standards",
         "kind": "too-many-definitions",
         "file": "plugin/scripts/reqmap_engine/rules.py",
@@ -24022,9 +24020,7 @@
       }
     ],
     "advice": {
-      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
       "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
-      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
       "too-many-definitions": "this many top-level definitions in one file is a package, not a module: group them"
     }
   },

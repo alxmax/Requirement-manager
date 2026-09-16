@@ -2543,7 +2543,7 @@ class DriftReason(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by:
 
     def test_a_reason_is_recorded_where_a_reviewer_reads_it(self):  # verifies: ARCH-DRIFT-003#CASE-5  # verifies: REQ-DRIFT-988#CASE-1
         with tempfile.TemporaryDirectory() as d:
-            rdir, _out = self._drift(d, accept_drift=True, drift_reason="renamed the flag")
+            rdir, _out = self._drift(d, accept_drift="renamed the flag")
             log = R.load_driftlog(rdir)
         self.assertIn("REQ-A-001", log)
         self.assertEqual("renamed the flag", log["REQ-A-001"]["reason"])
@@ -2566,14 +2566,14 @@ class DriftReason(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by:
 
     def test_a_retired_id_is_pruned_from_the_log(self):  # verifies: REQ-DRIFT-988#CASE-4
         with tempfile.TemporaryDirectory() as d:
-            rdir, _out = self._drift(d, accept_drift=True, drift_reason="first")
+            rdir, _out = self._drift(d, accept_drift="first")
             R.save_driftlog(rdir, dict(R.load_driftlog(rdir),
                                        **{"GONE-X-999": {"hash": "abc", "reason": "old"}}))
             self._confirmed_repo(d, body_tail="\n" + "Changed again." + "\n")
             members = R.scan_members(d, rdir)
             with redirect_stdout(io.StringIO()):
                 R.cmd_check(R.Workspace(R.load_requirements(rdir), members, rdir, d), True,
-                            accept_drift=True, drift_reason="second")
+                            accept_drift="second")
             log = R.load_driftlog(rdir)
         self.assertNotIn("GONE-X-999", log)
         self.assertEqual("second", log["REQ-A-001"]["reason"])

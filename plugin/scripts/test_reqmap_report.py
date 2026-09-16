@@ -1873,11 +1873,11 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026  # tested-by: REQ-SIT
             r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
             R.cmd_site(R.Workspace(r, m), d, page, ["stats"])
             data = R._build_map_data(r, m); data["repo"] = R._repo_name(d)
-            self.assertEqual(R._map_check(data, reqs, d), 0)        # fresh
+            self.assertEqual(R._map_check(data, R.Workspace(None, None, reqs), d), 0)  # fresh
             cur = open(page, encoding="utf-8").read()
             tampered = cur.replace(R._extract_region(cur, "stats"), "TAMPERED")
             open(page, "w", encoding="utf-8").write(tampered)
-            self.assertEqual(R._map_check(data, reqs, d), 1)        # stale stats -> exit 1
+            self.assertEqual(R._map_check(data, R.Workspace(None, None, reqs), d), 1)  # stale
 
     def test_site_detect_runs(self):
         """`site` folded into `sync` in v4.0.0; detect mode stays as a function, and
@@ -4882,7 +4882,7 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         record in CLAUDE.md, and this test is what makes recording it necessary.
         """
         claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
-        words = {"THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7}
+        words = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7}
         m = re.search(r"reports exactly ([A-Z]+) findings on itself", claude_md)
         self.assertIsNotNone(m, "CLAUDE.md no longer states the engine's design-finding count")
         claimed = words.get(m.group(1))
@@ -4962,7 +4962,7 @@ class AdvisoryDataCarriesNoVerdict(unittest.TestCase):  # tested-by: ARCH-DESIGN
         return rd, data
 
     def _stale(self, rd, data, root):
-        return R._stale_artifacts(data, rd, root)
+        return R._stale_artifacts(data, R.Workspace(None, None, rd), root)
 
     def test_baseline_is_fresh(self):
         with tempfile.TemporaryDirectory() as d:

@@ -174,17 +174,27 @@ def _stale_integration_artifacts():
     return []
 
 
-def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
-              accept_drift=True, drift_reason=None):
+def _drift_acceptance(accept_drift):
+    # implements: ARCH-CHECK-006  # implements: REQ-PROMOTE-974
+    """(accepted, reason) from the one `accept_drift` value a caller passes: True or False,
+    or the reason string `--accept-drift REASON` yields.
+
+    Read with `is not False`, never with truthiness: `--accept-drift ""` is a caller who
+    passed the flag with an empty reason, and reading it as falsy would demote contracts
+    they meant to keep."""
+    if isinstance(accept_drift, str):
+        return True, accept_drift.strip() or None
+    return accept_drift is not False, None
+
+
+def cmd_check(ws, update_lock, strict=False, as_json=False, since=None, accept_drift=True):
     # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832
     # implements: REQ-CHECK-833  # implements: REQ-RULES-948
     """The gate: run GATE_RULES, print findings with their codes, advance the lock when
     asked. Report-only unless `update_lock` (that is `sync`).
 
-    `accept_drift` stays a plain boolean and the reason travels beside it. Folding the
-    two into one value would have made `--accept-drift ""` falsy, and an empty string
-    is a caller who passed the flag — reading it as 'did not' would demote contracts
-    they meant to keep."""
+    `accept_drift` is True, False, or the reason string the flag carried; see
+    `_drift_acceptance` for why an empty reason still accepts."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     code_root = code_root or "."   # a workspace built without one gates the cwd
     ac_cover, level_cover = ws.ac_cover, ws.level_cover
@@ -211,7 +221,7 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
     legacy = _legacy_schema_ids(reqs)
 
     if update_lock:
-        _advance_lock_and_report(ctx, accept_drift, drift_reason)
+        _advance_lock_and_report(ctx, *_drift_acceptance(accept_drift))
 
     # Integration-artifact freshness must run BEFORE the as_json early-return so
     # --json also exits non-zero on it.
