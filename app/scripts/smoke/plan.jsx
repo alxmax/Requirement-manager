@@ -164,6 +164,19 @@ test("gantt: a version's guide runs from its due day to its pill",
     return g.includes("top:80px") && g.includes("height:106px");
   })());
 
+test("gantt: the lane column sticks while the chart scrolls sideways",
+  // verifies: REQ-PLANSTACK-1012#CASE-4
+  (() => {
+    // A scroll cannot be rendered on the server, so this asserts the two conditions it
+    // depends on: the lane column is sticky at the left edge, and the bordered box that
+    // holds it declares no overflow — an ancestor that does becomes the scrollport, and a
+    // scrollport that never scrolls never lets its sticky child stick.
+    const html = renderToString(<PlanGantt planning={stackPlan} history={[]}
+      locale="en" t={(x) => x} zoom={100} />);
+    const box = (html.match(/<div style="display:flex;border:1px solid[^"]*"/) || [""])[0];
+    return html.includes("position:sticky;left:0") && box !== "" && !box.includes("overflow");
+  })());
+
 export const cadencePlan = {
   lanes: ["Engine"],
   bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],

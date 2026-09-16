@@ -58,8 +58,8 @@
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     },
     "ARCH-ROADMAP-038": {
-      "hash": "20cbb2fa5e24",
-      "reason": "roadmap vs bars"
+      "hash": "749da72cdc2d",
+      "reason": "obligation wikilinks"
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -86,8 +86,8 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "ARCH-VIEWER-007": {
-      "hash": "e890b0af4c9c",
-      "reason": null
+      "hash": "3db3856fa72d",
+      "reason": "obligation wikilinks"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -158,8 +158,8 @@
       "reason": "day is 22px"
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "edeaebfe059b",
-      "reason": "day labels and guides from the day"
+      "hash": "c6d7850f9f5a",
+      "reason": "obligation wikilinks"
     },
     "REQ-PLANSTALE-1013": {
       "hash": "9434789ef73b",
