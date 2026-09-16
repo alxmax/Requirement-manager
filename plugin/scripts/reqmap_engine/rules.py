@@ -464,8 +464,7 @@ def _map_stale_rule(ctx):  # implements: ARCH-MAP-007
     try:
         absent_map = _absent_tracked_artifacts(ctx.reqs_dir, ctx.code_root)
         stale_map = _stale_artifacts(
-            ctx.ws.map_data(ctx.code_root, ctx.full_members),
-            ctx.reqs_dir, ctx.code_root, ctx.reqs)
+            ctx.ws.map_data(ctx.code_root, ctx.full_members), ctx.ws, ctx.code_root)
     except Exception:
         absent_map, stale_map = [], []  # fail-open — a freshness probe never blocks the gate
     if absent_map:

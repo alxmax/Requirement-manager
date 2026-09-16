@@ -217,14 +217,10 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     # rescan + regenerate map + advance the drift baseline (guarded). Members were
     # already scanned above; cmd_check rewrites the lock unless confirmed drift is
     # detected without --accept-drift, then map regenerates only on success.
-    _accepted = getattr(a, "accept_drift", False)
-    # `--accept-drift` alone yields True; with a reason it yields the string. An empty
-    # string is still a caller who passed the flag, so the boolean is `is not False`
-    # rather than a truthiness test.
+    # `--accept-drift` alone yields True, with a reason the string, absent False;
+    # cmd_check reads all three.
     rc = cmd_check(ws, True, strict=a.strict,
-                   accept_drift=_accepted is not False,
-                   drift_reason=(_accepted.strip() or None
-                                 if isinstance(_accepted, str) else None))
+                   accept_drift=getattr(a, "accept_drift", False))
     if rc == 0:
         cmd_map(ws, code_root)
         # Everything derived is rebuilt in one place: there is no state of the world
