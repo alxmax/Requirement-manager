@@ -45,7 +45,9 @@ function Row({ row, selected, onSelect, onToggle }) {
       <span className="ex-id">{r.id}</span>
       <span className="ex-title">{r.title}</span>
       <span className="ex-glyphs">
-        {hasOpenQuestions(r) && <span className="ex-q" title="has an open verify-intent question">?</span>}
+        {hasOpenQuestions(r) && (
+          <span className="ex-q" title="has an open verify-intent question">?</span>
+        )}
         {row.hasChildren && !row.expanded && <span className="ex-count">{chip}</span>}
         <span className="ex-dot" title={r.status} style={{ background: statusDot(r.status) }} />
       </span>
@@ -56,10 +58,14 @@ function Row({ row, selected, onSelect, onToggle }) {
 function LinkGroup({ label, ids, count, onNav, emptyLabel }) {
   return (
     <div className="ex-link-group">
-      <div className="ex-link-label">{label}{count != null && <span className="ex-link-n">{count}</span>}</div>
+      <div className="ex-link-label">
+        {label}{count != null && <span className="ex-link-n">{count}</span>}
+      </div>
       {ids.length
         ? <div className="ex-link-ids">{ids.map((id) => (
-          <button type="button" key={id} className="dep-link" onClick={() => onNav(id)}>{id}</button>
+          <button type="button" key={id} className="dep-link" onClick={() => onNav(id)}>
+            {id}
+          </button>
         ))}</div>
         : <div className="ex-link-empty">{emptyLabel}</div>}
     </div>
@@ -73,50 +79,60 @@ function ExplorerLinks({ sel, h, setSelId, t }) {
   return (
     <div className="sec ex-links">
       <div className="eyebrow">{t("Links — traceability")}</div>
-      <LinkGroup label={t("satisfies (up)")} ids={parents} onNav={setSelId} emptyLabel={t("— top of the trace")} />
-      <LinkGroup label={t("satisfied by (down)")} ids={kids} count={kids.length} onNav={setSelId} emptyLabel={t("— nothing decomposes this")} />
-      <LinkGroup label={t("depends on (out)")} ids={sel.deps || []} onNav={setSelId} emptyLabel={t("— no outgoing dependency")} />
-      <LinkGroup label={t("used by (in)")} ids={sel.usedBy || []} onNav={setSelId} emptyLabel={t("— nothing depends on this")} />
+      <LinkGroup label={t("satisfies (up)")} ids={parents} onNav={setSelId}
+                 emptyLabel={t("— top of the trace")} />
+      <LinkGroup label={t("satisfied by (down)")} ids={kids} count={kids.length} onNav={setSelId}
+                 emptyLabel={t("— nothing decomposes this")} />
+      <LinkGroup label={t("depends on (out)")} ids={sel.deps || []} onNav={setSelId}
+                 emptyLabel={t("— no outgoing dependency")} />
+      <LinkGroup label={t("used by (in)")} ids={sel.usedBy || []} onNav={setSelId}
+                 emptyLabel={t("— nothing depends on this")} />
     </div>
   );
 }
 
-export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
-  const { t } = useI18n();
-  const h = useMemo(() => buildHierarchy(REQUIREMENTS), [REQUIREMENTS]);
-  const [expanded, setExpanded] = useState(() => defaultExpanded(h));
-  const [levelFilter, setLevelFilter] = useState({});
-  const [statusFilter, setStatusFilter] = useState(() => (focus && focus !== "orphan") ? { [focus]: true } : {});
+/** A key-set toggler: `flip(setter)(key)` adds the key when absent and removes it when set. */
+const flip = (setter) => (key) => setter((prev) => {
+  const next = Object.assign({}, prev);
+  if (next[key]) delete next[key]; else next[key] = true;
+  return next;
+});
+
+/** The filter state, reset whenever the host focuses a status or the orphans. */
+function useExplorerFilters(focus, clearFocus) {
+  const [level, setLevel] = useState({});
+  const focused = () => (focus && focus !== "orphan" ? { [focus]: true } : {});
+  const [status, setStatus] = useState(focused);
   const [onlyQuestions, setOnlyQuestions] = useState(false);
   const [onlyOrphans, setOnlyOrphans] = useState(focus === "orphan");
-  const listRef = useRef(null);
-
-  useEffect(() => { setExpanded(defaultExpanded(h)); }, [h]);
   useEffect(() => {
-    if (focus === "orphan") { setOnlyOrphans(true); setStatusFilter({}); }
-    else if (focus) { setOnlyOrphans(false); setStatusFilter({ [focus]: true }); }
-    else { setOnlyOrphans(false); setStatusFilter({}); }
+    setOnlyOrphans(focus === "orphan");
+    setStatus(focused());
   }, [focus]);
+  return {
+    level, status, onlyQuestions, onlyOrphans, setOnlyQuestions, setOnlyOrphans, clearFocus,
+    flipLevel: flip(setLevel), flipStatus: flip(setStatus),
+  };
+}
 
-  const anyLevel = Object.keys(levelFilter).some((k) => levelFilter[k]);
-  const anyStatus = Object.keys(statusFilter).some((k) => statusFilter[k]);
-  const filtering = anyLevel || anyStatus || onlyQuestions || onlyOrphans;
+const anyOn = (set) => Object.keys(set).some((k) => set[k]);
 
-  const matched = useMemo(() => {
-    if (!filtering) return null;
+/** The ids the filters keep, or null when nothing filters. */
+function useMatched(f) {
+  const anyLevel = anyOn(f.level), anyStatus = anyOn(f.status);
+  return useMemo(() => {
+    if (!anyLevel && !anyStatus && !f.onlyQuestions && !f.onlyOrphans) return null;
     return REQUIREMENTS.filter((r) =>
-      (!anyLevel || levelFilter[levelOf(r)]) &&
-      (!anyStatus || statusFilter[r.status]) &&
-      (!onlyQuestions || hasOpenQuestions(r)) &&
-      (!onlyOrphans || isOrphan(r))
+      (!anyLevel || f.level[levelOf(r)]) &&
+      (!anyStatus || f.status[r.status]) &&
+      (!f.onlyQuestions || hasOpenQuestions(r)) &&
+      (!f.onlyOrphans || isOrphan(r))
     ).map((r) => r.id);
-  }, [filtering, anyLevel, anyStatus, onlyQuestions, onlyOrphans, levelFilter, statusFilter]);
+  }, [anyLevel, anyStatus, f.onlyQuestions, f.onlyOrphans, f.level, f.status]);
+}
 
-  const keep = useMemo(() => (matched ? keepSetFor(h, matched) : null), [h, matched]);
-  const rows = useMemo(() => flattenTree(h, { expanded, keep }), [h, expanded, keep]);
-  const sel = selId && REQ_BY_ID[selId] ? REQ_BY_ID[selId] : (REQUIREMENTS[0] || null);
-  const selKey = sel ? sel.id : null;
-
+/** Expand the selection's ancestors and scroll its row into view. */
+function useRevealSelection(h, selKey, setExpanded, listRef, rows) {
   useEffect(() => {
     if (!selKey || !h.byId[selKey]) return;
     const chain = ancestorsOf(h, selKey);
@@ -128,21 +144,18 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
       return next;
     });
   }, [selKey, h]);
-
   useEffect(() => {
     if (!selKey || !listRef.current) return;
-    const el = listRef.current.querySelector('[data-req-row="' + selKey.replace(/"/g, '\\"') + '"]');
+    const sel = '[data-req-row="' + selKey.replace(/"/g, '\\"') + '"]';
+    const el = listRef.current.querySelector(sel);
     if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
   }, [selKey, rows]);
+}
 
-  const flip = (setter) => (key) => setter((prev) => {
-    const next = Object.assign({}, prev);
-    if (next[key]) delete next[key]; else next[key] = true;
-    return next;
-  });
-
+function Breadcrumb({ h, sel, setSelId }) {
   const crumbs = sel ? ancestorsOf(h, sel.id) : [];
-  const breadcrumb = sel && crumbs.length > 0 && (
+  if (!sel || !crumbs.length) return null;
+  return (
     <div className="ex-crumbs">
       {crumbs.map((id) => (
         <span key={id}>
@@ -155,34 +168,51 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
       <span className="ex-crumb cur">{sel.id}</span>
     </div>
   );
+}
 
+export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
+  const { t } = useI18n();
+  const h = useMemo(() => buildHierarchy(REQUIREMENTS), [REQUIREMENTS]);
+  const [expanded, setExpanded] = useState(() => defaultExpanded(h));
+  const filters = useExplorerFilters(focus, clearFocus);
+  const listRef = useRef(null);
+  useEffect(() => { setExpanded(defaultExpanded(h)); }, [h]);
+
+  const matched = useMatched(filters);
+  const keep = useMemo(() => (matched ? keepSetFor(h, matched) : null), [h, matched]);
+  const rows = useMemo(() => flattenTree(h, { expanded, keep }), [h, expanded, keep]);
+  const sel = selId && REQ_BY_ID[selId] ? REQ_BY_ID[selId] : (REQUIREMENTS[0] || null);
+  const selKey = sel ? sel.id : null;
+  useRevealSelection(h, selKey, setExpanded, listRef, rows);
+
+  const tree = {
+    shown: rows.length, total: REQUIREMENTS.length, flat: h.flat,
+    onExpandAll: () => setExpanded(allExpanded(h)),
+    onCollapseAll: () => setExpanded(Object.create(null)),
+  };
+  const toggle = (id) => setExpanded((prev) => {
+    const next = Object.assign(Object.create(null), prev);
+    if (next[id]) delete next[id]; else next[id] = true;
+    return next;
+  });
+  const head = <Breadcrumb h={h} sel={sel} setSelId={setSelId} />;
   return (
     <div className="main explorer">
       <div className="ex-pane">
-        <ExplorerFilters
-          levelFilter={levelFilter} flipLevel={flip(setLevelFilter)}
-          statusFilter={statusFilter} flipStatus={flip(setStatusFilter)}
-          onlyOrphans={onlyOrphans} setOnlyOrphans={setOnlyOrphans}
-          onlyQuestions={onlyQuestions} setOnlyQuestions={setOnlyQuestions}
-          clearFocus={clearFocus} rowsLength={rows.length} total={REQUIREMENTS.length}
-          flat={h.flat} onExpandAll={() => setExpanded(allExpanded(h))}
-          onCollapseAll={() => setExpanded(Object.create(null))}
-        />
+        <ExplorerFilters filters={filters} tree={tree} />
         <div className="ex-rows" ref={listRef}>
           {rows.map((row) => (
             <Row key={row.id} row={row} selected={selKey === row.id} onSelect={setSelId}
-              onToggle={(id) => setExpanded((prev) => {
-                const next = Object.assign(Object.create(null), prev);
-                if (next[id]) delete next[id]; else next[id] = true;
-                return next;
-              })} />
+                 onToggle={toggle} />
           ))}
-          {rows.length === 0 && <div className="ex-none">{t("No requirement matches these filters.")}</div>}
+          {rows.length === 0 && (
+            <div className="ex-none">{t("No requirement matches these filters.")}</div>
+          )}
         </div>
       </div>
       <div className="ex-detail">
         {sel
-          ? <SpecDoc r={sel} onNav={setSelId} head={breadcrumb}
+          ? <SpecDoc r={sel} onNav={setSelId} head={head}
               after={<ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />} />
           : <div className="ex-none">{t("No requirement selected.")}</div>}
       </div>

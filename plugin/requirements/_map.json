@@ -9060,15 +9060,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:130"
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:63"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:287"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:104"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:519"
+          "loc": "app/src/views/roadmap/ganttLayout.js:143"
         },
         {
           "role": "tested-by",
@@ -9135,11 +9135,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:108"
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:35"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:227"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:65"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/ganttLayout.js:119"
         },
         {
           "role": "tested-by",
@@ -19310,7 +19314,31 @@
         },
         {
           "role": "implements",
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/GanttRuler.jsx:1"
+        },
+        {
+          "role": "implements",
           "loc": "app/src/views/roadmap/PlanGantt.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/VersionsTable.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/ganttLayout.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/versionsData.js:1"
         },
         {
           "role": "implements",
@@ -20066,11 +20094,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/RoadmapView.jsx:64"
+          "loc": "app/src/views/RoadmapView.jsx:136"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/RoadmapView.jsx:152"
+          "loc": "app/src/views/roadmap/VersionsTable.jsx:17"
         }
       ],
       "test_exempt": null,
@@ -20126,7 +20154,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/RoadmapView.jsx:57"
+          "loc": "app/src/views/roadmap/VersionsTable.jsx:10"
         }
       ],
       "test_exempt": null,
@@ -20189,15 +20217,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:63"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:7"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:76"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:20"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:169"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:126"
         },
         {
           "role": "implements",
@@ -20264,15 +20292,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:17"
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:147"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:367"
+          "loc": "app/src/views/roadmap/ganttLayout.js:14"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:586"
+          "loc": "app/src/views/roadmap/ganttLayout.js:90"
         }
       ],
       "test_exempt": null,
@@ -20323,7 +20351,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:432"
+          "loc": "app/src/views/roadmap/GanttRuler.jsx:94"
         }
       ],
       "test_exempt": null,
@@ -23248,7 +23276,7 @@
     },
     {
       "month": "2026-09",
-      "count": 79,
+      "count": 80,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23330,11 +23358,17 @@
         "v7.18.0",
         "v7.19.0",
         "v7.20.0",
-        "v7.21.0"
+        "v7.21.0",
+        "v7.21.1"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.1",
+          "date": "2026-09-16",
+          "headline": "**The viewer's largest components are split, and every structural design finding outside"
+        },
         {
           "version": "v7.21.0",
           "date": "2026-09-16",
@@ -23916,16 +23950,16 @@
     }
   ],
   "design": {
-    "files": 94,
-    "clean_files": 68,
-    "score": 72,
+    "files": 100,
+    "clean_files": 81,
+    "score": 81,
     "candidates": {
-      "encapsulation": 9,
-      "abstraction": 8,
+      "encapsulation": 3,
+      "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 25
+      "standards": 17
     },
     "findings": [
       {
@@ -24043,46 +24077,6 @@
       {
         "pillar": "standards",
         "kind": "line-too-long",
-        "file": "app/src/views/ExplorerView.jsx",
-        "line": 48,
-        "name": "ExplorerView.jsx",
-        "detail": "10 line(s) wider than 100 columns, first at line 48"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "long-function",
-        "file": "app/src/views/ExplorerView.jsx",
-        "line": 84,
-        "name": "ExplorerView",
-        "detail": "`ExplorerView` is 108 lines (over 80)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/MapView.jsx",
-        "line": 19,
-        "name": "MapView.jsx",
-        "detail": "10 line(s) wider than 100 columns, first at line 19"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/MapView.jsx",
-        "line": 19,
-        "name": "ZoomedCanvas",
-        "detail": "`ZoomedCanvas` takes 11 parameters (over 6)"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "long-function",
-        "file": "app/src/views/MapView.jsx",
-        "line": 44,
-        "name": "MapView",
-        "detail": "`MapView` is 105 lines (over 80)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
         "file": "app/src/views/ProblemsView.jsx",
         "line": 9,
         "name": "ProblemsView.jsx",
@@ -24091,146 +24085,10 @@
       {
         "pillar": "standards",
         "kind": "line-too-long",
-        "file": "app/src/views/RoadmapView.jsx",
-        "line": 15,
-        "name": "RoadmapView.jsx",
-        "detail": "30 line(s) wider than 100 columns, first at line 15"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "deep-nesting",
-        "file": "app/src/views/RoadmapView.jsx",
-        "line": 152,
-        "name": "RoadmapView",
-        "detail": "`RoadmapView` nests 7 levels deep (over 4)"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "long-function",
-        "file": "app/src/views/RoadmapView.jsx",
-        "line": 152,
-        "name": "RoadmapView",
-        "detail": "`RoadmapView` is 261 lines (over 80)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/RoadmapView.jsx",
-        "line": 152,
-        "name": "RoadmapView",
-        "detail": "`RoadmapView` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
         "file": "app/src/views/SpecDoc.jsx",
         "line": 16,
         "name": "SpecDoc.jsx",
         "detail": "17 line(s) wider than 100 columns, first at line 16"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/explorer/ExplorerFilters.jsx",
-        "line": 15,
-        "name": "ExplorerFilters",
-        "detail": "`ExplorerFilters` takes 14 parameters (over 6)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/explorer/ExplorerFilters.jsx",
-        "line": 44,
-        "name": "ExplorerFilters.jsx",
-        "detail": "1 line(s) wider than 100 columns, first at line 44"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/map/MapParts.jsx",
-        "line": 7,
-        "name": "MapParts.jsx",
-        "detail": "18 line(s) wider than 100 columns, first at line 7"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/map/MapParts.jsx",
-        "line": 7,
-        "name": "MapNodeBox",
-        "detail": "`MapNodeBox` takes 8 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/map/MapParts.jsx",
-        "line": 60,
-        "name": "MapCanvas",
-        "detail": "`MapCanvas` takes 9 parameters (over 6)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/problems/ProblemsPanels.jsx",
-        "line": 10,
-        "name": "ProblemsPanels.jsx",
-        "detail": "5 line(s) wider than 100 columns, first at line 10"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "deep-nesting",
-        "file": "app/src/views/problems/ProblemsPanels.jsx",
-        "line": 26,
-        "name": "DesignProblemsPanel",
-        "detail": "`DesignProblemsPanel` nests 5 levels deep (over 4)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 1,
-        "name": "PlanGantt.jsx",
-        "detail": "614 lines (over 500)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 34,
-        "name": "PlanGantt.jsx",
-        "detail": "21 line(s) wider than 100 columns, first at line 34"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "deep-nesting",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 131,
-        "name": "VersionNote",
-        "detail": "`VersionNote` nests 5 levels deep (over 4)"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "deep-nesting",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 213,
-        "name": "PlanGantt",
-        "detail": "`PlanGantt` nests 7 levels deep (over 4)"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "long-function",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 213,
-        "name": "PlanGantt",
-        "detail": "`PlanGantt` is 401 lines (over 80)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 213,
-        "name": "PlanGantt",
-        "detail": "`PlanGantt` takes 8 parameters (over 6)"
       },
       {
         "pillar": "encapsulation",
@@ -24267,11 +24125,9 @@
     ],
     "advice": {
       "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
-      "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
-      "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
       "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
       "too-many-definitions": "this many top-level definitions in one file is a package, not a module: group them"
     }

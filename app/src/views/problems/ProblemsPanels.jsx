@@ -3,11 +3,13 @@ import { Icon } from "../../lib/icons.jsx";
 import { Pill, statusKind } from "../../lib/ui.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 
+const COUNT = { marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11 };
+
 export function ProblemTabBar({ filter, setFilter, counts, designCount, gateMsg }) {
   const { t } = useI18n();
   const Tab = ({ k, label, n }) => (
     <button className={"tab" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>
-      {label}{n != null && <span style={{ marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11 }}>{n}</span>}
+      {label}{n != null && <span style={COUNT}>{n}</span>}
     </button>
   );
   return (
@@ -23,40 +25,48 @@ export function ProblemTabBar({ filter, setFilter, counts, designCount, gateMsg 
   );
 }
 
+function DesignRow({ f }) {
+  return (
+    <div className="prob-row">
+      <span className="prob-sev sev-REVIEW">{f.kind}</span>
+      <div className="prob-body">
+        <div className="prob-head"><span className="prob-id">{f.name}</span></div>
+        <div className="prob-msg">{f.detail}</div>
+      </div>
+      <span className="prob-loc">{f.file}:{f.line}</span>
+    </div>
+  );
+}
+
+/** One OOP pillar: its findings, then the advice for each kind of finding in it. */
+function PillarGroup({ pillar, rows, advice }) {
+  const kinds = [...new Set(rows.map((f) => f.kind))].sort().filter((k) => advice[k]);
+  return (
+    <div>
+      <div className="prob-head" style={{ margin: "14px 0 6px", textTransform: "capitalize" }}>
+        <b>{pillar}</b>
+        <span style={COUNT}>{rows.length}</span>
+      </div>
+      {rows.map((f, i) => <DesignRow key={i} f={f} />)}
+      {kinds.map((k) => (
+        <div className="prob-fix" key={k} style={{ margin: "4px 0 0 4px" }}>
+          <Icon name="arrow-right" size={13} /> {advice[k]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function DesignProblemsPanel({ byPillar, advice }) {
   const { t } = useI18n();
+  const note = "Advisory only — a candidate is a shape worth a look, never a defect, "
+    + "and this never enters the gate.";
   return (
     <>
-      <div className="prob-chip" style={{ cursor: "default" }}>
-        {t("Advisory only — a candidate is a shape worth a look, never a defect, and this never enters the gate.")}
-      </div>
-      {Object.keys(byPillar).sort().map((pillar) => {
-        const rows = byPillar[pillar];
-        const kinds = [...new Set(rows.map((f) => f.kind))].sort();
-        return (
-          <div key={pillar}>
-            <div className="prob-head" style={{ margin: "14px 0 6px", textTransform: "capitalize" }}>
-              <b>{pillar}</b>
-              <span style={{ marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11 }}>{rows.length}</span>
-            </div>
-            {rows.map((f, i) => (
-              <div className="prob-row" key={i}>
-                <span className="prob-sev sev-REVIEW">{f.kind}</span>
-                <div className="prob-body">
-                  <div className="prob-head"><span className="prob-id">{f.name}</span></div>
-                  <div className="prob-msg">{f.detail}</div>
-                </div>
-                <span className="prob-loc">{f.file}:{f.line}</span>
-              </div>
-            ))}
-            {kinds.filter((k) => advice[k]).map((k) => (
-              <div className="prob-fix" key={k} style={{ margin: "4px 0 0 4px" }}>
-                <Icon name="arrow-right" size={13} /> {advice[k]}
-              </div>
-            ))}
-          </div>
-        );
-      })}
+      <div className="prob-chip" style={{ cursor: "default" }}>{t(note)}</div>
+      {Object.keys(byPillar).sort().map((pillar) => (
+        <PillarGroup key={pillar} pillar={pillar} rows={byPillar[pillar]} advice={advice} />
+      ))}
     </>
   );
 }
@@ -82,13 +92,17 @@ export function ProblemRow({ p, openSpec, t }) {
   );
 }
 
+const EMPTY_NOTE = {
+  marginTop: 6, color: "var(--fg-muted)", font: "var(--text-small)", maxWidth: 460,
+};
+
 export function ProblemsEmpty({ filter, t }) {
   return (
     <div className="prob-empty">
       <Icon name="shield-check" size={26} style={{ color: "var(--cov-tested)" }} />
       <div>
         <b>{filter === "ALL" ? t("Nothing to fix.") : t("Nothing in this tab.")}</b>
-        <div style={{ marginTop: 6, color: "var(--fg-muted)", font: "var(--text-small)", maxWidth: 460 }}>
+        <div style={EMPTY_NOTE}>
           {filter === "ALL"
             ? t("The gate reports no errors, warnings or review items for this registry.")
             : t("Other tabs may still have open items.")}
