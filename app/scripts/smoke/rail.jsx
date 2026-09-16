@@ -1,3 +1,4 @@
+// tested-by: ARCH-VIEWER-007
 /* Render smoke test, part: rail readings, design tab, roadmap zoom and horizons. */
 import { renderToString } from "react-dom/server";
 

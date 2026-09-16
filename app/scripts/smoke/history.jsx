@@ -1,3 +1,4 @@
+// tested-by: ARCH-VIEWER-007
 /* Render smoke test, part: nav, shipped history, loadData. */
 import { renderToString } from "react-dom/server";
 

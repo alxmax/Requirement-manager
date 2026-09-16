@@ -906,8 +906,14 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_scripts_ssr_smoke_jsx_1
   f_app_scripts_sync_data_mjs_1["app/scripts/sync-data.mjs:1"]
   ARCH_VIEWER_007 -->|implements| f_app_scripts_sync_data_mjs_1
+  f_app_scripts_smoke_explorer_jsx_1["app/scripts/smoke/explorer.jsx:1"]
+  ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_explorer_jsx_1
   f_app_scripts_smoke_harness_jsx_1["app/scripts/smoke/harness.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_scripts_smoke_harness_jsx_1
+  f_app_scripts_smoke_history_jsx_1["app/scripts/smoke/history.jsx:1"]
+  ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_history_jsx_1
+  f_app_scripts_smoke_rail_jsx_1["app/scripts/smoke/rail.jsx:1"]
+  ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_rail_jsx_1
   f_app_scripts_smoke_views_jsx_2["app/scripts/smoke/views.jsx:2"]
   ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_views_jsx_2
   f_app_src_App_jsx_1["app/src/App.jsx:1"]

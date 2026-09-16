@@ -13945,7 +13945,9 @@
         "The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]",
         "A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]",
         "A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]",
-        "An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]"
+        "An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]",
+        "`init` seeds a plan a new repository can plan on, and a plan with no dates still carries a calendar to its horizon. [[REQ-PLANHORIZON-1010]]",
+        "The export carries the branch git is on, and the plan's shipped band is labelled with it. [[REQ-PLANBRANCH-1011]]"
       ],
       "verify": [],
       "notes": [
@@ -19112,7 +19114,9 @@
         "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]",
         "The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]",
         "The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]",
-        "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]"
+        "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]",
+        "The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]",
+        "Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]"
       ],
       "verify": [],
       "notes": [
@@ -19197,8 +19201,20 @@
           "loc": "app/scripts/sync-data.mjs:1"
         },
         {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/explorer.jsx:1"
+        },
+        {
           "role": "implements",
           "loc": "app/scripts/smoke/harness.jsx:1"
+        },
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/history.jsx:1"
+        },
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/rail.jsx:1"
         },
         {
           "role": "tested-by",
@@ -20255,7 +20271,6 @@
         "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
         "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
         "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
-        "Under the week row, every day carries its `day/month` label. [[REQ-PLANDAYS-1021]]",
         "The vertical guides mark the work: a solid rule from the centre of each bar's start day on the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the milestones keep theirs there or in the release lane, and neither rules a line through the lanes.",
         "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport.",
         "A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.",
@@ -20308,8 +20323,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 4
     },
     {
       "id": "REQ-PLANDAYS-1021",
@@ -20343,7 +20357,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:209"
+          "loc": "app/scripts/smoke/plan.jsx:222"
         },
         {
           "role": "implements",

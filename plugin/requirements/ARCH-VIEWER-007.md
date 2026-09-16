@@ -32,6 +32,8 @@ Every bullet below is binding.
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
 - The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
+- The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]
+- Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
 
 ## Cases
 CASE-1
@@ -932,7 +934,6 @@ Every bullet below is binding.
   where their dates do not.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
   the lane grows only where it must.
-- Under the week row, every day carries its `day/month` label. [[REQ-PLANDAYS-1021]]
 - The vertical guides mark the work: a solid rule from the centre of each bar's start day on
   the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a
   version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the

@@ -53,7 +53,7 @@ class CheckEngineBump(unittest.TestCase):
             _seed(d)
             self.assertEqual(_run(d, "--staged"), 0)
 
-    def test_staged_change_without_bump_fails(self):  # tested-by: ARCH-SELFGATE-039
+    def test_staged_change_without_bump_fails(self):  # tested-by: ARCH-SELFGATE-039 @integration
         with tempfile.TemporaryDirectory() as d:
             d = _seed(d)
             (d / ENGINE_REL).write_text(

@@ -1,3 +1,4 @@
+// tested-by: ARCH-VIEWER-007
 /* Render smoke test, part: explorer, tally, commands, search, questions. */
 import { renderToString } from "react-dom/server";
 
