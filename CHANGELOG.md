@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v7.21.13` — 2026-09-16
+
+**`gate --show`, `--search` and `--dupes` emit JSON, and the MCP server offers resources.**
+`--json` on `--show` prints the dossier with the requirement's frontmatter and body, and an
+object carrying `error` for an unknown id (REQ-SHOW-919); on `--search`, the matches in the
+order shown with how each matched and its score (REQ-SEARCH-913); on `--dupes`, every pair
+whatever `--top` says, and the counts of what was skipped (REQ-SIMILAR-923). The three MCP
+tools that returned text now return that JSON.
+
+The server offers `reqmap://map`, the committed `_map.json`, and one
+`reqmap://requirement/<id>` per requirement it names, so a client can attach a requirement as
+context; the listing reads the map file and runs no scan (REQ-MCPRESOURCES-1030). Search moved
+out of `similar.py` into its own module, `search.py`, which JSON would have taken past the
+500-line bar.
+
 ## plugin `v7.21.12` — 2026-09-16
 
 **`reqmap.py mcp`: the engine as an MCP server.** An assistant can now reach the engine over

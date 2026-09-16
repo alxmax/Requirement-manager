@@ -55,8 +55,8 @@ def _add_workspace_and_query_flags(ap):
                     help="gate --search: max ranked matches to show (default 5); gate --dupes: max "
                          "pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="check|health|coverage|design: emit structured JSON output (for CI/badge "
-                         "consumption)")
+                    help="gate (bare, --risk, --audit, --show, --search, --dupes, --design, "
+                         "--i18n), sync --retire/--release, clarify: emit JSON")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, "
                          "color)")

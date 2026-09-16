@@ -73,9 +73,8 @@ from reqmap_engine.retire import cmd_retire
 from reqmap_engine.review import cmd_review
 from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
-from reqmap_engine.similar import (
-    SEARCH_TOP, _redundant_groups, cmd_search, cmd_similar
-)
+from reqmap_engine.search import SEARCH_TOP, cmd_search
+from reqmap_engine.similar import _redundant_groups, cmd_similar
 from reqmap_engine.site import _site_default_target, cmd_site
 from reqmap_engine.workspace import Workspace, _is_source_repo
 from reqmap_engine import (
@@ -85,7 +84,7 @@ from reqmap_engine import (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review, targets, plandrift, history,
-    pyramid, cliflags, site_template, docclaims, versions, release, mcp, mcpconfig,
+    pyramid, cliflags, site_template, docclaims, versions, release, mcp, mcpconfig, search,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -157,12 +156,12 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         # Workspace.load (the non-cache path) already produced level_cover in the
         # same walk; ws.levels() only re-walks when --cache forced the
         # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
-        return cmd_show(ws, a.mode_show, ws.levels())
+        return cmd_show(ws, a.mode_show, ws.levels(), as_json=a.as_json)
     if a.mode_search is not None:
         if not a.mode_search:
             print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
         return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
-                          reqs_dir=reqs_dir)
+                          reqs_dir=reqs_dir, as_json=a.as_json)
     if a.mode_review is not None:
         if not a.mode_review:
             print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
@@ -175,7 +174,7 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         return 0
     if a.mode_dupes:
         return cmd_similar(reqs, a.threshold if a.threshold is not None else cfg.SIMILAR_THRESHOLD,
-                           members, top=a.top)
+                           members, top=a.top, as_json=a.as_json)
     if a.mode_design:
         return cmd_design(code_root, reqs_dir, as_json=a.as_json)
     # The whole verdict, in the order every hook and CI already ran it: link sync +
@@ -384,7 +383,7 @@ _ENGINE_MODULES = (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
-    cliflags, site_template, docclaims, versions, release, mcp, mcpconfig,
+    cliflags, site_template, docclaims, versions, release, mcp, mcpconfig, search,
 )
 
 

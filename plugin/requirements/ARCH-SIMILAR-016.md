@@ -283,6 +283,8 @@ Every bullet below is binding.
   terms, so the reviewer can see why the pair was flagged.
 - `dupes` always returns zero. The report is advisory: a human decides whether a
   flagged pair is a real duplicate.
+- `dupes --json` prints the threshold, the number of requirements compared, every pair with its
+  score and shared terms whatever `--top` says, and the counts of what was skipped.
 - `dupes --top N` prints the N highest-scoring pairs and a `... M more pair(s)` line; without
   `--top` every pair is printed.
 
@@ -316,6 +318,12 @@ CASE-6 — --top truncates with a count
   Given  three mutually similar requirements and `--top 1`
   When   `dupes` runs
   Then   one pair is printed followed by `... 2 more pair(s)`
+
+CASE-7 — --json carries every pair and what was skipped
+  Given  three mutually similar requirements, one of them `deprecated`, and `--top 1`
+  When   `dupes --json` runs
+  Then   it prints one JSON object with the one remaining pair, its score and shared terms,
+         and a `skipped` count of one deprecated requirement
 
 --------------------
 
