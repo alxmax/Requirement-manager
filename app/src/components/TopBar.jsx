@@ -5,8 +5,16 @@ import { searchRequirements } from "../lib/search.js";
 import { Icon, Logomark } from "../lib/icons.jsx";
 import { useI18n, LOCALES } from "../lib/i18n.jsx";
 
+const LOCALE_BTN = {
+  fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".04em", width: 34,
+};
+
 export function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   const { t, locale, setLocale } = useI18n();
+  const nextLocale = () => {
+    const at = LOCALES.findIndex((l) => l.code === locale);
+    setLocale(LOCALES[(at + 1) % LOCALES.length].code);
+  };
   const [open, setOpen] = useState(false);
   const q = query.trim();
   const hits = useMemo(
@@ -27,7 +35,9 @@ export function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
           value={query} onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setOpen(true)}
           onBlur={() => setOpen(false)}
-          onKeyDown={(e) => { if (e.key === "Escape") { setQuery(""); e.currentTarget.blur(); } }} />
+          onKeyDown={(e) => {
+            if (e.key === "Escape") { setQuery(""); e.currentTarget.blur(); }
+          }} />
         {q && open && (
           <div className="search-res">
             {hits.length ? hits.map((h) => (
@@ -40,12 +50,12 @@ export function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
           </div>
         )}
       </div>
-      <button className="btn-icon bare" title={t("switch language")} aria-label={t("switch language")}
-        onClick={() => setLocale(LOCALES[(LOCALES.findIndex((l) => l.code === locale) + 1) % LOCALES.length].code)}
-        style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".04em", width: 34 }}>
+      <button className="btn-icon bare" title={t("switch language")}
+        aria-label={t("switch language")} onClick={nextLocale} style={LOCALE_BTN}>
         {(LOCALES.find((l) => l.code === locale) || LOCALES[0]).label}
       </button>
-      <button className="btn-icon bare" title={t("toggle theme")} onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+      <button className="btn-icon bare" title={t("toggle theme")}
+        onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
         <Icon name={theme === "light" ? "moon" : "sun"} size={17} />
       </button>
     </header>

@@ -77,7 +77,8 @@ export function buildWeekBands(origin, totalDays) {
 
 /** One entry per day on the chart, labelled `day/month` ("15/9"), with its weekday so a
  *  weekend can be told apart. A week band says which week; this says which day, which is
- *  what a reader needs to place a one-day bar or a Friday release.  implements: REQ-PLANDAYS-1021 */
+ *  what a reader needs to place a one-day bar or a Friday release.
+ *  implements: REQ-PLANDAYS-1021 */
 export function buildDayBands(origin, totalDays) {
   const bands = [];
   for (let i = 0; i < totalDays; i++) {

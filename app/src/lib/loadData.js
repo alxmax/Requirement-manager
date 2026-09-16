@@ -47,7 +47,8 @@ export function adaptNode(n) {
     // search and counting), so gating this on `acc` being empty meant that the day
     // the engine learned to parse the block form (v2.29.0) every criterion silently
     // collapsed into a run-on line. Prefer the authored shape whenever it exists.
-    gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,  // implements: REQ-VIEWER-942
+    // implements: REQ-VIEWER-942
+    gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,
     members: Array.isArray(n.members) ? n.members : [],
     deps: Array.isArray(n.deps) ? n.deps : [],
     usedBy: Array.isArray(n.used_by) ? n.used_by : [],
@@ -96,7 +97,9 @@ export async function loadData() {
     const json = await res.json();
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) return { source: "baked" };
     adoptMapExport({ ...json, nodes: json.nodes.map(adaptNode) });
-    return { source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length };
+    return {
+      source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length,
+    };
   } catch {
     return { source: "baked" };
   }

@@ -26,7 +26,9 @@ class ErrorBoundary extends Component {
       return (
         <div className="view" style={{ padding: 24 }}>
           <h2>Something went wrong rendering this view.</h2>
-          <pre style={{ whiteSpace: "pre-wrap", color: "var(--fg-faint)", fontSize: 12 }}>{String(this.state.error)}</pre>
+          <pre style={{ whiteSpace: "pre-wrap", color: "var(--fg-faint)", fontSize: 12 }}>
+            {String(this.state.error)}
+          </pre>
         </div>
       );
     }
@@ -56,8 +58,8 @@ export default function App() {
     if (!selId) return;
     try {
       const next = "#/req/" + selId;
-      if (window.location.hash !== next)
-        window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
+      const { hash, pathname, search } = window.location;
+      if (hash !== next) window.history.replaceState(null, "", pathname + search + next);
     } catch { /* file:// or SSR */ }
   }, [selId]);
 
@@ -66,13 +68,20 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopBar query={query} setQuery={setQuery} theme={theme} setTheme={setTheme} onSearchPick={searchPick} />
+      <TopBar query={query} setQuery={setQuery} theme={theme} setTheme={setTheme}
+              onSearchPick={searchPick} />
       <div className="body">
         <Rail view={view} setView={setView} focus={focus} problems={problems}
           setFocus={(k) => { setFocus(k); setView("explorer"); }} />
         <ErrorBoundary key={view}>
-          {view === "explorer" && <ExplorerView selId={selId} setSelId={setSelId} focus={focus} clearFocus={() => setFocus(null)} />}
-          {view === "map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec} highlightId={highlightId} setHighlightId={setHighlightId} />}
+          {view === "explorer" && (
+            <ExplorerView selId={selId} setSelId={setSelId} focus={focus}
+                          clearFocus={() => setFocus(null)} />
+          )}
+          {view === "map" && (
+            <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
+                     highlightId={highlightId} setHighlightId={setHighlightId} />
+          )}
           {view === "problems" && <ProblemsView openSpec={openSpec} problems={problems} />}
           {view === "roadmap" && <RoadmapView openSpec={openSpec} />}
           {view === "commands" && <CommandsView />}

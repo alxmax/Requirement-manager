@@ -19,7 +19,10 @@ export function useDragPan(externalRef) {
     drag.current = d;
     const move = (ev) => {
       const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
-      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) { d.moved = true; el.classList.add("grabbing"); }
+      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) {
+        d.moved = true;
+        el.classList.add("grabbing");
+      }
       if (d.moved) { el.scrollLeft = d.sl - dx; el.scrollTop = d.st - dy; }
     };
     const up = () => {
