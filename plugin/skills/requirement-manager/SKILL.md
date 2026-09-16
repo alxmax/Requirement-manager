@@ -326,7 +326,7 @@ attempt and rejected it).
 
 ### Prose & doc capabilities (the three buckets)
 
-`draft`/`init` scan `.md`/`.html` by default and classify each prose file
+`init` scans `.md`/`.html` by default and classify each prose file
 (prose = human-readable spec/prompt text, not source code):
 
 1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
@@ -522,7 +522,7 @@ before push *and* on the remote for PRs.
 ## Commands
 
 Creation verbs (pick by input, not by outcome):
-- `draft` — input is **existing untagged CODE** (or prose); auto-extracts draft requirements from it.
+- `init` — input is **existing untagged CODE** (or prose); drafts requirements from it (`init --plan` shows them as JSON first, writing nothing).
 - `new AREA-NAME-NNN` — input is **nothing yet**; scaffolds one blank requirement from the built-in template.
 - `new --from-todo "TODO name" --id AREA-NAME-NNN` — input is a **TODO.md item**; scaffolds a requirement draft pre-filled from that item. Replaces the old `promote-todo` verb. Add `--mark-done` to flip the TODO item to `[x]` at the same time.
 
@@ -674,7 +674,7 @@ Before merging a feature branch, bump the semver **on that branch** so the versi
 
 ## Legacy / brownfield (draft mode)
 
-`draft` walks the code and proposes `draft` requirements (structure, input/output
+`init` walks the untagged code and proposes `draft` requirements (structure, input/output
 from signatures, `depends_on` from imports). It **cannot** recover intent — it only
 captures observed behavior, so:
 - Everything it emits is `draft`/`baseline`, never `confirmed`. It never canonizes a

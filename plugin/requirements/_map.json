@@ -23846,7 +23846,7 @@
     },
     {
       "month": "2026-09",
-      "count": 93,
+      "count": 94,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23935,6 +23935,7 @@
         "v7.21.12",
         "v7.21.13",
         "v7.21.14",
+        "v7.21.15",
         "v7.21.2",
         "v7.21.3",
         "v7.21.4",
@@ -23986,6 +23987,11 @@
           "version": "v7.21.2",
           "date": "2026-09-16",
           "headline": "**The viewer's components fit in 100 columns, and three messages stop naming commands that"
+        },
+        {
+          "version": "v7.21.15",
+          "date": "2026-09-16",
+          "headline": "**README and `docs/architecture.html` describe the MCP server, and the skill files lose three"
         },
         {
           "version": "v7.21.14",

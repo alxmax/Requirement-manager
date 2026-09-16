@@ -308,7 +308,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
 
 ### Prose & doc capabilities (the three buckets)
 
-`draft`/`init` scan `.md`/`.html` by default and classify each prose file
+`init` scans `.md`/`.html` by default and classify each prose file
 (prose = human-readable spec/prompt text, not source code):
 
 1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
@@ -428,7 +428,7 @@ Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.
 ## Commands
 
 Creation verbs (pick by input, not by outcome):
-- `draft` — input is **existing untagged CODE** (or prose); auto-extracts draft requirements from it.
+- `init` — input is **existing untagged CODE** (or prose); drafts requirements from it (`init --plan` shows them as JSON first, writing nothing).
 - `new AREA-NAME-NNN` — input is **nothing yet**; scaffolds one blank requirement from the built-in template.
 - `new --from-todo "TODO name" --id AREA-NAME-NNN` — input is a **TODO.md item**; scaffolds a requirement draft pre-filled from that item. Add `--mark-done` to flip the TODO item to `[x]` at the same time.
 
@@ -443,7 +443,7 @@ Creation verbs (pick by input, not by outcome):
 | `mcp` | Serve this repository's requirements to an AI assistant over the Model Context Protocol (stdio). Each tool is one reqmap invocation in a fresh process. Read-only unless --allow-writes. | `--allow-writes` |
 <!--##/REQMAP:COMMANDS##-->
 
-**`check` is a deprecated alias for `gate`** — kept for backward compat.
+**`check` no longer exists.** It was a deprecated alias for `gate` through `3.x` and was removed in `v4.0.0`; a hook or CI step that still calls `reqmap.py check` fails with an unknown-command error. Migrate with `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
 
 ## MCP server (`reqmap.py mcp`)
 
@@ -494,6 +494,6 @@ Before merging a feature branch, bump the semver **on that branch**:
 
 ## Legacy / brownfield (draft mode)
 
-`draft` walks the code and proposes `draft` requirements. It **cannot** recover intent — it only
+`init` walks the untagged code and proposes `draft` requirements. It **cannot** recover intent — it only
 captures observed behavior, so everything it emits is `draft`/`baseline`, never `confirmed`.
 Aim ~80% auto-`baseline` / ~20% human-`confirmed` as a *health signal*, not a quota.

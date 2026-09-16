@@ -198,7 +198,8 @@ download.
 `reqmap.py mcp` serves the engine over the Model Context Protocol on stdio. The assistant
 sees fifteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
 `reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
-invocation in a fresh process. It is **read-only by default**; `reqmap_sync`, `reqmap_new`
+invocation in a fresh process, so the answer is exactly what the CLI prints, as JSON wherever
+the command has `--json`. It is **read-only by default**; `reqmap_sync`, `reqmap_new`
 and `reqmap_release` appear only when the server starts with `--allow-writes`. The committed map
 and every requirement are also resources (`reqmap://map`, `reqmap://requirement/<id>`), so a
 client can attach a requirement to the conversation instead of calling a tool about it.
@@ -212,6 +213,8 @@ client can attach a requirement to the conversation instead of calling a tool ab
            "--root", "${CLAUDE_PROJECT_DIR:-.}"]}}}
 ```
 
+The skill tells an assistant when to prefer these tools over the terminal, and which
+decisions stay a person's whichever path runs them (confirming, the drift reason, retiring).
 Why a server when the CLI already works, and why it is not declared by the plugin:
 [ADR-0043](docs/adr/0043-the-engine-is-served-over-mcp.md).
 
@@ -251,9 +254,9 @@ any assistant — or with no assistant at all.
 > In **this** repo, run commands from inside `plugin/`. In **your** repo, run
 > from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
-The CLI is **five verbs**. Everything else is a flag on `gate` (every read-only
-question) or on `sync` (every write), so the shape of a command tells you whether
-it can change a file.
+The CLI is **six verbs**. Five do the work, and everything else is a flag on `gate` (every
+read-only question) or on `sync` (every write), so the shape of a command tells you whether
+it can change a file. The sixth, `mcp`, serves those same commands to an AI assistant.
 
 | Verb | What it does |
 |---|---|
@@ -261,6 +264,7 @@ it can change a file.
 | `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
 | `gate` | **The verdict, and every read-only question.** Bare, it is the commit/CI check (below). The mode flags each answer one question instead. Never writes anything. |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
+| `mcp` | Serve the engine over the Model Context Protocol on stdio: fifteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
 | `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |
 
 **`gate` — the bare verdict.** Link sync (every tag resolves, every enforced
@@ -277,9 +281,9 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 |---|---|
 | `--risk` | *What should I work on next?* A health score plus counted risk buckets. `--json`/`--badge` for the numbers alone, `--untagged` for the files carrying no `implements:` tag. |
 | `--audit` | *How is this repo doing?* Every discovery pass in one report: gate, risk, duplicates, design, tag coverage, the exemptions in force, corpus shape, and the plan against the releases (a milestone already shipped, version sources that disagree). The exit code comes from the gate alone — the rest is advice. |
-| `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. |
-| `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. |
-| `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). |
+| `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. `--json` adds the requirement's frontmatter and body. |
+| `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. `--json` for an agent. |
+| `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). A pair a reviewer read and found different is recorded with `distinct_from: [ID]` and stops being reported; `--json` lists every pair and what was skipped. |
 | `--design` | Advisory design review of the code: the four OOP pillars, one Chidamber & Kemerer per-class metric (RFC, Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
 | `--i18n` | Translations the configured `LANGUAGE` (`en` \| `ro` \| `both`, set in `requirements/_config.json`) expects and does not have, missing or stale. `--json` emits each entry's source fields and cache key for whoever translates — the engine never does. |
 | `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
@@ -402,20 +406,20 @@ to ignore red.
 
 ```
 .claude-plugin/marketplace.json             marketplace manifest (this repo is a marketplace)
+.mcp.json, .vscode/mcp.json                 MCP client configs that start this repo's own server
 plugin/                                     the plugin — self-contained
   .claude-plugin/plugin.json                plugin manifest
   tool_definition.json                      OpenAI function-calling schema for all reqmap commands
   skills/requirement-manager/
     SKILL.md                                full contract & authoring rules (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-    SKILL.md                                diagram skill contract (Claude Code)
-    SKILL.universal.md                      AI-agnostic variant (any assistant)
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
   scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,965 lines in all)
-  scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
+  scripts/reqmap_engine/mcp.py              the MCP server: protocol, the tool table, resources
+  scripts/test_reqmap.py                    the regression suite's entry point — re-exports the five parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git
   scripts/test_reqmap_gate.py               the verdict: gate rules, drift, --since, test links
