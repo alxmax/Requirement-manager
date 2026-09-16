@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.15",
+  "engine_version": "2026-09-16.16",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -633,15 +633,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3272"
+          "loc": "plugin/scripts/test_reqmap_report.py:3299"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3431"
+          "loc": "plugin/scripts/test_reqmap_report.py:3472"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5350"
+          "loc": "plugin/scripts/test_reqmap_report.py:5391"
         },
         {
           "role": "implements",
@@ -785,11 +785,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:46"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:51"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:64"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:69"
         }
       ],
       "test_exempt": null,
@@ -838,11 +838,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3272"
+          "loc": "plugin/scripts/test_reqmap_report.py:3299"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5350"
+          "loc": "plugin/scripts/test_reqmap_report.py:5391"
         },
         {
           "role": "implements",
@@ -893,7 +893,7 @@
       "title": "An exemption nobody justified is itself a finding",
       "intent": "An exemption is a finding somebody decided not to see. It was also the cheapest thing to reach for: one frontmatter token silences a check permanently, nobody has to say why, and nothing ever mentions it again — so \"split this requirement\" and \"add one word here\" cost a reader the same, and the wrong one won. Listing every exemption keeps silenced from becoming invisible, and warning on a bare one makes exempting cost a sentence a reviewer can argue with.",
       "contract": [
-        "The report lists every `lint_exempt:` and `gate_exempt:` entry in the corpus with its requirement and the check it silences.",
+        "The report lists every `lint_exempt:`, `gate_exempt:` and `distinct_from:` entry in the corpus with its requirement and the check, or the requirement, it silences.",
         "A reason counts as recorded when the requirement's own prose mentions the silenced check by name. The test cannot judge whether the reason is a good one, and does not try to: it makes the exemption cost a sentence, no more.",
         "The gate warns once per unjustified exemption. The finding is warn-only and is never promoted under `--strict` — the point is to make silencing cost something, not to make it impossible.",
         "The two findings used to name `clarify <ID> --decompose` as the remedy. They no longer do: that flag acts on `statement-size` findings ONLY, so an author who followed the advice on an over-scoped requirement got `All clean` and no files from a command the gate had just called an error — and was left with `lint_exempt:`, the one action the skill names as the reflex to avoid. Naming a remedy is right; naming one that no-ops is worse than naming none."
@@ -921,7 +921,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3272"
+          "loc": "plugin/scripts/test_reqmap_report.py:3299"
         },
         {
           "role": "implements",
@@ -933,7 +933,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:46"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:51"
         }
       ],
       "test_exempt": null,
@@ -978,11 +978,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3272"
+          "loc": "plugin/scripts/test_reqmap_report.py:3299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:64"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:69"
         }
       ],
       "test_exempt": null,
@@ -1041,7 +1041,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3272"
+          "loc": "plugin/scripts/test_reqmap_report.py:3299"
         },
         {
           "role": "implements",
@@ -1131,7 +1131,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3431"
+          "loc": "plugin/scripts/test_reqmap_report.py:3472"
         },
         {
           "role": "implements",
@@ -1715,7 +1715,7 @@
         "`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.",
         "`gate` warns (not errors) on contract drift against the lock, a confirmed requirement with no `tested-by:` link, or a confirmed requirement missing its `## Description`/`## Cases` section; `--strict` promotes most of these to errors. [[REQ-CHECK-829]] details the behaviour.",
         "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.",
-        "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on an unvalidated confirmed need, a bus requirement tested only at `@system`, or a `depends_on` cycle. [[REQ-CHECK-831]] details the behaviour.",
+        "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour."
       ],
@@ -1944,15 +1944,7 @@
       "priority": "",
       "risks": [],
       "clauses": 14,
-      "covered": 14,
-      "i18n": {
-        "ro": {
-          "title": "Gate-ul",
-          "intent": "Specificațiile putrezesc atunci când codul evoluează și nimeni nu actualizează fișierul care îl descrie. Aceasta este garda care prinde acest lucru: rulată înainte de fiecare commit, ea face build-ul să eșueze atunci când codul și cerințele nu mai corespund. Întregul instrument există pentru ca această verificare să poată rula.",
-          "contract": "> Specificațiile putrezesc atunci când codul evoluează și nimeni nu actualizează fișierul\n> care îl descrie. Aceasta este garda care prinde acest lucru: rulată înainte de fiecare\n> commit, ea face build-ul să eșueze atunci când codul și cerințele nu mai corespund.\n> Întregul instrument există pentru ca această verificare să poată rula.\n\nFiecare punct de mai jos este obligatoriu.\n- `gate` raportează un `ERROR` și iese cu cod diferit de zero pentru o etichetă suspendată, un status/layer/form/level invalid, o țintă `depends_on` lipsă, sau o cerință impusă fără niciun membru `implements:`. [[REQ-CHECK-828]] detaliază comportamentul.\n- `gate` avertizează (nu generează erori) pentru drift de contract față de lock, o cerință confirmată fără nicio legătură `tested-by:`, sau o cerință confirmată căreia îi lipsește secțiunea `## Description`/`## Cases`; `--strict` promovează majoritatea acestora la erori. [[REQ-CHECK-829]] detaliază comportamentul.\n- `gate` avertizează pentru o valoare `milestone:` malformată, și pentru un fișier lock corupt sau neurmărit de git, fără a afecta codul de ieșire. [[REQ-CHECK-830]] detaliază comportamentul.\n- `gate` numără cerințele cu schemă veche în rezumatul său și avertizează, fără a afecta codul de ieșire, pentru o nevoie confirmată nevalidată, o cerință bus testată doar la `@system`, sau un ciclu `depends_on`. [[REQ-CHECK-831]] detaliază comportamentul.\n- `gate` afișează numărul de constatări deschise verify-intent și un rezumat al cerințelor, membrilor, erorilor și avertismentelor; niciunul nu afectează codul de ieșire. [[REQ-CHECK-832]] detaliază comportamentul.\n- Cu `--update-lock` — transmis mereu de `sync` — `gate` scrie hash-urile obligatorii curente în `requirements/_reqlock.json`; verbul simplu `gate` este altfel doar de raportare. [[REQ-CHECK-833]] detaliază comportamentul.",
-          "acceptance": "CASE-1\n  Given  o etichetă care referențiază o capabilitate inexistentă\n  When   `gate` rulează\n  Then   produce un `ERROR` și exit 1\n\nCASE-2\n  Given  o cerință `confirmed` fără niciun membru `implements`\n  When   `gate` rulează\n  Then   produce un `ERROR`\n\nCASE-3\n  Given  un status sau layer invalid, sau un `depends_on` care indică spre un id lipsă\n  When   `gate` rulează\n  Then   fiecare produce un `ERROR`\n\nCASE-4\n  Given  o cerință `confirmed` al cărei hash obligatoriu diferă de cel din lock\n  When   `gate` rulează\n  Then   produce un `WARN` (nu o eroare) care numește locațiile `file:line` ale membrului\n\nCASE-5\n  Given  un fișier lock prezent dar corupt\n  When   `gate` rulează\n  Then   produce un `WARN` și nu schimbă codul de ieșire\n\nCASE-6\n  Given  o cerință cu un `milestone:` malformat (de ex. `next` sau `1.14`)\n  When   `gate` rulează\n  Then   produce un `WARN`; un `v1.14` valid, un milestone absent, sau o cerință\n         `deprecated` nu produc niciunul\n\nCASE-7\n  Given  o cerință `confirmed` fără secțiunea `## Description`\n  When   `gate` rulează\n  Then   produce un `WARN` și nu afectează codul de ieșire\n\nCASE-8\n  Given  o cerință `confirmed` fără secțiunea `## Cases`\n  When   `gate` rulează\n  Then   produce un `WARN` și nu afectează codul de ieșire\n\nCASE-9\n  Given  o cerință `confirmed` cu ambele secțiuni prezente\n  When   `gate` rulează\n  Then   nu produce niciun avertisment de lint pentru secțiuni\n\nCASE-10\n  Given  o cerință `confirmed` cu `test_exempt: <reason>` și fără niciun membru `tested-by`\n  When   `gate` rulează\n  Then   nu produce niciun avertisment de test\n\nCASE-11\n  Given  o cerință fără secțiunea `## Verify intent`\n  When   `gate` rulează\n  Then   este numărată ca schemă veche în rezumat\n\nCASE-12\n  Given  o rulare care avansează baseline-ul (`sync`, sau varianta învechită `check --update-lock`)\n  When   rulează\n  Then   hash-urile curente sunt scrise în `requirements/_reqlock.json`\n\nCASE-13\n  Given  un `_reqlock.json` (sau `_memberlock.json`) prezent pe disc dar neurmărit de git, într-un work tree git\n  When   `gate` rulează\n  Then   produce un `WARN` care numește fișierul; odată ce fișierul este urmărit, sau când rulează în afara unui work tree git, nu produce niciunul\n\nCASE-14\n  Given  două cerințe ale căror câmpuri `depends_on` indică una spre cealaltă\n  When   gate-ul rulează\n  Then   avertizează o singură dată, numind lanțul, iar codul de ieșire rămâne 0"
-        }
-      }
+      "covered": 14
     },
     {
       "id": "REQ-CHECK-828",
@@ -2049,7 +2041,10 @@
         "A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both the `bus` and `feature` layers. It does not affect the exit code."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-MEMBERDRIFT-880` - `REQ-MEMBERDRIFT-880` is member drift, code ahead of its spec; this is contract drift, the spec ahead of its code.",
+        "-------------------"
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR under plain gate Given  a confirmed requirement locked at an old hash, whose Description text has since changed When   plain `gate` runs (no `--strict`) Then   its output contains \"DRIFT\" on a line printed with the \"WARN\" prefix, never \"ERROR\"",
@@ -2058,9 +2053,9 @@
         "CASE-4 — — test_exempt suppresses the no-tested-by warning Given  a confirmed requirement with `test_exempt: covered by manual QA` and an `implements:` tag but no `tested-by:` tag When   `gate` runs Then   its output contains no \"tested-by\" finding and it exits 0",
         "CASE-5 — — a confirmed need with no tested-by tag raises no test warning Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag, satisfied by another requirement When   `gate` runs Then   its output contains no missing-tested-by warning for that need",
         "CASE-6 — — a confirmed requirement missing Description warns and exits 0 Given  a confirmed `layer: bus` requirement whose body has no `## Description`/ `## Contract` section When   `gate` runs Then   its output contains \"missing '## Description'\" and it exits 0",
-        "CASE-7 — — a confirmed requirement missing Cases warns and exits 0 Given  a confirmed `layer: bus` requirement whose body has a Description but no `## Cases`/`## Acceptance` section When   `gate` runs Then   its output contains \"missing '## Cases'\" and it exits 0 --------------------"
+        "CASE-7 — — a confirmed requirement missing Cases warns and exits 0 Given  a confirmed `layer: bus` requirement whose body has a Description but no `## Cases`/`## Acceptance` section When   `gate` runs Then   its output contains \"missing '## Cases'\" and it exits 0"
       ],
-      "accept": "CASE-1 — a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR under plain gate\n  Given  a confirmed requirement locked at an old hash, whose Description text has since\n         changed\n  When   plain `gate` runs (no `--strict`)\n  Then   its output contains \"DRIFT\" on a line printed with the \"WARN\" prefix, never\n         \"ERROR\"\n\nCASE-2 — the drift warning names the member's file and line\n  Given  a confirmed, drifted requirement with one member tagged at `mod.py:1`\n  When   `gate` runs\n  Then   its output contains \"re-check 1 member\" and \"mod.py:1\"\n\nCASE-3 — a confirmed requirement with no tested-by tag warns, not errors\n  Given  a confirmed requirement with an `implements:` tag but no `tested-by:` tag\n         anywhere, and no `test_exempt` field\n  When   `gate` runs\n  Then   its output contains \"confirmed but no tested-by\" and it exits 0\n\nCASE-4 — test_exempt suppresses the no-tested-by warning\n  Given  a confirmed requirement with `test_exempt: covered by manual QA` and an\n         `implements:` tag but no `tested-by:` tag\n  When   `gate` runs\n  Then   its output contains no \"tested-by\" finding and it exits 0\n\nCASE-5 — a confirmed need with no tested-by tag raises no test warning\n  Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag,\n         satisfied by another requirement\n  When   `gate` runs\n  Then   its output contains no missing-tested-by warning for that need\n\nCASE-6 — a confirmed requirement missing Description warns and exits 0\n  Given  a confirmed `layer: bus` requirement whose body has no `## Description`/\n         `## Contract` section\n  When   `gate` runs\n  Then   its output contains \"missing '## Description'\" and it exits 0\n\nCASE-7 — a confirmed requirement missing Cases warns and exits 0\n  Given  a confirmed `layer: bus` requirement whose body has a Description but no\n         `## Cases`/`## Acceptance` section\n  When   `gate` runs\n  Then   its output contains \"missing '## Cases'\" and it exits 0\n\n\n--------------------",
+      "accept": "CASE-1 — a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR under plain gate\n  Given  a confirmed requirement locked at an old hash, whose Description text has since\n         changed\n  When   plain `gate` runs (no `--strict`)\n  Then   its output contains \"DRIFT\" on a line printed with the \"WARN\" prefix, never\n         \"ERROR\"\n\nCASE-2 — the drift warning names the member's file and line\n  Given  a confirmed, drifted requirement with one member tagged at `mod.py:1`\n  When   `gate` runs\n  Then   its output contains \"re-check 1 member\" and \"mod.py:1\"\n\nCASE-3 — a confirmed requirement with no tested-by tag warns, not errors\n  Given  a confirmed requirement with an `implements:` tag but no `tested-by:` tag\n         anywhere, and no `test_exempt` field\n  When   `gate` runs\n  Then   its output contains \"confirmed but no tested-by\" and it exits 0\n\nCASE-4 — test_exempt suppresses the no-tested-by warning\n  Given  a confirmed requirement with `test_exempt: covered by manual QA` and an\n         `implements:` tag but no `tested-by:` tag\n  When   `gate` runs\n  Then   its output contains no \"tested-by\" finding and it exits 0\n\nCASE-5 — a confirmed need with no tested-by tag raises no test warning\n  Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag,\n         satisfied by another requirement\n  When   `gate` runs\n  Then   its output contains no missing-tested-by warning for that need\n\nCASE-6 — a confirmed requirement missing Description warns and exits 0\n  Given  a confirmed `layer: bus` requirement whose body has no `## Description`/\n         `## Contract` section\n  When   `gate` runs\n  Then   its output contains \"missing '## Description'\" and it exits 0\n\nCASE-7 — a confirmed requirement missing Cases warns and exits 0\n  Given  a confirmed `layer: bus` requirement whose body has a Description but no\n         `## Cases`/`## Acceptance` section\n  When   `gate` runs\n  Then   its output contains \"missing '## Cases'\" and it exits 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -2098,15 +2093,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Avertismente de drift al contractului și de acoperire lipsă",
-          "intent": "Un `WARN` nu blochează niciodată un commit de unul singur, dar fiecare numește o lacună reală: un contract confirmat care s-a mișcat de la blocarea lui, o cerință fără nicio acoperire de test legată, sau o cerință confirmată căreia îi lipsește secțiunea Description/Cases. `--strict` transformă majoritatea acestora în eșecuri dure odată ce o echipă este pregătită să le impună.",
-          "contract": "> Un `WARN` nu blochează niciodată un commit de unul singur, dar fiecare numește o lacună\n> reală: un contract confirmat care s-a mișcat de la blocarea lui, o cerință fără nicio\n> acoperire de test legată, sau o cerință confirmată căreia îi lipsește secțiunea\n> Description/Cases. `--strict` transformă majoritatea acestora în eșecuri dure odată ce o\n> echipă este pregătită să le impună.\n\nFiecare punct de mai jos este obligatoriu.\n- `gate` raportează drift ca un `WARN` sub `gate` simplu: o cerință `confirmed` al cărei\n  hash de legare diferă de blocare.\n- Avertismentul de drift numește locațiile `file:line` ale membrilor de reverificat.\n- `gate --strict` promovează drift-ul (și avertismentul lipsă de `tested-by:` de mai jos, și\n  drift-ul de membru) la un `ERROR`. Avertismentul de ciclu `depends_on` și avertismentul de\n  schemă legacy sunt cele două excepții — rămân avertismente chiar și sub `--strict`.\n- O cerință `confirmed` fără membru `tested-by:` este un `WARN`.\n- O cerință care poartă o scutire `test_exempt: <reason>` în frontmatter este scutită\n  de acel avertisment de test.\n- O cerință `layer: need` este scutită și ea.\n- O cerință `confirmed` căreia îi lipsește o secțiune `## Description` este un `WARN`, atât în\n  layer-ul `bus` cât și `feature`. Nu afectează codul de ieșire.\n- O cerință `confirmed` căreia îi lipsește o secțiune `## Cases` este un `WARN`, atât în\n  layer-ul `bus` cât și `feature`. Nu afectează codul de ieșire.",
-          "acceptance": "CASE-1 — contractul schimbat al unei cerințe confirmate avertizează DRIFT, prefixat WARN nu ERROR sub gate simplu\n  Given  o cerință confirmată blocată la un hash vechi, al cărei text Description s-a\n         schimbat între timp\n  When   `gate` simplu rulează (fără `--strict`)\n  Then   ieșirea lui conține \"DRIFT\" pe o linie tipărită cu prefixul \"WARN\", niciodată\n         \"ERROR\"\n\nCASE-2 — avertismentul de drift numește fișierul și linia membrului\n  Given  o cerință confirmată, cu drift, cu un membru etichetat la `mod.py:1`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"re-check 1 member\" și \"mod.py:1\"\n\nCASE-3 — o cerință confirmată fără etichetă tested-by avertizează, nu dă eroare\n  Given  o cerință confirmată cu o etichetă `implements:` dar fără nicio etichetă `tested-by:`\n         nicăieri, și fără câmp `test_exempt`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"confirmed but no tested-by\" și iese cu 0\n\nCASE-4 — test_exempt suprimă avertismentul lipsă de tested-by\n  Given  o cerință confirmată cu `test_exempt: covered by manual QA` și o etichetă\n         `implements:` dar fără etichetă `tested-by:`\n  When   `gate` rulează\n  Then   ieșirea lui nu conține nicio constatare \"tested-by\" și iese cu 0\n\nCASE-5 — o nevoie confirmată fără etichetă tested-by nu ridică niciun avertisment de test\n  Given  o cerință confirmată `layer: need` fără etichetă `implements:` sau `tested-by:`,\n         satisfăcută de altă cerință\n  When   `gate` rulează\n  Then   ieșirea lui nu conține niciun avertisment de tested-by lipsă pentru acea nevoie\n\nCASE-6 — o cerință confirmată căreia îi lipsește Description avertizează și iese cu 0\n  Given  o cerință `layer: bus` confirmată al cărei corp nu are secțiune `## Description`/\n         `## Contract`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"missing '## Description'\" și iese cu 0\n\nCASE-7 — o cerință confirmată căreia îi lipsește Cases avertizează și iese cu 0\n  Given  o cerință `layer: bus` confirmată care are Description dar nu\n         secțiune `## Cases`/`## Acceptance`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"missing '## Cases'\" și iese cu 0\n\n\n--------------------"
-        }
-      }
+      "covered": 7
     },
     {
       "id": "REQ-CHECK-830",
@@ -2180,14 +2167,12 @@
       "level": "code",
       "status": "confirmed",
       "area": "REQ",
-      "title": "Corpus-health warnings: needs, levels, cycles",
-      "intent": "These warnings are opt-in signals about corpus health rather than individual contract breaks: an unvalidated stakeholder need, foundation code tested only end-to-end, or a `depends_on` cycle that makes build order ambiguous. They stay warnings even under `--strict` so upgrading the engine never flips a green build red.",
+      "title": "Corpus-health warnings: legacy schema and cycles",
+      "intent": "These warnings are signals about corpus health rather than individual contract breaks: a requirement still in the legacy schema, or a `depends_on` cycle that makes build order ambiguous. They stay warnings even under `--strict` so upgrading the engine never flips a green build red. The two level warnings are [[REQ-VLEVEL-946]]'s; this requirement once restated them word for word.",
       "contract": [
         "`gate` counts those legacy-schema requirements in the summary.",
         "The legacy-schema warning does not affect the exit code.",
-        "A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at least one such tag (see [[ARCH-VLEVEL-037]]).",
-        "Whether the repo carries such a tag, and whether a given need carries one, are read from the whole tree. `--since` narrows which requirements are REPORTED on, never the facts a rule reads: half a tag pair inside a diff never warns about the half outside it.",
-        "A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.",
+        "Under `--since`, whether the repo carries a `validated-against:` tag, and whether a given need carries one, are read from the whole tree. `--since` narrows which requirements are REPORTED on, never the facts a rule reads: half a tag pair inside a diff never warns about the half outside it.",
         "A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.",
         "The cycle warning stays a warning under `--strict`, so an existing corpus keeps its exit code when the engine is upgraded."
       ],
@@ -2197,13 +2182,11 @@
       "acc": [
         "CASE-1 — — the summary line reports the legacy-schema count Given  one requirement whose body has no `## Verify intent` section When   `gate` runs Then   its final summary line contains \"1 legacy-schema\"",
         "CASE-2 — — a legacy-schema requirement warns but the gate exits 0 Given  a `status: baseline` requirement with no `## Verify intent` section When   `gate` runs Then   its output contains \"legacy schema\" and it exits 0",
-        "CASE-3 — — an unvalidated confirmed need warns once the repo has opted in Given  a confirmed need with no `validated-against:` tag, in a repo where at least one `validated-against:` tag exists elsewhere When   `gate` runs Then   its output names that need alongside \"validated-against\"",
-        "CASE-4 — — a bus requirement verified only at @system warns Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is `@system` When   `gate` runs Then   its output contains \"@system\"",
-        "CASE-5 — — a depends_on cycle warns once, naming the whole chain Given  two requirements whose `depends_on` fields point at each other When   `gate` runs Then   its output contains \"depends_on cycle\" and \"A-X-001 -> A-X-002 -> A-X-001\", and it exits 0",
-        "CASE-6 — — --strict does not promote the cycle warning to an error Given  two requirements whose `depends_on` fields point at each other When   `gate --strict` runs Then   it still exits 0",
-        "CASE-7 — — --since narrows the scope, not the facts Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff touching only the first one's member file When   `gate --since` runs Then   neither need is warned about: the second's tag is outside the diff, not absent --------------------"
+        "CASE-3 — — a depends_on cycle warns once, naming the whole chain Given  two requirements whose `depends_on` fields point at each other When   `gate` runs Then   its output contains \"depends_on cycle\" and \"A-X-001 -> A-X-002 -> A-X-001\", and it exits 0",
+        "CASE-4 — — --strict does not promote the cycle warning to an error Given  two requirements whose `depends_on` fields point at each other When   `gate --strict` runs Then   it still exits 0",
+        "CASE-5 — — --since narrows the scope, not the facts Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff touching only the first one's member file; and separately an unvalidated need inside the diff When   `gate --since` runs Then   neither validated need is warned about, and the unvalidated one still is --------------------"
       ],
-      "accept": "CASE-1 — the summary line reports the legacy-schema count\n  Given  one requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its final summary line contains \"1 legacy-schema\"\n\nCASE-2 — a legacy-schema requirement warns but the gate exits 0\n  Given  a `status: baseline` requirement with no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" and it exits 0\n\nCASE-3 — an unvalidated confirmed need warns once the repo has opted in\n  Given  a confirmed need with no `validated-against:` tag, in a repo where at least one\n         `validated-against:` tag exists elsewhere\n  When   `gate` runs\n  Then   its output names that need alongside \"validated-against\"\n\nCASE-4 — a bus requirement verified only at @system warns\n  Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is\n         `@system`\n  When   `gate` runs\n  Then   its output contains \"@system\"\n\nCASE-5 — a depends_on cycle warns once, naming the whole chain\n  Given  two requirements whose `depends_on` fields point at each other\n  When   `gate` runs\n  Then   its output contains \"depends_on cycle\" and \"A-X-001 -> A-X-002 -> A-X-001\", and\n         it exits 0\n\nCASE-6 — --strict does not promote the cycle warning to an error\n  Given  two requirements whose `depends_on` fields point at each other\n  When   `gate --strict` runs\n  Then   it still exits 0\n\nCASE-7 — --since narrows the scope, not the facts\n  Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff\n         touching only the first one's member file\n  When   `gate --since` runs\n  Then   neither need is warned about: the second's tag is outside the diff, not absent\n\n\n--------------------",
+      "accept": "CASE-1 — the summary line reports the legacy-schema count\n  Given  one requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its final summary line contains \"1 legacy-schema\"\n\nCASE-2 — a legacy-schema requirement warns but the gate exits 0\n  Given  a `status: baseline` requirement with no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" and it exits 0\n\nCASE-3 — a depends_on cycle warns once, naming the whole chain\n  Given  two requirements whose `depends_on` fields point at each other\n  When   `gate` runs\n  Then   its output contains \"depends_on cycle\" and \"A-X-001 -> A-X-002 -> A-X-001\", and\n         it exits 0\n\nCASE-4 — --strict does not promote the cycle warning to an error\n  Given  two requirements whose `depends_on` fields point at each other\n  When   `gate --strict` runs\n  Then   it still exits 0\n\nCASE-5 — --since narrows the scope, not the facts\n  Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff\n         touching only the first one's member file; and separately an unvalidated need\n         inside the diff\n  When   `gate --since` runs\n  Then   neither validated need is warned about, and the unvalidated one still is\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2244,8 +2227,8 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 7,
-      "covered": 7
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "REQ-CHECK-832",
@@ -2338,7 +2321,9 @@
         "The `gate` verb itself is report-only."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-DRIFT-842` - `REQ-DRIFT-842` is the lock file's read and write layer; this is when `gate` and `sync` advance it."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — --update-lock writes the requirement's hash into the lock Given  a `baseline` requirement with no existing lock entry When   `cmd_check(..., update_lock=True)` runs Then   `load_lock(d)` afterward contains that requirement's id",
@@ -2742,11 +2727,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4210"
+          "loc": "plugin/scripts/test_reqmap_report.py:4251"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5138"
+          "loc": "plugin/scripts/test_reqmap_report.py:5179"
         },
         {
           "role": "implements",
@@ -2830,7 +2815,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4210"
+          "loc": "plugin/scripts/test_reqmap_report.py:4251"
         },
         {
           "role": "implements",
@@ -2900,7 +2885,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5138"
+          "loc": "plugin/scripts/test_reqmap_report.py:5179"
         },
         {
           "role": "implements",
@@ -3108,7 +3093,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4191"
+          "loc": "plugin/scripts/test_reqmap_report.py:4232"
         },
         {
           "role": "implements",
@@ -3172,7 +3157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4191"
+          "loc": "plugin/scripts/test_reqmap_report.py:4232"
         },
         {
           "role": "implements",
@@ -3321,7 +3306,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4764"
         },
         {
           "role": "implements",
@@ -3378,7 +3363,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5384"
+          "loc": "plugin/scripts/test_reqmap_report.py:5425"
         },
         {
           "role": "implements",
@@ -3492,7 +3477,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "implements",
@@ -3922,15 +3907,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4996"
+          "loc": "plugin/scripts/test_reqmap_report.py:5037"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "implements",
@@ -3999,7 +3984,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4068,7 +4053,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4141,7 +4126,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4193,7 +4178,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4235,14 +4220,17 @@
         "The record is deterministic, so `map --check` treats a changed design score like any other change to the committed map."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-HEALTH-968` - `REQ-HEALTH-968` carries the requirement health record in the map; this carries the code design record.",
+        "-------------------"
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — the score counts clean files Given  a clean documented module, a module writing a global, and a test file writing a global When   `_design_summary` runs Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate",
         "CASE-2 — — the map header and health carry the score Given  a corpus and one clean module When   the map data is assembled and `health --json` runs Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design pass-rate:`) names it, and the JSON carries `design_score` 100",
-        "CASE-3 — — no program logic, no key Given  a repo whose only code is a stylesheet When   the map data is assembled and `health --json` runs Then   neither `design` nor `design_score` is present --------------------"
+        "CASE-3 — — no program logic, no key Given  a repo whose only code is a stylesheet When   the map data is assembled and `health --json` runs Then   neither `design` nor `design_score` is present"
       ],
-      "accept": "CASE-1 — the score counts clean files\n  Given  a clean documented module, a module writing a global, and a test file writing a global\n  When   `_design_summary` runs\n  Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate\n\nCASE-2 — the map header and health carry the score\n  Given  a corpus and one clean module\n  When   the map data is assembled and `health --json` runs\n  Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design pass-rate:`) names it, and the JSON carries `design_score` 100\n\nCASE-3 — no program logic, no key\n  Given  a repo whose only code is a stylesheet\n  When   the map data is assembled and `health --json` runs\n  Then   neither `design` nor `design_score` is present\n\n--------------------",
+      "accept": "CASE-1 — the score counts clean files\n  Given  a clean documented module, a module writing a global, and a test file writing a global\n  When   `_design_summary` runs\n  Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate\n\nCASE-2 — the map header and health carry the score\n  Given  a corpus and one clean module\n  When   the map data is assembled and `health --json` runs\n  Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design pass-rate:`) names it, and the JSON carries `design_score` 100\n\nCASE-3 — no program logic, no key\n  Given  a repo whose only code is a stylesheet\n  When   the map data is assembled and `health --json` runs\n  Then   neither `design` nor `design_score` is present",
       "input": "",
       "output": "",
       "desc": "",
@@ -4256,7 +4244,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4320,7 +4308,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4365,7 +4353,9 @@
         "The candidates are ordered by the walk that produced them, so a repo that did not change produces a byte-identical `design` block and `map --check` stays quiet."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-VIEWER-977` - `REQ-VIEWER-977` is the viewer tab that renders the design candidates; this emits them into `_map.json`."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — off by default Given  a repo with one Python file carrying a design candidate When   `_design_summary` runs without `with_findings` Then   the record carries `files`, `clean_files`, `score` and `candidates`, and neither `findings` nor `advice`",
@@ -4387,7 +4377,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4453,7 +4443,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4510,7 +4500,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4569,7 +4559,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3527"
+          "loc": "plugin/scripts/test_reqmap_report.py:3568"
         },
         {
           "role": "implements",
@@ -4622,7 +4612,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4996"
+          "loc": "plugin/scripts/test_reqmap_report.py:5037"
         },
         {
           "role": "implements",
@@ -4730,7 +4720,9 @@
         "The check is warn-only and never changes the gate's exit code."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-ORPHANCODE-888` - `REQ-ORPHANCODE-888` warns on untagged program files; this on untagged HTML under `docs/`. Each names the other's scope."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — a large untagged docs/ HTML file is flagged Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag When   `untagged_doc_bundles` scans the repo Then   it returns `[\"docs/arch.html\"]`, which `gate` folds into its warnings only — never an error, leaving the exit code unaffected",
@@ -5269,7 +5261,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4649"
+          "loc": "plugin/scripts/test_reqmap_report.py:4690"
         },
         {
           "role": "implements",
@@ -5333,7 +5325,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4649"
+          "loc": "plugin/scripts/test_reqmap_report.py:4690"
         },
         {
           "role": "implements",
@@ -6081,7 +6073,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4242"
+          "loc": "plugin/scripts/test_reqmap_report.py:4283"
         },
         {
           "role": "implements",
@@ -6162,7 +6154,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4242"
+          "loc": "plugin/scripts/test_reqmap_report.py:4283"
         },
         {
           "role": "implements",
@@ -6328,7 +6320,9 @@
         "The open-findings count never changes the gate's exit code."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-MAP-871` - `REQ-MAP-871` defines the map's freshness check; this adds `_findings.md` to the files it judges."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — map refreshes an already-committed findings report Given  a committed `_findings.md` and a requirement that gained a new Verify-intent item When   `map` runs Then   the regenerated `_findings.md` includes the new item",
@@ -6573,11 +6567,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4387"
+          "loc": "plugin/scripts/test_reqmap_report.py:4428"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "implements",
@@ -6656,7 +6650,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4387"
+          "loc": "plugin/scripts/test_reqmap_report.py:4428"
         },
         {
           "role": "implements",
@@ -6735,7 +6729,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4387"
+          "loc": "plugin/scripts/test_reqmap_report.py:4428"
         },
         {
           "role": "implements",
@@ -6807,7 +6801,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4387"
+          "loc": "plugin/scripts/test_reqmap_report.py:4428"
         },
         {
           "role": "implements",
@@ -7197,7 +7191,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "implements",
@@ -8612,11 +8606,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4171"
+          "loc": "plugin/scripts/test_reqmap_report.py:4212"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "tested-by",
@@ -9247,7 +9241,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4673"
+          "loc": "plugin/scripts/test_reqmap_report.py:4714"
         },
         {
           "role": "implements",
@@ -9328,7 +9322,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4673"
+          "loc": "plugin/scripts/test_reqmap_report.py:4714"
         },
         {
           "role": "implements",
@@ -9574,7 +9568,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4673"
+          "loc": "plugin/scripts/test_reqmap_report.py:4714"
         },
         {
           "role": "implements",
@@ -10213,7 +10207,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10278,15 +10272,19 @@
         "In that header, `tested` counts the requirements that have a `tested-by` member."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-SHOW-919` - `REQ-SHOW-919` prints one requirement's signals and exits non-zero on an unknown id; this groups every requirement's signals into buckets. Both read `_risk_signals`, which is the point.",
+        "`distinct_from: REQ-MAPDIAGRAMS-878` - `REQ-MAPDIAGRAMS-878` draws the flagged requirements as the Risk diagram in `_map.md`; this prints them as action buckets.",
+        "-------------------"
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — an untested confirmed requirement lands in the Needs-tests bucket Given  a confirmed requirement with an `implements` member but no `tested-by` member When   `cmd_next` runs Then   its output carries a \"Needs tests\" bucket naming that requirement",
         "CASE-2 — — a bucket's advice line matches RISK_ADVICE verbatim Given  a confirmed requirement carrying the `untested` signal When   `cmd_next` runs Then   the \"Needs tests\" bucket's `-> ...` line equals `RISK_ADVICE[\"untested\"]` exactly",
         "CASE-3 — — the header names all four counts Given  one confirmed-and-tested requirement and one draft requirement When   `cmd_next` runs Then   its first line reads \"2 requirement(s) · 1 confirmed · 1 tested · 1 unreviewed\"",
-        "CASE-4 — — implements-only members do not count as tested Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member When   `cmd_next` runs Then   the header reads \"1 tested\", not \"2 tested\" --------------------"
+        "CASE-4 — — implements-only members do not count as tested Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member When   `cmd_next` runs Then   the header reads \"1 tested\", not \"2 tested\""
       ],
-      "accept": "CASE-1 — an untested confirmed requirement lands in the Needs-tests bucket\n  Given  a confirmed requirement with an `implements` member but no `tested-by` member\n  When   `cmd_next` runs\n  Then   its output carries a \"Needs tests\" bucket naming that requirement\n\nCASE-2 — a bucket's advice line matches RISK_ADVICE verbatim\n  Given  a confirmed requirement carrying the `untested` signal\n  When   `cmd_next` runs\n  Then   the \"Needs tests\" bucket's `-> ...` line equals `RISK_ADVICE[\"untested\"]` exactly\n\nCASE-3 — the header names all four counts\n  Given  one confirmed-and-tested requirement and one draft requirement\n  When   `cmd_next` runs\n  Then   its first line reads \"2 requirement(s) · 1 confirmed · 1 tested · 1 unreviewed\"\n\nCASE-4 — implements-only members do not count as tested\n  Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member\n  When   `cmd_next` runs\n  Then   the header reads \"1 tested\", not \"2 tested\"\n\n\n--------------------",
+      "accept": "CASE-1 — an untested confirmed requirement lands in the Needs-tests bucket\n  Given  a confirmed requirement with an `implements` member but no `tested-by` member\n  When   `cmd_next` runs\n  Then   its output carries a \"Needs tests\" bucket naming that requirement\n\nCASE-2 — a bucket's advice line matches RISK_ADVICE verbatim\n  Given  a confirmed requirement carrying the `untested` signal\n  When   `cmd_next` runs\n  Then   the \"Needs tests\" bucket's `-> ...` line equals `RISK_ADVICE[\"untested\"]` exactly\n\nCASE-3 — the header names all four counts\n  Given  one confirmed-and-tested requirement and one draft requirement\n  When   `cmd_next` runs\n  Then   its first line reads \"2 requirement(s) · 1 confirmed · 1 tested · 1 unreviewed\"\n\nCASE-4 — implements-only members do not count as tested\n  Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member\n  When   `cmd_next` runs\n  Then   the header reads \"1 tested\", not \"2 tested\"",
       "input": "",
       "output": "",
       "desc": "",
@@ -10304,7 +10302,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10336,15 +10334,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "next citește aceleași semnale de risc pe care le citește tab-ul Risk",
-          "intent": "`next` nu rulează o a doua analiză: citește `_risk_signals` și `RISK_ADVICE`, exact sursa pe care diagrama Risk a map-ului o folosește deja, și grupează rezultatele în bucket-uri în spatele unui header de progres pe o singură linie. Împărțirea sursei este ce păstrează raportul din terminal și map-ul vizual să nu fie niciodată în dezacord despre ce e greșit la o cerință.",
-          "contract": "> `next` nu rulează o a doua analiză: citește `_risk_signals` și `RISK_ADVICE`, exact\n> sursa pe care diagrama Risk a map-ului o folosește deja, și grupează rezultatele în\n> bucket-uri în spatele unui header de progres pe o singură linie. Împărțirea sursei este\n> ce păstrează raportul din terminal și map-ul vizual să nu fie niciodată în dezacord\n> despre ce e greșit la o cerință.\n\nFiecare bullet de mai jos este obligatoriu.\n- `next` grupează semnalele de risc deschise ale fiecărei cerințe în bucket-uri de acțiune.\n- `next` citește acele semnale din `_risk_signals` și formularea lor din `RISK_ADVICE`, aceleași\n  două surse care conduc tab-ul Risk. Nu există niciodată o a doua cale de semnal.\n- `next` afișează un header de progres `N requirement(s) · X confirmed · Y tested · Z unreviewed (draft + baseline, the population of the Drafts bucket)`\n  înainte de bucket-uri.\n- În acel header, `tested` numără cerințele care au un membru `tested-by`.",
-          "acceptance": "CASE-1 — o cerință confirmed netestată aterizează în bucket-ul Needs-tests\n  Given  o cerință confirmed cu un membru `implements` dar fără membru `tested-by`\n  When   rulează `cmd_next`\n  Then   ieșirea sa poartă un bucket \"Needs tests\" care numește acea cerință\n\nCASE-2 — linia de sfat a unui bucket se potrivește cu RISK_ADVICE verbatim\n  Given  o cerință confirmed purtând semnalul `untested`\n  When   rulează `cmd_next`\n  Then   linia `-> ...` a bucket-ului \"Needs tests\" este egală exact cu `RISK_ADVICE[\"untested\"]`\n\nCASE-3 — header-ul numește toate cele patru numărători\n  Given  o cerință confirmed-și-tested și o cerință draft\n  When   rulează `cmd_next`\n  Then   prima sa linie se citește \"2 requirement(s) · 1 confirmed · 1 tested · 1 unreviewed\"\n\nCASE-4 — membrii doar-implements nu se numără ca tested\n  Given  două cerințe confirmed: una cu un membru `tested-by`, una doar cu un membru `implements`\n  When   rulează `cmd_next`\n  Then   header-ul se citește \"1 tested\", nu \"2 tested\"\n\n\n--------------------"
-        }
-      }
+      "covered": 4
     },
     {
       "id": "REQ-NEXT-884",
@@ -10398,7 +10388,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10477,7 +10467,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10565,7 +10555,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10640,7 +10630,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3964"
+          "loc": "plugin/scripts/test_reqmap_report.py:4005"
         },
         {
           "role": "implements",
@@ -10904,7 +10894,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "tested-by",
@@ -11142,15 +11132,18 @@
         "The linter treats a recognised atomic body as carrying both normative sections and one acceptance criterion (the Scenario), raising no missing-section, legacy-schema or under-specified finding. Whether the story and the Scenario agree is checked by [[REQ-LINTCHECKS-867]]."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-LINTCHECKS-867` - `REQ-LINTCHECKS-867` lints the atomic form; this recognises and hashes it, and points there for the parity checks instead of restating them.",
+        "-------------------"
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — an atomic body reads as both normative sections Given  a body whose only content before the first `## ` heading is a `>` story followed by a `Scenario:` block When   the gate and linter read it Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as exactly one acceptance criterion",
         "CASE-2 — — the drift hash covers the statement and the Scenario Given  an atomic body When   `binding_hash` runs on it, and again after editing either the story or the Scenario Then   the hash is never the hash of the empty string, and each edit changes it",
         "CASE-3 — — a well-formed atomic requirement lints clean Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body When   the linter runs Then   it raises no finding",
-        "CASE-4 — — a classic body with headings is never mistaken for atomic Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings When   the atomic-form detector reads it Then   it returns no match, and every existing classic-form code path is unchanged --------------------"
+        "CASE-4 — — a classic body with headings is never mistaken for atomic Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings When   the atomic-form detector reads it Then   it returns no match, and every existing classic-form code path is unchanged"
       ],
-      "accept": "CASE-1 — an atomic body reads as both normative sections\n  Given  a body whose only content before the first `## ` heading is a `>` story followed by\n         a `Scenario:` block\n  When   the gate and linter read it\n  Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as\n         exactly one acceptance criterion\n\nCASE-2 — the drift hash covers the statement and the Scenario\n  Given  an atomic body\n  When   `binding_hash` runs on it, and again after editing either the story or the Scenario\n  Then   the hash is never the hash of the empty string, and each edit changes it\n\nCASE-3 — a well-formed atomic requirement lints clean\n  Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body\n  When   the linter runs\n  Then   it raises no finding\n\nCASE-4 — a classic body with headings is never mistaken for atomic\n  Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings\n  When   the atomic-form detector reads it\n  Then   it returns no match, and every existing classic-form code path is unchanged\n\n--------------------",
+      "accept": "CASE-1 — an atomic body reads as both normative sections\n  Given  a body whose only content before the first `## ` heading is a `>` story followed by\n         a `Scenario:` block\n  When   the gate and linter read it\n  Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as\n         exactly one acceptance criterion\n\nCASE-2 — the drift hash covers the statement and the Scenario\n  Given  an atomic body\n  When   `binding_hash` runs on it, and again after editing either the story or the Scenario\n  Then   the hash is never the hash of the empty string, and each edit changes it\n\nCASE-3 — a well-formed atomic requirement lints clean\n  Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body\n  When   the linter runs\n  Then   it raises no finding\n\nCASE-4 — a classic body with headings is never mistaken for atomic\n  Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings\n  When   the atomic-form detector reads it\n  Then   it returns no match, and every existing classic-form code path is unchanged",
       "input": "",
       "output": "",
       "desc": "",
@@ -12531,7 +12524,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4797"
+          "loc": "plugin/scripts/test_reqmap_report.py:4838"
         },
         {
           "role": "implements",
@@ -12598,7 +12591,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4797"
+          "loc": "plugin/scripts/test_reqmap_report.py:4838"
         },
         {
           "role": "implements",
@@ -13171,7 +13164,9 @@
         "Nothing is written to `_planning.json`."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` finds ROADMAP items with no bar; this suggests new dates for bars that exist."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — work done early suggests the real end Given  a bar ending 2026-10-02 whose confirmed requirement's code was last committed 2026-09-12 When   `sync` runs Then   it suggests setting the bar's `end` to 2026-09-12",
@@ -13228,7 +13223,11 @@
         "`sync --release` lists those items as ones to tick by hand, and never edits `ROADMAP.md`."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-VIEWER-999` - `REQ-VIEWER-999` renders a selected bar's ROADMAP note in the viewer; this lists the items to tick when a release ships.",
+        "`distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` counts open Now/Next items no bar schedules; this names the items a released bar carried out. It matches a bar by title or any `req:`, this one by title or a `req:` only one item carries, because a tick suggestion must not guess.",
+        "`distinct_from: REQ-ROADMAP-998` - `REQ-ROADMAP-998` parses ROADMAP.md and checks its `req:` and `unpark:`; this reads the parsed items at release time."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — the items a release's bars carry out Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share When   the items for the bars are asked for Then   the first two are named and neither of the two sharing a `req:` is",
@@ -13440,7 +13439,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5252"
+          "loc": "plugin/scripts/test_reqmap_report.py:5293"
         },
         {
           "role": "implements",
@@ -13970,6 +13969,7 @@
       ],
       "current_impl": [
         "`_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by `cmd_health` and `_audit_summary`.",
+        "`distinct_from: REQ-PLANADVANCE-1020` - `REQ-PLANADVANCE-1020` changes the plan when a release is applied; this capability reads and reports on the plan and never writes it.",
         "-------------------"
       ],
       "acc": [
@@ -14025,7 +14025,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4632"
+          "loc": "plugin/scripts/test_reqmap_report.py:4673"
         },
         {
           "role": "implements",
@@ -14131,7 +14131,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4632"
+          "loc": "plugin/scripts/test_reqmap_report.py:4673"
         },
         {
           "role": "implements",
@@ -15456,19 +15456,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4298"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5173"
+          "loc": "plugin/scripts/test_reqmap_report.py:5214"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:311"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:344"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:360"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:393"
         }
       ],
       "test_exempt": null,
@@ -15537,11 +15537,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:360"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:393"
         }
       ],
       "test_exempt": null,
@@ -15602,11 +15602,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:360"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:393"
         }
       ],
       "test_exempt": null,
@@ -15665,11 +15665,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:361"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:394"
         }
       ],
       "test_exempt": null,
@@ -15726,11 +15726,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:361"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:394"
         }
       ],
       "test_exempt": null,
@@ -15800,15 +15800,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5173"
+          "loc": "plugin/scripts/test_reqmap_report.py:5214"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:311"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:344"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:325"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:358"
         }
       ],
       "test_exempt": null,
@@ -16107,7 +16107,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4881"
+          "loc": "plugin/scripts/test_reqmap_report.py:4922"
         },
         {
           "role": "implements",
@@ -16262,11 +16262,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap_report.py:4881"
+          "loc": "plugin/scripts/test_reqmap_report.py:4922"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4881"
+          "loc": "plugin/scripts/test_reqmap_report.py:4922"
         }
       ],
       "test_exempt": null,
@@ -16395,7 +16395,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4110"
+          "loc": "plugin/scripts/test_reqmap_report.py:4151"
         },
         {
           "role": "implements",
@@ -16462,7 +16462,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4110"
+          "loc": "plugin/scripts/test_reqmap_report.py:4151"
         },
         {
           "role": "implements",
@@ -16584,7 +16584,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4110"
+          "loc": "plugin/scripts/test_reqmap_report.py:4151"
         },
         {
           "role": "implements",
@@ -16619,6 +16619,7 @@
         "Each requirement's comparison text is a bag of words from its title, intent line and Contract bullets, tokenized to lowercase words of 3+ letters. [[REQ-SIMILAR-921]]",
         "An unauthored draft or a tested-by-linked pair is skipped and counted rather than compared. [[REQ-SIMILAR-921]]",
         "Requirement ids and the link syntax around them are left out of the text `dupes` compares. [[REQ-SIMILARIDS-1025]]",
+        "A pair a reviewer recorded as distinct, and a retired requirement, are left out and counted. [[REQ-SIMILARDISTINCT-1026]]",
         "Terms are weighted by a smoothed TF-IDF and pairs are scored by cosine similarity in the range zero to one. [[REQ-SIMILAR-922]]",
         "Only pairs at or above the threshold (default `0.35`, overridable with `--threshold`) are reported, most-similar-first with their shared terms; `dupes` always exits zero. [[REQ-SIMILAR-923]]",
         "Requirements whose clauses are byte-identical once normalised are reported as one redundancy group by `sync` and `next`, never by the gate. [[REQ-REDUNDANCY-058]]"
@@ -16666,6 +16667,7 @@
         "REQ-SIMILAR-922",
         "REQ-SIMILAR-923",
         "REQ-SIMILARIDS-1025",
+        "REQ-SIMILARDISTINCT-1026",
         "REQ-REDUNDANCY-058"
       ],
       "members": [
@@ -16679,7 +16681,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4514"
+          "loc": "plugin/scripts/test_reqmap_report.py:4555"
         },
         {
           "role": "implements",
@@ -16691,31 +16693,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:122"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:142"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:149"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:167"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:179"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:184"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:217"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:222"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:235"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:240"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/similar.py:266"
         }
       ],
       "test_exempt": null,
@@ -16761,11 +16767,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4514"
+          "loc": "plugin/scripts/test_reqmap_report.py:4555"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:235"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:266"
         }
       ],
       "test_exempt": null,
@@ -16839,7 +16845,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4514"
+          "loc": "plugin/scripts/test_reqmap_report.py:4555"
         },
         {
           "role": "implements",
@@ -16847,19 +16853,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:122"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:192"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:199"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:204"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:217"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:222"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/similar.py:250"
         }
       ],
       "test_exempt": null,
@@ -16908,15 +16918,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4514"
+          "loc": "plugin/scripts/test_reqmap_report.py:4555"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:149"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:167"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:172"
         }
       ],
       "test_exempt": null,
@@ -16979,11 +16989,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4514"
+          "loc": "plugin/scripts/test_reqmap_report.py:4555"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:235"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:266"
         }
       ],
       "test_exempt": null,
@@ -17032,7 +17042,61 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:142"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:147"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-SIMILARDISTINCT-1026",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A pair a reviewer read and found distinct stops being reported",
+      "intent": "`dupes` measures shared words, not shared obligations. On this corpus a real duplicate scored 0.54 and a pair checking different things scored 0.51, so no threshold separates them. The only thing that can is a person reading both, and until now that reading left no trace: the same pair came back on every run.",
+      "contract": [
+        "A requirement may list under `distinct_from:` requirements a reviewer compared with it and found to state different obligations.",
+        "`dupes` skips a pair named by `distinct_from:` on either side, and prints how many it skipped.",
+        "A `distinct_from:` entry is listed with the exemptions in force, and one whose id the requirement's prose never names is warned about like a bare exemption.",
+        "`dupes` does not compare a `deprecated` requirement, and prints how many it left out."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a recorded pair is skipped and counted, the rest are still reported Given  three requirements with the same contract, the first naming the second in `distinct_from:` When   `dupes` runs Then   the first two are not a pair, the skip line counts one, and both still pair with the third",
+        "CASE-2 — — a distinct_from with no written reason is a warning Given  a requirement whose `distinct_from:` names an id its prose never mentions When   the gate runs Then   one warning names the requirement, `distinct_from` and that id",
+        "CASE-3 — — a deprecated requirement is not compared Given  two requirements with the same contract, one of them `deprecated` When   `dupes` runs Then   no pair is reported and the skip line counts one deprecated requirement --------------------"
+      ],
+      "accept": "CASE-1 — a recorded pair is skipped and counted, the rest are still reported\n  Given  three requirements with the same contract, the first naming the second in `distinct_from:`\n  When   `dupes` runs\n  Then   the first two are not a pair, the skip line counts one, and both still pair with the third\n\nCASE-2 — a distinct_from with no written reason is a warning\n  Given  a requirement whose `distinct_from:` names an id its prose never mentions\n  When   the gate runs\n  Then   one warning names the requirement, `distinct_from` and that id\n\nCASE-3 — a deprecated requirement is not compared\n  Given  two requirements with the same contract, one of them `deprecated`\n  When   `dupes` runs\n  Then   no pair is reported and the skip line counts one deprecated requirement\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-SIMILAR-016"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:3249"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/similar.py:240"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/similar.py:250"
         }
       ],
       "test_exempt": null,
@@ -17093,7 +17157,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/similar.py:96"
+          "loc": "plugin/scripts/reqmap_engine/similar.py:101"
         }
       ],
       "test_exempt": null,
@@ -18460,7 +18524,9 @@
         "The warning never changes the exit code."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`distinct_from: REQ-UNSCANNEDTAG-939` - `REQ-UNSCANNEDTAG-939` names tracked files whose type the scan never reads; this names member files git does not track. They share the warning's shape, five paths and a total and no exit code, not a check."
+      ],
       "current_impl": [],
       "acc": [
         "CASE-1 — — untracked_members names a git-untracked member file Given  a member file that git does not track under the scan root When   `untracked_members` runs Then   it returns that file's path in its result list",
@@ -19452,7 +19518,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4455"
+          "loc": "plugin/scripts/test_reqmap_report.py:4496"
         },
         {
           "role": "implements",
@@ -19526,7 +19592,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4455"
+          "loc": "plugin/scripts/test_reqmap_report.py:4496"
         },
         {
           "role": "implements",
@@ -19600,7 +19666,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4455"
+          "loc": "plugin/scripts/test_reqmap_report.py:4496"
         },
         {
           "role": "implements",
@@ -20280,7 +20346,10 @@
       ],
       "verify": [],
       "notes": [
-        "`lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and the Plan's note panel renders it: one payload crossing the engine/viewer boundary."
+        "`lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and the Plan's note panel renders it: one payload crossing the engine/viewer boundary.",
+        "`distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` is an engine line counting unscheduled items; this is the viewer panel for one selected bar.",
+        "`distinct_from: REQ-ROADMAP-998` - `REQ-ROADMAP-998` parses ROADMAP.md; this renders what it parsed.",
+        "`distinct_from: ARCH-ROADMAP-038` - `ARCH-ROADMAP-038` is the engine's roadmap capability; this is its viewer side."
       ],
       "current_impl": [],
       "acc": [
@@ -22684,6 +22753,10 @@
       "ARCH-SIMILAR-016"
     ],
     [
+      "REQ-SIMILARDISTINCT-1026",
+      "ARCH-SIMILAR-016"
+    ],
+    [
       "REQ-REDUNDANCY-058",
       "ARCH-SIMILAR-016"
     ],
@@ -23381,7 +23454,7 @@
     },
     {
       "month": "2026-09",
-      "count": 89,
+      "count": 90,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23466,6 +23539,7 @@
         "v7.21.0",
         "v7.21.1",
         "v7.21.10",
+        "v7.21.11",
         "v7.21.2",
         "v7.21.3",
         "v7.21.4",
@@ -23517,6 +23591,11 @@
           "version": "v7.21.2",
           "date": "2026-09-16",
           "headline": "**The viewer's components fit in 100 columns, and three messages stop naming commands that"
+        },
+        {
+          "version": "v7.21.11",
+          "date": "2026-09-16",
+          "headline": "A pair a reviewer read and found distinct stops coming back from `dupes`"
         },
         {
           "version": "v7.21.10",
@@ -24145,13 +24224,13 @@
   },
   "health": {
     "score": 100,
-    "total": 282,
-    "scored": 274,
-    "healthy": 274,
+    "total": 283,
+    "scored": 275,
+    "healthy": 275,
     "deprecated": 8,
-    "confirmed": 274,
-    "implemented": 265,
-    "tested": 262,
+    "confirmed": 275,
+    "implemented": 266,
+    "tested": 263,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,

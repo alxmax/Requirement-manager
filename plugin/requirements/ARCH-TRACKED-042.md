@@ -68,6 +68,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-TRACKED-042]
+distinct_from: [REQ-UNSCANNEDTAG-939]
 ---
 
 # Warning when a member is not tracked by git
@@ -108,4 +109,8 @@ CASE-4 — the check stays silent outside a git work tree
   Given  a scan root that is not a git repository
   When   `untracked_members` runs
   Then   it returns nothing and `gate` prints no untracked-member warning
+
+## Context
+**Notes**
+- `distinct_from: REQ-UNSCANNEDTAG-939` - `REQ-UNSCANNEDTAG-939` names tracked files whose type the scan never reads; this names member files git does not track. They share the warning's shape, five paths and a total and no exit code, not a check.
 

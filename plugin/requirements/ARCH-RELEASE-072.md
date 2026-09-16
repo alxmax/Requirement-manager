@@ -362,6 +362,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-RELEASE-072]
+distinct_from: [REQ-UNPLANNED-1024]
 ---
 
 # `sync` suggests a bar's date when the work moved
@@ -401,6 +402,10 @@ CASE-4 — an open requirement past its end is overdue
   When   `sync` runs
   Then   only the bar that ended before today is reported, asking for its `end` to move
 
+## Context
+**Notes**
+- `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` finds ROADMAP items with no bar; this suggests new dates for bars that exist.
+
 ---
 id: REQ-RELEASEROADMAP-1023
 status: confirmed
@@ -408,6 +413,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-RELEASE-072]
+distinct_from: [REQ-VIEWER-999, REQ-UNPLANNED-1024, REQ-ROADMAP-998]
 ---
 
 # A release names the ROADMAP items it carries out
@@ -436,4 +442,10 @@ CASE-3 — a done item is never suggested
   Given  a bar titled like an item already ticked
   When   the items for the bars are asked for
   Then   none is named
+
+## Context
+**Notes**
+- `distinct_from: REQ-VIEWER-999` - `REQ-VIEWER-999` renders a selected bar's ROADMAP note in the viewer; this lists the items to tick when a release ships.
+- `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` counts open Now/Next items no bar schedules; this names the items a released bar carried out. It matches a bar by title or any `req:`, this one by title or a `req:` only one item carries, because a tick suggestion must not guess.
+- `distinct_from: REQ-ROADMAP-998` - `REQ-ROADMAP-998` parses ROADMAP.md and checks its `req:` and `unpark:`; this reads the parsed items at release time.
 

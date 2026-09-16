@@ -250,6 +250,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-FINDINGS-010]
+distinct_from: [REQ-MAP-871]
 ---
 
 # Findings integration with map and gate
@@ -295,4 +296,8 @@ CASE-4 — gate prints the open-findings count as an advisory
   When   `gate` runs
   Then   its output includes a line naming the open-findings count, and its exit code is
          unaffected
+
+## Context
+**Notes**
+- `distinct_from: REQ-MAP-871` - `REQ-MAP-871` defines the map's freshness check; this adds `_findings.md` to the files it judges.
 

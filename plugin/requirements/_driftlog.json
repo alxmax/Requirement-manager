@@ -13,6 +13,10 @@
       "hash": "fe6645d2ba41",
       "reason": "senate actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
+    "ARCH-CHECK-006": {
+      "hash": "33e11920b84b",
+      "reason": "distinct_from; CHECK-831 fold"
+    },
     "ARCH-CLARIFY-062": {
       "hash": "aa1955386c1b",
       "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
@@ -86,8 +90,8 @@
       "reason": "ARCH-SELFGATE-039 gains its third obligation sentence: check_retired_verbs.py was a member of it with no clause describing the guard, and its suite carried no tested-by."
     },
     "ARCH-SIMILAR-016": {
-      "hash": "b6c0988f8765",
-      "reason": "dupes ignores ids"
+      "hash": "906bc44a1966",
+      "reason": "distinct_from; CHECK-831 fold"
     },
     "ARCH-TRANSLATE-044": {
       "hash": "7437837e022f",
@@ -110,12 +114,12 @@
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     },
     "REQ-AUDIT-971": {
-      "hash": "7b757f667fb5",
-      "reason": "reworded to the house's plain present tense"
+      "hash": "195c3fc8e449",
+      "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-CHECK-831": {
-      "hash": "b94ffb48a121",
-      "reason": "reword REQ-CHECK-831's new clause to drop a redundant modal"
+      "hash": "b6348e2ee27e",
+      "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",

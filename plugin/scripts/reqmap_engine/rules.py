@@ -18,7 +18,7 @@ from .sections import (
     ACCEPTANCE_LABELS, CONTRACT_LABELS, VALID_FORM, _atomic_spans, _from_any, _has_any,
     _legacy_schema_ids
 )
-from .similar import _exemption_reason_recorded
+from .similar import EXEMPTION_FIELDS, _exemption_reason_recorded
 from .text import _bullets, _distinct_intent, _req_title, _section_raw
 from .viewer import check_viewer_data_sync
 from .workspace import _test_link_problem
@@ -327,7 +327,7 @@ def _exemption_without_reason_rule(ctx):
     green has nobody willing to write that line."""
     for rid in sorted(ctx.reqs):
         r = ctx.reqs[rid]
-        for field in ("lint_exempt", "gate_exempt"):
+        for field in EXEMPTION_FIELDS:
             for check in _as_list(r["meta"].get(field)):
                 if not _exemption_reason_recorded(r["body"], check):
                     yield rid, ("{}: `{}: [{}]` silences a finding with no reason recorded "

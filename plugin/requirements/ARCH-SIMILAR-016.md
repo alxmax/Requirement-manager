@@ -22,6 +22,7 @@ Every bullet below is binding.
 - Each requirement's comparison text is a bag of words from its title, intent line and Contract bullets, tokenized to lowercase words of 3+ letters. [[REQ-SIMILAR-921]]
 - An unauthored draft or a tested-by-linked pair is skipped and counted rather than compared. [[REQ-SIMILAR-921]]
 - Requirement ids and the link syntax around them are left out of the text `dupes` compares. [[REQ-SIMILARIDS-1025]]
+- A pair a reviewer recorded as distinct, and a retired requirement, are left out and counted. [[REQ-SIMILARDISTINCT-1026]]
 - Terms are weighted by a smoothed TF-IDF and pairs are scored by cosine similarity in the range zero to one. [[REQ-SIMILAR-922]]
 - Only pairs at or above the threshold (default `0.35`, overridable with `--threshold`) are reported, most-similar-first with their shared terms; `dupes` always exits zero. [[REQ-SIMILAR-923]]
 - Requirements whose clauses are byte-identical once normalised are reported as one redundancy group by `sync` and `next`, never by the gate. [[REQ-REDUNDANCY-058]]
@@ -357,6 +358,50 @@ CASE-3 — search keeps the ids
   Given  a contract ending in `[[REQ-X-001]]`
   When   the text `search` compares is built
   Then   it still contains `REQ-X-001`
+
+--------------------
+
+
+---
+id: REQ-SIMILARDISTINCT-1026
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SIMILAR-016]
+---
+
+# A pair a reviewer read and found distinct stops being reported
+
+## Description
+> `dupes` measures shared words, not shared obligations. On this corpus a real duplicate
+> scored 0.54 and a pair checking different things scored 0.51, so no threshold separates
+> them. The only thing that can is a person reading both, and until now that reading left
+> no trace: the same pair came back on every run.
+
+Every bullet below is binding.
+- A requirement may list under `distinct_from:` requirements a reviewer compared with it and
+  found to state different obligations.
+- `dupes` skips a pair named by `distinct_from:` on either side, and prints how many it skipped.
+- A `distinct_from:` entry is listed with the exemptions in force, and one whose id the
+  requirement's prose never names is warned about like a bare exemption.
+- `dupes` does not compare a `deprecated` requirement, and prints how many it left out.
+
+## Cases
+CASE-1 — a recorded pair is skipped and counted, the rest are still reported
+  Given  three requirements with the same contract, the first naming the second in `distinct_from:`
+  When   `dupes` runs
+  Then   the first two are not a pair, the skip line counts one, and both still pair with the third
+
+CASE-2 — a distinct_from with no written reason is a warning
+  Given  a requirement whose `distinct_from:` names an id its prose never mentions
+  When   the gate runs
+  Then   one warning names the requirement, `distinct_from` and that id
+
+CASE-3 — a deprecated requirement is not compared
+  Given  two requirements with the same contract, one of them `deprecated`
+  When   `dupes` runs
+  Then   no pair is reported and the skip line counts one deprecated requirement
 
 --------------------
 

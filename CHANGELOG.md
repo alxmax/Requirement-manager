@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v7.21.11` — 2026-09-16
+
+**A pair a reviewer read and found distinct stops coming back from `dupes`.** `dupes` measures
+shared words, and on this corpus a real duplicate scored 0.54 while a pair checking different
+things scored 0.51, so no threshold could separate them. A requirement may now list
+`distinct_from: [ID]`; `dupes` skips that pair from either side and counts it, and the entry is
+listed with the exemptions in force, warned about by RM030 when the prose never names the id
+(REQ-SIMILARDISTINCT-1026). `dupes` also stops comparing `deprecated` requirements.
+
+Reading all 27 pairs found one more real duplicate: REQ-CHECK-831 restated REQ-VLEVEL-946's
+unvalidated-need and `@system`-only warnings word for word. It now keeps only the legacy-schema
+and cycle warnings and the `--since` rule, with its cases renumbered. The other 23 pairs are
+marked `distinct_from:`, each with the reason written beside it; `gate --dupes` now reports none.
+
 ## plugin `v7.21.10` — 2026-09-16
 
 **`dupes` no longer compares requirement ids.** Every ARCH clause ends with the `[[REQ-...]]` it

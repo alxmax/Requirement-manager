@@ -221,6 +221,7 @@ milestone: v2.32
 priority: should-have
 depends_on: [ARCH-DRIFT-003, ARCH-CHECK-006]
 satisfies: [ARCH-PARSE-001]
+distinct_from: [REQ-LINTCHECKS-867]
 ---
 
 # The atomic requirement form
@@ -265,6 +266,10 @@ CASE-4 — a classic body with headings is never mistaken for atomic
   Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings
   When   the atomic-form detector reads it
   Then   it returns no match, and every existing classic-form code path is unchanged
+
+## Context
+**Notes**
+- `distinct_from: REQ-LINTCHECKS-867` - `REQ-LINTCHECKS-867` lints the atomic form; this recognises and hashes it, and points there for the parity checks instead of restating them.
 
 --------------------
 

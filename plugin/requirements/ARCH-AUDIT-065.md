@@ -147,8 +147,8 @@ satisfies: [ARCH-AUDIT-065]
 > can argue with.
 
 Every bullet below is binding.
-- The report lists every `lint_exempt:` and `gate_exempt:` entry in the corpus with its
-  requirement and the check it silences.
+- The report lists every `lint_exempt:`, `gate_exempt:` and `distinct_from:` entry in the
+  corpus with its requirement and the check, or the requirement, it silences.
 - A reason counts as recorded when the requirement's own prose mentions the silenced
   check by name. The test cannot judge whether the reason is a good one, and does not try
   to: it makes the exemption cost a sentence, no more.
