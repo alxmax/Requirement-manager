@@ -123,10 +123,10 @@ CASE-8
 **Current implementation**
 - `render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is
   called by `cmd_map` after `_map.json`/`_map.md` are written.
-- `check_viewer_data_sync` (+ `_vds_*` helpers) in `reqmap.py`, called from `cmd_check` (`gate`):
-  a warn-only heuristic comparing `app/src/lib/data.js`'s hand-authored `BAKED` fallback fixture
-  against the live registry, so a stale demo entry is flagged rather than silently shown forever.
-  A fixture entry marked `demoOnly:true` is skipped: the demo dataset deliberately invents an
+- `check_viewer_data_sync` in `reqmap_engine/viewer.py`, run by RM017 (`gate`): a warn-only
+  comparison of the viewer's hand-authored fallback fixture, `app/src/lib/baked.json` (read as
+  JSON; `data.js` imports it), against the live registry, so a stale demo entry is flagged
+  rather than silently shown forever. A fixture entry marked `demoOnly: true` is skipped: the demo dataset deliberately invents an
   orphan and a deprecated capability so the Risk and Problems tabs have signals with no engine
   present, and those ids cannot exist in any registry. An id left unmarked and absent from the
   registry is still reported — that is a requirement renamed out from under the fixture.

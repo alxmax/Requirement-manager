@@ -2288,13 +2288,8 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # teste
 
 
 class ViewerDataSync(unittest.TestCase):  # tested-by: ARCH-VIEWER-007
-    def _fixture_data_js(self, path, entries):
-        body = "const BAKED = [\n" + "".join(
-            '  {{ id:"{id}", contract:[{contract}] }},\n'.format(
-                id=e["id"], contract=",".join('"{}"'.format(c) for c in e["contract"]))
-            for e in entries
-        ) + "];\n"
-        _write(path, body)
+    def _fixture(self, path, entries):
+        _write(path, json.dumps(entries))
 
     def test_demo_only_entry_is_not_compared(self):
         """The fixture INVENTS two states the registry cannot contain - a fake orphan and
@@ -2302,13 +2297,12 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: ARCH-VIEWER-007
         something to show with no engine present. Comparing those against the registry
         reported permanent drift: the check crying wolf about data doing its job."""
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            _write(data_js, 'const BAKED = ['
-                   + chr(10) + '  { id:"REAL-ONE-001", contract:["Alpha does X."] },'
-                   + chr(10) + '  { id:"FAKE-DEMO-999", demoOnly:true, contract:["Invented."] },'
-                   + chr(10) + '];' + chr(10))
-            drift = R.check_viewer_data_sync(data_js, [{"id": "REAL-ONE-001",
-                                                       "contract": ["Alpha does X."]}])
+            baked = os.path.join(d, "baked.json")
+            self._fixture(baked, [{"id": "REAL-ONE-001", "contract": ["Alpha does X."]},
+                                  {"id": "FAKE-DEMO-999", "demoOnly": True,
+                                   "contract": ["Invented."]}])
+            drift = R.check_viewer_data_sync(baked, [{"id": "REAL-ONE-001",
+                                                     "contract": ["Alpha does X."]}])
             self.assertEqual(drift, [])
 
     def test_unmarked_missing_id_is_still_reported(self):
@@ -2316,73 +2310,69 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: ARCH-VIEWER-007
         requirement, whose id no longer exists (renamed out from under the fixture),
         still counts as drift."""
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            self._fixture_data_js(data_js, [{"id": "GONE-AWAY-001", "contract": ["X."]}])
-            self.assertEqual(R.check_viewer_data_sync(data_js, []), ["GONE-AWAY-001"])
+            baked = os.path.join(d, "baked.json")
+            self._fixture(baked, [{"id": "GONE-AWAY-001", "contract": ["X."]}])
+            self.assertEqual(R.check_viewer_data_sync(baked, []), ["GONE-AWAY-001"])
 
     def test_repo_fixture_is_in_sync_with_its_own_registry(self):
         """The end-to-end assertion the two tests above only approximate: THIS repo's
-        data.js against THIS repo's committed _map.json. Skipped where either is absent
-        (a seeded consumer copy has neither)."""
+        baked.json against THIS repo's committed _map.json. Skipped where either is
+        absent (a seeded consumer copy has neither)."""
         root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(R.__file__))))
-        data_js = os.path.join(root, "app", "src", "lib", "data.js")
+        baked = os.path.join(root, "app", "src", "lib", "baked.json")
         map_json = os.path.join(root, "plugin", "requirements", "_map.json")
-        if not (os.path.exists(data_js) and os.path.exists(map_json)):
+        if not (os.path.exists(baked) and os.path.exists(map_json)):
             self.skipTest("not running inside the requirement-manager repo")
         with open(map_json, encoding="utf-8") as f:
             nodes = json.load(f)["nodes"]
-        self.assertEqual(R.check_viewer_data_sync(data_js, nodes), [])
+        self.assertEqual(R.check_viewer_data_sync(baked, nodes), [])
 
-    def test_matching_data_js_reports_no_drift(self):
+    def test_matching_fixture_reports_no_drift(self):
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            baked = os.path.join(d, "baked.json")
+            self._fixture(baked, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
             map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}]
-            drift = R.check_viewer_data_sync(data_js, map_nodes)
-            self.assertEqual(drift, [])
+            self.assertEqual(R.check_viewer_data_sync(baked, map_nodes), [])
 
     def test_diverged_contract_text_is_reported(self):
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            baked = os.path.join(d, "baked.json")
+            self._fixture(baked, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
             map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do Y instead."]}]
-            drift = R.check_viewer_data_sync(data_js, map_nodes)
-            self.assertEqual(drift, ["FOO-BAR-001"])
+            self.assertEqual(R.check_viewer_data_sync(baked, map_nodes), ["FOO-BAR-001"])
 
     def test_missing_baked_id_is_reported(self):
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
-            map_nodes = []  # the requirement was deleted/renamed in the registry
-            drift = R.check_viewer_data_sync(data_js, map_nodes)
-            self.assertEqual(drift, ["FOO-BAR-001"])
+            baked = os.path.join(d, "baked.json")
+            self._fixture(baked, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            # the requirement was deleted/renamed in the registry
+            self.assertEqual(R.check_viewer_data_sync(baked, []), ["FOO-BAR-001"])
 
-    def test_missing_data_js_file_returns_none(self):
+    def test_missing_fixture_file_returns_none(self):
         # fail-open: no viewer checked out (e.g. a shallow consumer clone) is not an error
-        self.assertIsNone(R.check_viewer_data_sync("/no/such/data.js", []))
+        self.assertIsNone(R.check_viewer_data_sync("/no/such/baked.json", []))
 
-    def test_matching_data_js_with_bracket_in_contract_text_reports_no_drift(self):
-        # regression: a naive non-greedy `contract:\[(.*?)\]` regex stops at the FIRST
-        # ']', truncating any bullet whose own text contains a bracket -- and this
-        # repo's real contracts do (e.g. describing `[a, b]` syntax). A bracket-aware
-        # scanner must find the array's TRUE close, not the first stray ']'.
+    def test_bracket_in_contract_text_reports_no_drift(self):
+        # The JavaScript fixture needed a bracket-aware scanner, because a naive regex
+        # stopped at the first ']' inside a bullet describing `[a, b]` syntax. Read as
+        # JSON the text is data; this pins that such a bullet still compares equal.
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
+            baked = os.path.join(d, "baked.json")
             bullet = 'Accepts an inline `[a, b]` list and a `{k: v}` block.'
-            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": [bullet]}])
+            self._fixture(baked, [{"id": "FOO-BAR-001", "contract": [bullet]}])
             map_nodes = [{"id": "FOO-BAR-001", "contract": [bullet]}]
-            drift = R.check_viewer_data_sync(data_js, map_nodes)
-            self.assertEqual(drift, [])
+            self.assertEqual(R.check_viewer_data_sync(baked, map_nodes), [])
 
-    def test_non_utf8_data_js_returns_none(self):
-        # regression: only OSError was caught; a non-UTF-8 file raises UnicodeDecodeError
-        # (a ValueError subclass), which was uncaught and crashed `gate` outright instead
-        # of degrading to a warning.
+    def test_unreadable_fixture_returns_none(self):
+        # Neither a non-UTF-8 file nor one that is not JSON may crash `gate`: both degrade
+        # to "no comparison".
         with tempfile.TemporaryDirectory() as d:
-            data_js = os.path.join(d, "data.js")
-            with open(data_js, "wb") as f:
+            baked = os.path.join(d, "baked.json")
+            with open(baked, "wb") as f:
                 f.write(b"\xff\xfe garbage, not valid utf-8")
-            self.assertIsNone(R.check_viewer_data_sync(data_js, []))
+            self.assertIsNone(R.check_viewer_data_sync(baked, []))
+            _write(baked, "const BAKED = [];")
+            self.assertIsNone(R.check_viewer_data_sync(baked, []))
 
 # Entry point stays LAST on purpose. It used to sit mid-file, above
 # RoadmapSignals and ViewerDataSync, so `python test_reqmap.py` ran

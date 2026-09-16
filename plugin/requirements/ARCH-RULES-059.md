@@ -113,7 +113,7 @@ CASE-4 — health and gate agree on link-sync errors
   Then   it returns exactly the two messages RM001 and RM006 produce
 
 CASE-5 — a source-repo-only rule never runs in a consumer repo
-  Given  a temporary consumer repo with an `app/src/lib/data.js` fixture that disagrees with its corpus
+  Given  a temporary consumer repo with an `app/src/lib/baked.json` fixture that disagrees with its corpus
   When   `gate` runs there
   Then   no RM017 finding is printed
 

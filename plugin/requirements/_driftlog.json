@@ -177,6 +177,10 @@
       "hash": "34bdcb2ea67a",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     },
+    "REQ-RULES-947": {
+      "hash": "68dd0cb1b87c",
+      "reason": "baked fixture is JSON"
+    },
     "REQ-SELFGATE-916": {
       "hash": "11f65cd22341",
       "reason": "REQ-SELFGATE-916 CASE-1 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"

@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v7.21.3` — 2026-09-16
+
+**The viewer's fallback fixture is JSON, and the gate reads it as data.** The demo
+requirements the viewer shows with no engine present were a 190-line JavaScript literal in
+`app/src/lib/data.js`, compared with the registry by RM017 through a bracket-counting scanner
+and a regex over the source. They now live in `app/src/lib/baked.json`, which `data.js`
+imports, and `check_viewer_data_sync` reads it with `json.load` — the scanner, the three
+regexes and the escaping rules they needed are gone.
+
+Reading it as data showed what the regex had missed: `DRAFT-cache-utils`, an invented demo
+draft, was never compared, because the id pattern only matched upper-case ids. It is now
+marked `demoOnly`, like the other two invented entries. The top of `data.js` also carried a
+stray array of `confirm` bullets pasted into its header comment; that is gone. `gate --design`
+reports nothing outside the engine's four documented findings.
+
 ## plugin `v7.21.2` — 2026-09-16
 
 **The viewer's components fit in 100 columns, and three messages stop naming commands that
