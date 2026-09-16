@@ -32,6 +32,7 @@ Every bullet below is binding.
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
 - The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
+- The Versions view lists the same bars as the Plan chart, each in its milestone's column. [[REQ-VIEWER-999]]
 - The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]
 - Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
 
@@ -886,6 +887,8 @@ Every bullet below is binding.
 - The panel names the requirement when the bar carries a `req` the registry has, and opens
   it on request; an id the registry does not have is shown as plain text.
 - Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan.
+- The Versions view lists each bar in the column of its `milestone`, the same list the Plan
+  chart draws, and reads no `milestones[].items[]`.
 
 ## Cases
 CASE-1 — selecting a bar shows the note written under its roadmap item
@@ -913,6 +916,11 @@ CASE-5 — the roadmap payload survives the mode's removal
   Given  a repo with a `ROADMAP.md` holding one item
   When   `sync` writes the export
   Then   `_map.json` still carries that item under `roadmap`, with its context
+
+CASE-6 — a bar appears in its version's column
+  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`
+  When   the Versions view renders
+  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
 
 ## Context
 **Notes**

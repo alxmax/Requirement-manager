@@ -11139,7 +11139,7 @@
         "A requirement stating a single obligation may be written as one `>` story blockquote plus one unlabelled `Scenario:` block, with no `## Contract` or `## Cases` heading at all — the file then carries the obligation and its proof and nothing else.",
         "The atomic form is detected from the body itself (a story quote immediately followed by a `Scenario:` block, both before the first `## ` heading), never from `form: atomic` in the frontmatter, so every consumer that only sees a body — the gate, the linter, the drift hash — agrees on whether a given file is atomic.",
         "`binding_hash` covers the story and the Scenario, never the empty string, so an atomic requirement drifts like any other when its wording changes.",
-        "The linter treats a recognised atomic body as carrying both normative sections and one acceptance criterion (the Scenario), raising no missing-section, legacy-schema or under-specified finding — but it does check that every fact enumerated in the story has a matching `Then` line in the Scenario, and that the story does not grow past a fixed bullet ceiling."
+        "The linter treats a recognised atomic body as carrying both normative sections and one acceptance criterion (the Scenario), raising no missing-section, legacy-schema or under-specified finding. Whether the story and the Scenario agree is checked by [[REQ-LINTCHECKS-867]]."
       ],
       "verify": [],
       "notes": [],
@@ -11148,10 +11148,9 @@
         "CASE-1 — — an atomic body reads as both normative sections Given  a body whose only content before the first `## ` heading is a `>` story followed by a `Scenario:` block When   the gate and linter read it Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as exactly one acceptance criterion",
         "CASE-2 — — the drift hash covers the statement and the Scenario Given  an atomic body When   `binding_hash` runs on it, and again after editing either the story or the Scenario Then   the hash is never the hash of the empty string, and each edit changes it",
         "CASE-3 — — a well-formed atomic requirement lints clean Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body When   the linter runs Then   it raises no finding",
-        "CASE-4 — — a classic body with headings is never mistaken for atomic Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings When   the atomic-form detector reads it Then   it returns no match, and every existing classic-form code path is unchanged",
-        "CASE-5 — — a story fact with no matching Then line warns Given  an atomic story enumerating more `- ` facts than the Scenario has `Then` lines When   the linter runs Then   it warns `atomic-bullet-then-mismatch`; a story past the bullet ceiling instead warns `atomic-story-overlong` --------------------"
+        "CASE-4 — — a classic body with headings is never mistaken for atomic Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings When   the atomic-form detector reads it Then   it returns no match, and every existing classic-form code path is unchanged --------------------"
       ],
-      "accept": "CASE-1 — an atomic body reads as both normative sections\n  Given  a body whose only content before the first `## ` heading is a `>` story followed by\n         a `Scenario:` block\n  When   the gate and linter read it\n  Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as\n         exactly one acceptance criterion\n\nCASE-2 — the drift hash covers the statement and the Scenario\n  Given  an atomic body\n  When   `binding_hash` runs on it, and again after editing either the story or the Scenario\n  Then   the hash is never the hash of the empty string, and each edit changes it\n\nCASE-3 — a well-formed atomic requirement lints clean\n  Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body\n  When   the linter runs\n  Then   it raises no finding\n\nCASE-4 — a classic body with headings is never mistaken for atomic\n  Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings\n  When   the atomic-form detector reads it\n  Then   it returns no match, and every existing classic-form code path is unchanged\n\nCASE-5 — a story fact with no matching Then line warns\n  Given  an atomic story enumerating more `- ` facts than the Scenario has `Then` lines\n  When   the linter runs\n  Then   it warns `atomic-bullet-then-mismatch`; a story past the bullet ceiling instead\n         warns `atomic-story-overlong`\n\n--------------------",
+      "accept": "CASE-1 — an atomic body reads as both normative sections\n  Given  a body whose only content before the first `## ` heading is a `>` story followed by\n         a `Scenario:` block\n  When   the gate and linter read it\n  Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as\n         exactly one acceptance criterion\n\nCASE-2 — the drift hash covers the statement and the Scenario\n  Given  an atomic body\n  When   `binding_hash` runs on it, and again after editing either the story or the Scenario\n  Then   the hash is never the hash of the empty string, and each edit changes it\n\nCASE-3 — a well-formed atomic requirement lints clean\n  Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body\n  When   the linter runs\n  Then   it raises no finding\n\nCASE-4 — a classic body with headings is never mistaken for atomic\n  Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings\n  When   the atomic-form detector reads it\n  Then   it returns no match, and every existing classic-form code path is unchanged\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -11214,8 +11213,8 @@
       "milestone": "v2.32",
       "priority": "should-have",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "REQ-MODULEFILE-056",
@@ -14417,8 +14416,7 @@
         "The baseline is the highest of three versions: the one the repository's version files declare ([[REQ-VERSIONFILES-1014]]), the newest `v*` git tag, and the newest dated `vX.Y.Z` heading in `CHANGELOG.md`. With none of them, nothing is reported.",
         "Every version is compared in one form, `vX.Y.Z`, the form tags and CHANGELOG headings use: `plugin.json`'s `7.19.0` is `v7.19.0`, and a short key `vX.Y` is read as `vX.Y.0`. A milestone equal to the baseline is stale, because that version has been declared. A name that is not a version is never compared.",
         "Every milestone key in `_planning.json` and every bar `milestone` at or below the baseline is named in one `gate --audit` line and in `health --json` under `plan_shipped`, together with the baseline and the source it came from.",
-        "The signal is read-only: no gate rule reads it, and the gate's exit code never depends on it.",
-        "The planned set is `bars`: the Versions view lists each bar in the column of its `milestone`, the same list the Plan chart draws, and reads no `milestones[].items[]`."
+        "The signal is read-only: no gate rule reads it, and the gate's exit code never depends on it."
       ],
       "verify": [],
       "notes": [],
@@ -14429,10 +14427,9 @@
         "CASE-3 — — a patch past the baseline is silent, and a short key is padded Given  a CHANGELOG whose newest heading is `v7.19.0` When   milestone `v7.19.1`, then milestone `v7.19`, is checked Then   the first is silent and the second is stale",
         "CASE-4 — — no baseline, no signal Given  a plan with milestones and no manifest, tag or CHANGELOG When   the audit runs Then   nothing is reported",
         "CASE-5 — — the highest source wins, and bars count Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0` When   the audit runs Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`",
-        "CASE-6 — — reported, never gated Given  the registered gate rules When   they are listed Then   none of them comes from the planning module",
-        "CASE-7 — — a bar appears in its version's column Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8` When   the Versions view renders Then   the `v99.7` column lists the bar, and the `items` text appears nowhere"
+        "CASE-6 — — reported, never gated Given  the registered gate rules When   they are listed Then   none of them comes from the planning module"
       ],
-      "accept": "CASE-1 — a milestone equal to the declared version is stale\n  Given  `plugin.json` at 7.19.0 and milestones `v7.19.0` and `v7.20.0`\n  When   the audit runs\n  Then   exactly one line names `v7.19.0`, against `v7.19.0` from `plugin.json`\n\nCASE-2 — a milestone past the baseline is silent\n  Given  `plugin.json` at 7.19.0 and milestone `v7.20.0`\n  When   the audit runs\n  Then   no plan line is reported\n\nCASE-3 — a patch past the baseline is silent, and a short key is padded\n  Given  a CHANGELOG whose newest heading is `v7.19.0`\n  When   milestone `v7.19.1`, then milestone `v7.19`, is checked\n  Then   the first is silent and the second is stale\n\nCASE-4 — no baseline, no signal\n  Given  a plan with milestones and no manifest, tag or CHANGELOG\n  When   the audit runs\n  Then   nothing is reported\n\nCASE-5 — the highest source wins, and bars count\n  Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0`\n  When   the audit runs\n  Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`\n\nCASE-6 — reported, never gated\n  Given  the registered gate rules\n  When   they are listed\n  Then   none of them comes from the planning module\n\nCASE-7 — a bar appears in its version's column\n  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`\n  When   the Versions view renders\n  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere",
+      "accept": "CASE-1 — a milestone equal to the declared version is stale\n  Given  `plugin.json` at 7.19.0 and milestones `v7.19.0` and `v7.20.0`\n  When   the audit runs\n  Then   exactly one line names `v7.19.0`, against `v7.19.0` from `plugin.json`\n\nCASE-2 — a milestone past the baseline is silent\n  Given  `plugin.json` at 7.19.0 and milestone `v7.20.0`\n  When   the audit runs\n  Then   no plan line is reported\n\nCASE-3 — a patch past the baseline is silent, and a short key is padded\n  Given  a CHANGELOG whose newest heading is `v7.19.0`\n  When   milestone `v7.19.1`, then milestone `v7.19`, is checked\n  Then   the first is silent and the second is stale\n\nCASE-4 — no baseline, no signal\n  Given  a plan with milestones and no manifest, tag or CHANGELOG\n  When   the audit runs\n  Then   nothing is reported\n\nCASE-5 — the highest source wins, and bars count\n  Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0`\n  When   the audit runs\n  Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`\n\nCASE-6 — reported, never gated\n  Given  the registered gate rules\n  When   they are listed\n  Then   none of them comes from the planning module",
       "input": "",
       "output": "",
       "desc": "",
@@ -14473,8 +14470,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 7,
-      "covered": 7
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "REQ-UNPLANNED-1024",
@@ -19140,6 +19137,7 @@
         "The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]",
         "The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]",
         "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]",
+        "The Versions view lists the same bars as the Plan chart, each in its milestone's column. [[REQ-VIEWER-999]]",
         "The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]",
         "Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]"
       ],
@@ -20222,7 +20220,8 @@
         "A bar no roadmap item claims opens the panel with its own title and dates, and no note.",
         "Context written as an HTML comment renders as its text, because the comment markers are how a plan file hides a note from a Markdown reader, not part of what the note says.",
         "The panel names the requirement when the bar carries a `req` the registry has, and opens it on request; an id the registry does not have is shown as plain text.",
-        "Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan."
+        "Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan.",
+        "The Versions view lists each bar in the column of its `milestone`, the same list the Plan chart draws, and reads no `milestones[].items[]`."
       ],
       "verify": [],
       "notes": [
@@ -20234,9 +20233,10 @@
         "CASE-2 — — a bar with no matching item still opens, with no note Given  a bar carrying no `req`, and a roadmap list that does not mention it When   the reader selects that bar Then   the panel shows its title, milestone and dates, and no note section",
         "CASE-3 — — an HTML-comment context renders as text Given  a roadmap item whose context is `` When   its bar is selected Then   the panel shows `the reason` and neither comment marker",
         "CASE-4 — — the Horizons mode is gone Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item When   the Roadmap tab renders Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists",
-        "CASE-5 — — the roadmap payload survives the mode's removal Given  a repo with a `ROADMAP.md` holding one item When   `sync` writes the export Then   `_map.json` still carries that item under `roadmap`, with its context"
+        "CASE-5 — — the roadmap payload survives the mode's removal Given  a repo with a `ROADMAP.md` holding one item When   `sync` writes the export Then   `_map.json` still carries that item under `roadmap`, with its context",
+        "CASE-6 — — a bar appears in its version's column Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8` When   the Versions view renders Then   the `v99.7` column lists the bar, and the `items` text appears nowhere"
       ],
-      "accept": "CASE-1 — selecting a bar shows the note written under its roadmap item\n  Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose\n         context reads `two sentences of why`\n  When   the reader selects that bar\n  Then   a panel below the chart shows the bar's title and `two sentences of why`\n\nCASE-2 — a bar with no matching item still opens, with no note\n  Given  a bar carrying no `req`, and a roadmap list that does not mention it\n  When   the reader selects that bar\n  Then   the panel shows its title, milestone and dates, and no note section\n\nCASE-3 — an HTML-comment context renders as text\n  Given  a roadmap item whose context is `<!-- the reason -->`\n  When   its bar is selected\n  Then   the panel shows `the reason` and neither comment marker\n\nCASE-4 — the Horizons mode is gone\n  Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item\n  When   the Roadmap tab renders\n  Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists\n\nCASE-5 — the roadmap payload survives the mode's removal\n  Given  a repo with a `ROADMAP.md` holding one item\n  When   `sync` writes the export\n  Then   `_map.json` still carries that item under `roadmap`, with its context",
+      "accept": "CASE-1 — selecting a bar shows the note written under its roadmap item\n  Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose\n         context reads `two sentences of why`\n  When   the reader selects that bar\n  Then   a panel below the chart shows the bar's title and `two sentences of why`\n\nCASE-2 — a bar with no matching item still opens, with no note\n  Given  a bar carrying no `req`, and a roadmap list that does not mention it\n  When   the reader selects that bar\n  Then   the panel shows its title, milestone and dates, and no note section\n\nCASE-3 — an HTML-comment context renders as text\n  Given  a roadmap item whose context is `<!-- the reason -->`\n  When   its bar is selected\n  Then   the panel shows `the reason` and neither comment marker\n\nCASE-4 — the Horizons mode is gone\n  Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item\n  When   the Roadmap tab renders\n  Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists\n\nCASE-5 — the roadmap payload survives the mode's removal\n  Given  a repo with a `ROADMAP.md` holding one item\n  When   `sync` writes the export\n  Then   `_map.json` still carries that item under `roadmap`, with its context\n\nCASE-6 — a bar appears in its version's column\n  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`\n  When   the Versions view renders\n  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere",
       "input": "",
       "output": "",
       "desc": "",
@@ -20285,8 +20285,8 @@
       "milestone": "v7.7",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "REQ-PLANSTACK-1012",
@@ -23322,7 +23322,7 @@
     },
     {
       "month": "2026-09",
-      "count": 87,
+      "count": 88,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23412,11 +23412,17 @@
         "v7.21.5",
         "v7.21.6",
         "v7.21.7",
-        "v7.21.8"
+        "v7.21.8",
+        "v7.21.9"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.9",
+          "date": "2026-09-16",
+          "headline": "Two overlaps `gate --dupes` found are resolved"
+        },
         {
           "version": "v7.21.8",
           "date": "2026-09-16",

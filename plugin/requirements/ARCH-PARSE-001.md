@@ -240,9 +240,8 @@ Every bullet below is binding.
   requirement drifts like any other when its wording changes.
 - The linter treats a recognised atomic body as carrying both normative sections and one
   acceptance criterion (the Scenario), raising no missing-section, legacy-schema or
-  under-specified finding — but it does check that every fact enumerated in the story has a
-  matching `Then` line in the Scenario, and that the story does not grow past a fixed bullet
-  ceiling.
+  under-specified finding. Whether the story and the Scenario agree is checked by
+  [[REQ-LINTCHECKS-867]].
 
 ## Cases
 CASE-1 — an atomic body reads as both normative sections
@@ -266,12 +265,6 @@ CASE-4 — a classic body with headings is never mistaken for atomic
   Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings
   When   the atomic-form detector reads it
   Then   it returns no match, and every existing classic-form code path is unchanged
-
-CASE-5 — a story fact with no matching Then line warns
-  Given  an atomic story enumerating more `- ` facts than the Scenario has `Then` lines
-  When   the linter runs
-  Then   it warns `atomic-bullet-then-mismatch`; a story past the bullet ceiling instead
-         warns `atomic-story-overlong`
 
 --------------------
 

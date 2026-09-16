@@ -145,7 +145,7 @@ adoptMapExport({ todos: [], planning: {
 } });
 const roadBars = renderToString(<RoadmapView openSpec={noop} initialMode="versions" />);
 adoptMapExport({ todos: [], planning: json.planning || null });
-// verifies: REQ-PLANSTALE-1013#CASE-7
+// verifies: REQ-VIEWER-999#CASE-6
 test("roadmap: a bar appears in its version's column, and items[] is not read",
   roadBars.includes(">v99.7<") && roadBars.includes("the planned bar")
     && !roadBars.includes("ghost"));
