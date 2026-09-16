@@ -18,7 +18,7 @@ import { adaptNode, loadData } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
-import { PlanGantt, noteText, matchItem } from "../src/views/roadmap/PlanGantt.jsx";
+import { PlanGantt, noteText, matchItem, ShippedNote, VersionNote } from "../src/views/roadmap/PlanGantt.jsx";
 import { stackBars } from "../src/lib/timeline.js";
 import { SpecDoc } from "../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../src/lib/data.js";
@@ -507,6 +507,10 @@ const gaugeChecks = [
   ["rail: a mid-band score takes the partial tone, not the green one",  // verifies: REQ-VIEWER-969#CASE-2
     railHtml.includes('stroke="var(--cov-partial)"')
     && !railHtml.includes('stroke="var(--cov-tested)"')],
+  ["rail: the advisory design ring stays in one neutral ink",  // verifies: REQ-VIEWER-969#CASE-2
+    // 23 would be red on the health scale; the design score is advice, never a failure
+    railHtml.includes('stroke="var(--fg-muted)"')
+    && !railHtml.includes('stroke="var(--cov-untested)"')],
   ["rail: a map with neither record shows no gauge at all",  // verifies: REQ-VIEWER-969#CASE-3
     !railBare.includes("rail-gauges") && !railBare.includes("gauge-row")],
   ["rail: health is a control, the advisory design score is not",  // verifies: REQ-VIEWER-969#CASE-4
@@ -585,6 +589,16 @@ const roadAllDone = renderToString(<RoadmapView openSpec={noop} />);
 adoptMapExport({ todos: [] });
 test("roadmap: a milestone whose every item is complete still gets a column",  // verifies: REQ-VIEWER-995#CASE-4
   roadAllDone.includes(">v99.9<") && !roadAllDone.includes("a shipped item"));
+
+// Plan and Versions read one planned list, `bars` (REQ-PLANSTALE-1013). A bar used to
+// create its version's column and never appear in it, because the column read
+// `milestones[].items[]` — a second list nobody wrote.
+adoptMapExport({ todos: [], planning: { lanes: ["Feature"], milestones: { "v99.8": { items: ["ghost"] } },
+  bars: [{ title: "the planned bar", lane: "Feature", start: "2026-09-21", end: "2026-09-27", milestone: "v99.7" }] } });
+const roadBars = renderToString(<RoadmapView openSpec={noop} initialMode="versions" />);
+adoptMapExport({ todos: [], planning: json.planning || null });
+test("roadmap: a bar appears in its version's column, and items[] is not read",  // verifies: REQ-PLANSTALE-1013#CASE-7
+  roadBars.includes(">v99.7<") && roadBars.includes("the planned bar") && !roadBars.includes("ghost"));
 
 // ---- roadmap horizons (REQ-VIEWER-999) -----------------------------------
 // `initialRoadmap` is the seam the other two controls already open with
@@ -739,6 +753,16 @@ test("gantt: the guides mark the work, not today or the milestones",  // verifie
     return html.includes("v9.9") && !html.includes("dashed var(--indigo-400)");
   })());
 
+test("gantt: a guide stays in its bar's lane",  // verifies: REQ-PLANSTACK-1012#CASE-3
+  (() => {
+    // Drawn from the chart's top, a guide crossed the shipped band and every empty lane.
+    // Inside the lane it is positioned top:0, bottom:0 and never at the header's height.
+    const html = renderToString(<PlanGantt planning={{ ...stackPlan, lanes: ["Feature", "Fix"] }}
+      history={[]} locale="en" t={(x) => x} zoom={100} />);
+    const guides = html.match(/data-guide="(start|end)" style="[^"]*"/g) || [];
+    return guides.length === 4 && guides.every((g) => g.includes("top:0;bottom:0"));
+  })());
+
 const cadencePlan = {
   lanes: ["Engine"],
   bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],
@@ -753,6 +777,17 @@ const noCadence = renderToString(
 const cadenceChecks = [
   ["cadence: a rule is drawn for every emitted release date",  // verifies: REQ-PLANCADENCE-1000#CASE-1
     (withCadence.match(/release · 2026-09-/g) || []).length === 2],
+  ["cadence: a release is a tick on the ruler, not a line through the lanes",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+    // A weekly cadence drew one full-height rule per Friday across every lane, ruling
+    // through the bars it was meant to date. The ruler tick carries the same date.
+    !withCadence.includes("color-mix(in oklch, var(--fg-faint) 45%, transparent)")],
+  ["cadence: a version is drawn in the release lane, and a date with no version draws nothing there",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+    (() => {
+      const html = renderToString(<PlanGantt planning={{ ...cadencePlan, lanes: ["Engine", "Release"],
+        milestones: { "v9.8.0": { due: "2026-09-25" } } }}
+        locale="en" t={(s) => s} zoom={100} openSpec={noop} />);
+      return html.includes('data-version="v9.8.0"') && !html.includes("rotate(45deg)");
+    })()],
   ["cadence: no releases means no rules",  // verifies: REQ-PLANCADENCE-1000#CASE-2
     !noCadence.includes("release · ")],
   ["cadence: the chart places the emitted dates and computes none",  // verifies: REQ-PLANCADENCE-1000#CASE-1
@@ -763,6 +798,39 @@ const cadenceChecks = [
       .includes("release · 2026-09-20")],
 ];
 for (const [label, ok] of cadenceChecks) test(label, ok);
+
+// ---- selecting a shipped month or a version opens what is in it -----------
+test("gantt: a shipped month and a version are selectable",  // verifies: REQ-HISTORY-1003#CASE-6
+  (() => {
+    const hist = [{ month: "2026-08", count: 2, first: "2026-08-03", last: "2026-08-20",
+                    versions: ["v2.28.0", "v2.29.0"], landmark: "v2.29.0", headline: "x" }];
+    const html = renderToString(<PlanGantt planning={{ lanes: ["Feature", "Release"],
+      cadence: { every: "week", on: "friday", lane: "Release" }, releases: ["2026-09-25"],
+      milestones: { "v9.8.0": { due: "2026-09-25" } }, bars: [] }}
+      history={hist} locale="en" t={(x) => x} zoom={100} />);
+    return /data-month="2026-08" role="button" tabindex="0"/.test(html)
+      && /data-version="v9.8.0" role="button" tabindex="0"/.test(html);
+  })());
+
+test("gantt: an opened month lists every release with what it did",  // verifies: REQ-HISTORY-1003#CASE-6
+  (() => {
+    const html = renderToString(<ShippedNote t={(x) => x} onClose={noop} month={{
+      month: "2026-08", count: 2, first: "2026-08-03", last: "2026-08-20",
+      versions: ["v2.28.0", "v2.29.0"],
+      entries: [{ version: "v2.29.0", date: "2026-08-20", headline: "Ten findings fixed" },
+                { version: "v2.28.0", date: "2026-08-03", headline: "The viewer splits" }] }} />);
+    return html.includes("Ten findings fixed") && html.includes("The viewer splits")
+      && html.indexOf("v2.29.0") < html.indexOf("v2.28.0");
+  })());
+
+test("gantt: an opened version lists the work planned on it",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+  (() => {
+    const bars = [{ key: "a", title: "on it", milestone: "v9.8.0", start: "2026-09-21", end: "2026-09-25" },
+                  { key: "b", title: "elsewhere", milestone: "v9.9.0", start: "2026-09-28", end: "2026-10-02" }];
+    const html = renderToString(<VersionNote version={{ ms: "v9.8.0", due: "2026-09-25", label: "L" }}
+      bars={bars} t={(x) => x} onClose={noop} onPickBar={noop} />);
+    return html.includes("on it") && !html.includes("elsewhere") && html.includes("2026-09-25");
+  })());
 // ---- ISO week header ------------------------------------------------------
 // The week row is labelled with the week OF THE YEAR, not a count from the chart's left
 // edge: the same calendar week has to read the same in two charts and in a conversation

@@ -207,6 +207,8 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
   TODOS.forEach(item => { if (item.milestone) msSet.add(item.milestone); });
   const msMeta = TARGETS?.milestones || {};
   Object.keys(msMeta).forEach(ms => msSet.add(ms));
+  const planBars = Array.isArray(TARGETS?.bars) ? TARGETS.bars : [];
+  planBars.forEach(bar => { if (bar?.milestone) msSet.add(bar.milestone); });
   const milestones = Array.from(msSet).sort(semverCmp);
 
   const current =
@@ -233,16 +235,18 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
     .forEach(r => { if (byMs[r.milestone]) byMs[r.milestone].push({ type: "req", r }); });
   TODOS.filter(t => !t.done)
     .forEach(t => { if (byMs[t.milestone]) byMs[t.milestone].push({ type: "todo", t }); });
-  // Planned items from _planning.json — work not yet in TODO.md or requirements.
-  milestones.forEach(ms => {
-    const planned = msMeta[ms]?.items;
-    if (!Array.isArray(planned)) return;
-    const names = new Set(byMs[ms].map(item =>
-      item.type === "req" ? item.r.title.toLowerCase()
-        : item.type === "todo" ? item.t.name.toLowerCase() : ""));
-    planned.forEach(text => {
-      if (!names.has(text.toLowerCase())) byMs[ms].push({ type: "plan", text });
-    });
+  // Planned work is `bars`, the same list the Plan chart draws (REQ-PLANSTALE-1013's
+  // "planned set"). `milestones[].items[]` was a second list nobody wrote, which is why
+  // a bar planned for a version created that column and never appeared in it. A bar
+  // whose `req:` or title is already in the column is not listed twice.
+  planBars.forEach(bar => {
+    if (!bar?.title || !byMs[bar.milestone]) return;
+    const col = byMs[bar.milestone];
+    const dup = col.some(item =>
+      (item.type === "req" && (item.r.id === bar.req
+        || item.r.title.toLowerCase() === bar.title.toLowerCase()))
+      || (item.type === "todo" && item.t.name.toLowerCase() === bar.title.toLowerCase()));
+    if (!dup) col.push({ type: "plan", text: bar.title });
   });
   const plannedCount = Object.values(byMs).flat().filter(i => i.type === "plan").length;
   const today = new Date().toISOString().slice(0, 10);

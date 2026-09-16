@@ -1,6 +1,6 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-945
-import { REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN, TARGETS } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { ENFORCED } from "../views/SpecDoc.jsx";
@@ -13,19 +13,12 @@ const NAV = [
   { key: "commands", label: "Commands", icon: "terminal" },
 ];
 
-function Gauge({ pct, tone, target, size = 28 }) {
+function Gauge({ pct, tone, size = 28 }) {
   const r = (size - 4) / 2, c = 2 * Math.PI * r, mid = size / 2;
   const on = c * Math.max(0, Math.min(100, pct)) / 100;
-  const mark = target != null
-    ? (() => {
-        const ang = (-90 + (Math.max(0, Math.min(100, target)) / 100) * 360) * Math.PI / 180;
-        return { x: mid + r * Math.cos(ang), y: mid + r * Math.sin(ang) };
-      })()
-    : null;
   return (
     <svg className="gauge" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
       <circle cx={mid} cy={mid} r={r} fill="none" stroke="var(--line-2)" strokeWidth="3" />
-      {mark && <circle cx={mark.x} cy={mark.y} r={2.5} fill="var(--fg-muted)" />}
       <circle cx={mid} cy={mid} r={r} fill="none" stroke={tone} strokeWidth="3" strokeLinecap="round"
         strokeDasharray={`${on} ${c}`} transform={`rotate(-90 ${mid} ${mid})`} />
     </svg>
@@ -69,26 +62,15 @@ function RailNav({ view, setView, problems }) {
   );
 }
 
-function gaugeTone(score, target) {
-  if (target != null && score < target - 5) return "var(--cov-untested)";
-  if (score >= 90 || (target != null && score >= target)) return "var(--cov-tested)";
+function gaugeTone(score) {
+  if (score >= 90) return "var(--cov-tested)";
   if (score >= 60) return "var(--cov-partial)";
   return "var(--cov-untested)";
-}
-
-function targetSub(t, score, target) {
-  if (target == null) return null;
-  const delta = score - target;
-  if (delta >= 0) return t("target {n} — on track", { n: target });
-  return t("target {n} — {d} below", { n: target, d: Math.abs(delta) });
 }
 
 function RailGauges({ setView }) {
   const { t } = useI18n();
   if (!HEALTH && !DESIGN) return null;
-  const scoreTargets = TARGETS?.scores || {};
-  const healthTarget = scoreTargets.health;
-  const designTarget = scoreTargets.design;
   return (
     <div className="rail-gauges">
       <div className="rail-section" style={{ paddingTop: 0, paddingLeft: 0 }}>{t("Signals")}</div>
@@ -96,13 +78,11 @@ function RailGauges({ setView }) {
         <button type="button" className="gauge-row"
           title={t("Requirements green on every axis — confirmed, implemented, tested, no open question, no drift")}
           onClick={() => setView("problems")}>
-          <Gauge pct={HEALTH.score} target={healthTarget}
-            tone={gaugeTone(HEALTH.score, healthTarget)} />
+          <Gauge pct={HEALTH.score} tone={gaugeTone(HEALTH.score)} />
           <span className="gauge-txt">
             <span className="gauge-name">{t("Health")}<b>{HEALTH.score}</b></span>
             <span className="gauge-sub">
               {t("{a}/{b} green", { a: HEALTH.healthy, b: HEALTH.total })}
-              {(() => { const s = targetSub(t, HEALTH.score, healthTarget); return s ? ` · ${s}` : ""; })()}
             </span>
           </span>
         </button>
@@ -110,12 +90,11 @@ function RailGauges({ setView }) {
       {DESIGN && (
         <div className="gauge-row static"
           title={t("Source files with no OOP or house-standard candidate — advisory, never part of the gate")}>
-          <Gauge pct={DESIGN.score} target={designTarget} tone={gaugeTone(DESIGN.score, designTarget)} />
+          <Gauge pct={DESIGN.score} tone="var(--fg-muted)" />
           <span className="gauge-txt">
             <span className="gauge-name">{t("Design OOP")}<b>{DESIGN.score}</b></span>
             <span className="gauge-sub">
               {t("{a}/{b} files clean", { a: DESIGN.clean_files, b: DESIGN.files })}
-              {(() => { const s = targetSub(t, DESIGN.score, designTarget); return s ? ` · ${s}` : ""; })()}
             </span>
           </span>
         </div>

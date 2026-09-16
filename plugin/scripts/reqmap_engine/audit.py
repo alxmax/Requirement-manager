@@ -13,6 +13,7 @@ from .mapdata import (
     _read_roadmap, _roadmap_behind, _roadmap_plan_problems, _roadmap_signals
 )
 from .plandrift import plan_drift, plan_drift_lines
+from .targets import stale_plan_milestones
 from .model import _as_list
 from .orphans import _scan_untagged
 from .relevel import relevel_residue_lines
@@ -170,6 +171,17 @@ def _untagged_files_line(code_root, reqs_dir):
     return "{} code file(s) traced to no requirement".format(len(untagged))
 
 
+def _plan_stale_line(code_root, reqs_dir):
+    # implements: ARCH-AUDIT-065  # implements: REQ-PLANSTALE-1013
+    """One line naming planned milestones already declared, or None."""
+    stale = stale_plan_milestones(reqs_dir, code_root) if reqs_dir else None
+    if not stale:
+        return None
+    return ("_planning.json schedules {} at or below {} ({}) - the plan names a version "
+            "already declared".format(", ".join(stale["milestones"]), stale["baseline"],
+                                      stale["source"]))
+
+
 def _roadmap_lag_lines(reqs, code_root):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """Zero or more lines describing how TODO.md's roadmap and the requirements
@@ -205,7 +217,8 @@ def _print_audit_roadmap(reqs, code_root, reqs_dir=None):
     Deliberately here and not in the bare `gate`: the commit hook runs `gate` on every
     commit and ADR-0020 draws that line for corpus-shape signals. `--audit` is a question
     a reader asks on purpose."""
-    lines = _roadmap_lag_lines(reqs, code_root)
+    lines = [ln for ln in [_plan_stale_line(code_root, reqs_dir)] if ln]
+    lines += _roadmap_lag_lines(reqs, code_root)
     # Only here, never in `sync`'s tail: this one walks the tree a second time and shells
     # to git once per cited file. `--audit` is asked for on purpose; `sync` runs on every
     # edit and must not grow a second walk.
@@ -243,6 +256,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):
         _auto_level_line(shape),
         _design_candidate_line(code_root, reqs_dir),
         _untagged_files_line(code_root, reqs_dir),
+        _plan_stale_line(code_root, reqs_dir),
     ) if text]
     lines.extend(_roadmap_lag_lines(reqs, code_root))
     lines.extend(relevel_residue_lines(reqs))
@@ -272,7 +286,8 @@ def _json_audit_report(ws, signals, strict):
         out["untagged"] = len(untagged)
     # Same lines the console report prints under "Roadmap" — a JSON consumer that could
     # not see them would be back in the position REQ-AUDIT-973's reporter was in.
-    roadmap = _roadmap_lag_lines(reqs, ws.code_root)
+    roadmap = [ln for ln in [_plan_stale_line(ws.code_root, ws.reqs_dir)] if ln]
+    roadmap += _roadmap_lag_lines(reqs, ws.code_root)
     if roadmap:
         out["roadmap"] = roadmap
     errs, warns = run_gate_rules(

@@ -140,12 +140,13 @@ def _planning_seed():
     return json.dumps({
         "_comment": [
             "Bars drawn on the Plan chart. `lanes` are yours to rename.",
-            "The calendar runs to the end of this year, or three months out,",
-            "whichever is later - the engine computes it, so it never goes stale.",
-            "Pin it by adding `until` to `cadence` if you want a fixed end.",
+            "Name a milestone in full, vX.Y.Z (like v1.4.0), the form tags and CHANGELOG use.",
+            "While nothing here has a date, the calendar runs to the end of this year,",
+            "or three months out, whichever is later - the engine computes it. Once bars",
+            "or dues exist it ends at the last of them; add `until` to `cadence` to pin it.",
         ],
         "lanes": ["Feature", "Fix", "Release"],
-        "cadence": {"every": "month", "on": "last", "lane": "Release"},
+        "cadence": {"every": "week", "on": "friday", "lane": "Release"},
         "milestones": {},
         "bars": [],
     }, ensure_ascii=False, indent=2) + "\n"

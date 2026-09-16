@@ -120,7 +120,7 @@ const BAKED = [
 
   { id:"ARCH-MAP-007", area:"REQ", title:"Requirement graph (_map.json)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
-    contract:["`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]", "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]", "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]", "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]", "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]", "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]"],
+    contract:["`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]", "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]", "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]", "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]", "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]", "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan, and a month opens to every release in it. [[REQ-HISTORY-1003]]"],
     acc:[
       "The generated files contain one node per requirement and one edge per `depends_on`.",
       "`_map.md` contains 4 Mermaid code blocks, each with a legend.",
@@ -243,7 +243,7 @@ export let COMMANDS = [];
 export let HEALTH = null;
 export let DESIGN = null;
 /* Planning sidecar from requirements/_planning.json (legacy: `targets` key).
- * Milestone due dates, planned items, optional score targets. Null until loaded. */
+ * Lanes, bars, milestone due dates and the release cadence. Null until loaded. */
 export let TARGETS = null;
 /* ROADMAP.md's horizon plan, as the engine parsed it: one entry per `- [ ]` / `- [x]`
  * item under Now / Next / Later / Not now, with its `req:` and `unpark:`. Empty for a

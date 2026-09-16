@@ -1,11 +1,14 @@
 # implements: ARCH-MAP-007
-"""Optional planning sidecar — score targets, milestone due dates, planned items.
+"""Optional planning sidecar — lanes, bars, milestone due dates, release cadence.
 
 Reads `requirements/_planning.json` first, then legacy `_targets.json`."""
 import datetime
 import json
 import os
 import re
+
+from .git import _git
+from .history import read_history
 
 PLANNING_FILES = ("_planning.json", "_targets.json")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -25,11 +28,6 @@ def _parse_milestone_entry(raw):
     label = raw.get("label") or raw.get("note")
     if isinstance(label, str) and label.strip():
         out["label"] = label.strip()
-    items = raw.get("items")
-    if isinstance(items, list):
-        clean = [s.strip() for s in items if isinstance(s, str) and s.strip()]
-        if clean:
-            out["items"] = clean
     return out or None
 
 
@@ -68,7 +66,7 @@ PERIODS = {"week": "week", "weekly": "week", "month": "month", "monthly": "month
 # week, a day-of-month (or "last") for a month. A single default would be wrong for one
 # of them, and silently so.
 PERIOD_DEFAULT_ON = {"week": "friday", "month": "last"}
-CADENCE_DEFAULTS = {"every": "month", "on": "last", "lane": "Release"}
+CADENCE_DEFAULTS = {"every": "week", "on": "friday", "lane": "Release"}
 # A plan can span years; one marker per week over a decade is 520 vertical lines and an
 # unreadable chart. The cap is a rendering limit, not a planning opinion — it truncates
 # the tail and the count says so, rather than silently thinning the series.
@@ -236,16 +234,6 @@ def load_targets(reqs_dir):
         return {}
 
     out = {}
-    scores = raw.get("scores")
-    if isinstance(scores, dict):
-        clean = {}
-        for key in ("health", "design"):
-            val = scores.get(key)
-            if isinstance(val, (int, float)) and 0 <= val <= 100:
-                clean[key] = int(round(val))
-        if clean:
-            out["scores"] = clean
-
     milestones = raw.get("milestones")
     if isinstance(milestones, dict):
         clean_ms = {}
@@ -284,3 +272,78 @@ def load_targets(reqs_dir):
             out["cadence"] = cadence
             out["releases"] = dates
     return out
+
+
+# ---------- a plan that schedules the past ----------
+_SEMVER_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
+
+
+def _semver3(text):  # implements: REQ-PLANSTALE-1013
+    """(major, minor, patch) for `vX.Y` or `vX.Y.Z`, or None for anything else.
+
+    A missing patch is 0, so milestone `v7.19` is the same number as release `v7.19.0`:
+    the 7.19 line has been declared, and a plan naming it describes the past."""
+    m = _SEMVER_RE.match(text.strip()) if isinstance(text, str) else None
+    return tuple(int(g or 0) for g in m.groups()) if m else None
+
+
+def _plugin_json_version(reqs_dir, code_root):  # implements: REQ-PLANSTALE-1013
+    """The `version` of a `.claude-plugin/plugin.json` beside the requirements directory
+    or at the code root, or None."""
+    bases = [os.path.dirname(os.path.abspath(reqs_dir or "."))]
+    if code_root:
+        bases.append(os.path.abspath(code_root))
+    for base in dict.fromkeys(bases):
+        raw = _read_planning_file(os.path.join(base, ".claude-plugin", "plugin.json"))
+        if isinstance(raw, dict) and _semver3(raw.get("version")):
+            return raw["version"]
+    return None
+
+
+def shipped_baseline(reqs_dir, code_root):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-PLANSTALE-1013
+    """(version tuple, "vX.Y.Z", source) — the highest version any of three places has
+    already committed to — or None when none of them names one.
+
+    All three, because each is ahead of the others at some point in a release: the
+    manifest is bumped before a tag exists, the CHANGELOG heading is written with the
+    bump, and a tag can exist for a repo that keeps neither. Taking only the tag would
+    have passed the plan that scheduled v7.19 while plugin.json already said 7.19.0."""
+    found = []
+    declared = _plugin_json_version(reqs_dir, code_root)
+    if declared:
+        found.append((_semver3(declared), "plugin.json"))
+    tags = _git(["-C", code_root, "tag", "-l", "v*"], timeout=5) if code_root else None
+    for tag in (tags or "").split():
+        if _semver3(tag):
+            found.append((_semver3(tag), "git tag"))
+    for entry in read_history(code_root) if code_root else []:
+        if _semver3(entry["version"]):
+            found.append((_semver3(entry["version"]), "CHANGELOG.md"))
+    if not found:
+        return None
+    key, source = max(found, key=lambda f: f[0])
+    return key, "v{}.{}.{}".format(*key), source
+
+
+def stale_plan_milestones(reqs_dir, code_root):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-PLANSTALE-1013
+    """{"baseline", "source", "milestones"} naming every `_planning.json` milestone key
+    or bar `milestone` at or below `shipped_baseline`, or None when there is none.
+
+    Read-only, like every roadmap signal: it is reported by `gate --audit` and `health`
+    and never becomes a gate rule (precedent: Senate run 2026-09-14_225939). The plan had
+    scheduled an already-shipped version three times before this existed."""
+    plan = load_targets(reqs_dir)
+    names = set(plan.get("milestones", {}))
+    names.update(bar["milestone"] for bar in plan.get("bars", []) if bar.get("milestone"))
+    if not names:
+        return None
+    base = shipped_baseline(reqs_dir, code_root)
+    if base is None:
+        return None
+    stale = sorted((n for n in names if _semver3(n) and _semver3(n) <= base[0]),
+                   key=_semver3)
+    if not stale:
+        return None
+    return {"baseline": base[1], "source": base[2], "milestones": stale}

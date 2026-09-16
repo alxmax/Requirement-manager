@@ -42,7 +42,7 @@
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
     "ARCH-MAP-007": {
-      "hash": "4f93ce5f5feb",
+      "hash": "7c4e810f31e7",
       "reason": null
     },
     "ARCH-PARSE-001": {
@@ -52,6 +52,10 @@
     "ARCH-REPRO-041": {
       "hash": "95d822880e6c",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
+    },
+    "ARCH-ROADMAP-038": {
+      "hash": "df08b870193f",
+      "reason": null
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -121,6 +125,10 @@
       "hash": "524079054104",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "REQ-HISTORY-1003": {
+      "hash": "55682bd805d3",
+      "reason": null
+    },
     "REQ-INITTAG-1008": {
       "hash": "8b464f058897",
       "reason": "feedback 2026-09-14: lint fixes and recorded exemption reasons"
@@ -138,11 +146,15 @@
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     },
     "REQ-PLANCADENCE-1000": {
-      "hash": "4ddea76b8894",
+      "hash": "3f85229041a5",
       "reason": null
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "e7d3ea39a6d7",
+      "hash": "396a731f0b12",
+      "reason": null
+    },
+    "REQ-PLANSTALE-1013": {
+      "hash": "9434789ef73b",
       "reason": null
     },
     "REQ-PLANTAGGED-1005": {

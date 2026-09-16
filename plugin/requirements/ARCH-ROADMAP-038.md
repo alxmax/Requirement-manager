@@ -24,6 +24,7 @@ Every bullet below is binding.
 - The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]
 - The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]
 - A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]
+- A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]
 
 ## Cases
 CASE-1
@@ -78,6 +79,15 @@ CASE-6
   divergențe item/bară și ≥ 1 recurență de prospețime (o bară rămasă în urma item-ului
   ei după ce a fost corectată o dată). Dacă pe 2027-03-14 cele două numere citesc
   sub 2 și zero, propunerea se marchează respinsă — nu re-argumentată.
+- Precedente: Senate `2026-06-21_122415-reqmap-todo-roadmap-coherence` (MODIFY, outcome OK:
+  semnal read-only la n=2, niciodată gate) și `2026-09-14_225939-senate-reqmap-plan-single-source`
+  (MODIFY, outcome OVR: ștergerea `scores` nu fusese livrată). Auditul
+  `2026-09-16_160109-rm-planning-audit` (MODIFY 9-0) a cerut REQ-PLANSTALE-1013.
+- Citirea condiției de redeschidere la 2026-09-16: recurențe de prospețime a planului = 2
+  (v7.9 în 830df0f, v7.19 cu `plugin.json` deja la 7.19.0), după prima (v7.4);
+  divergențe item/bară măsurate = 1 (bara „Server MCP” era planificată pe v7.19 în timp ce
+  item-ul ei stă în `Later` cu `unpark:`). Sub pragul de ≥ 2 divergențe: condiția NU e
+  îndeplinită, merge-ul rămâne respins.
 
 **Current implementation**
 - `_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by
@@ -381,3 +391,79 @@ CASE-4 — the band shows the name, or keeps its old label
   Given  one export carrying `branch: feat/x` and one carrying none
   When   the Plan renders each
   Then   the first labels the shipped band `feat/x` and the second labels it `Shipped`
+
+---
+id: REQ-PLANSTALE-1013
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# A plan that schedules a version already declared is reported
+
+## Description
+> The plan scheduled a version that had already shipped three times — v7.4, v7.9, then
+> v7.19 while `plugin.json` already said 7.19.0 — and each time a human found it by
+> rereading the file. The one comparison the engine had read `TODO.md`, which this repo
+> archived, so it went silent exactly when the plan moved to `_planning.json`.
+
+Every bullet below is binding.
+- The baseline is the highest of three versions: `version` in a `.claude-plugin/plugin.json`
+  beside the requirements directory or at the code root, the newest `v*` git tag, and the
+  newest dated `vX.Y.Z` heading in `CHANGELOG.md`. With none of them, nothing is reported.
+- Every version is compared in one form, `vX.Y.Z`, the form tags and CHANGELOG headings
+  use: `plugin.json`'s `7.19.0` is `v7.19.0`, and a short key `vX.Y` is read as `vX.Y.0`.
+  A milestone equal to the baseline is stale, because that version has been declared.
+  A name that is not a version is never compared.
+- Every milestone key in `_planning.json` and every bar `milestone` at or below the
+  baseline is named in one `gate --audit` line and in `health --json` under `plan_shipped`,
+  together with the baseline and the source it came from.
+- The signal is read-only: no gate rule reads it, and the gate's exit code never depends on it.
+- The planned set is `bars`: the Versions view lists each bar in the column of its `milestone`, the same list the Plan chart draws, and reads no `milestones[].items[]`.
+
+## Cases
+CASE-1 — a milestone equal to the declared version is stale
+  Given  `plugin.json` at 7.19.0 and milestones `v7.19.0` and `v7.20.0`
+  When   the audit runs
+  Then   exactly one line names `v7.19.0`, against `v7.19.0` from `plugin.json`
+
+CASE-2 — a milestone past the baseline is silent
+  Given  `plugin.json` at 7.19.0 and milestone `v7.20.0`
+  When   the audit runs
+  Then   no plan line is reported
+
+CASE-3 — a patch past the baseline is silent, and a short key is padded
+  Given  a CHANGELOG whose newest heading is `v7.19.0`
+  When   milestone `v7.19.1`, then milestone `v7.19`, is checked
+  Then   the first is silent and the second is stale
+
+CASE-4 — no baseline, no signal
+  Given  a plan with milestones and no manifest, tag or CHANGELOG
+  When   the audit runs
+  Then   nothing is reported
+
+CASE-5 — the highest source wins, and bars count
+  Given  `plugin.json` at 7.18.0, a CHANGELOG at `v7.19.0` and a bar on milestone `v7.19.0`
+  When   the audit runs
+  Then   the bar's milestone is stale against `v7.19.0` from `CHANGELOG.md`
+
+CASE-6 — reported, never gated
+  Given  the registered gate rules
+  When   they are listed
+  Then   none of them comes from the planning module
+
+CASE-7 — a bar appears in its version's column
+  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`
+  When   the Versions view renders
+  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
+
+## Context
+**Terms**
+- the baseline      the highest version already declared by manifest, tag or CHANGELOG.
+- a version         written `vX.Y.Z` everywhere a plan names one, like `v7.18.0`.
+- the planned set   `bars`, grouped by `milestone`. The Plan chart and the Versions columns
+                    both read it; `milestones` carries only a due date and a label.
+- a numbered milestone  valid only for the NEXT release. At about five releases a day
+                    (20 in 2026-09-13..16), a number further out is overtaken within hours.

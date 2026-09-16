@@ -10,6 +10,7 @@ from .orphans import _scan_untagged, untaggable_by_design
 from .risk import _member_roles
 from .scan import _walk_code
 from .sections import binding_hash
+from .targets import stale_plan_milestones
 from .text import _verify_bullets
 
 
@@ -269,6 +270,9 @@ def _health_gather_signals(reqs, code_root, reqs_dir, data):
                                         "requirements": newest_req}
         if roadmap["unversioned_headings"]:
             data["roadmap_unversioned_headings"] = roadmap["unversioned_headings"]
+    stale = stale_plan_milestones(reqs_dir, code_root) if reqs_dir else None
+    if stale:  # implements: REQ-PLANSTALE-1013
+        data["plan_shipped"] = stale
     return data, untagged, lag, design
 
 
