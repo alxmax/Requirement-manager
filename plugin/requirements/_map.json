@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.6",
+  "engine_version": "2026-09-16.7",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -645,79 +645,87 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:27"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:30"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:45"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:48"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:55"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:82"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:102"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:105"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:124"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:140"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:143"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:156"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:159"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:166"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:169"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:175"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:186"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:189"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:208"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:198"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:245"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:207"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:272"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:229"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:303"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:266"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:332"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:343"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:329"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:366"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:358"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:397"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:369"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:392"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:423"
         },
         {
           "role": "implements",
@@ -838,35 +846,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:27"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:30"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:208"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:229"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:272"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:303"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:329"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:332"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:358"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:343"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:369"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:366"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:392"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:397"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:423"
         }
       ],
       "test_exempt": null,
@@ -1029,7 +1037,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:251"
+          "loc": "plugin/scripts/reqmap.py:255"
         },
         {
           "role": "tested-by",
@@ -1037,43 +1045,43 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:45"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:48"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:55"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:82"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:102"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:105"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:124"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:140"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:143"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:156"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:159"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:166"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:169"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:186"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:207"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:245"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:266"
         }
       ],
       "test_exempt": null,
@@ -2722,7 +2730,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:113"
+          "loc": "plugin/scripts/reqmap.py:114"
         },
         {
           "role": "tested-by",
@@ -2952,7 +2960,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:285"
+          "loc": "plugin/scripts/reqmap.py:289"
         },
         {
           "role": "tested-by",
@@ -2960,11 +2968,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:197"
+          "loc": "plugin/scripts/reqmap_engine/config.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:207"
+          "loc": "plugin/scripts/reqmap_engine/config.py:213"
         }
       ],
       "test_exempt": null,
@@ -3023,11 +3031,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:197"
+          "loc": "plugin/scripts/reqmap_engine/config.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:207"
+          "loc": "plugin/scripts/reqmap_engine/config.py:213"
         }
       ],
       "test_exempt": null,
@@ -5815,7 +5823,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:85"
+          "loc": "plugin/scripts/reqmap_engine/init.py:87"
         },
         {
           "role": "implements",
@@ -6576,15 +6584,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:280"
+          "loc": "plugin/scripts/reqmap_engine/health.py:283"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:299"
+          "loc": "plugin/scripts/reqmap_engine/health.py:302"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:346"
+          "loc": "plugin/scripts/reqmap_engine/health.py:349"
         }
       ],
       "test_exempt": null,
@@ -6639,15 +6647,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:280"
+          "loc": "plugin/scripts/reqmap_engine/health.py:283"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:299"
+          "loc": "plugin/scripts/reqmap_engine/health.py:302"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:346"
+          "loc": "plugin/scripts/reqmap_engine/health.py:349"
         }
       ],
       "test_exempt": null,
@@ -6716,15 +6724,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:281"
+          "loc": "plugin/scripts/reqmap_engine/health.py:284"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:300"
+          "loc": "plugin/scripts/reqmap_engine/health.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:347"
+          "loc": "plugin/scripts/reqmap_engine/health.py:350"
         }
       ],
       "test_exempt": null,
@@ -6792,15 +6800,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:281"
+          "loc": "plugin/scripts/reqmap_engine/health.py:284"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:300"
+          "loc": "plugin/scripts/reqmap_engine/health.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:347"
+          "loc": "plugin/scripts/reqmap_engine/health.py:350"
         }
       ],
       "test_exempt": null,
@@ -7149,7 +7157,9 @@
         "ARCH-CHECK-006",
         "ARCH-MAP-007"
       ],
-      "used_by": [],
+      "used_by": [
+        "ARCH-RELEASE-072"
+      ],
       "satisfies": [
         "SYS-SHIP-108"
       ],
@@ -7176,15 +7186,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:130"
+          "loc": "plugin/scripts/reqmap_engine/init.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:156"
+          "loc": "plugin/scripts/reqmap_engine/init.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:199"
+          "loc": "plugin/scripts/reqmap_engine/init.py:205"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:228"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:241"
         }
       ],
       "test_exempt": null,
@@ -7241,7 +7259,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:156"
+          "loc": "plugin/scripts/reqmap_engine/init.py:158"
         }
       ],
       "test_exempt": null,
@@ -7306,7 +7324,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:199"
+          "loc": "plugin/scripts/reqmap_engine/init.py:241"
         }
       ],
       "test_exempt": null,
@@ -8524,6 +8542,7 @@
         "ARCH-INIT-012",
         "ARCH-MAPDIAGRAMS-055",
         "ARCH-NEXT-013",
+        "ARCH-RELEASE-072",
         "ARCH-SITE-026",
         "ARCH-TRANSLATE-044",
         "ARCH-VIEWER-007"
@@ -9041,15 +9060,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:126"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:130"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:282"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:287"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:497"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:519"
         },
         {
           "role": "tested-by",
@@ -9057,7 +9076,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:266"
+          "loc": "plugin/scripts/reqmap_engine/targets.py:263"
         }
       ],
       "test_exempt": null,
@@ -9116,11 +9135,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:104"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:108"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:223"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:227"
         },
         {
           "role": "tested-by",
@@ -9128,23 +9147,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:30"
+          "loc": "plugin/scripts/reqmap_engine/history.py:36"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:55"
+          "loc": "plugin/scripts/reqmap_engine/history.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:68"
+          "loc": "plugin/scripts/reqmap_engine/history.py:74"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:85"
+          "loc": "plugin/scripts/reqmap_engine/history.py:121"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:100"
+          "loc": "plugin/scripts/reqmap_engine/history.py:136"
         },
         {
           "role": "implements",
@@ -11316,11 +11335,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:338"
+          "loc": "plugin/scripts/reqmap.py:342"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:356"
+          "loc": "plugin/scripts/reqmap.py:360"
         },
         {
           "role": "tested-by",
@@ -11368,7 +11387,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:356"
+          "loc": "plugin/scripts/reqmap.py:360"
         },
         {
           "role": "tested-by",
@@ -12300,7 +12319,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:95"
+          "loc": "plugin/scripts/reqmap.py:96"
         },
         {
           "role": "tested-by",
@@ -12359,15 +12378,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:93"
+          "loc": "plugin/scripts/reqmap.py:94"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:95"
+          "loc": "plugin/scripts/reqmap.py:96"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:267"
+          "loc": "plugin/scripts/reqmap.py:271"
         },
         {
           "role": "tested-by",
@@ -12592,6 +12611,644 @@
           "acceptance": "CASE-1 — --json expune numărătoarea ca o cheie întreagă\n  Given  un repo cu două commit-uri aterizate după ultimul commit care a atins `requirements/`\n  When   rulează `health --json`\n  Then   cheia `commits_since_req_touch` a obiectului JSON parsat este egală cu întregul `2`\n\nCASE-2 — linia de lag apare doar pentru o numărătoare diferită de zero\n  Given  un repo unde ultimul commit a atins `requirements/` (lag 0) și altul cu două commit-uri de cod ulterioare (lag 2)\n  When   rulează `health` în mod text pe fiecare\n  Then   linia \"commits since requirements touched\" este absentă pentru primul și prezentă pentru al doilea\n\nCASE-3 — un lag diferit de zero lasă scorul de health neschimbat\n  Given  o cerință verde și două commit-uri aterizate după ce `requirements/` a fost atins ultima oară (`commits_since_req_touch` = 2)\n  When   rulează `health --json`\n  Then   `score` tot se citește 100 iar codul de ieșire rămâne neschimbat, neafectat de lag-ul diferit de zero\n\nCASE-4 — un lag nemăsurabil omite cheia complet\n  Given  un code root care nu este un git worktree\n  When   rulează `health --json` cu acel code root\n  Then   obiectul JSON parsat nu are nicio cheie `commits_since_req_touch`, păstrând schema `--json` astfel încât o citire lipsă nu este niciodată confundată cu un registry proaspăt\n\nCASE-5 — un git worktree al cărui reqs_dir nu are commit-uri se citește ca nemăsurabil\n  Given  un repo git cu commit-uri, unde `requirements/` nu a fost niciodată committed\n  When   rulează `_commits_since_reqs_touch` pe acel repo\n  Then   returnează `None`, nu `0` sau o excepție"
         }
       }
+    },
+    {
+      "id": "ARCH-RELEASE-072",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "confirmed",
+      "area": "ARCH",
+      "title": "Releasing from the plan",
+      "intent": "The plan says which version the work goes out in, the CHANGELOG says what shipped, and a version file says what the repository is. Keeping the three in step used to be three hand edits, and they drifted: the plan scheduled a shipped version three times. This capability reads all three in one form, reports where they disagree, and cuts the next planned release in one step, so a repository set up by `init` can release without a script of its own.",
+      "contract": [
+        "The engine reads the version a repository declares from the usual version files, or from the files `_config.json` names. [[REQ-VERSIONFILES-1014]]",
+        "A CHANGELOG is read in the dated heading forms its ecosystem uses, and `init` seeds one when the repository has none. [[REQ-CHANGELOGFORMS-1015]]",
+        "`sync`, `gate --audit` and `health` report where the version files, the CHANGELOG and the tags disagree, and never fail on it. [[REQ-VERSIONALIGN-1016]]",
+        "The next release's number is the lowest planned milestone above the highest version already declared. [[REQ-NEXTVERSION-1017]]",
+        "`sync --release` prints the release it would cut and writes the version files and the CHANGELOG entry only with `--apply`. [[REQ-RELEASECMD-1018]]",
+        "`init` gives a GitHub repository a workflow that tags and releases the declared version once. [[REQ-RELEASEWORKFLOW-1019]]",
+        "Releasing a version removes its milestone and bars from the plan, so the plan never describes the past. [[REQ-PLANADVANCE-1020]]",
+        "`sync` suggests a new date for a bar whose work finished on another day, or ran past its end. [[REQ-PLANDATES-1022]]",
+        "A release names the ROADMAP items its bars carry out, for the author to tick. [[REQ-RELEASEROADMAP-1023]]"
+      ],
+      "verify": [],
+      "notes": [
+        "The decision and what it supersedes are in ADR-0040. Tagging stays in CI: the engine never tags or pushes."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — Given  a fresh repository with a `package.json` at 0.1.0 When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry"
+      ],
+      "accept": "CASE-1\n  Given  a fresh repository with a `package.json` at 0.1.0\n  When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs\n  Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "ARCH-ROADMAP-038",
+        "ARCH-INIT-012",
+        "ARCH-MAP-007"
+      ],
+      "depends_on": [
+        "ARCH-ROADMAP-038",
+        "ARCH-INIT-012",
+        "ARCH-MAP-007"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-SHIP-108"
+      ],
+      "satisfied_by": [
+        "REQ-VERSIONFILES-1014",
+        "REQ-CHANGELOGFORMS-1015",
+        "REQ-VERSIONALIGN-1016",
+        "REQ-NEXTVERSION-1017",
+        "REQ-RELEASECMD-1018",
+        "REQ-RELEASEWORKFLOW-1019",
+        "REQ-PLANADVANCE-1020",
+        "REQ-PLANDATES-1022",
+        "REQ-RELEASEROADMAP-1023"
+      ],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3819"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:251"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:301"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:1"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:111"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:187"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:285"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:1"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:110"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:187"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:201"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.21.0",
+      "priority": "",
+      "risks": [],
+      "clauses": 1,
+      "covered": 1
+    },
+    {
+      "id": "REQ-VERSIONFILES-1014",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The version a repository declares is read where it lives",
+      "intent": "Every ecosystem keeps its version in a different file, and a check that knows only one of them is blind in every other repository.",
+      "contract": [
+        "`package.json`, `pyproject.toml`, `Cargo.toml`, `.claude-plugin/plugin.json` and `VERSION` are probed at the code root and beside the requirements directory; a TOML version is read only from the `project`, `tool.poetry`, `package` or `workspace.package` table.",
+        "A non-empty `VERSION_FILES` list in `_config.json` replaces the probe with the files it names.",
+        "Rewriting a version changes only the version text; every other byte of the file is kept.",
+        "`init` prints which files the version is read from, or that none was found."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the usual files are found and a dependency pin is not Given  a `package.json` at 1.4.0 and a `pyproject.toml` whose `[tool.black]` table sets another version When   the version files are read Then   `package.json` and the `[project]` version are returned, and the tool's is not",
+        "CASE-2 — — a configured file replaces the probe Given  `VERSION_FILES` naming `meta/VERSION` When   the version files are read Then   only `meta/VERSION` is returned",
+        "CASE-3 — — a bump rewrites the version and nothing else Given  a formatted `package.json` and a `Cargo.toml` with a comment and a dependency version When   both are rewritten to 1.5.0 Then   each file differs from before only in its own version text",
+        "CASE-4 — — no version file is an empty answer Given  a repository with no version file When   the version files are read Then   the answer is empty"
+      ],
+      "accept": "CASE-1 — the usual files are found and a dependency pin is not\n  Given  a `package.json` at 1.4.0 and a `pyproject.toml` whose `[tool.black]` table sets another version\n  When   the version files are read\n  Then   `package.json` and the `[project]` version are returned, and the tool's is not\n\nCASE-2 — a configured file replaces the probe\n  Given  `VERSION_FILES` naming `meta/VERSION`\n  When   the version files are read\n  Then   only `meta/VERSION` is returned\n\nCASE-3 — a bump rewrites the version and nothing else\n  Given  a formatted `package.json` and a `Cargo.toml` with a comment and a dependency version\n  When   both are rewritten to 1.5.0\n  Then   each file differs from before only in its own version text\n\nCASE-4 — no version file is an empty answer\n  Given  a repository with no version file\n  When   the version files are read\n  Then   the answer is empty",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3572"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:228"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:60"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:110"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
+    },
+    {
+      "id": "REQ-CHANGELOGFORMS-1015",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A CHANGELOG is read in the form its ecosystem writes",
+      "intent": "A parser that knew one heading form left every other repository with an empty history and nothing to release into.",
+      "contract": [
+        "A dated release heading is read as ``## plugin `vX.Y.Z` — date``, `## [X.Y.Z] - date`, `## vX.Y.Z - date` or `## X.Y.Z (date)`, and its version is reported as `vX.Y.Z`.",
+        "A heading without a date, such as `## [Unreleased]`, is not a release.",
+        "A new entry is written in the heading form the file already uses, and in the Keep a Changelog form when it has none.",
+        "`init` seeds a `CHANGELOG.md` holding an `Unreleased` heading when the repository has none, never overwrites one, and lists it in the seeded `.reqmapignore`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — every form is read, and Unreleased is not Given  a CHANGELOG with an Unreleased heading and one release in each of three forms When   it is parsed Then   the three releases are returned newest first as `vX.Y.Z`, and Unreleased is not",
+        "CASE-2 — — a new entry follows the form the file uses Given  a Keep a Changelog file, a file in this repository's form, and an empty file When   a heading is written for each Then   each heading takes the file's own form, and the empty file's is Keep a Changelog",
+        "CASE-3 — — init seeds a CHANGELOG once and does not scan it Given  a repository without a CHANGELOG When   `init` runs, the file is edited, and `init` runs again Then   the first run creates it, the second leaves the edit, and `.reqmapignore` lists it"
+      ],
+      "accept": "CASE-1 — every form is read, and Unreleased is not\n  Given  a CHANGELOG with an Unreleased heading and one release in each of three forms\n  When   it is parsed\n  Then   the three releases are returned newest first as `vX.Y.Z`, and Unreleased is not\n\nCASE-2 — a new entry follows the form the file uses\n  Given  a Keep a Changelog file, a file in this repository's form, and an empty file\n  When   a heading is written for each\n  Then   each heading takes the file's own form, and the empty file's is Keep a Changelog\n\nCASE-3 — init seeds a CHANGELOG once and does not scan it\n  Given  a repository without a CHANGELOG\n  When   `init` runs, the file is edited, and `init` runs again\n  Then   the first run creates it, the second leaves the edit, and `.reqmapignore` lists it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3612"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:285"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-VERSIONALIGN-1016",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Where the version sources disagree is reported",
+      "intent": "A version bumped in one file and not another, or a release with no CHANGELOG entry, is found at release time by whoever reads the tag. It should be found when `sync` runs.",
+      "contract": [
+        "Version files declaring different versions are named in one line, each with its version.",
+        "A newest dated CHANGELOG release different from the declared version is reported, saying whether the entry is missing or the CHANGELOG is ahead.",
+        "A tag above the declared version is reported; a tag below it is the normal state between a bump and its release and is not.",
+        "The lines are printed by `sync` and `gate --audit` and carried by `health --json` under `version_alignment`; no gate rule reads them."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — files that disagree are named Given  a `package.json` at 1.4.0 and a `VERSION` file at 1.3.0 When   the alignment is checked Then   one line names both files and their versions",
+        "CASE-2 — — a CHANGELOG behind the files asks for the entry Given  version files at 1.4.0 and a CHANGELOG whose newest release is 1.3.0 When   the alignment is checked Then   a line names `v1.3.0` and asks for the entry",
+        "CASE-3 — — a tag below the files is the normal state Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.3.0` When   the alignment is checked Then   nothing is reported",
+        "CASE-4 — — a tag above the files is reported Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.5.0` When   the alignment is checked Then   one line says `v1.5.0` is above the declared version"
+      ],
+      "accept": "CASE-1 — files that disagree are named\n  Given  a `package.json` at 1.4.0 and a `VERSION` file at 1.3.0\n  When   the alignment is checked\n  Then   one line names both files and their versions\n\nCASE-2 — a CHANGELOG behind the files asks for the entry\n  Given  version files at 1.4.0 and a CHANGELOG whose newest release is 1.3.0\n  When   the alignment is checked\n  Then   a line names `v1.3.0` and asks for the entry\n\nCASE-3 — a tag below the files is the normal state\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.3.0`\n  When   the alignment is checked\n  Then   nothing is reported\n\nCASE-4 — a tag above the files is reported\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.5.0`\n  When   the alignment is checked\n  Then   one line says `v1.5.0` is above the declared version",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3646"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:189"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/health.py:277"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:136"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:201"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
+    },
+    {
+      "id": "REQ-NEXTVERSION-1017",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The next release's number comes from the plan",
+      "intent": "The milestone a bar was scheduled on already states which release the work goes out in. Reading the number anywhere else makes a second place to state it (ADR-0040).",
+      "contract": [
+        "The next version is the lowest milestone key or bar `milestone` above the highest version a version file, tag or CHANGELOG heading has declared, spelled as the plan spells it.",
+        "With nothing planned above that baseline there is no next version."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the lowest planned version above the baseline Given  a declared 1.4.0 and milestones `v1.4.0`, `v1.6.0` and `v1.5.0` When   the next version is asked for Then   it is `v1.5.0`",
+        "CASE-2 — — nothing planned above the baseline Given  a declared 1.4.0 and only a milestone `v1.4.0` When   the next version is asked for Then   there is none",
+        "CASE-3 — — a bar's milestone counts as planned Given  a declared 1.4.0 and a bar on milestone `v1.4.1` with no milestone entry When   the next version is asked for Then   it is `v1.4.1`"
+      ],
+      "accept": "CASE-1 — the lowest planned version above the baseline\n  Given  a declared 1.4.0 and milestones `v1.4.0`, `v1.6.0` and `v1.5.0`\n  When   the next version is asked for\n  Then   it is `v1.5.0`\n\nCASE-2 — nothing planned above the baseline\n  Given  a declared 1.4.0 and only a milestone `v1.4.0`\n  When   the next version is asked for\n  Then   there is none\n\nCASE-3 — a bar's milestone counts as planned\n  Given  a declared 1.4.0 and a bar on milestone `v1.4.1` with no milestone entry\n  When   the next version is asked for\n  Then   it is `v1.4.1`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3676"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:112"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:187"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-RELEASECMD-1018",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "`sync --release` cuts the next planned version",
+      "intent": "Bumping the files, writing the CHANGELOG entry and updating the plan are one decision made in three places. One command makes it in all three, and shows what it will do first.",
+      "contract": [
+        "`sync --release` prints the version it would release, the version-file changes, the CHANGELOG entry and the plan change, and writes nothing.",
+        "With `--apply` it rewrites every version file, and writes the dated entry — headed by the milestone's label in bold, then one bullet per bar planned on that version — directly under `Unreleased` when the file has one, otherwise above the newest release.",
+        "A version named after `--release` is released instead of the planned one.",
+        "It refuses with exit 2, writing nothing, when nothing is planned above the baseline, when the version is not above it, or when the gate reports errors.",
+        "An entry for the version that already exists is never written a second time."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a dry run writes nothing Given  a plan with `v1.5.0` above a declared 1.4.0 When   `sync --release` runs without `--apply` Then   it names `v1.5.0` and every file is unchanged",
+        "CASE-2 — — apply bumps the files and writes the entry under Unreleased Given  that plan and a CHANGELOG holding an Unreleased item When   `sync --release --apply` runs Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item",
+        "CASE-3 — — apply with nothing planned is refused Given  a declared 1.4.0 and an empty plan When   `sync --release --apply` runs Then   it exits 2, says nothing is planned above `v1.4.0`, and `package.json` is unchanged",
+        "CASE-4 — — a named version not above the baseline is refused Given  a declared 1.4.0 When   `sync --release v1.4.0 --apply` runs Then   it exits 2 and says `v1.4.0` is not above `v1.4.0`",
+        "CASE-5 — — an entry is never written twice Given  a release already applied for `v1.5.0` When   it is applied again Then   the CHANGELOG holds one `1.5.0` heading"
+      ],
+      "accept": "CASE-1 — a dry run writes nothing\n  Given  a plan with `v1.5.0` above a declared 1.4.0\n  When   `sync --release` runs without `--apply`\n  Then   it names `v1.5.0` and every file is unchanged\n\nCASE-2 — apply bumps the files and writes the entry under Unreleased\n  Given  that plan and a CHANGELOG holding an Unreleased item\n  When   `sync --release --apply` runs\n  Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item\n\nCASE-3 — apply with nothing planned is refused\n  Given  a declared 1.4.0 and an empty plan\n  When   `sync --release --apply` runs\n  Then   it exits 2, says nothing is planned above `v1.4.0`, and `package.json` is unchanged\n\nCASE-4 — a named version not above the baseline is refused\n  Given  a declared 1.4.0\n  When   `sync --release v1.4.0 --apply` runs\n  Then   it exits 2 and says `v1.4.0` is not above `v1.4.0`\n\nCASE-5 — an entry is never written twice\n  Given  a release already applied for `v1.5.0`\n  When   it is applied again\n  Then   the CHANGELOG holds one `1.5.0` heading",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3698"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/history.py:92"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/history.py:101"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:71"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:83"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:111"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:146"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:187"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:82"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
+    },
+    {
+      "id": "REQ-RELEASEWORKFLOW-1019",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A GitHub repository gets the workflow that tags a release once",
+      "intent": "The engine decides the version and never tags. CI tags, and it needs to know the version, whether it is already tagged, and the notes to publish.",
+      "contract": [
+        "`sync --release --json` carries `declared`, `tag_exists` and `notes`: the declared version as `vX.Y.Z`, whether that tag exists, and that version's CHANGELOG entry.",
+        "`init` writes `.github/workflows/reqmap-release.yml` when the repository has a `.github` directory or a github.com remote, and never over an existing file.",
+        "The workflow runs the engine vendored in the checkout and creates the tag and GitHub release only when the declared version has no tag; with no engine inside the repository, `init` writes no workflow and says why."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — init seeds the workflow on a GitHub repository Given  a repository with a `.github` directory and no release workflow When   `init` runs Then   `.github/workflows/reqmap-release.yml` is written",
+        "CASE-2 — — an existing workflow is never overwritten Given  a repository whose release workflow already exists When   the release files are seeded Then   the workflow is unchanged and not reported as created",
+        "CASE-3 — — a repository off GitHub gets no workflow Given  a repository with no `.github` directory and no remote When   `init` runs Then   no `.github` directory is created",
+        "CASE-4 — — the workflow runs the vendored engine and releases once Given  the engine inside the checkout, and a checkout without it When   the workflow text is built for each Then   the first runs that engine with `sync --release --json` and skips an existing tag, and the second has no workflow",
+        "CASE-5 — — the JSON carries what CI needs Given  a declared 1.5.0 with a CHANGELOG entry and no tag When   `sync --release --json` runs Then   it reports `v1.5.0`, no tag, and the entry's text"
+      ],
+      "accept": "CASE-1 — init seeds the workflow on a GitHub repository\n  Given  a repository with a `.github` directory and no release workflow\n  When   `init` runs\n  Then   `.github/workflows/reqmap-release.yml` is written\n\nCASE-2 — an existing workflow is never overwritten\n  Given  a repository whose release workflow already exists\n  When   the release files are seeded\n  Then   the workflow is unchanged and not reported as created\n\nCASE-3 — a repository off GitHub gets no workflow\n  Given  a repository with no `.github` directory and no remote\n  When   `init` runs\n  Then   no `.github` directory is created\n\nCASE-4 — the workflow runs the vendored engine and releases once\n  Given  the engine inside the checkout, and a checkout without it\n  When   the workflow text is built for each\n  Then   the first runs that engine with `sync --release --json` and skips an existing tag, and the second has no workflow\n\nCASE-5 — the JSON carries what CI needs\n  Given  a declared 1.5.0 with a CHANGELOG entry and no tag\n  When   `sync --release --json` runs\n  Then   it reports `v1.5.0`, no tag, and the entry's text",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3771"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/history.py:110"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:97"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:263"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:286"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
+    },
+    {
+      "id": "REQ-PLANADVANCE-1020",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Releasing a version advances the plan",
+      "intent": "A plan that keeps a shipped version describes the past, which is worse than no plan. The record of what shipped is the CHANGELOG entry written in the same step.",
+      "contract": [
+        "Applying a release removes that version's milestone and every bar planned on it from `_planning.json`, keeping every other key, milestone and bar.",
+        "After a release the plan names no version at or below the declared one, and the next planned milestone becomes the next release."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the plan drops the released version and keeps the rest Given  a plan holding `v1.5.0` and `v1.6.0`, a bar on each, and lanes When   `v1.5.0` is released Then   only `v1.6.0`, its bar and the lanes remain",
+        "CASE-2 — — after a release the plan is current and names the next Given  that release applied When   the plan and version sources are checked Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next"
+      ],
+      "accept": "CASE-1 — the plan drops the released version and keeps the rest\n  Given  a plan holding `v1.5.0` and `v1.6.0`, a bar on each, and lanes\n  When   `v1.5.0` is released\n  Then   only `v1.6.0`, its bar and the lanes remain\n\nCASE-2 — after a release the plan is current and names the next\n  Given  that release applied\n  When   the plan and version sources are checked\n  Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3698"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:54"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:146"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 2,
+      "covered": 2
+    },
+    {
+      "id": "REQ-PLANDATES-1022",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "`sync` suggests a bar's date when the work moved",
+      "intent": "A bar keeps the dates it was planned with. When the work finishes early, or runs over, the chart goes on showing the plan as if it were the schedule. The engine can see both from the requirement the bar names; it suggests the date and leaves the choice to the author.",
+      "contract": [
+        "A bar whose `req:` names a confirmed or implemented requirement with code implementing it is done on the date of the last commit to that code; when that date differs from the bar's `end` and is not before its `start`, `sync` names it as the `end` to set.",
+        "A bar whose `end` has passed while the requirement it names is not done is reported as needing its `end` moved.",
+        "A bar with no `req:`, or whose requirement does not exist, is never reported.",
+        "Nothing is written to `_planning.json`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — work done early suggests the real end Given  a bar ending 2026-10-02 whose confirmed requirement's code was last committed 2026-09-12 When   `sync` runs Then   it suggests setting the bar's `end` to 2026-09-12",
+        "CASE-2 — — work that matches its plan is silent Given  the same bar planned to end 2026-09-12 When   `sync` runs Then   nothing is suggested",
+        "CASE-3 — — code older than the bar is not its finish Given  a bar starting 2026-09-14 whose requirement's code was last committed 2026-09-12 When   `sync` runs Then   nothing is suggested, because the bar's work has not touched the code yet",
+        "CASE-4 — — an open requirement past its end is overdue Given  bars naming a draft requirement, one ending before today and one after, and a bar with no `req:` When   `sync` runs Then   only the bar that ended before today is reported, asking for its `end` to move"
+      ],
+      "accept": "CASE-1 — work done early suggests the real end\n  Given  a bar ending 2026-10-02 whose confirmed requirement's code was last committed 2026-09-12\n  When   `sync` runs\n  Then   it suggests setting the bar's `end` to 2026-09-12\n\nCASE-2 — work that matches its plan is silent\n  Given  the same bar planned to end 2026-09-12\n  When   `sync` runs\n  Then   nothing is suggested\n\nCASE-3 — code older than the bar is not its finish\n  Given  a bar starting 2026-09-14 whose requirement's code was last committed 2026-09-12\n  When   `sync` runs\n  Then   nothing is suggested, because the bar's work has not touched the code yet\n\nCASE-4 — an open requirement past its end is overdue\n  Given  bars naming a draft requirement, one ending before today and one after, and a bar with no `req:`\n  When   `sync` runs\n  Then   only the bar that ended before today is reported, asking for its `end` to move",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3842"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:198"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:251"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:280"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
+    },
+    {
+      "id": "REQ-RELEASEROADMAP-1023",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A release names the ROADMAP items it carries out",
+      "intent": "A release drops its bars from the plan, and the ROADMAP item the work came from stayed open beside a version that had shipped. Ticking it is the author's call; finding it is not.",
+      "contract": [
+        "An open ROADMAP item belongs to a released bar when its name equals the bar's title, or, failing that, when it is the only open item carrying the bar's `req:`.",
+        "`sync --release` lists those items as ones to tick by hand, and never edits `ROADMAP.md`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the items a release's bars carry out Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share When   the items for the bars are asked for Then   the first two are named and neither of the two sharing a `req:` is",
+        "CASE-2 — — the release plan names the items and writes none Given  a release whose bar is titled like an open Now item When   `sync --release --apply` runs Then   it names the item to tick and `ROADMAP.md` is unchanged"
+      ],
+      "accept": "CASE-1 — the items a release's bars carry out\n  Given  open items matched by title, by a `req:` only one item carries, and by a `req:` two items share\n  When   the items for the bars are asked for\n  Then   the first two are named and neither of the two sharing a `req:` is\n\nCASE-2 — the release plan names the items and writes none\n  Given  a release whose bar is titled like an open Now item\n  When   `sync --release --apply` runs\n  Then   it names the item to tick and `ROADMAP.md` is unchanged",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RELEASE-072"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3880"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:301"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 2,
+      "covered": 2
     },
     {
       "id": "ARCH-REPRO-041",
@@ -13283,7 +13940,8 @@
         "The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]",
         "The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]",
         "A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]",
-        "A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]"
+        "A planned milestone in `_planning.json` — a milestone key or a bar's `milestone` — at or below the highest version the repo has already declared is reported by `gate --audit` and `health`, and is never a gate rule. [[REQ-PLANSTALE-1013]]",
+        "An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]"
       ],
       "verify": [],
       "notes": [
@@ -13317,7 +13975,8 @@
         "ARCH-HEALTH-017"
       ],
       "used_by": [
-        "ARCH-PLANDRIFT-069"
+        "ARCH-PLANDRIFT-069",
+        "ARCH-RELEASE-072"
       ],
       "satisfies": [
         "SYS-REPORT-105"
@@ -13328,7 +13987,8 @@
         "REQ-ROADMAP-998",
         "REQ-PLANHORIZON-1010",
         "REQ-PLANBRANCH-1011",
-        "REQ-PLANSTALE-1013"
+        "REQ-PLANSTALE-1013",
+        "REQ-UNPLANNED-1024"
       ],
       "members": [
         {
@@ -13385,15 +14045,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:160"
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:319"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:304"
+          "loc": "plugin/scripts/reqmap_engine/targets.py:157"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:330"
+          "loc": "plugin/scripts/reqmap_engine/versions.py:144"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/versions.py:173"
         }
       ],
       "test_exempt": null,
@@ -13635,11 +14299,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:130"
+          "loc": "plugin/scripts/reqmap_engine/init.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:160"
+          "loc": "plugin/scripts/reqmap_engine/init.py:205"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/targets.py:157"
         }
       ],
       "test_exempt": null,
@@ -13753,7 +14421,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:175"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:178"
         },
         {
           "role": "implements",
@@ -13761,19 +14429,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:281"
+          "loc": "plugin/scripts/reqmap_engine/versions.py:33"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:290"
+          "loc": "plugin/scripts/reqmap_engine/versions.py:144"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:304"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/targets.py:330"
+          "loc": "plugin/scripts/reqmap_engine/versions.py:173"
         }
       ],
       "test_exempt": null,
@@ -13782,6 +14446,57 @@
       "risks": [],
       "clauses": 7,
       "covered": 7
+    },
+    {
+      "id": "REQ-UNPLANNED-1024",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A Now or Next item with no bar is counted",
+      "intent": "Now and Next say the work is coming; a bar says when. An item in either with no bar is a commitment with no date, and nothing said so. The two files stay two (Senate run 2026-09-14_225939); this is a read-only line between them.",
+      "contract": [
+        "An open item under Now or Next is scheduled when a bar's title equals its name or a bar carries its `req:`; otherwise it is unplanned.",
+        "`sync` prints one line counting unplanned items and naming the first; done items and Later items are never counted, and a repo with no ROADMAP.md sees nothing."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — Now and Next items without a bar are counted Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither When   the unplanned items are asked for Then   only the one matched by neither is counted and named",
+        "CASE-2 — — everything scheduled is silent Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all When   the line is asked for Then   there is none"
+      ],
+      "accept": "CASE-1 — Now and Next items without a bar are counted\n  Given  open Now/Next items, one matched by a bar's title, two by a bar's `req:`, one by neither\n  When   the unplanned items are asked for\n  Then   only the one matched by neither is counted and named\n\nCASE-2 — everything scheduled is silent\n  Given  every open Now/Next item matched by a bar, and separately no ROADMAP.md at all\n  When   the line is asked for\n  Then   there is none",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-ROADMAP-038"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3880"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:319"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/plandrift.py:328"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 2,
+      "covered": 2
     },
     {
       "id": "ARCH-RULES-059",
@@ -16295,7 +17010,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:241"
+          "loc": "plugin/scripts/reqmap.py:245"
         },
         {
           "role": "tested-by",
@@ -16382,7 +17097,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:239"
+          "loc": "plugin/scripts/reqmap_engine/init.py:270"
         },
         {
           "role": "implements",
@@ -18465,7 +19180,8 @@
         "REQ-VIEWER-984",
         "REQ-VIEWER-995",
         "REQ-VIEWER-999",
-        "REQ-PLANSTACK-1012"
+        "REQ-PLANSTACK-1012",
+        "REQ-PLANDAYS-1021"
       ],
       "members": [
         {
@@ -19473,15 +20189,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:59"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:63"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:72"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:76"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:165"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:169"
         },
         {
           "role": "implements",
@@ -19511,7 +20227,8 @@
         "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
         "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
         "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
-        "The vertical guides mark the work: a solid rule at each bar's start and a dotted one at its end, drawn only through that bar's own lane. `today` keeps its pill on the ruler, the milestones keep theirs there or in the release lane, and neither rules a line through the lanes.",
+        "Under the week row, every day carries its `day/month` label. [[REQ-PLANDAYS-1021]]",
+        "The vertical guides mark the work: a solid rule from the centre of each bar's start day on the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the milestones keep theirs there or in the release lane, and neither rules a line through the lanes.",
         "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport.",
         "A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.",
         "The lane column stays in place while the chart scrolls sideways, which means no ancestor of it may declare an overflow: an ancestor that does becomes its scrollport, and a scrollport that never scrolls never lets its sticky child stick."
@@ -19543,19 +20260,19 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:91"
+          "loc": "app/src/lib/timeline.js:104"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:14"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:17"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:344"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:367"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:477"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:586"
         }
       ],
       "test_exempt": null,
@@ -19565,6 +20282,56 @@
       "clauses": 4,
       "covered": 3,
       "gap": "no `verifies:` tag for CASE-4"
+    },
+    {
+      "id": "REQ-PLANDAYS-1021",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Each day on the Plan is labelled",
+      "intent": "A week band says which week a bar falls in; placing a one-day bar or a Friday release needs the day itself, and counting ticks from a week's edge is how a reader gets it wrong.",
+      "contract": [
+        "Under the week row the Plan draws one cell per day, labelled `day/month` with no leading zero, written across within the width of one day.",
+        "Today's label is drawn in the accent colour, and a Saturday or Sunday is fainter."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — each day under the weeks is labelled day/month Given  a chart that covers Monday 14 September 2026 through the following Sunday When   the Plan renders Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days"
+      ],
+      "accept": "CASE-1 — each day under the weeks is labelled day/month\n  Given  a chart that covers Monday 14 September 2026 through the following Sunday\n  When   the Plan renders\n  Then   the days read 14/9 through 20/9, and only 19/9 and 20/9 are weekend days",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/ssr-smoke.jsx:816"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/timeline.js:80"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:432"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 1,
+      "covered": 1
     },
     {
       "id": "ARCH-VLEVEL-037",
@@ -20237,6 +21004,7 @@
         "ARCH-CMDREGISTRY-033",
         "ARCH-INIT-012",
         "ARCH-PYFLOOR-040",
+        "ARCH-RELEASE-072",
         "ARCH-REPRO-041",
         "ARCH-SELFGATE-039",
         "ARCH-STALEENGINE-043",
@@ -20711,6 +21479,18 @@
     [
       "ARCH-REGISTRYLAG-035",
       "ARCH-HEALTH-017"
+    ],
+    [
+      "ARCH-RELEASE-072",
+      "ARCH-ROADMAP-038"
+    ],
+    [
+      "ARCH-RELEASE-072",
+      "ARCH-INIT-012"
+    ],
+    [
+      "ARCH-RELEASE-072",
+      "ARCH-MAP-007"
     ],
     [
       "ARCH-REPRO-041",
@@ -21535,6 +22315,46 @@
       "ARCH-REGISTRYLAG-035"
     ],
     [
+      "ARCH-RELEASE-072",
+      "SYS-SHIP-108"
+    ],
+    [
+      "REQ-VERSIONFILES-1014",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-CHANGELOGFORMS-1015",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-VERSIONALIGN-1016",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-NEXTVERSION-1017",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-RELEASECMD-1018",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-RELEASEWORKFLOW-1019",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-PLANADVANCE-1020",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-PLANDATES-1022",
+      "ARCH-RELEASE-072"
+    ],
+    [
+      "REQ-RELEASEROADMAP-1023",
+      "ARCH-RELEASE-072"
+    ],
+    [
       "ARCH-REPRO-041",
       "SYS-SHIP-108"
     ],
@@ -21596,6 +22416,10 @@
     ],
     [
       "REQ-PLANSTALE-1013",
+      "ARCH-ROADMAP-038"
+    ],
+    [
+      "REQ-UNPLANNED-1024",
       "ARCH-ROADMAP-038"
     ],
     [
@@ -21903,6 +22727,10 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-PLANDAYS-1021",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "ARCH-VLEVEL-037",
       "SYS-VMODEL-107"
     ],
@@ -22050,10 +22878,10 @@
     {
       "name": "CD: deploy automat pe git",
       "horizon": "next",
-      "req": "ARCH-SELFGATE-039",
+      "req": "ARCH-RELEASE-072",
       "unpark": null,
-      "done": false,
-      "context": "Jumatate exista deja: la push pe `main`, jobul `release` taie tag-ul din\n`plugin.json`, creeaza release-ul cu notele extrase din CHANGELOG si muta\naliasul `check@vN` pe commit-ul tagged. E idempotent, deci un push care nu\nbumpeaza nu creeaza nimic.\n\nCe e MANUAL si de asta deploy-ul nu e automat: bump-ul insusi. Cineva editeaza\nversiunea in trei locuri si scrie intrarea de CHANGELOG inainte de push, iar\n`check_versions.py` doar verifica dupa aceea ca cele trei sunt aliniate.\n\nDeci intrebarea nu e \"cum publicam automat\" - se publica deja - ci \"de unde\nstie masina CE numar sa puna\". Raspunsul trebuie sa fie derivabil din commit,\nnu ghicit: fie un trailer pe commit, fie o eticheta pe PR. Pana nu e ales\nunul, automatizarea ar bumpa dupa o regula pe care nimeni n-a scris-o.\n",
+      "done": true,
+      "context": "<!-- v7.21.0, ADR-0040. Numărul vine din plan: `sync --release --apply` ia cel mai mic\nmilestone planificat peste versiunea declarată, face bump-ul, scrie intrarea de\nCHANGELOG și scoate milestone-ul din plan. Tag-ul rămâne în CI. Nota de mai jos\ne starea de dinainte. -->\nJumatate exista deja: la push pe `main`, jobul `release` taie tag-ul din\n`plugin.json`, creeaza release-ul cu notele extrase din CHANGELOG si muta\naliasul `check@vN` pe commit-ul tagged. E idempotent, deci un push care nu\nbumpeaza nu creeaza nimic.\n\nCe e MANUAL si de asta deploy-ul nu e automat: bump-ul insusi. Cineva editeaza\nversiunea in trei locuri si scrie intrarea de CHANGELOG inainte de push, iar\n`check_versions.py` doar verifica dupa aceea ca cele trei sunt aliniate.\n\nDeci intrebarea nu e \"cum publicam automat\" - se publica deja - ci \"de unde\nstie masina CE numar sa puna\". Raspunsul trebuie sa fie derivabil din commit,\nnu ghicit: fie un trailer pe commit, fie o eticheta pe PR. Pana nu e ales\nunul, automatizarea ar bumpa dupa o regula pe care nimeni n-a scris-o.\n",
       "section_date": null
     },
     {
@@ -22420,7 +23248,7 @@
     },
     {
       "month": "2026-09",
-      "count": 78,
+      "count": 79,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -22501,11 +23329,17 @@
         "v7.17.0",
         "v7.18.0",
         "v7.19.0",
-        "v7.20.0"
+        "v7.20.0",
+        "v7.21.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.0",
+          "date": "2026-09-16",
+          "headline": "A release is cut from the plan, and this entry was written by it"
+        },
         {
           "version": "v7.20.0",
           "date": "2026-09-16",
@@ -23031,12 +23865,16 @@
           "help": "Take these requirements out of service instead of confirming them. Accepts one id or many; a batch retires in an order computed from the graph, under one working-tree check. Prints the blast radius; writes nothing without --apply."
         },
         {
+          "flag": "--release",
+          "help": "Cut a release instead of syncing: the next version planned in _planning.json above what is already declared, or the vX.Y.Z named here. Prints the plan - version files to bump, the CHANGELOG entry, the milestone the plan drops - and writes nothing without --apply. With --json it also reports the declared version, whether its tag exists and its notes, which is what a release workflow reads."
+        },
+        {
           "flag": "--delete",
           "help": "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
         },
         {
           "flag": "--apply",
-          "help": "With --retire: actually write the change. Without it, the run is a dry report."
+          "help": "With --retire or --release: actually write the change. Without it, the run is a dry report."
         },
         {
           "flag": "--force",
@@ -23078,16 +23916,16 @@
     }
   ],
   "design": {
-    "files": 92,
-    "clean_files": 67,
-    "score": 73,
+    "files": 94,
+    "clean_files": 68,
+    "score": 72,
     "candidates": {
       "encapsulation": 9,
       "abstraction": 8,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 24
+      "standards": 25
     },
     "findings": [
       {
@@ -23096,7 +23934,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "925 lines (over 500)"
+        "detail": "950 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -23104,7 +23942,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "91 line(s) wider than 100 columns, first at line 1"
+        "detail": "93 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -23177,6 +24015,14 @@
         "line": 78,
         "name": "search.js",
         "detail": "1 line(s) wider than 100 columns, first at line 78"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/timeline.js",
+        "line": 80,
+        "name": "timeline.js",
+        "detail": "1 line(s) wider than 100 columns, first at line 80"
       },
       {
         "pillar": "standards",
@@ -23344,21 +24190,21 @@
         "file": "app/src/views/roadmap/PlanGantt.jsx",
         "line": 1,
         "name": "PlanGantt.jsx",
-        "detail": "579 lines (over 500)"
+        "detail": "614 lines (over 500)"
       },
       {
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 30,
+        "line": 34,
         "name": "PlanGantt.jsx",
-        "detail": "18 line(s) wider than 100 columns, first at line 30"
+        "detail": "21 line(s) wider than 100 columns, first at line 34"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 127,
+        "line": 131,
         "name": "VersionNote",
         "detail": "`VersionNote` nests 5 levels deep (over 4)"
       },
@@ -23366,7 +24212,7 @@
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 209,
+        "line": 213,
         "name": "PlanGantt",
         "detail": "`PlanGantt` nests 7 levels deep (over 4)"
       },
@@ -23374,15 +24220,15 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 209,
+        "line": 213,
         "name": "PlanGantt",
-        "detail": "`PlanGantt` is 370 lines (over 80)"
+        "detail": "`PlanGantt` is 401 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 209,
+        "line": 213,
         "name": "PlanGantt",
         "detail": "`PlanGantt` takes 8 parameters (over 6)"
       },
@@ -23390,7 +24236,7 @@
         "pillar": "encapsulation",
         "kind": "global-state",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 207,
+        "line": 213,
         "name": "apply_config",
         "detail": "`apply_config` writes module state: CODE_EXTS"
       },
@@ -23432,11 +24278,11 @@
   },
   "health": {
     "score": 97,
-    "total": 269,
-    "healthy": 261,
-    "confirmed": 261,
-    "implemented": 252,
-    "tested": 249,
+    "total": 281,
+    "healthy": 273,
+    "confirmed": 273,
+    "implemented": 264,
+    "tested": 261,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
@@ -23447,10 +24293,6 @@
   },
   "planning": {
     "milestones": {
-      "v7.21.0": {
-        "due": "2026-10-02",
-        "label": "Server MCP + suprafata CLI"
-      },
       "v7.22.0": {
         "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
@@ -23471,16 +24313,7 @@
         "start": "2026-09-21",
         "end": "2026-09-27",
         "lane": "Feature",
-        "milestone": "v7.21.0",
-        "progress": 0
-      },
-      {
-        "title": "CD: deploy automat pe git",
-        "start": "2026-09-28",
-        "end": "2026-10-02",
-        "lane": "Feature",
-        "milestone": "v7.21.0",
-        "req": "ARCH-SELFGATE-039",
+        "milestone": "v7.22.0",
         "progress": 0
       }
     ],
@@ -23509,10 +24342,6 @@
   },
   "targets": {
     "milestones": {
-      "v7.21.0": {
-        "due": "2026-10-02",
-        "label": "Server MCP + suprafata CLI"
-      },
       "v7.22.0": {
         "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
@@ -23533,16 +24362,7 @@
         "start": "2026-09-21",
         "end": "2026-09-27",
         "lane": "Feature",
-        "milestone": "v7.21.0",
-        "progress": 0
-      },
-      {
-        "title": "CD: deploy automat pe git",
-        "start": "2026-09-28",
-        "end": "2026-10-02",
-        "lane": "Feature",
-        "milestone": "v7.21.0",
-        "req": "ARCH-SELFGATE-039",
+        "milestone": "v7.22.0",
         "progress": 0
       }
     ],

@@ -2736,8 +2736,8 @@ class PlanStale(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by:
     def test_the_signal_is_not_a_gate_rule(self):  # verifies: REQ-PLANSTALE-1013#CASE-6
         # Precedent (Senate run 2026-09-14_225939): roadmap coherence is reported, never
         # gated, so the planning module registers no rule and the gate stays green.
-        self.assertFalse([r.id for r in R.GATE_RULES if r.fn.__module__.endswith("targets")])
-        with open(R.targets.__file__, encoding="utf-8") as f:
+        self.assertFalse([r.id for r in R.GATE_RULES if r.fn.__module__.endswith("versions")])
+        with open(R.versions.__file__, encoding="utf-8") as f:
             self.assertNotIn("@gate_rule", f.read())
 
 

@@ -49,13 +49,17 @@
       "hash": "3eca960dd4f3",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "ARCH-RELEASE-072": {
+      "hash": "f3f33aa2b577",
+      "reason": "roadmap vs bars"
+    },
     "ARCH-REPRO-041": {
       "hash": "95d822880e6c",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     },
     "ARCH-ROADMAP-038": {
-      "hash": "df08b870193f",
-      "reason": null
+      "hash": "20cbb2fa5e24",
+      "reason": "roadmap vs bars"
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -149,9 +153,13 @@
       "hash": "3f85229041a5",
       "reason": null
     },
+    "REQ-PLANDAYS-1021": {
+      "hash": "78a57de21c48",
+      "reason": "day is 22px"
+    },
     "REQ-PLANSTACK-1012": {
-      "hash": "396a731f0b12",
-      "reason": null
+      "hash": "edeaebfe059b",
+      "reason": "day labels and guides from the day"
     },
     "REQ-PLANSTALE-1013": {
       "hash": "9434789ef73b",

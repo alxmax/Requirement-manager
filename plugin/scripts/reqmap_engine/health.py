@@ -10,7 +10,7 @@ from .orphans import _scan_untagged, untaggable_by_design
 from .risk import _member_roles
 from .scan import _walk_code
 from .sections import binding_hash
-from .targets import stale_plan_milestones
+from .versions import stale_plan_milestones, version_alignment_lines
 from .text import _verify_bullets
 
 
@@ -273,6 +273,9 @@ def _health_gather_signals(reqs, code_root, reqs_dir, data):
     stale = stale_plan_milestones(reqs_dir, code_root) if reqs_dir else None
     if stale:  # implements: REQ-PLANSTALE-1013
         data["plan_shipped"] = stale
+    misaligned = version_alignment_lines(reqs_dir, code_root) if reqs_dir else []
+    if misaligned:  # implements: REQ-VERSIONALIGN-1016
+        data["version_alignment"] = misaligned
     return data, untagged, lag, design
 
 

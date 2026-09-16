@@ -2,17 +2,20 @@
 /* Calendar Gantt: months and ISO weeks on X, swimlanes on Y, today + milestone flags in
  * the header. Selecting a bar opens the note its author wrote under the matching
  * ROADMAP.md item (REQ-VIEWER-999). */
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import {
-  parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, stackBars,
+  parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, buildDayBands,
+  stackBars,
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
 
-/* 11px a day, and a floor of 30. At 7px a week drew 43px and was floored to 72 — nearly
+/* 22px a day, and a floor of 30. At 7px a week drew 43px and was floored to 72 — nearly
  * three days of borrowed room, which is what pushed a bar into its neighbour's week. At
- * 11 a week is 71px of its own, and the floor only catches bars under three days, which
- * have no label room at any scale.  implements: REQ-PLANSTACK-1012 */
-const PX = 11;
+ * 11 a week was 71px of its own; doubled to 22 a month is twice as wide, a week is 148px,
+ * a day has room for its `15/9` label written across, and the floor only catches a bar of
+ * a single day.  Every width on the chart is a multiple of this one constant.
+ * implements: REQ-PLANSTACK-1012 */
+const PX = 22;
 const BAR_MIN_W = 30;
 const LABEL_W = 108;
 /* 3 lines x 11px x 1.3 = 43px of text, plus the bar's 8px of vertical padding, plus the
@@ -24,7 +27,8 @@ const PAD = 10;
 const FLAG_H = 22;
 const MONTH_H = 26;
 const WEEK_H = 16;
-const HEAD_H = FLAG_H + MONTH_H + WEEK_H;
+const DAY_H = 16;
+const HEAD_H = FLAG_H + MONTH_H + WEEK_H + DAY_H;
 
 const LANE_TONE = [
   { bg: "color-mix(in oklch, var(--cov-tested) 22%, transparent)", fg: "var(--cov-tested)", edge: "var(--cov-tested)" },
@@ -274,6 +278,7 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
   const bodyH = heights.reduce((a, h) => a + h, 0);
   const months = buildMonthBands(origin, totalDays, locale);
   const weeks = buildWeekBands(origin, totalDays);
+  const days = buildDayBands(origin, totalDays);
   const todayIdx = todayD ? dayIndex(origin, todayD) : -1;
   const flags = dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) }));
   /* Release cadence: the ENGINE computed these dates (targets.py) and the chart only
@@ -288,6 +293,24 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
    * names, not on the ruler above every lane. With no such lane the pill stays on the
    * ruler, where a plan without a cadence has always shown it. */
   const releaseLane = lanes.includes(planning?.cadence?.lane) ? planning.cadence.lane : null;
+  /* Where each guide ends, measured from the bottom of the ruler: the top of the lane it
+   * points into, plus the item's own offset inside that lane. `subRow` was set by the
+   * `stackBars` call that sized the lanes above. */
+  const laneTop = {};
+  lanes.reduce((top, ln, i) => { laneTop[ln] = top; return top + heights[i]; },
+               pastRows.length > 0 ? ROW_H + PAD * 2 : 0);
+  const dayCentre = (idx) => idx * PX + PX / 2;
+  const guides = [
+    ...bars.filter((b) => laneTop[b.lane] != null).flatMap((b) => {
+      const to = laneTop[b.lane] + PAD + (b.subRow || 0) * ROW_H;
+      return [{ key: `start-${b.key}`, kind: "start", x: dayCentre(b.startIdx), to },
+              { key: `end-${b.key}`, kind: "end", x: dayCentre(b.endIdx), to }];
+    }),
+    ...(releaseLane ? flags : []).map((f) => ({
+      key: `version-${f.ms}`, kind: "version", x: dayCentre(f.idx),
+      to: laneTop[releaseLane] + heights[lanes.indexOf(releaseLane)] / 2 - 11,
+    })),
+  ];
 
   return (
     <div style={{ zoom: zoom / 100, width: "max-content", minWidth: "100%" }}>
@@ -404,6 +427,28 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
                 </div>
               ))}
             </div>
+            {/* The day of the month under each week, `day/month`. Today is marked in the
+                accent colour and a weekend is fainter, so a Friday reads as the end of the
+                week.  implements: REQ-PLANDAYS-1021 */}
+            <div style={{ height: DAY_H, display: "flex", borderTop: "1px solid var(--border-soft)" }}>
+              {days.map((dd) => (
+                <div key={dd.start} data-day={dd.label} style={{
+                  width: PX, flexShrink: 0, boxSizing: "border-box",
+                  borderRight: "1px solid color-mix(in oklch, var(--border-soft) 60%, transparent)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  overflow: "hidden", whiteSpace: "nowrap",
+                  fontSize: 8, lineHeight: 1, fontVariantNumeric: "tabular-nums",
+                  letterSpacing: "-0.2px",
+                  fontWeight: dd.start === todayIdx ? 800 : 500,
+                  color: dd.start === todayIdx ? "var(--accent-2)"
+                    : dd.weekend ? "color-mix(in oklch, var(--fg-faint) 55%, transparent)"
+                    : "var(--fg-faint)",
+                  background: dd.weekend ? "color-mix(in oklch, var(--fg-faint) 6%, transparent)" : "none",
+                }}>
+                  {dd.label}
+                </div>
+              ))}
+            </div>
           </div>
 
           {pastRows.length > 0 && (
@@ -469,29 +514,6 @@ ${h.headline}`}
                     width: 1, background: "var(--border-soft)", pointerEvents: "none",
                   }} />
                 ))}
-                {/* Guides mark the WORK, not the dates, and only in the bar's own lane.
-                    `today` and the milestones keep their header pills; a rule drawn the
-                    full height of the chart crossed the shipped band and every empty lane
-                    to say something about one bar. A start is solid and an end dotted,
-                    because a start is a commitment and an end an estimate.
-                    implements: REQ-PLANSTACK-1012 */}
-                {laneBars.map((b) => {
-                  const { left, width } = extent(b);
-                  return (
-                    <Fragment key={`guide-${b.key}`}>
-                      <div data-guide="start" style={{
-                        position: "absolute", top: 0, bottom: 0, left, width: 0,
-                        borderLeft: "2px solid var(--fg-muted)", opacity: 0.5,
-                        pointerEvents: "none", zIndex: 1,
-                      }} />
-                      <div data-guide="end" style={{
-                        position: "absolute", top: 0, bottom: 0, left: left + width, width: 0,
-                        borderLeft: "2px dotted var(--fg-muted)", opacity: 0.38,
-                        pointerEvents: "none", zIndex: 1,
-                      }} />
-                    </Fragment>
-                  );
-                })}
                 {/* A version is a release: its pill sits in the cadence's lane at its due
                     date, and selecting it opens what is planned on it below the chart.
                     implements: REQ-PLANCADENCE-1000 */}
@@ -557,6 +579,19 @@ ${h.headline}`}
             );
           })}
 
+          {/* Guides run from the day on the ruler down to the thing that happens on it,
+              and stop there: a bar's start (solid, a commitment) and end (dotted, an
+              estimate) at the centre of their day cells, and a version at its due day.
+              Drawn the full height of the chart they crossed every lane below to say
+              something about one item.  implements: REQ-PLANSTACK-1012 */}
+          {guides.map((gd) => (
+            <div key={gd.key} data-guide={gd.kind} style={{
+              position: "absolute", top: HEAD_H, height: gd.to, left: gd.x - 1, width: 0,
+              borderLeft: gd.kind === "end" ? "2px dotted var(--fg-muted)"
+                : gd.kind === "version" ? "2px solid var(--indigo-400)" : "2px solid var(--fg-muted)",
+              opacity: gd.kind === "end" ? 0.38 : 0.5, pointerEvents: "none", zIndex: 1,
+            }} />
+          ))}
         </div>
       </div>
       {/* Sticky too, and for the same reason: the note belongs to the reader, not to

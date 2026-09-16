@@ -5,6 +5,8 @@ import os
 from .draft import cmd_extract
 from .gate import cmd_check
 from .mapcmd import cmd_map
+from .release import seed_release_files
+from .versions import version_files
 from .parse import load_requirements
 from .scan import _walk_code, scan_members
 from .site import _site_default_target, _site_pages_bootstrap, cmd_site
@@ -173,7 +175,11 @@ def _reqmapignore_seed(code_root, reqs_dir):
               "# The plan, not a capability. `_read_roadmap` opens it by name, so the\n"
               "# scanner never needs to: left scanned, the extractor reads it as untagged\n"
               "# prose and drafts a requirement whose subject is the plan file itself.\n"
-              "ROADMAP.md\n")
+              "ROADMAP.md\n"
+              "# The release history and the release workflow `init` seeds: read by name,\n"
+              "# or run by CI, and neither is a capability to draft.\n"
+              "CHANGELOG.md\n"
+              ".github/workflows/reqmap-release.yml\n")
     engine = os.path.join(code_root, "scripts", "reqmap.py")
     req_ids = set(load_requirements(reqs_dir))
     if req_ids and os.path.isfile(engine):
@@ -195,6 +201,42 @@ def _reqmapignore_seed(code_root, reqs_dir):
             "scripts/reqmap_engine/**\n")
 
 
+def _seed_plan_files(code_root, reqs_dir, created):
+    # implements: ARCH-INIT-012  # implements: REQ-PLANHORIZON-1010
+    """Seed the plan and what a release needs, appending each file made to `created`.
+    Returns the notes the release seeding raised.
+
+    A plan file a repo does not have is a plan nobody writes, and a release needs a
+    CHANGELOG to write into and, on GitHub, the workflow that tags it (ARCH-RELEASE-072).
+    Every file is seeded once and never clobbered, so `init` stays idempotent."""
+    roadmap = os.path.join(code_root, "ROADMAP.md")
+    if not os.path.exists(roadmap):
+        with open(roadmap, "w", encoding="utf-8") as f:
+            f.write(ROADMAP_SEED)
+        created.append("ROADMAP.md")
+    planning = os.path.join(reqs_dir, "_planning.json")
+    if not os.path.exists(planning):
+        with open(planning, "w", encoding="utf-8") as f:
+            f.write(_planning_seed())
+        created.append(os.path.relpath(planning, code_root).replace(os.sep, "/"))
+    seeded, notes = seed_release_files(code_root, reqs_dir)
+    created.extend(seeded)
+    return notes
+
+
+def _print_release_setup(reqs_dir, code_root, notes):
+    # implements: ARCH-INIT-012  # implements: REQ-VERSIONFILES-1014
+    """Say where this repo's version is read from, so a release is never set up blind."""
+    found = version_files(reqs_dir, code_root)
+    if found:
+        print("version: read from " + ", ".join("{} ({})".format(p, v) for p, v in found))
+    else:
+        print("version: no version file found - releases follow git tags only. Name the "
+              "file in _config.json as VERSION_FILES if it lives elsewhere.")
+    for note in notes:
+        print("note: " + note)
+
+
 def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
     # implements: ARCH-INIT-012  # implements: REQ-INIT-861
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
@@ -213,18 +255,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
         with open(ignore, "w", encoding="utf-8") as f:
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
-    # A plan file a repo does not have is a plan nobody writes. Both are seeded empty
-    # and never clobbered, so `init` is still idempotent (REQ-PLANHORIZON-1010).
-    roadmap = os.path.join(code_root, "ROADMAP.md")
-    if not os.path.exists(roadmap):
-        with open(roadmap, "w", encoding="utf-8") as f:
-            f.write(ROADMAP_SEED)
-        created.append("ROADMAP.md")
-    planning = os.path.join(reqs_dir, "_planning.json")
-    if not os.path.exists(planning):
-        with open(planning, "w", encoding="utf-8") as f:
-            f.write(_planning_seed())
-        created.append(os.path.relpath(planning, code_root).replace(os.sep, "/"))
+    release_notes = _seed_plan_files(code_root, reqs_dir, created)
     if wipe:
         _wipe(reqs_dir, code_root)
     print("Bootstrapping draft requirements from existing code...\n")
@@ -259,6 +290,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
     print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
     if created:
         print("created: " + ", ".join(created))
+    _print_release_setup(reqs_dir, code_root, release_notes)
     print("\nNext: run `reqmap.py gate --risk` — it shows what to do, most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
     # `init` drafts the three rungs only for code it EXTRACTED, and it extracts only

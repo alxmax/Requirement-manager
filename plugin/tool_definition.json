@@ -169,13 +169,17 @@
               "type": "string"
             }
           },
+          "mode_release": {
+            "type": "string",
+            "description": "Cut a release instead of syncing: the next version planned in _planning.json above what is already declared, or the vX.Y.Z named here. Prints the plan - version files to bump, the CHANGELOG entry, the milestone the plan drops - and writes nothing without --apply. With --json it also reports the declared version, whether its tag exists and its notes, which is what a release workflow reads."
+          },
           "delete": {
             "type": "boolean",
             "description": "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
           },
           "do_apply": {
             "type": "boolean",
-            "description": "With --retire: actually write the change. Without it, the run is a dry report."
+            "description": "With --retire or --release: actually write the change. Without it, the run is a dry report."
           },
           "force": {
             "type": "boolean",

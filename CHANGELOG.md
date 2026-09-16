@@ -1,5 +1,52 @@
 # Changelog
 
+## plugin `v7.21.0` — 2026-09-16
+
+**A release is cut from the plan, and this entry was written by it.** `sync --release`
+takes the lowest milestone planned above the version already declared, and with `--apply`
+bumps the version files, writes the dated CHANGELOG entry and drops that milestone and its
+bars from `_planning.json` (ADR-0040, ARCH-RELEASE-072). This repository's own 7.21.0 was
+cut that way; only `marketplace.json` still needs `check_versions.py --fix`, which the
+engine does not know about. It refuses with exit 2 when nothing is planned, when a named
+version is not above the baseline, or when the gate has errors. Tagging stays in CI.
+
+**The version is read where each ecosystem keeps it.** `package.json`, `pyproject.toml`,
+`Cargo.toml`, `.claude-plugin/plugin.json` and `VERSION` are probed; `VERSION_FILES` in
+`_config.json` names any other. A bump rewrites the version text and nothing else. A list
+default in `_config.json` (`DOC_CLAIM_FILES`, now `VERSION_FILES`) was rejected on every
+override by the numeric type check; lists are accepted now.
+
+**CHANGELOGs are read in every common form** — this repo's ``## plugin `vX.Y.Z` — date``,
+Keep a Changelog's `## [X.Y.Z] - date`, `## vX.Y.Z - date` and `## X.Y.Z (date)` — and a new
+entry is written in the form the file already uses, under `Unreleased` when it has one.
+
+**`sync`, `gate --audit` and `health` report where the version sources disagree**: version
+files with different versions, a CHANGELOG behind or ahead of them, a tag above them.
+Read-only, never a gate rule.
+
+**Every day on the Plan is labelled.** Under the week row each day carries `day/month`
+(`15/9`); today is in the accent colour and the weekend is fainter. A day is 22px wide
+instead of 11, so a month, a week and every bar are twice as wide at the same zoom. The guides now start at that day: a bar's start (solid) and end
+(dotted) run from the centre of their day cells down to the bar and stop there, and a
+version's guide runs from its due day to its pill.
+
+**`sync` suggests a bar's date when the work moved.** A bar whose `req:` names a finished
+requirement — confirmed or implemented, with code — gets the date of the last commit to that
+code suggested as its `end` when the two differ; a bar past its `end` whose requirement is
+not done is asked to move. The plan is never rewritten: the dates stay the author's.
+
+**ROADMAP.md and the plan are checked against each other, read-only.** `sync --release`
+names the open ROADMAP items its bars carry out, to tick by hand — by title, or by a `req:`
+only one open item carries. `sync` counts the Now and Next items no bar schedules, since
+an item there with no date is a commitment nothing tracks.
+
+**`init` sets a repository up to release**: it seeds a Keep a Changelog `CHANGELOG.md`,
+prints where the version is read from, and on GitHub writes
+`.github/workflows/reqmap-release.yml`, which tags and releases the declared version once
+when its tag does not exist yet. None of these is ever overwritten.
+
+- CD: deploy automat pe git (ARCH-RELEASE-072)
+
 ## plugin `v7.20.0` — 2026-09-16
 
 **A plan that schedules a version already declared is now reported.** `_planning.json`

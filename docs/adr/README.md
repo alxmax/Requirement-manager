@@ -50,6 +50,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0037](0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md) | The command surface is already five; the cut is one mode per release | Accepted |
 | [0038](0038-the-retrofit-writes-the-whole-pyramid-in-inits-shape.md) | The retrofit writes the whole pyramid, in `init`'s shape | Accepted |
 | [0039](0039-the-first-recorded-criterion-that-did-not-cover-its-clause.md) | The first recorded criterion that did not cover its clause | Accepted |
+| [0040](0040-a-release-is-cut-from-the-plan.md) | A release is cut from the plan | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

@@ -7,9 +7,6 @@ import json
 import os
 import re
 
-from .git import _git
-from .history import read_history
-
 PLANNING_FILES = ("_planning.json", "_targets.json")
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -273,77 +270,3 @@ def load_targets(reqs_dir):
             out["releases"] = dates
     return out
 
-
-# ---------- a plan that schedules the past ----------
-_SEMVER_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
-
-
-def _semver3(text):  # implements: REQ-PLANSTALE-1013
-    """(major, minor, patch) for `vX.Y` or `vX.Y.Z`, or None for anything else.
-
-    A missing patch is 0, so milestone `v7.19` is the same number as release `v7.19.0`:
-    the 7.19 line has been declared, and a plan naming it describes the past."""
-    m = _SEMVER_RE.match(text.strip()) if isinstance(text, str) else None
-    return tuple(int(g or 0) for g in m.groups()) if m else None
-
-
-def _plugin_json_version(reqs_dir, code_root):  # implements: REQ-PLANSTALE-1013
-    """The `version` of a `.claude-plugin/plugin.json` beside the requirements directory
-    or at the code root, or None."""
-    bases = [os.path.dirname(os.path.abspath(reqs_dir or "."))]
-    if code_root:
-        bases.append(os.path.abspath(code_root))
-    for base in dict.fromkeys(bases):
-        raw = _read_planning_file(os.path.join(base, ".claude-plugin", "plugin.json"))
-        if isinstance(raw, dict) and _semver3(raw.get("version")):
-            return raw["version"]
-    return None
-
-
-def shipped_baseline(reqs_dir, code_root):
-    # implements: ARCH-ROADMAP-038  # implements: REQ-PLANSTALE-1013
-    """(version tuple, "vX.Y.Z", source) — the highest version any of three places has
-    already committed to — or None when none of them names one.
-
-    All three, because each is ahead of the others at some point in a release: the
-    manifest is bumped before a tag exists, the CHANGELOG heading is written with the
-    bump, and a tag can exist for a repo that keeps neither. Taking only the tag would
-    have passed the plan that scheduled v7.19 while plugin.json already said 7.19.0."""
-    found = []
-    declared = _plugin_json_version(reqs_dir, code_root)
-    if declared:
-        found.append((_semver3(declared), "plugin.json"))
-    tags = _git(["-C", code_root, "tag", "-l", "v*"], timeout=5) if code_root else None
-    for tag in (tags or "").split():
-        if _semver3(tag):
-            found.append((_semver3(tag), "git tag"))
-    for entry in read_history(code_root) if code_root else []:
-        if _semver3(entry["version"]):
-            found.append((_semver3(entry["version"]), "CHANGELOG.md"))
-    if not found:
-        return None
-    key, source = max(found, key=lambda f: f[0])
-    return key, "v{}.{}.{}".format(*key), source
-
-
-def stale_plan_milestones(reqs_dir, code_root):
-    # implements: ARCH-ROADMAP-038  # implements: REQ-PLANSTALE-1013
-    """{"baseline", "source", "milestones"} naming every `_planning.json` milestone key
-    or bar `milestone` at or below `shipped_baseline`, or None when there is none.
-
-    Read-only, like every roadmap signal: it is reported by `gate --audit` and `health`
-    and never becomes a gate rule (precedent: Senate run 2026-09-14_225939). The plan had
-    scheduled an already-shipped version three times before this existed."""
-    plan = load_targets(reqs_dir)
-    names = set(plan.get("milestones", {}))
-    names.update(bar["milestone"] for bar in plan.get("bars", []) if bar.get("milestone"))
-    if not names:
-        return None
-    base = shipped_baseline(reqs_dir, code_root)
-    if base is None:
-        return None
-    stale = sorted((n for n in names if _semver3(n) and _semver3(n) <= base[0]),
-                   key=_semver3)
-    if not stale:
-        return None
-    return {"baseline": base[1], "source": base[2], "milestones": stale}

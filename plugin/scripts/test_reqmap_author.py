@@ -3540,3 +3540,382 @@ class InitTagsTheSource(unittest.TestCase):  # tested-by: REQ-INITTAG-1008 @unit
         self.assertEqual(seen[0], seen[1])
         self.assertEqual(seen[1], seen[2])
         self.assertEqual(len(seen[0].splitlines()), 3)   # shebang + tag + code, never growing
+
+
+def _release_repo(d, version="1.4.0", milestones=None, bars=None, changelog=None):
+    """A minimal consumer repo: a version file, a plan, optionally a CHANGELOG."""
+    reqs = os.path.join(d, "requirements")
+    os.makedirs(reqs, exist_ok=True)
+    if version:
+        _write(os.path.join(d, "package.json"),
+               '{\n  "name": "x",\n  "version": "%s",\n  "private": true\n}\n' % version)
+    _write(os.path.join(reqs, "_planning.json"), json.dumps({
+        "lanes": ["Feature"], "milestones": milestones or {}, "bars": bars or []}))
+    if changelog is not None:
+        _write(os.path.join(d, "CHANGELOG.md"), changelog)
+    return reqs
+
+
+def _release(d, reqs, version=True, apply_it=False, as_json=False):
+    ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+    out = io.StringIO()
+    with redirect_stdout(out):
+        rc = R.cmd_release(ws, d, reqs, version=version, apply_it=apply_it, as_json=as_json)
+    return rc, out.getvalue()
+
+
+def _text(*parts):
+    with open(os.path.join(*parts), encoding="utf-8") as f:
+        return f.read()
+
+
+class VersionFiles(unittest.TestCase):  # tested-by: REQ-VERSIONFILES-1014 @unit
+    """Where a repository declares its version."""
+
+    def test_the_usual_files_are_found_and_a_dependency_pin_is_not(self):  # verifies: REQ-VERSIONFILES-1014#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0")
+            _write(os.path.join(d, "pyproject.toml"),
+                   '[tool.black]\nversion = "9.9.9"\n\n[project]\nname = "x"\nversion = "1.4.0"\n')
+            self.assertEqual([("package.json", "1.4.0"), ("pyproject.toml", "1.4.0")],
+                             R.version_files(reqs, d))
+
+    def test_a_configured_file_replaces_the_probe(self):  # verifies: REQ-VERSIONFILES-1014#CASE-2
+        saved = R.config.VERSION_FILES
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                reqs = _release_repo(d, "1.4.0")
+                _write(os.path.join(d, "meta", "VERSION"), "2.0.1\n")
+                R.config.apply_config({"VERSION_FILES": ["meta/VERSION"]}, out=io.StringIO())
+                self.assertEqual([("meta/VERSION", "2.0.1")], R.version_files(reqs, d))
+        finally:
+            R.config.VERSION_FILES = saved
+
+    def test_a_bump_rewrites_the_version_and_nothing_else(self):  # verifies: REQ-VERSIONFILES-1014#CASE-3
+        cargo = ('[package]\nname = "x"\nversion = "1.4.0"  # keep\n\n'
+                 '[dependencies]\nserde = { version = "1.0" }\n')
+        with tempfile.TemporaryDirectory() as d:
+            _release_repo(d, "1.4.0")
+            _write(os.path.join(d, "Cargo.toml"), cargo)
+            self.assertTrue(R.write_version_file(os.path.join(d, "package.json"), "1.5.0"))
+            self.assertTrue(R.write_version_file(os.path.join(d, "Cargo.toml"), "1.5.0"))
+            self.assertEqual('{\n  "name": "x",\n  "version": "1.5.0",\n  "private": true\n}\n',
+                             _text(d, "package.json"))
+            self.assertEqual(cargo.replace('"1.4.0"', '"1.5.0"'), _text(d, "Cargo.toml"))
+
+    def test_no_version_file_is_an_empty_answer(self):  # verifies: REQ-VERSIONFILES-1014#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, version=None)
+            self.assertEqual([], R.version_files(reqs, d))
+
+
+class ChangelogForms(unittest.TestCase):  # tested-by: REQ-CHANGELOGFORMS-1015 @unit
+    """A CHANGELOG is read in the convention its ecosystem writes it in."""
+
+    LOG = ("# Changelog\n\n## [Unreleased]\n- pending\n\n## [1.2.0] - 2026-09-01\n**Big.**\n\n"
+           "## v1.1.0 - 2026-08-01\nsmall\n\n## 1.0.0 (2026-07-01)\nfirst\n")
+
+    def test_every_form_is_read_and_unreleased_is_not(self):  # verifies: REQ-CHANGELOGFORMS-1015#CASE-1
+        got = R.history.parse_changelog(self.LOG)
+        self.assertEqual([("v1.2.0", "2026-09-01", "Big"), ("v1.1.0", "2026-08-01", "small"),
+                          ("v1.0.0", "2026-07-01", "first")],
+                         [(e["version"], e["date"], e["headline"]) for e in got])
+
+    def test_a_new_entry_follows_the_form_the_file_uses(self):  # verifies: REQ-CHANGELOGFORMS-1015#CASE-2
+        h = R.history
+        self.assertEqual("## [1.3.0] - 2026-09-20",
+                         h.release_heading(h.changelog_style(self.LOG), "v1.3.0", "2026-09-20"))
+        plugin = "## plugin `v7.1.0` — 2026-09-01\n**x.**\n"
+        self.assertEqual("## plugin `v7.2.0` — 2026-09-20",
+                         h.release_heading(h.changelog_style(plugin), "v7.2.0", "2026-09-20"))
+        self.assertEqual("keep", h.changelog_style(""))
+
+    def test_init_seeds_a_changelog_once_and_does_not_scan_it(self):  # verifies: REQ-CHANGELOGFORMS-1015#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs = os.path.join(d, "requirements")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(reqs, d, no_site=True)
+            self.assertIn("## [Unreleased]", _text(d, "CHANGELOG.md"))
+            _write(os.path.join(d, "CHANGELOG.md"), "# mine\n")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(reqs, d, no_site=True)
+            self.assertEqual("# mine\n", _text(d, "CHANGELOG.md"))
+            self.assertIn("CHANGELOG.md", _text(d, ".reqmapignore").splitlines())
+
+
+class VersionAlignment(unittest.TestCase):  # tested-by: REQ-VERSIONALIGN-1016 @unit
+    """Where the version files, the CHANGELOG and the tags disagree."""
+
+    def test_files_that_disagree_are_named(self):  # verifies: REQ-VERSIONALIGN-1016#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0")
+            _write(os.path.join(d, "VERSION"), "1.3.0\n")
+            lines = R.version_alignment_lines(reqs, d)
+            self.assertEqual(1, sum("version files disagree" in ln for ln in lines))
+
+    def test_a_changelog_behind_the_files_asks_for_the_entry(self):  # verifies: REQ-VERSIONALIGN-1016#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", changelog="## [1.3.0] - 2026-09-01\n**x.**\n")
+            lines = R.version_alignment_lines(reqs, d)
+            self.assertTrue(any("v1.3.0" in ln and "write its entry" in ln for ln in lines))
+
+    def test_a_tag_below_the_files_is_the_normal_state(self):  # verifies: REQ-VERSIONALIGN-1016#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", changelog="## [1.4.0] - 2026-09-01\n**x.**\n")
+            with mock.patch.object(R.versions, "newest_tag", return_value=((1, 3, 0), "v1.3.0")):
+                self.assertEqual([], R.version_alignment_lines(reqs, d))
+
+    def test_a_tag_above_the_files_is_reported(self):  # verifies: REQ-VERSIONALIGN-1016#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", changelog="## [1.4.0] - 2026-09-01\n**x.**\n")
+            with mock.patch.object(R.versions, "newest_tag", return_value=((1, 5, 0), "v1.5.0")):
+                lines = R.version_alignment_lines(reqs, d)
+            self.assertEqual(1, sum("git tag v1.5.0 is above" in ln for ln in lines))
+
+
+class NextVersion(unittest.TestCase):  # tested-by: REQ-NEXTVERSION-1017 @unit
+    """The next release's number is read from the plan."""
+
+    def test_the_lowest_planned_version_above_the_baseline(self):  # verifies: REQ-NEXTVERSION-1017#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", milestones={
+                "v1.4.0": {"due": "2026-09-01"}, "v1.6.0": {"due": "2026-10-09"},
+                "v1.5.0": {"due": "2026-10-02"}})
+            self.assertEqual("v1.5.0", R.next_planned_version(reqs, d))
+
+    def test_nothing_planned_above_the_baseline_is_none(self):  # verifies: REQ-NEXTVERSION-1017#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", milestones={"v1.4.0": {"due": "2026-09-01"}})
+            self.assertIsNone(R.next_planned_version(reqs, d))
+
+    def test_a_bar_milestone_counts_as_planned(self):  # verifies: REQ-NEXTVERSION-1017#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", bars=[{"title": "b", "start": "2026-09-21",
+                                                    "milestone": "v1.4.1"}])
+            self.assertEqual("v1.4.1", R.next_planned_version(reqs, d))
+
+
+class ReleaseCommand(unittest.TestCase):  # tested-by: REQ-RELEASECMD-1018 @unit  # tested-by: REQ-PLANADVANCE-1020 @unit
+    """`sync --release`: plan first, write only with --apply."""
+
+    PLAN = {"v1.5.0": {"due": "2026-10-02", "label": "Export to CSV"},
+            "v1.6.0": {"due": "2026-10-09"}}
+    BARS = [{"title": "CSV writer", "start": "2026-09-28", "end": "2026-10-02",
+             "milestone": "v1.5.0", "req": "REQ-CSV-001"},
+            {"title": "Later thing", "start": "2026-10-05", "milestone": "v1.6.0"}]
+
+    def test_a_dry_run_writes_nothing(self):  # verifies: REQ-RELEASECMD-1018#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
+            before = (_text(d, "package.json"), _text(d, "CHANGELOG.md"),
+                      _text(reqs, "_planning.json"))
+            rc, out = _release(d, reqs)
+            self.assertEqual(0, rc)
+            self.assertIn("release v1.5.0", out)
+            self.assertEqual(before, (_text(d, "package.json"), _text(d, "CHANGELOG.md"),
+                                      _text(reqs, "_planning.json")))
+
+    def test_apply_bumps_the_files_and_writes_the_entry_under_unreleased(self):  # verifies: REQ-RELEASECMD-1018#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS,
+                                 changelog="# Changelog\n\n## [Unreleased]\n- collected fix\n")
+            rc, _ = _release(d, reqs, apply_it=True)
+            self.assertEqual(0, rc)
+            self.assertIn('"version": "1.5.0"', _text(d, "package.json"))
+            log = _text(d, "CHANGELOG.md")
+            self.assertLess(log.index("## [Unreleased]"), log.index("## [1.5.0] - "))
+            self.assertEqual("**Export to CSV.**\n\n- CSV writer (REQ-CSV-001)\n- collected fix",
+                             R.history.entry_body(log, "v1.5.0"))
+
+    def test_apply_with_nothing_planned_is_refused(self):  # verifies: REQ-RELEASECMD-1018#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0")
+            rc, out = _release(d, reqs, apply_it=True)
+            self.assertEqual(2, rc)
+            self.assertIn("no planned milestone above v1.4.0", out)
+            self.assertIn('"version": "1.4.0"', _text(d, "package.json"))
+
+    def test_a_named_version_not_above_the_baseline_is_refused(self):  # verifies: REQ-RELEASECMD-1018#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS)
+            rc, out = _release(d, reqs, version="v1.4.0", apply_it=True)
+            self.assertEqual(2, rc)
+            self.assertIn("v1.4.0 is not above v1.4.0", out)
+
+    def test_a_second_apply_does_not_write_the_entry_twice(self):  # verifies: REQ-RELEASECMD-1018#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
+            _release(d, reqs, version="v1.5.0", apply_it=True)
+            with mock.patch.object(R.release, "shipped_baseline", return_value=None):
+                _release(d, reqs, version="v1.5.0", apply_it=True)
+            self.assertEqual(1, _text(d, "CHANGELOG.md").count("## [1.5.0]"))
+
+    def test_the_plan_drops_the_released_version_and_keeps_the_rest(self):  # verifies: REQ-PLANADVANCE-1020#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
+            _release(d, reqs, apply_it=True)
+            plan = json.loads(_text(reqs, "_planning.json"))
+            self.assertEqual(["v1.6.0"], list(plan["milestones"]))
+            self.assertEqual(["Later thing"], [b["title"] for b in plan["bars"]])
+            self.assertEqual(["Feature"], plan["lanes"])
+
+    def test_after_a_release_the_plan_is_current_and_names_the_next(self):  # verifies: REQ-PLANADVANCE-1020#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
+            _release(d, reqs, apply_it=True)
+            self.assertIsNone(R.stale_plan_milestones(reqs, d))
+            self.assertEqual([], R.version_alignment_lines(reqs, d))
+            self.assertEqual("v1.6.0", R.next_planned_version(reqs, d))
+
+
+class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019 @unit
+    """`init` gives a GitHub repo the workflow that tags the declared version once."""
+
+    WORKFLOW = os.path.join(".github", "workflows", "reqmap-release.yml")
+
+    def test_init_seeds_the_workflow_on_a_github_repo(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, ".github"))
+            with mock.patch.object(R.release, "release_workflow",
+                                   return_value="name: release\nsync --release --json\n"):
+                with redirect_stdout(io.StringIO()):
+                    R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+            self.assertEqual("name: release\nsync --release --json\n", _text(d, self.WORKFLOW))
+
+    def test_an_existing_workflow_is_never_overwritten(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, self.WORKFLOW), "mine\n")
+            created, _ = R.seed_release_files(d, os.path.join(d, "requirements"))
+            self.assertNotIn(".github/workflows/reqmap-release.yml", created)
+            self.assertEqual("mine\n", _text(d, self.WORKFLOW))
+
+    def test_a_repo_off_github_gets_no_workflow(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+            self.assertFalse(os.path.exists(os.path.join(d, ".github")))
+
+    def test_the_workflow_runs_the_vendored_engine_and_releases_once(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-4
+        scripts = os.path.dirname(os.path.dirname(os.path.abspath(R.release.__file__)))
+        root = os.path.dirname(scripts)
+        text = R.release_workflow(root, os.path.join(root, "requirements"))
+        self.assertIn("python {}/reqmap.py sync --release --json --reqs requirements --code ."
+                      .format(os.path.basename(scripts)), text)
+        self.assertIn('[ "$exists" = "true" ]', text)
+        self.assertIn("gh release create", text)
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R.release_workflow(d, os.path.join(d, "requirements")))
+
+    def test_json_reports_the_declared_version_its_tag_and_notes(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.5.0",
+                                 changelog="## [1.5.0] - 2026-10-02\n**Export to CSV.**\n")
+            _, out = _release(d, reqs, as_json=True)
+            got = json.loads(out)
+            self.assertEqual(("v1.5.0", False, "**Export to CSV.**"),
+                             (got["declared"], got["tag_exists"], got["notes"]))
+
+
+class ReleaseEndToEnd(unittest.TestCase):  # tested-by: ARCH-RELEASE-072 @integration
+    """init, plan, release, through the command line."""
+
+    def _run(self, d, *args):
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", engine] + list(args)
+                              + ["--reqs", "requirements", "--code", "."],
+                              cwd=d, capture_output=True, text=True, encoding="utf-8")
+
+    def test_init_then_release_through_the_cli(self):  # verifies: ARCH-RELEASE-072#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "package.json"), '{"name": "x", "version": "0.1.0"}\n')
+            self.assertEqual(0, self._run(d, "init", "--no-site").returncode)
+            plan = os.path.join(d, "requirements", "_planning.json")
+            data = json.loads(_text(plan))
+            data["milestones"] = {"v0.2.0": {"due": "2026-10-02", "label": "First feature"}}
+            _write(plan, json.dumps(data))
+            done = self._run(d, "sync", "--release", "--apply")
+            self.assertEqual(0, done.returncode, done.stdout + done.stderr)
+            self.assertIn('"version": "0.2.0"', _text(d, "package.json"))
+            self.assertIn("## [0.2.0] - ", _text(d, "CHANGELOG.md"))
+
+
+class PlanDates(unittest.TestCase):  # tested-by: REQ-PLANDATES-1022 @unit
+    """`sync` suggests a bar's date when the work it names finished, or ran over."""
+
+    REQS = {"REQ-DONE-001": {"meta": {"status": "confirmed"}},
+            "REQ-OPEN-002": {"meta": {"status": "draft"}}}
+    MEMBERS = {"REQ-DONE-001": [("implements", "src/done.py", 1),
+                                ("tested-by", "tests/test_done.py", 1)],
+               "REQ-OPEN-002": [("implements", "src/open.py", 1)]}
+
+    def _suggest(self, bars, touched="2026-09-12", today="2026-09-16"):
+        with mock.patch.object(R.plandrift, "_last_touched", return_value=touched):
+            return R.bar_date_suggestions(bars, self.REQS, self.MEMBERS, ".", today)
+
+    def test_work_done_early_suggests_the_real_end(self):  # verifies: REQ-PLANDATES-1022#CASE-1
+        got = self._suggest([{"title": "A", "req": "REQ-DONE-001",
+                              "start": "2026-09-07", "end": "2026-10-02"}])
+        self.assertEqual([("done", "2026-10-02", "2026-09-12")],
+                         [(s["kind"], s["planned"], s["actual"]) for s in got])
+        self.assertIn("set its `end` to 2026-09-12", R.bar_date_lines(got)[0])
+
+    def test_work_that_matches_its_plan_is_silent(self):  # verifies: REQ-PLANDATES-1022#CASE-2
+        self.assertEqual([], self._suggest([{"title": "A", "req": "REQ-DONE-001",
+                                             "start": "2026-09-07", "end": "2026-09-12"}]))
+
+    def test_code_older_than_the_bar_is_not_its_finish(self):  # verifies: REQ-PLANDATES-1022#CASE-3
+        self.assertEqual([], self._suggest([{"title": "A", "req": "REQ-DONE-001",
+                                             "start": "2026-09-14", "end": "2026-10-02"}]))
+
+    def test_an_open_requirement_past_its_end_is_overdue(self):  # verifies: REQ-PLANDATES-1022#CASE-4
+        got = self._suggest([{"title": "B", "req": "REQ-OPEN-002",
+                              "start": "2026-09-01", "end": "2026-09-10"},
+                             {"title": "C", "req": "REQ-OPEN-002",
+                              "start": "2026-09-14", "end": "2026-09-30"},
+                             {"title": "D", "start": "2026-09-01", "end": "2026-09-02"}])
+        self.assertEqual([("B", "overdue")], [(s["title"], s["kind"]) for s in got])
+        self.assertIn("move its `end`", R.bar_date_lines(got)[0])
+
+
+class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @unit  # tested-by: REQ-UNPLANNED-1024 @unit
+    """ROADMAP items against the bars that schedule them."""
+
+    ITEMS = [
+        {"name": "CSV writer", "horizon": "now", "req": "REQ-CSV-001", "done": False},
+        {"name": "Parser speed", "horizon": "next", "req": "REQ-PARSE-002", "done": False},
+        {"name": "Viewer A", "horizon": "next", "req": "REQ-VIEW-003", "done": False},
+        {"name": "Viewer B", "horizon": "next", "req": "REQ-VIEW-003", "done": False},
+        {"name": "Shipped", "horizon": "now", "req": "REQ-OLD-004", "done": True},
+        {"name": "Someday", "horizon": "later", "req": None, "done": False},
+    ]
+
+    def test_a_release_suggests_ticking_the_items_its_bars_carry_out(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-1
+        bars = [{"title": "csv writer", "req": "REQ-OTHER"},
+                {"title": "Speed-up", "req": "REQ-PARSE-002"},
+                {"title": "Viewer work", "req": "REQ-VIEW-003"}]
+        self.assertEqual(["CSV writer", "Parser speed"],
+                         [it["name"] for it in R.items_for_bars(self.ITEMS, bars)])
+
+    def test_the_release_plan_names_the_items_and_writes_none(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", {"v1.5.0": {"due": "2026-10-02"}},
+                                 [{"title": "CSV writer", "start": "2026-09-28",
+                                   "milestone": "v1.5.0"}], changelog="# Changelog\n")
+            roadmap = "# Roadmap\n\n## Now\n\n- [ ] CSV writer | req: REQ-CSV-001\n"
+            _write(os.path.join(d, "ROADMAP.md"), roadmap)
+            rc, out = _release(d, reqs, apply_it=True)
+            self.assertEqual(0, rc)
+            self.assertIn("tick     ROADMAP.md (by hand, if it is done): CSV writer", out)
+            self.assertEqual(roadmap, _text(d, "ROADMAP.md"))
+
+    def test_now_and_next_items_without_a_bar_are_counted(self):  # verifies: REQ-UNPLANNED-1024#CASE-1
+        bars = [{"title": "CSV writer"}, {"title": "x", "req": "REQ-VIEW-003"}]
+        self.assertEqual(["Parser speed"],
+                         [it["name"] for it in R.unplanned_items(self.ITEMS, bars)])
+        self.assertIn("1 Now/Next ROADMAP item(s) have no bar", R.unplanned_line(self.ITEMS, bars))
+
+    def test_everything_scheduled_is_silent(self):  # verifies: REQ-UNPLANNED-1024#CASE-2
+        bars = [{"title": "CSV writer"}, {"title": "y", "req": "REQ-PARSE-002"},
+                {"title": "x", "req": "REQ-VIEW-003"}]
+        self.assertIsNone(R.unplanned_line(self.ITEMS, bars))
+        self.assertIsNone(R.unplanned_line(None, bars))

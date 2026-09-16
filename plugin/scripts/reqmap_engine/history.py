@@ -13,13 +13,19 @@ shipped, which is what "in broad strokes" asks for.
 import os
 import re
 
-# `## plugin `vX.Y.Z` — YYYY-MM-DD`, the shape `check_versions.py` and the release job
-# already depend on. Both dash characters, because the file uses an em dash and a
-# consumer writing a hyphen means the same thing.
+# Three spellings of one dated release heading, because a CHANGELOG is written in the
+# convention its ecosystem uses and a parser that knows one form leaves every other repo
+# with an empty history (REQ-CHANGELOGFORMS-1015):
+#   ## plugin `vX.Y.Z` — YYYY-MM-DD   this repository, which `check_versions.py` reads
+#   ## [X.Y.Z] - YYYY-MM-DD           Keep a Changelog
+#   ## vX.Y.Z - YYYY-MM-DD  /  ## X.Y.Z (YYYY-MM-DD)
+# Both dash characters, because an em dash and a hyphen mean the same thing here.
+_VERSION = r"v?[0-9]+\.[0-9][0-9A-Za-z.\-]*"
 _ENTRY_RE = re.compile(
-    r"^##\s+plugin\s+`(v[0-9][0-9A-Za-z.\-]*)`\s*[—–-]+\s*(\d{4}-\d{2}-\d{2})\s*$",
+    r"^##\s+(?:plugin\s+`(" + _VERSION + r")`|\[(" + _VERSION + r")\]|(" + _VERSION + r"))"
+    r"\s*(?:[—–-]+\s*|\()(\d{4}-\d{2}-\d{2})\)?\s*$",
     re.M)
-_HEADING_RE = re.compile(r"^##\s+plugin\s+", re.M)
+_HEADING_RE = re.compile(r"^##\s", re.M)
 _BOLD_RE = re.compile(r"^\*\*(.+?)\*\*", re.S)
 HISTORY_FILES = ("CHANGELOG.md",)
 # A headline is a label on a timeline, not the entry itself. Past this the chart shows a
@@ -77,9 +83,39 @@ def parse_changelog(text):  # implements: REQ-HISTORY-1003
     stops = [m.start() for m in _HEADING_RE.finditer(text)] + [len(text)]
     for m in marks:
         end = next(s for s in stops if s > m.start())
-        out.append({"version": m.group(1), "date": m.group(2),
-                    "headline": _headline(text[m.end():end])})
+        version = next(g for g in m.groups()[:3] if g)
+        out.append({"version": version if version.startswith("v") else "v" + version,
+                    "date": m.group(4), "headline": _headline(text[m.end():end])})
     return out
+
+
+def changelog_style(text):  # implements: REQ-RELEASECMD-1018
+    """The heading form a CHANGELOG already uses — "plugin", "keep" or "bare" — so a new
+    entry is written the way the file's author writes them. Keep a Changelog when empty."""
+    m = _ENTRY_RE.search(text or "")
+    if not m:
+        return "keep"
+    return "plugin" if m.group(1) else "keep" if m.group(2) else "bare"
+
+
+def release_heading(style, version, date):  # implements: REQ-RELEASECMD-1018
+    """One dated release heading in `style`; `version` is `vX.Y.Z`."""
+    if style == "plugin":
+        return "## plugin `{}` \u2014 {}".format(version, date)
+    if style == "bare":
+        return "## {} - {}".format(version, date)
+    return "## [{}] - {}".format(version.lstrip("v"), date)
+
+
+def entry_body(text, version):  # implements: REQ-RELEASEWORKFLOW-1019
+    """The prose under `version`'s dated heading, or "" — the release notes."""
+    stops = [m.start() for m in _HEADING_RE.finditer(text)] + [len(text)]
+    for m in _ENTRY_RE.finditer(text):
+        found = next(g for g in m.groups()[:3] if g)
+        if found.lstrip("v") == version.lstrip("v"):
+            end = next(s for s in stops if s > m.start())
+            return text[m.end():end].strip()
+    return ""
 
 
 def read_history(root):  # implements: REQ-HISTORY-1003

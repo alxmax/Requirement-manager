@@ -66,6 +66,7 @@ from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
 from reqmap_engine.registry import _cli_choices, cmd_gen_integration
+from reqmap_engine.release import cmd_release
 from reqmap_engine.retire import cmd_retire
 from reqmap_engine.review import cmd_review
 from reqmap_engine.risk import cmd_next
@@ -82,7 +83,7 @@ from reqmap_engine import (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review, targets, plandrift, history,
-    pyramid, cliflags, site_template, docclaims,
+    pyramid, cliflags, site_template, docclaims, versions, release,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -205,6 +206,9 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
             print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]"); return 2
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
+    if a.mode_release is not None:
+        return cmd_release(ws, code_root, reqs_dir, version=a.mode_release,
+                           apply_it=a.do_apply, as_json=a.as_json)
     # Before the gate, not after: the generated integration artifacts are derived
     # from the command registry, and RM028 reports them stale. Regenerating them
     # downstream of a check that fails ON them can never converge.
@@ -380,7 +384,7 @@ _ENGINE_MODULES = (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
-    cliflags, site_template, docclaims,
+    cliflags, site_template, docclaims, versions, release,
 )
 
 
