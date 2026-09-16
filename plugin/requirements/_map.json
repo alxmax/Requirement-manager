@@ -23560,7 +23560,7 @@
       "req": null,
       "unpark": "consumator numit care nu poate CLI",
       "done": true,
-      "context": "<!-- v7.21.12, ADR-0043. Deblocat de decizia maintainerului („MCP e un must have”), nu de\ncondiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes. -->",
+      "context": "<!-- v7.21.12, ADR-0043. Deblocat de decizia maintainerului („MCP e un must have”), nu de\ncondiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes.\nv7.21.13: JSON pentru show/search/dupes și resursele reqmap://map și\nreqmap://requirement/<id>. În _planning.json, bara „Server MCP” e la 100%. -->",
       "section_date": null
     },
     {
@@ -24677,6 +24677,14 @@
     ],
     "bars": [
       {
+        "title": "Server MCP: expune reqmap ca tool",
+        "start": "2026-09-16",
+        "end": "2026-09-16",
+        "lane": "Feature",
+        "req": "ARCH-MCP-073",
+        "progress": 100
+      },
+      {
         "title": "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului",
         "start": "2026-09-28",
         "end": "2026-10-09",
@@ -24720,6 +24728,8 @@
       "until": "2026-12-31"
     },
     "releases": [
+      "2026-09-18",
+      "2026-09-25",
       "2026-10-02",
       "2026-10-09",
       "2026-10-16",
@@ -24753,6 +24763,14 @@
     ],
     "bars": [
       {
+        "title": "Server MCP: expune reqmap ca tool",
+        "start": "2026-09-16",
+        "end": "2026-09-16",
+        "lane": "Feature",
+        "req": "ARCH-MCP-073",
+        "progress": 100
+      },
+      {
         "title": "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului",
         "start": "2026-09-28",
         "end": "2026-10-09",
@@ -24796,6 +24814,8 @@
       "until": "2026-12-31"
     },
     "releases": [
+      "2026-09-18",
+      "2026-09-25",
       "2026-10-02",
       "2026-10-09",
       "2026-10-16",
