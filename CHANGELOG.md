@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v7.21.9` — 2026-09-16
+
+**Two overlaps `gate --dupes` found are resolved.** REQ-ATOMICFORM-053 specified the atomic
+story/Scenario parity checks a second time, in a clause and CASE-5 that restated
+REQ-LINTCHECKS-867; it now points there, and the two tests verify 867 only. REQ-PLANSTALE-1013
+carried a clause and CASE-7 about how the Versions view lists bars, which is viewer behaviour;
+it moved to REQ-VIEWER-999 as CASE-6. No code changed.
+
 ## plugin `v7.21.8` — 2026-09-16
 
 **A retired requirement no longer lowers the health score.** The headline score divided the

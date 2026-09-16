@@ -440,7 +440,6 @@ Every bullet below is binding.
   baseline is named in one `gate --audit` line and in `health --json` under `plan_shipped`,
   together with the baseline and the source it came from.
 - The signal is read-only: no gate rule reads it, and the gate's exit code never depends on it.
-- The planned set is `bars`: the Versions view lists each bar in the column of its `milestone`, the same list the Plan chart draws, and reads no `milestones[].items[]`.
 
 ## Cases
 CASE-1 — a milestone equal to the declared version is stale
@@ -472,11 +471,6 @@ CASE-6 — reported, never gated
   Given  the registered gate rules
   When   they are listed
   Then   none of them comes from the planning module
-
-CASE-7 — a bar appears in its version's column
-  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`
-  When   the Versions view renders
-  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
 
 ## Context
 **Terms**

@@ -94,12 +94,16 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "ARCH-VIEWER-007": {
-      "hash": "3db3856fa72d",
-      "reason": "obligation wikilinks"
+      "hash": "60be1b2efc12",
+      "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
       "reason": "Editorial only: named the subject of one clause (It -> RM034) and dropped a redundant 'must' the Contract header already binds. Neither obligation changed."
+    },
+    "REQ-ATOMICFORM-053": {
+      "hash": "04f47c23718a",
+      "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
     },
     "REQ-AUDIT-970": {
       "hash": "918984c1362a",
@@ -186,8 +190,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANSTALE-1013": {
-      "hash": "9b9493630743",
-      "reason": "health score excludes deprecated; PLANSTALE baseline names version files"
+      "hash": "428616bf0fd7",
+      "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
     },
     "REQ-PLANTAGGED-1005": {
       "hash": "ebb234c6ee12",
@@ -254,8 +258,8 @@
       "reason": "v7.3.1: REQ-VIEWER-995 gains a clause and CASE-4 \u2014 a milestone whose TODO items are all complete still renders a column"
     },
     "REQ-VIEWER-999": {
-      "hash": "b357adfd41ea",
-      "reason": null
+      "hash": "9167b2703c51",
+      "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
     }
   }
 }

@@ -1080,7 +1080,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: REQ-ATOMICFORM-053
         scen += ["  Then   fact {} holds".format(i + 1) for i in range(thens)]
         return "# T\n\n" + "\n".join(quote) + "\n\n" + "\n".join(scen) + "\n\n## Members in code (auto)\n"
 
-    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11  # verifies: REQ-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-1
+    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11  # verifies: REQ-LINTCHECKS-867#CASE-1
         fs = R.lint_requirement("REQ-A-002", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(3, 1)})
         self.assertIn(("warn", "atomic-bullet-then-mismatch"),
@@ -1099,7 +1099,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: REQ-ATOMICFORM-053
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX)})
         self.assertEqual(fs, [])
 
-    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12  # verifies: REQ-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-2
+    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12  # verifies: REQ-LINTCHECKS-867#CASE-2
         fs = R.lint_requirement("REQ-A-005", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(R.LINT_ATOMIC_STORY_BULLETS_MAX + 1,
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX + 1)})
