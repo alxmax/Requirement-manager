@@ -45,6 +45,10 @@
       "hash": "33759a7a7e3f",
       "reason": "feedback 2026-09-14: UTF-16 scan, one tagged-files definition, plan carries the pyramid, init tags the source, one untagged list"
     },
+    "ARCH-GITRUN-067": {
+      "hash": "d1ff7d6940c6",
+      "reason": "MCP server: registry tool:False clause, GITRUN case scope"
+    },
     "ARCH-HEALTH-017": {
       "hash": "f37afd7a0755",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
@@ -121,6 +125,10 @@
       "hash": "b6348e2ee27e",
       "reason": "distinct_from; CHECK-831 fold"
     },
+    "REQ-CMDREGISTRY-834": {
+      "hash": "ad1ac9c0ae6f",
+      "reason": "MCP server: registry tool:False clause, GITRUN case scope"
+    },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
       "reason": "Editorial only: named the subject of one clause (It -> RM034) and dropped a redundant 'must' the Contract header already binds. Neither obligation changed."
@@ -144,6 +152,10 @@
     "REQ-DESIGN-991": {
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
+    },
+    "REQ-GITRUN-993": {
+      "hash": "70bef219f0bd",
+      "reason": "GITRUN-993 case scope"
     },
     "REQ-HEALTH-858": {
       "hash": "417d0647ff2c",

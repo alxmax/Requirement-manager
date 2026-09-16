@@ -193,6 +193,26 @@ On first use in any repo the skill copies `scripts/reqmap.py` into that repo and
 runs `init`. The requirement template is built into the script — nothing else to
 download.
 
+### MCP server (Claude Code, VS Code with Copilot, any MCP client)
+
+`reqmap.py mcp` serves the engine over the Model Context Protocol on stdio. The assistant
+sees fifteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
+`reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
+invocation in a fresh process. It is **read-only by default**; `reqmap_sync`, `reqmap_new`
+and `reqmap_release` appear only when the server starts with `--allow-writes`.
+
+`init` writes the client configs when they are absent, and never edits one that exists:
+`.mcp.json` for Claude Code and `.vscode/mcp.json` for VS Code. By hand:
+
+```json
+{"mcpServers": {"reqmap": {"type": "stdio", "command": "python",
+  "args": ["${CLAUDE_PROJECT_DIR:-.}/scripts/reqmap.py", "mcp",
+           "--root", "${CLAUDE_PROJECT_DIR:-.}"]}}}
+```
+
+Why a server when the CLI already works, and why it is not declared by the plugin:
+[ADR-0043](docs/adr/0043-the-engine-is-served-over-mcp.md).
+
 ### GitHub Copilot, Gemini CLI, and others
 
 The engine is a plain Python CLI with no AI SDK dependency. Any assistant that
@@ -392,7 +412,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,471 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,831 lines in all)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git

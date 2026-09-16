@@ -20,7 +20,7 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
              "list": "array"}
     tools = []
     for name, spec in COMMANDS.items():
-        if spec.get("internal"):
+        if spec.get("internal") or spec.get("tool") is False:
             continue
         props = {"root": {"type": "string",
                           "description": "Repo root where requirements/ lives; "

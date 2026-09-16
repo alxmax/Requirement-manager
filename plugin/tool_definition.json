@@ -196,6 +196,10 @@
           "strict": {
             "type": "boolean",
             "description": "Promote drift and test-link integrity from warn to error."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "With --retire or --release: emit the plan as JSON."
           }
         },
         "required": []

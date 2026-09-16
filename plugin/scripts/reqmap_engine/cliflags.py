@@ -92,6 +92,8 @@ def _add_todo_and_mode_flags(ap):
                          "(scaffolds it if absent)")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
+    ap.add_argument("--allow-writes", dest="allow_writes", action="store_true",
+                    help="mcp: also offer the tools that write (sync, new, release)")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="sync --retire / --release: actually write the change (without it, "
                          "the run is a dry report)")

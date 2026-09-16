@@ -2004,9 +2004,11 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
         import json as _j
         tools = _j.loads(R._generate_schema())
         names = {t["function"]["name"] for t in tools}
-        expected = {"reqmap_" + c.replace("-", "_")
-                    for c, s in R.COMMANDS.items() if not s.get("internal")}
+        expected = {"reqmap_" + c.replace("-", "_") for c, s in R.COMMANDS.items()
+                    if not s.get("internal") and s.get("tool") is not False}
         self.assertEqual(names, expected)
+        self.assertNotIn("reqmap_mcp", names)                # a server is not a function
+        self.assertIn("`mcp`", R._generate_command_table())  # and is still documented
 
     def test_command_table_region_is_generated(self):  # verifies: REQ-CMDREGISTRY-834#CASE-3
         table = R._generate_command_table()              # markdown table string
@@ -4917,6 +4919,179 @@ def _repo_root():
                 os.path.isfile(os.path.join(here, "README.md")):
             return here
     return None
+
+
+class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # tested-by: REQ-MCPTOOLS-1028 @unit
+    """`reqmap.py mcp`: the protocol over stdio, and the tools it runs as the CLI."""
+
+    def _args(self, allow_writes=False, **kw):
+        base = {"root": ".", "reqs": None, "code": None, "cache": False,
+                "allow_writes": allow_writes}
+        base.update(kw)
+        return type("A", (), base)()
+
+    def _serve(self, messages, allow_writes=False, run=None):
+        lines = [m if isinstance(m, str) else json.dumps(m) for m in messages]
+        stdin = io.BytesIO(("\n".join(lines) + "\n").encode("utf-8"))
+        stdout = io.BytesIO()
+        calls = []
+
+        def fake(argv, workspace):
+            calls.append(argv)
+            return run(argv) if run else (0, "ok")
+        R.mcp.serve(self._args(allow_writes), stdin, stdout, fake)
+        out = [json.loads(l) for l in stdout.getvalue().decode("utf-8").splitlines()]
+        return out, calls
+
+    @staticmethod
+    def _req(i, method, params=None):
+        msg = {"jsonrpc": "2.0", "id": i, "method": method}
+        if params is not None:
+            msg["params"] = params
+        return msg
+
+    def _call(self, i, name, arguments):
+        return self._req(i, "tools/call", {"name": name, "arguments": arguments})
+
+    def test_initialize_names_the_pinned_revision(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-1
+        out, _ = self._serve([self._req(1, "initialize", {"protocolVersion": "2025-06-18"})])
+        result = out[0]["result"]
+        self.assertEqual("2025-06-18", result["protocolVersion"])
+        self.assertIn("tools", result["capabilities"])
+        self.assertEqual("reqmap", result["serverInfo"]["name"])
+
+    def test_a_notification_is_not_answered_a_ping_is(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-2
+        out, _ = self._serve([{"jsonrpc": "2.0", "method": "notifications/initialized"},
+                              self._req(7, "ping")])
+        self.assertEqual([{"jsonrpc": "2.0", "id": 7, "result": {}}], out)
+
+    def test_malformed_input_is_a_protocol_error(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-3
+        out, _ = self._serve([self._req(1, "resources/list"), "not json",
+                              {"jsonrpc": "2.0", "id": 3}])
+        self.assertEqual([-32601, -32700, -32600], [m["error"]["code"] for m in out])
+
+    def test_relative_paths_resolve_against_the_project_directory(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-4
+        project = os.path.abspath(os.path.join(os.sep, "work", "proj"))
+        flags = R.mcp._workspace_flags(self._args(reqs="plugin/requirements"),
+                                       env={"CLAUDE_PROJECT_DIR": project})
+        at = flags.index("--reqs") + 1
+        self.assertEqual(os.path.join(project, "plugin", "requirements"), flags[at])
+        self.assertEqual(project, flags[flags.index("--root") + 1])
+
+    def test_the_tools_name_only_what_the_cli_has(self):  # verifies: REQ-MCPTOOLS-1028#CASE-1
+        for tool in R.mcp.MCP_TOOLS:
+            verb = tool["argv"][0]
+            self.assertIn(verb, R.COMMANDS, tool["name"])
+            known = {p["flag"] for p in R.COMMANDS[verb]["params"]}
+            flags = [a for a in tool["argv"][1:] if a.startswith("--")]
+            flags += [p["flag"] for p in tool["params"] if p["flag"]]
+            for flag in flags:
+                self.assertIn(flag, known, "{} uses {}".format(tool["name"], flag))
+
+    def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
+        writes = {"reqmap_sync", "reqmap_new", "reqmap_release"}
+        out, calls = self._serve([self._req(1, "tools/list"),
+                                  self._call(2, "reqmap_sync", {})])
+        self.assertFalse(writes & {t["name"] for t in out[0]["result"]["tools"]})
+        self.assertEqual(-32602, out[1]["error"]["code"])
+        self.assertEqual([], calls)
+        out, _ = self._serve([self._req(1, "tools/list")], allow_writes=True)
+        self.assertLessEqual(writes, {t["name"] for t in out[0]["result"]["tools"]})
+
+    def test_arguments_are_checked_and_passed_one_by_one(self):  # verifies: REQ-MCPTOOLS-1028#CASE-3
+        out, calls = self._serve([self._call(1, "reqmap_search", {}),
+                                  self._call(2, "reqmap_search", {"query": "x", "top": "3"}),
+                                  self._call(3, "reqmap_search", {"query": "a b", "top": 3})])
+        self.assertEqual([-32602, -32602], [m["error"]["code"] for m in out[:2]])
+        self.assertEqual([["gate", "--search", "a b", "--top", "3"]], calls)
+
+    def test_a_fail_verdict_is_an_answer_a_failed_command_is_an_error(self):  # verifies: REQ-MCPTOOLS-1028#CASE-4
+        out, _ = self._serve([self._call(1, "reqmap_gate", {}),
+                              self._call(2, "reqmap_show", {"id": "NOPE-X-001"})],
+                             run=lambda argv: (1, "result"))
+        gate, show = out[0]["result"], out[1]["result"]
+        self.assertFalse(gate["isError"])
+        self.assertTrue(show["isError"])
+        for res in (gate, show):
+            self.assertEqual("exit code 1", res["content"][-1]["text"])
+
+    def test_a_release_plan_passes_release_with_or_without_a_version(self):  # verifies: REQ-MCPTOOLS-1028#CASE-5
+        tool = next(t for t in R.mcp.MCP_TOOLS if t["name"] == "reqmap_release_plan")
+        self.assertEqual(["sync", "--json", "--release"], R.mcp.tool_argv(tool, {}))
+        self.assertEqual(["sync", "--json", "--release", "v1.2.0"],
+                         R.mcp.tool_argv(tool, {"version": "v1.2.0"}))
+
+
+class McpConfigSeed(unittest.TestCase):  # tested-by: REQ-MCPSEED-1029 @unit
+    """`init` writes the client configs that start `reqmap.py mcp`."""
+
+    @staticmethod
+    def _read(*parts):
+        with open(os.path.join(*parts), encoding="utf-8") as f:
+            return f.read()
+
+    def _repo(self, d):
+        scripts = os.path.join(d, "scripts")
+        os.makedirs(scripts)
+        return mock.patch.object(R.mcpconfig, "ENGINE_DIR", scripts)
+
+    def test_both_configs_start_the_vendored_engine(self):  # verifies: REQ-MCPSEED-1029#CASE-1
+        with tempfile.TemporaryDirectory() as d, self._repo(d):
+            created, notes = R.seed_mcp_files(d, os.path.join(d, "requirements"))
+            claude = json.loads(self._read(d, ".mcp.json"))
+            code = json.loads(self._read(d, ".vscode", "mcp.json"))
+        self.assertEqual([".mcp.json", ".vscode/mcp.json"], created)
+        self.assertEqual([], notes)
+        for entry, base in ((claude["mcpServers"]["reqmap"], "${CLAUDE_PROJECT_DIR:-.}"),
+                            (code["servers"]["reqmap"], "${workspaceFolder}")):
+            self.assertEqual(base + "/scripts/reqmap.py", entry["args"][0])
+            self.assertEqual("mcp", entry["args"][1])
+            self.assertEqual(base + "/requirements",
+                             entry["args"][entry["args"].index("--reqs") + 1])
+
+    def test_an_existing_config_is_left_alone(self):  # verifies: REQ-MCPSEED-1029#CASE-2
+        with tempfile.TemporaryDirectory() as d, self._repo(d):
+            mine = '{"servers": {"other": {"type": "stdio", "command": "x"}}}\n'
+            _write(os.path.join(d, ".vscode", "mcp.json"), mine)
+            created, notes = R.seed_mcp_files(d, os.path.join(d, "requirements"))
+            self.assertEqual(mine, self._read(d, ".vscode", "mcp.json"))
+        self.assertEqual([".mcp.json"], created)
+        self.assertTrue(any(".vscode/mcp.json" in n for n in notes), notes)
+
+    def test_an_engine_outside_the_repository_writes_nothing(self):  # verifies: REQ-MCPSEED-1029#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            created, notes = R.seed_mcp_files(d, os.path.join(d, "requirements"))
+            self.assertEqual([], os.listdir(d))
+        self.assertEqual([], created)
+        self.assertTrue(any("not inside this repository" in n for n in notes), notes)
+
+
+class McpEndToEnd(unittest.TestCase):  # tested-by: ARCH-MCP-073 @integration
+    """The server as a process, spoken to over real stdio."""
+
+    def test_initialize_list_and_call_over_stdio(self):  # verifies: ARCH-MCP-073#CASE-1
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["`gate` writes the lock file."]))
+            _write(os.path.join(d, "a.py"), "# implements: REQ-A-001\nx = 1\n")
+            msgs = [{"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                     "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                                "clientInfo": {"name": "test", "version": "0"}}},
+                    {"jsonrpc": "2.0", "method": "notifications/initialized"},
+                    {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+                    {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                     "params": {"name": "reqmap_gate", "arguments": {}}}]
+            done = subprocess.run(
+                [sys.executable, "-X", "utf8", engine, "mcp", "--root", d],
+                input="".join(json.dumps(m) + "\n" for m in msgs), capture_output=True,
+                text=True, encoding="utf-8", timeout=300, env=dict(os.environ, CLAUDE_PROJECT_DIR=""))
+        replies = [json.loads(l) for l in done.stdout.splitlines()]
+        self.assertEqual([1, 2, 3], [r["id"] for r in replies], done.stderr)
+        names = {t["name"] for t in replies[1]["result"]["tools"]}
+        self.assertIn("reqmap_gate", names)
+        self.assertNotIn("reqmap_sync", names)
+        self.assertIn("gate:", replies[2]["result"]["content"][0]["text"])
 
 
 class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-by: ARCH-SELFGATE-039  # tested-by: REQ-SELFGATE-990

@@ -1,0 +1,18 @@
+{
+  "servers": {
+    "reqmap": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/plugin/scripts/reqmap.py",
+        "mcp",
+        "--root",
+        "${workspaceFolder}",
+        "--reqs",
+        "${workspaceFolder}/plugin/requirements",
+        "--code",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}

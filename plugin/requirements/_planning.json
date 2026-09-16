@@ -23,14 +23,6 @@
   },
   "bars": [
     {
-      "title": "Server MCP: expune reqmap ca tool",
-      "lane": "Feature",
-      "start": "2026-09-21",
-      "end": "2026-09-27",
-      "milestone": "v7.22.0",
-      "progress": 0
-    },
-    {
       "title": "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului",
       "lane": "Feature",
       "start": "2026-09-28",
