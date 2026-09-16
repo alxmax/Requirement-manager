@@ -156,6 +156,8 @@ satisfies: [ARCH-HEALTH-017]
 
 Every bullet below is binding.
 - `next` computes a headline score: the percentage of requirements that are green.
+- A `deprecated` requirement is left out of that percentage: `scored` is the denominator,
+  and `deprecated` counts what was left out.
 - The axes are status `confirmed`, coverage, a test signal, no open verify-intent question,
   and no drift from the lock.
 - For a `bus` or `feature` requirement, coverage means an `implements` member.
@@ -184,6 +186,11 @@ CASE-4 — an unsatisfied confirmed need is an orphan
   Given  a confirmed `layer: need` requirement that no requirement's `satisfies:` names
   When   `next` runs
   Then   it is counted under orphans and excluded from green
+
+CASE-5 — a retired requirement does not lower the score
+  Given  one green requirement and one `deprecated` requirement
+  When   `next` runs
+  Then   the score is 100 and `deprecated` is 1
 
 
 --------------------

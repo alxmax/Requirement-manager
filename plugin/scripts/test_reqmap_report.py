@@ -1370,7 +1370,8 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertEqual(json.loads(out), {
-            "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
+            "score": 100, "total": 1, "scored": 1, "healthy": 1, "deprecated": 0,
+            "confirmed": 1, "implemented": 1,
             "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0,
             "gate_errors": 0, "gate_link_sync_clean": True})
 
@@ -1579,6 +1580,15 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         obj = json.loads(out)
         self.assertEqual(obj["orphans"], 1)
         self.assertEqual(obj["healthy"], 0)
+
+    def test_a_retired_requirement_does_not_lower_the_score(self):  # verifies: REQ-HEALTH-858#CASE-5
+        reqs = {"REQ-A-001": {"meta": {"status": "confirmed"},
+                              "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"},
+                "REQ-B-002": {"meta": {"status": "deprecated"}, "body": "# Old\n"}}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual((obj["score"], obj["deprecated"], obj["scored"]), (100, 1, 1))
 
     def test_aggregate_waived_from_test_axis_like_need(self):  # bug: health-aggregate-not-waived
         reqs = {

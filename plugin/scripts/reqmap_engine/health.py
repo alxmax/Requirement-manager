@@ -202,9 +202,10 @@ def _health_record(reqs, members, reqs_dir):
     for r in reqs.values():
         satisfied.update(_as_list(r["meta"].get("satisfies")))
     confirmed = implemented = tested = orphans = untested = 0
-    open_intent = drifted = drafts = healthy = 0
+    open_intent = drifted = drafts = healthy = retired = 0
     for rid, r in reqs.items():
         f = _requirement_health_flags(rid, r, members, lock, satisfied)
+        retired += f["status"] == "deprecated"
         confirmed += f["is_confirmed"]
         implemented += f["has_impl"]
         tested += f["has_test_member"]
@@ -216,11 +217,17 @@ def _health_record(reqs, members, reqs_dir):
         if (f["is_confirmed"] and f["covered"] and (f["has_test"] or f["impl_exempt"])
                 and not f["open_now"] and not f["is_drifted"]):
             healthy += 1
-    score = round(100 * healthy / total) if total else 0
+    # implements: REQ-HEALTH-858
+    # A `deprecated` requirement is out of service and can never be green, so counting it
+    # capped the headline forever: this repo read 97/100 with nothing wrong, 8 retired
+    # requirements in the denominator. The reviewed score already excluded them.
+    scored = total - retired
+    score = round(100 * healthy / scored) if scored else 0
     reviewed_score, reviewed_total = _reviewed_score(confirmed, drafts, healthy)
     gate_errors = _link_sync_errors(reqs, members)
-    data = {"score": score, "total": total, "healthy": healthy,
-            "confirmed": confirmed, "implemented": implemented, "tested": tested,
+    data = {"score": score, "total": total, "scored": scored, "healthy": healthy,
+            "deprecated": retired, "confirmed": confirmed, "implemented": implemented,
+            "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
             "open_intent": open_intent, "drift": drifted,
             "gate_errors": len(gate_errors), "gate_link_sync_clean": not gate_errors}
@@ -310,7 +317,10 @@ def _print_health_report(data, design, untagged, lag, headline_only):
     drifted, gate_errors = data["drift"], data["gate_errors"]
     reviewed_score = data.get("reviewed_score")
     reviewed_total = data.get("reviewed_total")
-    print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    retired = data.get("deprecated", 0)
+    print("Requirement health: {}/100  ({}/{} green on every axis{})".format(
+        score, healthy, total - retired,
+        ", {} deprecated not scored".format(retired) if retired else ""))
     if headline_only:
         # `next` opens with the score and then lists what to do about it; the component
         # breakdown below would push the actionable part off the first screen. The design

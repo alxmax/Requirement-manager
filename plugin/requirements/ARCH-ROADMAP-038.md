@@ -429,9 +429,9 @@ satisfies: [ARCH-ROADMAP-038]
 > archived, so it went silent exactly when the plan moved to `_planning.json`.
 
 Every bullet below is binding.
-- The baseline is the highest of three versions: `version` in a `.claude-plugin/plugin.json`
-  beside the requirements directory or at the code root, the newest `v*` git tag, and the
-  newest dated `vX.Y.Z` heading in `CHANGELOG.md`. With none of them, nothing is reported.
+- The baseline is the highest of three versions: the one the repository's version files
+  declare ([[REQ-VERSIONFILES-1014]]), the newest `v*` git tag, and the newest dated
+  `vX.Y.Z` heading in `CHANGELOG.md`. With none of them, nothing is reported.
 - Every version is compared in one form, `vX.Y.Z`, the form tags and CHANGELOG headings
   use: `plugin.json`'s `7.19.0` is `v7.19.0`, and a short key `vX.Y` is read as `vX.Y.0`.
   A milestone equal to the baseline is stale, because that version has been declared.
