@@ -9,7 +9,6 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 ## Now
 
-- [ ] n=2: Consilium-py, `uses: alxmax/requirement-manager/check@v7` pe `main`, verde 7 zile. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul (2026-06-19.1). | req: SYS-SSOT-001
 - [x] Scoate diagrama Specification Hierarchy din `_map.md` | req: ARCH-MAPDIAGRAMS-055
       <!-- Bifa anterioară („desenează CODE când sunt ≤24 noduri code") era falsă:
            `_mermaid_hierarchy` n-a desenat niciodată un nod code și n-a avut niciun prag
@@ -25,7 +24,9 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [x] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
       <!-- Făcut în v7.6.0 (REQ-VIEWER-999). Modul Horizons apare DOAR când exportul
            duce itemi de orizont. `Not now` se parsează și nu se desenează. -->
-- [ ] `roadmap_unmapped` / heading-uri fără milestone numesc un next-step | req: ARCH-ROADMAP-038
+- [x] `roadmap_unmapped` / heading-uri fără milestone numesc un next-step | req: ARCH-ROADMAP-038
+      <!-- v7.21.7, REQ-ROADMAP-983 CASE-4. Fiecare linie de roadmap din `sync` şi
+           `gate --audit` se termină cu editarea care o stinge. -->
       <!-- Debifat 2026-09-13: `audit.py:183-188` se opreşte la constatare în ambele cazuri.
            `roadmap_unmapped` are deja răspunsul — adaugă `milestone:` la cerinţele care au
            ieşit în versiunile alea. Vezi şi TODO.md v5.13, care cere acelaşi lucru. -->
@@ -35,7 +36,9 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 ## Next
 
-- [ ] Planul si Versiunile citesc acelasi lucru | req: ARCH-VIEWER-007
+- [x] Planul si Versiunile citesc acelasi lucru | req: ARCH-VIEWER-007
+      <!-- v7.20.0. O singură listă, două randări: `items[]` a fost şters, iar Versiunile
+           citesc `bars` filtrate pe `milestone`. Nota de mai jos e starea de dinainte. -->
       Ce apare in Plan nu apare in Versiuni. Puntea EXISTA deja - RoadmapView.jsx:236-246
       amesteca itemi planificati in coloana fiecarei versiuni - dar ii citeste din
       `milestones[].items[]`, nu din `bars`. Iar `items[]` e chiar cheia goala pe care
@@ -83,7 +86,8 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            Arhiva NU e citită: dacă ar fi, ar fi tot un plan viu, iar mutarea n-ar
            însemna nimic. Consecinţa intenţionată: cele trei semnale de roadmap din
            `gate --audit` tac aici, iar graficul se alimentează doar din `milestone:`. -->
-- [ ] `init` spune o dată că roadmap-ul e inert, când planul n-are niciun titlu de versiune | req: ARCH-INIT-012
+- [x] `init` spune o dată că roadmap-ul e inert, când planul n-are niciun titlu de versiune | req: ARCH-INIT-012
+      <!-- v7.21.7, REQ-ROADMAP-983 CASE-5. -->
       <!-- Ultimul rest din TODO-feedback-management-dashboard.md §14, propunerea 2,
            înainte ca fişierul să fie şters pe 2026-09-14. Propunerea 1 a intrat în
            v7.5.0 (`gate --audit` tipăreşte semnalele de roadmap); 3 e alternativa ei
@@ -105,6 +109,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 ## Later
 
 - [ ] MCP server, stdlib, din registrul de comenzi | unpark: consumator numit care nu poate CLI
+- [ ] n=2: Consilium-py pe `uses: alxmax/requirement-manager/check@v7`. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul | unpark: Consilium-py are action-ul pe `main`, verde 7 zile
 - [ ] Licență Apache-2.0 / MIT în loc de BSL 1.1 | unpark: primul evaluator intern într-o firmă care cere grant
 - [ ] Search RO: rank pe flexiuni, nu match literal | unpark: un cititor din afara repo-ului care folosește viewer-ul în RO
 

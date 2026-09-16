@@ -207,6 +207,9 @@ Every bullet below is binding.
   that lacks a requirement.
 - `roadmap_unmapped` is read-only, like the behind-signal it mirrors: no exit code
   changes, and the health score is untouched.
+- Each roadmap line `sync` and `gate --audit` print ends with the edit that clears it.
+- `init` says once that the roadmap chart stays empty when `TODO.md` has headings and
+  none of them starts with a version.
 
 ## Cases
 CASE-1 — the requirements trailing the shipped roadmap is reported
@@ -227,6 +230,18 @@ CASE-3 — a corpus level with the shipped roadmap raises nothing
          newest requirement `milestone:` is `v2.13`
   When   `health --json` runs
   Then   the payload carries no `roadmap_unmapped` key
+
+CASE-4 — each roadmap line names its next step
+  Given  a `TODO.md` whose `## v2.16` holds a `[x]` item and whose `## Deferred` is not a
+         version, and a corpus whose newest requirement `milestone:` is `v2.13`
+  When   the roadmap lines are printed
+  Then   one says to add `milestone:` after `v2.13`, and one says to start `Deferred` with
+         its version
+
+CASE-5 — init names an inert roadmap
+  Given  a repository whose `TODO.md` has only the heading `## Backlog`
+  When   `init` runs
+  Then   its output says the roadmap chart stays empty, once
 
 
 --------------------

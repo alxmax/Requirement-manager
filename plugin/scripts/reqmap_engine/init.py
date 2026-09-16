@@ -3,6 +3,7 @@ import json
 import os
 
 from .draft import cmd_extract
+from .mapdata import _roadmap_signals
 from .gate import cmd_check
 from .mapcmd import cmd_map
 from .release import seed_release_files
@@ -235,6 +236,13 @@ def _print_release_setup(reqs_dir, code_root, notes):
               "file in _config.json as VERSION_FILES if it lives elsewhere.")
     for note in notes:
         print("note: " + note)
+    # implements: REQ-ROADMAP-983
+    # Said once, here: a TODO.md with no version heading gives the roadmap chart nothing,
+    # and silence there reads the same as "all is well".
+    roadmap = _roadmap_signals(code_root)
+    if roadmap and not roadmap["newest_milestone"] and roadmap["unversioned_headings"]:
+        print("roadmap: TODO.md has {} heading(s) and none starts with a version (`## vX.Y`), "
+              "so the roadmap chart stays empty".format(len(roadmap["unversioned_headings"])))
 
 
 def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):

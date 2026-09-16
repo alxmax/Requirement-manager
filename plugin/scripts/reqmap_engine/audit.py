@@ -210,17 +210,23 @@ def _roadmap_lag_lines(reqs, code_root):
     roadmap = _roadmap_signals(code_root) if code_root else None
     if not roadmap:
         return lines
+    # implements: REQ-ROADMAP-983
+    # Each line ends with the edit that clears it: a finding with no next step is one a
+    # reader has to go and research, and this one was left standing for three minors.
     behind, newest_req, unmapped = _roadmap_behind(reqs, roadmap)
     if behind:
-        lines.append("TODO.md stops at {} while the requirements reach {} - the roadmap "
-                     "is behind".format(roadmap["newest_milestone"], newest_req))
+        lines.append("TODO.md stops at {} while the requirements reach {} - add a `## {}` "
+                     "heading for that work".format(roadmap["newest_milestone"], newest_req,
+                                                    newest_req))
     if unmapped:
         lines.append("the requirements stop at {} while TODO.md marks work shipped "
-                     "through {} - the roadmap chart ends before the product does"
-                     .format(newest_req, roadmap["newest_shipped"]))
+                     "through {} - add `milestone:` to the requirements that shipped after {}"
+                     .format(newest_req, roadmap["newest_shipped"], newest_req))
     if roadmap["unversioned_headings"]:
-        lines.append("{} TODO.md heading(s) are not milestones, so their items never "
-                     "reach the roadmap".format(len(roadmap["unversioned_headings"])))
+        lines.append("{} TODO.md heading(s) are not milestones, so their items never reach "
+                     "the roadmap - start each with its version, `## vX.Y` (first: {})"
+                     .format(len(roadmap["unversioned_headings"]),
+                             roadmap["unversioned_headings"][0]))
     return lines
 
 

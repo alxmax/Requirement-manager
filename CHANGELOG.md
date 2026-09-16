@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v7.21.7` — 2026-09-16
+
+**Every roadmap line names the edit that clears it, and `init` says when the roadmap is
+inert.** The three roadmap lines `sync` and `gate --audit` print stopped at the finding: the
+roadmap is behind, the requirements stop before shipped work, a heading is not a milestone.
+Each now ends with its fix — add the `## vX.Y` heading, add `milestone:` to the requirements
+after the named version, start the heading with its version. `init` prints once that the
+roadmap chart stays empty when `TODO.md` has headings and none is a version, because that
+silence read the same as a clean result (REQ-ROADMAP-983 CASE-4, CASE-5).
+
+`ROADMAP.md` is current again: the two items this release carries out and "Plan and Versions
+read one list" (v7.20.0) are ticked, the Consilium-py adoption item moved to Later with its
+`unpark:` condition, and the remaining Next items have bars on v7.22.0 and v8.0.0, so `sync`
+no longer reports Now/Next items with no date.
+
 ## plugin `v7.21.6` — 2026-09-16
 
 **The corpus's readability report is empty: `file-spread` counts directories, and the rest
