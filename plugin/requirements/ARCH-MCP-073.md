@@ -22,6 +22,7 @@ Every bullet below is binding.
 - `reqmap.py mcp` answers MCP over stdio, newline-delimited JSON-RPC at one pinned protocol revision, and writes nothing but protocol messages to stdout. [[REQ-MCPPROTOCOL-1027]]
 - Each tool is one `reqmap.py` invocation in a fresh process, named for the question it answers, and only `--allow-writes` offers a tool that writes. [[REQ-MCPTOOLS-1028]]
 - `init` writes the Claude Code and VS Code client configs that start the server, and never edits one that exists. [[REQ-MCPSEED-1029]]
+- The committed map and every requirement in it are readable as MCP resources. [[REQ-MCPRESOURCES-1030]]
 
 ## Cases
 CASE-1
@@ -111,6 +112,7 @@ Every bullet below is binding.
   call to one without it is error -32602.
 - Each argument becomes its own argument to `reqmap.py`, never text for a shell; an unknown,
   missing required or wrongly typed argument is error -32602.
+- `reqmap_show`, `reqmap_search` and `reqmap_dupes` run their command with `--json`.
 - A call's result carries the command's output as text and, when the exit code is not zero,
   a second item naming it. `isError` is set only for an exit code the tool does not count as
   an answer: `reqmap_gate`'s exit 1 is a FAIL verdict, not an error.
@@ -185,3 +187,48 @@ CASE-3 — an engine outside the repository writes nothing
   Given  a repository that does not contain the engine
   When   the configs are seeded
   Then   no file is written and a note says the engine is not inside the repository
+
+
+--------------------
+
+
+---
+id: REQ-MCPRESOURCES-1030
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MCP-073]
+---
+
+# The map and each requirement, as resources
+
+## Description
+> A tool is something an agent decides to call; a resource is something a person or a client
+> attaches as context. A requirement is the second kind as often as the first: "work on
+> this, per REQ-X" wants the requirement in the conversation, not a tool call about it.
+
+Every bullet below is binding.
+- `resources/list` offers `reqmap://map`, the committed `_map.json`, and one
+  `reqmap://requirement/<id>` per requirement the map names, read from the map file without
+  running the engine; with no map it offers nothing.
+- `resources/templates/list` offers `reqmap://requirement/{id}`.
+- Reading `reqmap://requirement/<id>` returns what `reqmap_show` returns for that id; an id
+  with no requirement, or a missing map, is error -32002, and a URI the server does not serve
+  is error -32602.
+
+## Cases
+CASE-1 — the list comes from the committed map
+  Given  a `_map.json` naming two requirements, and separately no map
+  When   `resources/list` is asked
+  Then   the first lists `reqmap://map` and both requirements; the second lists nothing
+
+CASE-2 — a requirement reads as its dossier
+  Given  a server whose `gate --json --show` answers for `REQ-A-001` and fails for `NOPE-1`
+  When   `resources/read` asks for each
+  Then   the first returns that JSON with its URI, the second is error -32002
+
+CASE-3 — the map reads as the file, the template is offered, other URIs are refused
+  Given  a committed `_map.json`
+  When   `reqmap://map`, `file:///x` and the template list are asked for
+  Then   the first returns the file's text, the second is error -32602, and the template is `reqmap://requirement/{id}`

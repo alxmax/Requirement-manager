@@ -222,6 +222,8 @@ Every bullet below is binding.
   `findings`, so the "None" placeholder is skipped.
 - `show` lists the risk signals with their advice, reusing the same `_risk_signals` source as
   `next` and the Risk tab, so the three never disagree.
+- `show --json` prints the same dossier as one JSON object, adding the requirement's
+  frontmatter and body; for an unknown id it prints an object carrying `error`.
 - `show` returns zero for a known id and a non-zero code for an unknown one, so a typo is
   visible to a caller or to CI.
 
@@ -244,4 +246,10 @@ CASE-3 — exit code distinguishes a known id from an unknown one
   When   `show` runs on each
   Then   the known id returns 0 and the unknown id returns 1 with "no requirement with id
          NOPE-000"
+
+CASE-4 — --json carries the dossier and the file
+  Given  a known id with a dependency and a member, and an unknown id
+  When   `show --json` runs on each
+  Then   the first prints one JSON object with its contract, members, frontmatter and body,
+         exit 0; the second prints an object with `error`, exit 1
 

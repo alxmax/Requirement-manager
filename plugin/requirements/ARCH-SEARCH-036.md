@@ -167,6 +167,8 @@ satisfies: [ARCH-SEARCH-036]
 Every bullet below is binding.
 - `search` prints every match it shows together with that match's cosine score. A weak match
   then looks weak, instead of carrying the authority of a strong one.
+- `search --json` prints the query, the matches in the order shown, each with its id, title,
+  how it matched (`id`, `text` or `lexical`) and its score, and the message an empty result prints.
 - `search` shows at most `--top` matches. `--top` defaults to five.
 - A `--top` of zero or less counts as one.
 - `search` applies a relevance floor and never prints a ranked list of below-floor results.
@@ -198,6 +200,11 @@ CASE-5 — the no-strong-match line names the best score and the floor
   Given  a query with no requirement scoring at or above the floor
   When   `search` runs
   Then   the printed line reports both the best score found and the floor value
+
+CASE-6 — --json lists the same matches
+  Given  a query matching one requirement lexically
+  When   `search --json` runs
+  Then   it prints one JSON object whose `matches` hold that id, how it matched and its score
 
 
 --------------------

@@ -199,7 +199,9 @@ download.
 sees fifteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
 `reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
 invocation in a fresh process. It is **read-only by default**; `reqmap_sync`, `reqmap_new`
-and `reqmap_release` appear only when the server starts with `--allow-writes`.
+and `reqmap_release` appear only when the server starts with `--allow-writes`. The committed map
+and every requirement are also resources (`reqmap://map`, `reqmap://requirement/<id>`), so a
+client can attach a requirement to the conversation instead of calling a tool about it.
 
 `init` writes the client configs when they are absent, and never edits one that exists:
 `.mcp.json` for Claude Code and `.vscode/mcp.json` for VS Code. By hand:
@@ -412,7 +414,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,831 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,965 lines in all)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git

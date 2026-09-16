@@ -1083,6 +1083,27 @@ class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHO
         return {"meta": {"status": status, "layer": "feature", **dict(_kv(extra))},
                 "body": body, "path": "requirements/X.md"}
 
+    def test_json_carries_the_dossier_and_the_file(self):  # verifies: REQ-SHOW-919#CASE-4
+        reqs = {"REQ-X-001": self._req(extra="depends_on: [REQ-Y-002]",
+                                       body="# T\n\n## Description\n- does x\n"),
+                "REQ-Y-002": self._req()}
+        members = {"REQ-X-001": [("implements", "a.py", 3)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_show(R.Workspace(reqs, members), "REQ-X-001", as_json=True)
+        rec = json.loads(buf.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual((["does x"], ["REQ-Y-002"]), (rec["contract"], rec["depends_on"]))
+        self.assertEqual([{"role": "implements", "file": "a.py", "line": 3, "level": None}],
+                         rec["members"])
+        self.assertEqual("confirmed", rec["frontmatter"]["status"])
+        self.assertIn("## Description", rec["body"])
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_show(R.Workspace(reqs, members), "NOPE-000", as_json=True)
+        self.assertEqual(1, code)
+        self.assertIn("no requirement with id NOPE-000", json.loads(buf.getvalue())["error"])
+
     def test_known_id_header_and_zero(self):  # verifies: REQ-SHOW-917#CASE-3  # verifies: REQ-SHOW-919#CASE-3
         code, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
         self.assertEqual(code, 0)
@@ -1251,6 +1272,18 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         # ("2 match(es) ...") starts with a digit too but carries no "REQ-" token.
         return [ln for ln in out.splitlines()
                 if "REQ-" in ln and ln.strip()[:1].isdigit()]
+
+    def test_json_lists_the_same_matches(self):  # verifies: REQ-SEARCH-913#CASE-6
+        reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash baseline"),
+                "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_search(reqs, "lock hash baseline", 5, as_json=True)
+        rec = json.loads(buf.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual("REQ-DRIFT-001", rec["matches"][0]["id"])
+        self.assertIn(rec["matches"][0]["match"], ("text", "lexical"))
+        self.assertIsNone(rec["message"])
 
     def test_query_ranks_matching_requirement_first_with_score(self):  # AC-1  # verifies: REQ-SEARCH-913#CASE-1
         reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash baseline"),
@@ -3275,6 +3308,18 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertIn("skipped 1 deprecated requirement(s)", out)
         self.assertNotIn("<->", out)
 
+    def test_dupes_json_carries_every_pair_and_what_was_skipped(self):  # verifies: REQ-SIMILAR-923#CASE-7
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},
+                "A-C-003": {"meta": {"status": "deprecated"}, "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {}, top=0, as_json=True)
+        rec = json.loads(buf.getvalue())
+        self.assertEqual([("A-A-001", "A-B-002")], [(p["a"], p["b"]) for p in rec["pairs"]])
+        self.assertIn("scanner", rec["pairs"][0]["shared"])
+        self.assertEqual((1, 2), (rec["skipped"]["deprecated"], rec["compared"]))
+
     def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
         body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
         reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},
@@ -4966,7 +5011,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
         self.assertEqual([{"jsonrpc": "2.0", "id": 7, "result": {}}], out)
 
     def test_malformed_input_is_a_protocol_error(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-3
-        out, _ = self._serve([self._req(1, "resources/list"), "not json",
+        out, _ = self._serve([self._req(1, "prompts/list"), "not json",
                               {"jsonrpc": "2.0", "id": 3}])
         self.assertEqual([-32601, -32700, -32600], [m["error"]["code"] for m in out])
 
@@ -5003,7 +5048,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                                   self._call(2, "reqmap_search", {"query": "x", "top": "3"}),
                                   self._call(3, "reqmap_search", {"query": "a b", "top": 3})])
         self.assertEqual([-32602, -32602], [m["error"]["code"] for m in out[:2]])
-        self.assertEqual([["gate", "--search", "a b", "--top", "3"]], calls)
+        self.assertEqual([["gate", "--json", "--search", "a b", "--top", "3"]], calls)
 
     def test_a_fail_verdict_is_an_answer_a_failed_command_is_an_error(self):  # verifies: REQ-MCPTOOLS-1028#CASE-4
         out, _ = self._serve([self._call(1, "reqmap_gate", {}),
@@ -5020,6 +5065,61 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
         self.assertEqual(["sync", "--json", "--release"], R.mcp.tool_argv(tool, {}))
         self.assertEqual(["sync", "--json", "--release", "v1.2.0"],
                          R.mcp.tool_argv(tool, {"version": "v1.2.0"}))
+
+
+class McpResources(unittest.TestCase):  # tested-by: REQ-MCPRESOURCES-1030 @unit
+    """The committed map and each requirement, as MCP resources."""
+
+    def _server(self, d, run=None):
+        return {"allow_writes": False, "run": run or (lambda argv, ws: (0, "{}")),
+                "workspace": ["--root", d, "--reqs", os.path.join(d, "requirements")]}
+
+    def _map(self, d):
+        _write(os.path.join(d, "requirements", "_map.json"), json.dumps({"nodes": [
+            {"id": "REQ-A-001", "title": "Alpha"}, {"id": "REQ-B-002", "title": "Beta"}]}))
+
+    def test_the_list_comes_from_the_committed_map(self):  # verifies: REQ-MCPRESOURCES-1030#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual([], R.mcp.resource_list(self._server(d)))
+            self._map(d)
+            uris = [r["uri"] for r in R.mcp.resource_list(self._server(d))]
+        self.assertEqual(["reqmap://map", "reqmap://requirement/REQ-A-001",
+                          "reqmap://requirement/REQ-B-002"], uris)
+
+    def test_a_requirement_reads_as_its_dossier(self):  # verifies: REQ-MCPRESOURCES-1030#CASE-2
+        calls = []
+
+        def run(argv, ws):
+            calls.append(argv)
+            return (0, '{"id": "REQ-A-001"}') if argv[-1] == "REQ-A-001" else (1, "no")
+        with tempfile.TemporaryDirectory() as d:
+            server = self._server(d, run)
+            ok = R.mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "resources/read",
+                               "params": {"uri": "reqmap://requirement/REQ-A-001"}}, server)
+            bad = R.mcp.handle({"jsonrpc": "2.0", "id": 2, "method": "resources/read",
+                                "params": {"uri": "reqmap://requirement/NOPE-1"}}, server)
+        content = ok["result"]["contents"][0]
+        self.assertEqual(("reqmap://requirement/REQ-A-001", '{"id": "REQ-A-001"}'),
+                         (content["uri"], content["text"]))
+        self.assertEqual(["gate", "--json", "--show", "REQ-A-001"], calls[0])
+        self.assertEqual(-32002, bad["error"]["code"])
+
+    def test_the_map_reads_as_the_file_and_other_uris_are_refused(self):  # verifies: REQ-MCPRESOURCES-1030#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._map(d)
+            server = self._server(d)
+            text = R.mcp.read_resource("reqmap://map", server)["contents"][0]["text"]
+            self.assertEqual(self._file(d), text)
+            refused = R.mcp.handle({"jsonrpc": "2.0", "id": 1, "method": "resources/read",
+                                    "params": {"uri": "file:///x"}}, server)
+        self.assertEqual(-32602, refused["error"]["code"])
+        self.assertEqual("reqmap://requirement/{id}",
+                         R.mcp.resource_templates()[0]["uriTemplate"])
+
+    @staticmethod
+    def _file(d):
+        with open(os.path.join(d, "requirements", "_map.json"), encoding="utf-8") as f:
+            return f.read()
 
 
 class McpConfigSeed(unittest.TestCase):  # tested-by: REQ-MCPSEED-1029 @unit

@@ -47,13 +47,14 @@ MCP_TOOLS = (
      "params": [_param("all", "bool", "List every pending item, not the top few.", "--all")]},
     {"name": "reqmap_health", "argv": ["gate", "--risk", *_JSON], "writes": False,
      "description": "The health score and its component counts, as JSON.", "params": []},
-    {"name": "reqmap_show", "argv": ["gate"], "writes": False,
+    {"name": "reqmap_show", "argv": ["gate", *_JSON], "writes": False,
      "description": "One requirement's dossier: contract, dependencies, code members, open "
-                    "questions and risk signals.",
+                    "questions and risk signals, as JSON with the requirement's frontmatter "
+                    "and body.",
      "params": [_param("id", "str", _ID, "--show", required=True)]},
-    {"name": "reqmap_search", "argv": ["gate"], "writes": False,
-     "description": "Requirements ranked by relevance to a free-text query; an id in the "
-                    "query is matched first.",
+    {"name": "reqmap_search", "argv": ["gate", *_JSON], "writes": False,
+     "description": "Requirements ranked by relevance to a free-text query, as JSON; an id "
+                    "in the query is matched first.",
      "params": [_param("query", "str", "What to look for.", "--search", required=True),
                 _param("top", "int", "How many matches to return (default 5).", "--top")]},
     {"name": "reqmap_audit", "argv": ["gate", "--audit", *_JSON], "ok": (0, 1),
@@ -61,8 +62,9 @@ MCP_TOOLS = (
      "description": "Everything the engine can find, as JSON: gate, health, duplicate "
                     "contracts, design, tag coverage, exemptions and corpus shape.",
      "params": []},
-    {"name": "reqmap_dupes", "argv": ["gate", "--dupes"], "writes": False,
-     "description": "Requirement pairs whose contracts share wording, most similar first.",
+    {"name": "reqmap_dupes", "argv": ["gate", "--dupes", *_JSON], "writes": False,
+     "description": "Requirement pairs whose contracts share wording, most similar first, "
+                    "as JSON.",
      "params": [_param("threshold", "number", "Cosine cutoff in (0, 1], default 0.35.",
                        "--threshold"),
                 _param("top", "int", "Print only this many pairs.", "--top")]},
@@ -190,11 +192,88 @@ def _error(msg_id, code, message):
 
 def _initialize_result():  # implements: REQ-MCPPROTOCOL-1027
     return {"protocolVersion": PROTOCOL_VERSION,
-            "capabilities": {"tools": {"listChanged": False}},
+            "capabilities": {"tools": {"listChanged": False},
+                             "resources": {"listChanged": False}},
             "serverInfo": {"name": "reqmap", "version": MAP_ENGINE_VERSION},
             "instructions": "Requirement manager for this repository. Start with "
                             "reqmap_gate for the verdict or reqmap_next for what to do; "
-                            "reqmap_show and reqmap_search read one requirement."}
+                            "reqmap_show and reqmap_search read one requirement, and each "
+                            "requirement is also a resource, reqmap://requirement/<id>."}
+
+
+MAP_URI = "reqmap://map"
+REQUIREMENT_URI = "reqmap://requirement/"
+
+
+def _map_path(workspace):  # implements: REQ-MCPRESOURCES-1030
+    """`_map.json` in the requirements directory the server was started on."""
+    flags = dict(zip(workspace[::2], workspace[1::2]))
+    reqs = flags.get("--reqs") or os.path.join(flags["--root"], "requirements")
+    return os.path.join(reqs, "_map.json")
+
+
+def resource_list(server):  # implements: REQ-MCPRESOURCES-1030
+    """The committed map, and one resource per requirement it names. Read from the map
+    file, not the engine: a listing must not cost a full scan. No map, no resources."""
+    try:
+        with open(_map_path(server["workspace"]), encoding="utf-8") as f:
+            nodes = json.load(f).get("nodes") or []
+    except (OSError, ValueError, AttributeError):
+        return []
+    nodes = nodes.values() if isinstance(nodes, dict) else nodes
+    out = [{"uri": MAP_URI, "name": "_map.json", "mimeType": "application/json",
+            "description": "The requirement graph this repository commits: every "
+                           "requirement, its members, dependencies and health."}]
+    for n in nodes:
+        if isinstance(n, dict) and n.get("id"):
+            out.append({"uri": REQUIREMENT_URI + n["id"], "name": n["id"],
+                        "title": n.get("title") or n["id"], "mimeType": "application/json"})
+    return out
+
+
+def resource_templates():  # implements: REQ-MCPRESOURCES-1030
+    """The `resources/templates/list` entries: one requirement by id."""
+    return [{"uriTemplate": REQUIREMENT_URI + "{id}", "name": "requirement",
+             "mimeType": "application/json",
+             "description": "One requirement's dossier with its frontmatter and body, as "
+                            "`reqmap_show` returns it."}]
+
+
+def read_resource(uri, server):  # implements: REQ-MCPRESOURCES-1030
+    """`resources/read` contents, LookupError when the resource does not exist, or
+    ValueError for a URI this server does not serve."""
+    if uri == MAP_URI:
+        try:
+            with open(_map_path(server["workspace"]), encoding="utf-8") as f:
+                text = f.read()
+        except OSError:
+            raise LookupError("no committed map: run `reqmap.py sync`")
+    elif isinstance(uri, str) and uri.startswith(REQUIREMENT_URI):
+        rid = uri[len(REQUIREMENT_URI):]
+        rc, text = server["run"](["gate", "--json", "--show", rid], server["workspace"])
+        if rc != 0:
+            raise LookupError("no requirement with id {}".format(rid))
+    else:
+        raise ValueError("unknown resource: {}".format(uri))
+    return {"contents": [{"uri": uri, "mimeType": "application/json", "text": text}]}
+
+
+def _call(params, server):
+    return call_tool(params.get("name"), params.get("arguments"), server)
+
+
+# method -> the result it answers with. A ValueError is invalid params (-32602), a
+# LookupError a resource that does not exist (-32002, the protocol's resource-not-found).
+_ROUTES = {
+    "initialize": lambda params, server: _initialize_result(),
+    "ping": lambda params, server: {},
+    "tools/list": lambda params, server: {"tools": tool_list(server["allow_writes"])},
+    "tools/call": _call,
+    "resources/list": lambda params, server: {"resources": resource_list(server)},
+    "resources/templates/list": lambda params, server: {
+        "resourceTemplates": resource_templates()},
+    "resources/read": lambda params, server: read_resource(params.get("uri"), server),
+}
 
 
 def handle(msg, server):  # implements: ARCH-MCP-073  # implements: REQ-MCPPROTOCOL-1027
@@ -205,20 +284,15 @@ def handle(msg, server):  # implements: ARCH-MCP-073  # implements: REQ-MCPPROTO
     if "id" not in msg:
         return None
     method, params, msg_id = msg["method"], msg.get("params") or {}, msg["id"]
-    if method == "initialize":
-        return {"jsonrpc": "2.0", "id": msg_id, "result": _initialize_result()}
-    if method == "ping":
-        return {"jsonrpc": "2.0", "id": msg_id, "result": {}}
-    if method == "tools/list":
-        return {"jsonrpc": "2.0", "id": msg_id,
-                "result": {"tools": tool_list(server["allow_writes"])}}
-    if method == "tools/call":
-        try:
-            result = call_tool(params.get("name"), params.get("arguments"), server)
-        except ValueError as e:
-            return _error(msg_id, -32602, str(e))
-        return {"jsonrpc": "2.0", "id": msg_id, "result": result}
-    return _error(msg_id, -32601, "method not found: {}".format(method))
+    route = _ROUTES.get(method)
+    if route is None:
+        return _error(msg_id, -32601, "method not found: {}".format(method))
+    try:
+        return {"jsonrpc": "2.0", "id": msg_id, "result": route(params, server)}
+    except LookupError as e:
+        return _error(msg_id, -32002, str(e))
+    except ValueError as e:
+        return _error(msg_id, -32602, str(e))
 
 
 def _workspace_flags(a, env=None):  # implements: REQ-MCPPROTOCOL-1027

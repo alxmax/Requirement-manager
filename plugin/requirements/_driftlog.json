@@ -61,6 +61,10 @@
       "hash": "7c4e810f31e7",
       "reason": null
     },
+    "ARCH-MCP-073": {
+      "hash": "f6a4bb3f4454",
+      "reason": "JSON for show/search/dupes; MCP resources"
+    },
     "ARCH-PARSE-001": {
       "hash": "3eca960dd4f3",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
@@ -185,6 +189,10 @@
       "hash": "6c5320cf4220",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
+    "REQ-MCPTOOLS-1028": {
+      "hash": "d5744e4e9da0",
+      "reason": "JSON for show/search/dupes; MCP resources"
+    },
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
@@ -237,6 +245,10 @@
       "hash": "68dd0cb1b87c",
       "reason": "baked fixture is JSON"
     },
+    "REQ-SEARCH-913": {
+      "hash": "58260ffdf26a",
+      "reason": "JSON for show/search/dupes; MCP resources"
+    },
     "REQ-SELFGATE-916": {
       "hash": "11f65cd22341",
       "reason": "REQ-SELFGATE-916 CASE-1 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
@@ -245,9 +257,17 @@
       "hash": "1a1b6c2ac3d7",
       "reason": "REQ-SELFGATE-990 gains the design-finding count clause: the CLAUDE.md sentence claiming three findings had drifted to ten unread, and a clause with no test is the same claim again."
     },
+    "REQ-SHOW-919": {
+      "hash": "21313c69df10",
+      "reason": "JSON for show/search/dupes; MCP resources"
+    },
     "REQ-SIMILAR-921": {
       "hash": "63bc945fdfcc",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-SIMILAR-923": {
+      "hash": "242c5a7aa921",
+      "reason": "JSON for show/search/dupes; MCP resources"
     },
     "REQ-TRACE-934": {
       "hash": "2ccdcdb3fec3",
