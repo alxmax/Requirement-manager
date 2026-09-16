@@ -269,16 +269,16 @@ def _corrupt_lock_rule(ctx):
 @gate_rule("RM017", "warn", only_source_repo=True)
 def _viewer_fixture_rule(ctx):  # implements: ARCH-VIEWER-007
     # the viewer's fallback fixture vs the live registry — this repository only.
-    candidate = os.path.join(ctx.code_root, "app", "src", "lib", "data.js")
+    candidate = os.path.join(ctx.code_root, "app", "src", "lib", "baked.json")
     if not os.path.exists(candidate):
         return
     nodes = [{"id": rid, "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS)}
              for rid, r in ctx.reqs.items()]
     drifted = check_viewer_data_sync(candidate, nodes)
     if drifted:
-        yield None, ("app/src/lib/data.js out of sync with {} requirement(s): {} — "
-                     "regenerate its BAKED fixture or accept the drift is intentional for this "
-                     "fallback demo data."
+        yield None, ("app/src/lib/baked.json out of sync with {} requirement(s): {} — "
+                     "update the viewer's fallback fixture or accept the drift is intentional "
+                     "for this demo data."
                      .format(len(drifted), ", ".join(drifted)))
 
 

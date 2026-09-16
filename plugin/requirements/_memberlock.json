@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "47581a61c13819a32320792a72a1ffa22bf6761778831e9f54720751dba7238b",
+      "plugin/scripts/reqmap_engine/__init__.py": "e0f50500e7213e348bba66907075194172afebd309dfb8708fe418f39c32d9c3",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -149,8 +149,8 @@
       "app/src/views/roadmap/versionsData.js": "354aa4817bd4ff539271f37b618569a8573c95f5111a73ac77b682e28c79f71c",
       "app/src/views/spec/SpecParts.jsx": "49f4c8e491b1a22d52b8e501a9bad4caf392123e716f0edc2c075e6b6aaf9ec1",
       "app/vite.viewer.config.js": "0cdcb9953b91d24d45dc42ea5d3ab06dcacf40a12309ef1c2bdbc4dd9eb1b5f9",
-      "plugin/scripts/reqmap_engine/rules.py#_viewer_fixture_rule": "2108cb055856b14520210bd7faf9fd3ccc10a3125ed61e4b1122e4ff59da8917",
-      "plugin/scripts/reqmap_engine/viewer.py#check_viewer_data_sync": "cbeab54b1890be479514c18e25e1969b290a9f5a4625edd3d4858c17821f382c"
+      "plugin/scripts/reqmap_engine/rules.py#_viewer_fixture_rule": "b009cd3a9c9b5226dabea4452f55f14d08d982052db0efd706c89f174052a2ee",
+      "plugin/scripts/reqmap_engine/viewer.py#check_viewer_data_sync": "c97931119b062db3b99b2fdea17615dca4b7744702479faf4bb98b3d37a43420"
     },
     "REQ-ATOMICFORM-053": {
       "plugin/scripts/reqmap_engine/sections.py#_atomic_scenario_then_count": "7fcd8c3790c3953e13cdafff2acfe44cf8d274b841af3ec8bd61fbf6ae6a9de5",
