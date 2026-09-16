@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v7.21.6` — 2026-09-16
+
+**The corpus's readability report is empty: `file-spread` counts directories, and the rest
+was fixed in the prose.** `file-spread` counted files while the engine was one file; since
+the package split a behaviour computed in one module, reported by `audit` and exported by
+`mapjson` spanned three files by design, and 35 of its 38 warnings said nothing else. It now
+counts the distinct directories of a requirement's `implements` members (ADR-0042); the key
+and its default of 3 are unchanged. The three requirements that still cross the engine and two
+viewer areas carry `lint_exempt: [file-spread]` with the reason written beside it. Eight
+clauses that stacked conditions, used a redundant modal or opened on "It" were split or named,
+and six requirements with fewer than three cases gained a third case and the test that
+verifies it. `gate --code ..` now reports 0 errors and 0 warnings.
+
 ## plugin `v7.21.5` — 2026-09-16
 
 **A requirement already at `level: code` is no longer offered for decomposition.** `sync`

@@ -203,7 +203,8 @@ CASE-6 — a tested-by-linked pair is skipped and counted
 CASE-7 — a parent and its child, or two children of one parent, are never a duplicate finding
   Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent
   When   `dupes` runs
-  Then   the parent-child and sibling pairs are skipped and counted in the linked-pairs line, and the pair across parents is still reported
+  Then   the parent-child and sibling pairs are skipped, counted in the linked-pairs line;
+         the pair across parents is still reported
 
 
 --------------------

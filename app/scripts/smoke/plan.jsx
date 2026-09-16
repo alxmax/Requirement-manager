@@ -12,6 +12,7 @@ import {
   PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
 } from "../../src/views/roadmap/PlanGantt.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
+import { dayStyle } from "../../src/views/roadmap/GanttRuler.jsx";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
@@ -228,6 +229,24 @@ test("gantt: each day under the weeks is labelled day/month",  // verifies: REQ-
     return bands.map((b) => b.label).join(" ") === "14/9 15/9 16/9 17/9 18/9 19/9 20/9"
       && bands[5].weekend && bands[6].weekend && !bands[4].weekend
       && html.includes('data-day="15/9"') && html.includes('data-day="16/9"');
+  })());
+
+test("gantt: today stands out and a weekend recedes",  // verifies: REQ-PLANDAYS-1021#CASE-2
+  (() => {
+    const today = dayStyle({ start: 4, weekend: false }, 4);
+    const friday = dayStyle({ start: 11, weekend: false }, 4);
+    const saturday = dayStyle({ start: 5, weekend: true }, 4);
+    return today.color === "var(--accent-2)" && friday.color !== today.color
+      && saturday.color !== friday.color && saturday.color.includes("55%")
+      && saturday.background !== "none";
+  })());
+
+test("gantt: the day row spans the chart",  // verifies: REQ-PLANDAYS-1021#CASE-3
+  (() => {
+    const html = renderToString(<PlanGantt planning={cadencePlan} locale="en" t={(s) => s}
+                                           zoom={100} openSpec={noop} />);
+    const cells = (html.match(/data-day="/g) || []).length;
+    return cells >= 14 && cells === new Set(html.match(/data-day="[^"]+"/g)).size;
   })());
 
 // ---- selecting a shipped month or a version opens what is in it -----------

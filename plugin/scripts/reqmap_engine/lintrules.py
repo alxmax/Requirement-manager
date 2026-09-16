@@ -1,6 +1,7 @@
 """The lint checks themselves: prose, sections, acceptance, shape, terms, graph, and the thresholds
 they read.
 """
+import os
 import re
 
 from . import config as cfg
@@ -415,19 +416,22 @@ def _graph_lint(r, member_list, fanin):
     """What the requirement looks like from outside: how far its members are spread,
     and whether its declared layer matches its fan-in."""
     findings = []
-    # file-spread (warn): a requirement whose implements members span many distinct FILES is
-    # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
-    # cannot see, since a tight contract can still be smeared across many files. Auto-off when
-    # the members live in fewer than LINT_FILE_SPREAD_MAX files, so it is silent in a single-file
-    # repo (near-zero false positive). Needs member_list; skipped when not supplied.
+    # file-spread (warn): a requirement whose implements members span many distinct
+    # DIRECTORIES is architecturally diffuse — a cohesion axis the intent-axis checks
+    # (over-scoped, ac-count) cannot see. It counted files while the engine was one file; once
+    # it became one module per capability (ADR-0035), a behaviour computed in one module,
+    # reported by `audit` and exported by `mapjson` spanned three files by design, and 38 of
+    # this corpus's warnings said nothing else. Directories are the unit a reader navigates
+    # (ADR-0042). Needs member_list; skipped when not supplied.
     if member_list:
-        impl_files = {m[1] for m in member_list if m and m[0] == "implements"}
-        if len(impl_files) >= cfg.LINT_FILE_SPREAD_MAX:
+        impl_dirs = {os.path.dirname(m[1].replace("\\", "/"))
+                     for m in member_list if m and m[0] == "implements"}
+        if len(impl_dirs) >= cfg.LINT_FILE_SPREAD_MAX:
             findings.append({
                 "severity": "warn", "check": "file-spread",
-                "detail": "implements span {} files (>= {}): capability may be diffuse — "
+                "detail": "implements span {} directories (>= {}): capability may be diffuse — "
                           "confirm cohesion or split".format(
-                              len(impl_files), cfg.LINT_FILE_SPREAD_MAX)})
+                              len(impl_dirs), cfg.LINT_FILE_SPREAD_MAX)})
     # layer-mismatch (warn): `bus` is DEFINED by fan-in ("foundation, high fan-in"),
     # and nothing checked it. A requirement with no dependents and many dependencies is
     # the exact inverse — a roof labelled a foundation. It reads as bus in the map, in

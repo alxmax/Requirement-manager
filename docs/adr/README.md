@@ -52,6 +52,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0039](0039-the-first-recorded-criterion-that-did-not-cover-its-clause.md) | The first recorded criterion that did not cover its clause | Accepted |
 | [0040](0040-a-release-is-cut-from-the-plan.md) | A release is cut from the plan | Accepted |
 | [0041](0041-two-of-the-engines-four-design-findings-are-fixed.md) | Two of the engine's four design findings are fixed, two are kept | Accepted |
+| [0042](0042-file-spread-counts-directories.md) | `file-spread` counts directories, not files | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

@@ -413,6 +413,7 @@ layer: feature
 owner: Alex
 milestone: v7.8
 satisfies: [ARCH-MAP-007]
+lint_exempt: [file-spread]
 ---
 
 # What already shipped, read from the CHANGELOG and grouped by month
@@ -471,3 +472,9 @@ CASE-6 — a shipped month opens to what was done in it
   Given  a month holding two releases, each with a headline
   When   the reader selects that month on the chart
   Then   a note lists both releases, newest first, each with its date and headline
+
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the engine reads the CHANGELOG, the viewer's data layer
+  adopts the rows, and the Plan draws them: three directories because the capability is
+  one payload crossing the engine/viewer boundary, which is the shape every map feature has.

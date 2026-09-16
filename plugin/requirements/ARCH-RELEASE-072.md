@@ -21,7 +21,8 @@ satisfies: [SYS-SHIP-108]
 Every bullet below is binding.
 - The engine reads the version a repository declares from the usual version files, or from the files `_config.json` names. [[REQ-VERSIONFILES-1014]]
 - A CHANGELOG is read in the dated heading forms its ecosystem uses, and `init` seeds one when the repository has none. [[REQ-CHANGELOGFORMS-1015]]
-- `sync`, `gate --audit` and `health` report where the version files, the CHANGELOG and the tags disagree, and never fail on it. [[REQ-VERSIONALIGN-1016]]
+- `sync`, `gate --audit` and `health` report where the version files, the CHANGELOG and the tags disagree. [[REQ-VERSIONALIGN-1016]]
+- A disagreement between the version sources never fails a command. [[REQ-VERSIONALIGN-1016]]
 - The next release's number is the lowest planned milestone above the highest version already declared. [[REQ-NEXTVERSION-1017]]
 - `sync --release` prints the release it would cut and writes the version files and the CHANGELOG entry only with `--apply`. [[REQ-RELEASECMD-1018]]
 - `init` gives a GitHub repository a workflow that tags and releases the declared version once. [[REQ-RELEASEWORKFLOW-1019]]
@@ -34,6 +35,16 @@ CASE-1
   Given  a fresh repository with a `package.json` at 0.1.0
   When   `init` runs, a milestone `v0.2.0` is planned, and `sync --release --apply` runs
   Then   `package.json` declares 0.2.0 and the CHANGELOG carries a dated `0.2.0` entry
+
+CASE-2
+  Given  a fresh repository with nothing planned above its declared version
+  When   `sync --release --apply` runs
+  Then   it exits 2 and the version file is unchanged
+
+CASE-3
+  Given  a repository whose version file was bumped by hand with no CHANGELOG entry
+  When   `gate --audit` runs
+  Then   it names the disagreement and exits 0
 
 ## Context
 **Notes**
@@ -227,8 +238,8 @@ Every bullet below is binding.
   milestone's label in bold, then one bullet per bar planned on that version — directly under
   `Unreleased` when the file has one, otherwise above the newest release.
 - A version named after `--release` is released instead of the planned one.
-- It refuses with exit 2, writing nothing, when nothing is planned above the baseline, when
-  the version is not above it, or when the gate reports errors.
+- `sync --release --apply` refuses with exit 2 and writes nothing in three cases: nothing is
+  planned above the baseline, the version is not above it, or the gate reports errors.
 - An entry for the version that already exists is never written a second time.
 
 ## Cases
@@ -339,6 +350,11 @@ CASE-2 — after a release the plan is current and names the next
   When   the plan and version sources are checked
   Then   no milestone is stale, nothing is misaligned, and `v1.6.0` is next
 
+CASE-3 — a dry run leaves the plan as it was
+  Given  a plan holding `v1.5.0` and a bar on it
+  When   `sync --release` runs without `--apply`
+  Then   `_planning.json` is byte-identical
+
 ---
 id: REQ-PLANDATES-1022
 status: confirmed
@@ -415,4 +431,9 @@ CASE-2 — the release plan names the items and writes none
   Given  a release whose bar is titled like an open Now item
   When   `sync --release --apply` runs
   Then   it names the item to tick and `ROADMAP.md` is unchanged
+
+CASE-3 — a done item is never suggested
+  Given  a bar titled like an item already ticked
+  When   the items for the bars are asked for
+  Then   none is named
 

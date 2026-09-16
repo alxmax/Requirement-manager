@@ -18,8 +18,8 @@
       "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
     },
     "ARCH-COVERAGE-029": {
-      "hash": "f11cc3dc6c9c",
-      "reason": "feedback 2026-09-14: UTF-16 scan, one tagged-files definition, plan carries the pyramid, init tags the source, one untagged list"
+      "hash": "25d7127a672c",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-DECOMPOSE-050": {
       "hash": "82f6630155c2",
@@ -28,6 +28,10 @@
     "ARCH-DESIGN-061": {
       "hash": "98d3066d75c0",
       "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
+    },
+    "ARCH-DOCCLAIMS-071": {
+      "hash": "c26232330457",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-DRIFT-003": {
       "hash": "d29eb01c1e04",
@@ -41,6 +45,10 @@
       "hash": "f37afd7a0755",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "ARCH-LINTCHECKS-025": {
+      "hash": "01c4f8e83f6e",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
     "ARCH-MAP-007": {
       "hash": "7c4e810f31e7",
       "reason": null
@@ -50,16 +58,16 @@
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
     "ARCH-RELEASE-072": {
-      "hash": "f3f33aa2b577",
-      "reason": "roadmap vs bars"
+      "hash": "485c43b9135b",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-REPRO-041": {
       "hash": "95d822880e6c",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     },
     "ARCH-ROADMAP-038": {
-      "hash": "749da72cdc2d",
-      "reason": "obligation wikilinks"
+      "hash": "daf5f508b040",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -70,8 +78,8 @@
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     },
     "ARCH-SECTIONS-068": {
-      "hash": "a69c428c96ed",
-      "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
+      "hash": "1b379be4fc5e",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-SELFGATE-039": {
       "hash": "6179c5ac1d86",
@@ -146,24 +154,32 @@
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
     },
     "REQ-LEVELRETROFIT-987": {
-      "hash": "2e66d9978fda",
-      "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
+      "hash": "f275a981c830",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-LINTCHECKS-866": {
+      "hash": "6c5320cf4220",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+    },
+    "REQ-PLANADVANCE-1020": {
+      "hash": "a45b85b812db",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANCADENCE-1000": {
       "hash": "3f85229041a5",
       "reason": null
     },
     "REQ-PLANDAYS-1021": {
-      "hash": "78a57de21c48",
-      "reason": "day is 22px"
+      "hash": "bb4560f824aa",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "c6d7850f9f5a",
-      "reason": "obligation wikilinks"
+      "hash": "1d1a04ef9be3",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANSTALE-1013": {
       "hash": "9434789ef73b",
@@ -176,6 +192,14 @@
     "REQ-PROMOTE-894": {
       "hash": "b9701e079e3a",
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
+    },
+    "REQ-RELEASECMD-1018": {
+      "hash": "23eeba192147",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-RELEASEROADMAP-1023": {
+      "hash": "a3e41c373fd0",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-REPRO-905": {
       "hash": "34bdcb2ea67a",
@@ -194,8 +218,8 @@
       "reason": "REQ-SELFGATE-990 gains the design-finding count clause: the CLAUDE.md sentence claiming three findings had drifted to ten unread, and a clause with no test is the same claim again."
     },
     "REQ-SIMILAR-921": {
-      "hash": "18c77b368797",
-      "reason": "ADR-0036: REQ-SIMILAR-921 CASE-7 now covers siblings as well as parent-child"
+      "hash": "63bc945fdfcc",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-TRACE-934": {
       "hash": "2ccdcdb3fec3",
@@ -208,6 +232,10 @@
     "REQ-TRANSLATE-996": {
       "hash": "4f6e6771dd73",
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
+    },
+    "REQ-UNPLANNED-1024": {
+      "hash": "f4c83e90aff2",
+      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-VIEWER-977": {
       "hash": "8c401c2200b5",

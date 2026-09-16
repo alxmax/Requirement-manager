@@ -205,7 +205,11 @@ CASE-1 — the default run changes nothing on disk
 CASE-2 — the upper rungs and the edges are written with the rungs, in `init`'s shape
   Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub
   When   `clarify --levels --apply` runs
-  Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing
+  Then   a draft `ARCH-JS-001` exists and the three point at it;
+         the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`;
+         both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`;
+         the stub is unchanged, as is a requirement that already satisfied something;
+         a second run writes nothing
 
 CASE-3 — a requirement with contract groups is told which command builds its code rung
   Given  a requirement whose Description carries two bold contract groups

@@ -37,6 +37,11 @@ CASE-2
   Then   no finding is produced and the run is byte-identical to one from before this
          requirement existed
 
+CASE-3
+  Given  a stale marked count in a document `DOC_CLAIM_FILES` does not name
+  When   `gate` runs
+  Then   no finding is produced for it
+
 ## Context
 **Terms**
 - *marked claim*: a `<!--reqmap:KIND-->` comment in prose, followed by the integer it

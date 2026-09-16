@@ -787,8 +787,11 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
 
     def test_file_spread_warns_across_many_files(self):  # senate-driven; validates the positive branch via a synthetic multi-file fixture  # verifies: REQ-LINTCHECKS-866#CASE-5  # verifies: REQ-LINTCHECKS-866#CASE-6  # verifies: ARCH-LINTCHECKS-025#CASE-7
         r = self._req("confirmed", self._body())
-        spread = [("implements", "a.py", 1), ("implements", "b.py", 2), ("implements", "c.py", 3)]
+        spread = [("implements", "x/a.py", 1), ("implements", "y/b.py", 2), ("implements", "z/c.py", 3)]
         self.assertIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-D-001", r, spread)])
+        # three files in one directory are one place to read (ADR-0042)
+        pkg = [("implements", "pkg/a.py", 1), ("implements", "pkg/b.py", 2), ("implements", "pkg/c.py", 3)]
+        self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-H-001", r, pkg)])
         # implements within a single file (tested-by files don't count) => silent in single-file repos
         one = [("implements", "a.py", 1), ("implements", "a.py", 9), ("tested-by", "t.py", 1)]
         self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-E-001", r, one)])
@@ -3778,6 +3781,13 @@ class ReleaseCommand(unittest.TestCase):  # tested-by: REQ-RELEASECMD-1018 @unit
             self.assertEqual([], R.version_alignment_lines(reqs, d))
             self.assertEqual("v1.6.0", R.next_planned_version(reqs, d))
 
+    def test_a_dry_run_leaves_the_plan_as_it_was(self):  # verifies: REQ-PLANADVANCE-1020#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
+            before = _text(reqs, "_planning.json")
+            self.assertEqual(0, _release(d, reqs)[0])
+            self.assertEqual(before, _text(reqs, "_planning.json"))
+
 
 class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019 @unit
     """`init` gives a GitHub repo the workflow that tags the declared version once."""
@@ -3853,6 +3863,24 @@ class ReleaseEndToEnd(unittest.TestCase):  # tested-by: ARCH-RELEASE-072 @integr
             self.assertIn('"version": "0.2.0"', _text(d, "package.json"))
             self.assertIn("## [0.2.0] - ", _text(d, "CHANGELOG.md"))
 
+    def test_nothing_planned_is_refused_through_the_cli(self):  # verifies: ARCH-RELEASE-072#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "package.json"), '{"name": "x", "version": "0.1.0"}\n')
+            self.assertEqual(0, self._run(d, "init", "--no-site").returncode)
+            done = self._run(d, "sync", "--release", "--apply")
+            self.assertEqual(2, done.returncode, done.stdout + done.stderr)
+            self.assertIn('"version": "0.1.0"', _text(d, "package.json"))
+
+    def test_a_hand_bump_is_reported_by_the_audit_and_fails_nothing(self):  # verifies: ARCH-RELEASE-072#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "package.json"), '{"name": "x", "version": "0.1.0"}\n')
+            self.assertEqual(0, self._run(d, "init", "--no-site").returncode)
+            _write(os.path.join(d, "package.json"), '{"name": "x", "version": "0.3.0"}\n')
+            _write(os.path.join(d, "CHANGELOG.md"), "# Changelog\n\n## [0.1.0] - 2026-09-01\n**First.**\n")
+            audit = self._run(d, "gate", "--audit")
+            self.assertEqual(0, audit.returncode, audit.stdout + audit.stderr)
+            self.assertIn("while the version files declare v0.3.0", audit.stdout)
+
 
 class PlanDates(unittest.TestCase):  # tested-by: REQ-PLANDATES-1022 @unit
     """`sync` suggests a bar's date when the work it names finished, or ran over."""
@@ -3911,6 +3939,9 @@ class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @
         self.assertEqual(["CSV writer", "Parser speed"],
                          [it["name"] for it in R.items_for_bars(self.ITEMS, bars)])
 
+    def test_a_done_item_is_never_suggested(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-3
+        self.assertEqual([], R.items_for_bars(self.ITEMS, [{"title": "Shipped", "req": "REQ-OLD-004"}]))
+
     def test_the_release_plan_names_the_items_and_writes_none(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-2
         with tempfile.TemporaryDirectory() as d:
             reqs = _release_repo(d, "1.4.0", {"v1.5.0": {"due": "2026-10-02"}},
@@ -3934,3 +3965,7 @@ class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @
                 {"title": "x", "req": "REQ-VIEW-003"}]
         self.assertIsNone(R.unplanned_line(self.ITEMS, bars))
         self.assertIsNone(R.unplanned_line(None, bars))
+
+    def test_done_and_later_items_are_never_counted(self):  # verifies: REQ-UNPLANNED-1024#CASE-3
+        self.assertEqual(["CSV writer", "Parser speed", "Viewer A", "Viewer B"],
+                         [it["name"] for it in R.unplanned_items(self.ITEMS, [])])
