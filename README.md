@@ -93,6 +93,7 @@ Copy the engine into any project, then:
 python scripts/reqmap.py init     # scaffold + draft the SYS → ARCH → CODE pyramid
 python scripts/reqmap.py gate     # are code and specs in sync? (report-only)
 python scripts/reqmap.py sync      # build the visual map → open requirements/_map.html
+python scripts/reqmap.py sync --release   # when a version is due: what it would release (--apply writes it)
 ```
 
 `init` is the friendly starting point — it sets everything up, drafts the SYS → ARCH → CODE
@@ -234,7 +235,7 @@ it can change a file.
 
 | Verb | What it does |
 |---|---|
-| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. Idempotent; never clobbers an existing `.reqmapignore`. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
+| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
 | `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
 | `gate` | **The verdict, and every read-only question.** Bare, it is the commit/CI check (below). The mode flags each answer one question instead. Never writes anything. |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
@@ -253,21 +254,21 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 | Flag | What it answers |
 |---|---|
 | `--risk` | *What should I work on next?* A health score plus counted risk buckets. `--json`/`--badge` for the numbers alone, `--untagged` for the files carrying no `implements:` tag. |
-| `--audit` | *How is this repo doing?* Every discovery pass in one report: gate, risk, duplicates, design, tag coverage, the exemptions in force, corpus shape. The exit code comes from the gate alone — the rest is advice. |
+| `--audit` | *How is this repo doing?* Every discovery pass in one report: gate, risk, duplicates, design, tag coverage, the exemptions in force, corpus shape, and the plan against the releases (a milestone already shipped, version sources that disagree). The exit code comes from the gate alone — the rest is advice. |
 | `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. |
 | `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. |
 | `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). |
 | `--design` | Advisory design review of the code: the four OOP pillars, one Chidamber & Kemerer per-class metric (RFC, Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
 | `--i18n` | Translations the configured `LANGUAGE` (`en` \| `ro` \| `both`, set in `requirements/_config.json`) expects and does not have, missing or stale. `--json` emits each entry's source fields and cache key for whoever translates — the engine never does. |
-| `--implement ID` | The brief for writing the code: obligations, cases, the exact tags the new code must carry, where similar code already lives. `--json` for a coding agent. |
 | `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
 
 **`sync` — the write modes.**
 
 | Flag | What it does |
 |---|---|
-| *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the site regions, the integration artifacts. |
+| *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the site regions, the integration artifacts. Then print, as suggestions only, where the plan and reality disagree — see [Planning and releasing](#planning-and-releasing). |
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
+| `--release [vX.Y.Z]` | Cut the next version planned in `_planning.json` — the lowest milestone above the version already declared — or the one named. Prints the plan and writes nothing without `--apply`; with it, bumps the version files, writes the dated CHANGELOG entry and drops the milestone and its bars from the plan. Exit 2 when nothing is planned, the version is not above the baseline, or the gate has errors. `--json` is what a release workflow reads. |
 | `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
 | `--attach <page>` | Refresh the engine-owned regions (nav links, counts) of a presentation page, scaffolding one if absent. `--regions nav,stats`, `--diagram <rel>`. |
 
@@ -408,7 +409,8 @@ app/                                        the React viewer (built into the sin
 docs/                                       guides, plans + specs
   history/TODO-archive.md                   the retired TODO.md — history, not an instruction
 ROADMAP.md                                  the live plan — Now / Next / Later; a bar opens its note
-  requirements/_planning.json               Gantt bars, lanes and the release cadence (both seeded by `init`)
+  requirements/_planning.json               Gantt bars, lanes, milestones and the release cadence (both seeded by `init`)
+CHANGELOG.md                                one dated entry per release; read as the shipped history, written by `sync --release`
 ```
 
 `SKILL.md` (authoritative for authoring rules, statuses, and the gate):
@@ -421,24 +423,58 @@ a checkbox with an optional `| lane: <label>` suffix. The lane is parsed and car
 `_map.json`, but the Roadmap tab renders one lane, `Implementations`, so it no longer
 splits the chart. Completed items (`[x]`) are hidden in the chart.
 
-**The plan, and the note under it.** `init` seeds a `ROADMAP.md` and a
-`requirements/_planning.json` on a fresh repo, because a plan file a repo does not have
-is a plan nobody writes. The first holds horizons — `Now` / `Next` / `Later`, an item
-per line with `| req: ID`; **the lines you indent under an item are its note**, and the
-Plan shows them when that item's bar is selected. The second holds the bars, the lanes
-and the release cadence. Its calendar runs to the end of the year, or three months out,
-whichever is later — computed on every run, so it cannot go stale; pin it with `until`
-if you want a fixed end. A repo that has scheduled nothing still gets the calendar,
-which is the point: that is the repo with planning to do.
-
 ```markdown
 ## v1.14
 - [ ] Promote-todo command    | lane: feature
 - [ ] Milestone id rejected on Windows paths | lane: bug
 ```
 
-Items appear as amber dashed bars in the Roadmap tab until you replace them with a
-real requirement file.
+Open items appear in their version's column on the Roadmap tab's Versions view.
+
+**The plan, and the note under it.** `init` seeds a `ROADMAP.md` and a
+`requirements/_planning.json` on a fresh repo, because a plan file a repo does not have
+is a plan nobody writes. The first holds horizons — `Now` / `Next` / `Later`, an item
+per line with `| req: ID`; **the lines you indent under an item are its note**, and the
+Plan shows them when that item's bar is selected. The second holds the bars, the lanes
+and the release cadence — weekly on Friday unless you say otherwise with `every` and `on`.
+While nothing in it has a date, its calendar runs to the end of the year, or three months
+out, whichever is later; once bars exist it ends at the last of them, and `until` pins it.
+A repo that has scheduled nothing still gets the calendar, which is the point: that is the
+repo with planning to do. Name milestones in full, `vX.Y.Z`, the form tags and CHANGELOG
+headings use.
+
+## Planning and releasing
+
+The plan says which version the work goes out in, `CHANGELOG.md` says what shipped, and a
+version file says what the repository is. The engine reads all three as `vX.Y.Z`
+([ADR-0040](docs/adr/0040-a-release-is-cut-from-the-plan.md)):
+
+- **The version** is read from `package.json`, `pyproject.toml`, `Cargo.toml`,
+  `.claude-plugin/plugin.json` or `VERSION` — or from the files `VERSION_FILES` names in
+  `requirements/_config.json`.
+- **The CHANGELOG** is read in the common heading forms — `## [1.2.0] - 2026-09-16`,
+  `## v1.2.0 - 2026-09-16`, `## 1.2.0 (2026-09-16)` — and a new entry is written in the form
+  the file already uses.
+
+`sync` then says, without writing anything:
+
+- a milestone planned at or below the version already declared — the plan describes the past;
+- version files, the newest CHANGELOG entry and the newest tag that disagree;
+- a bar whose requirement is done on a different day than the bar's `end` — the date of the
+  last commit to that requirement's code — or a bar past its `end` whose requirement is not;
+- `Now` / `Next` items in `ROADMAP.md` that no bar schedules.
+
+**Cutting a release.** `sync --release` takes the lowest milestone planned above the
+declared version and shows what it would do. `sync --release --apply` does it: bumps every
+version file (only the version text changes), writes the dated CHANGELOG entry headed by
+the milestone's label with one bullet per bar planned on it — under `## [Unreleased]` when
+the file has one, so what you collected there becomes the notes — removes the milestone and
+its bars from `_planning.json`, and names the `ROADMAP.md` items to tick by hand.
+
+**Tagging stays in CI.** On a GitHub repo `init` writes `.github/workflows/reqmap-release.yml`:
+on every push to the default branch it reads `sync --release --json` and, only when the
+declared version has no tag yet, creates the tag and a GitHub release whose notes are that
+version's CHANGELOG entry. Commit the release, push, and the tag follows.
 
 ## Why it works the way it does
 

@@ -424,6 +424,7 @@ footer a:hover{color:var(--accent)}
       <li><a href="#model">Model</a></li>
       <li><a href="#commands">Commands</a></li>
       <li><a href="#layers">Layers</a></li>
+      <li><a href="#release">Plan &amp; release</a></li>
       <li><a href="#ci">CI/CD</a></li>
       <li><a href="#install">Install</a></li>
       <!--##REQMAP:NAV##-->
@@ -436,7 +437,7 @@ footer a:hover{color:var(--accent)}
 <!-- HERO -->
 <div class="hero">
   <div class="wrap">
-    <div class="badge"><div class="badge-dot"></div>v7.2.0 · Claude Code Plugin · stdlib-only</div>
+    <div class="badge"><div class="badge-dot"></div>v7.21.0 · Claude Code Plugin · stdlib-only</div>
     <h1>Keep your specs and<br>your code <em>honest.</em></h1>
     <p class="hero-lead">
       A capability registry that sits between intent and code. One Markdown file per capability as
@@ -556,23 +557,28 @@ footer a:hover{color:var(--accent)}
 <span class="kw">layer</span><span class="pu">:</span>      <span class="vl">feature</span>
 <span class="kw">owner</span><span class="pu">:</span>      <span class="vl">auth-team</span>
 <span class="kw">depends_on</span><span class="pu">:</span> <span class="pu">[</span><span class="vl">CORE-SESSION-002</span><span class="pu">]</span>
-<span class="kw">milestone</span><span class="pu">:</span>  <span class="vl">v1.4</span>    <span class="cm"># optional — shows on the Roadmap tab</span>
+<span class="kw">milestone</span><span class="pu">:</span>  <span class="vl">v1.4.0</span>  <span class="cm"># optional — its column on the Roadmap tab</span>
 <span class="pu">---</span>
 
 <span class="tg"># User login</span>
 
-<span class="cm">> WHY: users need to reach their own data securely.</span>
+<span class="tg">## Description</span>
+<span class="cm">> Users need to reach their own data, and an attacker must not learn who has an account.</span>
 
-<span class="tg">## WHAT — Contract</span>
-- It shall accept an email + password and return a session token.
-- It shall reject an unknown email with a generic error (no user enumeration).
+Every bullet below is binding.
+- Login accepts an email and password and returns a session token.
+- An unknown email gets the same generic error as a wrong password.
 
-<span class="tg">## HOW — Acceptance</span>
-- <span class="cm">Given</span> a valid email/password, <span class="cm">When</span> login is called, <span class="cm">Then</span> a token is returned.
-- <span class="cm">Given</span> an unknown email, <span class="cm">When</span> login is called, <span class="cm">Then</span> a generic error is returned.
+<span class="tg">## Cases</span>
+CASE-1 — a valid login returns a token
+  <span class="cm">Given</span>  a registered email and its password
+  <span class="cm">When</span>   login is called
+  <span class="cm">Then</span>   a session token is returned
 
-<span class="tg">## WHAT — Verify intent</span>
-- Should the token TTL be configurable per environment?  <span class="cm"># open question for human reviewer</span></pre></div>
+CASE-2 — an unknown email is not revealed
+  <span class="cm">Given</span>  an email with no account
+  <span class="cm">When</span>   login is called
+  <span class="cm">Then</span>   the generic error is returned</pre></div>
     </div>
 
     <div class="tag-roles reveal">
@@ -618,103 +624,38 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">All 21 commands</h2>
+      <h2 class="reveal">Five verbs</h2>
       <p class="lead reveal">
-        One stdlib-only Python script. No installation, no dependencies.
-        Seed it with <code>cp</code>; run it from the directory where <code>requirements/</code> lives.
+        One stdlib-only Python engine. No installation, no dependencies. Every read-only question
+        is a flag on <code>gate</code>, every write a flag on <code>sync</code>, so the shape of a
+        command tells you whether it can change a file.
       </p>
     </div>
 
     <div class="cmds reveal">
+      <div class="cmd">
+        <div class="cmd-n"><code>init</code></div>
+        <div class="cmd-d">First-time setup: scaffold <code>requirements/</code> and <code>.reqmapignore</code>, draft the SYS → ARCH → CODE pyramid from untagged code, build the lock and map. Seeds <code>ROADMAP.md</code>, <code>_planning.json</code> (weekly Friday cadence) and a <code>CHANGELOG.md</code>, prints where the version is read from, and on GitHub writes a release workflow. Never clobbers an existing file. <span class="fl">--wipe</span> hard reset · <span class="fl">--no-site</span></div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>new AREA-NAME-NNN</code></div>
+        <div class="cmd-d">Scaffold one blank requirement from the built-in template. <span class="fl">--from-todo "name" --id ID</span> pre-fills it from a <code>TODO.md</code> item; <span class="fl">--mark-done</span> ticks it off.</div>
+      </div>
       <div class="cmd gate">
         <div class="cmd-n"><code>gate</code></div>
         <div class="cmd-d">
-          <strong>The gate.</strong> Every tag resolves, every confirmed requirement has code, nothing drifted.
-          Run before every commit and in CI.<br>
-          <span class="fl">--strict</span> promotes warnings to errors ·
-          <span class="fl">--json</span> structured output ·
-          <span class="fl">--since &lt;ref&gt;</span> git-scoped scan (full-scan fallback + WARN on failure)
+          <strong>The verdict.</strong> Every tag resolves, every confirmed requirement has code, every <code>depends_on</code> exists; then readability and map freshness. Run before every commit and in CI; never writes.<br>
+          <span class="fl">--strict</span> · <span class="fl">--json</span> · <span class="fl">--since &lt;ref&gt;</span><br>
+          Questions: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span> · <span class="fl">--search</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review</span>
         </div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>sync</code></div>
-        <div class="cmd-d">Rescan + advance the drift baseline + regenerate the map in one step. <span class="fl">--accept-drift</span> re-baselines an edited confirmed/implemented contract; without it, <code>sync</code> refuses to silently re-baseline confirmed drift.</div>
+        <div class="cmd-d"><strong>The write path.</strong> Rescan, advance the drift baseline, regenerate the map, findings, site regions and integration artifacts — and print what the plan and the versions disagree on. <span class="fl">--accept-drift</span> re-baselines an edited confirmed contract · <span class="fl">--release [vX.Y.Z]</span> cuts the next planned version · <span class="fl">--retire ID …</span> takes requirements out of service · <span class="fl">--apply</span> writes a planned release or retirement</div>
       </div>
       <div class="cmd">
-        <div class="cmd-n"><code>init</code></div>
-        <div class="cmd-d">First-time bootstrap: scaffold <code>requirements/</code> + <code>.reqmapignore</code>, draft requirements from existing code, build lock + map. Idempotent; never clobbers existing files.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>map</code></div>
-        <div class="cmd-d">Generate <code>_map.md</code> (4 Mermaid diagrams) + <code>_map.json</code> (graph) + <code>_map.html</code> (self-contained viewer). Reads <code>ROADMAP.md</code> and <code>requirements/_planning.json</code> for the Roadmap tab. <span class="fl">--check</span> freshness gate — exits non-zero if committed map is stale.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>site</code></div>
-        <div class="cmd-d">Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. <span class="fl">--attach &lt;page&gt;</span> · <span class="fl">--regions nav,stats</span> · <span class="fl">--diagram &lt;rel&gt;</span> links an Excalidraw HTML.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>next</code></div>
-        <div class="cmd-d">"What should I work on?" — prioritised actionable buckets: orphans · needs tests · needs intent review · drafts to review. Read-only, always exit 0.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>lint</code></div>
-        <div class="cmd-d">Readability check on non-draft requirements: long sentences (&gt;35 words), stacked conditions (≥3 and/or joins), missing Contract/Acceptance sections. <span class="fl">--strict</span> exits non-zero on errors.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>show &lt;ID&gt;</code></div>
-        <div class="cmd-d">Consolidated dossier for one requirement: contract, dependencies both directions, code members by role with file:line, open verify-intent questions, risk signals. Answers "where is X implemented?" in one command.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>dupes</code></div>
-        <div class="cmd-d">Flag requirement pairs with overlapping contracts (TF-IDF cosine, stdlib). Catches divergent re-implementations before they land. <span class="fl">--threshold T</span> overrides default 0.35.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>health</code></div>
-        <div class="cmd-d">Corpus coherence snapshot: % of requirements fully green (confirmed + member + tested + no open questions + not drifted). <span class="fl">--json</span> for CI badges.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>confirm &lt;ID&gt;</code></div>
-        <div class="cmd-d">Human validation step: flip a reviewed requirement to <code>confirmed</code>. Refuses if no <code>implements:</code> member exists; warns if no <code>tested-by:</code> is linked.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>new AREA-NAME-NNN</code></div>
-        <div class="cmd-d">Scaffold a new empty requirement from the built-in template. The requirement template is built into the engine — no template file needed.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>scan</code></div>
-        <div class="cmd-d">List which code belongs to which requirement. Shows member counts per capability with file paths.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>draft</code></div>
-        <div class="cmd-d">Draft requirements for untagged code and prose files (<code>.py .js .ts .md .html</code> and more). Existing files and membership tags are preserved.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>plan</code></div>
-        <div class="cmd-d">Read-only extraction plan: JSON capability map from legacy code without writing any <code>.md</code> files. Safe first pass before <code>draft</code>. Add <span class="fl">--md-glob</span> for prose discovery.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>findings</code></div>
-        <div class="cmd-d">Aggregate open "Verify intent" questions across all requirements into <code>_findings.md</code>. Accepts an AI-triage sidecar for a classified view.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>review &lt;ID?&gt;</code></div>
-        <div class="cmd-d">Emit a JSON review plan (intent, contract, acceptance, anchors) for all requirements or one — an AI-feed for advisory quality review. Read-only, writes nothing.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>export</code></div>
-        <div class="cmd-d">Emit just <code>_map.json</code> for an external front-end. <span class="fl">--out PATH</span> or <span class="fl">--out -</span> for stdout.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>search "&lt;query&gt;"</code></div>
-        <div class="cmd-d">Rank requirements by lexical relevance, most-relevant first — the same TF-IDF/cosine model <code>dupes</code> uses, and the same one the viewer's search box runs, so CLI and UI agree on what matches. <span class="fl">--top</span> caps the hit count. Below a calibrated floor it prints "no strong match" rather than a spurious first result.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>coverage</code></div>
-        <div class="cmd-d">List the source files carrying no <code>implements:</code> tag, grouped by directory — the code your registry does not trace. <span class="fl">--json</span> for machine output. Read-only: it reports, it never gates.</div>
-      </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>gen-integration</code></div>
-        <div class="cmd-d">Regenerate <code>tool_definition.json</code> (the function-calling schema non-Claude assistants read) and the command table inside <code>SKILL.universal.md</code> from the <code>COMMANDS</code> registry — the CLI's single source of truth. Never hand-edit those two; <code>gate</code> fails when they drift from the registry.</div>
+        <div class="cmd-n"><code>clarify AREA-NAME-NNN</code></div>
+        <div class="cmd-d">The questions a requirement has not answered: vague terms, numbers without units, clauses without a case, a missing failure path. Read-only, exit 0. <span class="fl">--decompose</span> plans code-rung children · <span class="fl">--levels</span> proposes a rung for every requirement.</div>
       </div>
     </div>
   </div>
@@ -749,7 +690,7 @@ has not been re-touched.</pre></div>
       <strong>Split heuristic.</strong> If a requirement accumulates more than four or five acceptance criteria
       that cover behaviors which could break <em>independently</em>, it's a split candidate.
       Author two requirements, each with its own contract and its own failure mode.
-      <code>next</code> flags these automatically.
+      <code>gate --risk</code> flags these automatically.
     </div>
   </div>
 </section>
@@ -862,7 +803,7 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
     <span class="kw">runs-on</span><span class="pu">:</span> <span class="vl">ubuntu-latest</span>
     <span class="kw">steps</span><span class="pu">:</span>
       <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/checkout@v4</span>
-      <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">alxmax/requirement-manager/check@v1</span></pre></div>
+      <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">alxmax/requirement-manager/check@v7</span></pre></div>
         </div>
         <p style="font-size:.82rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.55">
           Uses <code style="font-size:.8em">permissions: contents: read</code> — least privilege,
@@ -913,26 +854,30 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
     <div class="label reveal">The Viewer</div>
     <h2 class="reveal">Double-click to open</h2>
     <p class="lead reveal">
-      <code>reqmap.py map</code> produces <code>requirements/_map.html</code> — a self-contained React app
-      with your graph inlined. No server, no npm, no install. Four tabs:
+      <code>reqmap.py sync</code> produces <code>requirements/_map.html</code> — a self-contained React app
+      with your graph inlined. No server, no npm, no install. Five tabs:
     </p>
 
     <div class="vtabs reveal">
       <div class="vtab">
-        <div class="vtab-name">Map</div>
-        <div class="vtab-desc">Interactive graph explorer. Bus-layout ranks by dependency depth. Color-coded, selectable edges. Click to open the detail panel for any requirement.</div>
+        <div class="vtab-name">Explorer</div>
+        <div class="vtab-desc">Every requirement, filterable, with its spec rendered for reading: intent, clauses, cases, members, coverage and risk.</div>
       </div>
       <div class="vtab">
         <div class="vtab-name">Problems</div>
         <div class="vtab-desc">Linter-style inbox of every open signal: errors, warnings, needs-review, cautions. Each row jumps to its spec.</div>
       </div>
       <div class="vtab">
-        <div class="vtab-name">Spec</div>
-        <div class="vtab-desc">One requirement rendered for reading: frontmatter → WHY → coverage strip → WHAT → HOW → WHERE → Risk.</div>
+        <div class="vtab-name">Map</div>
+        <div class="vtab-desc">Interactive graph explorer. Bus-layout ranks by dependency depth. Colour-coded, selectable edges.</div>
       </div>
       <div class="vtab">
         <div class="vtab-name">Roadmap</div>
-        <div class="vtab-desc">Calendar Gantt: swimlanes from <code>requirements/_planning.json</code>, the shipped band read from <code>CHANGELOG.md</code> and labelled by the checked-out branch. Selecting a bar opens the note its author wrote under the matching <code>ROADMAP.md</code> item.</div>
+        <div class="vtab-desc"><strong>Plan</strong>: a calendar Gantt — months, ISO weeks and every day as <code>d/m</code>; bars in lanes from <code>_planning.json</code>, each guide running from its day to its bar; versions in the release lane; the shipped band read from <code>CHANGELOG.md</code>. Bars, versions and shipped months all open a note below. <strong>Versions</strong>: one column per version, listing the same bars.</div>
+      </div>
+      <div class="vtab">
+        <div class="vtab-name">Commands</div>
+        <div class="vtab-desc">The CLI reference, generated from the engine's command registry.</div>
       </div>
     </div>
 
@@ -941,8 +886,8 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
         <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
         <span class="cb-filename">shell</span>
       </div>
-      <div class="cb-body"><pre><span class="cm"># rebuild data + regenerate viewer</span>
-python scripts/reqmap.py map
+      <div class="cb-body"><pre><span class="cm"># rescan and regenerate the map</span>
+python scripts/reqmap.py sync
 
 <span class="cm"># then open the generated file:</span>
 <span class="vl">requirements/_map.html</span></pre></div>
@@ -951,8 +896,42 @@ python scripts/reqmap.py map
     <div class="callout reveal" style="margin-top:2rem">
       <strong>Live requirements map →</strong>
       <a href="./map.html" style="color:var(--accent);text-decoration:none;font-weight:500">map.html</a>
-      — this repo's own capability graph, generated by <code>reqmap.py map</code> and served alongside
-      this page on GitHub Pages. Opens in-browser, no install.
+      — this repo's own capability graph, built by <code>reqmap.py sync</code> in the deploy job and
+      served alongside this page on GitHub Pages. Opens in-browser, no install.
+    </div>
+  </div>
+</section>
+
+<!-- PLAN AND RELEASE -->
+<section id="release">
+  <div class="wrap-wide">
+    <div class="wrap" style="padding:0">
+      <div class="label reveal">Plan &amp; release</div>
+      <h2 class="reveal">The plan names the next version</h2>
+      <p class="lead reveal">
+        <code>_planning.json</code> says which version the work goes out in, <code>CHANGELOG.md</code>
+        says what shipped, and a version file says what the repository is. The engine reads all
+        three in one form, <code>vX.Y.Z</code>, and one command cuts the release. Tagging stays in CI.
+      </p>
+    </div>
+
+    <div class="cmds reveal">
+      <div class="cmd">
+        <div class="cmd-n"><code>1 · plan</code></div>
+        <div class="cmd-d">Bars in lanes, each on a milestone such as <code>v1.5.0</code>; releases on a cadence, weekly on Friday by default. <code>ROADMAP.md</code> keeps Now / Next / Later and the note under each item.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>2 · sync</code></div>
+        <div class="cmd-d">Read-only suggestions, never written: a milestone already shipped, version files / CHANGELOG / tags that disagree, a bar whose work finished on another day (the date of the last commit to its requirement's code), and Now/Next items no bar schedules.</div>
+      </div>
+      <div class="cmd gate">
+        <div class="cmd-n"><code>3 · sync --release</code></div>
+        <div class="cmd-d">Takes the lowest planned milestone above the declared version and prints the plan. <span class="fl">--apply</span> bumps <code>package.json</code> / <code>pyproject.toml</code> / <code>Cargo.toml</code> / plugin manifest / <code>VERSION</code> (or <code>VERSION_FILES</code>), writes the dated CHANGELOG entry in the file's own form, drops the milestone and its bars from the plan, and names the ROADMAP items to tick. Exit 2 when nothing is planned or the gate has errors.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>4 · push</code></div>
+        <div class="cmd-d">The workflow <code>init</code> seeded reads <code>sync --release --json</code> and creates the tag and GitHub release once, only when the declared version has no tag. Decision record: ADR-0040.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -984,7 +963,7 @@ python scripts/reqmap.py map
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <span class="foot-copy">requirement-manager v7.2.0 · Business Source License 1.1</span>
+      <span class="foot-copy">requirement-manager v7.21.0 · Business Source License 1.1</span>
       <div class="foot-links">
         <a href="https://github.com/alxmax/requirement-manager">GitHub</a>
         <a href="https://github.com/alxmax/requirement-manager/blob/main/plugin/skills/requirement-manager/SKILL.md">SKILL.md</a>
