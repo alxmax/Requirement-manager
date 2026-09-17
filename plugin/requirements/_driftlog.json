@@ -69,6 +69,10 @@
       "hash": "f6a4bb3f4454",
       "reason": "JSON for show/search/dupes; MCP resources"
     },
+    "ARCH-NEW-004": {
+      "hash": "f55421f03e9a",
+      "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
+    },
     "ARCH-PARSE-001": {
       "hash": "3eca960dd4f3",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
@@ -176,6 +180,10 @@
     "REQ-HISTORY-1003": {
       "hash": "55682bd805d3",
       "reason": null
+    },
+    "REQ-INIT-861": {
+      "hash": "74293b79d18b",
+      "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
     },
     "REQ-INITTAG-1008": {
       "hash": "8b464f058897",

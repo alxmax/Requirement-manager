@@ -74,7 +74,7 @@ CASE-5
   anything a parser cares about).
 
 **Example**
-- Ana scaffolds a new requirement with `reqmap.py new AREA-NAME-NNN`. Instead of deciding
+- Ana starts a new requirement from the built-in template. Instead of deciding
   whether a sentence belongs under Notes, Example, or WHERE, she writes it under `##
   Context`, grouped by whichever of the three bold labels fits — or skips a label entirely
   if she has nothing to say there.

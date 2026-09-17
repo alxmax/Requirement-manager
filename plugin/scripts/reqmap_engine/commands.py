@@ -67,8 +67,9 @@ COMMANDS = {
     },
     "new": {
         "summary": (
-            "Scaffold a new blank requirement from the built-in template. "
-            "Use --from-todo and --id together to pre-fill from a TODO.md item instead."
+            "Deprecated, removed in v8.0.0: write the requirement file yourself or ask your "
+            "assistant to. Scaffolds a new blank requirement from the built-in template; "
+            "--from-todo and --id pre-fill it from a TODO.md item instead."
         ),
         "arg": "AREA-NAME-NNN",
         "params": [

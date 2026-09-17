@@ -40,7 +40,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_new",
-      "description": "Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead.",
+      "description": "Deprecated, removed in v8.0.0: write the requirement file yourself or ask your assistant to. Scaffolds a new blank requirement from the built-in template; --from-todo and --id pre-fill it from a TODO.md item instead.",
       "parameters": {
         "type": "object",
         "properties": {

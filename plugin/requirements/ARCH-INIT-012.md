@@ -206,7 +206,7 @@ CASE-2 — the summary names next, not the full command list
 CASE-3 — an extraction-free repo gets a distinct empty-result message
   Given  a repo containing only `README.txt` (no extractable code)
   When   `cmd_init` runs
-  Then   its output says "no requirements were extracted" and points at `reqmap.py new`, never "0 requirement(s) tracked"
+  Then   its output says "no requirements were extracted" and points at writing `requirements/AREA-NAME-NNN.md`, never "0 requirement(s) tracked"
 
 CASE-4 — a second init run exits clean and reprints the summary
   Given  a repo already initialized by one `cmd_init` run

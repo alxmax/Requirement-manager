@@ -296,7 +296,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
         print("(no supported source files found, or all are ignored by .reqmapignore).")
         if created:
             print("created: " + ", ".join(created))
-        print("\nNext: author your first requirement with `reqmap.py new AREA-NAME-NNN`.")
+        print("\nNext: write your first requirement as requirements/AREA-NAME-NNN.md.")
         return 0
     print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
     if created:

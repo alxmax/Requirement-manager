@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v7.22.1` — 2026-09-17
+
+**`new` is deprecated** (ADR-0045). `new` and `new --from-todo` still work and now print one line
+on stderr: they are removed in **v8.0.0**, and a requirement is written as a file instead, by
+hand or by an assistant asked for one (REQ-NEW-1032). `init` and `gate --risk` name the file to
+write rather than the verb, and README, CLAUDE.md, both skills, the architecture page, the MCP
+tool description and the viewer's Romanian command text say the same.
+
+**Condition:** v8.0.0 removes `cmd_new`, `cmd_promote_todo`, the `reqmap_new` MCP tool and the
+`--id` / `--from-todo` / `--mark-done` flags, retires ARCH-NEW-004 and ARCH-PROMOTE-TODO-001, and
+adds `new` to the retired-name guard.
+
 ## plugin `v7.22.0` — 2026-09-17
 
 **`gate` is the verdict; every other question is `ask`** (ADR-0044). `gate` drops from sixteen

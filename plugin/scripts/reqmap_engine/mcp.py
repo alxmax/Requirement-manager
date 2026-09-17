@@ -95,7 +95,8 @@ MCP_TOOLS = (
      "params": [_param("accept_drift", "str", "Why the changed contracts are accepted.",
                        "--accept-drift")]},
     {"name": "reqmap_new", "argv": ["new"], "writes": True,
-     "description": "Scaffold a new requirement file from the template.",
+     "description": "Deprecated, removed in v8.0.0: scaffold a new requirement file from "
+                    "the template. Writing the file directly works the same.",
      "params": [_param("id", "str", "The new id, AREA-NAME-NNN.", required=True)]},
     {"name": "reqmap_release", "argv": ["sync", "--apply", *_JSON],
      "writes": True,

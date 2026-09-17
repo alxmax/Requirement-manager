@@ -50,7 +50,7 @@ def _next_pending(reqs, members, code_root, reqs_dir):
     total = len(reqs)
     if total == 0:   # distinguish "nothing set up yet" from "all clean"
         print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
-              "code, or `reqmap.py new AREA-NAME-NNN` to author one.")
+              "code, or write requirements/AREA-NAME-NNN.md to author one.")
         return None
     confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
     tested = sum(1 for rid in reqs if any(role == "tested-by" for role, *_ in members.get(rid, [])))
