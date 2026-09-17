@@ -1,4 +1,4 @@
-"""`gate --design`: the shared vocabulary — pillars, advice, thresholds, the finding
+"""`ask --design`: the shared vocabulary — pillars, advice, thresholds, the finding
 record and the language-neutral shape/standards checks.
 """
 import os, re

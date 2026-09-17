@@ -52,7 +52,7 @@ from reqmap_engine.author import cmd_new, cmd_promote_todo
 from reqmap_engine.candidates import cmd_candidates
 from reqmap_engine.clarify import cmd_clarify
 from reqmap_engine.cliflags import (
-    _add_todo_and_mode_flags, _add_workspace_and_query_flags
+    _add_todo_and_mode_flags, _add_workspace_and_query_flags, _moved_gate_flags, _verb_scope
 )
 from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
@@ -134,13 +134,13 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     return ap
 
 def _dispatch_gate(a, ws, code_root, reqs_dir):
-    """`gate` and every read-only question its mode flags ask. Returns the exit
-    code; only the bare verdict can make it non-zero."""
-    reqs, members = ws.reqs, ws.members   # the commands that take only part of it
+    """`gate`: the verdict, or the report its --audit/--risk/--show mode asks for.
+    `ask`, and `gate` carrying one of `ask`'s modes until v8.0.0, go to `_dispatch_ask`.
+    Returns the exit code; only the bare verdict can make it non-zero."""
+    if a.cmd == "ask" or _moved_gate_flags(a)[1]:
+        return _dispatch_ask(a, ws)
     if a.mode_audit:
         return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
-    if a.mode_i18n:
-        return cmd_i18n(ws, as_json=a.as_json)
     if a.mode_risk:
         if a.as_badge:
             return cmd_health(ws, False, True)
@@ -157,26 +157,12 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         # same walk; ws.levels() only re-walks when --cache forced the
         # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
         return cmd_show(ws, a.mode_show, ws.levels(), as_json=a.as_json)
-    if a.mode_search is not None:
-        if not a.mode_search:
-            print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
-        return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
-                          reqs_dir=reqs_dir, as_json=a.as_json)
-    if a.mode_review is not None:
-        if not a.mode_review:
-            print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
-        return cmd_review(reqs, a.mode_review)
     if a.mode_implement is not None:
         print("`gate --implement` was retired in v7.4.0: the brief it printed is the "
               "requirement itself, and `gate --show <ID>` prints the same contract, "
               "cases and members from the same facts. This flag is accepted for one "
               "release and does nothing.", file=sys.stderr)
         return 0
-    if a.mode_dupes:
-        return cmd_similar(reqs, a.threshold if a.threshold is not None else cfg.SIMILAR_THRESHOLD,
-                           members, top=a.top, as_json=a.as_json)
-    if a.mode_design:
-        return cmd_design(code_root, reqs_dir, as_json=a.as_json)
     # The whole verdict, in the order every hook and CI already ran it: link sync +
     # drift + test-link, then requirement readability, then map freshness. They were
     # three commands because they were written on three days, not because a caller
@@ -199,6 +185,27 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         "" if a.no_lint else ", readability",
         "" if a.no_map_check else ", map freshness"))
     return rc
+def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
+    """`ask`: the read-only questions that are not the verdict (ADR-0044). Returns the
+    question's exit code; with no mode, a usage line and 2."""
+    reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
+    if a.mode_i18n:
+        return cmd_i18n(ws, as_json=a.as_json)
+    if a.mode_search is not None:
+        if not a.mode_search:
+            print("usage: reqmap ask --search \"<query>\"   [--top N]"); return 2
+        return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
+                          reqs_dir=reqs_dir, as_json=a.as_json)
+    if a.mode_review is not None:
+        # No id plans the whole corpus: what cmd_review and the review skill always said.
+        return cmd_review(reqs, a.mode_review or None)
+    if a.mode_dupes:
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else cfg.SIMILAR_THRESHOLD,
+                           members, top=a.top, as_json=a.as_json)
+    if a.mode_design:
+        return cmd_design(ws.code_root, reqs_dir, as_json=a.as_json)
+    print("usage: reqmap ask --search QUERY | --dupes | --design | --review [ID] | --i18n")
+    return 2
 def _dispatch_sync(a, ws, code_root, reqs_dir):
     """`sync` and its write modes. Returns the exit code."""
     reqs, members = ws.reqs, ws.members   # the commands that take only part of it
@@ -281,6 +288,8 @@ def main():
             pass
     ap = _build_parser()
     a = ap.parse_args()
+    if _verb_scope(ap, a):              # ADR-0044: refused before any scan runs
+        return 2
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
     apply_config(load_config(reqs_dir))   # implements: ARCH-CONFIG-060
@@ -313,7 +322,7 @@ def main():
         for g in (a.md_glob or []):
             md_globs += [x.strip() for x in g.split(",") if x.strip()]
         return cmd_candidates(ws, a.out, md_globs)
-    if a.cmd == "gate":
+    if a.cmd in ("gate", "ask"):
         return _dispatch_gate(a, ws, code_root, reqs_dir)
     if a.cmd == "sync":
         return _dispatch_sync(a, ws, code_root, reqs_dir)

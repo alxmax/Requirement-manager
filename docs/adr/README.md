@@ -54,6 +54,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0041](0041-two-of-the-engines-four-design-findings-are-fixed.md) | Two of the engine's four design findings are fixed, two are kept | Accepted |
 | [0042](0042-file-spread-counts-directories.md) | `file-spread` counts directories, not files | Accepted |
 | [0043](0043-the-engine-is-served-over-mcp.md) | The engine is served over MCP | Accepted |
+| [0044](0044-questions-leave-the-verdict-verb.md) | Questions leave the verdict verb: `ask` | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

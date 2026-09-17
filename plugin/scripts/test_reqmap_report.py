@@ -4455,7 +4455,7 @@ class CasesSearch036(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "requirements"))
             old_argv = sys.argv
-            sys.argv = ["reqmap", "gate", "--search", "--root", d]
+            sys.argv = ["reqmap", "ask", "--search", "--root", d]
             try:
                 with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                     rc = R.main()
@@ -4631,7 +4631,7 @@ class CasesSimilar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-
                    + "\n> Checker intent.\n\n## WHAT — Contract (normative)\n- " + c + "\n")
             before = {n: open(os.path.join(reqs_dir, n), "rb").read() for n in os.listdir(reqs_dir)}
             old_argv = sys.argv
-            sys.argv = ["reqmap", "gate", "--dupes", "--root", d]
+            sys.argv = ["reqmap", "ask", "--dupes", "--root", d]
             buf = io.StringIO()
             try:
                 with redirect_stdout(buf):
@@ -5048,7 +5048,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                                   self._call(2, "reqmap_search", {"query": "x", "top": "3"}),
                                   self._call(3, "reqmap_search", {"query": "a b", "top": 3})])
         self.assertEqual([-32602, -32602], [m["error"]["code"] for m in out[:2]])
-        self.assertEqual([["gate", "--json", "--search", "a b", "--top", "3"]], calls)
+        self.assertEqual([["ask", "--json", "--search", "a b", "--top", "3"]], calls)
 
     def test_a_fail_verdict_is_an_answer_a_failed_command_is_an_error(self):  # verifies: REQ-MCPTOOLS-1028#CASE-4
         out, _ = self._serve([self._call(1, "reqmap_gate", {}),
@@ -5265,7 +5265,7 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         found = summary["findings"] if summary else []
         self.assertEqual(len(found), claimed,
                          "CLAUDE.md claims {} design finding(s) for the engine package; "
-                         "gate --design reports {}: {}".format(
+                         "ask --design reports {}: {}".format(
                              claimed, len(found),
                              [(f["file"], f["kind"]) for f in found]))
 

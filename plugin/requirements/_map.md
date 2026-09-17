@@ -1,7 +1,7 @@
 ---
-generated: 2026-09-16
-engine: 2026-09-16.18
-nodes: 288
+generated: 2026-09-17
+engine: 2026-09-17
+nodes: 289
 edges: 122
 design pass-rate: 98% (107/109 source files without a design candidate)
 ---
@@ -110,6 +110,7 @@ graph LR
     REQ_CLARIFY_975["An answer can raise a question the old text never had<br><small>REQ-CLARIFY-975</small>"]
     REQ_CMDREGISTRY_834["One COMMANDS dict drives argparse, schema and docs<br><small>REQ-CMDREGISTRY-834</small>"]
     REQ_CMDREGISTRY_963["The command registry as data on the map<br><small>REQ-CMDREGISTRY-963</small>"]
+    REQ_CMDREGISTRY_1031["'ask' holds the questions, 'gate' the verdict<br><small>REQ-CMDREGISTRY-1031</small>"]
     REQ_CONFIG_949["Reading and applying '_config.json'<br><small>REQ-CONFIG-949</small>"]
     REQ_CONTEXT_835["One Context section replaces three near-synonymous headings<br><small>REQ-CONTEXT-835</small>"]
     REQ_COVERAGE_836["Counting untagged code as a read-only signal<br><small>REQ-COVERAGE-836</small>"]
@@ -442,15 +443,15 @@ graph LR
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_115
   f_plugin_scripts_test_reqmap_report_py_2015_5454["plugin/scripts/test_reqmap_report.py:2015-5454"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2015_5454
-  f_plugin_scripts_reqmap_engine_cliflags_py_15_76["plugin/scripts/reqmap_engine/cliflags.py:15-76"]
-  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_15_76
+  f_plugin_scripts_reqmap_engine_cliflags_py_16_77["plugin/scripts/reqmap_engine/cliflags.py:16-77"]
+  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_16_77
   f_plugin_scripts_reqmap_engine_commands_py_14["plugin/scripts/reqmap_engine/commands.py:14"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_commands_py_14
   f_plugin_scripts_reqmap_engine_registry_py_12_42["plugin/scripts/reqmap_engine/registry.py:12-42"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_registry_py_12_42
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_286["plugin/scripts/reqmap.py:286"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_286
+  f_plugin_scripts_reqmap_py_295["plugin/scripts/reqmap.py:295"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_295
   f_plugin_scripts_test_reqmap_report_py_3152["plugin/scripts/test_reqmap_report.py:3152"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_3152
   f_plugin_scripts_reqmap_engine_config_py_203_213["plugin/scripts/reqmap_engine/config.py:203-213"]
@@ -632,8 +633,8 @@ graph LR
   ARCH_MCP_073["Serving the engine over MCP<br><small>ARCH-MCP-073</small>"]
   f_plugin_scripts_test_reqmap_report_py_5169["plugin/scripts/test_reqmap_report.py:5169"]
   ARCH_MCP_073 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5169
-  f_plugin_scripts_reqmap_engine_mcp_py_8_312["plugin/scripts/reqmap_engine/mcp.py:8-312"]
-  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_8_312
+  f_plugin_scripts_reqmap_engine_mcp_py_8_313["plugin/scripts/reqmap_engine/mcp.py:8-313"]
+  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_8_313
   f_plugin_scripts_reqmap_engine_mcpconfig_py_7["plugin/scripts/reqmap_engine/mcpconfig.py:7"]
   ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcpconfig_py_7
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
@@ -676,8 +677,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_parse_py_7_97["plugin/scripts/reqmap_engine/parse.py:7-97"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_7_97
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_341_359["plugin/scripts/reqmap.py:341-359"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_341_359
+  f_plugin_scripts_reqmap_py_350_368["plugin/scripts/reqmap.py:350-368"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_350_368
   f_plugin_scripts_test_reqmap_gate_py_2069["plugin/scripts/test_reqmap_gate.py:2069"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2069
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]
@@ -815,8 +816,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f_scripts_changelog_notes_py_2
   f_scripts_check_engine_bump_py_2["scripts/check_engine_bump.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_engine_bump_py_2
-  f_scripts_check_retired_verbs_py_2_200["scripts/check_retired_verbs.py:2-200"]
-  ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2_200
+  f_scripts_check_retired_verbs_py_2_208["scripts/check_retired_verbs.py:2-208"]
+  ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2_208
   f_scripts_check_versions_py_2["scripts/check_versions.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
   f_scripts_test_changelog_notes_py_2["scripts/test_changelog_notes.py:2"]
@@ -1050,7 +1051,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>66 caps</small>"]
-  a_REQ["REQ<br><small>213 caps</small>"]
+  a_REQ["REQ<br><small>214 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

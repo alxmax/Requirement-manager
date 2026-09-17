@@ -134,7 +134,7 @@ def _i18n_gap_line(reqs, reqs_dir):
         return None
     missing = sum(1 for g in gaps if g["reason"] == "missing")
     return ("{} requirement(s) have no fresh translation for LANGUAGE `{}` ({} missing, "
-           "{} stale) - `reqmap.py gate --i18n --json` emits the entries to fill"
+           "{} stale) - `reqmap.py ask --i18n --json` emits the entries to fill"
            .format(len(gaps), cfg.LANGUAGE, missing, len(gaps) - missing))
 
 
@@ -345,13 +345,13 @@ def _summary_table_rows(gate_rc, signals, dups):
              "reqmap.py gate --risk")]
     if design is not None:
         rows.append(("Design pass-rate", "{}% ({}/{} files with no candidate)".format(
-            design["score"], design["clean_files"], design["files"]), "reqmap.py gate --design"))
+            design["score"], design["clean_files"], design["files"]), "reqmap.py ask --design"))
     if untagged is not None:
         rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),
                      "reqmap.py gate --risk --untagged"))
     if dups:
         rows.append(("Redundancy", "{} group(s) share an identical contract".format(len(dups)),
-                     "reqmap.py gate --dupes"))
+                     "reqmap.py ask --dupes"))
     rows.append(("Exemptions", "{} in force, {} with no recorded reason".format(
         len(exemptions), len(unexplained)), "see below"))
     rows.append(("Corpus shape", "{}/{} carry a `level:`{}".format(
@@ -457,9 +457,9 @@ def cmd_audit(ws, strict=False, as_json=False):
         _audit_section("Gate", "reqmap.py gate",
                        lambda: cmd_check(ws, False, strict=strict), fail_rc=1),
         _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(ws, False)),
-        _audit_section("Duplicates", "reqmap.py gate --dupes",
+        _audit_section("Duplicates", "reqmap.py ask --dupes",
                        lambda: cmd_similar(reqs, cfg.SIMILAR_THRESHOLD, members)),
-        _audit_section("Design", "reqmap.py gate --design",
+        _audit_section("Design", "reqmap.py ask --design",
                        lambda: cmd_design(code_root, reqs_dir)),
         _audit_section("Tag coverage", "reqmap.py gate --risk --untagged",
                        lambda: cmd_coverage(ws, False)),

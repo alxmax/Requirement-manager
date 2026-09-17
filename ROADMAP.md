@@ -77,9 +77,13 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
       nu ghicit: fie un trailer pe commit, fie o eticheta pe PR. Pana nu e ales
       unul, automatizarea ar bumpa dupa o regula pe care nimeni n-a scris-o.
 
-- [ ] `gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului | req: ARCH-CMDREGISTRY-033
+- [x] `gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului | req: ARCH-CMDREGISTRY-033
+      <!-- v7.22.0, ADR-0044 (Senate 2026-09-17, MODIFY, condițiile în ADR). `gate` are 9
+           flag-uri, întrebările au plecat pe verbul `ask`. Vechile forme `gate --search` & co.
+           merg până la v8.0.0 cu o linie pe stderr; bara de mai jos le scoate. -->
+- [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
 - [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
-- [ ] Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului | req: ARCH-HEALTH-017
+- [ ] Health: un snapshot, untagged, semnalele noi de orizont | req: ARCH-HEALTH-017
 - [x] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
       <!-- 2026-09-14. Motorul citeşte în continuare `TODO.md` oriunde un consumator
            ţine unul — capacitatea rămâne; repo-ul ăsta pur şi simplu nu mai are unul.

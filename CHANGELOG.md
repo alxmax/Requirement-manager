@@ -1,5 +1,22 @@
 # Changelog
 
+## plugin `v7.22.0` — 2026-09-17
+
+**`gate` is the verdict; every other question is `ask`** (ADR-0044). `gate` drops from sixteen
+registry flags to nine — `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`,
+`--strict`, `--json`, `--since` — and the new read-only verb `ask` takes `--search`, `--dupes`,
+`--design`, `--review`, `--i18n`, `--top`, `--threshold` and `--json` (REQ-CMDREGISTRY-1031). No
+capability is retired. `ask --review` with no id plans the whole corpus, which the review skill
+always documented and the `gate` dispatch refused. `ask` exits 2 on a flag another verb owns or
+with no mode. The MCP tools `reqmap_search`, `reqmap_dupes`, `reqmap_design` and
+`reqmap_review` now run `ask`, and `check_retired_verbs.py` reports a moved flag passed to its
+old verb (REQ-SELFGATE-1011), so every doc, skill, engine hint and requirement was moved with it.
+
+**Condition (Senate `2026-09-17_081414-senate-reqmap-cli-surface-gate-flags-to-9`):** the seven
+spellings `gate --search`, `gate --dupes`, `gate --design`, `gate --review`, `gate --i18n`,
+`gate --top` and `gate --threshold` are accepted through v7.22.x only, each printing one
+migration line on stderr, and are removed in **v8.0.0**, where `gate` with any of them exits 2.
+
 ## plugin `v7.21.15` — 2026-09-16
 
 **README and `docs/architecture.html` describe the MCP server, and the skill files lose three

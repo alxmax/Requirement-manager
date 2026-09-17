@@ -307,9 +307,9 @@ Every bullet below is binding.
 - Under `ro` or `both`, a requirement that is not deprecated and has no `_i18n/ro.json`
   entry whose `hash` equals its current `translation_hash` is a gap; the gap is `missing`
   when there is no entry and `stale` when the entry's hash differs.
-- Under `en` there are no gaps, `sync` says nothing about translation, and `gate --i18n`
+- Under `en` there are no gaps, `sync` says nothing about translation, and `ask --i18n`
   says that nothing is expected and how to change that.
-- `gate --i18n` lists every gap with its locale, id, reason and title; `--json` emits each
+- `ask --i18n` lists every gap with its locale, id, reason and title; `--json` emits each
   gap's `title`, `intent`, `contract` and `acceptance` exactly as `translation_hash` was
   computed over them, plus that `hash`, so the writer stores the four translated fields
   under the id with the same key.
@@ -339,13 +339,13 @@ CASE-3 — missing and stale are told apart
 
 CASE-4 — English means nothing is owed
   Given  `LANGUAGE` `en` and a corpus with no translation at all
-  When   `gate --i18n` and the `sync` tail run
-  Then   no gap is reported and `gate --i18n` says nothing is expected and names the key to
+  When   `ask --i18n` and the `sync` tail run
+  Then   no gap is reported and `ask --i18n` says nothing is expected and names the key to
          change
 
 CASE-5 — the JSON hand-off carries the source and the key
   Given  one gap under `ro`
-  When   `gate --i18n --json` runs
+  When   `ask --i18n --json` runs
   Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract`
          and `acceptance`, and writing those four fields under the id with that hash makes
          the next gap computation empty
@@ -353,7 +353,7 @@ CASE-5 — the JSON hand-off carries the source and the key
 CASE-6 — the sync tail names the gap
   Given  `LANGUAGE` `ro` and two gaps
   When   the `sync` tail prints
-  Then   one line reports 2 with the missing/stale split and names `gate --i18n --json`
+  Then   one line reports 2 with the missing/stale split and names `ask --i18n --json`
 
 CASE-7 — the viewer's default follows the setting, the reader's choice beats it
   Given  the single-file viewer's inlined data with `language` `ro`, then `en`, then `both`

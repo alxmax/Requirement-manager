@@ -1,4 +1,4 @@
-"""`gate --design`: per-file dispatch, the summary record and cmd_design."""
+"""`ask --design`: per-file dispatch, the summary record and cmd_design."""
 import json
 
 from .design import (

@@ -349,7 +349,7 @@ def _print_health_report(data, design, untagged, lag, headline_only):
     if lag:         print("  commits since requirements touched:{}".format(lag))
     if design is not None:
         print("  design pass-rate (files w/o candidate): {}%  ({}/{}) — "
-             "run `reqmap.py gate --design`".format(
+             "run `reqmap.py ask --design`".format(
                  design["score"], design["clean_files"], design["files"]))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")

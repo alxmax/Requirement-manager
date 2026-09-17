@@ -1,4 +1,4 @@
-"""`gate --review`: the JSON review plan."""
+"""`ask --review`: the JSON review plan."""
 import json
 
 from . import MAP_ENGINE_VERSION

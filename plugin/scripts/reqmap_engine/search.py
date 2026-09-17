@@ -1,4 +1,4 @@
-"""`gate --search`: free-text requirement lookup, on the model `dupes` compares with."""
+"""`ask --search`: free-text requirement lookup, on the model `dupes` compares with."""
 import json
 
 from .i18n import _load_translations

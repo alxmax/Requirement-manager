@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.18",
+  "engine_version": "2026-09-17",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1037,7 +1037,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:252"
+          "loc": "plugin/scripts/reqmap.py:259"
         },
         {
           "role": "tested-by",
@@ -2674,7 +2674,8 @@
       "intent": "`tool_definition.json` and the `SKILL.universal.md` command table were hand-maintained mirrors of the CLI and silently drifted whenever a command was added or renamed. A single declarative `COMMANDS` registry — with generation and a gate drift-guard — makes those mirrors impossible to diverge undetected.",
       "contract": [
         "A `COMMANDS` dict is the single source of truth for the CLI's commands: argparse's choices, the generated `tool_definition.json`, and the `SKILL.universal.md` command table all derive from it, and the gate fails when a generated artifact goes stale. [[REQ-CMDREGISTRY-834]]",
-        "The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]"
+        "The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]",
+        "`gate` owns the verdict and the reports on it, and `ask` owns every other read-only question; `gate`'s old spellings of those questions run the same call with one migration line on stderr until v8.0.0. [[REQ-CMDREGISTRY-1031]]"
       ],
       "verify": [],
       "notes": [
@@ -2715,7 +2716,8 @@
       ],
       "satisfied_by": [
         "REQ-CMDREGISTRY-834",
-        "REQ-CMDREGISTRY-963"
+        "REQ-CMDREGISTRY-963",
+        "REQ-CMDREGISTRY-1031"
       ],
       "members": [
         {
@@ -2736,11 +2738,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:15"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:16"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:76"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:77"
         },
         {
           "role": "implements",
@@ -2758,15 +2760,7 @@
       "test_exempt": null,
       "milestone": "v2.7",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Registrul de comenzi CLI + artefacte de integrare generate",
-          "intent": "`tool_definition.json` și tabelul de comenzi din `SKILL.universal.md` erau oglinzi întreținute manual ale CLI-ului și sufereau drift în tăcere de fiecare dată când o comandă era adăugată sau redenumită. Un singur registru declarativ `COMMANDS` — cu generare și o gardă de drift în gate — face ca acele oglinzi să nu mai poată diverge nedetectate.",
-          "contract": "> `tool_definition.json` și tabelul de comenzi din `SKILL.universal.md` erau oglinzi\n> întreținute manual ale CLI-ului și sufereau drift în tăcere de fiecare dată când o\n> comandă era adăugată sau redenumită. Un singur registru declarativ `COMMANDS` — cu\n> generare și o gardă de drift în gate — face ca acele oglinzi să nu mai poată diverge\n> nedetectate.\n\nFiecare punct de mai jos este obligatoriu.\n- Un dicționar `COMMANDS` este sursa unică de adevăr pentru comenzile CLI-ului: opțiunile argparse, `tool_definition.json` generat, și tabelul de comenzi din `SKILL.universal.md` derivă toate din el, iar gate-ul eșuează atunci când un artefact generat devine învechit. [[REQ-CMDREGISTRY-834]]\n- Registrul este de asemenea emis ca date în hartă, astfel încât o suprafață poate documenta CLI-ul fără să îl ruleze. [[REQ-CMDREGISTRY-963]]",
-          "acceptance": "CASE-1\n  Given  registrul `COMMANDS` și parserul argparse activ\n  When   `_cli_choices()` este apelat\n  Then   valoarea returnată este egală cu `list(COMMANDS)` (ordinea de inserare) — nu există opțiuni literale\n\nCASE-2\n  Given  un `tool_definition.json` commis al cărui conținut diferă de o generare proaspătă\n  When   `gate` rulează\n  Then   gate-ul iese cu cod diferit de zero (artefactul învechit este o eroare fermă)\n\nCASE-3\n  Given  `gen-integration` este rulat\n  When   `tool_definition.json` și tabelul de comenzi din `SKILL.universal.md` sunt scrise\n  Then   conținutul lor este reproductibil octet-cu-octet la o a doua rulare cu același `COMMANDS`\n\nCASE-4\n  Given  orice comandă CLI existentă (de ex. `init`, `gate`, `sync`)\n  When   este invocată prin punctul de intrare CLI standard\n  Then   se execută fără eroare — nicio regresie din migrarea registrului\n\nCASE-5\n  Given  artefactele generate sunt inspectate pentru importuri\n  When   codul generatorului rulează\n  Then   sunt importate doar module stdlib; nicio dependență terță nu este prezentă"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-CMDREGISTRY-834",
@@ -2910,6 +2904,74 @@
       }
     },
     {
+      "id": "REQ-CMDREGISTRY-1031",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "`ask` holds the questions, `gate` the verdict",
+      "intent": "`gate` was two things under one name: the commit verdict every hook runs, and every question the engine can answer, sixteen flags in all. A reader choosing a flag had to know which of them run the verdict and which never do. ADR-0044 moves the questions to their own verb.",
+      "contract": [
+        "The command registry gives `gate` exactly nine flags: `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json` and `--since`.",
+        "`ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and `--json`. `ask --review` with no id plans the whole corpus.",
+        "Until v8.0.0, `gate` given one of `ask`'s flags runs the same call as `ask`: the same exit code and byte-identical stdout, plus exactly one line on stderr naming the `ask` spelling and v8.0.0. The line never goes to stdout, where it would break `--json` for every parser.",
+        "`ask` given a flag the registry gives another verb, or given no mode at all, exits 2 with one line and runs nothing.",
+        "No MCP tool invokes `gate` with a flag `ask` owns."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the registry splits the flags Given  the command registry When   the flags of `gate` and `ask` are read Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag",
+        "CASE-2 — — the old spelling is the same call plus one stderr line Given  a corpus and each moved spelling, with and without `--json` When   it runs as `gate …` and as `ask …` Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly one line naming `ask` and v8.0.0",
+        "CASE-3 — — `ask` refuses what it does not own Given  a corpus When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show` Then   it exits 2 and no verdict is printed",
+        "CASE-4 — — the MCP tools ask `ask` Given  the MCP tool table When   each tool's verb and flags are read Then   no tool pairs `gate` with a flag `ask` owns"
+      ],
+      "accept": "CASE-1 — the registry splits the flags\n  Given  the command registry\n  When   the flags of `gate` and `ask` are read\n  Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag\n\nCASE-2 — the old spelling is the same call plus one stderr line\n  Given  a corpus and each moved spelling, with and without `--json`\n  When   it runs as `gate …` and as `ask …`\n  Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly\n         one line naming `ask` and v8.0.0\n\nCASE-3 — `ask` refuses what it does not own\n  Given  a corpus\n  When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show`\n  Then   it exits 2 and no verdict is printed\n\nCASE-4 — the MCP tools ask `ask`\n  Given  the MCP tool table\n  When   each tool's verb and flags are read\n  Then   no tool pairs `gate` with a flag `ask` owns",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CMDREGISTRY-033"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:188"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2913"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2960"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:156"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:162"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:176"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.22.0",
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
+    },
+    {
       "id": "ARCH-CONFIG-060",
       "layer": "bus",
       "level": "architecture",
@@ -2951,7 +3013,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:286"
+          "loc": "plugin/scripts/reqmap.py:295"
         },
         {
           "role": "tested-by",
@@ -4347,7 +4409,7 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Design candidates in the map",
-      "intent": "The score told a reader that design was at 23/100 and stopped there. To learn *which* shapes cost the other 77 they had to leave the map and run `gate --design` in a terminal, which is the moment most readers stop looking. The candidates now travel in the committed map beside the score they explain, so the viewer can list them in a tab of their own.",
+      "intent": "The score told a reader that design was at 23/100 and stopped there. To learn *which* shapes cost the other 77 they had to leave the map and run `ask --design` in a terminal, which is the moment most readers stop looking. The candidates now travel in the committed map beside the score they explain, so the viewer can list them in a tab of their own.",
       "contract": [
         "`_design_summary` takes `with_findings`, off by default; when it is on the returned record also carries `findings`, one entry per candidate with its `pillar`, `kind`, `file`, `line`, `name` and `detail`.",
         "The advice text is emitted once per `kind` in a sibling `advice` object, never repeated on each entry, because the advice belongs to the rule rather than to the occurrence.",
@@ -9649,15 +9711,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:112"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:279"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:312"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:313"
         },
         {
           "role": "implements",
@@ -9713,19 +9775,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:193"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:279"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:298"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:312"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:313"
         }
       ],
       "test_exempt": null,
@@ -9756,11 +9818,11 @@
       "acc": [
         "CASE-1 — — the tools name only what the CLI has Given  the tool table and the command registry When   every tool's verb and flags are compared with the registry Then   each verb is registered and each flag is one of that verb's flags",
         "CASE-2 — — writing tools need --allow-writes Given  a server started without `--allow-writes`, and one started with it When   each lists its tools and calls `reqmap_sync` Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three",
-        "CASE-3 — — arguments are checked and passed one by one Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3 When   each call is made Then   the first two are -32602, and the third runs `gate --search \"a b\" --top 3` as separate arguments",
+        "CASE-3 — — arguments are checked and passed one by one Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3 When   each call is made Then   the first two are -32602, and the third runs `ask --search \"a b\" --top 3` as separate arguments",
         "CASE-4 — — a FAIL verdict is an answer, a failed command is an error Given  `reqmap_gate` and `reqmap_show` both exiting 1 When   each is called Then   the gate result has `isError` false and the show result has it true, both naming exit code 1",
         "CASE-5 — — a release plan passes --release with or without a version Given  `reqmap_release_plan` called with no version and with `v1.2.0` When   the arguments are built Then   they are `sync --json --release` and `sync --json --release v1.2.0` --------------------"
       ],
-      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `gate --search \"a b\" --top 3` as separate arguments\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release v1.2.0`\n\n\n--------------------",
+      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `ask --search \"a b\" --top 3` as separate arguments\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release v1.2.0`\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -9782,19 +9844,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:112"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:131"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:159"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:160"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:175"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:176"
         }
       ],
       "test_exempt": null,
@@ -9901,19 +9963,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:208"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:209"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:215"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:216"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:234"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:235"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:242"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:243"
         }
       ],
       "test_exempt": null,
@@ -11628,7 +11690,7 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "A closed output pipe ends a command quietly",
-      "intent": "`reqmap.py gate --dupes | head` is the natural way to look at a long report. On Windows there is no SIGPIPE, so when `head` stops reading, the next `print` raises `OSError` and the command dies with a traceback the reader had nothing to do with. The first C/C++ evidence run hit it on `curl` (2,055 pairs). A closed reader is not an error.",
+      "intent": "`reqmap.py ask --dupes | head` is the natural way to look at a long report. On Windows there is no SIGPIPE, so when `head` stops reading, the next `print` raises `OSError` and the command dies with a traceback the reader had nothing to do with. The first C/C++ evidence run hit it on `curl` (2,055 pairs). A closed reader is not an error.",
       "contract": [
         "`_run_cli` ends a command with exit code 0 and no traceback when its standard output turns out to be a closed pipe. [[REQ-PIPE-893]]"
       ],
@@ -11665,11 +11727,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:341"
+          "loc": "plugin/scripts/reqmap.py:350"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:359"
+          "loc": "plugin/scripts/reqmap.py:368"
         },
         {
           "role": "tested-by",
@@ -11688,7 +11750,7 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "A closed reader ends the command with exit 0",
-      "intent": "`reqmap.py gate --dupes | head` closes the pipe as soon as `head` has enough. On Windows that surfaces as `OSError` rather than `SIGPIPE`, and the command used to die with a traceback the reader had nothing to do with. `_run_cli` catches that specific failure and turns it into a quiet exit 0, so a normal shell pipeline never looks like a crash.",
+      "intent": "`reqmap.py ask --dupes | head` closes the pipe as soon as `head` has enough. On Windows that surfaces as `OSError` rather than `SIGPIPE`, and the command used to die with a traceback the reader had nothing to do with. `_run_cli` catches that specific failure and turns it into a quiet exit 0, so a normal shell pipeline never looks like a crash.",
       "contract": [
         "When the command's standard output turns out to be a closed pipe, `reqmap.py` ends the command, prints no traceback, and exits with code 0.",
         "`reqmap.py` treats `BrokenPipeError` and the Windows form of the same event (`OSError` with `EPIPE` or `EINVAL`) alike.",
@@ -11717,7 +11779,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:359"
+          "loc": "plugin/scripts/reqmap.py:368"
         },
         {
           "role": "tested-by",
@@ -12720,7 +12782,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:268"
+          "loc": "plugin/scripts/reqmap.py:275"
         },
         {
           "role": "tested-by",
@@ -16462,7 +16524,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/check_retired_verbs.py:200"
+          "loc": "scripts/check_retired_verbs.py:208"
         },
         {
           "role": "implements",
@@ -16625,25 +16687,26 @@
       "intent": "Folding one verb into another has happened four times here, and three of those left an instruction telling a reader to type a command that no longer resolves: `map --check` in three places of a consumer's CLAUDE.md, a script telling the reader to run the `findings` verb after it was folded into `sync`, and a SKILL contract that documented `scan` (gone) while omitting five verbs that existed. None failed at merge. None failed in CI. Each failed later, at the moment a human followed a written line. The guard moves that failure to merge time, and it reads the engine rather than a second list, because a list of what is live is one more claim to keep true.",
       "contract": [
         "The live surface is read from the engine itself: the verbs from the `COMMANDS` registry, the flags from the `add_argument` calls the parser is built from, across every file that holds them.",
+        "A flag the parser still accepts but that moved to another verb is named in one table beside the guard, verb by verb, and reported when a line passes it to its old verb. The parser is flat, so it accepts `gate --search` for as long as `ask --search` exists.",
         "A retired name is reported only where a line instructs a reader to type it — an invocation inside backticks, inside a quoted string, or after `python`/`$PY` — so prose that merely mentions the name is not a finding.",
         "A line that states the name is gone is skipped whole, in English and in Romanian, because a migration note is the reason a reader stops calling the old name and reporting it would retract the retraction.",
         "A flag belongs to the call it follows and to nothing after a backtick, a quote, `&&`, `||` or `;`, so a second command on the same line never hands its flags to `reqmap`.",
         "When the engine's flags cannot be read the flag half is skipped rather than reported, so a guard that cannot read the engine fails open instead of accusing every flag at once.",
         "Positional arguments are extra consumer roots, scanned against THIS repo's live surface; a root that does not exist ends the run with exit 2 rather than a pass.",
-        "A finding ends the run with exit 1 and names the file, the line number, whether it was a verb or a flag, and the line itself."
+        "A finding ends the run with exit 1 and names the file, the line number, whether it was a verb, a flag or a moved flag, and the line itself."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
       "acc": [
         "CASE-1 — — the live surface comes from the engine, both halves Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser When   the guard reads its live surface Then   it holds every registered verb and every long flag the parser accepts, including flags the registry itself omits",
-        "CASE-2 — — an instruction to type a retired name is reported Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does not accept, in any of the delimited or bare invocation forms When   the guard scans it Then   it reports the name with its file, line and kind, and the run exits 1",
+        "CASE-2 — — an instruction to type a retired name is reported Given  a line instructing a reader to run a retired verb, to pass a flag the parser does not accept, or to pass a moved flag to its old verb, in any of the delimited or bare invocation forms When   the guard scans it Then   it reports the name with its file, line and kind, and the run exits 1",
         "CASE-3 — — a live name and an unrelated word are not findings Given  a line naming a verb the engine still has, and another naming a word that was never a verb When   the guard scans them Then   neither is reported",
         "CASE-4 — — a removal note retracts the instruction it describes Given  a line saying the name was folded, renamed or removed, written in English or in Romanian When   the guard scans it Then   the whole line is skipped and nothing is reported",
         "CASE-5 — — a neighbour command keeps its own flags Given  a line carrying a `reqmap` call followed by a second command with its own flags, separated by a backtick, a quote or a shell operator When   the guard attributes flags Then   only the flags before that separator are read against the engine",
         "CASE-6 — — a guard that cannot read fails open, a missing root does not Given  an engine whose flags cannot be read, and separately an extra root that is not a directory When   the guard runs Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass"
       ],
-      "accept": "CASE-1 — the live surface comes from the engine, both halves\n  Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser\n  When   the guard reads its live surface\n  Then   it holds every registered verb and every long flag the parser accepts, including\n         flags the registry itself omits\n\nCASE-2 — an instruction to type a retired name is reported\n  Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does\n         not accept, in any of the delimited or bare invocation forms\n  When   the guard scans it\n  Then   it reports the name with its file, line and kind, and the run exits 1\n\nCASE-3 — a live name and an unrelated word are not findings\n  Given  a line naming a verb the engine still has, and another naming a word that was never\n         a verb\n  When   the guard scans them\n  Then   neither is reported\n\nCASE-4 — a removal note retracts the instruction it describes\n  Given  a line saying the name was folded, renamed or removed, written in English or in\n         Romanian\n  When   the guard scans it\n  Then   the whole line is skipped and nothing is reported\n\nCASE-5 — a neighbour command keeps its own flags\n  Given  a line carrying a `reqmap` call followed by a second command with its own flags,\n         separated by a backtick, a quote or a shell operator\n  When   the guard attributes flags\n  Then   only the flags before that separator are read against the engine\n\nCASE-6 — a guard that cannot read fails open, a missing root does not\n  Given  an engine whose flags cannot be read, and separately an extra root that is not a\n         directory\n  When   the guard runs\n  Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass",
+      "accept": "CASE-1 — the live surface comes from the engine, both halves\n  Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser\n  When   the guard reads its live surface\n  Then   it holds every registered verb and every long flag the parser accepts, including\n         flags the registry itself omits\n\nCASE-2 — an instruction to type a retired name is reported\n  Given  a line instructing a reader to run a retired verb, to pass a flag the parser does\n         not accept, or to pass a moved flag to its old verb, in any of the delimited or bare\n         invocation forms\n  When   the guard scans it\n  Then   it reports the name with its file, line and kind, and the run exits 1\n\nCASE-3 — a live name and an unrelated word are not findings\n  Given  a line naming a verb the engine still has, and another naming a word that was never\n         a verb\n  When   the guard scans them\n  Then   neither is reported\n\nCASE-4 — a removal note retracts the instruction it describes\n  Given  a line saying the name was folded, renamed or removed, written in English or in\n         Romanian\n  When   the guard scans it\n  Then   the whole line is skipped and nothing is reported\n\nCASE-5 — a neighbour command keeps its own flags\n  Given  a line carrying a `reqmap` call followed by a second command with its own flags,\n         separated by a backtick, a quote or a shell operator\n  When   the guard attributes flags\n  Then   only the flags before that separator are read against the engine\n\nCASE-6 — a guard that cannot read fails open, a missing root does not\n  Given  an engine whose flags cannot be read, and separately an extra root that is not a\n         directory\n  When   the guard runs\n  Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass",
       "input": "",
       "output": "",
       "desc": "",
@@ -16661,7 +16724,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/check_retired_verbs.py:200"
+          "loc": "scripts/check_retired_verbs.py:208"
         },
         {
           "role": "tested-by",
@@ -17512,7 +17575,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:242"
+          "loc": "plugin/scripts/reqmap.py:249"
         },
         {
           "role": "tested-by",
@@ -19233,8 +19296,8 @@
         "`LANGUAGE` in `requirements/_config.json` accepts exactly `en`, `ro` or `both`; any other value is reported and ignored, and the default is `en`.",
         "`_map.json` carries the setting as a top-level `language` field.",
         "Under `ro` or `both`, a requirement that is not deprecated and has no `_i18n/ro.json` entry whose `hash` equals its current `translation_hash` is a gap; the gap is `missing` when there is no entry and `stale` when the entry's hash differs.",
-        "Under `en` there are no gaps, `sync` says nothing about translation, and `gate --i18n` says that nothing is expected and how to change that.",
-        "`gate --i18n` lists every gap with its locale, id, reason and title; `--json` emits each gap's `title`, `intent`, `contract` and `acceptance` exactly as `translation_hash` was computed over them, plus that `hash`, so the writer stores the four translated fields under the id with the same key.",
+        "Under `en` there are no gaps, `sync` says nothing about translation, and `ask --i18n` says that nothing is expected and how to change that.",
+        "`ask --i18n` lists every gap with its locale, id, reason and title; `--json` emits each gap's `title`, `intent`, `contract` and `acceptance` exactly as `translation_hash` was computed over them, plus that `hash`, so the writer stores the four translated fields under the id with the same key.",
         "`sync`'s tail names the gap count, the missing/stale split and the `--i18n --json` command whenever there is at least one gap.",
         "The viewer opens in Romanian under `ro` and in English under `en` and `both`, with the toggle offered whenever a translation exists; a locale the reader chose earlier is kept over the engine's default."
       ],
@@ -19245,12 +19308,12 @@
         "CASE-1 — — the setting is an enum Given  `_config.json` with `\"LANGUAGE\": \"ro\"`, then with `\"LANGUAGE\": \"romanian\"` When   the config is applied Then   the first sets `LANGUAGE` to `ro` and the second is reported on stderr and leaves it unchanged",
         "CASE-2 — — the map carries the setting Given  `LANGUAGE` set to `both` When   the map data is assembled Then   its top-level `language` is `both`",
         "CASE-3 — — missing and stale are told apart Given  `LANGUAGE` `ro`, one requirement with a fresh `ro` entry, one whose entry's hash no longer matches, and one with no entry When   the gaps are computed Then   exactly two gaps come back, reasons `stale` and `missing`, and the fresh one is absent",
-        "CASE-4 — — English means nothing is owed Given  `LANGUAGE` `en` and a corpus with no translation at all When   `gate --i18n` and the `sync` tail run Then   no gap is reported and `gate --i18n` says nothing is expected and names the key to change",
-        "CASE-5 — — the JSON hand-off carries the source and the key Given  one gap under `ro` When   `gate --i18n --json` runs Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract` and `acceptance`, and writing those four fields under the id with that hash makes the next gap computation empty",
-        "CASE-6 — — the sync tail names the gap Given  `LANGUAGE` `ro` and two gaps When   the `sync` tail prints Then   one line reports 2 with the missing/stale split and names `gate --i18n --json`",
+        "CASE-4 — — English means nothing is owed Given  `LANGUAGE` `en` and a corpus with no translation at all When   `ask --i18n` and the `sync` tail run Then   no gap is reported and `ask --i18n` says nothing is expected and names the key to change",
+        "CASE-5 — — the JSON hand-off carries the source and the key Given  one gap under `ro` When   `ask --i18n --json` runs Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract` and `acceptance`, and writing those four fields under the id with that hash makes the next gap computation empty",
+        "CASE-6 — — the sync tail names the gap Given  `LANGUAGE` `ro` and two gaps When   the `sync` tail prints Then   one line reports 2 with the missing/stale split and names `ask --i18n --json`",
         "CASE-7 — — the viewer's default follows the setting, the reader's choice beats it Given  the single-file viewer's inlined data with `language` `ro`, then `en`, then `both` When   the viewer mounts with no stored locale Then   it opens in Romanian, then English, then English; a stored or explicit locale is kept regardless"
       ],
-      "accept": "CASE-1 — the setting is an enum\n  Given  `_config.json` with `\"LANGUAGE\": \"ro\"`, then with `\"LANGUAGE\": \"romanian\"`\n  When   the config is applied\n  Then   the first sets `LANGUAGE` to `ro` and the second is reported on stderr and leaves\n         it unchanged\n\nCASE-2 — the map carries the setting\n  Given  `LANGUAGE` set to `both`\n  When   the map data is assembled\n  Then   its top-level `language` is `both`\n\nCASE-3 — missing and stale are told apart\n  Given  `LANGUAGE` `ro`, one requirement with a fresh `ro` entry, one whose entry's hash\n         no longer matches, and one with no entry\n  When   the gaps are computed\n  Then   exactly two gaps come back, reasons `stale` and `missing`, and the fresh one is absent\n\nCASE-4 — English means nothing is owed\n  Given  `LANGUAGE` `en` and a corpus with no translation at all\n  When   `gate --i18n` and the `sync` tail run\n  Then   no gap is reported and `gate --i18n` says nothing is expected and names the key to\n         change\n\nCASE-5 — the JSON hand-off carries the source and the key\n  Given  one gap under `ro`\n  When   `gate --i18n --json` runs\n  Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract`\n         and `acceptance`, and writing those four fields under the id with that hash makes\n         the next gap computation empty\n\nCASE-6 — the sync tail names the gap\n  Given  `LANGUAGE` `ro` and two gaps\n  When   the `sync` tail prints\n  Then   one line reports 2 with the missing/stale split and names `gate --i18n --json`\n\nCASE-7 — the viewer's default follows the setting, the reader's choice beats it\n  Given  the single-file viewer's inlined data with `language` `ro`, then `en`, then `both`\n  When   the viewer mounts with no stored locale\n  Then   it opens in Romanian, then English, then English; a stored or explicit locale\n         is kept regardless",
+      "accept": "CASE-1 — the setting is an enum\n  Given  `_config.json` with `\"LANGUAGE\": \"ro\"`, then with `\"LANGUAGE\": \"romanian\"`\n  When   the config is applied\n  Then   the first sets `LANGUAGE` to `ro` and the second is reported on stderr and leaves\n         it unchanged\n\nCASE-2 — the map carries the setting\n  Given  `LANGUAGE` set to `both`\n  When   the map data is assembled\n  Then   its top-level `language` is `both`\n\nCASE-3 — missing and stale are told apart\n  Given  `LANGUAGE` `ro`, one requirement with a fresh `ro` entry, one whose entry's hash\n         no longer matches, and one with no entry\n  When   the gaps are computed\n  Then   exactly two gaps come back, reasons `stale` and `missing`, and the fresh one is absent\n\nCASE-4 — English means nothing is owed\n  Given  `LANGUAGE` `en` and a corpus with no translation at all\n  When   `ask --i18n` and the `sync` tail run\n  Then   no gap is reported and `ask --i18n` says nothing is expected and names the key to\n         change\n\nCASE-5 — the JSON hand-off carries the source and the key\n  Given  one gap under `ro`\n  When   `ask --i18n --json` runs\n  Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract`\n         and `acceptance`, and writing those four fields under the id with that hash makes\n         the next gap computation empty\n\nCASE-6 — the sync tail names the gap\n  Given  `LANGUAGE` `ro` and two gaps\n  When   the `sync` tail prints\n  Then   one line reports 2 with the missing/stale split and names `ask --i18n --json`\n\nCASE-7 — the viewer's default follows the setting, the reader's choice beats it\n  Given  the single-file viewer's inlined data with `language` `ro`, then `en`, then `both`\n  When   the viewer mounts with no stored locale\n  Then   it opens in Romanian, then English, then English; a stored or explicit locale\n         is kept regardless",
       "input": "",
       "output": "",
       "desc": "",
@@ -22369,6 +22432,10 @@
       "ARCH-CMDREGISTRY-033"
     ],
     [
+      "REQ-CMDREGISTRY-1031",
+      "ARCH-CMDREGISTRY-033"
+    ],
+    [
       "ARCH-CONFIG-060",
       "SYS-AUTHOR-101"
     ],
@@ -23478,6 +23545,15 @@
       "horizon": "next",
       "req": "ARCH-CMDREGISTRY-033",
       "unpark": null,
+      "done": true,
+      "context": "<!-- v7.22.0, ADR-0044 (Senate 2026-09-17, MODIFY, condițiile în ADR). `gate` are 9\nflag-uri, întrebările au plecat pe verbul `ask`. Vechile forme `gate --search` & co.\nmerg până la v8.0.0 cu o linie pe stderr; bara de mai jos le scoate. -->",
+      "section_date": null
+    },
+    {
+      "name": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
+      "horizon": "next",
+      "req": "ARCH-CMDREGISTRY-033",
+      "unpark": null,
       "done": false,
       "context": "",
       "section_date": null
@@ -23492,7 +23568,7 @@
       "section_date": null
     },
     {
-      "name": "Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului",
+      "name": "Health: un snapshot, untagged, semnalele noi de orizont",
       "horizon": "next",
       "req": "ARCH-HEALTH-017",
       "unpark": null,
@@ -23846,9 +23922,9 @@
     },
     {
       "month": "2026-09",
-      "count": 94,
+      "count": 95,
       "first": "2026-09-02",
-      "last": "2026-09-16",
+      "last": "2026-09-17",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -23943,11 +24019,17 @@
         "v7.21.6",
         "v7.21.7",
         "v7.21.8",
-        "v7.21.9"
+        "v7.21.9",
+        "v7.22.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.22.0",
+          "date": "2026-09-17",
+          "headline": "`gate` is the verdict; every other question is `ask`"
+        },
         {
           "version": "v7.21.9",
           "date": "2026-09-16",
@@ -24473,7 +24555,7 @@
     {
       "name": "gate",
       "group": "read",
-      "summary": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review for the machine-readable review plan.",
+      "summary": "The commit/CI verdict. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. Three mode flags report on the verdict's own subject instead of running it: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier. Every other question is `ask`.",
       "arg": null,
       "flags": [
         {
@@ -24489,6 +24571,38 @@
           "help": "Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals."
         },
         {
+          "flag": "--all",
+          "help": "With --risk: expand every bucket instead of the top few."
+        },
+        {
+          "flag": "--untagged",
+          "help": "With --risk: report membership-tag coverage per directory."
+        },
+        {
+          "flag": "--badge",
+          "help": "With --risk: print the coherence score as a badge string."
+        },
+        {
+          "flag": "--strict",
+          "help": "Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed."
+        },
+        {
+          "flag": "--json",
+          "help": "Emit structured JSON output instead of human-readable text."
+        },
+        {
+          "flag": "--since",
+          "help": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "group": "read",
+      "summary": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr.",
+      "arg": null,
+      "flags": [
+        {
           "flag": "--search",
           "help": "Rank requirements by lexical relevance to a free-text query."
         },
@@ -24502,43 +24616,23 @@
         },
         {
           "flag": "--review",
-          "help": "Emit the deterministic review plan for one requirement, as JSON."
-        },
-        {
-          "flag": "--all",
-          "help": "With --risk: expand every bucket instead of the top few."
+          "help": "Emit the deterministic review plan as JSON: for one requirement, or with no id for the whole corpus."
         },
         {
           "flag": "--i18n",
           "help": "List the translations the configured LANGUAGE (en | ro | both, in requirements/_config.json) expects and does not have, missing or stale. --json emits each entry's source fields and cache key for whoever translates."
         },
         {
-          "flag": "--untagged",
-          "help": "With --risk: report membership-tag coverage per directory."
-        },
-        {
-          "flag": "--badge",
-          "help": "With --risk: print the coherence score as a badge string."
+          "flag": "--top",
+          "help": "With --search or --dupes: how many results to print."
         },
         {
           "flag": "--threshold",
           "help": "With --dupes: override the similarity threshold."
         },
         {
-          "flag": "--top",
-          "help": "With --search or --dupes: how many results to print."
-        },
-        {
-          "flag": "--strict",
-          "help": "Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed."
-        },
-        {
           "flag": "--json",
           "help": "Emit structured JSON output instead of human-readable text."
-        },
-        {
-          "flag": "--since",
-          "help": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
         }
       ]
     },
@@ -24656,13 +24750,13 @@
   },
   "health": {
     "score": 100,
-    "total": 288,
-    "scored": 280,
-    "healthy": 280,
+    "total": 289,
+    "scored": 281,
+    "healthy": 281,
     "deprecated": 8,
-    "confirmed": 280,
-    "implemented": 271,
-    "tested": 268,
+    "confirmed": 281,
+    "implemented": 272,
+    "tested": 269,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
@@ -24673,7 +24767,7 @@
   },
   "planning": {
     "milestones": {
-      "v7.22.0": {
+      "v7.23.0": {
         "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
       },
@@ -24697,29 +24791,20 @@
         "progress": 100
       },
       {
-        "title": "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului",
-        "start": "2026-09-28",
-        "end": "2026-10-09",
-        "lane": "Feature",
-        "milestone": "v7.22.0",
-        "req": "ARCH-CMDREGISTRY-033",
-        "progress": 0
-      },
-      {
         "title": "README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran",
         "start": "2026-10-12",
         "end": "2026-10-16",
         "lane": "Feature",
-        "milestone": "v7.22.0",
+        "milestone": "v7.23.0",
         "req": "SYS-SSOT-001",
         "progress": 0
       },
       {
-        "title": "Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului",
+        "title": "Health: un snapshot, untagged, semnalele noi de orizont",
         "start": "2026-10-19",
         "end": "2026-10-30",
         "lane": "Feature",
-        "milestone": "v7.22.0",
+        "milestone": "v7.23.0",
         "req": "ARCH-HEALTH-017",
         "progress": 0
       },
@@ -24730,6 +24815,15 @@
         "lane": "Feature",
         "milestone": "v8.0.0",
         "req": "ARCH-VIEWER-007",
+        "progress": 0
+      },
+      {
+        "title": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
+        "start": "2026-11-23",
+        "end": "2026-11-27",
+        "lane": "Fix",
+        "milestone": "v8.0.0",
+        "req": "ARCH-CMDREGISTRY-033",
         "progress": 0
       }
     ],
@@ -24759,7 +24853,7 @@
   },
   "targets": {
     "milestones": {
-      "v7.22.0": {
+      "v7.23.0": {
         "due": "2026-10-30",
         "label": "README onest + health pe o singura pagina"
       },
@@ -24783,29 +24877,20 @@
         "progress": 100
       },
       {
-        "title": "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului",
-        "start": "2026-09-28",
-        "end": "2026-10-09",
-        "lane": "Feature",
-        "milestone": "v7.22.0",
-        "req": "ARCH-CMDREGISTRY-033",
-        "progress": 0
-      },
-      {
         "title": "README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran",
         "start": "2026-10-12",
         "end": "2026-10-16",
         "lane": "Feature",
-        "milestone": "v7.22.0",
+        "milestone": "v7.23.0",
         "req": "SYS-SSOT-001",
         "progress": 0
       },
       {
-        "title": "Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului",
+        "title": "Health: un snapshot, untagged, semnalele noi de orizont",
         "start": "2026-10-19",
         "end": "2026-10-30",
         "lane": "Feature",
-        "milestone": "v7.22.0",
+        "milestone": "v7.23.0",
         "req": "ARCH-HEALTH-017",
         "progress": 0
       },
@@ -24816,6 +24901,15 @@
         "lane": "Feature",
         "milestone": "v8.0.0",
         "req": "ARCH-VIEWER-007",
+        "progress": 0
+      },
+      {
+        "title": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
+        "start": "2026-11-23",
+        "end": "2026-11-27",
+        "lane": "Fix",
+        "milestone": "v8.0.0",
+        "req": "ARCH-CMDREGISTRY-033",
         "progress": 0
       }
     ],

@@ -265,6 +265,9 @@ Every bullet below is binding.
 - The live surface is read from the engine itself: the verbs from the `COMMANDS` registry,
   the flags from the `add_argument` calls the parser is built from, across every file that
   holds them.
+- A flag the parser still accepts but that moved to another verb is named in one table beside
+  the guard, verb by verb, and reported when a line passes it to its old verb. The parser is
+  flat, so it accepts `gate --search` for as long as `ask --search` exists.
 - A retired name is reported only where a line instructs a reader to type it — an invocation
   inside backticks, inside a quoted string, or after `python`/`$PY` — so prose that merely
   mentions the name is not a finding.
@@ -278,7 +281,7 @@ Every bullet below is binding.
 - Positional arguments are extra consumer roots, scanned against THIS repo's live surface; a
   root that does not exist ends the run with exit 2 rather than a pass.
 - A finding ends the run with exit 1 and names the file, the line number, whether it was a
-  verb or a flag, and the line itself.
+  verb, a flag or a moved flag, and the line itself.
 
 ## Cases
 CASE-1 — the live surface comes from the engine, both halves
@@ -288,8 +291,9 @@ CASE-1 — the live surface comes from the engine, both halves
          flags the registry itself omits
 
 CASE-2 — an instruction to type a retired name is reported
-  Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does
-         not accept, in any of the delimited or bare invocation forms
+  Given  a line instructing a reader to run a retired verb, to pass a flag the parser does
+         not accept, or to pass a moved flag to its old verb, in any of the delimited or bare
+         invocation forms
   When   the guard scans it
   Then   it reports the name with its file, line and kind, and the run exits 1
 
