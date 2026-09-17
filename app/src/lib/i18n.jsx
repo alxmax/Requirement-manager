@@ -203,8 +203,9 @@ const COMMAND_RO = {  // implements: REQ-VIEWER-964
       + "cerințe-schiță din codul existent, construiește lock-ul și harta, apoi tipărește "
       + "pașii următori. Idempotentă.",
   "new":
-    "Schelet de cerință nouă din șablon. Cu --from-todo și --id o pre-umple dintr-un item "
-      + "din TODO.md.",
+    "Învechită, scoasă în v8.0.0: scrie fișierul cerinței direct sau cere-i asistentului. "
+      + "Până atunci face schelet de cerință nouă din șablon; cu --from-todo și --id o "
+      + "pre-umple dintr-un item din TODO.md.",
   "clarify":
     "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, numere fără unitate, "
       + "cantități nemărginite, clauze fără caz, lipsa căii de eșec. Doar citește, iese mereu "

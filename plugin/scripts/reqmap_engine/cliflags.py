@@ -174,8 +174,8 @@ def _foreign_flags(ap, a, verb):  # implements: REQ-CMDREGISTRY-1031
 
 
 def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
-    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings on
-    stderr. Returns 2 when the call is refused, else 0."""
+    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings and the
+    deprecated `new` on stderr. Returns 2 when the call is refused, else 0."""
     if a.cmd == "ask":
         foreign = _foreign_flags(ap, a, "ask")
         if foreign:
@@ -183,6 +183,9 @@ def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
                 " ".join(foreign), " ".join(p["flag"] for p in COMMANDS["ask"]["params"])),
                 file=sys.stderr)
             return 2
+    if a.cmd == "new":  # implements: REQ-NEW-1032
+        print("reqmap: `new` is deprecated and removed in v8.0.0 (ADR-0045): write "
+              "requirements/<ID>.md yourself, or ask your assistant to.", file=sys.stderr)
     moved = _moved_gate_flags(a)[0] if a.cmd == "gate" else []
     if moved:
         print("reqmap: `gate {0}` moved to `ask {0}` in v7.22.0; the `gate` spelling is "

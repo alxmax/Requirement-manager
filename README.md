@@ -29,8 +29,7 @@ several AI agents touch the same codebase and the specs slowly rot.
 One requirement, one agent session, one drift the gate caught — real terminal output, not a mockup:
 
 ```
-$ python scripts/reqmap.py new AREA-DEMO-999
-created .\requirements\AREA-DEMO-999.md
+$ # write requirements/AREA-DEMO-999.md (by hand, or ask your assistant to)
 
 $ # a human reads it, then sets `status: confirmed` in the frontmatter
 promoted AREA-DEMO-999: draft -> confirmed
@@ -199,7 +198,7 @@ download.
 sees fifteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
 `reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
 invocation in a fresh process, so the answer is exactly what the CLI prints, as JSON wherever
-the command has `--json`. It is **read-only by default**; `reqmap_sync`, `reqmap_new`
+the command has `--json`. It is **read-only by default**; `reqmap_sync`, `reqmap_new` (deprecated, removed in v8.0.0)
 and `reqmap_release` appear only when the server starts with `--allow-writes`. The committed map
 and every requirement are also resources (`reqmap://map`, `reqmap://requirement/<id>`), so a
 client can attach a requirement to the conversation instead of calling a tool about it.
@@ -262,7 +261,7 @@ serves those same commands to an AI assistant.
 | Verb | What it does |
 |---|---|
 | `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
-| `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
+| `new AREA-NAME-NNN` | **Deprecated, removed in v8.0.0** ([ADR-0045](docs/adr/0045-new-is-deprecated.md)): write the requirement file yourself, or ask your assistant to. Until then it still scaffolds one blank requirement from the built-in template, and `--from-todo "name" --id ID` still pre-fills one from a `TODO.md` item. |
 | `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
 | `ask` | **Every other read-only question**: search, overlapping contracts, the design review, the review plan, missing translations. Never writes anything, and its exit code is the question's, never the verdict's. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr ([ADR-0044](docs/adr/0044-questions-leave-the-verdict-verb.md)). |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
@@ -424,7 +423,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 15,045 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 15,050 lines in all)
   scripts/reqmap_engine/mcp.py              the MCP server: protocol, the tool table, resources
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the five parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)

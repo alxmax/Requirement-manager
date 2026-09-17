@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-17
-engine: 2026-09-17
-nodes: 289
+engine: 2026-09-17.1
+nodes: 290
 edges: 122
 design pass-rate: 98% (107/109 source files without a design candidate)
 ---
@@ -187,6 +187,7 @@ graph LR
     REQ_MEMBERDRIFT_982["The member hash keys on the tagged definition<br><small>REQ-MEMBERDRIFT-982</small>"]
     REQ_NEW_881["Stamping a fresh requirement file from a template<br><small>REQ-NEW-881</small>"]
     REQ_NEW_882["Refusing to clobber, and a scaffold that lints clean<br><small>REQ-NEW-882</small>"]
+    REQ_NEW_1032["'new' says it is going away<br><small>REQ-NEW-1032</small>"]
     REQ_NEXT_883["next reads the same risk signals the Risk tab reads<br><small>REQ-NEXT-883</small>"]
     REQ_NEXT_884["Four action buckets, two advisory ones, and untagged files<br><small>REQ-NEXT-884</small>"]
     REQ_NEXT_885["Priority, then risk score, then id decide bucket order<br><small>REQ-NEXT-885</small>"]
@@ -633,8 +634,8 @@ graph LR
   ARCH_MCP_073["Serving the engine over MCP<br><small>ARCH-MCP-073</small>"]
   f_plugin_scripts_test_reqmap_report_py_5169["plugin/scripts/test_reqmap_report.py:5169"]
   ARCH_MCP_073 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5169
-  f_plugin_scripts_reqmap_engine_mcp_py_8_313["plugin/scripts/reqmap_engine/mcp.py:8-313"]
-  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_8_313
+  f_plugin_scripts_reqmap_engine_mcp_py_8_314["plugin/scripts/reqmap_engine/mcp.py:8-314"]
+  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_8_314
   f_plugin_scripts_reqmap_engine_mcpconfig_py_7["plugin/scripts/reqmap_engine/mcpconfig.py:7"]
   ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcpconfig_py_7
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
@@ -1051,7 +1052,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>66 caps</small>"]
-  a_REQ["REQ<br><small>214 caps</small>"]
+  a_REQ["REQ<br><small>215 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

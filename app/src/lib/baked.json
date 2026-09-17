@@ -338,7 +338,8 @@
     "intent": "Create a new requirement file from the template, so every capability starts in the same shape.",
     "contract": [
       "Given a capability id, `new` writes `requirements/<ID>.md`, stamped from the scaffold (an on-disk `templates/requirement.md` if present, else the built-in template) with the placeholder `AREA-NAME-NNN` replaced by that id, creating the requirements directory if needed. [[REQ-NEW-881]]",
-      "`new` refuses to overwrite an existing file, exiting non-zero and writing nothing; it warns but still succeeds on a same-area number collision, and its scaffold is pre-shaped to pass the linter's own authoring rules. [[REQ-NEW-882]]"
+      "`new` refuses to overwrite an existing file, exiting non-zero and writing nothing; it warns but still succeeds on a same-area number collision, and its scaffold is pre-shaped to pass the linter's own authoring rules. [[REQ-NEW-882]]",
+      "`new`, with or without `--from-todo`, is deprecated: it still does its work through v7.x and says on stderr that it is removed in v8.0.0. [[REQ-NEW-1032]]"
     ],
     "acc": [
       "`new FOO-NEW-099` on an empty registry creates `requirements/FOO-NEW-099.md` with that id.",

@@ -81,6 +81,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
       <!-- v7.22.0, ADR-0044 (Senate 2026-09-17, MODIFY, condițiile în ADR). `gate` are 9
            flag-uri, întrebările au plecat pe verbul `ask`. Vechile forme `gate --search` & co.
            merg până la v8.0.0 cu o linie pe stderr; bara de mai jos le scoate. -->
+- [ ] Scoate verbul `new` și `new --from-todo` (ADR-0045) | req: ARCH-NEW-004
 - [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
 - [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
 - [ ] Health: un snapshot, untagged, semnalele noi de orizont | req: ARCH-HEALTH-017

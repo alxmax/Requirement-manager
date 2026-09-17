@@ -140,8 +140,7 @@ next steps. It is idempotent (safe to re-run) and never clobbers an existing
 `.reqmapignore`. The manual steps below are what `init` automates — do them by hand
 only if you want finer control.
 
-The requirement template is **built into the engine** — `reqmap.py new` needs no
-template file. (Optionally, drop a `templates/requirement.md` in the repo to override
+The requirement template is **built into the engine**, so no template file is needed. (Optionally, drop a `templates/requirement.md` in the repo to override
 the built-in scaffold; the engine uses it automatically when present.)
 
 **Create `.reqmapignore` immediately after the copy** — `reqmap.py` carries its own
@@ -173,7 +172,7 @@ plugin present.
 - **Source of truth**: one `.md` per capability in `requirements/`, with YAML
   frontmatter (machine-readable) + prose body (human-readable). Nothing else
   restates the contract — code and docs *reference* it by id, never re-describe it.
-- **Non-binding commentary has one home**: `reqmap.py new`'s template scaffolds a single
+- **Non-binding commentary has one home**: the built-in template scaffolds a single
   `## Context (non-binding)` section with bold `**Notes**` / `**Example**` / `**Current
   implementation**` sub-groups, replacing the older three separate headings (`## WHAT —
   Notes & known limitations`, `## Example — in practice`, `## WHERE — Current
@@ -429,14 +428,13 @@ Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.
 
 Creation verbs (pick by input, not by outcome):
 - `init` — input is **existing untagged CODE** (or prose); drafts requirements from it (`init --plan` shows them as JSON first, writing nothing).
-- `new AREA-NAME-NNN` — input is **nothing yet**; scaffolds one blank requirement from the built-in template.
-- `new --from-todo "TODO name" --id AREA-NAME-NNN` — input is a **TODO.md item**; scaffolds a requirement draft pre-filled from that item. Add `--mark-done` to flip the TODO item to `[x]` at the same time.
+- nothing yet, or a TODO item — write `requirements/AREA-NAME-NNN.md` directly, or have the assistant write it. `new` and `new --from-todo` are deprecated and removed in v8.0.0 (ADR-0045).
 
 <!--##REQMAP:COMMANDS##-->
 | Command | What it does | Flags |
 |---|---|---|
 | `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring.  | `--plan`, `--out`, `--md-glob`, `--wipe`, `--no-site` |
-| `new` | Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
+| `new` | Deprecated, removed in v8.0.0: write the requirement file yourself or ask your assistant to. Scaffolds a new blank requirement from the built-in template; --from-todo and --id pre-fill it from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
 | `gate` | The commit/CI verdict. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. Three mode flags report on the verdict's own subject instead of running it: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier. Every other question is `ask`.  | `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json`, `--since` |
 | `ask` | Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr.  | `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold`, `--json` |
 | `sync` | The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed.  | `--retire`, `--release`, `--delete`, `--apply`, `--force`, `--findings`, `--accept-drift`, `--strict`, `--json` |
@@ -470,7 +468,7 @@ works the same from the shell.
 the committed `_map.json`. Attach a requirement as a resource when the task is "implement
 or change this requirement", so the contract is in context before any code is written.
 
-**Writing is opt-in.** `reqmap_sync`, `reqmap_new` and `reqmap_release` exist only when the
+**Writing is opt-in.** `reqmap_sync`, `reqmap_new` (deprecated) and `reqmap_release` exist only when the
 user started the server with `--allow-writes`. Without them, run `sync` in the terminal as
 before; never ask the user to restart the server with writes just to save a command. Some
 decisions stay with a person whichever path runs them: flipping `status: confirmed`, the

@@ -74,7 +74,7 @@ CASE-6
 **Example**
 - Dan vibe-codes a 400-line `exporter.py` in an afternoon and commits. The
   gate warns: "exporter.py: 400-line code file has no membership tag". He runs
-  `reqmap.py new`, tags the file `# implements: REQ-EXPORT-036`, and the next
+  writes `requirements/REQ-EXPORT-036.md`, tags the file `# implements: REQ-EXPORT-036`, and the next
   contract drift on that requirement now lists his file to re-check.
 
 **Current implementation**

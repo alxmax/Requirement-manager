@@ -2975,3 +2975,60 @@ class AskVerbRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1031 @un
             flags = set(tool["argv"][1:]) | {p["flag"] for p in tool["params"] if p["flag"]}
             if tool["argv"][0] == "gate":
                 self.assertEqual(set(), flags & moved, tool["name"])
+
+
+class NewIsDeprecated(unittest.TestCase):  # tested-by: REQ-NEW-1032 @integration
+    """ADR-0045: `new` keeps working through v7.x and says on stderr that v8.0.0 removes it."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args, "--root", cwd],
+                              cwd=cwd, capture_output=True, text=True, encoding="utf-8")
+
+    def _notice(self, r):
+        return [ln for ln in r.stderr.splitlines() if "v8.0.0" in ln]
+
+    def test_new_scaffolds_and_names_its_removal(self):  # verifies: REQ-NEW-1032#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run("new", "AREA-DEP-001", cwd=d)
+            self.assertEqual(0, r.returncode, r.stderr)
+            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "AREA-DEP-001.md")))
+            self.assertEqual(1, len(self._notice(r)), r.stderr)
+            self.assertIn("`new` is deprecated", self._notice(r)[0])
+            self.assertNotIn("v8.0.0", r.stdout)
+
+    def test_from_todo_names_its_removal(self):  # verifies: REQ-NEW-1032#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"))
+            _write(os.path.join(d, "TODO.md"), "# TODO\n\n## v1.0\n- [ ] Make widget\n")
+            r = self._run("new", "--from-todo", "Make widget", "--id", "REQ-W-001", cwd=d)
+            self.assertEqual(0, r.returncode, r.stderr)
+            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
+            self.assertEqual(1, len(self._notice(r)), r.stderr)
+
+    def test_another_verb_says_nothing_of_new(self):  # verifies: REQ-NEW-1032#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
+            r = self._run("gate", cwd=d)
+            self.assertEqual([], self._notice(r))
+            self.assertNotIn("`new`", r.stderr)
+
+
+class NewNoticeUnit(unittest.TestCase):  # tested-by: REQ-NEW-1032 @unit
+    """The notice itself, from the parsed arguments alone."""
+
+    def _scope(self, argv):
+        ap = R._build_parser()
+        a = ap.parse_args(argv)
+        err = io.StringIO()
+        with redirect_stderr(err):
+            rc = R.cliflags._verb_scope(ap, a)
+        return rc, err.getvalue()
+
+    def test_only_new_prints_the_notice(self):  # verifies: REQ-NEW-1032#CASE-1  # verifies: REQ-NEW-1032#CASE-3
+        rc, err = self._scope(["new", "AREA-DEP-001"])
+        self.assertEqual((0, 1), (rc, len(err.splitlines())))
+        self.assertIn("v8.0.0", err)
+        self.assertEqual((0, ""), self._scope(["gate"]))
+        self.assertEqual((0, ""), self._scope(["sync"]))

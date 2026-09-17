@@ -20,6 +20,7 @@ satisfies: [SYS-AUTHOR-101]
 Every bullet below is binding.
 - Given a capability id, `new` writes `requirements/<ID>.md`, stamped from the scaffold (an on-disk `templates/requirement.md` if present, else the built-in template) with the placeholder `AREA-NAME-NNN` replaced by that id, creating the requirements directory if needed. [[REQ-NEW-881]]
 - `new` refuses to overwrite an existing file, exiting non-zero and writing nothing; it warns but still succeeds on a same-area number collision, and its scaffold is pre-shaped to pass the linter's own authoring rules. [[REQ-NEW-882]]
+- `new`, with or without `--from-todo`, is deprecated: it still does its work through v7.x and says on stderr that it is removed in v8.0.0. [[REQ-NEW-1032]]
 
 ## Cases
 CASE-1
@@ -181,3 +182,42 @@ CASE-4 — a same-area number collision warns but still creates the file
   Then   `ARCH-VIEWER-007.md` is created, the exit code is 0, and the output contains
          "WARN" naming "ARCH-MAP-007"
 
+---
+id: REQ-NEW-1032
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.22.1
+satisfies: [ARCH-NEW-004]
+---
+
+# `new` says it is going away
+
+## Description
+> The maintainer never used `new`: a requirement is written directly, by hand or by an
+> assistant asked to write it (ADR-0045). A verb nobody runs still costs a parser entry, an
+> MCP tool, docs and tests, so it goes in v8.0.0, and until then it says so where it runs.
+
+Every bullet below is binding.
+- `new` and `new --from-todo` print exactly one line on stderr naming v8.0.0 and the
+  replacement: write `requirements/<ID>.md` yourself, or ask an assistant to.
+- Apart from that line, both behave as before: the same exit code, the same file written and
+  the same stdout.
+
+## Cases
+CASE-1 — `new` scaffolds and names its removal
+  Given  an empty requirements directory
+  When   `new AREA-DEP-001` runs
+  Then   it exits 0, writes `requirements/AREA-DEP-001.md`, and stderr has exactly one line
+         naming v8.0.0
+
+CASE-2 — `new --from-todo` names its removal too
+  Given  a `TODO.md` with an unfinished item
+  When   `new --from-todo` runs for it with an id
+  Then   it exits 0, writes the requirement, and stderr has exactly one line naming v8.0.0
+
+CASE-3 — another verb says nothing about `new`
+  Given  a requirements directory
+  When   `gate` runs
+  Then   stderr names neither `new` nor v8.0.0
