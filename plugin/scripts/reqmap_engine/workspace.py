@@ -86,7 +86,7 @@ class Workspace(object):  # implements: ARCH-RULES-059
     the same walk produced.
 
     These six values are computed together in `main` and were then passed
-    together to fifteen command functions, which is why `gate --design` reported
+    together to fifteen command functions, which is why `ask --design` reported
     the clump fifteen times. Naming the bundle is the whole point: a command now
     asks for the workspace it operates on, not for six positional arguments a
     caller can transpose.

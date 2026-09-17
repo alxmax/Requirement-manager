@@ -2,12 +2,13 @@
 
 Lifted out of `reqmap.py` because it is not the command line's shape, only its
 surface: 117 lines of mechanical `add_argument` calls that push the CLI module past
-the 500-line bar `gate --design` holds every engine file to. `reqmap.py` keeps what
+the 500-line bar `ask --design` holds every engine file to. `reqmap.py` keeps what
 reads as the command line — the floor check, the parser assembly, dispatch — and the
 registry that names these flags already lives here, in `commands.py`.
 """
-import argparse
+import argparse, sys
 
+from .commands import COMMANDS
 from .similar import _threshold_arg
 
 
@@ -50,12 +51,12 @@ def _add_workspace_and_query_flags(ap):
                     help="clarify --levels: propose a V-model rung for every requirement that "
                          "declares none (read-only; --apply writes them)")
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
-                    help="gate --dupes: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
+                    help="ask --dupes: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--top", type=int, default=None,
-                    help="gate --search: max ranked matches to show (default 5); gate --dupes: max "
+                    help="ask --search: max ranked matches to show (default 5); ask --dupes: max "
                          "pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="gate (bare, --risk, --audit, --show, --search, --dupes, --design, "
+                    help="gate (bare, --risk, --audit, --show), ask (--search, --dupes, --design, "
                          "--i18n), sync --retire/--release, clarify: emit JSON")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, "
@@ -98,23 +99,23 @@ def _add_todo_and_mode_flags(ap):
                     help="sync --retire / --release: actually write the change (without it, "
                          "the run is a dry report)")
     # Mode flags: the read-only queries that used to be their own verbs. The work
-    # they do is unchanged — only the entry point moved, so `gate` is the one place
-    # a reader asks the corpus anything and `sync` the one place a write happens.
+    # they do is unchanged — only the entry point moved: `gate` keeps the verdict and
+    # the reports on it, `ask` every other question (ADR-0044), `sync` every write.
     ap.add_argument("--audit", dest="mode_audit", action="store_true",
                     help="gate: also print risk, duplicate contracts, design signals and tag "
                          "coverage")
     ap.add_argument("--risk", dest="mode_risk", action="store_true",
                     help="gate: print the corpus risk snapshot and what to do next")
     ap.add_argument("--i18n", dest="mode_i18n", action="store_true",
-                    help="gate: list the translations the configured LANGUAGE expects and does not "
+                    help="ask: list the translations the configured LANGUAGE expects and does not "
                          "have")
     ap.add_argument("--show", dest="mode_show", metavar="ID", nargs="?", default=None, const="",
                     help="gate: print one requirement's dossier")
     ap.add_argument("--search",
                     dest="mode_search", metavar="QUERY", nargs="?", default=None, const="",
-                    help="gate: rank requirements by lexical relevance to a query")
+                    help="ask: rank requirements by lexical relevance to a query")
     ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None, const="",
-                    help="gate: emit the review plan for one requirement")
+                    help="ask: emit the review plan for one requirement, or the whole corpus")
     # DEPRECATED in v7.4.0, removed in v7.5.0 — the same one-release alias window
     # `--suggest-verifies` got in v7.3.0 (ADR-0037 decision 3/4). The capability is
     # gone (ARCH-IMPLEMENT-063 and its two children are `deprecated`, implement.py
@@ -125,9 +126,9 @@ def _add_todo_and_mode_flags(ap):
                     dest="mode_implement", metavar="ID", nargs="?", default=None, const="",
                     help=argparse.SUPPRESS)
     ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
-                    help="gate: rank requirement pairs whose contracts overlap")
+                    help="ask: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
-                    help="gate: print the advisory design review of the code")
+                    help="ask: print the advisory design review of the code")
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
                     help="sync: take one or more requirements out of service; prints the blast "
                          "radius first")
@@ -135,3 +136,55 @@ def _add_todo_and_mode_flags(ap):
                     default=None,
                     help="sync: cut the next planned version (or the vX.Y.Z named); prints "
                          "the plan first")
+
+
+# The flags every verb accepts: where the workspace is, and whether to cache the scan.
+WORKSPACE_FLAGS = ("--root", "--reqs", "--code", "--cache")
+
+# `gate`'s spellings of what `ask` owns since v7.22.0 (ADR-0044): the argparse dest, and
+# whether the flag is a mode on its own or only a helper to one. Removed in v8.0.0.
+MOVED_GATE_FLAGS = (("mode_search", "--search", True), ("mode_dupes", "--dupes", True),
+                    ("mode_design", "--design", True), ("mode_review", "--review", True),
+                    ("mode_i18n", "--i18n", True), ("top", "--top", False),
+                    ("threshold", "--threshold", False))
+
+
+def _given(value):
+    return value is not None and value is not False
+
+
+def _moved_gate_flags(a):  # implements: REQ-CMDREGISTRY-1031
+    """The moved flags this `gate` call carries, and the subset that are modes."""
+    given = [(flag, mode) for dest, flag, mode in MOVED_GATE_FLAGS if _given(getattr(a, dest))]
+    return [f for f, _m in given], [f for f, m in given if m]
+
+
+def _foreign_flags(ap, a, verb):  # implements: REQ-CMDREGISTRY-1031
+    """The flags given on this call that `verb` does not own. The parser is flat, so the
+    registry is what says which verb a flag belongs to."""
+    owned = set(WORKSPACE_FLAGS) | {p["flag"] for p in COMMANDS[verb]["params"]}
+    out = []
+    for action in ap._actions:
+        longs = [o for o in action.option_strings if o.startswith("--")]
+        if not longs or longs[0] in owned or action.dest == "help":
+            continue
+        if getattr(a, action.dest, action.default) != action.default:
+            out.append(longs[0])
+    return out
+
+
+def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
+    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings on
+    stderr. Returns 2 when the call is refused, else 0."""
+    if a.cmd == "ask":
+        foreign = _foreign_flags(ap, a, "ask")
+        if foreign:
+            print("reqmap ask: not an `ask` flag: {}. `ask` takes {}".format(
+                " ".join(foreign), " ".join(p["flag"] for p in COMMANDS["ask"]["params"])),
+                file=sys.stderr)
+            return 2
+    moved = _moved_gate_flags(a)[0] if a.cmd == "gate" else []
+    if moved:
+        print("reqmap: `gate {0}` moved to `ask {0}` in v7.22.0; the `gate` spelling is "
+              "removed in v8.0.0 (ADR-0044).".format(" ".join(moved)), file=sys.stderr)
+    return 0

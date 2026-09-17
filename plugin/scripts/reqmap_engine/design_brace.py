@@ -1,4 +1,4 @@
-"""`gate --design`, brace-language side: masking and heuristics for JS/TS/Java/C-family sources.
+"""`ask --design`, brace-language side: masking and heuristics for JS/TS/Java/C-family sources.
 """
 import re
 

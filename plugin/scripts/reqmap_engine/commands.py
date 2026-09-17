@@ -103,17 +103,14 @@ COMMANDS = {
     },
     "gate": {
         "summary": (
-            "The commit/CI verdict, and every read-only question you can ask the corpus. "
-            "Bare, it verifies that every code tag resolves to a real requirement, that "
-            "every confirmed requirement has at least one implements: member, and that "
-            "drift has not been introduced since the last sync, then checks requirement "
-            "readability and map freshness. Exits non-zero on link-sync errors only. Never "
-            "writes anything. The mode flags answer one question each instead of running "
-            "the verdict: --audit for the whole problem report, --risk for what to do next, "
-            "--show for one requirement's dossier, --search to rank by relevance, --dupes "
-            "for overlapping contracts, --design for the code review, --review for the "
-            "machine-readable review plan. "
-       
+            "The commit/CI verdict. Bare, it verifies that every code tag resolves to a real "
+            "requirement, that every confirmed requirement has at least one implements: "
+            "member, and that drift has not been introduced since the last sync, then checks "
+            "requirement readability and map freshness. Exits non-zero on link-sync errors "
+            "only. Never writes anything. Three mode flags report on the verdict's own "
+            "subject instead of running it: --audit for the whole problem report, --risk for "
+            "what to do next, --show for one requirement's dossier. Every other question is "
+            "`ask`. "
         ),
         "arg": None,
         "params": [
@@ -145,6 +142,67 @@ COMMANDS = {
                 ),
             },
             {
+                "name": "show_all",
+                "flag": "--all",
+                "type": "bool",
+                "help": (
+                    "With --risk: expand every bucket instead of the top few."
+                ),
+            },
+            {
+                "name": "untagged",
+                "flag": "--untagged",
+                "type": "bool",
+                "help": (
+                    "With --risk: report membership-tag coverage per directory."
+                ),
+            },
+            {
+                "name": "as_badge",
+                "flag": "--badge",
+                "type": "bool",
+                "help": (
+                    "With --risk: print the coherence score as a badge string."
+                ),
+            },
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": (
+                    "Promote drift and test-link integrity warnings to errors. "
+                    "Useful in CI when all requirements are confirmed."
+                ),
+            },
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit structured JSON output instead of human-readable text.",
+            },
+            {
+                "name": "since",
+                "flag": "--since",
+                "type": "str",
+                "help": (
+                    "Scope the gate to requirements whose member files changed since "
+                    "this git ref (e.g. 'main', 'HEAD~1')."
+                ),
+            },
+        ],
+    },
+    "ask": {
+        "summary": (
+            "Ask the corpus a question without running the verdict. Read-only, never "
+            "writes, and its exit code is the question's, never the gate's: --search ranks "
+            "requirements by relevance, --dupes ranks overlapping contracts, --design reviews "
+            "the code, --review emits the machine-readable review plan, --i18n lists missing "
+            "translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts "
+            "these flags and prints one migration line on stderr. "
+        ),
+        "arg": None,
+        "params": [
+            {
                 "name": "mode_search",
                 "flag": "--search",
                 "type": "str",
@@ -173,15 +231,8 @@ COMMANDS = {
                 "flag": "--review",
                 "type": "str",
                 "help": (
-                    "Emit the deterministic review plan for one requirement, as JSON."
-                ),
-            },
-            {
-                "name": "show_all",
-                "flag": "--all",
-                "type": "bool",
-                "help": (
-                    "With --risk: expand every bucket instead of the top few."
+                    "Emit the deterministic review plan as JSON: for one requirement, or "
+                    "with no id for the whole corpus."
                 ),
             },
             {
@@ -195,19 +246,11 @@ COMMANDS = {
                 ),
             },
             {
-                "name": "untagged",
-                "flag": "--untagged",
-                "type": "bool",
+                "name": "top",
+                "flag": "--top",
+                "type": "int",
                 "help": (
-                    "With --risk: report membership-tag coverage per directory."
-                ),
-            },
-            {
-                "name": "as_badge",
-                "flag": "--badge",
-                "type": "bool",
-                "help": (
-                    "With --risk: print the coherence score as a badge string."
+                    "With --search or --dupes: how many results to print."
                 ),
             },
             {
@@ -219,36 +262,10 @@ COMMANDS = {
                 ),
             },
             {
-                "name": "top",
-                "flag": "--top",
-                "type": "int",
-                "help": (
-                    "With --search or --dupes: how many results to print."
-                ),
-            },
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "type": "bool",
-                "help": (
-                    "Promote drift and test-link integrity warnings to errors. "
-                    "Useful in CI when all requirements are confirmed."
-                ),
-            },
-            {
                 "name": "json",
                 "flag": "--json",
                 "type": "bool",
                 "help": "Emit structured JSON output instead of human-readable text.",
-            },
-            {
-                "name": "since",
-                "flag": "--since",
-                "type": "str",
-                "help": (
-                    "Scope the gate to requirements whose member files changed since "
-                    "this git ref (e.g. 'main', 'HEAD~1')."
-                ),
             },
         ],
     },
@@ -416,5 +433,5 @@ COMMANDS = {
 COMMAND_GROUPS = (
     ("author", ("init", "new", "clarify")),
     ("build", ("sync",)),
-    ("read", ("gate", "mcp")),
+    ("read", ("gate", "ask", "mcp")),
 )

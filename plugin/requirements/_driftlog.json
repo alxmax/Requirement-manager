@@ -21,6 +21,10 @@
       "hash": "aa1955386c1b",
       "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
     },
+    "ARCH-CMDREGISTRY-033": {
+      "hash": "e43c656396b8",
+      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+    },
     "ARCH-COVERAGE-029": {
       "hash": "25d7127a672c",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
@@ -190,8 +194,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-MCPTOOLS-1028": {
-      "hash": "d5744e4e9da0",
-      "reason": "JSON for show/search/dupes; MCP resources"
+      "hash": "bdfcda48c769",
+      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
@@ -249,6 +253,10 @@
       "hash": "58260ffdf26a",
       "reason": "JSON for show/search/dupes; MCP resources"
     },
+    "REQ-SELFGATE-1011": {
+      "hash": "01428251f82d",
+      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+    },
     "REQ-SELFGATE-916": {
       "hash": "11f65cd22341",
       "reason": "REQ-SELFGATE-916 CASE-1 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
@@ -278,8 +286,8 @@
       "reason": "senate i18n sequence: clause 4 corrected against search.js, CASE-4 authored at the mutation evidence, counting check added"
     },
     "REQ-TRANSLATE-996": {
-      "hash": "4f6e6771dd73",
-      "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
+      "hash": "cd9ffcc8e0ce",
+      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
     "REQ-UNPLANNED-1024": {
       "hash": "f4c83e90aff2",

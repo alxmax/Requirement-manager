@@ -64,7 +64,7 @@ def _translation_gaps(reqs, reqs_dir):
 
 
 def cmd_i18n(ws, as_json=False):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-996
-    """`gate --i18n`: the translations the configured LANGUAGE expects and does not have.
+    """`ask --i18n`: the translations the configured LANGUAGE expects and does not have.
 
     Read-only. The JSON form is the hand-off: each entry carries the four source fields
     exactly as the hash was computed over them, plus that hash, so whoever translates —

@@ -68,7 +68,7 @@ export function computeProblems() {
     out.push({ id: f.file, title: (f.name && f.name !== f.file) ? `${f.kind} · ${f.name}` : f.kind,
       signal: "design", sev: "DESIGN", noSpec: true, msg: f.detail,
       fix: advice[f.kind]
-        || "Advisory: a shape worth a look, never a defect; `gate --design` names it.",
+        || "Advisory: a shape worth a look, never a defect; `ask --design` names it.",
       loc: `${f.file}:${f.line}` });
   });
   const order = { ERROR: 0, WARN: 1, QUESTION: 2, REVIEW: 3, DESIGN: 4 };

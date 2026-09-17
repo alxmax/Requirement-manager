@@ -131,7 +131,7 @@ CASE-2 — writing tools need --allow-writes
 CASE-3 — arguments are checked and passed one by one
   Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3
   When   each call is made
-  Then   the first two are -32602, and the third runs `gate --search "a b" --top 3` as separate arguments
+  Then   the first two are -32602, and the third runs `ask --search "a b" --top 3` as separate arguments
 
 CASE-4 — a FAIL verdict is an answer, a failed command is an error
   Given  `reqmap_gate` and `reqmap_show` both exiting 1

@@ -405,7 +405,7 @@ footer a:hover{color:var(--accent)}
 <body>
 <div class="stats-bar">
 <!--##REQMAP:STATS##-->
-<div class="stat"><b>288</b><span>requirements</span></div><div class="stat"><b>280</b><span>confirmed</span></div><div class="stat"><b>3</b><span>layers</span></div><div class="stat"><b>122</b><span>edges</span></div><div class="stat"><b>2026-09-16.18</b><span>engine</span></div>
+<div class="stat"><b>289</b><span>requirements</span></div><div class="stat"><b>281</b><span>confirmed</span></div><div class="stat"><b>3</b><span>layers</span></div><div class="stat"><b>122</b><span>edges</span></div><div class="stat"><b>2026-09-17</b><span>engine</span></div>
 <!--##/REQMAP:STATS##-->
 </div>
 
@@ -625,12 +625,13 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">Six verbs</h2>
+      <h2 class="reveal">Seven verbs</h2>
       <p class="lead reveal">
-        One stdlib-only Python engine. No installation, no dependencies. Every read-only question
-        is a flag on <code>gate</code>, every write a flag on <code>sync</code>, so the shape of a
-        command tells you whether it can change a file. The sixth verb, <code>mcp</code>, serves
-        the same commands to an AI assistant.
+        One stdlib-only Python engine. No installation, no dependencies. The verdict and its
+        reports are flags on <code>gate</code>, every other read-only question a flag on
+        <code>ask</code>, every write a flag on <code>sync</code>, so the shape of a command tells
+        you whether it can change a file. The seventh verb, <code>mcp</code>, serves the same
+        commands to an AI assistant.
       </p>
     </div>
 
@@ -648,8 +649,12 @@ has not been re-touched.</pre></div>
         <div class="cmd-d">
           <strong>The verdict.</strong> Every tag resolves, every confirmed requirement has code, every <code>depends_on</code> exists; then readability and map freshness. Run before every commit and in CI; never writes.<br>
           <span class="fl">--strict</span> · <span class="fl">--json</span> · <span class="fl">--since &lt;ref&gt;</span><br>
-          Questions: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span> · <span class="fl">--search</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review</span>, each with <span class="fl">--json</span> for an agent
+          Reports: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span>, each with <span class="fl">--json</span> for an agent
         </div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>ask</code></div>
+        <div class="cmd-d"><strong>Every other question.</strong> Read-only; its exit code is the question's, never the verdict's. <span class="fl">--search "query"</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review [ID]</span>, each with <span class="fl">--json</span> for an agent. Until v8.0.0 <code>gate</code> still takes these flags, with one line on stderr.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>sync</code></div>

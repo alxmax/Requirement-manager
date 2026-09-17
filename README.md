@@ -254,15 +254,17 @@ any assistant — or with no assistant at all.
 > In **this** repo, run commands from inside `plugin/`. In **your** repo, run
 > from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
-The CLI is **six verbs**. Five do the work, and everything else is a flag on `gate` (every
-read-only question) or on `sync` (every write), so the shape of a command tells you whether
-it can change a file. The sixth, `mcp`, serves those same commands to an AI assistant.
+The CLI is **seven verbs**. Six do the work, and everything else is a flag on `gate` (the
+verdict and the reports on it), on `ask` (every other read-only question) or on `sync` (every
+write), so the shape of a command tells you whether it can change a file. The seventh, `mcp`,
+serves those same commands to an AI assistant.
 
 | Verb | What it does |
 |---|---|
 | `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
 | `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
-| `gate` | **The verdict, and every read-only question.** Bare, it is the commit/CI check (below). The mode flags each answer one question instead. Never writes anything. |
+| `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
+| `ask` | **Every other read-only question**: search, overlapping contracts, the design review, the review plan, missing translations. Never writes anything, and its exit code is the question's, never the verdict's. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr ([ADR-0044](docs/adr/0044-questions-leave-the-verdict-verb.md)). |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
 | `mcp` | Serve the engine over the Model Context Protocol on stdio: fifteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
 | `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |
@@ -275,13 +277,18 @@ two to errors, `--json` emits one machine-readable document, `--since <ref>` sco
 it to requirements whose members changed since a git ref, and `--no-lint` /
 `--no-map-check` opt out of the two extras.
 
-**`gate` — the read-only questions.**
+**`gate` — the reports on the verdict.**
 
 | Flag | What it answers |
 |---|---|
 | `--risk` | *What should I work on next?* A health score plus counted risk buckets. `--json`/`--badge` for the numbers alone, `--untagged` for the files carrying no `implements:` tag. |
 | `--audit` | *How is this repo doing?* Every discovery pass in one report: gate, risk, duplicates, design, tag coverage, the exemptions in force, corpus shape, and the plan against the releases (a milestone already shipped, version sources that disagree). The exit code comes from the gate alone — the rest is advice. |
 | `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. `--json` adds the requirement's frontmatter and body. |
+
+**`ask` — the questions.**
+
+| Flag | What it answers |
+|---|---|
 | `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. `--json` for an agent. |
 | `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). A pair a reviewer read and found different is recorded with `distinct_from: [ID]` and stops being reported; `--json` lists every pair and what was skipped. |
 | `--design` | Advisory design review of the code: the four OOP pillars, one Chidamber & Kemerer per-class metric (RFC, Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
@@ -417,7 +424,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 14,965 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 15,045 lines in all)
   scripts/reqmap_engine/mcp.py              the MCP server: protocol, the tool table, resources
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the five parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)

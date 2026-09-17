@@ -156,6 +156,14 @@ RETIRED = {
     "check", "scan", "translate", "confirm",
 }
 
+# Flags that still parse but moved to another verb: the parser is flat, so the derived
+# flag check cannot see that `gate --search` is stale while `ask --search` is live.
+# verb -> {flag: the verb that owns it now}. ADR-0044, v7.22.0.
+MOVED_FLAGS = {
+    "gate": {flag: "ask" for flag in ("--search", "--dupes", "--design", "--review",
+                                      "--i18n", "--top", "--threshold")},
+}
+
 # An invocation, not a mention: inside backticks or a quoted string, or after
 # `python` / $PY. The quoted form matters because the engine PRINTS instructions
 # — the audit report tells you how to run each section on its own, and those
@@ -271,9 +279,12 @@ def scan_line(line, live, flags):
         # Only the flags of THIS call. One line often carries a second command
         # after it — `reqmap.py gate` ... `npm test --workspace=apps/web` — and
         # reading to end-of-line hands the neighbour's flags to reqmap.
+        moved = MOVED_FLAGS.get(m.group(1), {})
         for flag in FLAG.findall(END_OF_CALL.split(line[m.end():], 1)[0]):
             if flag not in flags:
                 yield "flag", flag
+            elif flag in moved:
+                yield "moved", "%s %s -> %s" % (m.group(1), flag, moved[flag])
 
 
 def check_root(root, live, flags, consumer=False):
@@ -318,7 +329,8 @@ def main(argv=None):
         print("  %s:%d  %s `%s`  %s" % (where, n, kind, name, line))
     print("")
     print("Either the name came back, or the instruction is stale. A reader who")
-    print("follows one of these lines gets an unknown-command error.")
+    print("follows one of these lines gets an unknown-command error, or for a moved")
+    print("flag a deprecation notice until the release that removes it.")
     return 1
 
 

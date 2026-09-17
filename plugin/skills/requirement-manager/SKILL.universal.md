@@ -286,7 +286,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     the code is covered twice and a later edit will change one of them. `reqmap.py
     next` reports a **Redundancy** bucket for contracts that are identical word for
     word (exact match, no threshold — a group there is a duplicate, not a guess),
-    and `reqmap.py gate --dupes` scores the near-matches. Fold a group into one
+    and `reqmap.py ask --dupes` scores the near-matches. Fold a group into one
     requirement and re-point the tags, or make the contracts say different things.
     Both are advisory and neither ever rewrites a file: which of two ids survives,
     and what the merged contract says, is a judgement call.
@@ -437,7 +437,8 @@ Creation verbs (pick by input, not by outcome):
 |---|---|---|
 | `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring.  | `--plan`, `--out`, `--md-glob`, `--wipe`, `--no-site` |
 | `new` | Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
-| `gate` | The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review for the machine-readable review plan.  | `--audit`, `--risk`, `--show`, `--search`, `--dupes`, `--design`, `--review`, `--all`, `--i18n`, `--untagged`, `--badge`, `--threshold`, `--top`, `--strict`, `--json`, `--since` |
+| `gate` | The commit/CI verdict. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. Three mode flags report on the verdict's own subject instead of running it: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier. Every other question is `ask`.  | `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json`, `--since` |
+| `ask` | Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr.  | `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold`, `--json` |
 | `sync` | The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed.  | `--retire`, `--release`, `--delete`, `--apply`, `--force`, `--findings`, `--accept-drift`, `--strict`, `--json` |
 | `clarify` | Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. --decompose is the write half of the same question: it splits a requirement into code-rung children along the bold group labels in its Description (--apply writes), or scaffolds one draft per over-long clause when it has none. Run it before implementing, so the ambiguity is resolved in the requirement instead of guessed in code.  | `--decompose`, `--levels`, `--json` |
 | `mcp` | Serve this repository's requirements to an AI assistant over the Model Context Protocol (stdio). Each tool is one reqmap invocation in a fresh process. Read-only unless --allow-writes. | `--allow-writes` |
@@ -458,11 +459,11 @@ works the same from the shell.
 | Is the repo in step? (exit 1 is a FAIL verdict, not a tool error) | `reqmap_gate` | `gate` |
 | What should I do next? | `reqmap_next` / `reqmap_health` | `gate --risk` / `--risk --json` |
 | What does this requirement say, and where is its code? | `reqmap_show(id)` | `gate --show ID --json` |
-| Which requirement covers X? | `reqmap_search(query)` | `gate --search Q --json` |
+| Which requirement covers X? | `reqmap_search(query)` | `ask --search Q --json` |
 | Everything that is wrong, at once | `reqmap_audit` | `gate --audit --json` |
-| Do two contracts overlap? | `reqmap_dupes` | `gate --dupes --json` |
+| Do two contracts overlap? | `reqmap_dupes` | `ask --dupes --json` |
 | What is unanswered in a requirement? | `reqmap_clarify(id)` | `clarify ID --json` |
-| Review plan / design / tag coverage | `reqmap_review(id)` / `reqmap_design` / `reqmap_untagged` | `gate --review` / `--design` / `--risk --untagged` |
+| Review plan / design / tag coverage | `reqmap_review(id)` / `reqmap_design` / `reqmap_untagged` | `ask --review` / `ask --design` / `gate --risk --untagged` |
 | What would the next release cut? | `reqmap_release_plan` | `sync --release --json` |
 
 **Resources.** `reqmap://requirement/<id>` is one requirement's dossier, and `reqmap://map`

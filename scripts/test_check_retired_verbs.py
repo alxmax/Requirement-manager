@@ -18,8 +18,8 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_retired_verbs as C
 
-LIVE = {"gate", "sync", "init", "new", "clarify"}
-FLAGS = {"--code", "--root", "--risk", "--i18n", "--attach", "--strict"}
+LIVE = {"gate", "ask", "sync", "init", "new", "clarify"}
+FLAGS = {"--code", "--root", "--risk", "--i18n", "--attach", "--strict", "--search", "--top"}
 
 
 def scan(line, live=None, flags=None):
@@ -108,6 +108,20 @@ class ThisRepo(unittest.TestCase):
             self.assertEqual(C.main([os.path.join(os.sep, "no", "such", "root")]), 2)
         finally:
             sys.stderr = stderr
+
+
+
+class MovedFlags(unittest.TestCase):
+    """ADR-0044: a flag that still parses but belongs to another verb now. The flat
+    parser accepts `gate --search`, so only a verb-scoped table can call it stale."""
+
+    def test_a_moved_flag_under_its_old_verb_is_caught(self):  # verifies: REQ-SELFGATE-1011#CASE-2
+        self.assertEqual(scan("`python scripts/reqmap.py gate --search x --top 3`"),
+                         [("moved", "gate --search -> ask"), ("moved", "gate --top -> ask")])
+
+    def test_the_same_flag_under_its_new_verb_is_not(self):  # verifies: REQ-SELFGATE-1011#CASE-2
+        self.assertEqual(scan("`python scripts/reqmap.py ask --search x --top 3`"), [])
+        self.assertEqual(scan("`python scripts/reqmap.py gate --risk --strict`"), [])
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ description: Use on-demand to AI-review the SEMANTIC quality of requirement file
 # Requirement quality review (AI — advisory)
 
 This skill is the **out-of-band AI consumer** of the deterministic plan emitted by
-`reqmap.py gate --review`. The engine never calls an LLM; the AI assistant makes the semantic
+`reqmap.py ask --review`. The engine never calls an LLM; the AI assistant makes the semantic
 judgements here. **This is advisory only — it is NEVER part of the gate, and the AI
 NEVER edits a requirement file.** A human decides what to act on.
 
@@ -28,9 +28,13 @@ frontmatter to silence a lint check that is intentionally violated (e.g.
 
 1. **Get the plan** (deterministic, read-only — safe to run anywhere):
    ```bash
-   python scripts/reqmap.py gate --review            # whole corpus
-   python scripts/reqmap.py gate --review AREA-NAME-NNN   # one requirement
+   python scripts/reqmap.py ask --review            # whole corpus
+   python scripts/reqmap.py ask --review AREA-NAME-NNN   # one requirement
    ```
+
+   An engine vendored before plugin v7.22.0 has no `ask` verb (`invalid choice: 'ask'`):
+   check `MAP_ENGINE_VERSION` in `scripts/reqmap_engine/__init__.py` (older than `2026-09-17`),
+   and on such an engine run the same plan as `gate --review`, a spelling removed in v8.0.0.
    The JSON carries each requirement's prose + structural `anchors`, a `coverage_summary`,
    and the three `categories` you judge.
 

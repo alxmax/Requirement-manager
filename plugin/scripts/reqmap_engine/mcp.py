@@ -31,8 +31,9 @@ def _param(name, kind, help_text, flag=None, required=False, bare=False):
 _ID = "A requirement id, e.g. ARCH-PARSE-001."
 
 # The tools, named for the question an agent asks rather than for the flag that asks it:
-# `gate` alone has sixteen flags, most of them separate modes. `argv` is the fixed part
-# of the invocation; a test holds every verb and flag here to the command registry.
+# `gate` once had sixteen flags, most of them separate modes (ADR-0044 moved the questions
+# to `ask`). `argv` is the fixed part of the invocation; a test holds every verb and flag
+# here to the command registry.
 MCP_TOOLS = (
     {"name": "reqmap_gate", "argv": ["gate"], "ok": (0, 1), "writes": False,
      "description": "The verdict: code tags resolve to requirements, no contract drifted, "
@@ -52,7 +53,7 @@ MCP_TOOLS = (
                     "questions and risk signals, as JSON with the requirement's frontmatter "
                     "and body.",
      "params": [_param("id", "str", _ID, "--show", required=True)]},
-    {"name": "reqmap_search", "argv": ["gate", *_JSON], "writes": False,
+    {"name": "reqmap_search", "argv": ["ask", *_JSON], "writes": False,
      "description": "Requirements ranked by relevance to a free-text query, as JSON; an id "
                     "in the query is matched first.",
      "params": [_param("query", "str", "What to look for.", "--search", required=True),
@@ -62,19 +63,19 @@ MCP_TOOLS = (
      "description": "Everything the engine can find, as JSON: gate, health, duplicate "
                     "contracts, design, tag coverage, exemptions and corpus shape.",
      "params": []},
-    {"name": "reqmap_dupes", "argv": ["gate", "--dupes", *_JSON], "writes": False,
+    {"name": "reqmap_dupes", "argv": ["ask", "--dupes", *_JSON], "writes": False,
      "description": "Requirement pairs whose contracts share wording, most similar first, "
                     "as JSON.",
      "params": [_param("threshold", "number", "Cosine cutoff in (0, 1], default 0.35.",
                        "--threshold"),
                 _param("top", "int", "Print only this many pairs.", "--top")]},
-    {"name": "reqmap_design", "argv": ["gate", "--design", *_JSON], "writes": False,
+    {"name": "reqmap_design", "argv": ["ask", "--design", *_JSON], "writes": False,
      "description": "The advisory design review of the repository's code, as JSON.",
      "params": []},
     {"name": "reqmap_untagged", "argv": ["gate", "--risk", "--untagged"], "writes": False,
      "description": "Tag coverage per directory, and the source files no requirement claims.",
      "params": []},
-    {"name": "reqmap_review", "argv": ["gate"], "writes": False,
+    {"name": "reqmap_review", "argv": ["ask"], "writes": False,
      "description": "The review plan for one requirement, as JSON: intent, contract, cases "
                     "and code anchors, for judging whether the code does what it says.",
      "params": [_param("id", "str", _ID, "--review", required=True)]},

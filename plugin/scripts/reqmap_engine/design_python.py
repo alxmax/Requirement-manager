@@ -1,4 +1,4 @@
-"""`gate --design`, Python side: ast-driven shape, fields, cohesion and metrics."""
+"""`ask --design`, Python side: ast-driven shape, fields, cohesion and metrics."""
 import ast
 
 from . import config as cfg

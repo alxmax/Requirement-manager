@@ -380,7 +380,7 @@ distinct_from: [REQ-VIEWER-977]
 
 ## Description
 > The score told a reader that design was at 23/100 and stopped there. To learn *which*
-> shapes cost the other 77 they had to leave the map and run `gate --design` in a
+> shapes cost the other 77 they had to leave the map and run `ask --design` in a
 > terminal, which is the moment most readers stop looking. The candidates now travel in
 > the committed map beside the score they explain, so the viewer can list them in a tab
 > of their own.

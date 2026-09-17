@@ -183,7 +183,7 @@ def _print_redundant_bucket(redundant, disp):
     print(
         "  -> {} requirement(s) state an obligation another already states, word for "
         "word. Fold each group into one and re-point the tags, or make the contracts "
-        "say different things. Exact matches only — run `reqmap.py gate --dupes` for the "
+        "say different things. Exact matches only — run `reqmap.py ask --dupes` for the "
         "near-matches this cannot see.\n".format(spare)
     )
 

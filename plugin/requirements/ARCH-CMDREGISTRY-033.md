@@ -21,6 +21,7 @@ satisfies: [SYS-SHIP-108]
 Every bullet below is binding.
 - A `COMMANDS` dict is the single source of truth for the CLI's commands: argparse's choices, the generated `tool_definition.json`, and the `SKILL.universal.md` command table all derive from it, and the gate fails when a generated artifact goes stale. [[REQ-CMDREGISTRY-834]]
 - The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]
+- `gate` owns the verdict and the reports on it, and `ask` owns every other read-only question; `gate`'s old spellings of those questions run the same call with one migration line on stderr until v8.0.0. [[REQ-CMDREGISTRY-1031]]
 
 ## Cases
 CASE-1
@@ -174,3 +175,54 @@ CASE-3 — each command is placed in a group
   Given  the manifest
   When   its entries are inspected
   Then   every entry names one of the declared groups
+
+---
+id: REQ-CMDREGISTRY-1031
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.22.0
+satisfies: [ARCH-CMDREGISTRY-033]
+---
+
+# `ask` holds the questions, `gate` the verdict
+
+## Description
+> `gate` was two things under one name: the commit verdict every hook runs, and every question
+> the engine can answer, sixteen flags in all. A reader choosing a flag had to know which of
+> them run the verdict and which never do. ADR-0044 moves the questions to their own verb.
+
+Every bullet below is binding.
+- The command registry gives `gate` exactly nine flags: `--audit`, `--risk`, `--show`, `--all`,
+  `--untagged`, `--badge`, `--strict`, `--json` and `--since`.
+- `ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and
+  `--json`. `ask --review` with no id plans the whole corpus.
+- Until v8.0.0, `gate` given one of `ask`'s flags runs the same call as `ask`: the same exit code
+  and byte-identical stdout, plus exactly one line on stderr naming the `ask` spelling and v8.0.0.
+  The line never goes to stdout, where it would break `--json` for every parser.
+- `ask` given a flag the registry gives another verb, or given no mode at all, exits 2 with one
+  line and runs nothing.
+- No MCP tool invokes `gate` with a flag `ask` owns.
+
+## Cases
+CASE-1 — the registry splits the flags
+  Given  the command registry
+  When   the flags of `gate` and `ask` are read
+  Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag
+
+CASE-2 — the old spelling is the same call plus one stderr line
+  Given  a corpus and each moved spelling, with and without `--json`
+  When   it runs as `gate …` and as `ask …`
+  Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly
+         one line naming `ask` and v8.0.0
+
+CASE-3 — `ask` refuses what it does not own
+  Given  a corpus
+  When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show`
+  Then   it exits 2 and no verdict is printed
+
+CASE-4 — the MCP tools ask `ask`
+  Given  the MCP tool table
+  When   each tool's verb and flags are read
+  Then   no tool pairs `gate` with a flag `ask` owns

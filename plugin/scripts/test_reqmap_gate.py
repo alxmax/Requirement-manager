@@ -1857,7 +1857,7 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     def test_new_verbs_dispatch(self):
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
-            for args in (("gate", "--dupes"), ("gate", "--design")):
+            for args in (("ask", "--dupes"), ("ask", "--design")):
                 r = self._run(*args, "--root", d, cwd=d)
                 self.assertEqual(r.returncode, 0, f"{args}: {r.stderr}")
             # `draft --plan` (cmd_candidates) always prints its extraction plan to
@@ -2908,3 +2908,70 @@ class TemporalVagueTerms(unittest.TestCase):  # tested-by: ARCH-LINT-014  # test
             "A block starts at a line immediately followed by an id."))
         self.assertEqual([], self._vague("A later block keeps its own id."))
         self.assertEqual([], self._vague("The most recent commit wins."))
+
+
+class AskVerb(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1031 @integration
+    """ADR-0044: the questions left `gate` for `ask`; the old spellings are an alias for
+    one release, and `ask` refuses what it does not own."""
+
+    MOVED = (("--search", "t"), ("--dupes",), ("--design",), ("--review", "REQ-A-001"),
+             ("--i18n",), ("--search", "t", "--top", "1"), ("--dupes", "--threshold", "0.5"))
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args, "--root", cwd],
+                              cwd=cwd, capture_output=True, text=True, encoding="utf-8")
+
+    def _seed(self, d):
+        _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
+
+    def test_old_spelling_is_the_same_call_plus_one_stderr_line(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            calls = [list(m) for m in self.MOVED]
+            calls += [list(m) + ["--json"] for m in (("--search", "t"), ("--dupes",),
+                                                     ("--design",), ("--i18n",))]
+            for args in calls:
+                old, new = self._run("gate", *args, cwd=d), self._run("ask", *args, cwd=d)
+                self.assertEqual((0, 0), (old.returncode, new.returncode), (args, old.stderr))
+                self.assertEqual(new.stdout, old.stdout, args)
+                if "--json" in args:
+                    json.loads(old.stdout)
+                notice = [ln for ln in old.stderr.splitlines() if "moved to `ask" in ln]
+                self.assertEqual(1, len(notice), (args, old.stderr))
+                self.assertIn("v8.0.0", notice[0])
+                rest = [ln for ln in old.stderr.splitlines() if ln not in notice]
+                self.assertEqual(new.stderr.splitlines(), rest, args)
+                self.assertNotIn("moved to `ask", old.stdout)
+
+    def test_ask_refuses_a_foreign_flag_and_a_missing_mode(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            for args in ((), ("--strict",), ("--risk",), ("--since", "HEAD", "--search", "t"),
+                         ("--dupes", "--show", "REQ-A-001")):
+                r = self._run("ask", *args, cwd=d)
+                self.assertEqual(2, r.returncode, (args, r.stdout, r.stderr))
+                self.assertNotIn("gate: PASS", r.stdout)
+            r = self._run("gate", cwd=d)       # the verdict itself says nothing of `ask`
+            self.assertNotIn("moved to `ask", r.stderr)
+
+
+class AskVerbRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1031 @unit
+    """ADR-0044, read from the tables alone: the registry split and the MCP tool argv."""
+
+    def test_gate_owns_nine_flags_and_ask_the_questions(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-1
+        gate = {p["flag"] for p in R.COMMANDS["gate"]["params"]}
+        ask = {p["flag"] for p in R.COMMANDS["ask"]["params"]}
+        self.assertEqual(9, len(R.COMMANDS["gate"]["params"]))
+        moved = {flag for _dest, flag, _mode in R.cliflags.MOVED_GATE_FLAGS}
+        self.assertEqual(set(), gate & moved)
+        self.assertLessEqual(moved, ask)
+        self.assertIn("ask", dict(R.COMMAND_GROUPS)["read"])
+
+    def test_no_mcp_tool_asks_gate_a_question(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-4
+        moved = {flag for _dest, flag, _mode in R.cliflags.MOVED_GATE_FLAGS}
+        for tool in R.mcp.MCP_TOOLS:
+            flags = set(tool["argv"][1:]) | {p["flag"] for p in tool["params"] if p["flag"]}
+            if tool["argv"][0] == "gate":
+                self.assertEqual(set(), flags & moved, tool["name"])

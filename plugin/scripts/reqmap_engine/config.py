@@ -90,7 +90,7 @@ SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not aut
 # The repository's declared requirements language: `en`, `ro`, or `both`. Set in
 # `requirements/_config.json` as `"LANGUAGE": "ro"`. It changes what the engine EXPECTS,
 # never what it writes: with `ro` or `both` a requirement without a fresh Romanian entry
-# is a gap `sync` reports and `gate --i18n` lists, and the viewer opens in Romanian
+# is a gap `sync` reports and `ask --i18n` lists, and the viewer opens in Romanian
 # (`ro`) or offers both (`both`). The engine still translates nothing — that is
 # REQ-TRANSLATE-937, and it holds because the emitter hands the source text and the
 # cache key to whoever does.

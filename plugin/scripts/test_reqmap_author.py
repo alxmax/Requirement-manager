@@ -3330,7 +3330,7 @@ class LanguageSetting(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # te
             R._audit_summary(self.reqs, {}, self.rd, None)
         out = buf.getvalue()
         self.assertIn("2 requirement(s) have no fresh translation for LANGUAGE `ro` (1 missing, 1 stale)", out)
-        self.assertIn("gate --i18n --json", out)
+        self.assertIn("ask --i18n --json", out)
 
     def test_gate_i18n_lists_every_gap_readably(self):  # verifies: REQ-TRANSLATE-996#CASE-3
         self._set("both")

@@ -73,7 +73,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_gate",
-      "description": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review for the machine-readable review plan. ",
+      "description": "The commit/CI verdict. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. Three mode flags report on the verdict's own subject instead of running it: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier. Every other question is `ask`. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -93,6 +93,47 @@
             "type": "string",
             "description": "Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals."
           },
+          "show_all": {
+            "type": "boolean",
+            "description": "With --risk: expand every bucket instead of the top few."
+          },
+          "untagged": {
+            "type": "boolean",
+            "description": "With --risk: report membership-tag coverage per directory."
+          },
+          "as_badge": {
+            "type": "boolean",
+            "description": "With --risk: print the coherence score as a badge string."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit structured JSON output instead of human-readable text."
+          },
+          "since": {
+            "type": "string",
+            "description": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_ask",
+      "description": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr. ",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
           "mode_search": {
             "type": "string",
             "description": "Rank requirements by lexical relevance to a free-text query."
@@ -107,43 +148,23 @@
           },
           "mode_review": {
             "type": "string",
-            "description": "Emit the deterministic review plan for one requirement, as JSON."
-          },
-          "show_all": {
-            "type": "boolean",
-            "description": "With --risk: expand every bucket instead of the top few."
+            "description": "Emit the deterministic review plan as JSON: for one requirement, or with no id for the whole corpus."
           },
           "mode_i18n": {
             "type": "boolean",
             "description": "List the translations the configured LANGUAGE (en | ro | both, in requirements/_config.json) expects and does not have, missing or stale. --json emits each entry's source fields and cache key for whoever translates."
           },
-          "untagged": {
-            "type": "boolean",
-            "description": "With --risk: report membership-tag coverage per directory."
-          },
-          "as_badge": {
-            "type": "boolean",
-            "description": "With --risk: print the coherence score as a badge string."
+          "top": {
+            "type": "integer",
+            "description": "With --search or --dupes: how many results to print."
           },
           "threshold": {
             "type": "string",
             "description": "With --dupes: override the similarity threshold."
           },
-          "top": {
-            "type": "integer",
-            "description": "With --search or --dupes: how many results to print."
-          },
-          "strict": {
-            "type": "boolean",
-            "description": "Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed."
-          },
           "json": {
             "type": "boolean",
             "description": "Emit structured JSON output instead of human-readable text."
-          },
-          "since": {
-            "type": "string",
-            "description": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
           }
         },
         "required": []
