@@ -424,7 +424,7 @@ CASE-4 — a corpus full of orphans and drafts still exits 0
 
 ---
 id: REQ-PLANGAPS-1033
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

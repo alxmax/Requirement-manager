@@ -11120,7 +11120,7 @@
       "id": "REQ-PLANGAPS-1033",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The plan's own gaps are a bucket in the worklist",
       "intent": "\"What should I do next\" had two answers in two places: `gate --risk` read the corpus, while the three signals that read the PLAN — a `Now`/`Next` item no bar schedules, a `Later` item with no `unpark:`, an item naming a requirement that does not exist — printed only at the tail of `sync` and inside `gate --audit`. A reader who opens the worklist sees a clean screen while the roadmap carries unscheduled work. The signals do not change; the screen that asks the question gets them.",
@@ -11191,12 +11191,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6
     },
@@ -24084,9 +24079,9 @@
     },
     {
       "month": "2026-09",
-      "count": 96,
+      "count": 97,
       "first": "2026-09-02",
-      "last": "2026-09-17",
+      "last": "2026-09-20",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -24183,11 +24178,17 @@
         "v7.21.8",
         "v7.21.9",
         "v7.22.0",
-        "v7.22.1"
+        "v7.22.1",
+        "v7.23.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.23.0",
+          "date": "2026-09-20",
+          "headline": "README onest + health pe o singura pagina"
+        },
         {
           "version": "v7.22.1",
           "date": "2026-09-17",
@@ -24920,27 +24921,21 @@
     "score": 100,
     "total": 291,
     "scored": 283,
-    "healthy": 282,
+    "healthy": 283,
     "deprecated": 8,
-    "confirmed": 282,
+    "confirmed": 283,
     "implemented": 274,
     "tested": 271,
-    "drafts": 1,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 282
+    "gate_link_sync_clean": true
   },
   "planning": {
     "milestones": {
-      "v7.23.0": {
-        "due": "2026-10-30",
-        "label": "README onest + health pe o singura pagina"
-      },
       "v8.0.0": {
         "due": "2026-11-27",
         "label": "Datoria de viewer: split ARCH-VIEWER-007"
@@ -24959,24 +24954,6 @@
         "lane": "Feature",
         "req": "ARCH-MCP-073",
         "progress": 100
-      },
-      {
-        "title": "README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran",
-        "start": "2026-10-12",
-        "end": "2026-10-16",
-        "lane": "Feature",
-        "milestone": "v7.23.0",
-        "req": "SYS-SSOT-001",
-        "progress": 0
-      },
-      {
-        "title": "Health: un snapshot, untagged, semnalele noi de orizont",
-        "start": "2026-10-19",
-        "end": "2026-10-30",
-        "lane": "Feature",
-        "milestone": "v7.23.0",
-        "req": "ARCH-HEALTH-017",
-        "progress": 0
       },
       {
         "title": "Split ARCH-VIEWER-007: artefactul HTML vs. ce randează",
@@ -25032,10 +25009,6 @@
   },
   "targets": {
     "milestones": {
-      "v7.23.0": {
-        "due": "2026-10-30",
-        "label": "README onest + health pe o singura pagina"
-      },
       "v8.0.0": {
         "due": "2026-11-27",
         "label": "Datoria de viewer: split ARCH-VIEWER-007"
@@ -25054,24 +25027,6 @@
         "lane": "Feature",
         "req": "ARCH-MCP-073",
         "progress": 100
-      },
-      {
-        "title": "README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran",
-        "start": "2026-10-12",
-        "end": "2026-10-16",
-        "lane": "Feature",
-        "milestone": "v7.23.0",
-        "req": "SYS-SSOT-001",
-        "progress": 0
-      },
-      {
-        "title": "Health: un snapshot, untagged, semnalele noi de orizont",
-        "start": "2026-10-19",
-        "end": "2026-10-30",
-        "lane": "Feature",
-        "milestone": "v7.23.0",
-        "req": "ARCH-HEALTH-017",
-        "progress": 0
       },
       {
         "title": "Split ARCH-VIEWER-007: artefactul HTML vs. ce randează",

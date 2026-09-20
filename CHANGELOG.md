@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v7.23.0` — 2026-09-20
+
+**README onest + health pe o singura pagina.**
+
+- README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran (SYS-SSOT-001)
+- Health: un snapshot, untagged, semnalele noi de orizont (ARCH-HEALTH-017)
+
 ## plugin `v7.22.1` — 2026-09-17
 
 **`new` is deprecated** (ADR-0045). `new` and `new --from-todo` still work and now print one line
