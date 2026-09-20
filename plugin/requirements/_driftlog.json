@@ -73,6 +73,10 @@
       "hash": "f55421f03e9a",
       "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
     },
+    "ARCH-NEXT-013": {
+      "hash": "a946c1af5f10",
+      "reason": "REQ-PLANGAPS-1033: ARCH-NEXT-013 gains the Plan-bucket obligation"
+    },
     "ARCH-PARSE-001": {
       "hash": "3eca960dd4f3",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"

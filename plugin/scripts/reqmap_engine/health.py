@@ -7,7 +7,7 @@ from .locks import load_lock
 from .mapdata import _roadmap_behind, _roadmap_signals
 from .model import _as_list, _impl_exempt, gate_rule_by_id
 from .orphans import _scan_untagged, untaggable_by_design
-from .risk import _member_roles
+from .risk import _member_roles, _plan_gaps
 from .scan import _walk_code
 from .sections import binding_hash
 from .versions import stale_plan_milestones, version_alignment_lines
@@ -277,6 +277,14 @@ def _health_gather_signals(reqs, code_root, reqs_dir, data):
                                         "requirements": newest_req}
         if roadmap["unversioned_headings"]:
             data["roadmap_unversioned_headings"] = roadmap["unversioned_headings"]
+    # The plan's own gaps, counted here and named by `next`'s Plan bucket from the one
+    # computation — `gate --risk` prints the bucket and `gate --risk --json` is this
+    # record, so a signal on one surface and not the other is how the two come to
+    # disagree about what is left to do. Absent (not 0) with no ROADMAP.md, like
+    # `untagged`: a repo that keeps no plan gains no key. implements: REQ-PLANGAPS-1033
+    gaps = _plan_gaps(reqs, code_root, reqs_dir)
+    if gaps:
+        data["plan_gaps"] = len(gaps)
     stale = stale_plan_milestones(reqs_dir, code_root) if reqs_dir else None
     if stale:  # implements: REQ-PLANSTALE-1013
         data["plan_shipped"] = stale

@@ -251,6 +251,21 @@ def _read_roadmap(root):
     return None
 
 
+def _roadmap_plan_gaps(items, reqs):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
+    # implements: REQ-PLANGAPS-1033
+    """The two mechanically-exact gaps in a parsed ROADMAP: the items naming a `req:`
+    the corpus does not hold, and the open `Later` items carrying no `unpark:`.
+
+    Split out of `_roadmap_plan_problems` so `next` can NAME the items it would only
+    have counted — one predicate, two readings, rather than the audit's line and the
+    worklist's bucket drifting into two ideas of the same gap."""
+    missing = [it for it in items or [] if it["req"] and it["req"] not in reqs]
+    parked = [it for it in items or []
+              if it["horizon"] == "later" and not it["done"] and not it["unpark"]]
+    return missing, parked
+
+
 def _roadmap_plan_problems(root, reqs):
     # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
     """Zero or more lines about ROADMAP.md itself. Both checks are mechanically exact —
@@ -265,13 +280,12 @@ def _roadmap_plan_problems(root, reqs):
     if not items:
         return []
     lines = []
-    dangling = sorted({it["req"] for it in items if it["req"] and it["req"] not in reqs})
+    missing, parked = _roadmap_plan_gaps(items, reqs)
+    dangling = sorted({it["req"] for it in missing})
     if dangling:
         lines.append("{} ROADMAP.md item(s) name a `req:` that is not in the corpus "
                      "({}) - the plan points at nothing".format(len(dangling),
                                                                 ", ".join(dangling[:4])))
-    parked = [it for it in items
-              if it["horizon"] == "later" and not it["done"] and not it["unpark"]]
     if parked:
         lines.append("{} ROADMAP.md `Later` item(s) carry no `unpark:` - parked with no "
                      "condition to bring them back is parked forever".format(len(parked)))

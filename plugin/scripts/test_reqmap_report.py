@@ -5773,3 +5773,115 @@ class OneUntaggedList(unittest.TestCase):  # tested-by: REQ-UNTAGGEDSET-1007 @un
         data = json.loads(buf.getvalue())
         self.assertEqual(data["excluded_by_design"], 3)
         self.assertTrue(all("dir" in row for row in data["rows"]))
+
+
+class PlanBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-PLANGAPS-1033
+    """`next`'s Plan bucket: the horizon work the plan files leave open. The three
+    signals existed only in `sync` and `gate --audit`; they answer the question this
+    report asks, so they are shown here too, from the same predicate."""
+    ROADMAP = ("# Roadmap\n\n## Now\n\n- [ ] Write the README | req: REQ-A-001\n"
+               "\n## Later\n\n- [ ] Someday idea\n")
+
+    def _repo(self, d, roadmap=None, planning=None):
+        """A tempdir holding a code root, a requirements dir and the two plan files.
+        `.reqmapignore` carries ROADMAP.md exactly as `init` seeds it, so the plan
+        file itself is not reported as untagged code."""
+        rd = os.path.join(d, "requirements")
+        os.makedirs(rd)
+        if roadmap is not None:
+            _write(os.path.join(d, "ROADMAP.md"), roadmap)
+        if planning is not None:
+            _write(os.path.join(rd, "_planning.json"), json.dumps(planning))
+        _write(os.path.join(d, ".reqmapignore"), "ROADMAP.md\n")
+        return rd
+
+    def _reqs(self):
+        return {"REQ-A-001": {"meta": {"status": "confirmed"}, "body": "# T\n"}}
+
+    def _members(self):
+        return {"REQ-A-001": [("implements", "a.py", 1), ("tested-by", "t.py", 2)]}
+
+    def _next(self, d, rd, show_all=False):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_next(R.Workspace(self._reqs(), self._members(), rd, d), show_all)
+        return code, buf.getvalue()
+
+    def _health(self, d, rd):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_health(R.Workspace(self._reqs(), self._members(), rd, d), as_json=True)
+        return json.loads(buf.getvalue())
+
+    def test_unscheduled_now_item_is_named(self):  # verifies: REQ-PLANGAPS-1033#CASE-1  # verifies: ARCH-NEXT-013#CASE-13
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=self.ROADMAP, planning={"bars": []})
+            code, out = self._next(d, rd)
+            self.assertEqual(code, 0)
+            self.assertIn("Plan (", out)
+            self.assertIn("Write the README", out)
+            self.assertIn("no bar", out)
+
+    def test_bar_scheduled_item_is_not_a_gap(self):  # verifies: REQ-PLANGAPS-1033#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=self.ROADMAP,
+                            planning={"bars": [{"title": "Write the README",
+                                                "lane": "Feature", "start": "2026-10-01",
+                                                "end": "2026-10-02"}]})
+            _, out = self._next(d, rd, show_all=True)
+            self.assertNotIn("Write the README", out)
+
+    def test_parked_item_without_unpark_is_named(self):  # verifies: REQ-PLANGAPS-1033#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=self.ROADMAP, planning={"bars": []})
+            _, out = self._next(d, rd, show_all=True)
+            self.assertIn("Someday idea", out)
+            self.assertIn("unpark", out)
+
+    def test_unparked_item_with_a_condition_is_not_a_gap(self):  # verifies: REQ-PLANGAPS-1033#CASE-2
+        plan = self.ROADMAP.replace("- [ ] Someday idea",
+                                    "- [ ] Someday idea | unpark: a second consumer asks")
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=plan, planning={"bars": []})
+            _, out = self._next(d, rd, show_all=True)
+            self.assertNotIn("Someday idea", out)
+
+    def test_item_naming_absent_requirement_is_named(self):  # verifies: REQ-PLANGAPS-1033#CASE-3
+        plan = self.ROADMAP.replace("req: REQ-A-001", "req: ARCH-GONE-999")
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=plan, planning={"bars": []})
+            _, out = self._next(d, rd, show_all=True)
+            self.assertIn("ARCH-GONE-999 missing", out)
+
+    def test_no_roadmap_means_no_bucket_and_no_key(self):  # verifies: REQ-PLANGAPS-1033#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=None, planning={"bars": []})
+            _, out = self._next(d, rd)
+            self.assertNotIn("Plan (", out)
+            self.assertNotIn("plan_gaps", self._health(d, rd))
+
+    def test_count_matches_what_the_bucket_names(self):  # verifies: REQ-PLANGAPS-1033#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=self.ROADMAP, planning={"bars": []})
+            _, out = self._next(d, rd, show_all=True)
+            heading = re.search(r"Plan \((\d+)\)", out)
+            self.assertIsNotNone(heading)
+            self.assertEqual(self._health(d, rd)["plan_gaps"], int(heading.group(1)))
+
+    def test_a_plan_gap_alone_is_not_nothing_pending(self):  # verifies: REQ-PLANGAPS-1033#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap=self.ROADMAP, planning={"bars": []})
+            _, out = self._next(d, rd)
+            self.assertNotIn("Nothing pending", out)
+            self.assertIn("Plan (", out)
+
+    def test_bucket_truncates_and_all_expands(self):  # verifies: REQ-PLANGAPS-1033#CASE-1
+        items = "".join("- [ ] Item {}\n".format(i) for i in range(5))
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, roadmap="# Roadmap\n\n## Now\n\n" + items,
+                            planning={"bars": []})
+            _, out = self._next(d, rd)
+            self.assertIn("more — run `reqmap.py gate --risk --all`", out)
+            _, out_all = self._next(d, rd, show_all=True)
+            for i in range(5):
+                self.assertIn("Item {}".format(i), out_all)

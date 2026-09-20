@@ -446,7 +446,8 @@
       "`next` surfaces exactly the actionable buckets, most urgent first: `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review), plus advisory Granularity/Redundancy buckets and an Untagged-files bucket. [[REQ-NEXT-884]]",
       "Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:` score, then by id, and names the file to open. [[REQ-NEXT-885]]",
       "By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]",
-      "With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]"
+      "With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]",
+      "`next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]"
     ],
     "acc": [
       "The output starts with a progress header carrying confirmed/tested/draft counts.",

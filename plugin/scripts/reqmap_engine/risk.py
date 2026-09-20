@@ -5,7 +5,9 @@ from . import config as cfg
 from .lintrules import _count_ac, _oversize
 from .model import ENFORCED, RISK_ADVICE, _as_list, _impl_exempt
 from .orphans import _scan_untagged
+from .plandrift import unplanned_items
 from .similar import _redundant_groups
+from .targets import load_targets
 from .text import _req_file, _verify_bullets
 
 
@@ -41,12 +43,51 @@ def _recorded_members(reqs_dir, ids):  # implements: ARCH-NEXT-013
     return out
 
 
+def _plan_gaps(reqs, code_root, reqs_dir):
+    # implements: ARCH-NEXT-013  # implements: REQ-PLANGAPS-1033
+    """The horizon work `next` names beside the corpus buckets, as (kind, text) pairs:
+    open `Now`/`Next` items no bar schedules, open `Later` items with no `unpark:`, and
+    items naming a `req:` the corpus does not hold.
+
+    Empty — never a complaint — when the repo keeps no `ROADMAP.md`, which is most of
+    them. These three already existed as one line each in `sync` and `gate --audit`;
+    what they answer is "what is next", so they belong on the screen that asks it.
+    Nothing here reads the code, so the whole thing costs one small file read."""
+    # Imported at call time, not at the top: `mapdata` reads `_risk_signals` from this
+    # module, so a module-level import would close the cycle. The engine's second
+    # documented one, after `health._link_sync_errors` -> `rules`.
+    from .mapdata import _read_roadmap, _roadmap_plan_gaps
+    items = _read_roadmap(code_root) if code_root else None
+    if not items:
+        return []
+    bars = load_targets(reqs_dir).get("bars", []) if reqs_dir else []
+    missing, parked = _roadmap_plan_gaps(items, reqs)
+    gaps = [("no bar", it["name"]) for it in unplanned_items(items, bars)]
+    gaps += [("{} missing".format(it["req"]), it["name"]) for it in missing]
+    gaps += [("no `unpark:`", it["name"]) for it in parked]
+    return gaps
+
+
+def _print_plan_bucket(gaps, show_all, top_n):
+    # implements: ARCH-NEXT-013  # implements: REQ-PLANGAPS-1033
+    """Print the Plan bucket and its advice."""
+    print("Plan ({})".format(len(gaps)))
+    for kind, name in (gaps if show_all else gaps[:top_n]):
+        print("  {:<16} {}".format(kind, name[:70] + ("..." if len(name) > 70 else "")))
+    if not show_all and len(gaps) > top_n:
+        print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(gaps) - top_n))
+    print("  -> The plan and the corpus disagree. Give a `Now`/`Next` item dates in "
+          "`_planning.json`, an `unpark:` condition to a `Later` one, or point a `req:` "
+          "at a requirement that exists.\n")
+
+
 def _next_pending(reqs, members, code_root, reqs_dir):
     # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883
     """Everything `next` has to say about the corpus, before a word of it is
     formatted: the headline counts, the risk buckets in priority order, the
-    untagged files, and the two corpus-shape advisories. Returns None when the
-    corpus is empty, which the caller reports differently from a clean one."""
+    untagged files, the two corpus-shape advisories and the plan's own gaps.
+    Returns None when the corpus is empty, which the caller reports differently
+    from a clean one."""
     total = len(reqs)
     if total == 0:   # distinguish "nothing set up yet" from "all clean"
         print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
@@ -103,8 +144,11 @@ def _next_pending(reqs, members, code_root, reqs_dir):
     # The other direction of the same concern: covering the code with FEWER requirements.
     # Granularity above says "this one does too much"; this says "these say the same thing".
     redundant = _redundant_groups(reqs)
+    # The horizon, read from the plan files rather than from the corpus: work the
+    # ROADMAP says is open and the plan does not schedule. implements: REQ-PLANGAPS-1033
+    gaps = _plan_gaps(reqs, code_root, reqs_dir)
     return (total, confirmed, tested, unreviewed, pending, untagged,
-            oversize, redundant)
+            oversize, redundant, gaps)
 
 def _print_pending_bucket(sig, label, ids, reqs_dir, disp):
     # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883  # implements: REQ-NEXT-884
@@ -196,23 +240,27 @@ def cmd_next(ws, show_all=False, top_n=3):
     header, leads with the most-urgent bucket, shows the top few per bucket (the
     extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
     item names the requirement file to open. Also surfaces scannable files that
-    carry no membership tag (untagged bucket). Read-only, always exit 0."""
+    carry no membership tag (untagged bucket) and, last, the gaps in the plan
+    itself (Plan bucket). Read-only, always exit 0."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     found = _next_pending(reqs, members, code_root, reqs_dir)
     if found is None:
         return 0
     (total, confirmed, tested, unreviewed, pending, untagged,
-     oversize, redundant) = found
+     oversize, redundant, gaps) = found
     # Computed BEFORE the early return: Granularity/Redundancy are their own findings, not
     # a footnote on the four risk buckets above — a corpus clean on every bucket but still
-    # carrying an oversize or redundant requirement is NOT "nothing pending".
-    if not pending and not untagged and not oversize and not redundant:
+    # carrying an oversize or redundant requirement is NOT "nothing pending". The plan's
+    # gaps join them for the same reason: a corpus in perfect order whose ROADMAP still
+    # carries unscheduled work has something to do. implements: REQ-PLANGAPS-1033
+    if not pending and not untagged and not oversize and not redundant and not gaps:
         print("Nothing pending — every confirmed requirement is implemented, tested and "
               "intent-checked.")
         return 0
     if pending:
         total_actions = sum(len(ids) for _, _, ids in pending)
-        n_cat = len(pending) + bool(untagged) + bool(oversize) + bool(redundant)
+        n_cat = (len(pending) + bool(untagged) + bool(oversize) + bool(redundant)
+                 + bool(gaps))
         print("{} item(s) need attention across {} {}:\n".format(
             total_actions, n_cat, "category" if n_cat == 1 else "categories"))
     disp = (reqs, show_all, top_n)
@@ -224,6 +272,8 @@ def cmd_next(ws, show_all=False, top_n=3):
         _print_oversize_bucket(oversize, disp)
     if redundant:
         _print_redundant_bucket(redundant, disp)
+    if gaps:
+        _print_plan_bucket(gaps, show_all, top_n)
     return 0
 
 
