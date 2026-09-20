@@ -83,7 +83,13 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            merg până la v8.0.0 cu o linie pe stderr; bara de mai jos le scoate. -->
 - [ ] Scoate verbul `new` și `new --from-todo` (ADR-0045) | req: ARCH-NEW-004
 - [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
-- [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
+- [x] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
+      <!-- 527 -> 92 de linii. Nimic nu s-a pierdut: secțiunile tăiate au plecat verbatim în
+           cinci pagini de referință, `docs/commands.md`, `docs/requirements.md`,
+           `docs/integrations.md`, `docs/planning.md`, `docs/internals.md`, linkate dintr-un
+           tabel la final. V-modelul (nivelurile de specificație) trăiește acum în
+           `docs/requirements.md`, deci nu mai e în primul ecran — era la linia 139.
+           Cele cinci pagini intră în `.reqmapignore` din aceleași motive ca README.md. -->
 - [x] Health: un snapshot, untagged, semnalele noi de orizont | req: ARCH-HEALTH-017
       <!-- REQ-PLANGAPS-1033. Snapshot-ul și untagged existau; noutatea e bucket-ul `Plan`
            din `gate --risk`: itemi `Now`/`Next` fără bară, `Later` fără `unpark:`, `req:`
