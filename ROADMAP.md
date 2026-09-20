@@ -84,7 +84,15 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] Scoate verbul `new` și `new --from-todo` (ADR-0045) | req: ARCH-NEW-004
 - [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
 - [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
-- [ ] Health: un snapshot, untagged, semnalele noi de orizont | req: ARCH-HEALTH-017
+- [x] Health: un snapshot, untagged, semnalele noi de orizont | req: ARCH-HEALTH-017
+      <!-- REQ-PLANGAPS-1033. Snapshot-ul și untagged existau; noutatea e bucket-ul `Plan`
+           din `gate --risk`: itemi `Now`/`Next` fără bară, `Later` fără `unpark:`, `req:`
+           care nu există. Semnalele nu sunt noi — trăiau doar în coada lui `sync` și în
+           `gate --audit`, adică nu pe ecranul care pune exact întrebarea asta.
+           `_roadmap_plan_gaps` e singurul predicat, deci linia din audit și bucket-ul nu
+           pot ajunge să însemne lucruri diferite; `plan_gaps` intră și în `--json`. -->
+      <!-- `risk.py` importă `mapdata` la apel, nu la import: `mapdata` citește
+           `_risk_signals` din `risk`. Al doilea import de felul ăsta din motor. -->
 - [x] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
       <!-- 2026-09-14. Motorul citeşte în continuare `TODO.md` oriunde un consumator
            ţine unul — capacitatea rămâne; repo-ul ăsta pur şi simplu nu mai are unul.

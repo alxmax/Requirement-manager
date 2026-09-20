@@ -1,7 +1,7 @@
 ---
-generated: 2026-09-17
-engine: 2026-09-17.1
-nodes: 290
+generated: 2026-09-20
+engine: 2026-09-20
+nodes: 291
 edges: 122
 design pass-rate: 98% (107/109 source files without a design candidate)
 ---
@@ -193,6 +193,7 @@ graph LR
     REQ_NEXT_885["Priority, then risk score, then id decide bucket order<br><small>REQ-NEXT-885</small>"]
     REQ_NEXT_886["Each bucket truncates to a top few, --all shows everything<br><small>REQ-NEXT-886</small>"]
     REQ_NEXT_887["An empty registry and a clean one get different messages<br><small>REQ-NEXT-887</small>"]
+    REQ_PLANGAPS_1033["The plan's own gaps are a bucket in the worklist<br><small>REQ-PLANGAPS-1033</small>"]
     REQ_ORPHANCODE_888["Warning on a sizeable file with no requirement link<br><small>REQ-ORPHANCODE-888</small>"]
     REQ_PARSE_890["load_requirements returns one meta/body/path record per file<br><small>REQ-PARSE-890</small>"]
     REQ_PARSE_891["The hand-rolled frontmatter grammar: scalars and lists only<br><small>REQ-PARSE-891</small>"]
@@ -554,8 +555,8 @@ graph LR
   ARCH_HEALTH_017["Corpus health snapshot<br><small>ARCH-HEALTH-017</small>"]
   f_plugin_scripts_test_reqmap_report_py_1351_5568["plugin/scripts/test_reqmap_report.py:1351-5568"]
   ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1351_5568
-  f_plugin_scripts_reqmap_engine_health_py_17_359["plugin/scripts/reqmap_engine/health.py:17-359"]
-  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_engine_health_py_17_359
+  f_plugin_scripts_reqmap_engine_health_py_17_367["plugin/scripts/reqmap_engine/health.py:17-367"]
+  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_engine_health_py_17_367
   ARCH_IMPLEMENT_063["The brief for implementing a requirement<br><small>ARCH-IMPLEMENT-063</small>"]
   style ARCH_IMPLEMENT_063 fill:#eee,stroke:#bbb,color:#888
   ARCH_INIT_012["First-use bootstrap<br><small>ARCH-INIT-012</small>"]
@@ -653,14 +654,14 @@ graph LR
   ARCH_NEXT_013["What-should-I-do-next report<br><small>ARCH-NEXT-013</small>"]
   f_plugin_scripts_test_reqmap_author_py_1741["plugin/scripts/test_reqmap_author.py:1741"]
   ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1741
-  f_plugin_scripts_test_reqmap_report_py_918_4052["plugin/scripts/test_reqmap_report.py:918-4052"]
-  ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_918_4052
+  f_plugin_scripts_test_reqmap_report_py_918_5778["plugin/scripts/test_reqmap_report.py:918-5778"]
+  ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_918_5778
   f_plugin_scripts_reqmap_engine_lintrules_py_18["plugin/scripts/reqmap_engine/lintrules.py:18"]
   ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_engine_lintrules_py_18
   f_plugin_scripts_reqmap_engine_orphans_py_150["plugin/scripts/reqmap_engine/orphans.py:150"]
   ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_engine_orphans_py_150
-  f_plugin_scripts_reqmap_engine_risk_py_12_192["plugin/scripts/reqmap_engine/risk.py:12-192"]
-  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_engine_risk_py_12_192
+  f_plugin_scripts_reqmap_engine_risk_py_14_236["plugin/scripts/reqmap_engine/risk.py:14-236"]
+  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_engine_risk_py_14_236
   ARCH_ORPHANCODE_034["Orphan-code warning<br><small>ARCH-ORPHANCODE-034</small>"]
   f_plugin_scripts_test_reqmap_gate_py_394_2474["plugin/scripts/test_reqmap_gate.py:394-2474"]
   ARCH_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_394_2474
@@ -757,8 +758,8 @@ graph LR
   ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2276_4720
   f_plugin_scripts_reqmap_engine_health_py_263["plugin/scripts/reqmap_engine/health.py:263"]
   ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_health_py_263
-  f_plugin_scripts_reqmap_engine_mapdata_py_116_282["plugin/scripts/reqmap_engine/mapdata.py:116-282"]
-  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_116_282
+  f_plugin_scripts_reqmap_engine_mapdata_py_116_296["plugin/scripts/reqmap_engine/mapdata.py:116-296"]
+  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_116_296
   f_plugin_scripts_reqmap_engine_plandrift_py_319["plugin/scripts/reqmap_engine/plandrift.py:319"]
   ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_319
   f_plugin_scripts_reqmap_engine_targets_py_157["plugin/scripts/reqmap_engine/targets.py:157"]
@@ -1052,7 +1053,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>66 caps</small>"]
-  a_REQ["REQ<br><small>215 caps</small>"]
+  a_REQ["REQ<br><small>216 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1066,5 +1067,14 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  ok["No risk signals detected"]
+  subgraph sg_misc["misc"]
+    REQ_PLANGAPS_1033["The plan's own gaps are a bucket in the worklist<br><small>REQ-PLANGAPS-1033</small><br>unreviewed"]
+  end
+  style REQ_PLANGAPS_1033 fill:#fff3cd,stroke:#a66,color:#630
 ```
+
+### Risk Table
+
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| REQ-PLANGAPS-1033 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

@@ -25,6 +25,7 @@ Every bullet below is binding.
 - Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:` score, then by id, and names the file to open. [[REQ-NEXT-885]]
 - By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]
 - With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]
+- `next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]
 
 ## Cases
 CASE-1
@@ -87,6 +88,11 @@ CASE-12
   Given  two confirmed requirements whose Description states the same obligation, word for word
   When   `next` runs
   Then   they are listed together under "Redundancy" as one group
+
+CASE-13
+  Given  an open `ROADMAP.md` item that `_planning.json` does not schedule
+  When   `next` runs with a code root
+  Then   it is listed last, under "Plan", with what the item is missing
 
 ## Context
 **Terms**
@@ -413,3 +419,80 @@ CASE-4 — a corpus full of orphans and drafts still exits 0
   When   `cmd_next` runs
   Then   it returns exit code 0
 
+--------------------
+
+
+---
+id: REQ-PLANGAPS-1033
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-NEXT-013]
+---
+
+# The plan's own gaps are a bucket in the worklist
+
+## Description
+> "What should I do next" had two answers in two places: `gate --risk` read the corpus,
+> while the three signals that read the PLAN — a `Now`/`Next` item no bar schedules, a
+> `Later` item with no `unpark:`, an item naming a requirement that does not exist —
+> printed only at the tail of `sync` and inside `gate --audit`. A reader who opens the
+> worklist sees a clean screen while the roadmap carries unscheduled work. The signals do
+> not change; the screen that asks the question gets them.
+
+Every bullet below is binding.
+- `next` prints a `Plan` bucket, after the corpus buckets, naming each open `Now`/`Next`
+  item that no bar in `_planning.json` schedules, each open `Later` item carrying no
+  `unpark:`, and each item whose `req:` is not in the corpus.
+- Each Plan line names which of the three it is, and the item's own text.
+- A repo with no `ROADMAP.md` gets no `Plan` bucket and no `plan_gaps` key: the absence of
+  a plan is not a finding.
+- The health record carries `plan_gaps`, the count of exactly what the bucket names, from
+  the same computation — absent, not zero, when there is nothing to count.
+- A plan gap alone keeps `next` off the all-clear line, and counts as one of the
+  categories in the "N item(s) need attention" header.
+- The `Plan` bucket truncates to the same top few as every other bucket, and `--all`
+  lists every gap.
+
+## Cases
+CASE-1 — an unscheduled Now item is named
+  Given  a `ROADMAP.md` with one open `Now` item and a `_planning.json` with no bar for it
+  When   `next` runs
+  Then   the `Plan` bucket names that item and says it has no bar
+
+CASE-2 — a parked item with no condition is named
+  Given  an open `Later` item carrying no `unpark:`
+  When   `next` runs
+  Then   the `Plan` bucket names it and says it has no `unpark:`
+
+CASE-3 — an item pointing at nothing is named with the id it points at
+  Given  a `Now` item carrying `req: ARCH-GONE-999`, absent from the corpus
+  When   `next` runs
+  Then   the `Plan` bucket names the item and the missing id
+
+CASE-4 — no roadmap, no bucket and no key
+  Given  a repo with no `ROADMAP.md`
+  When   `next` and `gate --risk --json` run
+  Then   no `Plan` bucket is printed and the record carries no `plan_gaps` key
+
+CASE-5 — the count and the bucket cannot disagree
+  Given  a corpus whose roadmap holds three gaps
+  When   `gate --risk` and `gate --risk --json` run
+  Then   `plan_gaps` equals the number the `Plan` bucket heading reports
+
+CASE-6 — a plan gap alone is not "nothing pending"
+  Given  a corpus clean on every risk bucket whose roadmap carries one gap
+  When   `next` runs
+  Then   the all-clear line is not printed and the `Plan` bucket is
+
+## Context
+**Notes**
+- The three gaps keep their existing definitions: `_roadmap_plan_gaps` is the one
+  predicate behind both the audit's line and this bucket, so the two surfaces cannot come
+  to mean different things by the same word.
+- Deliberately NOT a gate rule. Whether a plan is scheduled is a planning decision, and
+  the hook runs `gate` on every commit — see [[ARCH-ROADMAP-038]] and `docs/adr/0020`.
+- `risk.py` reads `mapdata` at call time, not at import: `mapdata` reads `_risk_signals`
+  from `risk`, so a module-level import would close the cycle. It is the engine's second
+  such import, after `health._link_sync_errors`.

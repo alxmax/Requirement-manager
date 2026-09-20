@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-17.1",
+  "engine_version": "2026-09-20",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -6659,15 +6659,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:290"
+          "loc": "plugin/scripts/reqmap_engine/health.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:309"
+          "loc": "plugin/scripts/reqmap_engine/health.py:317"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:359"
+          "loc": "plugin/scripts/reqmap_engine/health.py:367"
         }
       ],
       "test_exempt": null,
@@ -6722,15 +6722,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:290"
+          "loc": "plugin/scripts/reqmap_engine/health.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:309"
+          "loc": "plugin/scripts/reqmap_engine/health.py:317"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:359"
+          "loc": "plugin/scripts/reqmap_engine/health.py:367"
         }
       ],
       "test_exempt": null,
@@ -6805,15 +6805,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:291"
+          "loc": "plugin/scripts/reqmap_engine/health.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:310"
+          "loc": "plugin/scripts/reqmap_engine/health.py:318"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:360"
+          "loc": "plugin/scripts/reqmap_engine/health.py:368"
         }
       ],
       "test_exempt": null,
@@ -6873,15 +6873,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:291"
+          "loc": "plugin/scripts/reqmap_engine/health.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:310"
+          "loc": "plugin/scripts/reqmap_engine/health.py:318"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:360"
+          "loc": "plugin/scripts/reqmap_engine/health.py:368"
         }
       ],
       "test_exempt": null,
@@ -10557,7 +10557,8 @@
         "`next` surfaces exactly the actionable buckets, most urgent first: `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review), plus advisory Granularity/Redundancy buckets and an Untagged-files bucket. [[REQ-NEXT-884]]",
         "Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:` score, then by id, and names the file to open. [[REQ-NEXT-885]]",
         "By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]",
-        "With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]"
+        "With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]",
+        "`next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]"
       ],
       "verify": [],
       "notes": [
@@ -10586,9 +10587,10 @@
         "CASE-9 — Given  scannable files in the repo with no membership tag When   `next` runs with a code_root Then   they are listed under \"Untagged files\" with a `reqmap.py init` suggestion",
         "CASE-10 — Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one When   `next` runs with a `reqs_dir` Then   the Orphans bucket carries a note naming that member and `--code`",
         "CASE-11 — Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`, not exempt When   `next` runs Then   it is listed under \"Granularity\" with its AC count and `requirements/<ID>.md`",
-        "CASE-12 — Given  two confirmed requirements whose Description states the same obligation, word for word When   `next` runs Then   they are listed together under \"Redundancy\" as one group"
+        "CASE-12 — Given  two confirmed requirements whose Description states the same obligation, word for word When   `next` runs Then   they are listed together under \"Redundancy\" as one group",
+        "CASE-13 — Given  an open `ROADMAP.md` item that `_planning.json` does not schedule When   `next` runs with a code root Then   it is listed last, under \"Plan\", with what the item is missing"
       ],
-      "accept": "CASE-1\n  Given  any corpus\n  When   `next` runs\n  Then   the output starts with a progress header carrying the confirmed/tested/draft counts\n\nCASE-2\n  Given  a confirmed requirement with implementing code but no `tested-by`\n  When   `next` runs\n  Then   it is listed under \"Needs tests\" with `requirements/<ID>.md`\n\nCASE-3\n  Given  a draft requirement with an open verify bullet\n  When   `next` runs\n  Then   it is listed under \"Drafts to review\" and NOT under \"Needs intent review\" (source dedup)\n\nCASE-4\n  Given  a confirmed requirement with an open Verify-intent bullet\n  When   `next` runs\n  Then   it is listed under \"Needs intent review\"\n\nCASE-5\n  Given  a bucket with more items than the top-N\n  When   `next` runs\n  Then   the default view truncates and prints a `... N more` line; `--all` lists every item\n\nCASE-6\n  Given  a draft with `risk: 2` (REVIEW) and a `risk: 0` draft in one bucket\n  When   `next` runs\n  Then   the REVIEW draft is ordered first and tagged `[REVIEW]`\n\nCASE-7\n  Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket\n  When   `next` runs\n  Then   they are ordered must-have, should-have, then no-priority\n\nCASE-8\n  Given  an empty registry, or one with no open signals\n  When   `next` runs\n  Then   it prints the \"no requirements yet\" message or the all-clear line respectively,\n         writes no files, and returns 0\n\nCASE-9\n  Given  scannable files in the repo with no membership tag\n  When   `next` runs with a code_root\n  Then   they are listed under \"Untagged files\" with a `reqmap.py init` suggestion\n\nCASE-10\n  Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one\n  When   `next` runs with a `reqs_dir`\n  Then   the Orphans bucket carries a note naming that member and `--code`\n\nCASE-11\n  Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`, not exempt\n  When   `next` runs\n  Then   it is listed under \"Granularity\" with its AC count and `requirements/<ID>.md`\n\nCASE-12\n  Given  two confirmed requirements whose Description states the same obligation, word for word\n  When   `next` runs\n  Then   they are listed together under \"Redundancy\" as one group",
+      "accept": "CASE-1\n  Given  any corpus\n  When   `next` runs\n  Then   the output starts with a progress header carrying the confirmed/tested/draft counts\n\nCASE-2\n  Given  a confirmed requirement with implementing code but no `tested-by`\n  When   `next` runs\n  Then   it is listed under \"Needs tests\" with `requirements/<ID>.md`\n\nCASE-3\n  Given  a draft requirement with an open verify bullet\n  When   `next` runs\n  Then   it is listed under \"Drafts to review\" and NOT under \"Needs intent review\" (source dedup)\n\nCASE-4\n  Given  a confirmed requirement with an open Verify-intent bullet\n  When   `next` runs\n  Then   it is listed under \"Needs intent review\"\n\nCASE-5\n  Given  a bucket with more items than the top-N\n  When   `next` runs\n  Then   the default view truncates and prints a `... N more` line; `--all` lists every item\n\nCASE-6\n  Given  a draft with `risk: 2` (REVIEW) and a `risk: 0` draft in one bucket\n  When   `next` runs\n  Then   the REVIEW draft is ordered first and tagged `[REVIEW]`\n\nCASE-7\n  Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket\n  When   `next` runs\n  Then   they are ordered must-have, should-have, then no-priority\n\nCASE-8\n  Given  an empty registry, or one with no open signals\n  When   `next` runs\n  Then   it prints the \"no requirements yet\" message or the all-clear line respectively,\n         writes no files, and returns 0\n\nCASE-9\n  Given  scannable files in the repo with no membership tag\n  When   `next` runs with a code_root\n  Then   they are listed under \"Untagged files\" with a `reqmap.py init` suggestion\n\nCASE-10\n  Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one\n  When   `next` runs with a `reqs_dir`\n  Then   the Orphans bucket carries a note naming that member and `--code`\n\nCASE-11\n  Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`, not exempt\n  When   `next` runs\n  Then   it is listed under \"Granularity\" with its AC count and `requirements/<ID>.md`\n\nCASE-12\n  Given  two confirmed requirements whose Description states the same obligation, word for word\n  When   `next` runs\n  Then   they are listed together under \"Redundancy\" as one group\n\nCASE-13\n  Given  an open `ROADMAP.md` item that `_planning.json` does not schedule\n  When   `next` runs with a code root\n  Then   it is listed last, under \"Plan\", with what the item is missing",
       "input": "",
       "output": "",
       "desc": "",
@@ -10611,7 +10613,8 @@
         "REQ-NEXT-884",
         "REQ-NEXT-885",
         "REQ-NEXT-886",
-        "REQ-NEXT-887"
+        "REQ-NEXT-887",
+        "REQ-PLANGAPS-1033"
       ],
       "members": [
         {
@@ -10651,6 +10654,10 @@
           "loc": "plugin/scripts/test_reqmap_report.py:4052"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5778"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lintrules.py:18"
         },
@@ -10660,43 +10667,51 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:12"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:14"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:25"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:45"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:47"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:110"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:72"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:135"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:150"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:171"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:179"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:192"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:194"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:215"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:236"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.12",
       "priority": "",
       "risks": [],
-      "clauses": 12,
-      "covered": 12
+      "clauses": 13,
+      "covered": 13
     },
     {
       "id": "REQ-NEXT-883",
@@ -10747,27 +10762,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:45"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:110"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:135"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:179"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:150"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:171"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:215"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:192"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:236"
         }
       ],
       "test_exempt": null,
@@ -10833,23 +10848,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:110"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:135"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:179"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:150"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:171"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:215"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:192"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:236"
         }
       ],
       "test_exempt": null,
@@ -10912,27 +10927,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:12"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:14"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:111"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:155"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:136"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:180"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:151"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:172"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:216"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:193"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:237"
         }
       ],
       "test_exempt": null,
@@ -11004,23 +11019,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:111"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:155"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:136"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:180"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:151"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:172"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:216"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:193"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:237"
         }
       ],
       "test_exempt": null,
@@ -11051,9 +11066,9 @@
         "CASE-1 — — an empty registry gets its own message, never the all-clear line Given  an empty requirements registry When   `cmd_next` runs Then   its output contains \"No requirements yet\" and \"reqmap.py init\", but never \"Nothing pending\"",
         "CASE-2 — — a fully clean registry prints the all-clear line Given  one confirmed requirement with both `implements` and `tested-by` members and no open questions When   `cmd_next` runs Then   its output contains \"Nothing pending\"",
         "CASE-3 — — two runs on the same input print byte-identical output Given  a fixed corpus with a mix of confirmed, untested and draft requirements When   `cmd_next` runs on it twice Then   both runs' captured output are identical strings, and no file was created",
-        "CASE-4 — — a corpus full of orphans and drafts still exits 0 Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets When   `cmd_next` runs Then   it returns exit code 0"
+        "CASE-4 — — a corpus full of orphans and drafts still exits 0 Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets When   `cmd_next` runs Then   it returns exit code 0 --------------------"
       ],
-      "accept": "CASE-1 — an empty registry gets its own message, never the all-clear line\n  Given  an empty requirements registry\n  When   `cmd_next` runs\n  Then   its output contains \"No requirements yet\" and \"reqmap.py init\", but never \"Nothing pending\"\n\nCASE-2 — a fully clean registry prints the all-clear line\n  Given  one confirmed requirement with both `implements` and `tested-by` members and no open questions\n  When   `cmd_next` runs\n  Then   its output contains \"Nothing pending\"\n\nCASE-3 — two runs on the same input print byte-identical output\n  Given  a fixed corpus with a mix of confirmed, untested and draft requirements\n  When   `cmd_next` runs on it twice\n  Then   both runs' captured output are identical strings, and no file was created\n\nCASE-4 — a corpus full of orphans and drafts still exits 0\n  Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets\n  When   `cmd_next` runs\n  Then   it returns exit code 0",
+      "accept": "CASE-1 — an empty registry gets its own message, never the all-clear line\n  Given  an empty requirements registry\n  When   `cmd_next` runs\n  Then   its output contains \"No requirements yet\" and \"reqmap.py init\", but never \"Nothing pending\"\n\nCASE-2 — a fully clean registry prints the all-clear line\n  Given  one confirmed requirement with both `implements` and `tested-by` members and no open questions\n  When   `cmd_next` runs\n  Then   its output contains \"Nothing pending\"\n\nCASE-3 — two runs on the same input print byte-identical output\n  Given  a fixed corpus with a mix of confirmed, untested and draft requirements\n  When   `cmd_next` runs on it twice\n  Then   both runs' captured output are identical strings, and no file was created\n\nCASE-4 — a corpus full of orphans and drafts still exits 0\n  Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets\n  When   `cmd_next` runs\n  Then   it returns exit code 0\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -11075,23 +11090,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:111"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:155"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:136"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:180"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:151"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:172"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:216"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/risk.py:193"
+          "loc": "plugin/scripts/reqmap_engine/risk.py:237"
         }
       ],
       "test_exempt": null,
@@ -11099,15 +11114,91 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Un registry gol și unul curat primesc mesaje diferite",
-          "intent": "\"Nimic de arătat\" are două cauze diferite, iar `next` spune care: un registry fără nicio cerință deloc îndreaptă cititorul spre `init`/`new`, în timp ce un registry care e pur și simplu curat — nimic deschis — afișează în loc linia all-clear. Niciun caz nu scrie un fișier, iar `next` iese mereu cu 0: este sfat, nu un gate.",
-          "contract": "> \"Nimic de arătat\" are două cauze diferite, iar `next` spune care: un registry fără\n> nicio cerință deloc îndreaptă cititorul spre `init`/`new`, în timp ce un registry care e\n> pur și simplu curat — nimic deschis — afișează în loc linia all-clear. Niciun caz nu\n> scrie un fișier, iar `next` iese mereu cu 0: este sfat, nu un gate.\n\nFiecare bullet de mai jos este obligatoriu.\n- Cu un registry care nu conține nicio cerință, `next` afișează un mesaj distinct \"no requirements yet\"\n  care indică spre `init`/`new`. `next` nu afișează niciodată linia all-clear în acel caz.\n- Cu cerințe dar fără niciun semnal deschis, `next` afișează linia all-clear.\n- `next` este determinist și nu scrie niciun fișier.\n- `next` iese mereu cu zero. Raportul este sfat, nu un gate.",
-          "acceptance": "CASE-1 — un registry gol primește propriul mesaj, niciodată linia all-clear\n  Given  un registry de cerințe gol\n  When   rulează `cmd_next`\n  Then   ieșirea sa conține \"No requirements yet\" și \"reqmap.py init\", dar niciodată \"Nothing pending\"\n\nCASE-2 — un registry complet curat afișează linia all-clear\n  Given  o cerință confirmed cu atât membri `implements` cât și `tested-by` și fără întrebări deschise\n  When   rulează `cmd_next`\n  Then   ieșirea sa conține \"Nothing pending\"\n\nCASE-3 — două rulări pe aceeași intrare afișează ieșire byte-identică\n  Given  un corpus fix cu un amestec de cerințe confirmed, netestate și draft\n  When   rulează `cmd_next` de două ori pe el\n  Then   ieșirea capturată a ambelor rulări sunt string-uri identice, și niciun fișier nu a fost creat\n\nCASE-4 — un corpus plin de orfani și draft-uri tot iese cu 0\n  Given  trei cerințe confirmed neimplementate și două draft-uri cu bullets verify-intent deschise\n  When   rulează `cmd_next`\n  Then   returnează codul de ieșire 0"
+      "covered": 4
+    },
+    {
+      "id": "REQ-PLANGAPS-1033",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The plan's own gaps are a bucket in the worklist",
+      "intent": "\"What should I do next\" had two answers in two places: `gate --risk` read the corpus, while the three signals that read the PLAN — a `Now`/`Next` item no bar schedules, a `Later` item with no `unpark:`, an item naming a requirement that does not exist — printed only at the tail of `sync` and inside `gate --audit`. A reader who opens the worklist sees a clean screen while the roadmap carries unscheduled work. The signals do not change; the screen that asks the question gets them.",
+      "contract": [
+        "`next` prints a `Plan` bucket, after the corpus buckets, naming each open `Now`/`Next` item that no bar in `_planning.json` schedules, each open `Later` item carrying no `unpark:`, and each item whose `req:` is not in the corpus.",
+        "Each Plan line names which of the three it is, and the item's own text.",
+        "A repo with no `ROADMAP.md` gets no `Plan` bucket and no `plan_gaps` key: the absence of a plan is not a finding.",
+        "The health record carries `plan_gaps`, the count of exactly what the bucket names, from the same computation — absent, not zero, when there is nothing to count.",
+        "A plan gap alone keeps `next` off the all-clear line, and counts as one of the categories in the \"N item(s) need attention\" header.",
+        "The `Plan` bucket truncates to the same top few as every other bucket, and `--all` lists every gap."
+      ],
+      "verify": [],
+      "notes": [
+        "The three gaps keep their existing definitions: `_roadmap_plan_gaps` is the one predicate behind both the audit's line and this bucket, so the two surfaces cannot come to mean different things by the same word.",
+        "Deliberately NOT a gate rule. Whether a plan is scheduled is a planning decision, and the hook runs `gate` on every commit — see [[ARCH-ROADMAP-038]] and `docs/adr/0020`.",
+        "`risk.py` reads `mapdata` at call time, not at import: `mapdata` reads `_risk_signals` from `risk`, so a module-level import would close the cycle. It is the engine's second such import, after `health._link_sync_errors`."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — an unscheduled Now item is named Given  a `ROADMAP.md` with one open `Now` item and a `_planning.json` with no bar for it When   `next` runs Then   the `Plan` bucket names that item and says it has no bar",
+        "CASE-2 — — a parked item with no condition is named Given  an open `Later` item carrying no `unpark:` When   `next` runs Then   the `Plan` bucket names it and says it has no `unpark:`",
+        "CASE-3 — — an item pointing at nothing is named with the id it points at Given  a `Now` item carrying `req: ARCH-GONE-999`, absent from the corpus When   `next` runs Then   the `Plan` bucket names the item and the missing id",
+        "CASE-4 — — no roadmap, no bucket and no key Given  a repo with no `ROADMAP.md` When   `next` and `gate --risk --json` run Then   no `Plan` bucket is printed and the record carries no `plan_gaps` key",
+        "CASE-5 — — the count and the bucket cannot disagree Given  a corpus whose roadmap holds three gaps When   `gate --risk` and `gate --risk --json` run Then   `plan_gaps` equals the number the `Plan` bucket heading reports",
+        "CASE-6 — — a plan gap alone is not \"nothing pending\" Given  a corpus clean on every risk bucket whose roadmap carries one gap When   `next` runs Then   the all-clear line is not printed and the `Plan` bucket is"
+      ],
+      "accept": "CASE-1 — an unscheduled Now item is named\n  Given  a `ROADMAP.md` with one open `Now` item and a `_planning.json` with no bar for it\n  When   `next` runs\n  Then   the `Plan` bucket names that item and says it has no bar\n\nCASE-2 — a parked item with no condition is named\n  Given  an open `Later` item carrying no `unpark:`\n  When   `next` runs\n  Then   the `Plan` bucket names it and says it has no `unpark:`\n\nCASE-3 — an item pointing at nothing is named with the id it points at\n  Given  a `Now` item carrying `req: ARCH-GONE-999`, absent from the corpus\n  When   `next` runs\n  Then   the `Plan` bucket names the item and the missing id\n\nCASE-4 — no roadmap, no bucket and no key\n  Given  a repo with no `ROADMAP.md`\n  When   `next` and `gate --risk --json` run\n  Then   no `Plan` bucket is printed and the record carries no `plan_gaps` key\n\nCASE-5 — the count and the bucket cannot disagree\n  Given  a corpus whose roadmap holds three gaps\n  When   `gate --risk` and `gate --risk --json` run\n  Then   `plan_gaps` equals the number the `Plan` bucket heading reports\n\nCASE-6 — a plan gap alone is not \"nothing pending\"\n  Given  a corpus clean on every risk bucket whose roadmap carries one gap\n  When   `next` runs\n  Then   the all-clear line is not printed and the `Plan` bucket is",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-NEXT-013"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5778"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/health.py:284"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:256"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:47"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:72"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:148"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/risk.py:255"
         }
-      }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-ORPHANCODE-034",
@@ -13320,7 +13411,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:284"
+          "loc": "plugin/scripts/reqmap_engine/health.py:292"
         },
         {
           "role": "implements",
@@ -14498,7 +14589,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapdata.py:282"
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:270"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:296"
         },
         {
           "role": "implements",
@@ -14584,7 +14679,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapdata.py:282"
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:296"
         }
       ],
       "test_exempt": null,
@@ -14650,7 +14745,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapdata.py:282"
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:296"
         }
       ],
       "test_exempt": null,
@@ -14716,6 +14811,10 @@
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/mapdata.py:255"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapdata.py:270"
         }
       ],
       "test_exempt": null,
@@ -14892,7 +14991,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:281"
+          "loc": "plugin/scripts/reqmap_engine/health.py:289"
         },
         {
           "role": "implements",
@@ -22914,6 +23013,10 @@
       "ARCH-NEXT-013"
     ],
     [
+      "REQ-PLANGAPS-1033",
+      "ARCH-NEXT-013"
+    ],
+    [
       "ARCH-ORPHANCODE-034",
       "SYS-GATE-102"
     ],
@@ -23631,8 +23734,8 @@
       "horizon": "next",
       "req": "ARCH-HEALTH-017",
       "unpark": null,
-      "done": false,
-      "context": "",
+      "done": true,
+      "context": "<!-- REQ-PLANGAPS-1033. Snapshot-ul și untagged existau; noutatea e bucket-ul `Plan`\ndin `gate --risk`: itemi `Now`/`Next` fără bară, `Later` fără `unpark:`, `req:`\ncare nu există. Semnalele nu sunt noi — trăiau doar în coada lui `sync` și în\n`gate --audit`, adică nu pe ecranul care pune exact întrebarea asta.\n`_roadmap_plan_gaps` e singurul predicat, deci linia din audit și bucket-ul nu\npot ajunge să însemne lucruri diferite; `plan_gaps` intră și în `--json`. -->\n<!-- `risk.py` importă `mapdata` la apel, nu la import: `mapdata` citește\n`_risk_signals` din `risk`. Al doilea import de felul ăsta din motor. -->",
       "section_date": null
     },
     {
@@ -24815,20 +24918,22 @@
   },
   "health": {
     "score": 100,
-    "total": 290,
-    "scored": 282,
+    "total": 291,
+    "scored": 283,
     "healthy": 282,
     "deprecated": 8,
     "confirmed": 282,
-    "implemented": 273,
-    "tested": 270,
-    "drafts": 0,
+    "implemented": 274,
+    "tested": 271,
+    "drafts": 1,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true
+    "gate_link_sync_clean": true,
+    "reviewed_score": 100,
+    "reviewed_total": 282
   },
   "planning": {
     "milestones": {

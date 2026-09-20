@@ -423,7 +423,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 15,050 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 15,122 lines in all)
   scripts/reqmap_engine/mcp.py              the MCP server: protocol, the tool table, resources
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the five parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
