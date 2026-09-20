@@ -96,7 +96,7 @@ class Extract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: R
                     self.assertNotIn("shall", f.read().lower(), p)
 
 
-class Template(unittest.TestCase):  # tested-by: REQ-NEWGONE-1034
+class Template(unittest.TestCase):  # tested-by: REQ-NEWGONE-1034 @unit
     """ADR-0045 decision 2: `new` is gone and the template it stamped stays — it is
     the shape a person or an assistant follows when writing the file directly."""
 

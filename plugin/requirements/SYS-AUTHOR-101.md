@@ -1,6 +1,6 @@
 ---
 id: SYS-AUTHOR-101
-status: draft
+status: confirmed
 form: atomic
 level: system
 layer: need

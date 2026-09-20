@@ -143,6 +143,7 @@ REMOVAL_NOTE = re.compile(
     r"nu mai exist|a fost eliminat|au fost eliminate|a fost redenumit|"
     r"comasat|înlocuit de|inlocuit de", re.I)
 
+# implements: REQ-NEWGONE-1034
 RETIRED = {
     # folded into `gate`'s mode flags in v4.0.0/v5.0.0
     "next", "show", "audit", "dupes", "search", "review", "implement",

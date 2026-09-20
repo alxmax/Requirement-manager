@@ -11,7 +11,7 @@
 # Later tasks will derive argparse choices, tool_definition.json, and a
 # markdown command table from this registry — do NOT add behaviour here.
 # ---------------------------------------------------------------------------
-# implements: ARCH-CMDREGISTRY-033
+# implements: ARCH-CMDREGISTRY-033  # implements: REQ-NEWGONE-1034
 COMMANDS = {
     "init": {
         "summary": (

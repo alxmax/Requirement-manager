@@ -1,6 +1,6 @@
 ---
 id: ARCH-CMDREGISTRY-033
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -179,7 +179,7 @@ CASE-3 — each command is placed in a group
 
 ---
 id: REQ-CMDREGISTRY-1031
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -233,7 +233,7 @@ CASE-4 — the MCP tools ask `ask`
 
 ---
 id: REQ-NEWGONE-1034
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
