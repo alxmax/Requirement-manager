@@ -116,8 +116,14 @@ This repo is a Claude Code plugin that ships **two skills** under `plugin/skills
 
 **Diagrams of this repo** are no longer generated here. The `excalidraw-diagram` skill was
 split out at plugin `v6.1.0` into [its own repository](https://github.com/alxmax/excalidraw-diagram) — it shared this one and
-nothing else, with no imports in either direction. `docs/` stays the published Pages root and
-holds only reviewed, self-contained HTML; `.gitignore` still hard-blocks `docs/*.excalidraw`.
+nothing else, with no imports in either direction. `docs/` stays the published Pages root;
+`.gitignore` still hard-blocks `docs/*.excalidraw`. Its HTML is reviewed and self-contained,
+and beside it live the five reference pages the README's own sections moved into on
+2026-09-20 — `commands.md`, `requirements.md`, `integrations.md`, `planning.md`,
+`internals.md`. The README is the front door only (problem, `init`/`sync`/`gate`, the worked
+example, the Action, 92 lines); a fact that belongs in one of the five is edited THERE, never
+copied back. All six are in the root `.reqmapignore`: prose about the capabilities, never a
+member of one.
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 

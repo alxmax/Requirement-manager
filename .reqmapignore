@@ -90,6 +90,14 @@ plugin/scripts/test_reqmap_common.py
 
 # Prose, page shells, build config and dev tooling: not capability implementations.
 README.md
+# The reference pages the README's own sections moved into (2026-09-20). Same class as
+# README.md above, and the same reason: prose about the capabilities, never a member of
+# one. They also quote the tagging syntax with the fictional `AUTH-LOGIN-001` id.
+docs/commands.md
+docs/integrations.md
+docs/internals.md
+docs/planning.md
+docs/requirements.md
 # ROADMAP.md is INPUT the engine reads (`_roadmap_signals`, ARCH-ROADMAP-038), not a
 # capability and not an artifact derived from one. A `generated-from:` tag would be
 # backwards: the drift gate would call the plan stale whenever the requirement that

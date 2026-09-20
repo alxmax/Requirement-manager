@@ -23725,8 +23725,8 @@
       "horizon": "next",
       "req": "SYS-SSOT-001",
       "unpark": null,
-      "done": false,
-      "context": "",
+      "done": true,
+      "context": "<!-- 527 -> 92 de linii. Nimic nu s-a pierdut: secțiunile tăiate au plecat verbatim în\ncinci pagini de referință, `docs/commands.md`, `docs/requirements.md`,\n`docs/integrations.md`, `docs/planning.md`, `docs/internals.md`, linkate dintr-un\ntabel la final. V-modelul (nivelurile de specificație) trăiește acum în\n`docs/requirements.md`, deci nu mai e în primul ecran — era la linia 139.\nCele cinci pagini intră în `.reqmapignore` din aceleași motive ca README.md. -->",
       "section_date": null
     },
     {
