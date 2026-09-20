@@ -1,6 +1,6 @@
 ---
 id: ARCH-NEW-004
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -59,7 +59,7 @@ CASE-5
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana is about to document a new login feature. She runs `reqmap.py new AUTH-LOGIN-001` and a ready-to-fill `requirements/AUTH-LOGIN-001.md` appears, already carrying the Contract and Acceptance headings with her id filled in. When she accidentally runs the same command again, it refuses and writes nothing, so her half-finished work is never clobbered.
+- Ana is about to document a new login feature. She runs the verb this requirement described, removed in v8.0.0 (ADR-0045), and a ready-to-fill `requirements/AUTH-LOGIN-001.md` appears, already carrying the Contract and Acceptance headings with her id filled in. When she accidentally runs the same command again, it refuses and writes nothing, so her half-finished work is never clobbered.
 
 **Current implementation**
 - `cmd_new` and `REQUIREMENT_TEMPLATE` in `reqmap.py`.
@@ -70,7 +70,7 @@ CASE-5
 
 ---
 id: REQ-NEW-881
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -131,7 +131,7 @@ CASE-5 — an id no tag could spell is refused before anything is written
 
 ---
 id: REQ-NEW-882
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -184,7 +184,7 @@ CASE-4 — a same-area number collision warns but still creates the file
 
 ---
 id: REQ-NEW-1032
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

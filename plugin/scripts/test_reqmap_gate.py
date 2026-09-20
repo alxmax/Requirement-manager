@@ -1885,18 +1885,6 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertIn("gate", r.stdout)
             self.assertIn("sync", r.stdout)
 
-    def test_new_from_todo_scaffolds_and_old_verb_gone(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "requirements"), exist_ok=True)
-            _write(os.path.join(d, "TODO.md"), "# TODO\n\n## v1.0\n- [ ] Make widget\n")
-            r = self._run("new", "--from-todo", "Make widget", "--id", "REQ-W-001",
-                          "--root", d, cwd=d)
-            self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
-            r2 = self._run("promote-todo", "Make widget", "--id", "REQ-W-002", "--root", d, cwd=d)
-            self.assertEqual(r2.returncode, 2)  # old verb removed
-
-
 class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     """sync must not silently re-baseline an edited confirmed contract."""
 
@@ -2977,58 +2965,35 @@ class AskVerbRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1031 @un
                 self.assertEqual(set(), flags & moved, tool["name"])
 
 
-class NewIsDeprecated(unittest.TestCase):  # tested-by: REQ-NEW-1032 @integration
-    """ADR-0045: `new` keeps working through v7.x and says on stderr that v8.0.0 removes it."""
+class NewIsGone(unittest.TestCase):  # tested-by: REQ-NEWGONE-1034 @integration
+    """ADR-0045: `new` and `new --from-todo` are removed in v8.0.0. Six verbs remain."""
 
     def _run(self, *args, cwd):
         reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
         return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args, "--root", cwd],
                               cwd=cwd, capture_output=True, text=True, encoding="utf-8")
 
-    def _notice(self, r):
-        return [ln for ln in r.stderr.splitlines() if "v8.0.0" in ln]
-
-    def test_new_scaffolds_and_names_its_removal(self):  # verifies: REQ-NEW-1032#CASE-1
+    def test_the_verb_is_refused_and_writes_nothing(self):  # verifies: REQ-NEWGONE-1034#CASE-2
         with tempfile.TemporaryDirectory() as d:
-            r = self._run("new", "AREA-DEP-001", cwd=d)
-            self.assertEqual(0, r.returncode, r.stderr)
-            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "AREA-DEP-001.md")))
-            self.assertEqual(1, len(self._notice(r)), r.stderr)
-            self.assertIn("`new` is deprecated", self._notice(r)[0])
-            self.assertNotIn("v8.0.0", r.stdout)
+            r = self._run("new", "AREA-GONE-001", cwd=d)
+            self.assertEqual(2, r.returncode)
+            self.assertFalse(os.path.exists(os.path.join(d, "requirements", "AREA-GONE-001.md")))
+            self.assertIn("init", r.stderr)          # the usage line names the verbs that remain
+            self.assertNotIn("AREA-GONE-001.md", r.stdout)
 
-    def test_from_todo_names_its_removal(self):  # verifies: REQ-NEW-1032#CASE-2
+    def test_from_todo_is_refused_too(self):  # verifies: REQ-NEWGONE-1034#CASE-2
         with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "requirements"))
             _write(os.path.join(d, "TODO.md"), "# TODO\n\n## v1.0\n- [ ] Make widget\n")
             r = self._run("new", "--from-todo", "Make widget", "--id", "REQ-W-001", cwd=d)
-            self.assertEqual(0, r.returncode, r.stderr)
-            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
-            self.assertEqual(1, len(self._notice(r)), r.stderr)
+            self.assertEqual(2, r.returncode)
+            self.assertFalse(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
 
-    def test_another_verb_says_nothing_of_new(self):  # verifies: REQ-NEW-1032#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "requirements", "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
-            r = self._run("gate", cwd=d)
-            self.assertEqual([], self._notice(r))
-            self.assertNotIn("`new`", r.stderr)
+    def test_six_verbs_remain_and_none_is_new(self):  # verifies: REQ-NEWGONE-1034#CASE-1
+        self.assertNotIn("new", R.COMMANDS)
+        self.assertEqual({"init", "gate", "ask", "sync", "clarify", "mcp"}, set(R.COMMANDS))
+        self.assertEqual(("init", "clarify"), dict(R.COMMAND_GROUPS)["author"])
 
-
-class NewNoticeUnit(unittest.TestCase):  # tested-by: REQ-NEW-1032 @unit
-    """The notice itself, from the parsed arguments alone."""
-
-    def _scope(self, argv):
-        ap = R._build_parser()
-        a = ap.parse_args(argv)
-        err = io.StringIO()
-        with redirect_stderr(err):
-            rc = R.cliflags._verb_scope(ap, a)
-        return rc, err.getvalue()
-
-    def test_only_new_prints_the_notice(self):  # verifies: REQ-NEW-1032#CASE-1  # verifies: REQ-NEW-1032#CASE-3
-        rc, err = self._scope(["new", "AREA-DEP-001"])
-        self.assertEqual((0, 1), (rc, len(err.splitlines())))
-        self.assertIn("v8.0.0", err)
-        self.assertEqual((0, ""), self._scope(["gate"]))
-        self.assertEqual((0, ""), self._scope(["sync"]))
+    def test_no_mcp_tool_scaffolds(self):  # verifies: REQ-NEWGONE-1034#CASE-3
+        names = {tool["name"] for tool in R.mcp.MCP_TOOLS}
+        self.assertNotIn("reqmap_new", names)
+        self.assertEqual([], [t for t in R.mcp.MCP_TOOLS if t["argv"][0] == "new"])

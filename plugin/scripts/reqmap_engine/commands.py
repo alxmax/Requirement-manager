@@ -65,43 +65,6 @@ COMMANDS = {
             },
         ],
     },
-    "new": {
-        "summary": (
-            "Deprecated, removed in v8.0.0: write the requirement file yourself or ask your "
-            "assistant to. Scaffolds a new blank requirement from the built-in template; "
-            "--from-todo and --id pre-fill it from a TODO.md item instead."
-        ),
-        "arg": "AREA-NAME-NNN",
-        "params": [
-            {
-                "name": "id",
-                "flag": "--id",
-                "type": "str",
-                "help": (
-                    "Requirement ID in AREA-NAME-NNN format (e.g. AUTH-LOGIN-001). "
-                    "Required when using --from-todo."
-                ),
-            },
-            {
-                "name": "from_todo",
-                "flag": "--from-todo",
-                "type": "str",
-                "help": (
-                    "Scaffold the requirement from a TODO.md item matched by this name "
-                    "(use with --id; add --mark-done to flip the item to [x])."
-                ),
-            },
-            {
-                "name": "mark_done",
-                "flag": "--mark-done",
-                "type": "bool",
-                "help": (
-                    "Also flip the matched TODO.md item to [x] (off by default). "
-                    "Only used with --from-todo."
-                ),
-            },
-        ],
-    },
     "gate": {
         "summary": (
             "The commit/CI verdict. Bare, it verifies that every code tag resolves to a real "
@@ -432,7 +395,7 @@ COMMANDS = {
 # single source of truth, so the grouping the help text and the viewer both show is
 # declared here once rather than restated in each surface.
 COMMAND_GROUPS = (
-    ("author", ("init", "new", "clarify")),
+    ("author", ("init", "clarify")),
     ("build", ("sync",)),
     ("read", ("gate", "ask", "mcp")),
 )

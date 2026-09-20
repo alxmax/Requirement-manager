@@ -96,52 +96,11 @@ class Extract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: R
                     self.assertNotIn("shall", f.read().lower(), p)
 
 
-class New(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-881  # tested-by: REQ-NEW-882
-    def test_new_scaffolds_from_template_and_substitutes_id(self):  # verifies: REQ-NEW-881#CASE-1  # verifies: REQ-NEW-881#CASE-2  # verifies: REQ-NEW-881#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            tmpl = os.path.join(d, "tmpl.md")
-            _write(tmpl, "---\nid: AREA-NAME-NNN\n---\n\n# AREA-NAME-NNN\n")
-            reqs_dir = os.path.join(d, "reqs")  # does not exist yet
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_new(reqs_dir, tmpl, "CORE-FOO-001")
-            self.assertEqual(code, 0)
-            dest = os.path.join(reqs_dir, "CORE-FOO-001.md")
-            self.assertTrue(os.path.exists(dest))
-            with open(dest, encoding="utf-8") as f:
-                content = f.read()
-            self.assertIn("CORE-FOO-001", content)
-            self.assertNotIn("AREA-NAME-NNN", content)
+class Template(unittest.TestCase):  # tested-by: REQ-NEWGONE-1034
+    """ADR-0045 decision 2: `new` is gone and the template it stamped stays — it is
+    the shape a person or an assistant follows when writing the file directly."""
 
-    def test_new_uses_builtin_template_when_no_file(self):  # verifies: REQ-NEW-881#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            reqs_dir = os.path.join(d, "reqs")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_new(reqs_dir, None, "CORE-FOO-001")   # no on-disk template
-            self.assertEqual(code, 0)
-            content = open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8").read()
-            self.assertIn("CORE-FOO-001", content)
-            self.assertNotIn("AREA-NAME-NNN", content)
-            self.assertIn("## Description", content)           # current emission schema
-            self.assertIn("## Cases", content)
-            self.assertIn("CASE-1", content)
-            self.assertIn("Cases (= tests)", content)          # from the built-in scaffold
-
-    def test_new_refuses_to_overwrite_existing(self):  # verifies: REQ-NEW-882#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            tmpl = os.path.join(d, "tmpl.md")
-            _write(tmpl, "# AREA-NAME-NNN\n")
-            reqs_dir = os.path.join(d, "reqs")
-            _write(os.path.join(reqs_dir, "CORE-FOO-001.md"), "existing\n")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_new(reqs_dir, tmpl, "CORE-FOO-001")
-            self.assertEqual(code, 1)
-            with open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8") as f:
-                self.assertEqual(f.read(), "existing\n")  # untouched
-
-    def test_template_uses_the_plain_present_voice(self):  # verifies: REQ-NEW-882#CASE-2
+    def test_template_uses_the_plain_present_voice(self):  # verifies: REQ-NEWGONE-1034#CASE-4
         t = R.REQUIREMENT_TEMPLATE
         self.assertIn("Every bullet below is binding.", t)
         # No CLAUSE may use a modal — but the guidance comment must stay free to name
@@ -154,7 +113,7 @@ class New(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-8
             self.assertNotIn("shall", ln.lower())
             self.assertNotIn("must", ln.lower())
 
-    def test_template_contract_body_passes_its_own_linter(self):  # verifies: REQ-NEW-882#CASE-3
+    def test_template_contract_body_passes_its_own_linter(self):  # verifies: REQ-NEWGONE-1034#CASE-4
         # the shipped template must not be flagged by the checks it teaches
         req = {"meta": {"status": "confirmed"}, "body": R.REQUIREMENT_TEMPLATE.split("---\n", 2)[-1]}
         checks = {f["check"] for f in R.lint_requirement("AREA-NAME-001", req)}
@@ -1339,92 +1298,6 @@ class LayerMismatchLint(unittest.TestCase):  # tested-by: ARCH-LINTCHECKS-025  #
         self.assertIn("aggregate", R.VALID_LAYER)
 
 
-class PromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: REQ-PROMOTE-TODO-897  # tested-by: REQ-PROMOTE-TODO-898  # tested-by: REQ-PROMOTE-TODO-899
-    TODO = "## v1.14\n- [ ] Build the thing | lane: ops\n- [x] Done already | lane: feature\n"
-
-    def _setup(self, d):
-        _write(os.path.join(d, "TODO.md"), self.TODO)
-        rq = os.path.join(d, "requirements")
-        os.makedirs(rq, exist_ok=True)
-        return rq
-
-    def _run(self, rq, name, cap_id, mark_done=False, root="."):
-        with redirect_stdout(io.StringIO()):
-            return R.cmd_promote_todo(rq, None, name, cap_id, mark_done=mark_done, root=root)
-
-    def test_scaffolds_draft_from_todo(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-1  # verifies: REQ-PROMOTE-TODO-897#CASE-3  # verifies: REQ-PROMOTE-TODO-897#CASE-4  # verifies: REQ-PROMOTE-TODO-897#CASE-5  # verifies: REQ-PROMOTE-TODO-899#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            rq = self._setup(d)
-            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 0)
-            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
-            self.assertIn("# Build the thing", text)
-            self.assertIn("milestone: v1.14", text)
-            self.assertIn("layer: feature", text)            # lane ops -> feature
-            self.assertIn("status: draft", text)
-            self.assertIn("- [ ] Build the thing", open(os.path.join(d, "TODO.md"), encoding="utf-8").read())  # unchanged
-
-    def test_mark_done_flips_only_matched_line(self):  # verifies: REQ-PROMOTE-TODO-899#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            rq = self._setup(d)
-            self._run(rq, "Build the thing", "REQ-T-001", mark_done=True, root=d)
-            todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
-            self.assertIn("- [x] Build the thing", todo)
-            self.assertIn("- [x] Done already", todo)        # other lines untouched
-
-    def test_mark_done_flips_todo_with_pipe_in_name(self):  # verifies: REQ-PROMOTE-TODO-899#CASE-2
-        """A TODO whose displayed name contains a literal '|' is still flipped — the
-        marker must rsplit like the parser, not split on the first '|' (#7)."""
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"),
-                   "## v1.14\n- [ ] Support a|b pipe syntax | lane: bus\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            self._run(rq, "Support a|b pipe syntax", "REQ-P-001", mark_done=True, root=d)
-            todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
-            self.assertIn("- [x] Support a|b pipe syntax", todo)
-
-    def test_custom_template_without_anchor_still_records_milestone(self):  # bug: promote-todo-silent-drop
-        """A custom template lacking the `superseded_by:` anchor must still get the
-        milestone (frontmatter-fence fallback), not silently drop it (#18)."""
-        with tempfile.TemporaryDirectory() as d:
-            rq = self._setup(d)
-            tmpl = os.path.join(d, "tmpl.md")
-            _write(tmpl, "---\nid: AREA-NAME-NNN\nstatus: draft\nlayer: feature\n---\n\n# Short name\n")
-            with redirect_stdout(io.StringIO()):
-                R.cmd_promote_todo(rq, tmpl, "Build the thing", "REQ-T-001", root=d)
-            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
-            self.assertIn("milestone: v1.14", text)   # injected via the fence fallback
-            self.assertIn("# Build the thing", text)   # title anchor present -> filled
-
-    def test_errors_write_nothing(self):  # verifies: REQ-PROMOTE-TODO-898#CASE-1  # verifies: REQ-PROMOTE-TODO-898#CASE-2  # verifies: REQ-PROMOTE-TODO-898#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rq = self._setup(d)
-            self.assertEqual(self._run(rq, "Build the thing", None, root=d), 2)            # no --id
-            self.assertEqual(self._run(rq, "nope", "REQ-T-001", root=d), 1)                # not found
-            self.assertFalse(os.path.exists(os.path.join(rq, "REQ-T-001.md")))
-            _write(os.path.join(rq, "REQ-T-001.md"), "x")
-            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 1)     # id taken
-
-    def test_custom_template_layer_mismatch_warns_not_silently_wrong(self):  # bug: promote-todo-layer-silent-drop
-        """A custom template whose layer line does not literally read
-        `layer: feature` must warn — not silently keep the wrong layer while the
-        success message claims the intended one was recorded."""
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Build the thing | lane: bus\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            tmpl = os.path.join(d, "tmpl.md")
-            _write(tmpl, "---\nid: AREA-NAME-NNN\nstatus: draft\nlayer: TODO-LAYER\n---\n\n# Short name\n")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                rc = R.cmd_promote_todo(rq, tmpl, "Build the thing", "REQ-T-001", root=d)
-            self.assertEqual(rc, 0)
-            self.assertIn("warning", buf.getvalue().lower())
-            self.assertIn("layer", buf.getvalue().lower())
-            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
-            self.assertIn("layer: TODO-LAYER", text)   # unchanged, not silently mis-set
-
-
 class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ-REVIEW-906
     BODY = ("---\nid: A-R-001\nstatus: confirmed\nlayer: feature\n---\n\n"
             "# Thing\n\n> WHY: it does the thing for a reason that matters to readers here.\n\n"
@@ -1484,32 +1357,6 @@ class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ
             _write(os.path.join(d, "_ai_review.md"),
                    "# AI — advisory (non-deterministic). NOT a gate.\n- something\n")
             self.assertEqual(before, gate())   # check never reads the AI sidecar
-
-
-class NewNumberCollision(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-882
-    def _new(self, rd, cap_id):
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_new(rd, None, cap_id)
-        return code, buf.getvalue()
-
-    def test_same_area_same_number_warns_but_creates(self):  # verifies: REQ-NEW-882#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "ARCH-MAP-007.md"), "---\nid: ARCH-MAP-007\n---\n# M\n")
-            code, out = self._new(rd, "ARCH-VIEWER-007")
-            self.assertEqual(code, 0)
-            self.assertTrue(os.path.exists(os.path.join(rd, "ARCH-VIEWER-007.md")))
-            self.assertIn("WARN", out)
-            self.assertIn("ARCH-MAP-007", out)
-
-    def test_different_area_same_number_is_silent(self):
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "ARCH-PARSE-001.md"), "---\nid: ARCH-PARSE-001\n---\n# P\n")
-            code, out = self._new(rd, "SYS-SSOT-001")
-            self.assertEqual(code, 0)
-            self.assertNotIn("WARN", out)
 
 
 class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-by: REQ-CANDIDATES-826  # tested-by: REQ-CANDIDATES-827
@@ -2186,57 +2033,6 @@ class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
         self.assertIn("RM006", out)
         self.assertIn("AREA-A-001", out)
         self.assertNotEqual(rc, 0, "RM006 is an error — the gate must fail")
-
-class CasesPromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: REQ-PROMOTE-TODO-897  # tested-by: REQ-PROMOTE-TODO-898  # tested-by: REQ-PROMOTE-TODO-899
-    def test_matching_is_case_insensitive_and_trims(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Add Export Command | lane: cli\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            with redirect_stdout(io.StringIO()):
-                code = R.cmd_promote_todo(rq, None, "  add export command  ", "REQ-X-001", root=d)
-            self.assertEqual(code, 0)
-            self.assertTrue(os.path.exists(os.path.join(rq, "REQ-X-001.md")))
-
-    def test_ambiguous_name_refuses(self):  # verifies: REQ-PROMOTE-TODO-898#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"),
-                   "## v1.14\n- [ ] Ship the widget | lane: ops\n## v1.15\n- [ ] Ship the widget | lane: bus\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            with redirect_stdout(io.StringIO()):
-                code = R.cmd_promote_todo(rq, None, "Ship the widget", "REQ-X-001", root=d)
-            self.assertNotEqual(code, 0)
-            self.assertEqual([n for n in os.listdir(rq) if n.endswith(".md")], [])
-
-    def test_no_match_lists_open_items(self):  # verifies: REQ-PROMOTE-TODO-898#CASE-5
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"),
-                   "## v1.14\n- [ ] Build the thing | lane: ops\n- [ ] Ship the widget | lane: bus\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote_todo(rq, None, "nope not a match", "REQ-X-001", root=d)
-            out = buf.getvalue()
-            self.assertNotEqual(code, 0)
-            self.assertIn("Build the thing", out)
-            self.assertIn("Ship the widget", out)
-
-    def test_mark_done_write_failure_warns_not_fails(self):  # verifies: REQ-PROMOTE-TODO-899#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Build the thing | lane: ops\n")
-            rq = os.path.join(d, "requirements")
-            os.makedirs(rq, exist_ok=True)
-            buf = io.StringIO()
-            with mock.patch.object(R.author, "_mark_todo_done", return_value=0):
-                with redirect_stdout(buf):
-                    code = R.cmd_promote_todo(rq, None, "Build the thing", "REQ-X-001", mark_done=True, root=d)
-            out = buf.getvalue()
-            self.assertEqual(code, 0)
-            self.assertIn("warning", out.lower())
-            self.assertTrue(os.path.exists(os.path.join(rq, "REQ-X-001.md")))
-
 
 class CasesCandidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-by: REQ-CANDIDATES-827
     def test_candidate_carries_full_field_set(self):  # verifies: REQ-CANDIDATES-827#CASE-1
@@ -2963,34 +2759,6 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
 
     def test_a_case_per_clause_raises_nothing(self):
         self.assertEqual(self._questions(3, 3), [])
-
-
-class NewRefusesANonId(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-881
-    """An id is what a tag must spell; anything else mints a requirement no code can name."""
-
-    def test_a_non_id_is_refused_and_writes_nothing(self):  # verifies: REQ-NEW-881#CASE-5
-        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
-        for bad in ("my req", "lower-case-1", "NOPARTS", "../evil", "A/B-1", ""):
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                rc = R.cmd_new(d, None, bad)
-            self.assertEqual(rc, 2, bad)
-            self.assertIn("invalid id", buf.getvalue())
-        self.assertEqual(os.listdir(d), [])
-
-    def test_a_real_id_still_scaffolds(self):  # verifies: REQ-NEW-881#CASE-1
-        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
-        with redirect_stdout(io.StringIO()):
-            self.assertEqual(R.cmd_new(d, None, "AREA-NAME-001"), 0)
-        self.assertEqual(os.listdir(d), ["AREA-NAME-001.md"])
-
-    def test_promote_todo_refuses_the_same_ids(self):  # verifies: REQ-NEW-881#CASE-5
-        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            rc = R.cmd_promote_todo(d, None, "some todo", "my req", root=d)
-        self.assertEqual(rc, 2)
-        self.assertIn("invalid id", buf.getvalue())
 
 
 class RetireKeepsTheLineBreak(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-962

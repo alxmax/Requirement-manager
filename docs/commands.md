@@ -6,19 +6,20 @@
 > In **this** repo, run commands from inside `plugin/`. In **your** repo, run
 > from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
-The CLI is **seven verbs**. Six do the work, and everything else is a flag on `gate` (the
+The CLI is **six verbs**. Five do the work, and everything else is a flag on `gate` (the
 verdict and the reports on it), on `ask` (every other read-only question) or on `sync` (every
-write), so the shape of a command tells you whether it can change a file. The seventh, `mcp`,
-serves those same commands to an AI assistant.
+write), so the shape of a command tells you whether it can change a file. The sixth, `mcp`,
+serves those same commands to an AI assistant. A seventh, `new`, scaffolded a blank
+requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)): write
+`requirements/<ID>.md` yourself, or ask your assistant to.
 
 | Verb | What it does |
 |---|---|
 | `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
-| `new AREA-NAME-NNN` | **Deprecated, removed in v8.0.0** ([ADR-0045](adr/0045-new-is-deprecated.md)): write the requirement file yourself, or ask your assistant to. Until then it still scaffolds one blank requirement from the built-in template, and `--from-todo "name" --id ID` still pre-fills one from a `TODO.md` item. |
 | `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
 | `ask` | **Every other read-only question**: search, overlapping contracts, the design review, the review plan, missing translations. Never writes anything, and its exit code is the question's, never the verdict's. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)). |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
-| `mcp` | Serve the engine over the Model Context Protocol on stdio: fifteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](integrations.md#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
+| `mcp` | Serve the engine over the Model Context Protocol on stdio: fourteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](integrations.md#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
 | `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |
 
 **`gate` — the bare verdict.** Link sync (every tag resolves, every enforced
