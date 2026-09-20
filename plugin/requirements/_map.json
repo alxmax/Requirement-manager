@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-20.1",
+  "engine_version": "2026-09-21",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2668,7 +2668,7 @@
       "id": "ARCH-CMDREGISTRY-033",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "CLI command registry + generated integration artifacts",
       "intent": "`tool_definition.json` and the `SKILL.universal.md` command table were hand-maintained mirrors of the CLI and silently drifted whenever a command was added or renamed. A single declarative `COMMANDS` registry — with generation and a gate drift-guard — makes those mirrors impossible to diverge undetected.",
@@ -2762,12 +2762,7 @@
       "test_exempt": null,
       "milestone": "v2.7",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-CMDREGISTRY-834",
@@ -2914,7 +2909,7 @@
       "id": "REQ-CMDREGISTRY-1031",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`ask` holds the questions, `gate` the verdict",
       "intent": "`gate` was two things under one name: the commit verdict every hook runs, and every question the engine can answer, sixteen flags in all. A reader choosing a flag had to know which of them run the verdict and which never do. ADR-0044 moves the questions to their own verb.",
@@ -2974,12 +2969,7 @@
       "test_exempt": null,
       "milestone": "v7.22.0",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -2987,7 +2977,7 @@
       "id": "REQ-NEWGONE-1034",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`new` is gone; six verbs remain, and the template stays",
       "intent": "`new` stamped a blank requirement out of the built-in template and `new --from-todo` pre-filled one from a `TODO.md` item. Neither was used: this corpus keeps its requirements as module files a command cannot write into, and the verb still cost a registry entry, a parser branch, an MCP writing tool and about twenty tests. ADR-0045 deprecated it in v7.22.1 and removes it here. What replaces it is not a command — a requirement is a file someone writes, by hand or by asking an assistant.",
@@ -3029,17 +3019,24 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_gate.py:2968"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/author.py:11"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/commands.py:14"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/check_retired_verbs.py:146"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -8990,7 +8987,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:180"
+          "loc": "plugin/scripts/reqmap_engine/author.py:181"
         },
         {
           "role": "implements",
@@ -11776,7 +11773,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:132"
+          "loc": "plugin/scripts/reqmap_engine/author.py:133"
         },
         {
           "role": "implements",
@@ -12151,11 +12148,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:90"
+          "loc": "plugin/scripts/reqmap_engine/author.py:91"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:116"
+          "loc": "plugin/scripts/reqmap_engine/author.py:117"
         }
       ],
       "test_exempt": null,
@@ -12211,7 +12208,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:90"
+          "loc": "plugin/scripts/reqmap_engine/author.py:91"
         },
         {
           "role": "implements",
@@ -16589,7 +16586,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/check_retired_verbs.py:210"
+          "loc": "scripts/check_retired_verbs.py:211"
         },
         {
           "role": "implements",
@@ -16789,7 +16786,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/check_retired_verbs.py:210"
+          "loc": "scripts/check_retired_verbs.py:211"
         },
         {
           "role": "tested-by",
@@ -21403,7 +21400,7 @@
       "id": "SYS-AUTHOR-101",
       "layer": "need",
       "level": "system",
-      "status": "draft",
+      "status": "confirmed",
       "area": "SYS",
       "title": "Authoring and evolving a requirement",
       "intent": "",
@@ -21440,12 +21437,7 @@
       "test_exempt": null,
       "milestone": "v2.32",
       "priority": "must-have",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "SYS-GATE-102",
@@ -24820,23 +24812,21 @@
     }
   },
   "health": {
-    "score": 99,
+    "score": 100,
     "total": 292,
     "scored": 276,
-    "healthy": 272,
+    "healthy": 276,
     "deprecated": 16,
-    "confirmed": 272,
-    "implemented": 266,
+    "confirmed": 276,
+    "implemented": 267,
     "tested": 264,
-    "drafts": 4,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 272
+    "gate_link_sync_clean": true
   },
   "planning": {
     "milestones": {

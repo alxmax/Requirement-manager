@@ -1,6 +1,6 @@
 ---
-generated: 2026-09-20
-engine: 2026-09-20.1
+generated: 2026-09-21
+engine: 2026-09-21
 nodes: 292
 edges: 121
 design pass-rate: 98% (107/109 source files without a design candidate)
@@ -692,8 +692,8 @@ graph LR
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_825
   f_plugin_scripts_test_reqmap_report_py_1712_2158["plugin/scripts/test_reqmap_report.py:1712-2158"]
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1712_2158
-  f_plugin_scripts_reqmap_engine_author_py_90_116["plugin/scripts/reqmap_engine/author.py:90-116"]
-  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_engine_author_py_90_116
+  f_plugin_scripts_reqmap_engine_author_py_91_117["plugin/scripts/reqmap_engine/author.py:91-117"]
+  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_engine_author_py_91_117
   ARCH_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>ARCH-PROMOTE-TODO-001</small>"]
   style ARCH_PROMOTE_TODO_001 fill:#eee,stroke:#bbb,color:#888
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
@@ -810,8 +810,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f_scripts_changelog_notes_py_2
   f_scripts_check_engine_bump_py_2["scripts/check_engine_bump.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_engine_bump_py_2
-  f_scripts_check_retired_verbs_py_2_210["scripts/check_retired_verbs.py:2-210"]
-  ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2_210
+  f_scripts_check_retired_verbs_py_2_211["scripts/check_retired_verbs.py:2-211"]
+  ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2_211
   f_scripts_check_versions_py_2["scripts/check_versions.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
   f_scripts_test_changelog_notes_py_2["scripts/test_changelog_notes.py:2"]
@@ -1019,7 +1019,7 @@ graph LR
   f_scripts_test_cross_tool_py_84["scripts/test_cross_tool.py:84"]
   ARCH_VLEVEL_037 -->|tested-by| f_scripts_test_cross_tool_py_84
   SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small>"]
-  style SYS_AUTHOR_101 fill:#eee,stroke:#bbb,color:#888
+  style SYS_AUTHOR_101 fill:#fee,stroke:#c66
   SYS_GATE_102["Keeping code and specification in step<br><small>SYS-GATE-102</small>"]
   style SYS_GATE_102 fill:#fee,stroke:#c66
   SYS_QUALITY_104["Keeping requirements readable<br><small>SYS-QUALITY-104</small>"]
@@ -1059,25 +1059,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_REQ["REQ"]
-    REQ_CMDREGISTRY_1031["'ask' holds the questions, 'gate' the verdict<br><small>REQ-CMDREGISTRY-1031</small><br>unreviewed"]
-    REQ_NEWGONE_1034["'new' is gone; six verbs remain, and the template stays<br><small>REQ-NEWGONE-1034</small><br>unreviewed"]
-  end
-  subgraph sg_misc["misc"]
-    ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small><br>unreviewed"]
-    SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small><br>unreviewed"]
-  end
-  style ARCH_CMDREGISTRY_033 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_1031 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEWGONE_1034 fill:#fff3cd,stroke:#a66,color:#630
-  style SYS_AUTHOR_101 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| ARCH-CMDREGISTRY-033 | draft | 9 | 3 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-1031 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEWGONE-1034 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| SYS-AUTHOR-101 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

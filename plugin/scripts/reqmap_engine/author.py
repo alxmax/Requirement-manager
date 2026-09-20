@@ -8,6 +8,7 @@ from .parse import split_requirement_blocks
 # decision 2: the template stays documented as the shape to follow). `draft` stamps
 # extracted requirements out of it, and a person or an assistant writing one by hand
 # reads it here.
+# implements: REQ-NEWGONE-1034
 REQUIREMENT_TEMPLATE = """\
 ---
 id: AREA-NAME-NNN

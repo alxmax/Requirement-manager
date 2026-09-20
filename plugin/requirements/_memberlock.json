@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "9fa9a03974a333099a0c16b4c62b713ddfccbb5a5efed2fda0ad3968276288ce",
+      "plugin/scripts/reqmap_engine/__init__.py": "261977179d8661d178138abb747c5961e7e569974a521e319225b0fcee0d181a",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -21,7 +21,6 @@
       "plugin/scripts/reqmap.py#_build_parser": "4176f079f2b44eb44ba2ee94ee99deefc5d65368a62c8a617d87004fe1c13b27",
       "plugin/scripts/reqmap_engine/cliflags.py#_add_todo_and_mode_flags": "c7b616a2c26b5e6e14c045d8e5d2d1502b24a6106ff6d54dec64cfe0b1dbbf71",
       "plugin/scripts/reqmap_engine/cliflags.py#_add_workspace_and_query_flags": "ba02f4c638e370a23139b0cc6b566af7b6210e73e64d3843122e3ae639ab444f",
-      "plugin/scripts/reqmap_engine/commands.py": "b8c78c4c771adb4a0798db4c346b8f3db327c1cc04a3054501d566c5eb9d43fb",
       "plugin/scripts/reqmap_engine/registry.py#_generate_schema": "89a104020850f98b7b8d80e46f9a2172b8fc4e579ae9b37b90e11f308fa3b777"
     },
     "ARCH-DESIGN-061": {
@@ -295,6 +294,9 @@
       "plugin/scripts/reqmap_engine/parse.py": "b87877d0c0b25126b66d7512acfab42d1c1aed263758111b0fdbf8a8a229b2b9",
       "plugin/scripts/reqmap_engine/parse.py#split_requirement_blocks": "233ff6bd93659a0c83636311aa87078b0a543ab043b95d47e2f16af670da338b",
       "plugin/scripts/reqmap_engine/text.py#_req_file": "3d1d8be1f66cffe499847b62e8dc9ae70019ea4286f6b2aa70dc9f9dcf7a5587"
+    },
+    "REQ-NEWGONE-1034": {
+      "plugin/scripts/reqmap_engine/author.py": "51901c2afa011edb756e282b074aa606cfaf046235ebc1ad0064f898d4ced04c"
     },
     "REQ-PLANADVANCE-1020": {
       "plugin/scripts/reqmap_engine/release.py#_released_work": "d1bf5872e5fb00d509dee898603ff0f0bf50ca8c9e1114b24778ae1768e909a0"
