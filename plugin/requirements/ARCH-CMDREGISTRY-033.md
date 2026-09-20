@@ -1,6 +1,6 @@
 ---
 id: ARCH-CMDREGISTRY-033
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -22,6 +22,7 @@ Every bullet below is binding.
 - A `COMMANDS` dict is the single source of truth for the CLI's commands: argparse's choices, the generated `tool_definition.json`, and the `SKILL.universal.md` command table all derive from it, and the gate fails when a generated artifact goes stale. [[REQ-CMDREGISTRY-834]]
 - The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]
 - `gate` owns the verdict and the reports on it, and `ask` owns every other read-only question; `gate`'s old spellings of those questions run the same call with one migration line on stderr until v8.0.0. [[REQ-CMDREGISTRY-1031]]
+- The registry holds six verbs: `new` and `new --from-todo` are removed, and the template they stamped stays as the documented shape. [[REQ-NEWGONE-1034]]
 
 ## Cases
 CASE-1
@@ -178,7 +179,7 @@ CASE-3 — each command is placed in a group
 
 ---
 id: REQ-CMDREGISTRY-1031
-status: confirmed
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -226,3 +227,69 @@ CASE-4 — the MCP tools ask `ask`
   Given  the MCP tool table
   When   each tool's verb and flags are read
   Then   no tool pairs `gate` with a flag `ask` owns
+
+--------------------
+
+
+---
+id: REQ-NEWGONE-1034
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CMDREGISTRY-033]
+---
+
+# `new` is gone; six verbs remain, and the template stays
+
+## Description
+> `new` stamped a blank requirement out of the built-in template and `new --from-todo`
+> pre-filled one from a `TODO.md` item. Neither was used: this corpus keeps its
+> requirements as module files a command cannot write into, and the verb still cost a
+> registry entry, a parser branch, an MCP writing tool and about twenty tests. ADR-0045
+> deprecated it in v7.22.1 and removes it here. What replaces it is not a command — a
+> requirement is a file someone writes, by hand or by asking an assistant.
+
+Every bullet below is binding.
+- The command registry holds six verbs — `init`, `gate`, `ask`, `sync`, `clarify`, `mcp` —
+  and `new` is not among them. The author group is `init` and `clarify`.
+- The verb `new`, with or without `--from-todo`, is refused with exit 2 and writes no
+  requirement file. The usage line names the six verbs that remain.
+- No MCP tool scaffolds a requirement: `reqmap_new` is gone, and no tool invokes `new`.
+- The built-in template stays and keeps the shape it taught: the `Context` section, the
+  plain present voice, and a body its own linter does not flag.
+- `new` is a retired name, so an instruction that still tells a reader to run it fails
+  `check_retired_verbs.py`.
+
+## Cases
+CASE-1 — the registry holds six verbs
+  Given  the command registry and the command groups
+  When   their verbs are read
+  Then   they are `init`, `gate`, `ask`, `sync`, `clarify`, `mcp`, and the author group is
+         `init` and `clarify`
+
+CASE-2 — the verb is refused and writes nothing
+  Given  a repo with a `requirements/` directory and a `TODO.md`
+  When   the CLI is called with `new AREA-GONE-001`, and with `new --from-todo … --id …`
+  Then   both exit 2 and neither writes a requirement file
+
+CASE-3 — no MCP tool scaffolds
+  Given  the MCP tool table
+  When   its names and verbs are read
+  Then   none is `reqmap_new` and none invokes `new`
+
+CASE-4 — the template outlives the verb
+  Given  the built-in requirement template
+  When   it is linted the way a requirement is
+  Then   it carries the `Context` section, uses no modal in a clause, and its body raises
+         none of `anonymous-subject`, `statement-too-long`, `statement-size`
+
+## Context
+**Notes**
+- The removal is recorded twice on purpose: this requirement says what the CLI is now,
+  and ARCH-NEW-004 / ARCH-PROMOTE-TODO-001 stay in the corpus as `deprecated`, so a
+  reader who meets an old `# implements:` tag or an old ADR still finds what they named.
+- `_warn_number_collision` and the id regex went with the verb — nothing called them once
+  `cmd_new` and `cmd_promote_todo` were gone. `_parse_todos`, `_set_frontmatter_status`
+  and `_write_frontmatter_status` stay: `gate`, `retire`, `mapcmd` and `mapdata` read them
+  (ADR-0045 decision 3).

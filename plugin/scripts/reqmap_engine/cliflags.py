@@ -75,15 +75,6 @@ def _add_workspace_and_query_flags(ap):
 
 def _add_todo_and_mode_flags(ap):
     # implements: ARCH-CMDREGISTRY-033
-    ap.add_argument("--id", dest="new_id", default=None,
-                    help="new --from-todo: the AREA-NAME-NNN id for the scaffolded requirement "
-                         "(required)")
-    ap.add_argument("--from-todo", dest="from_todo", default=None,
-                    help="new: scaffold the requirement from a TODO.md item matched by this name "
-                         "(use with --id; add --mark-done to flip the item to [x])")
-    ap.add_argument("--mark-done", dest="mark_done", action="store_true",
-                    help="new --from-todo: also flip the matched TODO.md item to [x] (off by "
-                         "default)")
     ap.add_argument("--cache", action="store_true",
                     help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so "
                          "unchanged files skip re-parsing. Off by default; results are identical "
@@ -174,8 +165,8 @@ def _foreign_flags(ap, a, verb):  # implements: REQ-CMDREGISTRY-1031
 
 
 def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
-    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings and the
-    deprecated `new` on stderr. Returns 2 when the call is refused, else 0."""
+    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings on
+    stderr. Returns 2 when the call is refused, else 0."""
     if a.cmd == "ask":
         foreign = _foreign_flags(ap, a, "ask")
         if foreign:
@@ -183,9 +174,6 @@ def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
                 " ".join(foreign), " ".join(p["flag"] for p in COMMANDS["ask"]["params"])),
                 file=sys.stderr)
             return 2
-    if a.cmd == "new":  # implements: REQ-NEW-1032
-        print("reqmap: `new` is deprecated and removed in v8.0.0 (ADR-0045): write "
-              "requirements/<ID>.md yourself, or ask your assistant to.", file=sys.stderr)
     moved = _moved_gate_flags(a)[0] if a.cmd == "gate" else []
     if moved:
         print("reqmap: `gate {0}` moved to `ask {0}` in v7.22.0; the `gate` spelling is "

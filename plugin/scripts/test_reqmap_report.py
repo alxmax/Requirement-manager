@@ -2155,7 +2155,7 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
                               "regenerating flipped the file's existing LF convention to CRLF")
 
 
-class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: ARCH-NEXT-013
+class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: ARCH-NEXT-013
     def test_set_status_empty_value_with_comment_not_corrupted(self):
         out, n = R._set_frontmatter_status(
             "---\nid: X\nstatus:  # deprecated hint\nlayer: bus\n---\nbody\n", "confirmed")
@@ -2164,23 +2164,6 @@ class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  #
         self.assertNotIn("confirmed deprecated", out)   # value+leaked text must not glue
         self.assertNotIn("confirmed#", out)
         self.assertIn("\nbody\n", out)
-
-    def test_mark_todo_done_unreadable_root_falls_through_to_parent(self):
-        with tempfile.TemporaryDirectory() as d:
-            root = os.path.join(d, "plugin"); os.makedirs(root)
-            root_todo = os.path.join(root, "TODO.md")
-            _write(root_todo, "# TODO\n- [ ] Widget\n")
-            parent_todo = os.path.join(d, "TODO.md")
-            _write(parent_todo, "# TODO\n- [ ] Widget\n")
-            real_open = open
-            def fake_open(file, *a, **k):
-                if os.path.abspath(file) == os.path.abspath(root_todo):
-                    raise OSError("simulated unreadable")
-                return real_open(file, *a, **k)
-            with mock.patch("builtins.open", side_effect=fake_open):
-                changed = R._mark_todo_done(root, "Widget")
-            self.assertEqual(changed, 1)
-            self.assertIn("[x] Widget", open(parent_todo, encoding="utf-8").read())
 
     def test_next_granularity_counts_labeled_acs(self):
         # 9 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
@@ -4277,15 +4260,10 @@ class CasesMap(unittest.TestCase):  # tested-by: ARCH-MAP-007
 
 
 class CasesContext(unittest.TestCase):  # tested-by: ARCH-CONTEXT-048  # tested-by: REQ-CONTEXT-835
-    def test_new_scaffolds_context_section(self):  # verifies: REQ-CONTEXT-835#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_new(rd, None, "AREA-X-001")
-            self.assertEqual(code, 0)
-            content = open(os.path.join(rd, "AREA-X-001.md"), encoding="utf-8").read()
-            self.assertIn("## Context (non-binding)", content)
+    def test_the_template_carries_the_context_section(self):  # verifies: REQ-CONTEXT-835#CASE-1
+        # written through `cmd_new` until ADR-0045 removed it; the template it stamped is
+        # the thing under test, and it is still the shape an author follows.
+        self.assertIn("## Context (non-binding)", R.REQUIREMENT_TEMPLATE)
 
     def test_context_edit_does_not_change_binding_hash(self):  # verifies: REQ-CONTEXT-835#CASE-5
         body_a = ("# T\n\n## Description\n- shall do X.\n\n"
@@ -5034,7 +5012,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                 self.assertIn(flag, known, "{} uses {}".format(tool["name"], flag))
 
     def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
-        writes = {"reqmap_sync", "reqmap_new", "reqmap_release"}
+        writes = {"reqmap_sync", "reqmap_release"}   # reqmap_new went with the verb (ADR-0045)
         out, calls = self._serve([self._req(1, "tools/list"),
                                   self._call(2, "reqmap_sync", {})])
         self.assertFalse(writes & {t["name"] for t in out[0]["result"]["tools"]})

@@ -4,8 +4,6 @@
 Subcommands:
   init              first-use bootstrap: scaffold requirements/ + .reqmapignore, draft
                     requirements from existing code, build the lock + map, print next steps
-  new AREA-NAME-NNN   scaffold a requirement from the built-in template (--from-todo seeds from
-                    TODO.md)
   scan              list code members (implements/generated-from/... tags) per capability
   gate              the gate: link sync + drift + test-link integrity; exit non-zero on error
                     (pre-commit/CI)
@@ -48,7 +46,6 @@ import argparse, errno, os, sys
 
 from reqmap_engine import config as cfg
 from reqmap_engine.audit import _audit_summary, cmd_audit
-from reqmap_engine.author import cmd_new, cmd_promote_todo
 from reqmap_engine.candidates import cmd_candidates
 from reqmap_engine.clarify import cmd_clarify
 from reqmap_engine.cliflags import (
@@ -302,14 +299,6 @@ def main():
 
     if a.cmd == "mcp":               # a long-running server: no workspace of its own
         return cmd_mcp(a)
-    if a.cmd == "new":
-        if getattr(a, "from_todo", None):
-            return cmd_promote_todo(reqs_dir, tmpl, a.from_todo, a.new_id, a.mark_done, code_root)
-        if not a.arg:
-            print("usage: reqmap new AREA-NAME-NNN   |   reqmap new --from-todo \"<todo name>\" "
-                  "--id AREA-NAME-NNN")
-            return 2
-        return cmd_new(reqs_dir, tmpl, a.arg)
     if a.cmd == "init" and not a.plan:
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 

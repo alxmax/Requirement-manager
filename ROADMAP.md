@@ -81,7 +81,18 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
       <!-- v7.22.0, ADR-0044 (Senate 2026-09-17, MODIFY, condițiile în ADR). `gate` are 9
            flag-uri, întrebările au plecat pe verbul `ask`. Vechile forme `gate --search` & co.
            merg până la v8.0.0 cu o linie pe stderr; bara de mai jos le scoate. -->
-- [ ] Scoate verbul `new` și `new --from-todo` (ADR-0045) | req: ARCH-NEW-004
+- [x] Scoate verbul `new` și `new --from-todo` (ADR-0045) | req: ARCH-NEW-004
+      <!-- REQ-NEWGONE-1034. Motorul are șase verbe: `init`, `gate`, `ask`, `sync`,
+           `clarify`, `mcp`. Au plecat `cmd_new`, `cmd_promote_todo`, `_mark_todo_done`,
+           `--id` / `--from-todo` / `--mark-done`, intrarea din registru, tool-ul MCP
+           `reqmap_new` și ~20 de teste; `new` a intrat în paznicul de verbe retrase.
+           ARCH-NEW-004 și ARCH-PROMOTE-TODO-001 (cu cei 6 copii) sunt `deprecated`, nu
+           șterse — un tag vechi sau un ADR care le numește tot găsește ce descriau. -->
+      <!-- Ce a RĂMAS, deliberat (ADR-0045 decizia 3): `REQUIREMENT_TEMPLATE` — forma
+           documentată după care scrii fișierul — plus `_parse_todos`,
+           `_set_frontmatter_status`, `_write_frontmatter_status`, pe care le citesc
+           `gate`, `retire`, `mapcmd` și `mapdata`. Bara rămâne în v8.0.0: versiunea se
+           taie când intră și celelalte două (alias-urile `gate --…`, split-ul viewer-ului). -->
 - [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
 - [x] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
       <!-- 527 -> 92 de linii. Nimic nu s-a pierdut: secțiunile tăiate au plecat verbatim în

@@ -360,7 +360,8 @@ def _print_health_report(data, design, untagged, lag, headline_only):
              "run `reqmap.py ask --design`".format(
                  design["score"], design["clean_files"], design["files"]))
     if total == 0:
-        print("  (no requirements yet — run `reqmap.py init` or `new`)")
+        print("  (no requirements yet — run `reqmap.py init`, or write "
+              "requirements/AREA-NAME-NNN.md)")
 
 
 def cmd_health(ws, as_json=False, as_badge=False, headline_only=False):

@@ -154,6 +154,8 @@ RETIRED = {
     "draft", "plan",
     # removed outright
     "check", "scan", "translate", "confirm",
+    # removed in v8.0.0 (ADR-0045): a requirement is a file someone writes
+    "new",
 }
 
 # Flags that still parse but moved to another verb: the parser is flat, so the derived

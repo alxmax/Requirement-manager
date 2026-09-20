@@ -1,6 +1,6 @@
 ---
 id: ARCH-PROMOTE-TODO-001
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -70,7 +70,7 @@ CASE-4
 
 ---
 id: REQ-PROMOTE-TODO-897
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -130,7 +130,7 @@ CASE-5 — a scaffolded requirement starts as draft
 
 ---
 id: REQ-PROMOTE-TODO-898
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -189,7 +189,7 @@ CASE-5 — a no-match refusal lists the open items
 
 ---
 id: REQ-PROMOTE-TODO-899
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

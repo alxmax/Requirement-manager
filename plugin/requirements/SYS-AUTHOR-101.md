@@ -1,6 +1,6 @@
 ---
 id: SYS-AUTHOR-101
-status: confirmed
+status: draft
 form: atomic
 level: system
 layer: need
@@ -11,13 +11,13 @@ satisfies: [SYS-SSOT-001]
 ---
 # Authoring and evolving a requirement
 
-> As someone writing down what the system must do, I want one command to scaffold a 
-> requirement and one to promote it once code backs it, so that the corpus grows in a 
-> shape the engine can read instead of by hand-copying a template.
+> As someone writing down what the system must do, I want the shape of a requirement to be
+> one documented template and its status to be one field, so that the corpus grows in a shape
+> the engine can read whether a person or an assistant writes the file.
 
 Scenario: a capability goes from idea to confirmed
   Given  a capability that has just been built
-  When   an author scaffolds a requirement for it and confirms it
+  When   an author writes `requirements/<ID>.md` from the template and sets it `confirmed`
   Then   the file carries the schema the gate reads, and its status reflects that code now backs it
 
 ## Requirements in this system (auto)
