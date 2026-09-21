@@ -5,7 +5,7 @@ from . import MAP_ENGINE_VERSION, config as cfg
 from .design_report import _design_summary, cmd_design
 from .gate import cmd_check, run_gate_rules
 from .groups import decomposable
-from .health import _health_record, cmd_coverage
+from .health import _exempt_note, _health_record, cmd_coverage
 from .i18n import _translation_gaps
 from .lint import lint_requirement
 from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
@@ -340,8 +340,9 @@ def _summary_table_rows(gate_rc, signals, dups):
                                       signals["shape"])
     verdict = "FAIL" if gate_rc else "clean"
     rows = [("Gate", verdict, "reqmap.py gate"),
-            ("Health", "{}/100 ({}/{} green on every axis)".format(
-                health["score"], health["healthy"], health.get("scored", health["total"])),
+            ("Health", "{}/100 ({}/{} green on every axis{})".format(
+                health["score"], health["healthy"], health.get("scored", health["total"]),
+                _exempt_note(health)),
              "reqmap.py gate --risk")]
     if design is not None:
         rows.append(("Design pass-rate", "{}% ({}/{} files with no candidate)".format(

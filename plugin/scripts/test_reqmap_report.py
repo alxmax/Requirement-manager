@@ -1394,6 +1394,23 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
             second = R._build_json_text(R._assemble_map_data(reqs, members, d, d))
         self.assertEqual(first, second)
 
+    def test_the_score_names_its_exemptions(self):  # verifies: REQ-HEALTH-968#CASE-4
+        """100/100 over waivers must not read like 100/100 over none."""
+        waived = self._green()
+        waived["meta"]["lint_exempt"] = ["ac-count-high"]
+        retired = {"meta": {"status": "deprecated", "test_exempt": "gone"}, "body": "# T\n"}
+        reqs = {"REQ-A-001": waived, "REQ-B-002": self._green(), "REQ-C-003": retired}
+        members = {rid: [("implements", "x.py", 1), ("tested-by", "t.py", 2)]
+                   for rid in ("REQ-A-001", "REQ-B-002")}
+        with tempfile.TemporaryDirectory() as d:
+            rec = R._health_record(reqs, members, d)
+        self.assertEqual(1, rec["exempt"])            # the deprecated one is not counted
+        _, out = self._health(reqs, members)
+        self.assertIn("1 with an exemption", out.splitlines()[0])
+        self.assertIn("| 1 exempt", R._health_badge_payload(rec)["message"])
+        _, clean = self._health({"REQ-B-002": self._green()}, members)
+        self.assertNotIn("exemption", clean.splitlines()[0])
+
     def test_all_draft_is_zero(self):
         reqs = {"REQ-A-001": {"meta": {"status": "draft"}, "body": "# T\n"}}
         _, out = self._health(reqs, {})
@@ -1403,7 +1420,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertEqual(json.loads(out), {
-            "score": 100, "total": 1, "scored": 1, "healthy": 1, "deprecated": 0,
+            "score": 100, "total": 1, "scored": 1, "healthy": 1, "exempt": 0, "deprecated": 0,
             "confirmed": 1, "implemented": 1,
             "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0,
             "gate_errors": 0, "gate_link_sync_clean": True})

@@ -35,6 +35,9 @@ const railHtml = renderToString(<App />);
 // an older map carries neither key
 adoptMapExport({ health: null, design: null });
 const railBare = renderToString(<App />);
+// a waived check travels with the score (REQ-HEALTH-968)
+adoptMapExport({ health: { ...SCORES[0], exempt: 4 }, design: SCORES[1] });
+const railExempt = renderToString(<App />);
 adoptMapExport({ health: SCORES[0], design: SCORES[1] });
 const gaugeChecks = [
   ["rail: both readings render the engine's own numbers",  // verifies: REQ-VIEWER-969#CASE-1
@@ -53,6 +56,9 @@ const gaugeChecks = [
   // verifies: REQ-VIEWER-969#CASE-4
   ["rail: health is a control, the advisory design score is not",
     railHtml.includes("gauge-row static")],
+  ["rail: the exemption count sits beside the score, and only when there is one",  // verifies: REQ-HEALTH-968#CASE-4
+    railExempt.includes("4 exempt") && !/\d exempt/.test(railHtml)
+    && translate("ro", "{n} exempt", { n: 4 }) === "4 cu scutire"],
   ["rail: the labels follow the chosen language",  // verifies: REQ-VIEWER-969#CASE-5
     translate("ro", "Health") === "Sănătate"
     && translate("ro", "{a}/{b} green", { a: 39, b: 50 }) === "39/50 verzi"],

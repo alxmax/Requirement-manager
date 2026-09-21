@@ -273,6 +273,9 @@ Every bullet below is binding.
 - `_map.json` carries that record under a `health` key, beside the existing `design` record.
 - The record is a pure function of inputs the map already depends on, so a map carrying it
   stays deterministic and `gate`'s freshness check keeps working unchanged.
+- The record counts `exempt`: the non-deprecated requirements carrying a `lint_exempt`,
+  `test_exempt` or `gate_exempt`. The headline, the `--audit` row, the badge and the viewer's
+  gauge name that count beside the score whenever it is not zero.
 
 ## Cases
 CASE-1 — the map carries the score the console prints
@@ -289,6 +292,12 @@ CASE-3 — regenerating the map twice produces the same bytes
   Given  an unchanged corpus and lock
   When   `map` runs twice
   Then   both runs write byte-identical `_map.json`, so freshness checks stay stable
+
+CASE-4 — the score names its exemptions
+  Given  a confirmed requirement with `lint_exempt`, a clean one, and a deprecated one with
+         `test_exempt`
+  When   the record, the headline, the badge and the viewer's gauge are read
+  Then   `exempt` is 1, each surface names 1 exemption, and a corpus with none names nothing
 
 --------------------
 
