@@ -207,13 +207,16 @@ def _parse_roadmap_from_text(text):
     evidence comments in this repo's own plan live - and `section_date` carries the first
     date in the prose between a heading and its first item. Both feed `plandrift`, which
     must read an item's citations and its date from wherever the author put them."""
-    items, horizon, section_date, seen_item = [], None, None, False
+    items, horizon, section_date, seen_item, category = [], None, None, False, None
     for line in text.splitlines():
         stripped = line.strip()
         if stripped.startswith("## "):
             head = stripped[3:].strip().lower()
             horizon = head if head in ROADMAP_HORIZONS else None
-            section_date, seen_item = None, False
+            section_date, seen_item, category = None, False, None
+            continue
+        if stripped.startswith("### "):   # a category inside a horizon, never an item's prose
+            category, seen_item = stripped[4:].strip(), False
             continue
         m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", stripped)
         if not m:
@@ -230,7 +233,7 @@ def _parse_roadmap_from_text(text):
         items.append({"name": rest.split("|")[0].strip(), "horizon": horizon,
                       "req": req.group(1) if req else None,
                       "unpark": unpark.group(1).strip() if unpark else None,
-                      "done": m.group(1).lower() == "x",
+                      "done": m.group(1).lower() == "x", "category": category,
                       "context": "", "section_date": section_date})
     return items
 

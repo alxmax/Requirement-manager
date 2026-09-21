@@ -3049,6 +3049,13 @@ class RoadmapPlan(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-b
         self.assertEqual("someone asks for it", items[2]["unpark"])
         self.assertIsNone(items[3]["unpark"])
 
+    def test_a_category_heading_groups_the_items_under_it(self):  # verifies: REQ-ROADMAP-998#CASE-6
+        plan = ("## Now\n\n- [ ] first | req: AREA-A-001\n\n### Viewer\n\n"
+                "- [ ] second | req: AREA-A-001\n\n## Later\n\n- [ ] third | unpark: x\n")
+        items = R.mapdata._parse_roadmap_from_text(plan)
+        self.assertEqual([None, "Viewer", None], [i["category"] for i in items])
+        self.assertEqual("", items[0]["context"])   # the heading is not the first item's prose
+
     def test_an_item_under_an_invented_heading_is_skipped(self):  # verifies: REQ-ROADMAP-998#CASE-2
         # `## Someday` carries one item; it must not leak in under the horizon above it.
         names = [i["name"] for i in R.mapdata._parse_roadmap_from_text(self.PLAN)]

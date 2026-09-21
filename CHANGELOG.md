@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.1.1` — 2026-09-21
+
+**ROADMAP pe categorii.**
+
+- Un `###` în ROADMAP.md e categoria itemurilor de sub el, nu nota celui de deasupra (ARCH-ROADMAP-038)
+
 ## plugin `v8.1.0` — 2026-09-21
 
 **Scorul de health își numește scutirile.**
