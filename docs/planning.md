@@ -55,7 +55,8 @@ Open items appear in their version's column on the Roadmap tab's Versions view.
 `requirements/_planning.json` on a fresh repo, because a plan file a repo does not have
 is a plan nobody writes. The first holds horizons — `Now` / `Next` / `Later`, an item
 per line with `| req: ID`; **the lines you indent under an item are its note**, and the
-Plan shows them when that item's bar is selected. The second holds the bars, the lanes
+Plan shows them when that item's bar is selected. A `### ` heading inside a horizon names
+the category of the items under it; it is never read as the note of the item above. The second holds the bars, the lanes
 and the release cadence — weekly on Friday unless you say otherwise with `every` and `on`.
 While nothing in it has a date, its calendar runs to the end of the year, or three months
 out, whichever is later; once bars exist it ends at the last of them, and `until` pins it.

@@ -269,6 +269,10 @@
       "hash": "7a94ddf4659e",
       "reason": "roadmap next steps"
     },
+    "REQ-ROADMAP-998": {
+      "hash": "df395dca73f2",
+      "reason": "REQ-ROADMAP-998: a ### heading is a category, not an item's note (CASE-6)"
+    },
     "REQ-RULES-947": {
       "hash": "68dd0cb1b87c",
       "reason": "baked fixture is JSON"

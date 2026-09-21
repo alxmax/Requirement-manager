@@ -275,6 +275,8 @@ Every bullet below is binding.
   and its `unpark:` condition when present.
 - An item under a heading that is not one of the four reserved horizons is skipped, as an
   item before the first milestone is skipped in `TODO.md`.
+- A `### ` heading inside a horizon names the category of the items under it, until the next
+  `### ` or horizon; it is never read as prose belonging to the item above it.
 - `gate --audit` reports an item whose `req:` names an id absent from the corpus.
 - `gate --audit` reports an open `Later` item carrying no `unpark:`.
 - Both signals are read-only and advisory: they never change an exit code, and a repo with
@@ -305,6 +307,12 @@ CASE-5 — a repo with no ROADMAP.md sees nothing
   Given  a code root holding no `ROADMAP.md`
   When   `gate --audit` runs
   Then   it prints no roadmap-plan line
+
+CASE-6 — a category heading groups the items under it
+  Given  `## Now`, an item, `### Viewer`, an item, then `## Later` and an item
+  When   the roadmap is parsed
+  Then   the first item has no category and empty context, the second is in `Viewer`, and the
+         Later item has no category
 
 ---
 id: REQ-PLANHORIZON-1010
