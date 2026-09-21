@@ -162,7 +162,6 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [x] V2: `--attach`, `--no-lint`, `--no-map-check` intră în `COMMANDS` sau mor. Gata când: SKILL / viewer / schema OpenAI / `--help` spun același lucru | req: ARCH-CMDREGISTRY-033
       <!-- v8.0.0, plus `clarify --apply`. -->
 - [ ] V2: SKILL.md ecranul 1 = 40 de linii; i18n, site, decompose, release → `references/`. Gata când: un agent nou citește 40 de linii și rulează `init` + `gate` corect | req: SYS-AUTHOR-101
-- [ ] V2: `init --no-site` implicit; piramida V-model iese din primul contact, `clarify --levels` rămâne. Gata când: `init` pe un repo de 12 fișiere nu scrie ARCH+SYS | req: ARCH-INIT-012
 - [ ] V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți | req: ARCH-MCP-073
 - [x] V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp | req: ARCH-MCP-073
       <!-- 2026-09-21: test, nu grep în CHANGELOG — REQ-MCPTOOLS-1028 CASE-6 fixează cele 14 nume. -->
@@ -187,13 +186,11 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] V3: Șterge `design*.py` (722 linii). Gata când: `ask --design` e unknown, motorul < 14.500 linii | req: ARCH-DESIGN-061 | unpark: n=2 verde și `_design_summary` deconectat
 - [ ] V3: `init` nu mai scrie `architecture.html`; `site.py` + `site_template.py` pleacă sau devin opt-in pe `sync --attach`. Gata când: un consumer nu găsește `docs/architecture.html` după `init` | req: ARCH-SITE-026 | unpark: n=2 verde
 - [ ] V3: Nu mai comite `_i18n/ro.json` (701 KB); `i18n.py` rămâne detector de gap. Gata când: clone-ul e ~9% mai mic, `ask --i18n` tot merge | req: ARCH-TRANSLATE-044 | unpark: n=2 verde
-- [ ] V3: Piramida iese din `init`; `pyramid.py` + `levels.py` rămân pe `clarify --levels`, `axis.py` stă. Gata când: primul contact e plat | req: ARCH-LEVELRETROFIT-066 | unpark: n=2 verde
 - [x] V3: Nu tăia `new` înainte de v8 — v8 conform ADR-0045, nu hotfix | req: ARCH-NEW-004 | unpark: v8.0.0
       <!-- Deja depășit: `new` a fost scos în #319 (ebe4061) și bara e în v8.0.0. -->
 
 ## Not now
 
-- Comparație cu OpenFastTrace / Doorstop / rmtoo în README — respinsă de maintainer pe 2026-09-21 (PR #325 închis)
 - Requirement history — `git log -L` pe blocul cerinței ajunge
 - `verifiable by:` umplut de la 2 la 54 — ADR-0016 a respins un marker la 4% adopție
 - Formă atomică (54 → ~665 noduri) — ADR-0025

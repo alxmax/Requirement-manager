@@ -23856,15 +23856,6 @@
       "section_date": null
     },
     {
-      "name": "V2: `init --no-site` implicit; piramida V-model iese din primul contact, `clarify --levels` rămâne. Gata când: `init` pe un repo de 12 fișiere nu scrie ARCH+SYS",
-      "horizon": "next",
-      "req": "ARCH-INIT-012",
-      "unpark": null,
-      "done": false,
-      "context": "",
-      "section_date": null
-    },
-    {
       "name": "V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți",
       "horizon": "next",
       "req": "ARCH-MCP-073",
@@ -23976,15 +23967,6 @@
       "name": "V3: Nu mai comite `_i18n/ro.json` (701 KB); `i18n.py` rămâne detector de gap. Gata când: clone-ul e ~9% mai mic, `ask --i18n` tot merge",
       "horizon": "later",
       "req": "ARCH-TRANSLATE-044",
-      "unpark": "n=2 verde",
-      "done": false,
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "V3: Piramida iese din `init`; `pyramid.py` + `levels.py` rămân pe `clarify --levels`, `axis.py` stă. Gata când: primul contact e plat",
-      "horizon": "later",
-      "req": "ARCH-LEVELRETROFIT-066",
       "unpark": "n=2 verde",
       "done": false,
       "context": "",
