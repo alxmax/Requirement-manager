@@ -13,6 +13,14 @@ from .sections import binding_hash
 from .versions import stale_plan_milestones, version_alignment_lines
 from .text import _verify_bullets
 
+# The frontmatter keys that waive a check for one requirement.
+EXEMPT_KEYS = ("lint_exempt", "test_exempt", "gate_exempt")
+
+
+def _exempt_note(data):  # implements: REQ-HEALTH-968
+    """', N with an exemption' for a score line, or '' when nothing is waived."""
+    return ", {} with an exemption".format(data["exempt"]) if data.get("exempt") else ""
+
 
 def _link_sync_errors(reqs, members):  # implements: ARCH-HEALTH-017  # implements: REQ-RULES-947
     """`gate`'s ERROR-level link-sync problems (dangling tags, enforced requirements
@@ -223,9 +231,16 @@ def _health_record(reqs, members, reqs_dir):
     # requirements in the denominator. The reviewed score already excluded them.
     scored = total - retired
     score = round(100 * healthy / scored) if scored else 0
+    # implements: REQ-HEALTH-968
+    # A waiver is part of the score's meaning: 100/100 over twenty exemptions says less
+    # than 100/100 over none, and a reader of the number alone cannot tell them apart.
+    exempt = sum(1 for r in reqs.values()
+                 if r["meta"].get("status") != "deprecated"
+                 and any(_as_list(r["meta"].get(k)) for k in EXEMPT_KEYS))
     reviewed_score, reviewed_total = _reviewed_score(confirmed, drafts, healthy)
     gate_errors = _link_sync_errors(reqs, members)
     data = {"score": score, "total": total, "scored": scored, "healthy": healthy,
+            "exempt": exempt,
             "deprecated": retired, "confirmed": confirmed, "implemented": implemented,
             "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
@@ -304,6 +319,8 @@ def _health_badge_payload(data):
     color = ("brightgreen" if score == 100 else "green" if score >= 80
              else "yellow" if score >= 60 else "red")
     message = "{}/{} | {}%".format(confirmed, total, score)
+    if data.get("exempt"):
+        message += " | {} exempt".format(data["exempt"])
     # a badge cannot read "clean" while gate has link-sync errors gate itself
     # would fail on — this is the exact false-positive RM-6 closes.
     if gate_errors:
@@ -326,8 +343,8 @@ def _print_health_report(data, design, untagged, lag, headline_only):
     reviewed_score = data.get("reviewed_score")
     reviewed_total = data.get("reviewed_total")
     retired = data.get("deprecated", 0)
-    print("Requirement health: {}/100  ({}/{} green on every axis{})".format(
-        score, healthy, total - retired,
+    print("Requirement health: {}/100  ({}/{} green on every axis{}{})".format(
+        score, healthy, total - retired, _exempt_note(data),
         ", {} deprecated not scored".format(retired) if retired else ""))
     if headline_only:
         # `next` opens with the score and then lists what to do about it; the component

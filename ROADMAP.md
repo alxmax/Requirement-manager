@@ -166,7 +166,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] V4: Comparație de 20 de linii vs Doorstop / OpenFastTrace / rmtoo („Markdown + tag + CI, stdlib, fără server”). Gata când: e în README după cele 3 comenzi | req: SYS-SSOT-001
 - [ ] V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece | req: ARCH-INIT-012
 - [ ] V4: Cadență: 1 release / săptămână. Gata când: septembrie viitor are ≤5 tag-uri, nu 97 | req: ARCH-RELEASE-072
-- [ ] V4: Health 100/100 cu 13 `lint_exempt` nu se mai publică ca scor — scoate badge-ul sau pune numărul de scutiri lângă el. Gata când: un auditor nu citește 100/100 ca „corpus perfect” | req: ARCH-HEALTH-017
+- [x] V4: Health 100/100 cu 13 `lint_exempt` nu se mai publică ca scor — scoate badge-ul sau pune numărul de scutiri lângă el. Gata când: un auditor nu citește 100/100 ca „corpus perfect” | req: ARCH-HEALTH-017
 - [ ] V4: Un canal public (Discussions / show-and-tell). Gata când: primul screenshot dintr-un repo străin e acolo, nu în DM | req: SYS-SSOT-001
 
 ## Later

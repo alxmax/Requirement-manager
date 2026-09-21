@@ -85,6 +85,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "Add `bars` with start/end dates to _planning.json for the timeline view.":
     "Adaugă `bars` cu date start/end în _planning.json pentru vizualizarea timeline.",
   "{a}/{b} green": "{a}/{b} verzi",
+  "{n} exempt": "{n} cu scutire",
   "{a}/{b} files clean": "{a}/{b} fișiere curate",
   "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
     "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări "

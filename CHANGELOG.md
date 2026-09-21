@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.1.0` — 2026-09-21
+
+**Scorul de health își numește scutirile.**
+
+- Scorul de health numește câte cerințe au o scutire (gate --risk, --audit, badge, viewer) (ARCH-HEALTH-017)
+
 ## plugin `v8.0.1` — 2026-09-21
 
 **Ce a stricat prima re-vendorizare (Consilium-py).**

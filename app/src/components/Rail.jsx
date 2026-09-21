@@ -97,6 +97,7 @@ function RailGauges({ setView }) {
             <span className="gauge-name">{t("Health")}<b>{HEALTH.score}</b></span>
             <span className="gauge-sub">
               {t("{a}/{b} green", { a: HEALTH.healthy, b: HEALTH.scored ?? HEALTH.total })}
+              {HEALTH.exempt ? " · " + t("{n} exempt", { n: HEALTH.exempt }) : ""}
             </span>
           </span>
         </button>

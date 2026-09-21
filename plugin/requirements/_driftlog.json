@@ -185,6 +185,10 @@
       "hash": "524079054104",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "REQ-HEALTH-968": {
+      "hash": "1e8655d24ce1",
+      "reason": "REQ-HEALTH-968: the score names its exemptions (CASE-4)"
+    },
     "REQ-HISTORY-1003": {
       "hash": "55682bd805d3",
       "reason": null
