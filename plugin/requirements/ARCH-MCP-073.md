@@ -116,6 +116,8 @@ Every bullet below is binding.
 - A call's result carries the command's output as text and, when the exit code is not zero,
   a second item naming it. `isError` is set only for an exit code the tool does not count as
   an answer: `reqmap_gate`'s exit 1 is a FAIL verdict, not an error.
+- The tool set is frozen at its fourteen tools until a consumer other than the maintainer
+  uses the server: a fifteenth, or a renamed one, is a change to this clause first.
 
 ## Cases
 CASE-1 — the tools name only what the CLI has
@@ -142,6 +144,11 @@ CASE-5 — a release plan passes --release with or without a version
   Given  `reqmap_release_plan` called with no version and with `v1.2.0`
   When   the arguments are built
   Then   they are `sync --json --release` and `sync --json --release v1.2.0`
+
+CASE-6 — the tool set is frozen
+  Given  the tool table
+  When   its names are read
+  Then   they are exactly the fourteen of 2026-09-21, from `reqmap_gate` to `reqmap_release`
 
 
 --------------------
