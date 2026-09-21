@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-21
-engine: 2026-09-21
+engine: 2026-09-21.1
 nodes: 292
 edges: 121
 design pass-rate: 98% (107/109 source files without a design candidate)
@@ -452,8 +452,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_registry_py_12_42["plugin/scripts/reqmap_engine/registry.py:12-42"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_registry_py_12_42
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_292["plugin/scripts/reqmap.py:292"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_292
+  f_plugin_scripts_reqmap_py_286["plugin/scripts/reqmap.py:286"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_286
   f_plugin_scripts_test_reqmap_report_py_3135["plugin/scripts/test_reqmap_report.py:3135"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_3135
   f_plugin_scripts_reqmap_engine_config_py_203_213["plugin/scripts/reqmap_engine/config.py:203-213"]
@@ -676,8 +676,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_parse_py_7_97["plugin/scripts/reqmap_engine/parse.py:7-97"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_7_97
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_339_357["plugin/scripts/reqmap.py:339-357"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_339_357
+  f_plugin_scripts_reqmap_py_333_351["plugin/scripts/reqmap.py:333-351"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_333_351
   f_plugin_scripts_test_reqmap_gate_py_2057["plugin/scripts/test_reqmap_gate.py:2057"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2057
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]

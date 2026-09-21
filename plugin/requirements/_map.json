@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-21",
+  "engine_version": "2026-09-21.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1037,7 +1037,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:256"
+          "loc": "plugin/scripts/reqmap.py:250"
         },
         {
           "role": "tested-by",
@@ -2914,22 +2914,23 @@
       "title": "`ask` holds the questions, `gate` the verdict",
       "intent": "`gate` was two things under one name: the commit verdict every hook runs, and every question the engine can answer, sixteen flags in all. A reader choosing a flag had to know which of them run the verdict and which never do. ADR-0044 moves the questions to their own verb.",
       "contract": [
-        "The command registry gives `gate` exactly nine flags: `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json` and `--since`.",
+        "The command registry gives `gate` exactly eleven flags: `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint` and `--no-map-check`.",
         "`ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and `--json`. `ask --review` with no id plans the whole corpus.",
-        "Until v8.0.0, `gate` given one of `ask`'s flags runs the same call as `ask`: the same exit code and byte-identical stdout, plus exactly one line on stderr naming the `ask` spelling and v8.0.0. The line never goes to stdout, where it would break `--json` for every parser.",
-        "`ask` given a flag the registry gives another verb, or given no mode at all, exits 2 with one line and runs nothing.",
+        "Since v8.0.0, `gate` given one of `ask`'s flags exits 2 with one stderr line naming `ask`, and runs nothing.",
+        "Every verb given a flag the registry gives another verb exits 2 with one stderr line naming the verb that owns it, and runs nothing. `ask` given no mode at all exits 2 as well.",
         "No MCP tool invokes `gate` with a flag `ask` owns."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — the registry splits the flags Given  the command registry When   the flags of `gate` and `ask` are read Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag",
-        "CASE-2 — — the old spelling is the same call plus one stderr line Given  a corpus and each moved spelling, with and without `--json` When   it runs as `gate …` and as `ask …` Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly one line naming `ask` and v8.0.0",
+        "CASE-1 — — the registry splits the flags Given  the command registry When   the flags of `gate` and `ask` are read Then   `gate` has eleven, none of them a moved flag, and `ask` has every moved flag",
+        "CASE-2 — — the old spelling is refused Given  a corpus and each moved spelling When   it runs as `gate …` Then   it exits 2, stderr names `ask`, and no verdict is printed",
         "CASE-3 — — `ask` refuses what it does not own Given  a corpus When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show` Then   it exits 2 and no verdict is printed",
-        "CASE-4 — — the MCP tools ask `ask` Given  the MCP tool table When   each tool's verb and flags are read Then   no tool pairs `gate` with a flag `ask` owns --------------------"
+        "CASE-4 — — the MCP tools ask `ask` Given  the MCP tool table When   each tool's verb and flags are read Then   no tool pairs `gate` with a flag `ask` owns",
+        "CASE-5 — — every verb refuses a flag it does not own Given  a corpus When   `gate --wipe`, `sync --wipe`, `gate --plan`, `init --strict`, `clarify --risk` or `sync --search` runs Then   each exits 2, stderr names the verb that owns the flag, and nothing is written --------------------"
       ],
-      "accept": "CASE-1 — the registry splits the flags\n  Given  the command registry\n  When   the flags of `gate` and `ask` are read\n  Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag\n\nCASE-2 — the old spelling is the same call plus one stderr line\n  Given  a corpus and each moved spelling, with and without `--json`\n  When   it runs as `gate …` and as `ask …`\n  Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly\n         one line naming `ask` and v8.0.0\n\nCASE-3 — `ask` refuses what it does not own\n  Given  a corpus\n  When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show`\n  Then   it exits 2 and no verdict is printed\n\nCASE-4 — the MCP tools ask `ask`\n  Given  the MCP tool table\n  When   each tool's verb and flags are read\n  Then   no tool pairs `gate` with a flag `ask` owns\n\n--------------------",
+      "accept": "CASE-1 — the registry splits the flags\n  Given  the command registry\n  When   the flags of `gate` and `ask` are read\n  Then   `gate` has eleven, none of them a moved flag, and `ask` has every moved flag\n\nCASE-2 — the old spelling is refused\n  Given  a corpus and each moved spelling\n  When   it runs as `gate …`\n  Then   it exits 2, stderr names `ask`, and no verdict is printed\n\nCASE-3 — `ask` refuses what it does not own\n  Given  a corpus\n  When   `ask` runs with no mode, or with `--strict`, `--risk`, `--since` or `--show`\n  Then   it exits 2 and no verdict is printed\n\nCASE-4 — the MCP tools ask `ask`\n  Given  the MCP tool table\n  When   each tool's verb and flags are read\n  Then   no tool pairs `gate` with a flag `ask` owns\n\nCASE-5 — every verb refuses a flag it does not own\n  Given  a corpus\n  When   `gate --wipe`, `sync --wipe`, `gate --plan`, `init --strict`, `clarify --risk` or\n         `sync --search` runs\n  Then   each exits 2, stderr names the verb that owns the flag, and nothing is written\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2943,7 +2944,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:185"
+          "loc": "plugin/scripts/reqmap.py:179"
         },
         {
           "role": "tested-by",
@@ -2951,27 +2952,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2948"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2953"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:147"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:153"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:167"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:146"
         }
       ],
       "test_exempt": null,
       "milestone": "v7.22.0",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "REQ-NEWGONE-1034",
@@ -3018,7 +3015,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2968"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2974"
         },
         {
           "role": "implements",
@@ -3082,7 +3079,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:292"
+          "loc": "plugin/scripts/reqmap.py:286"
         },
         {
           "role": "tested-by",
@@ -11851,11 +11848,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:339"
+          "loc": "plugin/scripts/reqmap.py:333"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:357"
+          "loc": "plugin/scripts/reqmap.py:351"
         },
         {
           "role": "tested-by",
@@ -11903,7 +11900,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:357"
+          "loc": "plugin/scripts/reqmap.py:351"
         },
         {
           "role": "tested-by",
@@ -12836,7 +12833,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:272"
+          "loc": "plugin/scripts/reqmap.py:266"
         },
         {
           "role": "tested-by",
@@ -17637,7 +17634,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:246"
+          "loc": "plugin/scripts/reqmap.py:240"
         },
         {
           "role": "tested-by",
@@ -23581,6 +23578,78 @@
       "req": "ARCH-CMDREGISTRY-033",
       "unpark": null,
       "done": true,
+      "context": "<!-- Valul 0 — aplică ce e deja scris (1–2 zile) -->",
+      "section_date": null
+    },
+    {
+      "name": "V0: Aplică patch-ul first-contact. Gata când: `gate --help` nu listează `--wipe`, demo-ul din `examples/hello-drift` arată DRIFT",
+      "horizon": "now",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "context": "<!-- `reqmap-first-contact.patch` nu e în repo; singura urmă e branch-ul\n`origin/fix/first-contact-horizons` (098eb07). -->",
+      "section_date": null
+    },
+    {
+      "name": "V0: Release v8.0.0 (nu v7.23.1: `main` avea deja scoaterea lui `new`), cu `sync --release`. Gata când: tag-ul există, `check@v8` pointează pe el",
+      "horizon": "now",
+      "req": "ARCH-RELEASE-072",
+      "unpark": null,
+      "done": true,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V0: Pages = landing-ul de 3 comenzi, nu posterul; `architecture.html` rămâne link. Gata când: un străin nu cade în 291 de noduri",
+      "horizon": "now",
+      "req": "ARCH-SITE-026",
+      "unpark": null,
+      "done": false,
+      "context": "<!-- Valul 1 — primul străin poate evalua (săptămâna asta) -->",
+      "section_date": null
+    },
+    {
+      "name": "V1: Topics GitHub: requirements, drift, ssot, spec, claude-code, mcp, traceability. Gata când: `topic:drift` găsește repo-ul",
+      "horizon": "now",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V1: PR-uri de la public (`pull_request_creation_policy` ≠ collaborators_only). Gata când: un fork poate deschide PR",
+      "horizon": "now",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V1: n=2 real: Consilium-py pe `uses: alxmax/requirement-manager/check@v8`. Scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul. Gata când: job verde 7 zile pe `main` și motorul Consilium re-vendorizat (azi e din 19 iunie)",
+      "horizon": "now",
+      "req": "ARCH-SELFGATE-039",
+      "unpark": null,
+      "done": false,
+      "context": "<!-- Mutat din Later pe 2026-09-21. -->",
+      "section_date": null
+    },
+    {
+      "name": "V1: Un evaluator numit, nu un repo al tău — om/echipă ≠ Schipor, repo-ul lor, fără ajutor la gate. Gata când: au `uses: …/check@v8` pe un tree pe care nu-l comiți tu",
+      "horizon": "now",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V1: Issue template „I tried this on my repo” — limbă, mărime tree, ce-a picat, ce-a mers, BSL a blocat? Gata când: primul issue din afară se deschide fără să ghicească formatul",
+      "horizon": "now",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
       "context": "",
       "section_date": null
     },
@@ -23625,7 +23694,7 @@
       "horizon": "next",
       "req": "ARCH-CMDREGISTRY-033",
       "unpark": null,
-      "done": false,
+      "done": true,
       "context": "",
       "section_date": null
     },
@@ -23698,6 +23767,105 @@
       "req": "ARCH-VIEWER-007",
       "unpark": null,
       "done": false,
+      "context": "<!-- Valul 2 — produsul pe care-l țin minte (2 săptămâni) -->",
+      "section_date": null
+    },
+    {
+      "name": "V2: Parser din registry după v8, nu în v8 — subparser per verb. Gata când: `reqmap gate --wipe` e `unrecognized arguments`, nu no-op tăcut",
+      "horizon": "next",
+      "req": "ARCH-CMDREGISTRY-033",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V2: `--attach`, `--no-lint`, `--no-map-check` intră în `COMMANDS` sau mor. Gata când: SKILL / viewer / schema OpenAI / `--help` spun același lucru",
+      "horizon": "next",
+      "req": "ARCH-CMDREGISTRY-033",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V2: SKILL.md ecranul 1 = 40 de linii; i18n, site, decompose, release → `references/`. Gata când: un agent nou citește 40 de linii și rulează `init` + `gate` corect",
+      "horizon": "next",
+      "req": "SYS-AUTHOR-101",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V2: `init --no-site` implicit; piramida V-model iese din primul contact, `clarify --levels` rămâne. Gata când: `init` pe un repo de 12 fișiere nu scrie ARCH+SYS",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți",
+      "horizon": "next",
+      "req": "ARCH-MCP-073",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp",
+      "horizon": "next",
+      "req": "ARCH-MCP-073",
+      "unpark": null,
+      "done": false,
+      "context": "<!-- Valul 4 — adopție care nu e marketing (continuu) -->",
+      "section_date": null
+    },
+    {
+      "name": "V4: Comparație de 20 de linii vs Doorstop / OpenFastTrace / rmtoo („Markdown + tag + CI, stdlib, fără server”). Gata când: e în README după cele 3 comenzi",
+      "horizon": "next",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V4: Cadență: 1 release / săptămână. Gata când: septembrie viitor are ≤5 tag-uri, nu 97",
+      "horizon": "next",
+      "req": "ARCH-RELEASE-072",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V4: Health 100/100 cu 13 `lint_exempt` nu se mai publică ca scor — scoate badge-ul sau pune numărul de scutiri lângă el. Gata când: un auditor nu citește 100/100 ca „corpus perfect”",
+      "horizon": "next",
+      "req": "ARCH-HEALTH-017",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V4: Un canal public (Discussions / show-and-tell). Gata când: primul screenshot dintr-un repo străin e acolo, nu în DM",
+      "horizon": "next",
+      "req": "SYS-SSOT-001",
+      "unpark": null,
+      "done": false,
       "context": "",
       "section_date": null
     },
@@ -23708,15 +23876,6 @@
       "unpark": "consumator numit care nu poate CLI",
       "done": true,
       "context": "<!-- v7.21.12, ADR-0043. Deblocat de decizia maintainerului („MCP e un must have”), nu de\ncondiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes.\nv7.21.13: JSON pentru show/search/dupes și resursele reqmap://map și\nreqmap://requirement/<id>. În _planning.json, bara „Server MCP” e la 100%. -->",
-      "section_date": null
-    },
-    {
-      "name": "n=2: Consilium-py pe `uses: alxmax/requirement-manager/check@v7`. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul",
-      "horizon": "later",
-      "req": null,
-      "unpark": "Consilium-py are action-ul pe `main`, verde 7 zile",
-      "done": false,
-      "context": "",
       "section_date": null
     },
     {
@@ -23734,7 +23893,61 @@
       "req": null,
       "unpark": "un cititor din afara repo-ului care folosește viewer-ul în RO",
       "done": false,
+      "context": "<!-- Valul 3 — taie ce nu e produsul (după n=2, 1–2 săptămâni) -->",
+      "section_date": null
+    },
+    {
+      "name": "V3: Deconectează `_design_summary` din health / mapcmd / audit. Gata când: `ask --design` e singurul import",
+      "horizon": "later",
+      "req": "ARCH-DESIGN-061",
+      "unpark": "n=2 verde (Consilium-py pe check@v8, 7 zile)",
+      "done": false,
       "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V3: Șterge `design*.py` (722 linii). Gata când: `ask --design` e unknown, motorul < 14.500 linii",
+      "horizon": "later",
+      "req": "ARCH-DESIGN-061",
+      "unpark": "n=2 verde și `_design_summary` deconectat",
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V3: `init` nu mai scrie `architecture.html`; `site.py` + `site_template.py` pleacă sau devin opt-in pe `sync --attach`. Gata când: un consumer nu găsește `docs/architecture.html` după `init`",
+      "horizon": "later",
+      "req": "ARCH-SITE-026",
+      "unpark": "n=2 verde",
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V3: Nu mai comite `_i18n/ro.json` (701 KB); `i18n.py` rămâne detector de gap. Gata când: clone-ul e ~9% mai mic, `ask --i18n` tot merge",
+      "horizon": "later",
+      "req": "ARCH-TRANSLATE-044",
+      "unpark": "n=2 verde",
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V3: Piramida iese din `init`; `pyramid.py` + `levels.py` rămân pe `clarify --levels`, `axis.py` stă. Gata când: primul contact e plat",
+      "horizon": "later",
+      "req": "ARCH-LEVELRETROFIT-066",
+      "unpark": "n=2 verde",
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "V3: Nu tăia `new` înainte de v8 — v8 conform ADR-0045, nu hotfix",
+      "horizon": "later",
+      "req": "ARCH-NEW-004",
+      "unpark": "v8.0.0",
+      "done": true,
+      "context": "<!-- Deja depășit: `new` a fost scos în #319 (ebe4061) și bara e în v8.0.0. -->\n",
       "section_date": null
     }
   ],
@@ -23993,9 +24206,9 @@
     },
     {
       "month": "2026-09",
-      "count": 97,
+      "count": 98,
       "first": "2026-09-02",
-      "last": "2026-09-20",
+      "last": "2026-09-21",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -24093,11 +24306,17 @@
         "v7.21.9",
         "v7.22.0",
         "v7.22.1",
-        "v7.23.0"
+        "v7.23.0",
+        "v8.0.0"
       ],
-      "landmark": "v7.0.0",
-      "headline": "The engine is a package behind a thin CLI",
+      "landmark": "v8.0.0",
+      "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate",
       "entries": [
+        {
+          "version": "v8.0.0",
+          "date": "2026-09-21",
+          "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate"
+        },
         {
           "version": "v7.23.0",
           "date": "2026-09-20",
@@ -24656,13 +24875,21 @@
         {
           "flag": "--since",
           "help": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
+        },
+        {
+          "flag": "--no-lint",
+          "help": "Skip the requirement readability check."
+        },
+        {
+          "flag": "--no-map-check",
+          "help": "Skip the committed-map freshness check."
         }
       ]
     },
     {
       "name": "ask",
       "group": "read",
-      "summary": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts these flags and prints one migration line on stderr.",
+      "summary": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`.",
       "arg": null,
       "flags": [
         {
@@ -24730,6 +24957,10 @@
           "help": "Also regenerate the aggregated open-questions file."
         },
         {
+          "flag": "--attach",
+          "help": "Target HTML to inject the site's engine-owned regions into (scaffolds it if absent)."
+        },
+        {
           "flag": "--accept-drift",
           "help": "Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it. Takes an optional reason, recorded in requirements/_driftlog.json so the waiver and its justification land in the diff."
         },
@@ -24760,6 +24991,10 @@
         {
           "flag": "--json",
           "help": "Emit the questions as JSON for an agent to answer."
+        },
+        {
+          "flag": "--apply",
+          "help": "With --decompose or --levels: write the proposal instead of printing it."
         }
       ]
     },
@@ -24830,7 +25065,7 @@
   },
   "planning": {
     "milestones": {
-      "v8.0.0": {
+      "v8.1.0": {
         "due": "2026-11-27",
         "label": "Datoria de viewer: split ARCH-VIEWER-007"
       }
@@ -24854,26 +25089,8 @@
         "start": "2026-11-02",
         "end": "2026-11-27",
         "lane": "Feature",
-        "milestone": "v8.0.0",
+        "milestone": "v8.1.0",
         "req": "ARCH-VIEWER-007",
-        "progress": 0
-      },
-      {
-        "title": "Scoate verbul `new` și `new --from-todo` (ADR-0045)",
-        "start": "2026-11-23",
-        "end": "2026-11-27",
-        "lane": "Fix",
-        "milestone": "v8.0.0",
-        "req": "ARCH-NEW-004",
-        "progress": 0
-      },
-      {
-        "title": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
-        "start": "2026-11-23",
-        "end": "2026-11-27",
-        "lane": "Fix",
-        "milestone": "v8.0.0",
-        "req": "ARCH-CMDREGISTRY-033",
         "progress": 0
       }
     ],
@@ -24903,7 +25120,7 @@
   },
   "targets": {
     "milestones": {
-      "v8.0.0": {
+      "v8.1.0": {
         "due": "2026-11-27",
         "label": "Datoria de viewer: split ARCH-VIEWER-007"
       }
@@ -24927,26 +25144,8 @@
         "start": "2026-11-02",
         "end": "2026-11-27",
         "lane": "Feature",
-        "milestone": "v8.0.0",
+        "milestone": "v8.1.0",
         "req": "ARCH-VIEWER-007",
-        "progress": 0
-      },
-      {
-        "title": "Scoate verbul `new` și `new --from-todo` (ADR-0045)",
-        "start": "2026-11-23",
-        "end": "2026-11-27",
-        "lane": "Fix",
-        "milestone": "v8.0.0",
-        "req": "ARCH-NEW-004",
-        "progress": 0
-      },
-      {
-        "title": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
-        "start": "2026-11-23",
-        "end": "2026-11-27",
-        "lane": "Fix",
-        "milestone": "v8.0.0",
-        "req": "ARCH-CMDREGISTRY-033",
         "progress": 0
       }
     ],

@@ -153,6 +153,18 @@ COMMANDS = {
                     "this git ref (e.g. 'main', 'HEAD~1')."
                 ),
             },
+            {
+                "name": "no_lint",
+                "flag": "--no-lint",
+                "type": "bool",
+                "help": "Skip the requirement readability check.",
+            },
+            {
+                "name": "no_map_check",
+                "flag": "--no-map-check",
+                "type": "bool",
+                "help": "Skip the committed-map freshness check.",
+            },
         ],
     },
     "ask": {
@@ -161,8 +173,8 @@ COMMANDS = {
             "writes, and its exit code is the question's, never the gate's: --search ranks "
             "requirements by relevance, --dupes ranks overlapping contracts, --design reviews "
             "the code, --review emits the machine-readable review plan, --i18n lists missing "
-            "translations. Exactly one mode per call. Until v8.0.0, `gate` still accepts "
-            "these flags and prints one migration line on stderr. "
+            "translations. Exactly one mode per call. Since v8.0.0, `gate` refuses these "
+            "flags and names `ask`. "
         ),
         "arg": None,
         "params": [
@@ -304,6 +316,15 @@ COMMANDS = {
                 ),
             },
             {
+                "name": "attach",
+                "flag": "--attach",
+                "type": "str",
+                "help": (
+                    "Target HTML to inject the site's engine-owned regions into "
+                    "(scaffolds it if absent)."
+                ),
+            },
+            {
                 "name": "accept_drift",
                 "flag": "--accept-drift",
                 "type": "str",
@@ -367,6 +388,8 @@ COMMANDS = {
             },
             {"name": "as_json", "flag": "--json", "type": "bool",
              "help": "Emit the questions as JSON for an agent to answer."},
+            {"name": "do_apply", "flag": "--apply", "type": "bool",
+             "help": "With --decompose or --levels: write the proposal instead of printing it."},
         ],
     },
     # `tool: False` — a server is not a function to call, so the generated function-calling

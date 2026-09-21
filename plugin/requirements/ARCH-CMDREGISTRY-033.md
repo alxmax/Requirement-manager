@@ -195,28 +195,26 @@ satisfies: [ARCH-CMDREGISTRY-033]
 > them run the verdict and which never do. ADR-0044 moves the questions to their own verb.
 
 Every bullet below is binding.
-- The command registry gives `gate` exactly nine flags: `--audit`, `--risk`, `--show`, `--all`,
-  `--untagged`, `--badge`, `--strict`, `--json` and `--since`.
+- The command registry gives `gate` exactly eleven flags: `--audit`, `--risk`, `--show`, `--all`,
+  `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint` and `--no-map-check`.
 - `ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and
   `--json`. `ask --review` with no id plans the whole corpus.
-- Until v8.0.0, `gate` given one of `ask`'s flags runs the same call as `ask`: the same exit code
-  and byte-identical stdout, plus exactly one line on stderr naming the `ask` spelling and v8.0.0.
-  The line never goes to stdout, where it would break `--json` for every parser.
-- `ask` given a flag the registry gives another verb, or given no mode at all, exits 2 with one
-  line and runs nothing.
+- Since v8.0.0, `gate` given one of `ask`'s flags exits 2 with one stderr line naming `ask`, and
+  runs nothing.
+- Every verb given a flag the registry gives another verb exits 2 with one stderr line naming the
+  verb that owns it, and runs nothing. `ask` given no mode at all exits 2 as well.
 - No MCP tool invokes `gate` with a flag `ask` owns.
 
 ## Cases
 CASE-1 — the registry splits the flags
   Given  the command registry
   When   the flags of `gate` and `ask` are read
-  Then   `gate` has nine, none of them a moved flag, and `ask` has every moved flag
+  Then   `gate` has eleven, none of them a moved flag, and `ask` has every moved flag
 
-CASE-2 — the old spelling is the same call plus one stderr line
-  Given  a corpus and each moved spelling, with and without `--json`
-  When   it runs as `gate …` and as `ask …`
-  Then   both exit 0 with identical stdout, JSON output parses, and `gate`'s stderr adds exactly
-         one line naming `ask` and v8.0.0
+CASE-2 — the old spelling is refused
+  Given  a corpus and each moved spelling
+  When   it runs as `gate …`
+  Then   it exits 2, stderr names `ask`, and no verdict is printed
 
 CASE-3 — `ask` refuses what it does not own
   Given  a corpus
@@ -227,6 +225,12 @@ CASE-4 — the MCP tools ask `ask`
   Given  the MCP tool table
   When   each tool's verb and flags are read
   Then   no tool pairs `gate` with a flag `ask` owns
+
+CASE-5 — every verb refuses a flag it does not own
+  Given  a corpus
+  When   `gate --wipe`, `sync --wipe`, `gate --plan`, `init --strict`, `clarify --risk` or
+         `sync --search` runs
+  Then   each exits 2, stderr names the verb that owns the flag, and nothing is written
 
 --------------------
 

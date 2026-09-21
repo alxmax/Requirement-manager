@@ -17,7 +17,7 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 14,887 lines across
+map of how everything connects. The engine is stdlib only, 14,882 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 
@@ -69,7 +69,7 @@ Nothing else in the toolchain catches that; `gate` does, because the drift basel
 Fail the build on drift, on every push and pull request:
 
 ```yaml
-- uses: alxmax/requirement-manager/check@v7
+- uses: alxmax/requirement-manager/check@v8
 ```
 
 The action runs `reqmap.py gate` — also the readability lint and the map-freshness check —

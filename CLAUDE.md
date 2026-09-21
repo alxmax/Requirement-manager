@@ -39,7 +39,7 @@ python scripts/reqmap.py ask --review [AREA-NAME-NNN]  # emit a JSON review plan
 # The EN/RO toggle in the viewer still reads requirements/_i18n/<locale>.json; the `translate` verb that WROTE that cache was removed 2026-09-05, so a refresh is now a manual step.
 ```
 
-The CLI has six verbs — `init`, `gate`, `sync`, `clarify`, `ask` (every read-only question that is not the verdict, ADR-0044), and `mcp`, the server (ADR-0043) (`reqmap.py --help`); everything else is a flag of one of them. `new` was the seventh until v8.0.0 removed it (ADR-0045, REQ-NEWGONE-1034). Until v8.0.0 `gate` still accepts `ask`'s flags (`--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold`) with one migration line on stderr.
+The CLI has six verbs — `init`, `gate`, `sync`, `clarify`, `ask` (every read-only question that is not the verdict, ADR-0044), and `mcp`, the server (ADR-0043) (`reqmap.py --help`); everything else is a flag of one of them. `new` was the seventh until v8.0.0 removed it (ADR-0045, REQ-NEWGONE-1034). Since v8.0.0 every verb refuses a flag the registry gives another verb (exit 2, naming the owner), `gate --search` & co. included.
 
 The viewer (`app/`, see `app/CLAUDE.md`), run from `app/`:
 
@@ -206,9 +206,9 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v7`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v7` ships with plugin `7.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v8`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v8` ships with plugin `8.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
 ```yaml
-- uses: alxmax/requirement-manager/check@v7
+- uses: alxmax/requirement-manager/check@v8
 ```
 
 The action also ships `check/engine_staleness.py` (`ARCH-STALEENGINE-043`): it compares the

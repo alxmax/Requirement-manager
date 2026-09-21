@@ -34,6 +34,20 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [x] `sync --help` numește pașii (scan → drift → lock → map → findings → site) | req: ARCH-CMDREGISTRY-033
 - [x] Scoate `gate --implement` (ADR-0037 pass 2) | req: ARCH-CMDREGISTRY-033
 
+<!-- Valul 0 — aplică ce e deja scris (1–2 zile) -->
+- [ ] V0: Aplică patch-ul first-contact. Gata când: `gate --help` nu listează `--wipe`, demo-ul din `examples/hello-drift` arată DRIFT | req: ARCH-INIT-012
+      <!-- `reqmap-first-contact.patch` nu e în repo; singura urmă e branch-ul
+           `origin/fix/first-contact-horizons` (098eb07). -->
+- [x] V0: Release v8.0.0 (nu v7.23.1: `main` avea deja scoaterea lui `new`), cu `sync --release`. Gata când: tag-ul există, `check@v8` pointează pe el | req: ARCH-RELEASE-072
+- [ ] V0: Pages = landing-ul de 3 comenzi, nu posterul; `architecture.html` rămâne link. Gata când: un străin nu cade în 291 de noduri | req: ARCH-SITE-026
+<!-- Valul 1 — primul străin poate evalua (săptămâna asta) -->
+- [ ] V1: Topics GitHub: requirements, drift, ssot, spec, claude-code, mcp, traceability. Gata când: `topic:drift` găsește repo-ul | req: SYS-SSOT-001
+- [ ] V1: PR-uri de la public (`pull_request_creation_policy` ≠ collaborators_only). Gata când: un fork poate deschide PR | req: SYS-SSOT-001
+- [ ] V1: n=2 real: Consilium-py pe `uses: alxmax/requirement-manager/check@v8`. Scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul. Gata când: job verde 7 zile pe `main` și motorul Consilium re-vendorizat (azi e din 19 iunie) | req: ARCH-SELFGATE-039
+      <!-- Mutat din Later pe 2026-09-21. -->
+- [ ] V1: Un evaluator numit, nu un repo al tău — om/echipă ≠ Schipor, repo-ul lor, fără ajutor la gate. Gata când: au `uses: …/check@v8` pe un tree pe care nu-l comiți tu | req: SYS-SSOT-001
+- [ ] V1: Issue template „I tried this on my repo” — limbă, mărime tree, ce-a picat, ce-a mers, BSL a blocat? Gata când: primul issue din afară se deschide fără să ghicească formatul | req: SYS-SSOT-001
+
 ## Next
 
 - [x] Planul si Versiunile citesc acelasi lucru | req: ARCH-VIEWER-007
@@ -93,7 +107,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            `_set_frontmatter_status`, `_write_frontmatter_status`, pe care le citesc
            `gate`, `retire`, `mapcmd` și `mapdata`. Bara rămâne în v8.0.0: versiunea se
            taie când intră și celelalte două (alias-urile `gate --…`, split-ul viewer-ului). -->
-- [ ] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
+- [x] Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) | req: ARCH-CMDREGISTRY-033
 - [x] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
       <!-- 527 -> 92 de linii. Nimic nu s-a pierdut: secțiunile tăiate au plecat verbatim în
            cinci pagini de referință, `docs/commands.md`, `docs/requirements.md`,
@@ -136,6 +150,20 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            citită din CHANGELOG.md. 100 de release-uri, 2026-06-04 -> azi. -->
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
 
+<!-- Valul 2 — produsul pe care-l țin minte (2 săptămâni) -->
+- [ ] V2: Parser din registry după v8, nu în v8 — subparser per verb. Gata când: `reqmap gate --wipe` e `unrecognized arguments`, nu no-op tăcut | req: ARCH-CMDREGISTRY-033
+- [ ] V2: `--attach`, `--no-lint`, `--no-map-check` intră în `COMMANDS` sau mor. Gata când: SKILL / viewer / schema OpenAI / `--help` spun același lucru | req: ARCH-CMDREGISTRY-033
+- [ ] V2: SKILL.md ecranul 1 = 40 de linii; i18n, site, decompose, release → `references/`. Gata când: un agent nou citește 40 de linii și rulează `init` + `gate` corect | req: SYS-AUTHOR-101
+- [ ] V2: `init --no-site` implicit; piramida V-model iese din primul contact, `clarify --levels` rămâne. Gata când: `init` pe un repo de 12 fișiere nu scrie ARCH+SYS | req: ARCH-INIT-012
+- [ ] V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți | req: ARCH-MCP-073
+- [ ] V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp | req: ARCH-MCP-073
+<!-- Valul 4 — adopție care nu e marketing (continuu) -->
+- [ ] V4: Comparație de 20 de linii vs Doorstop / OpenFastTrace / rmtoo („Markdown + tag + CI, stdlib, fără server”). Gata când: e în README după cele 3 comenzi | req: SYS-SSOT-001
+- [ ] V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece | req: ARCH-INIT-012
+- [ ] V4: Cadență: 1 release / săptămână. Gata când: septembrie viitor are ≤5 tag-uri, nu 97 | req: ARCH-RELEASE-072
+- [ ] V4: Health 100/100 cu 13 `lint_exempt` nu se mai publică ca scor — scoate badge-ul sau pune numărul de scutiri lângă el. Gata când: un auditor nu citește 100/100 ca „corpus perfect” | req: ARCH-HEALTH-017
+- [ ] V4: Un canal public (Discussions / show-and-tell). Gata când: primul screenshot dintr-un repo străin e acolo, nu în DM | req: SYS-SSOT-001
+
 ## Later
 
 - [x] MCP server, stdlib, din registrul de comenzi | unpark: consumator numit care nu poate CLI
@@ -143,9 +171,17 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            condiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes.
            v7.21.13: JSON pentru show/search/dupes și resursele reqmap://map și
            reqmap://requirement/<id>. În _planning.json, bara „Server MCP” e la 100%. -->
-- [ ] n=2: Consilium-py pe `uses: alxmax/requirement-manager/check@v7`. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul | unpark: Consilium-py are action-ul pe `main`, verde 7 zile
 - [ ] Licență Apache-2.0 / MIT în loc de BSL 1.1 | unpark: primul evaluator intern într-o firmă care cere grant
 - [ ] Search RO: rank pe flexiuni, nu match literal | unpark: un cititor din afara repo-ului care folosește viewer-ul în RO
+
+<!-- Valul 3 — taie ce nu e produsul (după n=2, 1–2 săptămâni) -->
+- [ ] V3: Deconectează `_design_summary` din health / mapcmd / audit. Gata când: `ask --design` e singurul import | req: ARCH-DESIGN-061 | unpark: n=2 verde (Consilium-py pe check@v8, 7 zile)
+- [ ] V3: Șterge `design*.py` (722 linii). Gata când: `ask --design` e unknown, motorul < 14.500 linii | req: ARCH-DESIGN-061 | unpark: n=2 verde și `_design_summary` deconectat
+- [ ] V3: `init` nu mai scrie `architecture.html`; `site.py` + `site_template.py` pleacă sau devin opt-in pe `sync --attach`. Gata când: un consumer nu găsește `docs/architecture.html` după `init` | req: ARCH-SITE-026 | unpark: n=2 verde
+- [ ] V3: Nu mai comite `_i18n/ro.json` (701 KB); `i18n.py` rămâne detector de gap. Gata când: clone-ul e ~9% mai mic, `ask --i18n` tot merge | req: ARCH-TRANSLATE-044 | unpark: n=2 verde
+- [ ] V3: Piramida iese din `init`; `pyramid.py` + `levels.py` rămân pe `clarify --levels`, `axis.py` stă. Gata când: primul contact e plat | req: ARCH-LEVELRETROFIT-066 | unpark: n=2 verde
+- [x] V3: Nu tăia `new` înainte de v8 — v8 conform ADR-0045, nu hotfix | req: ARCH-NEW-004 | unpark: v8.0.0
+      <!-- Deja depășit: `new` a fost scos în #319 (ebe4061) și bara e în v8.0.0. -->
 
 ## Not now
 

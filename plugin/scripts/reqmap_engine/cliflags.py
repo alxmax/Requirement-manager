@@ -6,7 +6,7 @@ the 500-line bar `ask --design` holds every engine file to. `reqmap.py` keeps wh
 reads as the command line — the floor check, the parser assembly, dispatch — and the
 registry that names these flags already lives here, in `commands.py`.
 """
-import argparse, sys
+import sys
 
 from .commands import COMMANDS
 from .similar import _threshold_arg
@@ -85,7 +85,7 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
     ap.add_argument("--allow-writes", dest="allow_writes", action="store_true",
-                    help="mcp: also offer the tools that write (sync, new, release)")
+                    help="mcp: also offer the tools that write (sync, release)")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="sync --retire / --release: actually write the change (without it, "
                          "the run is a dry report)")
@@ -107,15 +107,6 @@ def _add_todo_and_mode_flags(ap):
                     help="ask: rank requirements by lexical relevance to a query")
     ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None, const="",
                     help="ask: emit the review plan for one requirement, or the whole corpus")
-    # DEPRECATED in v7.4.0, removed in v7.5.0 — the same one-release alias window
-    # `--suggest-verifies` got in v7.3.0 (ADR-0037 decision 3/4). The capability is
-    # gone (ARCH-IMPLEMENT-063 and its two children are `deprecated`, implement.py
-    # deleted); argparse still accepts the flag so an older doc meets a sentence
-    # instead of `unrecognized arguments`. One release means ONE: when v7.5.0 is cut,
-    # this block and its branch in `_dispatch_gate` go with it.
-    ap.add_argument("--implement",
-                    dest="mode_implement", metavar="ID", nargs="?", default=None, const="",
-                    help=argparse.SUPPRESS)
     ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
                     help="ask: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
@@ -132,22 +123,10 @@ def _add_todo_and_mode_flags(ap):
 # The flags every verb accepts: where the workspace is, and whether to cache the scan.
 WORKSPACE_FLAGS = ("--root", "--reqs", "--code", "--cache")
 
-# `gate`'s spellings of what `ask` owns since v7.22.0 (ADR-0044): the argparse dest, and
-# whether the flag is a mode on its own or only a helper to one. Removed in v8.0.0.
-MOVED_GATE_FLAGS = (("mode_search", "--search", True), ("mode_dupes", "--dupes", True),
-                    ("mode_design", "--design", True), ("mode_review", "--review", True),
-                    ("mode_i18n", "--i18n", True), ("top", "--top", False),
-                    ("threshold", "--threshold", False))
 
-
-def _given(value):
-    return value is not None and value is not False
-
-
-def _moved_gate_flags(a):  # implements: REQ-CMDREGISTRY-1031
-    """The moved flags this `gate` call carries, and the subset that are modes."""
-    given = [(flag, mode) for dest, flag, mode in MOVED_GATE_FLAGS if _given(getattr(a, dest))]
-    return [f for f, _m in given], [f for f, m in given if m]
+def _owners(flag):
+    """The verbs whose registry entry gives them `flag`."""
+    return [v for v in COMMANDS if any(p["flag"] == flag for p in COMMANDS[v]["params"])]
 
 
 def _foreign_flags(ap, a, verb):  # implements: REQ-CMDREGISTRY-1031
@@ -165,17 +144,16 @@ def _foreign_flags(ap, a, verb):  # implements: REQ-CMDREGISTRY-1031
 
 
 def _verb_scope(ap, a):  # implements: REQ-CMDREGISTRY-1031
-    """Refuse a flag another verb owns on `ask`, and name `gate`'s moved spellings on
-    stderr. Returns 2 when the call is refused, else 0."""
-    if a.cmd == "ask":
-        foreign = _foreign_flags(ap, a, "ask")
-        if foreign:
-            print("reqmap ask: not an `ask` flag: {}. `ask` takes {}".format(
-                " ".join(foreign), " ".join(p["flag"] for p in COMMANDS["ask"]["params"])),
-                file=sys.stderr)
-            return 2
-    moved = _moved_gate_flags(a)[0] if a.cmd == "gate" else []
-    if moved:
-        print("reqmap: `gate {0}` moved to `ask {0}` in v7.22.0; the `gate` spelling is "
-              "removed in v8.0.0 (ADR-0044).".format(" ".join(moved)), file=sys.stderr)
-    return 0
+    """Refuse a flag the registry gives another verb, on every verb, naming the verb that
+    owns it. `gate`'s old spellings of `ask`'s questions are refused the same way since
+    v8.0.0 (ADR-0044). Returns 2 when the call is refused, else 0."""
+    foreign = _foreign_flags(ap, a, a.cmd)
+    if not foreign:
+        return 0
+    hints = ["{} is `{}`'s".format(f, "`/`".join(_owners(f)) or "no verb")
+             for f in foreign]
+    print("reqmap {0}: not a `{0}` flag: {1}. `{0}` takes {2}".format(
+        a.cmd, "; ".join(hints),
+        " ".join(p["flag"] for p in COMMANDS[a.cmd]["params"]) or "no flags"),
+        file=sys.stderr)
+    return 2
