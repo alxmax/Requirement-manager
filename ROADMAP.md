@@ -40,13 +40,16 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            `origin/fix/first-contact-horizons` (098eb07). -->
 - [x] V0: Release v8.0.0 (nu v7.23.1: `main` avea deja scoaterea lui `new`), cu `sync --release`. Gata când: tag-ul există, `check@v8` pointează pe el | req: ARCH-RELEASE-072
 - [ ] V0: Pages = landing-ul de 3 comenzi, nu posterul; `architecture.html` rămâne link. Gata când: un străin nu cade în 291 de noduri | req: ARCH-SITE-026
+- [ ] Upgrade-ul de motor nu mai retrogradează în tăcere tot corpusul: `sync` pe Consilium-py (2026-06-19.1 → v8) a trecut 17/17 cerințe `confirmed` în `draft`, fiindcă schema `binding_hash` s-a schimbat, nu textul. Gata când: un lock scris de alt `MAP_ENGINE_VERSION` e re-baseline-uit, nu tratat ca drift | req: ARCH-DRIFT-003
+- [ ] Un consumer vechi re-vendorizat nu mai vede tag-urile motorului: `.reqmapignore` din Consilium-py n-avea `scripts/reqmap_engine/**` și gate-ul a dat 100+ RM001. Gata când: scanarea exclude pachetul motorului vendorizat fără o linie în `.reqmapignore` | req: ARCH-SCAN-002
+- [ ] `sync --release` bumpează și `marketplace.json`, nu doar `plugin.json` (la v8.0.0 a trebuit `check_versions.py --fix`) | req: ARCH-RELEASE-072
 <!-- Valul 1 — primul străin poate evalua (săptămâna asta) -->
 - [ ] V1: Topics GitHub: requirements, drift, ssot, spec, claude-code, mcp, traceability. Gata când: `topic:drift` găsește repo-ul | req: SYS-SSOT-001
 - [ ] V1: PR-uri de la public (`pull_request_creation_policy` ≠ collaborators_only). Gata când: un fork poate deschide PR | req: SYS-SSOT-001
 - [ ] V1: n=2 real: Consilium-py pe `uses: alxmax/requirement-manager/check@v8`. Scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul. Gata când: job verde 7 zile pe `main` și motorul Consilium re-vendorizat (azi e din 19 iunie) | req: ARCH-SELFGATE-039
       <!-- Mutat din Later pe 2026-09-21. -->
 - [ ] V1: Un evaluator numit, nu un repo al tău — om/echipă ≠ Schipor, repo-ul lor, fără ajutor la gate. Gata când: au `uses: …/check@v8` pe un tree pe care nu-l comiți tu | req: SYS-SSOT-001
-- [ ] V1: Issue template „I tried this on my repo” — limbă, mărime tree, ce-a picat, ce-a mers, BSL a blocat? Gata când: primul issue din afară se deschide fără să ghicească formatul | req: SYS-SSOT-001
+- [x] V1: Issue template „I tried this on my repo” — limbă, mărime tree, ce-a picat, ce-a mers, BSL a blocat? Gata când: primul issue din afară se deschide fără să ghicească formatul | req: SYS-SSOT-001
 
 ## Next
 
