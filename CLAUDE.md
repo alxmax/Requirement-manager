@@ -123,7 +123,7 @@ nothing else, with no imports in either direction. `docs/` stays the published P
 and beside it live the five reference pages the README's own sections moved into on
 2026-09-20 — `commands.md`, `requirements.md`, `integrations.md`, `planning.md`,
 `internals.md`. The README is the front door only (problem, `init`/`sync`/`gate`, the worked
-example, the Action, 92 lines); a fact that belongs in one of the five is edited THERE, never
+example, a comparison with three other tools, the Action, 106 lines); a fact that belongs in one of the five is edited THERE, never
 copied back. All six are in the root `.reqmapignore`: prose about the capabilities, never a
 member of one.
 

@@ -64,6 +64,20 @@ Between `sync` and `gate` the contract clause changed (`hello` returns `'hello'`
 Nothing else in the toolchain catches that; `gate` does, because the drift baseline in
 `_reqlock.json` hashes the requirement's own contract text, not just its existence.
 
+## How it compares
+
+|  | requirement-manager | [OpenFastTrace](https://github.com/itsallcode/openfasttrace) | [Doorstop](https://github.com/doorstop-dev/doorstop) | [rmtoo](https://github.com/florath/rmtoo) |
+|---|---|---|---|---|
+| Runs on | Python 3.9+, stdlib only, copied into the repo | Java 17: JAR, Maven or Gradle plugin | Python 3.10+, `pip install` | Python, `pip install` |
+| A requirement is | a Markdown file with frontmatter | an item in Markdown or RST, id `req~name~1` | one YAML file per item | a text file |
+| Code points at it with | `# implements: ID` | `[impl->dsn~name~1]` | the item lists the files instead (`references`) | not documented |
+| When the spec changes after the code was linked | the text's hash moves: `gate` warns, `sync` takes back `confirmed` | you bump the id's revision; tags naming the old one stop covering it | `reviewed` fingerprints flag the item and its suspect links | not documented |
+
+The difference is where the link lives: the code carries the tag, a changed spec is found from
+its text alone (no revision to bump by hand), and the warning names the `file:line` of every
+member to re-check. What it does not do: publish a formatted requirements document (Doorstop
+does) or a tracing report across artifact types (OpenFastTrace does).
+
 ## Run the gate in CI
 
 Fail the build on drift, on every push and pull request:
