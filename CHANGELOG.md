@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.1.2` — 2026-09-21
+
+**SKILL.md sub 400 de linii.**
+
+- SKILL.md: 683 -> 399 de linii; secțiunile ocazionale trec în references/ (SYS-AUTHOR-101)
+
 ## plugin `v8.1.1` — 2026-09-21
 
 **ROADMAP pe categorii.**

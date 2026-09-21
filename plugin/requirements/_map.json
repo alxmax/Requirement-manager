@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-21.4",
+  "engine_version": "2026-09-21.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -23928,7 +23928,7 @@
     },
     {
       "month": "2026-09",
-      "count": 101,
+      "count": 102,
       "first": "2026-09-02",
       "last": "2026-09-21",
       "versions": [
@@ -24032,11 +24032,17 @@
         "v8.0.0",
         "v8.0.1",
         "v8.1.0",
-        "v8.1.1"
+        "v8.1.1",
+        "v8.1.2"
       ],
       "landmark": "v8.0.0",
       "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate",
       "entries": [
+        {
+          "version": "v8.1.2",
+          "date": "2026-09-21",
+          "headline": "SKILL.md sub 400 de linii"
+        },
         {
           "version": "v8.1.1",
           "date": "2026-09-21",
@@ -24746,7 +24752,7 @@
       "flags": [
         {
           "flag": "--allow-writes",
-          "help": "Also offer the tools that write: sync, new and release."
+          "help": "Also offer the tools that write: sync and release."
         }
       ]
     }

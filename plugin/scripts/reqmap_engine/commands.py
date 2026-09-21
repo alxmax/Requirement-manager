@@ -407,7 +407,7 @@ COMMANDS = {
                 "name": "allow_writes",
                 "flag": "--allow-writes",
                 "type": "bool",
-                "help": "Also offer the tools that write: sync, new and release.",
+                "help": "Also offer the tools that write: sync and release.",
             },
         ],
     },

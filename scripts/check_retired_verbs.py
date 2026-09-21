@@ -124,9 +124,9 @@ INSTRUCTION_FILES = [
 # The engine package prints instructions too (audit sections, decompose, next steps).
 INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml"),
                      ("plugin/scripts/reqmap_engine", ".py")]
-# Every skill the plugin ships, at any depth: each one instructs a reader to run the
-# engine, and each goes stale the same way.
-INSTRUCTION_TREES = [("plugin/skills", "SKILL", ".md")]
+# Every skill the plugin ships, at any depth, and the `references/` pages a SKILL.md
+# links to: each one instructs a reader to run the engine, and each goes stale the same way.
+INSTRUCTION_TREES = [("plugin/skills", "", ".md")]
 
 # Verbs this project has had and no longer has. Only these are flagged: matching
 # "any word after reqmap" turns every sentence that mentions the file into a

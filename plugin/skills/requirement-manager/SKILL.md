@@ -38,74 +38,13 @@ After any action, summarize what changed and, when useful, point to
 | **confirm** (validate a reviewed requirement) | Human-validation step. There is no command: read the requirement, then set `status: confirmed` in its frontmatter. The gate refuses a confirmed requirement with no `implements:` member (RM006), and `sync` demotes an edited contract back to `draft` on its own. | 1. Tag the implementing file. 2. Edit `status:`. 3. `python scripts/reqmap.py sync`. |
 | **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map (plus `_findings.md`, if the repo keeps one) — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
 | **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after `/plugin update` to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py gate` → `map` |
-| **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py gate --risk` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
+| **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py gate --risk` (see status). 2. Present C/E/A framework to user (see references/triage.md). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
 
-**Advisory doc-sync (assistant step, not the engine).** After `map`, for each
-sync-only doc (bucket 2) tagged `generated-from: <ID>`, the assistant reads the doc,
-its requirement(s), and the implementing code, then reports concrete mismatches
-(e.g. "the HTML says quorum 6/9; the code says 7/9"). This is judgment, not a gate —
-it surfaces findings and never blocks a commit. The engine's deterministic drift
-flag (stale-on-change) is the hard half of doc-sync; this is the semantic half.
+**Advisory doc-sync and clarify answers** are assistant steps, not engine commands: read [references/assistant-steps.md](references/assistant-steps.md) before relaying a `clarify` or `gate --risk` question to the user.
 
-**Advisory clarify answers (assistant step, not the engine).** `clarify` counts; it
-does not read. Its own output says so — *"there are 6 clauses and 5 cases. This check
-counts, it does not read, so it cannot say WHICH — that is the part only you can do."*
-That last sentence is this step's whole job. Whenever an open question reaches the user
-— from `clarify <ID>`, or from the buckets in `gate --risk` — the assistant does not
-relay the engine's wording. It reads the requirement, then answers in two parts:
 
-1. **One synthesized question.** Name the specific thing that is undecided, in the
-   requirement's own vocabulary. `clarify` can only say "1 clause has no case"; you
-   have read the clauses, so say which one and what about it is unproven. Several
-   engine findings that turn out to be the same ambiguity become one question, not
-   three — and a finding you checked and found already answered is reported as
-   answered, not repeated.
-2. **2–4 concrete answer options**, presented with `AskUserQuestion`. Each option is
-   a candidate resolution the user can pick and you can then write — "add CASE-6
-   asserting X", "fold clause 4 into CASE-2", "move clause 4 to [[OTHER-ID]], which
-   already proves it" — never a restatement of the question and never "clarify this".
-   Say what each option costs and what it gives up, and put your recommendation
-   first. If you genuinely cannot see two defensible resolutions, ask the plain
-   question instead of padding the list to two.
+**Intent triage** (Core / Emergent / Accidental) for a corpus that is mostly `owner: auto` with nothing confirmed: [references/triage.md](references/triage.md). Offer it before any other action when `gate --risk` shows `0 confirmed`.
 
-Then write the picked option into the requirement and re-run the command, so the
-question disappears because it was answered rather than silenced. This never writes a
-`lint_exempt` — an exemption is the thing this step exists to avoid reaching for.
-It is judgment, not a gate: it reports and asks, and blocks nothing.
-
-### Intent triage — when the corpus is vibe-coded
-
-A vibe-coded corpus is one where most requirements have `owner: auto` and none
-(or very few) are `confirmed` — the requirements were auto-extracted from code
-and never validated for intent. Triage surfaces what the project genuinely needs
-vs. what the AI invented during extraction, before those inventions get promoted
-to `confirmed` and start blocking real work.
-
-**When to offer proactively**: when `reqmap.py gate --risk` shows `0 confirmed` and
-the majority of requirements carry `owner: auto` in their frontmatter, offer
-intent triage before any other action.
-
-**The C/E/A framework:**
-
-- **Core** — the tool cannot work without this. Remove it and users notice
-  immediately. Candidate for `confirmed` after human review.
-- **Emergent** — logically implied by Core capabilities; the AI added it as a
-  natural extension. Useful but not essential. Keep as `baseline`.
-- **Accidental** — the AI invented it during extraction; no user asked for it
-  and removing it changes nothing visible. Deprecate and delete.
-
-**Process:**
-
-1. Read each requirement's `## Description` to the user in one sentence.
-2. User says C, E, or A.
-3. After classifying all: apply decisions in bulk.
-   - Core → leave for human review; a human sets `status: confirmed` in the frontmatter.
-   - Emergent → keep as `baseline`; no action needed.
-   - Accidental → set `status: deprecated` in frontmatter; delete implementing
-     code (check for load-bearing callers first with `grep` before deleting).
-4. For Accidental code that IS still referenced: keep the code, strip the
-   `implements:` tag, delete only the requirement file.
-5. Run `reqmap.py sync` to verify.
 
 ## Setup (first use in a repo)
 
@@ -137,42 +76,8 @@ only if you want finer control.
 The requirement template is **built into the engine**, so no template file is needed. (Optionally, drop a `templates/requirement.md` in the repo to override
 the built-in scaffold; the engine uses it automatically when present.)
 
-**Create `.reqmapignore` immediately after the copy** — `reqmap.py` carries its own
-`implements:` self-tags. Without this file the gate fails with dangling-ref errors
-on the first run:
+`init` writes `.reqmapignore` for you. Its contents, re-seeding a newer engine and the plugin-author sync script: [references/setup.md](references/setup.md).
 
-```
-scripts/reqmap.py
-scripts/reqmap_engine/**
-.worktrees/**
-.claude/worktrees/**
-```
-
-The two `worktrees` globs matter the first time you run an isolated subagent: each
-worktree is a **full second copy of the repo**, so without them the gate counts every
-member twice and reports the copies' tags as dangling refs — errors that do not exist
-in your code, in files a clean CI checkout never has. (`.claude/worktrees/` is what
-Claude Code creates today; `.worktrees/` is the older parallel-session location.)
-
-Add any other vendored or generated paths that should not be scanned (one fnmatch
-glob per line, `#` comments ok). The engine itself is always the first entry.
-
-From then on every command below runs against the repo's own `scripts/reqmap.py`.
-Commit the script, the package and `.reqmapignore` so the gate works in CI without
-the plugin present. When the plugin ships a newer engine, re-seed with:
-
-```bash
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
-rm -rf scripts/reqmap_engine && cp -r "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # if you use the viewer
-```
-
-**Plugin authors** — use `sync_reqmap.sh` (in the plugin source repo) to propagate
-engine changes to the cache and any registered consumer repos in one command:
-
-```bash
-./sync_reqmap.sh /path/to/consumer-repo1 /path/to/consumer-repo2
-```
 
 ## Core model
 
@@ -323,27 +228,8 @@ attempt and rejected it).
    into the Contract (or Notes) and delete the bullet — the section should shrink toward
    empty as the requirement matures.
 
-### Prose & doc capabilities (the three buckets)
+**Prose files** (`.md`, `.html`) fall into three buckets — ignored, sync-only, or capability source: [references/prose-buckets.md](references/prose-buckets.md).
 
-`init` scans `.md`/`.html` by default and classify each prose file
-(prose = human-readable spec/prompt text, not source code):
-
-1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
-   `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`,
-   `_`-prefixed generated files) + anything in `.reqmapignore`. Invisible to reqmap.
-2. **Sync-only** — `README*`, everything under `docs/`, and every other `*.html`
-   (a `_`-prefixed generated file like `_map.json` is ignored by rule 1 first).
-   Never turned into a requirement. Tag it `# generated-from: <ID>` (HTML:
-   `<!-- generated-from: <ID> -->`) to make it a member: the drift gate then flags
-   it stale when its requirement changes, and the advisory doc-sync step (below)
-   verifies its claims still match the code.
-3. **Capability source** — prompt/spec prose (`prompts/**`, `specs/**`, …).
-   Auto-drafted as a `draft` stub from its title + `##` headings; review, edit and
-   `confirm`. `draft` is never enforced by the gate, so unreviewed prose is never
-   canonized as truth.
-
-The buckets govern auto-drafting only — an explicit tag on any file is always
-honored by the scanner.
 
 ## Audience & writing level
 
@@ -448,9 +334,7 @@ chmod +x .git/hooks/pre-commit
 ```
 
 One `gate` is the whole verdict: link sync and drift, then requirement readability
-(strict), then the committed-map freshness check. They were three commands once, and
-this hook ran the same `gate` three times after the verbs folded — three full scans
-per commit for one answer.
+(strict), then the committed-map freshness check.
 
 The readability check is part of the verdict for the same reason on the prose axis:
 link sync proves the links are real, not that the requirement is readable. It blocks
@@ -479,44 +363,13 @@ exemption in force with its requirement — silenced is not invisible, and the c
 debt. An exemption a reviewer can argue with beats a warning everyone learns to scroll past;
 an exemption nobody wrote a sentence for is neither.
 
-**GitHub Actions** (enforces the gate for the whole team) — use the published
-action, pinned to `@v2`:
+**GitHub Actions** — the published action, pinned to the plugin's major:
 
 ```yaml
-# .github/workflows/reqmap.yml
-name: reqmap gate
-on: [push, pull_request]
-permissions:
-  contents: read            # least privilege — the gate only reads the tree
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - uses: alxmax/requirement-manager/check@v8
-        # with:
-        #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
-        #   working-directory: .             # where requirements/ lives
-        #   freshness: 'true'                # also run `map --check` (default; set 'false' to skip)
-        #   lint: 'true'                     # also run `lint --strict` (default; needs engine >= 2.3.4)
-        #   reqmap-repo: owner/name          # only if your committed map targets a different slug
 ```
 
-`warn_if_stale` (the vendored-copy staleness notice) is gated on `CLAUDE_PLUGIN_ROOT`,
-unset in CI — so it is silent and exit-neutral there by design. The action runs the
-gate **and** `map --check` (map freshness) **and** `lint --strict` by default. The lint step
-runs the consumer's own vendored engine, so it needs `reqmap.py` from plugin v2.3.4 or newer
-(the release that added the `lint_exempt:` escape hatch); pass `lint: 'false'` to skip it.
-If you prefer not to depend on
-the action, run the engine directly instead of the `uses:` line:
-```yaml
-      - run: python -X utf8 scripts/reqmap.py gate
-      - run: python -X utf8 scripts/reqmap.py gate
-      - run: python -X utf8 scripts/reqmap.py gate
-```
-
-The hook and the CI job are independent — wire both so the gate runs locally
-before push *and* on the remote for PRs.
+The full workflow, its inputs and the plain `- run:` alternative: [references/ci.md](references/ci.md). Wire both the hook and CI.
 
 ## Commands
 
@@ -535,149 +388,12 @@ Creation verbs (pick by input, not by outcome):
 **Read**
 - `python scripts/reqmap.py gate` — The commit/CI verdict. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. Three mode flags report on the verdict's own subject instead of running it: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier. Every other question is `ask`. Flags: `--audit` Print every pass that discovers a problem as one report: the gate, corpus risk, duplicate contracts, design signals and tag coverage. The exit code still comes from the gate alone.; `--risk` Print the corpus risk snapshot and the actionable signals, most urgent first.; `--show` Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals.; `--all` With --risk: expand every bucket instead of the top few.; `--untagged` With --risk: report membership-tag coverage per directory.; `--badge` With --risk: print the coherence score as a badge string.; `--strict` Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed.; `--json` Emit structured JSON output instead of human-readable text.; `--since` Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1').; `--no-lint` Skip the requirement readability check.; `--no-map-check` Skip the committed-map freshness check..
 - `python scripts/reqmap.py ask` — Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code, --review emits the machine-readable review plan, --i18n lists missing translations. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`. Flags: `--search` Rank requirements by lexical relevance to a free-text query.; `--dupes` Rank requirement pairs whose contracts overlap, most similar first.; `--design` Print the advisory design review of the code. Never part of the verdict.; `--review` Emit the deterministic review plan as JSON: for one requirement, or with no id for the whole corpus.; `--i18n` List the translations the configured LANGUAGE (en | ro | both, in requirements/_config.json) expects and does not have, missing or stale. --json emits each entry's source fields and cache key for whoever translates.; `--top` With --search or --dupes: how many results to print.; `--threshold` With --dupes: override the similarity threshold.; `--json` Emit structured JSON output instead of human-readable text..
-- `python scripts/reqmap.py mcp` — Serve this repository's requirements to an AI assistant over the Model Context Protocol (stdio). Each tool is one reqmap invocation in a fresh process. Read-only unless --allow-writes. Flags: `--allow-writes` Also offer the tools that write: sync, new and release..
+- `python scripts/reqmap.py mcp` — Serve this repository's requirements to an AI assistant over the Model Context Protocol (stdio). Each tool is one reqmap invocation in a fresh process. Read-only unless --allow-writes. Flags: `--allow-writes` Also offer the tools that write: sync and release..
 <!--##/REQMAP:COMMANDS##-->
 
-## MCP server (`reqmap.py mcp`)
+## More, when you need it
 
-The engine is also served over the Model Context Protocol (ADR-0043). When the `reqmap_*`
-tools are available in this session (in Claude Code they appear as `mcp__reqmap__reqmap_gate`
-and so on), **ask the corpus through them instead of the terminal**: they take typed
-arguments, return JSON, are marked read-only, and need no per-command approval. Use the
-terminal for what the server does not offer. When the tools are absent, every command above
-works the same from the shell.
-
-| Question | Tool | Same as |
-|---|---|---|
-| Is the repo in step? (exit 1 is a FAIL verdict, not a tool error) | `reqmap_gate` | `gate` |
-| What should I do next? | `reqmap_next` / `reqmap_health` | `gate --risk` / `--risk --json` |
-| What does this requirement say, and where is its code? | `reqmap_show(id)` | `gate --show ID --json` |
-| Which requirement covers X? | `reqmap_search(query)` | `ask --search Q --json` |
-| Everything that is wrong, at once | `reqmap_audit` | `gate --audit --json` |
-| Do two contracts overlap? | `reqmap_dupes` | `ask --dupes --json` |
-| What is unanswered in a requirement? | `reqmap_clarify(id)` | `clarify ID --json` |
-| Review plan / design / tag coverage | `reqmap_review(id)` / `reqmap_design` / `reqmap_untagged` | `ask --review` / `ask --design` / `gate --risk --untagged` |
-| What would the next release cut? | `reqmap_release_plan` | `sync --release --json` |
-
-**Resources.** `reqmap://requirement/<id>` is one requirement's dossier, and `reqmap://map`
-the committed `_map.json`. Attach a requirement as a resource when the task is "implement
-or change this requirement", so the contract is in context before any code is written.
-
-**Writing is opt-in.** `reqmap_sync`, `reqmap_new` (deprecated) and `reqmap_release` exist only when the
-user started the server with `--allow-writes`. Without them, run `sync` in the terminal as
-before; never ask the user to restart the server with writes just to save a command. Some
-decisions stay with a person whichever path runs them: flipping `status: confirmed`, the
-reason passed as `accept_drift`, and `sync --retire`, which the server does not offer at all.
-
-**Setup.** `init` writes `.mcp.json` (Claude Code) and `.vscode/mcp.json` (VS Code with
-Copilot) when absent, pointing at the vendored `scripts/reqmap.py`, and never edits an
-existing one. Claude Code asks the user once to approve the project server. Each call runs
-the CLI in a fresh process and rescans the tree, so batch questions instead of calling a
-tool in a tight loop.
-
-## Language
-
-Requirements are authored in English. A repository that wants them **read** in Romanian, or
-in both, declares it once in `requirements/_config.json`:
-
-```json
-{ "LANGUAGE": "ro" }
-```
-
-`en` (the default), `ro`, or `both`. Any other value is reported and ignored. The setting
-changes what the engine *expects*, never what it writes — the engine translates nothing
-(`REQ-TRANSLATE-937`): under `ro`/`both` it tracks the Romanian layer and hands over the work.
-
-**When `sync` reports gaps** — *"N requirement(s) have no fresh translation for LANGUAGE `ro`"* —
-you are the translator:
-
-1. `python scripts/reqmap.py ask --i18n --json` — every gap with its `id`, `locale`,
-   `reason` (`missing` | `stale`), `hash`, and the four source fields `title`, `intent`,
-   `contract`, `acceptance`, exactly as the hash was computed over them.
-2. Translate the **prose** of those four fields into Romanian. Keep verbatim: requirement
-   ids, `CASE-N` labels, the `Given`/`When`/`Then` keywords, anything in backticks, file
-   paths, tag names, numbers and units. Keep the line structure of `contract` and
-   `acceptance` — the viewer renders them as written.
-3. Write each result into `requirements/_i18n/ro.json` under its `id`, with the four
-   translated fields and **the same `hash`**. The hash is the key that says "this
-   translation matches this version of the requirement"; the next edit to the requirement
-   invalidates it and `sync` reports the gap again.
-4. `python scripts/reqmap.py sync` — the map now serves the entries; `gate` warns if a
-   translated field has no source counterpart (`REQ-TRANSLATE-967`).
-
-The viewer opens in Romanian under `ro` and in English under `en` and `both`, with the
-EN/RO toggle offered whenever a translation exists; a reader's own choice is kept.
-
-**`check` no longer exists.** It was a deprecated alias for `gate` through `3.x` and was removed in `v4.0.0`; a hook or CI step that still calls `reqmap.py check` fails with an unknown-command error. Migrate with `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
-
-**Workflow order** — after modifying requirement files, run `sync` as a unit
-so the lock and map stay in sync:
-
-```bash
-python scripts/reqmap.py sync
-# or, if you edited a confirmed/implemented contract:
-python scripts/reqmap.py sync --accept-drift
-```
-
-`reqmap.py gate` is the freshness gate (no write): it rebuilds the map in
-memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
-edit shifted it). Wire it next to `gate` in your pre-commit hook / CI so a stale
-map can't be committed. A repo that doesn't track a map passes silently.
-
-## Project site (`reqmap.py sync --attach`)
-
-`sync --attach` keeps a project presentation page (e.g. `docs/architecture.html`) current by
-injecting **engine-owned, marker-delimited regions** and preserving the authored prose
-between them. It is deterministic and never prompts — the *interactive* part is your job
-as the skill.
-
-**When the user wants a project/landing/architecture page, or to refresh one:**
-1. Ask the user **which target** — an existing `docs/architecture.html`, an `index.html`,
-   or a bring-your-own HTML path.
-2. Run `python scripts/reqmap.py sync --attach <path>` (from the dir where `requirements/`
-   lives). It refreshes only the marked regions
-   (`<!--##REQMAP:NAV##-->…<!--##/REQMAP:NAV##-->`, `…:STATS…`); your prose is untouched.
-   `nav` and `stats` are refreshed together — there is no per-region flag.
-3. To CREATE a page that does not exist yet, run `python scripts/reqmap.py init`: its
-   best-effort site pass scaffolds a full default page (theme + regions + a placeholder
-   hero marked `<!-- author me -->`) at `docs/architecture.html`. `sync --attach` only
-   refreshes a file that is already there.
-4. If you scaffolded, offer to rewrite the placeholder hero into real prose for the repo.
-
-Regions and their sources: `nav` = Live Map / Diagram / GitHub links (from `git remote` +
-artifact paths, each emitted only if its target resolves); `stats` = requirement/confirmed/
-layer/edge counts + engine version (from `_map.json`). The engine **only links** an
-excalidraw diagram — it never generates one (the excalidraw-diagram skill stays independent).
-
-`init` already runs a best-effort site pass (`nav,stats` into `docs/architecture.html`,
-scaffolding it if absent); `reqmap.py init --no-site` opts out. The gate's built-in
-freshness check flags the page stale if its `stats` region drifts (the `nav` region is exempt — it embeds the
-fork-specific repo URL).
-
-## Releasing a new version (plugin semver checklist)
-
-Before merging a feature branch, bump the semver **on that branch** so the version commit is part of the merge. Do not bump after merge.
-
-1. Update `plugin/.claude-plugin/plugin.json` → `"version": "X.Y.Z"`
-2. Update `.claude-plugin/marketplace.json` → `"version": "X.Y.Z"` in all three occurrences (root + plugins array)
-3. Run `python scripts/check_versions.py` from repo root — must print `OK semver aligned at 'X.Y.Z'`
-4. Mark shipped `TODO.md` items `[x]` so they disappear from the Roadmap tab
-5. Commit: `chore: bump version to X.Y.Z`
-6. After merge: `git tag vX.Y.Z <merge-sha> && git push origin vX.Y.Z`
-
-**When to bump which digit:**
-- **patch** (X.Y.**Z**) — bug fixes, doc corrections, gate/map regen with no new behavior
-- **minor** (X.**Y**.0) — new commands, new viewer tabs, new frontmatter fields, new generated outputs
-- **major** (**X**.0.0) — breaking changes to the requirement schema, gate behavior, or CLI interface
-
-## Legacy / brownfield (draft mode)
-
-`init` walks the untagged code and proposes `draft` requirements (structure, input/output
-from signatures, `depends_on` from imports). It **cannot** recover intent — it only
-captures observed behavior, so:
-- Everything it emits is `draft`/`baseline`, never `confirmed`. It never canonizes a
-  bug as correct.
-- Routing to review is by **risk = blast radius × uncertainty × proximity to known
-  problems**, not by parsing ease (clean code can be a clean bug). High-risk →
-  review; low-risk → accept as `baseline` (tracked, not asserted correct).
-- Aim ~80% auto-`baseline` / ~20% human-`confirmed` as a *health signal*, not a quota.
+- **MCP** — when the `reqmap_*` tools are available, ask the corpus through them instead of the terminal: [references/mcp.md](references/mcp.md).
+- **Language** — `LANGUAGE` in `requirements/_config.json`; when `sync` reports translation gaps, you are the translator: [references/language.md](references/language.md).
+- **Project site** — `sync --attach <page>` refreshes a project page's engine-owned regions: [references/site.md](references/site.md).
+- **Releasing and brownfield repos** — the plugin semver checklist, and what `init` can recover from legacy code: [references/releasing-and-legacy.md](references/releasing-and-legacy.md).
