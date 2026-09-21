@@ -163,7 +163,6 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți | req: ARCH-MCP-073
 - [ ] V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp | req: ARCH-MCP-073
 <!-- Valul 4 — adopție care nu e marketing (continuu) -->
-- [ ] V4: Comparație de 20 de linii vs Doorstop / OpenFastTrace / rmtoo („Markdown + tag + CI, stdlib, fără server”). Gata când: e în README după cele 3 comenzi | req: SYS-SSOT-001
 - [ ] V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece | req: ARCH-INIT-012
 - [ ] V4: Cadență: 1 release / săptămână. Gata când: septembrie viitor are ≤5 tag-uri, nu 97 | req: ARCH-RELEASE-072
 - [x] V4: Health 100/100 cu 13 `lint_exempt` nu se mai publică ca scor — scoate badge-ul sau pune numărul de scutiri lângă el. Gata când: un auditor nu citește 100/100 ca „corpus perfect” | req: ARCH-HEALTH-017
@@ -190,6 +189,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 ## Not now
 
+- Comparație cu OpenFastTrace / Doorstop / rmtoo în README — respinsă de maintainer pe 2026-09-21 (PR #325 închis)
 - Requirement history — `git log -L` pe blocul cerinței ajunge
 - `verifiable by:` umplut de la 2 la 54 — ADR-0016 a respins un marker la 4% adopție
 - Formă atomică (54 → ~665 noduri) — ADR-0025

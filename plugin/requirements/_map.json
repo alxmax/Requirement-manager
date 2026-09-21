@@ -23881,15 +23881,6 @@
       "section_date": null
     },
     {
-      "name": "V4: Comparație de 20 de linii vs Doorstop / OpenFastTrace / rmtoo („Markdown + tag + CI, stdlib, fără server”). Gata când: e în README după cele 3 comenzi",
-      "horizon": "next",
-      "req": "SYS-SSOT-001",
-      "unpark": null,
-      "done": false,
-      "context": "",
-      "section_date": null
-    },
-    {
       "name": "V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece",
       "horizon": "next",
       "req": "ARCH-INIT-012",
