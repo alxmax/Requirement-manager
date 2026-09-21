@@ -35,31 +35,13 @@
       "lane": "Feature",
       "start": "2026-11-02",
       "end": "2026-11-27",
-      "milestone": "v8.0.0",
+      "milestone": "v8.1.0",
       "req": "ARCH-VIEWER-007",
-      "progress": 0
-    },
-    {
-      "title": "Scoate verbul `new` și `new --from-todo` (ADR-0045)",
-      "lane": "Fix",
-      "start": "2026-11-23",
-      "end": "2026-11-27",
-      "milestone": "v8.0.0",
-      "req": "ARCH-NEW-004",
-      "progress": 0
-    },
-    {
-      "title": "Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044)",
-      "lane": "Fix",
-      "start": "2026-11-23",
-      "end": "2026-11-27",
-      "milestone": "v8.0.0",
-      "req": "ARCH-CMDREGISTRY-033",
       "progress": 0
     }
   ],
   "milestones": {
-    "v8.0.0": {
+    "v8.1.0": {
       "due": "2026-11-27",
       "label": "Datoria de viewer: split ARCH-VIEWER-007"
     }

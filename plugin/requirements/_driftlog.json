@@ -141,6 +141,10 @@
       "hash": "b6348e2ee27e",
       "reason": "distinct_from; CHECK-831 fold"
     },
+    "REQ-CMDREGISTRY-1031": {
+      "hash": "c869d06fc64a",
+      "reason": "v8.0.0: gate refuses ask's flags; every verb refuses foreign flags (ADR-0044)"
+    },
     "REQ-CMDREGISTRY-834": {
       "hash": "ad1ac9c0ae6f",
       "reason": "MCP server: registry tool:False clause, GITRUN case scope"

@@ -49,7 +49,7 @@ from reqmap_engine.audit import _audit_summary, cmd_audit
 from reqmap_engine.candidates import cmd_candidates
 from reqmap_engine.clarify import cmd_clarify
 from reqmap_engine.cliflags import (
-    _add_todo_and_mode_flags, _add_workspace_and_query_flags, _moved_gate_flags, _verb_scope
+    _add_todo_and_mode_flags, _add_workspace_and_query_flags, _verb_scope
 )
 from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
@@ -132,9 +132,9 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
 
 def _dispatch_gate(a, ws, code_root, reqs_dir):
     """`gate`: the verdict, or the report its --audit/--risk/--show mode asks for.
-    `ask`, and `gate` carrying one of `ask`'s modes until v8.0.0, go to `_dispatch_ask`.
-    Returns the exit code; only the bare verdict can make it non-zero."""
-    if a.cmd == "ask" or _moved_gate_flags(a)[1]:
+    `ask` goes to `_dispatch_ask`. Returns the exit code; only the bare verdict can make it
+    non-zero."""
+    if a.cmd == "ask":
         return _dispatch_ask(a, ws)
     if a.mode_audit:
         return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
@@ -154,12 +154,6 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         # same walk; ws.levels() only re-walks when --cache forced the
         # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
         return cmd_show(ws, a.mode_show, ws.levels(), as_json=a.as_json)
-    if a.mode_implement is not None:
-        print("`gate --implement` was retired in v7.4.0: the brief it printed is the "
-              "requirement itself, and `gate --show <ID>` prints the same contract, "
-              "cases and members from the same facts. This flag is accepted for one "
-              "release and does nothing.", file=sys.stderr)
-        return 0
     # The whole verdict, in the order every hook and CI already ran it: link sync +
     # drift + test-link, then requirement readability, then map freshness. They were
     # three commands because they were written on three days, not because a caller
@@ -285,7 +279,7 @@ def main():
             pass
     ap = _build_parser()
     a = ap.parse_args()
-    if _verb_scope(ap, a):              # ADR-0044: refused before any scan runs
+    if _verb_scope(ap, a):              # a foreign flag is refused before any scan runs
         return 2
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root

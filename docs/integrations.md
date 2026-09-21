@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v7
+      - uses: alxmax/requirement-manager/check@v8
 ```
 
 The action runs `reqmap.py gate`, which since `v4.0.0` *is* the lint and the map

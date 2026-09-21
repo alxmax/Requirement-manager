@@ -1,5 +1,22 @@
 # Changelog
 
+## plugin `v8.0.0` — 2026-09-21
+
+**Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate.**
+
+- Scoate verbul `new` și `new --from-todo` (ADR-0045) (ARCH-NEW-004)
+- Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) (ARCH-CMDREGISTRY-033)
+- Fiecare verb refuză flag-urile altui verb (`gate --wipe` iese cu 2) (ARCH-CMDREGISTRY-033)
+
+**Ruptură de compatibilitate.** `new`, `gate --search` / `--dupes` / `--design` / `--review` /
+`--i18n` / `--top` / `--threshold` și `gate --implement` (acceptat fără efect din v7.4.0) nu mai
+există: fiecare iese cu 2 și numește verbul corect. Un flag dat unui verb care nu-l deține (`gate
+--wipe`, `sync --search`) nu mai e ignorat în tăcere. Action-ul se folosește ca
+`alxmax/requirement-manager/check@v8`; `@v7` rămâne pe v7.23.0.
+
+`--no-lint` și `--no-map-check` (`gate`), `--attach` (`sync`) și `--apply` (`clarify`) intră în
+registrul de comenzi, deci și în `tool_definition.json` și în tabelul din `SKILL.universal.md`.
+
 ## plugin `v7.23.0` — 2026-09-20
 
 **README onest + health pe o singura pagina.**
