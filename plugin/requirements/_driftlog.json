@@ -245,6 +245,10 @@
       "hash": "b9701e079e3a",
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
     },
+    "REQ-PROMOTE-974": {
+      "hash": "68bb32619455",
+      "reason": "REQ-PROMOTE-974: unchanged-since-lock-commit files keep their confirmation (CASE-4)"
+    },
     "REQ-RELEASECMD-1018": {
       "hash": "23eeba192147",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
@@ -264,6 +268,10 @@
     "REQ-RULES-947": {
       "hash": "68dd0cb1b87c",
       "reason": "baked fixture is JSON"
+    },
+    "REQ-SCAN-909": {
+      "hash": "261024cbc471",
+      "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
     },
     "REQ-SEARCH-913": {
       "hash": "58260ffdf26a",
@@ -308,6 +316,10 @@
     "REQ-UNPLANNED-1024": {
       "hash": "f4c83e90aff2",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-VERSIONFILES-1014": {
+      "hash": "ebb1422db3b0",
+      "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
     },
     "REQ-VIEWER-977": {
       "hash": "8c401c2200b5",

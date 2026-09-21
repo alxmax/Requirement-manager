@@ -21,7 +21,8 @@ _SEMVER_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
 # plugin manifest is last among the JSON files because a repo that is ALSO an npm
 # package declares its version in `package.json` first.
 VERSION_FILE_CANDIDATES = ("package.json", "pyproject.toml", "Cargo.toml",
-                           ".claude-plugin/plugin.json", "VERSION")
+                           ".claude-plugin/plugin.json", ".claude-plugin/marketplace.json",
+                           "VERSION")
 # The TOML tables a version is declared under; any other table's `version` key (a
 # dependency pin, a tool setting) is not the project's version.
 _TOML_TABLES = ("project", "tool.poetry", "package", "workspace.package")
@@ -87,7 +88,15 @@ def write_version_file(path, new):  # implements: REQ-RELEASECMD-1018
     with open(path, encoding="utf-8", newline="") as f:
         text = f.read()
     name = os.path.basename(path)
-    if name.endswith(".json"):
+    if name == "marketplace.json":
+        # A marketplace states the version twice, at the top and on its plugin's entry; every
+        # field still holding the old version moves, another plugin's version does not.
+        old = _JSON_VERSION_RE.search(text)
+        out, count = _JSON_VERSION_RE.subn(
+            lambda m: m.group(1) + (new if m.group(2) == old.group(2) else m.group(2))
+            + m.group(3), text) if old else (text, 0)
+        changed = count > 0
+    elif name.endswith(".json"):
         out, count = _JSON_VERSION_RE.subn(lambda m: m.group(1) + new + m.group(3), text, count=1)
         changed = count == 1
     elif name.endswith(".toml"):

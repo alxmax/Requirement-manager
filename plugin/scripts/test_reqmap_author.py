@@ -2658,6 +2658,47 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             self.assertEqual(self._status(rq), "status: confirmed")
 
 
+    def _commit_with_older_hash(self, d, rq):
+        """A git repo whose committed lock holds a hash an older engine wrote for the
+        same, unchanged text — the state a consumer is in right after re-vendoring."""
+        def git(*args):
+            subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *args],
+                           cwd=d, check=True, capture_output=True)
+        git("init", "-q")
+        self._sync(d)
+        lock = os.path.join(rq, "_reqlock.json")
+        with open(lock, encoding="utf-8") as f:
+            data = json.load(f)
+        data["AREA-E-001"] = "0123456789ab"
+        with open(lock, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        git("add", "-A")
+        git("commit", "-q", "-m", "baseline")
+
+    def test_unchanged_text_under_a_new_hash_keeps_its_confirmation(self):  # verifies: REQ-PROMOTE-974#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._commit_with_older_hash(d, rq)
+            out = self._sync(d)
+            self.assertNotIn("demoted:", out)
+            self.assertIn("re-baselined 1 confirmed contract", out)
+            self.assertEqual(self._status(rq), "status: confirmed")
+            with open(os.path.join(rq, "_driftlog.json"), encoding="utf-8") as f:
+                log = json.load(f)
+            self.assertIn("engine upgrade", log["accepted"]["AREA-E-001"]["reason"])
+            self.assertNotIn("re-baselined", self._sync(d))
+
+    def test_an_edit_after_the_lock_commit_is_still_demoted(self):  # verifies: REQ-PROMOTE-974#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._commit_with_older_hash(d, rq)
+            self._edit(rq)
+            out = self._sync(d)
+            self.assertIn("demoted: AREA-E-001", out)
+            self.assertNotIn("re-baselined", out)
+            self.assertEqual(self._status(rq), "status: draft")
+
+
 class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-975
     """Clarifying one requirement can raise a question its old text never had."""
 
@@ -3389,6 +3430,19 @@ class VersionFiles(unittest.TestCase):  # tested-by: REQ-VERSIONFILES-1014 @unit
         with tempfile.TemporaryDirectory() as d:
             reqs = _release_repo(d, version=None)
             self.assertEqual([], R.version_files(reqs, d))
+
+    def test_a_marketplace_moves_both_of_its_versions(self):  # verifies: REQ-VERSIONFILES-1014#CASE-5
+        market = ('{\n  "version": "1.4.0",\n  "plugins": [\n'
+                  '    {"name": "x", "version": "1.4.0"},\n'
+                  '    {"name": "other", "version": "0.3.0"}\n  ]\n}\n')
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0")
+            _write(os.path.join(d, ".claude-plugin", "marketplace.json"), market)
+            self.assertIn((".claude-plugin/marketplace.json", "1.4.0"), R.version_files(reqs, d))
+            self.assertTrue(R.write_version_file(
+                os.path.join(d, ".claude-plugin", "marketplace.json"), "1.5.0"))
+            self.assertEqual(market.replace('"1.4.0"', '"1.5.0"'),
+                             _text(d, ".claude-plugin", "marketplace.json"))
 
 
 class ChangelogForms(unittest.TestCase):  # tested-by: REQ-CHANGELOGFORMS-1015 @unit

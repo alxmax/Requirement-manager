@@ -5,9 +5,10 @@ from . import ENGINE_DIR, config as cfg
 from .author import _write_frontmatter_status
 from .clarify import blocking_question_rules
 from .findings import collect_findings
+from .git import _git
 from .locks import (
-    compute_member_hashes, load_clarifylock, record_accepted_drift, save_clarifylock, save_lock,
-    save_memberlock, warn_if_stale
+    compute_member_hashes, load_clarifylock, lock_path, record_accepted_drift, save_clarifylock,
+    save_lock, save_memberlock, warn_if_stale
 )
 from .mapjson import _path_key, _since_changed_files
 from .model import Finding, GATE_RULES
@@ -104,6 +105,30 @@ def _demote_drifted_confirmed(reqs, confirmed_drift, full_members):
     print("  with --accept-drift if the edit did not change what the code must do.")
 
 
+def _unchanged_since_lock(reqs, reqs_dir, rids):  # implements: REQ-PROMOTE-974
+    """(the ids among `rids` whose requirement file is byte-identical to its copy in the
+    commit that last wrote the lock, that commit's short sha).
+
+    Such a file cannot have been edited since it was baselined, so a hash that moved moved
+    because the HASHING did: a newer engine computes the binding hash differently. Demoting
+    it would strip every confirmation a consumer holds on the first sync after an upgrade
+    (Consilium-py, 2026-09-21: 17 of 17). Fail-closed: no git, a lock never committed, or a
+    file git does not track (added after the lock) all answer "edited"."""
+    root = os.path.dirname(os.path.abspath(lock_path(reqs_dir)))
+    sha = (_git(["log", "-1", "--format=%H", "--", os.path.basename(lock_path(reqs_dir))],
+                cwd=root) or "").strip()
+    if not sha:
+        return [], ""
+    same = []
+    for rid in rids:
+        path = os.path.abspath((reqs.get(rid) or {}).get("path") or "")
+        if (os.path.isfile(path)
+                and _git(["ls-files", "--error-unmatch", "--", path], cwd=root) is not None
+                and _git(["diff", "--quiet", sha, "--", path], cwd=root) is not None):
+            same.append(rid)
+    return same, sha[:8]
+
+
 def _advance_lock_and_report(ctx, accept_drift, drift_reason):
     # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832
     # implements: REQ-CHECK-833  # implements: REQ-RULES-948
@@ -130,6 +155,17 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
                        if old_h is not None
                        and reqs.get(rid, {}).get("meta", {}).get("status")
                        in ("confirmed", "implemented")]
+    if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
+        same, sha = _unchanged_since_lock(reqs, reqs_dir, confirmed_drift)
+        if same:
+            record_accepted_drift(reqs_dir, same, new_lock,
+                                  "text unchanged since lock commit %s: the binding hash "
+                                  "changed, not the contract (engine upgrade)" % sha,
+                                  set(new_lock))
+            print("  re-baselined %d confirmed contract(s) whose file is unchanged since the "
+                  "lock was committed (%s): the hash moved, the text did not — kept confirmed"
+                  % (len(same), sha))
+            confirmed_drift = [rid for rid in confirmed_drift if rid not in same]
     if confirmed_drift and accept_drift:
         record_accepted_drift(reqs_dir, confirmed_drift, new_lock,
                               drift_reason, set(new_lock))
