@@ -156,12 +156,16 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
 
 <!-- Valul 2 — produsul pe care-l țin minte (2 săptămâni) -->
-- [ ] V2: Parser din registry după v8, nu în v8 — subparser per verb. Gata când: `reqmap gate --wipe` e `unrecognized arguments`, nu no-op tăcut | req: ARCH-CMDREGISTRY-033
-- [ ] V2: `--attach`, `--no-lint`, `--no-map-check` intră în `COMMANDS` sau mor. Gata când: SKILL / viewer / schema OpenAI / `--help` spun același lucru | req: ARCH-CMDREGISTRY-033
+- [x] V2: Parser din registry după v8, nu în v8 — subparser per verb. Gata când: `reqmap gate --wipe` e `unrecognized arguments`, nu no-op tăcut | req: ARCH-CMDREGISTRY-033
+      <!-- v8.0.0: nu subparsere, ci refuzul din registru: orice verb dat unui flag al altui verb iese cu 2
+           și numește proprietarul (`gate --wipe` -> „--wipe is `init`'s”). -->
+- [x] V2: `--attach`, `--no-lint`, `--no-map-check` intră în `COMMANDS` sau mor. Gata când: SKILL / viewer / schema OpenAI / `--help` spun același lucru | req: ARCH-CMDREGISTRY-033
+      <!-- v8.0.0, plus `clarify --apply`. -->
 - [ ] V2: SKILL.md ecranul 1 = 40 de linii; i18n, site, decompose, release → `references/`. Gata când: un agent nou citește 40 de linii și rulează `init` + `gate` corect | req: SYS-AUTHOR-101
 - [ ] V2: `init --no-site` implicit; piramida V-model iese din primul contact, `clarify --levels` rămâne. Gata când: `init` pe un repo de 12 fișiere nu scrie ARCH+SYS | req: ARCH-INIT-012
 - [ ] V2: Un model de tool, nu două — schema OpenAI generată din `MCP_TOOLS`. Gata când: Copilot și Claude văd aceleași tool-uri, nu `reqmap_gate` cu 9 proprietăți | req: ARCH-MCP-073
-- [ ] V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp | req: ARCH-MCP-073
+- [x] V2: Freeze MCP — nicio unealtă nouă până n=2 folosește serverul. Gata când: CHANGELOG-ul următor nu conține mcp | req: ARCH-MCP-073
+      <!-- 2026-09-21: test, nu grep în CHANGELOG — REQ-MCPTOOLS-1028 CASE-6 fixează cele 14 nume. -->
 <!-- Valul 4 — adopție care nu e marketing (continuu) -->
 - [ ] V4: Repo-template `hello-reqmap`, nu dogfood-ul. Gata când: „Use this template” produce un gate care trece | req: ARCH-INIT-012
 - [ ] V4: Cadență: 1 release / săptămână. Gata când: septembrie viitor are ≤5 tag-uri, nu 97 | req: ARCH-RELEASE-072

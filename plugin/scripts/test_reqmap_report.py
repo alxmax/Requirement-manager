@@ -5028,6 +5028,16 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
             for flag in flags:
                 self.assertIn(flag, known, "{} uses {}".format(tool["name"], flag))
 
+    FROZEN_TOOLS = {"reqmap_gate", "reqmap_next", "reqmap_health", "reqmap_show", "reqmap_search",
+                    "reqmap_audit", "reqmap_dupes", "reqmap_design", "reqmap_untagged",
+                    "reqmap_review", "reqmap_clarify", "reqmap_release_plan", "reqmap_sync",
+                    "reqmap_release"}
+
+    def test_the_tool_set_is_frozen(self):  # verifies: REQ-MCPTOOLS-1028#CASE-6
+        self.assertEqual(self.FROZEN_TOOLS, {t["name"] for t in R.mcp.MCP_TOOLS},
+                         "the MCP tool set is frozen until a consumer other than the maintainer "
+                         "uses the server (ROADMAP V2); change REQ-MCPTOOLS-1028 first")
+
     def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
         writes = {"reqmap_sync", "reqmap_release"}   # reqmap_new went with the verb (ADR-0045)
         out, calls = self._serve([self._req(1, "tools/list"),
