@@ -23605,6 +23605,33 @@
       "req": "ARCH-SITE-026",
       "unpark": null,
       "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Upgrade-ul de motor nu mai retrogradează în tăcere tot corpusul: `sync` pe Consilium-py (2026-06-19.1 → v8) a trecut 17/17 cerințe `confirmed` în `draft`, fiindcă schema `binding_hash` s-a schimbat, nu textul. Gata când: un lock scris de alt `MAP_ENGINE_VERSION` e re-baseline-uit, nu tratat ca drift",
+      "horizon": "now",
+      "req": "ARCH-DRIFT-003",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Un consumer vechi re-vendorizat nu mai vede tag-urile motorului: `.reqmapignore` din Consilium-py n-avea `scripts/reqmap_engine/**` și gate-ul a dat 100+ RM001. Gata când: scanarea exclude pachetul motorului vendorizat fără o linie în `.reqmapignore`",
+      "horizon": "now",
+      "req": "ARCH-SCAN-002",
+      "unpark": null,
+      "done": false,
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --release` bumpează și `marketplace.json`, nu doar `plugin.json` (la v8.0.0 a trebuit `check_versions.py --fix`)",
+      "horizon": "now",
+      "req": "ARCH-RELEASE-072",
+      "unpark": null,
+      "done": false,
       "context": "<!-- Valul 1 — primul străin poate evalua (săptămâna asta) -->",
       "section_date": null
     },
@@ -23649,7 +23676,7 @@
       "horizon": "now",
       "req": "SYS-SSOT-001",
       "unpark": null,
-      "done": false,
+      "done": true,
       "context": "",
       "section_date": null
     },

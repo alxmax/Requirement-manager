@@ -1,0 +1,50 @@
+name: I tried this on my repo
+description: You ran reqmap on your own code. Tell us what worked, what broke, and what stopped you
+labels: ["field-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One report from a repo we have never seen is worth more than any test here. Short
+        answers are fine. Nothing in this form is shared beyond this issue.
+  - type: input
+    id: language
+    attributes:
+      label: Language(s) of the tree
+      placeholder: e.g. Python + TypeScript
+    validations:
+      required: true
+  - type: input
+    id: size
+    attributes:
+      label: Tree size
+      description: Roughly how many source files, and how many requirements you ended with.
+      placeholder: e.g. ~400 files, 12 requirements
+    validations:
+      required: true
+  - type: textarea
+    id: broke
+    attributes:
+      label: What failed or confused you
+      description: The command and its output, verbatim where you have it. Include the point where you stopped, if you stopped.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: worked
+    attributes:
+      label: What worked
+      description: Which commands or flags you actually used, and which of them you would keep.
+    validations:
+      required: true
+  - type: dropdown
+    id: license
+    attributes:
+      label: Did the license (BSL 1.1) block or slow adoption?
+      options:
+        - "No"
+        - "Yes: I could not use it"
+        - "Yes: it needed a review first"
+        - "I did not check"
+    validations:
+      required: true
