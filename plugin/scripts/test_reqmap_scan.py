@@ -168,6 +168,17 @@ class Scanning(unittest.TestCase):  # tested-by: ARCH-SCAN-002  # tested-by: REQ
             self.assertNotIn("TOOL-X-001", members)  # ignored
             self.assertIn("APP-Y-001", members)       # still scanned
 
+    def test_ignoring_the_cli_ignores_the_engine_package_beside_it(self):  # verifies: REQ-SCAN-909#CASE-5
+        # A .reqmapignore written before v7 names only the CLI; the package came later.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            _write(os.path.join(d, "scripts", "reqmap_engine", "gate.py"), tag("TOOL-Z-001") + "\n")
+            _write(os.path.join(d, "lib", "reqmap_engine", "own.py"), tag("APP-W-001") + "\n")
+            _write(os.path.join(d, ".reqmapignore"), "scripts/reqmap.py\n")
+            members = R.scan_members(d, None)
+            self.assertNotIn("TOOL-Z-001", members)   # the package beside the ignored CLI
+            self.assertIn("APP-W-001", members)       # a same-named dir elsewhere is scanned
+
     def test_is_code_file_extensions_and_basenames(self):
         self.assertTrue(R._is_code_file("foo.sh"))
         self.assertTrue(R._is_code_file("infra.tf"))

@@ -67,11 +67,13 @@ satisfies: [ARCH-RELEASE-072]
 > them is blind in every other repository.
 
 Every bullet below is binding.
-- `package.json`, `pyproject.toml`, `Cargo.toml`, `.claude-plugin/plugin.json` and `VERSION`
-  are probed at the code root and beside the requirements directory; a TOML version is read
+- `package.json`, `pyproject.toml`, `Cargo.toml`, `.claude-plugin/plugin.json`,
+  `.claude-plugin/marketplace.json` and `VERSION` are probed at the code root and beside the requirements directory; a TOML version is read
   only from the `project`, `tool.poetry`, `package` or `workspace.package` table.
 - A non-empty `VERSION_FILES` list in `_config.json` replaces the probe with the files it names.
 - Rewriting a version changes only the version text; every other byte of the file is kept.
+  A marketplace's every version field that holds the old version moves with it; a field
+  naming another version, another plugin's, does not.
 - `init` prints which files the version is read from, or that none was found.
 
 ## Cases
@@ -94,6 +96,12 @@ CASE-4 — no version file is an empty answer
   Given  a repository with no version file
   When   the version files are read
   Then   the answer is empty
+
+CASE-5 — a marketplace moves both of its versions
+  Given  a `.claude-plugin/marketplace.json` at 1.4.0 at the top and on its plugin, listing
+         another plugin at 0.3.0
+  When   it is rewritten to 1.5.0
+  Then   both 1.4.0 fields read 1.5.0 and the other plugin's 0.3.0 is unchanged
 
 ---
 id: REQ-CHANGELOGFORMS-1015

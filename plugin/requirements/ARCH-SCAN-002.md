@@ -195,7 +195,8 @@ Every bullet below is binding.
   skipped.
 - The SSOT directory is matched by realpath, so a source package merely named
   `requirements/` is still scanned.
-- Paths matching `.reqmapignore` are excluded.
+- Paths matching `.reqmapignore` are excluded. Ignoring a `reqmap.py` also ignores the
+  `reqmap_engine/` package beside it: since v7 the engine is both.
 - An unreadable file is skipped without aborting the scan.
 - `scan_all` returns the members, the per-criterion coverage and the verification levels
   from a single walk, and each result equals what the three separate scanners return.
@@ -223,9 +224,11 @@ CASE-4 — a source package named requirements/ that is not the SSOT dir is stil
   Then   `"pkg/requirements/impl.py"` appears among the recorded member paths
 
 CASE-5 — a file listed in .reqmapignore is excluded from the scan
-  Given  `.reqmapignore` naming `scripts/reqmap.py`, which itself carries a tag
+  Given  `.reqmapignore` naming `scripts/reqmap.py`, which itself carries a tag, beside a tagged
+         `scripts/reqmap_engine/` package
   When   `scan_members` runs
-  Then   the tagged id from that file is absent, while an untouched file's id is present
+  Then   the ids from the file and from the package beside it are absent, while an untouched
+         file's id, and one in a `reqmap_engine/` dir elsewhere, are present
 
 CASE-6 — an unreadable file yields None instead of raising
   Given  a path under a directory that does not exist

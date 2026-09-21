@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.0.1` — 2026-09-21
+
+**Ce a stricat prima re-vendorizare (Consilium-py).**
+
+- Upgrade-ul de motor nu mai retrogradează cerințele cu textul neschimbat (ARCH-PROMOTE-011)
+- Ignorarea lui `reqmap.py` ignoră și `reqmap_engine/` de lângă el (ARCH-SCAN-002)
+- `sync --release` mută și versiunile din `marketplace.json` (ARCH-RELEASE-072)
+
 ## plugin `v8.0.0` — 2026-09-21
 
 **Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate.**

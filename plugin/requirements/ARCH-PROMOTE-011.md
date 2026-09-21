@@ -158,6 +158,11 @@ Every bullet below is binding.
   clean, so the demotion happens once, not on every sync.
 - `--accept-drift` skips the demotion entirely: the status stays and the baseline
   advances.
+- **An unchanged file is not an edit.** A drifted requirement whose file is identical to its
+  copy in the commit that last wrote the lock keeps its status: its hash moved because a
+  newer engine hashes differently. The run says so, and the waiver is recorded in the drift
+  log with that commit. Without git, a lock never committed or a file git does not track,
+  the requirement is demoted as before.
 - The in-memory status is updated too, so the same run's own summary counts the
   requirement as a draft rather than reporting a status it has just changed.
 
@@ -177,3 +182,10 @@ CASE-3 — accept-drift keeps the status
   Given  a `confirmed` requirement whose contract was edited
   When   `sync --accept-drift` runs
   Then   the status stays `confirmed` and the lock advances
+
+CASE-4 — a new hash on unchanged text keeps the confirmation
+  Given  a committed lock holding another hash for a `confirmed` requirement whose file is
+         unchanged since that commit
+  When   `sync` runs
+  Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log
+         names the lock commit; had the file been edited after that commit, it is demoted
