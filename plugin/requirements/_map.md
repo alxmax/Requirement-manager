@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-21
-engine: 2026-09-21.4
+engine: 2026-09-21.5
 nodes: 292
 edges: 121
 design pass-rate: 97% (106/109 source files without a design candidate)

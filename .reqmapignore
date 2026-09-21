@@ -16,6 +16,7 @@ plugin/skills/excalidraw-diagram/references/excalidraw_format.md
 
 plugin/skills/requirement-manager/SKILL.md
 plugin/skills/requirement-manager/SKILL.universal.md
+plugin/skills/requirement-manager/references/*.md
 
 plugin/docs/superpowers/specs/*.md
 

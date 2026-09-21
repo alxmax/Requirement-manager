@@ -27,6 +27,7 @@ skills/excalidraw-diagram/references/excalidraw_format.md
 # requirements in plugin/requirements/, not by tagging the SKILL files.
 skills/requirement-manager/SKILL.md
 skills/requirement-manager/SKILL.universal.md
+skills/requirement-manager/references/*.md
 
 # --- working docs / specs ---
 # Design specs and superpowers working notes under docs/ are sync_only prose
