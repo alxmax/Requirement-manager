@@ -10,8 +10,6 @@ Subcommands:
   sync              rescan + advance the drift baseline + regen the map and a committed _findings.md
                     (--accept-drift for an edited contract)
   map               generate requirements/_map.md (Mermaid) + _map.json (graph) [+ _map.html viewer]
-  site              inject/refresh engine-owned regions into a presentation page
-                    (--attach/--regions/--diagram)
   export            emit the registry graph as requirements/_map.json (for a front-end)
   next              terminal 'what should I do next': counted, actionable risk buckets
   lint [--strict]   readability/structure check on non-draft requirements (warn; --strict fails on
@@ -22,8 +20,6 @@ Subcommands:
   draft             draft requirements from legacy code (status: draft, risk-scored)
   plan              read-only JSON capability-extraction plan (writes no .md)
   findings          aggregate open verify-intent items into requirements/_findings.md
-  design            advisory design candidates in the repo's code, any language (four OOP pillars +
-                    metrics + standards; never the gate)
   mcp [--allow-writes]  serve the requirements to an AI assistant over MCP (stdio)
   confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
   review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted
@@ -53,12 +49,10 @@ from reqmap_engine.cliflags import (
 )
 from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
-from reqmap_engine.design_report import cmd_design
 from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import cmd_check
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
-from reqmap_engine.i18n import cmd_i18n
 from reqmap_engine.init import cmd_init
 from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
@@ -72,16 +66,15 @@ from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
 from reqmap_engine.search import SEARCH_TOP, cmd_search
 from reqmap_engine.similar import _redundant_groups, cmd_similar
-from reqmap_engine.site import _site_default_target, cmd_site
 from reqmap_engine.workspace import Workspace, _is_source_repo
 from reqmap_engine import (
     config, model, parse, sections, acceptance, text, tags, scan,
     orphans, git, locks, commands, registry, author, draft, candidates,
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
-    risk, show, design, design_python, design_brace, design_report, mapmd,
-    mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
+    risk, show, mapmd,
+    mapjson, viewer, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review, targets, plandrift, history,
-    pyramid, cliflags, site_template, docclaims, versions, release, mcp, mcpconfig, search,
+    pyramid, cliflags, docclaims, versions, release, mcp, mcpconfig, search,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -176,12 +169,40 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         "" if a.no_lint else ", readability",
         "" if a.no_map_check else ", map freshness"))
     return rc
+def _removed_flag(flag):  # implements: REQ-CMDREGISTRY-1031
+    """One stderr line for a flag v8.2.0 removed with its capability (ADR-0047), and
+    exit 0: through v8.x the flag is accepted and ignored, as ADR-0037's alias rule
+    gave every earlier removal one release of warning; v9.0.0 refuses it."""
+    print("note: `{}` was removed in v8.2.0 (ADR-0047) and did nothing; v9.0.0 will "
+          "refuse it.".format(flag), file=sys.stderr)
+    return 0
+
+
+_SITE_PAGE = os.path.join("docs", "architecture.html")
+_SITE_MARKER = "<!--##REQMAP:STATS##-->"
+
+
+def _unmaintained_site_note(code_root):
+    # implements: REQ-CMDREGISTRY-1031
+    """Say once per `sync` that a site page the engine used to refresh no longer is.
+    A consumer whose `docs/architecture.html` carries the engine's region markers would
+    otherwise watch it go stale in silence (ADR-0047)."""
+    try:
+        with open(os.path.join(code_root, _SITE_PAGE), encoding="utf-8") as f:
+            carries = _SITE_MARKER in f.read()
+    except (OSError, UnicodeDecodeError):
+        return
+    if carries:
+        print("note: {} is no longer refreshed by `sync` (removed in v8.2.0, ADR-0047); "
+              "its engine regions are frozen as they are.".format(_SITE_PAGE))
+
+
 def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     """`ask`: the read-only questions that are not the verdict (ADR-0044). Returns the
     question's exit code; with no mode, a usage line and 2."""
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
-    if a.mode_i18n:
-        return cmd_i18n(ws, as_json=a.as_json)
+    if a.mode_i18n or a.mode_design:
+        return _removed_flag("ask --i18n" if a.mode_i18n else "ask --design")
     if a.mode_search is not None:
         if not a.mode_search:
             print("usage: reqmap ask --search \"<query>\"   [--top N]"); return 2
@@ -193,9 +214,7 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     if a.mode_dupes:
         return cmd_similar(reqs, a.threshold if a.threshold is not None else cfg.SIMILAR_THRESHOLD,
                            members, top=a.top, as_json=a.as_json)
-    if a.mode_design:
-        return cmd_design(ws.code_root, reqs_dir, as_json=a.as_json)
-    print("usage: reqmap ask --search QUERY | --dupes | --design | --review [ID] | --i18n")
+    print("usage: reqmap ask --search QUERY | --dupes | --review [ID]")
     return 2
 def _dispatch_sync(a, ws, code_root, reqs_dir):
     """`sync` and its write modes. Returns the exit code."""
@@ -230,10 +249,9 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         # kept opt-in so a consumer repo never gains a file it did not ask for.
         if a.findings and not os.path.exists(os.path.join(reqs_dir, "_findings.md")):
             cmd_findings(reqs, reqs_dir, raw=False)
-        _site_page = a.attach or _site_default_target(code_root)
-        if _site_page and os.path.isfile(_site_page):
-            cmd_site(ws, code_root, attach=_site_page,
-                     regions=["nav", "stats"], diagram=None, detect=False)
+        if a.attach:
+            _removed_flag("sync --attach")
+        _unmaintained_site_note(code_root)
         # Deliberately here and not in cmd_check: `gate` runs on every commit via the
         # hook, and a corpus-shape advisory there is noise on work that is already
         # correct. `sync` is the moment the corpus was just rewritten, which is when
@@ -294,7 +312,9 @@ def main():
     if a.cmd == "mcp":               # a long-running server: no workspace of its own
         return cmd_mcp(a)
     if a.cmd == "init" and not a.plan:
-        return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
+        if a.no_site:
+            _removed_flag("init --no-site")
+        return cmd_init(reqs_dir, code_root, wipe=a.wipe)
 
     # One walk for the commands that need coverage too (gate/sync); the rest only ever
     # asked for members. --cache stays on scan_members, the only scanner that implements
@@ -372,10 +392,10 @@ _ENGINE_MODULES = (
     config, model, parse, sections, acceptance, text, tags, scan,
     orphans, git, locks, commands, registry, author, draft, candidates,
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
-    risk, show, design, design_python, design_brace, design_report, mapmd,
-    mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
+    risk, show, mapmd,
+    mapjson, viewer, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
-    cliflags, site_template, docclaims, versions, release, mcp, mcpconfig, search,
+    cliflags, docclaims, versions, release, mcp, mcpconfig, search,
 )
 
 

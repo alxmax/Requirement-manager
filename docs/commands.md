@@ -15,11 +15,11 @@ requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)):
 
 | Verb | What it does |
 |---|---|
-| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
+| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first. |
 | `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
-| `ask` | **Every other read-only question**: search, overlapping contracts, the design review, the review plan, missing translations. Never writes anything, and its exit code is the question's, never the verdict's. Since v8.0.0 `gate` refuses them and names `ask` ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)); every verb refuses a flag another verb owns. |
-| `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
-| `mcp` | Serve the engine over the Model Context Protocol on stdio: fourteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](integrations.md#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
+| `ask` | **Every other read-only question**: search, overlapping contracts, the review plan. Never writes anything, and its exit code is the question's, never the verdict's. Since v8.0.0 `gate` refuses them and names `ask` ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)); every verb refuses a flag another verb owns. |
+| `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md` and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
+| `mcp` | Serve the engine over the Model Context Protocol on stdio: thirteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. See [MCP server](integrations.md#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
 | `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |
 
 **`gate` — the bare verdict.** Link sync (every tag resolves, every enforced
@@ -44,19 +44,16 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 |---|---|
 | `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. `--json` for an agent. |
 | `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). A pair a reviewer read and found different is recorded with `distinct_from: [ID]` and stops being reported; `--json` lists every pair and what was skipped. |
-| `--design` | Advisory design review of the code: the four OOP pillars, one Chidamber & Kemerer per-class metric (RFC, Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
-| `--i18n` | Translations the configured `LANGUAGE` (`en` \| `ro` \| `both`, set in `requirements/_config.json`) expects and does not have, missing or stale. `--json` emits each entry's source fields and cache key for whoever translates — the engine never does. |
 | `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
 
 **`sync` — the write modes.**
 
 | Flag | What it does |
 |---|---|
-| *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the site regions, the integration artifacts. Then print, as suggestions only, where the plan and reality disagree — see [Planning and releasing](planning.md). |
+| *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the integration artifacts. Then print, as suggestions only, where the plan and reality disagree — see [Planning and releasing](planning.md). |
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
 | `--release [vX.Y.Z]` | Cut the next version planned in `_planning.json` — the lowest milestone above the version already declared — or the one named. Prints the plan and writes nothing without `--apply`; with it, bumps the version files, writes the dated CHANGELOG entry and drops the milestone and its bars from the plan. Exit 2 when nothing is planned, the version is not above the baseline, or the gate has errors. `--json` is what a release workflow reads. |
 | `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
-| `--attach <page>` | Refresh the engine-owned regions (nav links, counts) of a presentation page, scaffolding one if absent. `--regions nav,stats`, `--diagram <rel>`. |
 
 Confirming a requirement is **not** a command — it is a human's answer. Edit
 `status: confirmed` in the frontmatter once someone has actually read it. The gate

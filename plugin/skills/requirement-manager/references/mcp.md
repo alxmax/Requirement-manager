@@ -18,7 +18,7 @@ works the same from the shell.
 | Everything that is wrong, at once | `reqmap_audit` | `gate --audit --json` |
 | Do two contracts overlap? | `reqmap_dupes` | `ask --dupes --json` |
 | What is unanswered in a requirement? | `reqmap_clarify(id)` | `clarify ID --json` |
-| Review plan / design / tag coverage | `reqmap_review(id)` / `reqmap_design` / `reqmap_untagged` | `ask --review` / `ask --design` / `gate --risk --untagged` |
+| Review plan / tag coverage | `reqmap_review(id)` / `reqmap_untagged` | `ask --review` / `gate --risk --untagged` |
 | What would the next release cut? | `reqmap_release_plan` | `sync --release --json` |
 
 **Resources.** `reqmap://requirement/<id>` is one requirement's dossier, and `reqmap://map`

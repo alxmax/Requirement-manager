@@ -26,7 +26,7 @@ Every bullet below is binding.
 - `lint` writes no file during the default run; only the opt-in `--decompose` flag creates one draft per reported `statement-size` clause, and no invocation site (the gate, the pre-commit hook, CI) ever passes it. [[REQ-DECOMPOSE-837]]
 - Each created draft carries `status: draft`, a `depends_on` entry naming its parent, the offending clause seeded verbatim, and an id that reuses the parent's area/name at the next free corpus number. [[REQ-DECOMPOSE-838]]
 - `lint --decompose` leaves the parent byte-identical, discloses that the split was chosen by word count and not by obligation, skips a clause already decomposed, never scaffolds from an `ac-count-high` finding, and says so when it scaffolds nothing. [[REQ-DECOMPOSE-839]]
-- `clarify --decompose` splits a requirement whose Description carries two or more bold group labels into one `level: code` child per group, moves a case to a child only when the case names exactly one group's subject, writes no member tag, refuses above `LINT_AC_MAX` groups, and writes nothing without `--apply`. [[REQ-DECOMPOSE-994]]
+- `clarify --decompose` splits a requirement whose Description carries two or more bold group labels into one `level: code` child per group, copies a case to a child only when the case names exactly one group's subject, never edits the parent, writes no member tag, refuses above `LINT_AC_MAX` groups, and writes nothing without `--apply`. [[REQ-DECOMPOSE-994]]
 
 ## Cases
 CASE-1
@@ -302,22 +302,22 @@ satisfies: [ARCH-DECOMPOSE-050]
 Every bullet below is binding.
 - A requirement whose Description carries two or more bold group labels is split into one
   child per group; a requirement with fewer than two falls through to the clause-level path.
+  A group label is a flush-left line that opens with a bold span, with or without text after
+  it; such a line is never read as part of the clause above it.
 - Each child carries `status: draft`, `level: code`, `level_source: auto`, `satisfies:` the
   parent, the group's clauses verbatim, and an id of the parent's stem plus the group's
   subject, with a numeric suffix only on collision.
-- A parent case moves to a child only when the case's text names exactly one group's
-  subject; a case naming none or more than one stays on the parent, and the run reports
-  how many stayed.
+- A parent case is copied to a child only when the case's text names exactly one group's
+  subject; a case naming none or more than one goes to no child, and the run reports how
+  many did.
 - No `implements:` tag is written. Each child lists the members it is expected to claim,
   found by searching the parent's `implements:` files for the group's subject at a
   definition.
 - A parent with more than `LINT_AC_MAX` groups is refused with the group list and the
   instruction to merge labels first.
-- Without `--apply` the run prints the whole plan and writes nothing. With it, the children
-  are written and the parent is rewritten: each split group becomes one obligation line
-  naming its child, moved cases leave, surviving cases keep their labels, and a parent left
-  with no case gets one placeholder naming what the rung still owes. Everything outside the
-  Description and Cases is byte-identical.
+- Without `--apply` the run prints the whole plan and writes nothing. With it, only the
+  children are written: the parent is byte-identical afterwards, so deleting the children
+  undoes the split completely.
 - With no id, every requirement in the corpus that carries two or more groups is planned,
   and each is written independently on `--apply`.
 - A requirement already at `level: code` is never split, named or not: its children would sit
@@ -331,11 +331,11 @@ CASE-1 — the author's group labels are the seams
   Then   three child files exist, each carrying its group's bullets verbatim, `level: code`,
          `level_source: auto`, `status: draft` and `satisfies: [<ID>]`
 
-CASE-2 — a case moves only when it names exactly one subject
+CASE-2 — a case is copied only when it names exactly one subject
   Given  a parent case naming one group's subject, one naming two, and one naming none
   When   the split runs
-  Then   the first case lands in its child and the other two stay on the parent, and stdout
-         reports 2 stayed
+  Then   the first case is in its child and still on the parent, the other two are in no
+         child, and stdout reports 2 went to none
 
 CASE-3 — no tag is written, expected members are listed
   Given  a parent whose `implements:` file defines the group's subject as a function
@@ -354,13 +354,15 @@ CASE-5 — the dry run is a dry run
   When   `clarify <ID> --decompose` runs without `--apply`
   Then   the plan is printed and no file in the requirements directory changed
 
-CASE-6 — the parent is rewritten only where the split happened
-  Given  a parent with prose before its Description and a Context section after its Cases
-  When   the split runs with `--apply`
-  Then   every split group is one line ending in its child's id, surviving cases keep their
-         original labels, and the text outside Description and Cases is byte-identical
+CASE-6 — the parent is never edited
+  Given  a splittable parent
+  When   the split runs with `--apply` and every child it wrote is then deleted
+  Then   the parent is byte-identical to its text before the run and still holds every
+         group with every clause
 
-CASE-7 — a parent stripped of every case gets a placeholder, not an empty section
-  Given  a parent whose cases all name a child
+CASE-7 — a label with a note after it is still a group
+  Given  a group label written as a bold `is_headless()` followed on the same line by
+         `(the environment probe)`
   When   the split runs with `--apply`
-  Then   the parent's Cases section holds one placeholder case rather than nothing
+  Then   that group gets its own child, and no other child's clauses contain its label or
+         its subject

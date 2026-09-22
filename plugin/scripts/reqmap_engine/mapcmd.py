@@ -1,11 +1,9 @@
 """`map` / `export` / `map --check`: assemble the data, write _map.md/_map.json/_map.html, refresh
 _findings.md, and tell a committed artifact from a stale one.
 """
-import os, re
+import os
 
-from . import config as cfg
 from .author import _parse_todos
-from .design_report import _design_summary
 from .findings import _render_findings, cmd_findings
 from .git import _git, _git_branch, _repo_name
 from .health import _health_record
@@ -15,7 +13,6 @@ from .mapdata import _read_roadmap, _build_map_data
 from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
 from .scan import scan_ac_verifies
-from .site import _extract_region, _render_region, _site_context_from_data, _site_default_target
 from .targets import load_targets
 from .viewer import render_html
 
@@ -67,7 +64,6 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     branch = _git_branch(root)
     if branch:
         data["branch"] = branch
-    data["language"] = cfg.LANGUAGE          # implements: REQ-TRANSLATE-996
     data["todos"] = _parse_todos(root)
     # The horizon plan, beside the versioned one. A repo keeps one, the other, or
     # both; the viewer shows the Horizons column set only when this list is non-empty,
@@ -78,10 +74,6 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     # the viewer, so the CLI and the chart cannot disagree about what a month held.
     # implements: REQ-HISTORY-1003
     data["history"] = by_month(read_history(root))
-    # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
-    _design = _design_summary(root, reqs_dir, with_findings=True)
-    if _design is not None:
-        data["design"] = _design
     # The same record `next` prints its headline from, so the viewer reads the score
     # rather than defining a second one.  # implements: REQ-HEALTH-968
     data["health"] = _health_record(reqs, members, reqs_dir)
@@ -93,65 +85,19 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     return data
 
 
-# The top-level `"design"` key of `_map.json`, as `json.dumps(indent=2)` writes it.
-# The block closes at the first line that is exactly `  },` or `  }` — every line
-# inside it is nested deeper, so the two-space indent is what ends it.
-_DESIGN_BLOCK_OPEN = '  "design": {'
-_DESIGN_BLOCK_CLOSE = ("  },", "  }")
-
-
-def _strip_generated(text):  # implements: REQ-DESIGN-991
+def _strip_generated(text):  # implements: ARCH-MAP-007  # implements: REQ-MAP-871
     """Drop volatile lines so a freshness diff compares content, not the
-    environment: the `generated: <timestamp>` frontmatter line (`_map.md`) and the
-    `"repo": ...` field (`_map.json`), which is git-derived and differs across
-    forks/clones — comparing it would make `map --check` spuriously fail on a fork.
-
-    The advisory design payload goes with them, and for a sharper reason than
-    volatility. `_map.json` is ONE freshness-gated artifact carrying three classes of
-    data with three different severities — the requirement graph (normative), `health`
-    (derived) and `design` (advisory by its own contract, ARCH-DESIGN-061). The
-    comparison was all-or-nothing, so anything landing in that document acquired ERROR
-    severity by construction, whatever its own contract said: one blank line inserted
-    into a file no requirement claims moved a `line:` number in `design.findings`,
-    which made the committed map stale, which failed `gate` with zero requirement
-    errors. Determinism was the wrong test for what may be gated — a freshness-checked
-    payload needs STABILITY UNDER UNRELATED EDITS, and per-line findings have none.
-
-    The data itself stays in the artifact: the viewer renders those rows in its Design
-    tab. What changes is that they no longer carry a verdict. The cost, taken with eyes
-    open, is that the committed design rows may lag the code until the next `sync`,
-    which is the correct trade for advice nobody should be blocked by."""
-    out, in_design = [], False
-    for l in text.splitlines():
-        if in_design:
-            in_design = l not in _DESIGN_BLOCK_CLOSE
-            continue
-        if l == _DESIGN_BLOCK_OPEN:
-            in_design = True
-            continue
-        if (l.startswith("generated: ")
+    environment: the `generated: <timestamp>` frontmatter line (`_map.md`), the
+    engine version, and the git-derived `"repo"` / `"branch"` fields (`_map.json`),
+    which differ across forks and clones — comparing them would make `map --check`
+    spuriously fail on a fork."""
+    return "\n".join(
+        l for l in text.splitlines()
+        if not (l.startswith("generated: ")
                 or l.startswith("engine: ")
-                # `_map.md`'s one-line design summary: the same advisory number, and
-                # the same reason it must not be able to fail a build.
-                or l.startswith("design pass-rate: ")
                 or l.lstrip().startswith('"repo":')
                 or l.lstrip().startswith('"branch":')
-                or l.lstrip().startswith('"engine_version":')):
-            continue
-        out.append(l)
-    return "\n".join(out)
-
-
-_ENGINE_STAT_RE = re.compile(r'<div class="stat"><b>[^<]*</b><span>engine</span></div>')
-
-
-def _strip_engine_stat(html):  # implements: ARCH-SITE-026
-    """Drop the `engine` stat cell before a site STATS-region freshness diff — it
-    embeds the live MAP_ENGINE_VERSION, which changes on every engine change
-    independent of requirement content, mirroring the `repo`/`engine_version`
-    exclusions `_strip_generated` already applies to `_map.md`/`_map.json` for the
-    same reason (a routine engine bump must not flag a committed site page stale)."""
-    return _ENGINE_STAT_RE.sub("", html)
+                or l.lstrip().startswith('"engine_version":')))
 
 
 _MAP_ARTIFACTS = ("_map.md", "_map.json")
@@ -212,19 +158,6 @@ def _stale_artifacts(data, ws, root="."):
     # (`_map.json` and the vendored template) and is therefore gitignored — so nothing
     # here can go stale in a commit. A published copy is built where it is published:
     # see the `deploy-map` job.
-    # Site presentation page: gate the deterministic STATS region only. NAV embeds
-    # the git-derived repo URL (fork-specific) and is excluded, mirroring the
-    # `repo`-field exclusion in _strip_generated.  # implements: ARCH-SITE-026
-    site_target = _site_default_target(root)
-    if site_target and os.path.exists(site_target):
-        with open(site_target, encoding="utf-8") as f:
-            on_disk = f.read()
-        disk_stats = _extract_region(on_disk, "stats")
-        if disk_stats is not None:
-            ctx = _site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
-            fresh_stats = _render_region("stats", ctx)
-            if _strip_engine_stat(disk_stats) != _strip_engine_stat(fresh_stats):
-                stale.append(os.path.basename(site_target))
     return stale
 
 

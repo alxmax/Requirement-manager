@@ -35,9 +35,8 @@ Cadență: un release pe săptămână, nu unul pe fiecare merge.
 
 ### Suprafața motorului
 
-- [ ] `ask --design` iese din motor: întâi `_design_summary` deconectat din health / mapcmd / audit, apoi `design*.py` șters. Cere un ADR care îl înlocuiește pe 0044 și un minor cu avertisment de deprecare | req: ARCH-DESIGN-061 | unpark: raportul primului evaluator extern arată că nu îl folosește
-- [ ] `init` nu mai scrie `docs/architecture.html`; site-ul devine opt-in pe `sync --attach` | req: ARCH-SITE-026 | unpark: raportul primului evaluator extern
-- [ ] `_i18n/ro.json` (702 KB) nu se mai comite, iar toggle-ul RO din viewer se decide odată cu el; `i18n.py` rămâne detector de gap | req: ARCH-TRANSLATE-044 | unpark: raportul primului evaluator extern
+- [ ] Motorul ≤ 12.500 de linii: bump-ul și scrierea CHANGELOG din `sync --release` trec în `scripts/` al repo-ului; cititorii de plan rămân cât un consumator are `_planning.json` (ADR-0046) | req: ARCH-RELEASE-072 | unpark: Consilium-py verde pe `check@v8` 7 zile
+- [ ] Motorul ≤ 8.000 de linii la v9.0.0: `gate`, `rules` și `init` nu mai importă module de autoring, căutare și release; v9.0.0 refuză flag-urile scoase în v8.2.0 (ADR-0046, ADR-0047) | req: ARCH-CMDREGISTRY-033 | unpark: etapa de 12.500 livrată
 - [ ] Lista de tool-uri MCP și schema OpenAI generate din același registru `COMMANDS` (ADR-0008) | req: ARCH-MCP-073 | unpark: freeze-ul MCP e ridicat
 
 ### Adopție

@@ -35,7 +35,7 @@ download.
 ### MCP server (Claude Code, VS Code with Copilot, any MCP client)
 
 `reqmap.py mcp` serves the engine over the Model Context Protocol on stdio. The assistant
-sees fourteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
+sees thirteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
 `reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
 invocation in a fresh process, so the answer is exactly what the CLI prints, as JSON wherever
 the command has `--json`. It is **read-only by default**; `reqmap_sync` and `reqmap_release`

@@ -2750,6 +2750,36 @@ class DanglingVerifies(unittest.TestCase):  # tested-by: REQ-DANGLINGVERIFY-1009
         self.assertIn("names no such requirement", out)
 
 
+class DanglingWikiLink(unittest.TestCase):  # tested-by: REQ-CHECK-1035
+    """RM036: an `[[ID]]` in a Description whose target no requirement defines."""
+
+    def _rm036(self, parent_clauses, others=()):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "ARCH-P-001.md"), _spec("ARCH-P-001", parent_clauses))
+            for rid in others:
+                _write(os.path.join(rdir, rid + ".md"), _spec(rid, ["`gate` writes the lock."]))
+            reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
+            _e, warns = R.run_gate_rules(R.GateContext(R.Workspace(reqs, members, rdir, d)))
+        return [str(w) for w in warns if w["rule"] == "RM036"]
+
+    def test_a_pointer_to_a_deleted_child_warns(self):  # verifies: REQ-CHECK-1035#CASE-1
+        found = self._rm036(["Loading — see [[REQ-P-LOAD]].", "Probing — see [[REQ-P-PROBE]]."],
+                            others=["REQ-P-PROBE"])
+        self.assertEqual(1, len(found), found)
+        self.assertIn("[[REQ-P-LOAD]]", found[0])
+        self.assertNotIn("REQ-P-PROBE", found[0])
+
+    def test_a_pointer_to_an_existing_requirement_is_silent(self):  # verifies: REQ-CHECK-1035#CASE-2
+        self.assertEqual([], self._rm036(["Probing — see [[REQ-P-PROBE]]."],
+                                         others=["REQ-P-PROBE"]))
+
+    def test_examples_and_prose_links_are_not_links(self):  # verifies: REQ-CHECK-1035#CASE-3
+        # A code span is an example; `[[child]]` is not id-shaped. Both are prose.
+        self.assertEqual([], self._rm036(["Write `see [[REQ-X-001]]` to point at a child.",
+                                          "Each group becomes one [[child]] line."]))
+
+
 class DocClaims(unittest.TestCase):  # tested-by: ARCH-DOCCLAIMS-071  # tested-by: REQ-DOCCLAIMS-1012
     """RM035: a number a prose document states about the corpus, re-measured.
 

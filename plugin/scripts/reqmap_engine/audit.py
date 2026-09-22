@@ -2,11 +2,9 @@
 import contextlib, datetime, io, json
 
 from . import MAP_ENGINE_VERSION, config as cfg
-from .design_report import _design_summary, cmd_design
 from .gate import cmd_check, run_gate_rules
 from .groups import decomposable
 from .health import _exempt_note, _health_record, cmd_coverage
-from .i18n import _translation_gaps
 from .lint import lint_requirement
 from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
 from .mapdata import (
@@ -122,22 +120,6 @@ def _decompose_candidates_line(reqs):
            "--apply writes it".format(len(splittable)))
 
 
-def _i18n_gap_line(reqs, reqs_dir):
-    # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
-    """One line naming requirements with no fresh translation, or None.
-
-    Translation coverage, only when the repo asked for a second language. Under `en`
-    nothing is expected and nothing is said; under `ro`/`both` a requirement with no
-    fresh Romanian entry is a gap, named with the command that hands over the text."""
-    gaps = _translation_gaps(reqs, reqs_dir)
-    if not gaps:
-        return None
-    missing = sum(1 for g in gaps if g["reason"] == "missing")
-    return ("{} requirement(s) have no fresh translation for LANGUAGE `{}` ({} missing, "
-           "{} stale) - `reqmap.py ask --i18n --json` emits the entries to fill"
-           .format(len(gaps), cfg.LANGUAGE, missing, len(gaps) - missing))
-
-
 def _auto_level_line(shape):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """One line naming requirements still carrying the engine's proposed level, or None.
@@ -152,16 +134,6 @@ def _auto_level_line(shape):
     return ("{} of {} levelled requirement(s) still carry the rung the engine "
            "proposed (`level_source: auto`) - rename, merge or accept them"
            .format(shape["auto"], shape["levelled"]))
-
-
-def _design_candidate_line(code_root, reqs_dir):
-    # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
-    """One line naming source files that carry a design candidate, or None."""
-    design = _design_summary(code_root, reqs_dir) if code_root else None
-    if design is None or design["clean_files"] >= design["files"]:
-        return None
-    return "design pass-rate {}% - {} of {} source files carry a candidate".format(
-        design["score"], design["files"] - design["clean_files"], design["files"])
 
 
 def _untagged_files_line(code_root, reqs_dir):
@@ -278,9 +250,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):
         _lint_error_line(reqs, members),
         _level_gap_line(shape),
         _decompose_candidates_line(reqs),
-        _i18n_gap_line(reqs, reqs_dir),
         _auto_level_line(shape),
-        _design_candidate_line(code_root, reqs_dir),
         _untagged_files_line(code_root, reqs_dir),
     ) if text]
     lines.extend(_version_lines(code_root, reqs_dir))
@@ -303,16 +273,14 @@ def _json_audit_report(ws, signals, strict):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
     """Build and print the `--json` audit report; return the gate's exit code.
 
-    `signals` bundles the already-computed shape/health/design/untagged/exemptions
+    `signals` bundles the already-computed shape/health/untagged/exemptions
     (and their unexplained subset) `cmd_audit` gathers once for both report forms —
-    an object in place of the parameter list those five separate values would be."""
+    an object in place of the parameter list those separate values would be."""
     reqs, members = ws.reqs, ws.members
     health, shape = signals["health"], signals["shape"]
-    design, untagged = signals["design"], signals["untagged"]
+    untagged = signals["untagged"]
     out = {"health": health, "shape": shape, "exemptions": signals["exemptions"],
            "redundant_groups": [sorted(g) for g in _redundant_groups(reqs)]}
-    if design is not None:
-        out["design"] = design
     if untagged is not None:
         out["untagged"] = len(untagged)
     # Same lines the console report prints under "Roadmap" — a JSON consumer that could
@@ -335,7 +303,7 @@ def _summary_table_rows(gate_rc, signals, dups):
     """The audit's summary table: one row per signal, in report order.
 
     `signals` is the same bundle `_json_audit_report` reads — see its docstring."""
-    health, design, untagged = signals["health"], signals["design"], signals["untagged"]
+    health, untagged = signals["health"], signals["untagged"]
     exemptions, unexplained, shape = (signals["exemptions"], signals["unexplained"],
                                       signals["shape"])
     verdict = "FAIL" if gate_rc else "clean"
@@ -344,9 +312,6 @@ def _summary_table_rows(gate_rc, signals, dups):
                 health["score"], health["healthy"], health.get("scored", health["total"]),
                 _exempt_note(health)),
              "reqmap.py gate --risk")]
-    if design is not None:
-        rows.append(("Design pass-rate", "{}% ({}/{} files with no candidate)".format(
-            design["score"], design["clean_files"], design["files"]), "reqmap.py ask --design"))
     if untagged is not None:
         rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),
                      "reqmap.py gate --risk --untagged"))
@@ -444,11 +409,10 @@ def cmd_audit(ws, strict=False, as_json=False):
     unexplained = [e for e in exemptions if not e["reason"]]
     shape = _corpus_shape(reqs)
     health = _health_record(reqs, members, reqs_dir)
-    design = _design_summary(code_root, reqs_dir) if code_root else None
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
     # Bundled once, in place of the long parameter list this report's two shapes
     # (`--json` and the console table) would otherwise both need repeated.
-    signals = {"shape": shape, "health": health, "design": design, "untagged": untagged,
+    signals = {"shape": shape, "health": health, "untagged": untagged,
                "exemptions": exemptions, "unexplained": unexplained}
 
     if as_json:
@@ -460,8 +424,6 @@ def cmd_audit(ws, strict=False, as_json=False):
         _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(ws, False)),
         _audit_section("Duplicates", "reqmap.py ask --dupes",
                        lambda: cmd_similar(reqs, cfg.SIMILAR_THRESHOLD, members)),
-        _audit_section("Design", "reqmap.py ask --design",
-                       lambda: cmd_design(code_root, reqs_dir)),
         _audit_section("Tag coverage", "reqmap.py gate --risk --untagged",
                        lambda: cmd_coverage(ws, False)),
     ]

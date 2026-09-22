@@ -31,9 +31,9 @@ Every bullet below is binding.
 - A cached entry is served only while its stored hash still matches the
   requirement's current content; a stale or malformed cache degrades to no
   translation, never to a wrong one. [[REQ-TRANSLATE-938]]
-- The gate reports a cached translation that carries a field the requirement
-  itself does not emit. [[REQ-TRANSLATE-967]]
-- A repository declares its requirements language as `LANGUAGE` (`en`, `ro`, `both`) in `_config.json`. Under `ro` or `both` the engine reports every requirement without a fresh translation, hands over the source text plus cache key on request, has the viewer open in that language — while still translating nothing itself. [[REQ-TRANSLATE-996]]
+- Nothing measures the cache: since v8.2.0 (ADR-0047) there is no `ask --i18n`, no
+  parity rule and no `LANGUAGE` key. A translation already cached is shown while it is
+  fresh and silently dropped once its requirement changes.
 
 ## Cases
 CASE-1 — a title-only edit invalidates the cached translation
@@ -225,7 +225,7 @@ CASE-4 — a translated field carries its own badge; an untranslated one carries
 
 ---
 id: REQ-TRANSLATE-967
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -275,7 +275,7 @@ CASE-3 — a corpus with no cache raises nothing
 
 ---
 id: REQ-TRANSLATE-996
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

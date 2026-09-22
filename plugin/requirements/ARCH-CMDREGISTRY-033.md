@@ -199,6 +199,8 @@ Every bullet below is binding.
   `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint` and `--no-map-check`.
 - `ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and
   `--json`. `ask --review` with no id plans the whole corpus.
+- `ask --design` and `ask --i18n` are accepted through v8.x and do nothing but print one stderr
+  line naming v8.2.0 and ADR-0047, exiting 0; so are `init --no-site` and `sync --attach`.
 - Since v8.0.0, `gate` given one of `ask`'s flags exits 2 with one stderr line naming `ask`, and
   runs nothing.
 - Every verb given a flag the registry gives another verb exits 2 with one stderr line naming the

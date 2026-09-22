@@ -1,6 +1,6 @@
 ---
 id: ARCH-SITE-026
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -64,7 +64,7 @@ CASE-5
 
 ---
 id: REQ-SITE-924
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

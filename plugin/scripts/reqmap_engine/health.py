@@ -1,7 +1,6 @@
 """`health` and `coverage`: the corpus coherence score and the acceptance-coverage table."""
 import json, os
 
-from .design_report import _design_summary
 from .git import _git
 from .locks import load_lock
 from .mapdata import _roadmap_behind, _roadmap_signals
@@ -255,8 +254,8 @@ def _health_record(reqs, members, reqs_dir):
 def _health_gather_signals(reqs, code_root, reqs_dir, data):
     # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857
     # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
-    """Layer the code-root-dependent signals (untagged files, registry lag, design
-    score, roadmap drift) onto `data`. Returns (data, untagged, lag, design)."""
+    """Layer the code-root-dependent signals (untagged files, registry lag, roadmap
+    drift) onto `data`. Returns (data, untagged, lag)."""
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
     # _scan_untagged (ARCH-NEXT-013). Informational only: it counts FILES, not
@@ -276,11 +275,6 @@ def _health_gather_signals(reqs, code_root, reqs_dir, data):
     # Roadmap signals (read-only): does TODO.md still track what shipped, and does every
     # section heading actually parse as a milestone. Absent (not empty) when the repo has
     # no TODO.md, so a repo that does not keep one sees nothing. implements: ARCH-ROADMAP-038
-    # implements: REQ-DESIGN-954
-    design = _design_summary(code_root, reqs_dir) if code_root else None
-    if design is not None:
-        data["design_score"] = design["score"]
-        data["design_files"] = design["files"]
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap is not None:
         behind, newest_req, unmapped = _roadmap_behind(reqs, roadmap)
@@ -306,7 +300,7 @@ def _health_gather_signals(reqs, code_root, reqs_dir, data):
     misaligned = version_alignment_lines(reqs_dir, code_root) if reqs_dir else []
     if misaligned:  # implements: REQ-VERSIONALIGN-1016
         data["version_alignment"] = misaligned
-    return data, untagged, lag, design
+    return data, untagged, lag
 
 
 def _health_badge_payload(data):
@@ -330,7 +324,7 @@ def _health_badge_payload(data):
             "message": message, "color": color}
 
 
-def _print_health_report(data, design, untagged, lag, headline_only):
+def _print_health_report(data, untagged, lag, headline_only):
     # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857
     # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
     """Print the human-readable health report built from an already-assembled
@@ -348,12 +342,7 @@ def _print_health_report(data, design, untagged, lag, headline_only):
         ", {} deprecated not scored".format(retired) if retired else ""))
     if headline_only:
         # `next` opens with the score and then lists what to do about it; the component
-        # breakdown below would push the actionable part off the first screen. The design
-        # score rides along because it is the other half of "how is this repo doing" and
-        # folding `health` into `next` had quietly dropped it from every text surface.
-        if design is not None:
-            print("Design pass-rate:   {}%  ({}/{} source files with no candidate)".format(
-                design["score"], design["clean_files"], design["files"]))
+        # breakdown below would push the actionable part off the first screen.
         return
     # Say what the headline cannot: a draft caps `score` by construction, so a low
     # reading over a draft-heavy corpus means "not reviewed yet", not "rotting".
@@ -372,10 +361,6 @@ def _print_health_report(data, design, untagged, lag, headline_only):
     if gate_errors: print("  gate link-sync errors (not clean):{}".format(gate_errors))
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
-    if design is not None:
-        print("  design pass-rate (files w/o candidate): {}%  ({}/{}) — "
-             "run `reqmap.py ask --design`".format(
-                 design["score"], design["clean_files"], design["files"]))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init`, or write "
               "requirements/AREA-NAME-NNN.md)")
@@ -402,12 +387,12 @@ def cmd_health(ws, as_json=False, as_badge=False, headline_only=False):
     scope for this signal."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     data = _health_record(reqs, members, reqs_dir)
-    data, untagged, lag, design = _health_gather_signals(reqs, code_root, reqs_dir, data)
+    data, untagged, lag = _health_gather_signals(reqs, code_root, reqs_dir, data)
     if as_badge:
         print(json.dumps(_health_badge_payload(data)))
         return 0
     if as_json:
         print(json.dumps(data, indent=2))
         return 0
-    _print_health_report(data, design, untagged, lag, headline_only)
+    _print_health_report(data, untagged, lag, headline_only)
     return 0

@@ -11,7 +11,6 @@ from .release import seed_release_files
 from .versions import version_files
 from .parse import load_requirements
 from .scan import _walk_code, scan_members
-from .site import _site_default_target, _site_pages_bootstrap, cmd_site
 from .tags import TAG_RE, _findall_tags, _scan_file_tags
 from .workspace import Workspace
 
@@ -248,7 +247,7 @@ def _print_release_setup(reqs_dir, code_root, notes):
               "so the roadmap chart stays empty".format(len(roadmap["unversioned_headings"])))
 
 
-def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
+def cmd_init(reqs_dir, code_root, wipe=False):
     # implements: ARCH-INIT-012  # implements: REQ-INIT-861
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
     .reqmapignore (idempotent — never clobbers an existing one), draft requirements
@@ -278,18 +277,6 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
     reqs = ws.reqs
     cmd_check(ws, update_lock=True)
     cmd_map(ws, code_root)
-    # implements: ARCH-SITE-026 — best-effort project site. Never aborts init.
-    if not no_site:
-        target = _site_default_target(code_root)
-        if target:
-            try:
-                _site_pages_bootstrap(os.path.dirname(target))   # .nojekyll + index.html redirect
-                cmd_site(ws, code_root, attach=target, regions=["nav", "stats"])
-            except Exception as e:   # site is decorative; a failure must not break bootstrap
-                print("note: site step skipped ({}).".format(e))
-        else:
-            print("note: no docs/ folder — run the requirement-manager skill to set up "
-                  "a project site.")
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
         print("reqmap initialized, but no requirements were extracted")
