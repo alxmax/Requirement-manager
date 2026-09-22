@@ -29,7 +29,7 @@ this repo's own requirement graph, republished on every push to `main`.
 ```bash
 python scripts/reqmap.py init     # set up requirements/, draft one per capability from the code you have
 python scripts/reqmap.py gate     # THE verdict: do the code and the specs still agree? (report-only)
-python scripts/reqmap.py sync     # rebuild everything derived: drift baseline, map, findings, site
+python scripts/reqmap.py sync     # rebuild everything derived: drift baseline, map, findings
 ```
 
 `init` is idempotent and never clobbers a file you already have. `gate` is what you wire
@@ -41,28 +41,24 @@ Confirming a requirement is **not** a command but a person's answer: set
 
 ## The drift it catches
 
-One requirement, one agent session, one drift — real terminal output, not a mockup:
+One requirement, one file, one contract change. It is in this repository as a demo you can
+run, [`examples/hello-drift`](examples/hello-drift), and this is its real output:
 
 ```
-$ # requirements/AREA-DEMO-999.md is written, read by a human, set to `confirmed`
-$ python scripts/reqmap.py sync
-  lock update: AREA-DEMO-999 hash changed (new->703e565f)
-lock updated.
-WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
+$ cd examples/hello-drift
+$ python ../../plugin/scripts/reqmap.py gate
+WARN  RM018 HELLO-GREET-001: DRIFT — contract changed since lock; re-check 1 member(s): hello.py:1
 
 1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
-
-$ python scripts/reqmap.py gate
-WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
-WARN  AREA-DEMO-999: DRIFT — contract changed since lock; re-check 1 member(s): scripts/_demo_hello.py:2
-
-1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 2 warnings.
+...
+gate: PASS — link sync + drift + test links, readability, map freshness (advice: `gate --full`).
 ```
 
-Between `sync` and `gate` the contract clause changed (`hello` returns `'hello'` ->
-`'hello, world'`) — but the code that backs it, `scripts/_demo_hello.py`, was never touched.
-Nothing else in the toolchain catches that; `gate` does, because the drift baseline in
-`_reqlock.json` hashes the requirement's own contract text, not just its existence.
+`HELLO-GREET-001` was confirmed and `sync` recorded its contract. Then the contract changed:
+`greet(name)` must now strip the spaces around `name`. The code that backs it, `hello.py`, was
+never touched. Nothing else in the toolchain catches that; `gate` does, because the drift
+baseline in `_reqlock.json` hashes the requirement's own contract text, not just its
+existence.
 
 ## Run the gate in CI
 

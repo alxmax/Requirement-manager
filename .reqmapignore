@@ -118,3 +118,8 @@ scripts/benchmark_scan.py
 # it as an untagged source file and, worse, pick up any `implements:` example in it
 # as a real member of a requirement.
 docs/history/**
+
+# The runnable demo. It is its own tiny repository: its `implements:` tag names a
+# requirement that lives in examples/hello-drift/requirements, not in this corpus, so
+# scanning it here would report a dangling tag.
+examples/**
