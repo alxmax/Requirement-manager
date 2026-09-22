@@ -1,7 +1,7 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-945
 import {
-  REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN,
+  REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
@@ -81,7 +81,7 @@ function gaugeTone(score) {
 
 function RailGauges({ setView }) {
   const { t } = useI18n();
-  if (!HEALTH && !DESIGN) return null;
+  if (!HEALTH) return null;
   return (
     <div className="rail-gauges">
       <div className="rail-section" style={{ paddingTop: 0, paddingLeft: 0 }}>{t("Signals")}</div>
@@ -101,21 +101,6 @@ function RailGauges({ setView }) {
             </span>
           </span>
         </button>
-      )}
-      {DESIGN && (
-        <div className="gauge-row static"
-          title={t(
-            "Source files with no OOP or house-standard candidate — advisory, "
-            + "never part of the gate",
-          )}>
-          <Gauge pct={DESIGN.score} tone="var(--fg-muted)" />
-          <span className="gauge-txt">
-            <span className="gauge-name">{t("Design OOP")}<b>{DESIGN.score}</b></span>
-            <span className="gauge-sub">
-              {t("{a}/{b} files clean", { a: DESIGN.clean_files, b: DESIGN.files })}
-            </span>
-          </span>
-        </div>
       )}
     </div>
   );

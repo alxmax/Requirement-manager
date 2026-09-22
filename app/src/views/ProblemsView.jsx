@@ -1,13 +1,12 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-966
-// implements: REQ-VIEWER-977
 import { useState } from "react";
-import { REQUIREMENTS, coverageOf, DESIGN } from "../lib/data.js";
+import { REQUIREMENTS, coverageOf } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { openQuestions } from "../lib/tree.js";
 import {
-  ProblemTabBar, DesignProblemsPanel, ProblemRow, ProblemsEmpty,
+  ProblemTabBar, ProblemRow, ProblemsEmpty,
 } from "./problems/ProblemsPanels.jsx";
 
 const SEV = {
@@ -62,16 +61,7 @@ export function computeProblems() {
       msg: `${qs.length} open verify-intent question(s).`,
       fix: "Answer it, fold the answer into the Description, then delete the bullet.", loc: "" });
   });
-  const design = (DESIGN && Array.isArray(DESIGN.findings)) ? DESIGN.findings : [];
-  const advice = (DESIGN && DESIGN.advice) || {};
-  design.forEach((f) => {
-    out.push({ id: f.file, title: (f.name && f.name !== f.file) ? `${f.kind} · ${f.name}` : f.kind,
-      signal: "design", sev: "DESIGN", noSpec: true, msg: f.detail,
-      fix: advice[f.kind]
-        || "Advisory: a shape worth a look, never a defect; `ask --design` names it.",
-      loc: `${f.file}:${f.line}` });
-  });
-  const order = { ERROR: 0, WARN: 1, QUESTION: 2, REVIEW: 3, DESIGN: 4 };
+  const order = { ERROR: 0, WARN: 1, QUESTION: 2, REVIEW: 3 };
   return out.sort((a, b) => order[a.sev] - order[b.sev] || a.id.localeCompare(b.id));
 }
 
@@ -85,17 +75,11 @@ export function ProblemsView({ openSpec, problems }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState("ALL");
   const [showDrafts, setShowDrafts] = useState(false);
-  const all = (problems || computeProblems()).filter((p) => p.sev !== "DESIGN");
+  const all = problems || computeProblems();
   const counts = all.reduce((a, p) => {
     a[p.sev] = (a[p.sev] || 0) + 1;
     return a;
   }, { all: all.length });
-  const design = (DESIGN && Array.isArray(DESIGN.findings)) ? DESIGN.findings : [];
-  const advice = (DESIGN && DESIGN.advice) || {};
-  const byPillar = design.reduce((a, f) => {
-    (a[f.pillar] = a[f.pillar] || []).push(f);
-    return a;
-  }, {});
   const draftReviews = all.filter(isDraftReview).length;
   const byTab = filter === "ALL" ? all : all.filter((p) => p.sev === filter);
   const shown = showDrafts ? byTab : byTab.filter((p) => !isDraftReview(p));
@@ -116,18 +100,17 @@ export function ProblemsView({ openSpec, problems }) {
   return (
     <div className="main">
       <ProblemTabBar filter={filter} setFilter={setFilter} counts={counts}
-                     designCount={design.length} gateMsg={gateMsg} />
+                     gateMsg={gateMsg} />
       <div className="problems">
-        {filter === "DESIGN" && <DesignProblemsPanel byPillar={byPillar} advice={advice} />}
-        {filter !== "DESIGN" && (hidden > 0 || (showDrafts && draftReviews > 0)) && (
+        {(hidden > 0 || (showDrafts && draftReviews > 0)) && (
           <button type="button" className="prob-chip" onClick={() => setShowDrafts((s) => !s)}>
             {draftsLabel}
           </button>
         )}
-        {filter !== "DESIGN" && shown.map((p, i) => (
+        {shown.map((p, i) => (
           <ProblemRow key={i} p={p} openSpec={openSpec} t={t} />
         ))}
-        {filter !== "DESIGN" && shown.length === 0 && <ProblemsEmpty filter={filter} t={t} />}
+        {shown.length === 0 && <ProblemsEmpty filter={filter} t={t} />}
       </div>
     </div>
   );

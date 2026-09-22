@@ -53,7 +53,6 @@ const RO = {  // implements: REQ-VIEWER-943
   "Registry": "Registru",
   "Signals": "Indicatori",
   "Health": "Sănătate",
-  "Design OOP": "Design OOP",
   "due {date}": "până la {date}",
   "Roadmap": "Planificare",
   "milestones": "repertori",
@@ -86,12 +85,9 @@ const RO = {  // implements: REQ-VIEWER-943
     "Adaugă `bars` cu date start/end în _planning.json pentru vizualizarea timeline.",
   "{a}/{b} green": "{a}/{b} verzi",
   "{n} exempt": "{n} cu scutire",
-  "{a}/{b} files clean": "{a}/{b} fișiere curate",
   "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
     "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări "
       + "deschise, fără drift",
-  "Source files with no OOP or house-standard candidate — advisory, never part of the gate":
-    "Fișiere sursă fără semnalări OOP sau de standarde — consultativ, niciodată parte din gate",
   "Map": "Hartă",
   "Problems": "Probleme",
   "Spec": "Specificații",

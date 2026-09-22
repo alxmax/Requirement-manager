@@ -1,5 +1,5 @@
 // tested-by: ARCH-VIEWER-007
-/* Render smoke test, part: rail readings, design tab, roadmap zoom and horizons. */
+/* Render smoke test, part: the rail reading, roadmap zoom and horizons. */
 import { renderToString } from "react-dom/server";
 
 import App from "../../src/App.jsx";
@@ -26,36 +26,30 @@ import {
 } from "../../src/lib/tree.js";
 import { json, noop, specOf, test, fail } from "./harness.jsx";
 
-// ---- the rail's two engine-emitted readings (REQ-VIEWER-969) ---------------
+// ---- the rail's engine-emitted reading (REQ-VIEWER-969) --------------------
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
-const SCORES = [{ score: 78, healthy: 39, total: 50 },
-                { score: 23, clean_files: 7, files: 30 }];
-adoptMapExport({ health: SCORES[0], design: SCORES[1] });
+const SCORE = { score: 78, healthy: 39, total: 50 };
+adoptMapExport({ health: SCORE });
 const railHtml = renderToString(<App />);
-// an older map carries neither key
-adoptMapExport({ health: null, design: null });
+// an older map carries no health key
+adoptMapExport({ health: null });
 const railBare = renderToString(<App />);
 // a waived check travels with the score (REQ-HEALTH-968)
-adoptMapExport({ health: { ...SCORES[0], exempt: 4 }, design: SCORES[1] });
+adoptMapExport({ health: { ...SCORE, exempt: 4 } });
 const railExempt = renderToString(<App />);
-adoptMapExport({ health: SCORES[0], design: SCORES[1] });
+adoptMapExport({ health: SCORE });
 const gaugeChecks = [
-  ["rail: both readings render the engine's own numbers",  // verifies: REQ-VIEWER-969#CASE-1
-    railHtml.includes("39/50 green") && railHtml.includes("7/30 files clean")
-    && railHtml.includes(">78<") && railHtml.includes(">23<")],
+  ["rail: the health ring renders the engine's own numbers",  // verifies: REQ-VIEWER-969#CASE-1
+    railHtml.includes("39/50 green") && railHtml.includes(">78<")],
   // verifies: REQ-VIEWER-969#CASE-2
   ["rail: a mid-band score takes the partial tone, not the green one",
     railHtml.includes('stroke="var(--cov-partial)"')
     && !railHtml.includes('stroke="var(--cov-tested)"')],
-  ["rail: the advisory design ring stays in one neutral ink",  // verifies: REQ-VIEWER-969#CASE-2
-    // 23 would be red on the health scale; the design score is advice, never a failure
-    railHtml.includes('stroke="var(--fg-muted)"')
-    && !railHtml.includes('stroke="var(--cov-untested)"')],
-  ["rail: a map with neither record shows no gauge at all",  // verifies: REQ-VIEWER-969#CASE-3
+  ["rail: a map with no health record shows no gauge at all",  // verifies: REQ-VIEWER-969#CASE-3
     !railBare.includes("rail-gauges") && !railBare.includes("gauge-row")],
   // verifies: REQ-VIEWER-969#CASE-4
-  ["rail: health is a control, the advisory design score is not",
-    railHtml.includes("gauge-row static")],
+  ["rail: the health ring is a control, and there is no static ring beside it",
+    railHtml.includes('class="gauge-row"') && !railHtml.includes("gauge-row static")],
   ["rail: the exemption count sits beside the score, and only when there is one",  // verifies: REQ-HEALTH-968#CASE-4
     railExempt.includes("4 exempt") && !/\d exempt/.test(railHtml)
     && translate("ro", "{n} exempt", { n: 4 }) === "4 cu scutire"],
@@ -65,43 +59,6 @@ const gaugeChecks = [
 ];
 for (const [label, ok] of gaugeChecks) test(label, ok);
 
-// ---- the advisory design tab (REQ-VIEWER-977) -----------------------------
-// The engine ships its code-review candidates in `_map.json`; the tab lists them by
-// pillar, and since 2026-09-07 each is one computed signal (so the rail counts it) at
-// its own severity, never a Warning row and never a row of "All". A map written before
-// that carries no `findings`, so the tab must simply not appear rather than render an
-// empty shell, and nothing is counted.
-const DESIGN_WITH = {
-  score: 23, clean_files: 7, files: 30,
-  candidates: { encapsulation: 1, abstraction: 1, inheritance: 0, polymorphism: 0, standards: 0 },
-  findings: [
-    { pillar: "encapsulation", kind: "long-parameter-list", file: "src/thing.py",
-      line: 12, name: "build", detail: "`build` takes 9 parameters (over 6)" },
-    { pillar: "abstraction", kind: "long-function", file: "src/thing.py",
-      line: 40, name: "run", detail: "`run` is 120 lines (over 80)" },
-  ],
-  advice: { "long-parameter-list": "a parameter list this long is an object waiting to be named",
-            "long-function": "a function this long hides several steps" },
-};
-adoptMapExport({ health: null, design: DESIGN_WITH });
-const designHtml = renderToString(<ProblemsView openSpec={noop} />);
-const designRows = computeProblems().filter(p => p.signal === "design");
-adoptMapExport({ health: null, design: { score: 23, clean_files: 7, files: 30, candidates: {} } });
-const designBare = renderToString(<ProblemsView openSpec={noop} />);
-adoptMapExport({ health: null, design: null });
-const designChecks = [
-  ["design: the tab is offered with the candidate count",  // verifies: REQ-VIEWER-977#CASE-1
-    designHtml.includes("Design") && designHtml.includes(">2<")],
-  ["design: no tab when the map carries no candidates",  // verifies: REQ-VIEWER-977#CASE-2
-    !designBare.includes(">Design<")],
-  // verifies: REQ-VIEWER-977#CASE-3
-  ["design: candidates are counted at their own severity, listed only in their tab",
-    designRows.length === 2 && designRows.every(p => p.sev === "DESIGN" && p.noSpec)
-    && designRows.some(p => p.loc === "src/thing.py:12")
-    && !designHtml.includes("src/thing.py:12")
-    && computeProblems().every(p => p.signal !== "design")],
-];
-for (const [label, ok] of designChecks) test(label, ok);
 
 // restore the real dataset for anything after this point
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });

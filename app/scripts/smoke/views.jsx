@@ -2,7 +2,7 @@
 // tested-by: ARCH-VIEWER-007
 // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
 // tested-by: ARCH-SEARCH-036
-// tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
+// tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969
 // tested-by: REQ-VIEWER-964
 // tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995  // tested-by: REQ-TRANSLATE-996
 // tested-by: REQ-VIEWER-999  // tested-by: REQ-PLANCADENCE-1000

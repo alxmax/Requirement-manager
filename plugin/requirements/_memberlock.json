@@ -129,7 +129,7 @@
       "app/src/views/commands/CommandGroup.jsx": "1b4fbb87efb50fb2f931942c443b2aa4749df7197c28bd19c440630a9a6d3608",
       "app/src/views/explorer/ExplorerFilters.jsx": "151e767151b61b1847703994205aa4f6a265f71f132a289efcc09f648c1006c4",
       "app/src/views/map/MapParts.jsx": "86b474a1300609691e963b3982bc10b921f262d38eb6328cd5dfed0e40a9ff74",
-      "app/src/views/problems/ProblemsPanels.jsx": "0a3f48c04bef169947b255c83c1fa6a88e43f6f8e8ccc65a8a2854b2ed7810b6",
+      "app/src/views/problems/ProblemsPanels.jsx": "23d2dc279dda64c237346a13c75d251966a9730667512e39e87c1452d956dff8",
       "app/src/views/roadmap/PlanGantt.jsx": "25d5eec9a20f9f3d00068eea10f79117564397157a23fc36c618a5d7fe28c87e",
       "app/src/views/roadmap/versionsData.js": "354aa4817bd4ff539271f37b618569a8573c95f5111a73ac77b682e28c79f71c",
       "app/src/views/spec/SpecParts.jsx": "49f4c8e491b1a22d52b8e501a9bad4caf392123e716f0edc2c075e6b6aaf9ec1",

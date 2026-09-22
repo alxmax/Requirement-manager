@@ -34,14 +34,13 @@ export let LANGUAGE = "en";                          // implements: REQ-TRANSLAT
 // The CLI as data, straight off _map.json (generated from the engine's command
 // registry). Empty in the baked fallback: a map produced before v4.0.0 carries none.
 export let COMMANDS = [];
-/* The engine's own `health` and `design` records, verbatim. Deliberately NOT
- * recomputed here: `next` already prints these two numbers, and a second
- * definition in JavaScript is how the CLI and the viewer come to disagree
- * about how the repo is doing. Null until a map carrying them is loaded —
- * an older map has neither key, and the rail then shows nothing rather than
- * an invented zero.  implements: REQ-VIEWER-969 */
+/* The engine's own `health` record, verbatim. Deliberately NOT recomputed here:
+ * `next` already prints this number, and a second definition in JavaScript is
+ * how the CLI and the viewer come to disagree about how the repo is doing. Null
+ * until a map carrying it is loaded — an older map has no key, and the rail then
+ * shows nothing rather than an invented zero. The engine stopped emitting a
+ * `design` record in v8.2.0 (ADR-0047).  implements: REQ-VIEWER-969 */
 export let HEALTH = null;
-export let DESIGN = null;
 /* Planning sidecar from requirements/_planning.json (legacy: `targets` key).
  * Lanes, bars, milestone due dates and the release cadence. Null until loaded. */
 export let TARGETS = null;
@@ -81,9 +80,8 @@ export function adoptMapExport(data) {               // implements: REQ-VIEWER-9
     BRANCH = typeof data.branch === "string" && data.branch ? data.branch : null;
   }
   if ("commands" in data) COMMANDS = Array.isArray(data.commands) ? data.commands : [];
-  const health = data.health, design = data.design;
+  const health = data.health;
   HEALTH = (health && typeof health.score === "number") ? health : null;
-  DESIGN = (design && typeof design.score === "number") ? design : null;
   const planning = data.planning || data.targets;
   TARGETS = (planning && typeof planning === "object") ? planning : null;
 }
