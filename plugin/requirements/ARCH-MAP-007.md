@@ -108,11 +108,13 @@ Every bullet below is binding.
 - `_map.json` is a derived view. It is regenerated, never edited.
 - `_map.json` carries one node per requirement and one edge per `depends_on`.
 - Each node carries its requirement's id, layer, status, area, title, intent,
-  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
+  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `depends_on`,
   `used_by`, and risk signals.
-- The dependency list is emitted twice under two names: `deps`, which the vendored viewer
-  reads, and `depends_on`, the name the frontmatter and every document use. A consumer that
-  asks for the documented name gets the same list, never a silent empty answer.
+- The dependency list is emitted once, as `depends_on`, the name the frontmatter and every
+  document use. Until v8.3.0 it was emitted a second time as `deps`.
+- The acceptance section is emitted once, as `accept`, the raw Cases text. The folded
+  one-line-per-criterion list is emitted as `acc` only for an atomic body, which has no
+  Cases text to fold; every other reader folds `accept` itself.
 - All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body
   by construction — there is no markup context for it to break out of.
 
@@ -130,17 +132,18 @@ CASE-2 — the graph has one node per requirement and one edge per dependency
 CASE-3 — a node carries its full requirement metadata
   Given  a requirement with an id, layer, status, area, title, Contract clauses and members
   When   `map` runs
-  Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals
+  Then   its node carries all of those fields plus `depends_on`, `used_by` and any risk signals
 
-CASE-7 — the dependency list answers to both names
+CASE-7 — the dependency list is emitted once, under its documented name
   Given  a requirement declaring `depends_on: [X]`
   When   `map` runs
-  Then   its node's `deps` and `depends_on` both read `[X]`
+  Then   its node's `depends_on` reads `[X]` and the node carries no `deps` key
 
-CASE-4 — acc lists one entry per criterion in either acceptance form
-  Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance
+CASE-4 — the acceptance section is emitted once
+  Given  one requirement with labelled `CASE-N` blocks and one in the atomic form
   When   `map` runs
-  Then   each node's `acc` list has exactly one entry per criterion, in both requirements
+  Then   the first node carries `accept` and no `acc`, and the atomic node carries `acc`
+         with its one criterion
 
 CASE-5 — repo resolves to the git remote's owner/repo
   Given  a git checkout whose remote `origin` points at `owner/repo`

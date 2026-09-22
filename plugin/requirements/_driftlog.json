@@ -217,6 +217,10 @@
       "hash": "6c5320cf4220",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
+    "REQ-MAP-870": {
+      "hash": "750addc172b2",
+      "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
+    },
     "REQ-MCPTOOLS-1028": {
       "hash": "938eb7ec8f3e",
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
@@ -332,6 +336,10 @@
     "REQ-VERSIONFILES-1014": {
       "hash": "ebb1422db3b0",
       "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
+    },
+    "REQ-VIEWER-942": {
+      "hash": "10d7eaf815db",
+      "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
     },
     "REQ-VIEWER-977": {
       "hash": "8c401c2200b5",

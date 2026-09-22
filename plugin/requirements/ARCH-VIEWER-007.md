@@ -316,8 +316,9 @@ Every bullet below is binding.
 - The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
 - The viewer excludes a cycle-closing edge from that ranking, and still draws it.
 - No node ranks higher than the number of nodes, whatever the registry's shape.
-- A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
-  block as the author wrote it, and `acc`, the same criteria folded to one line each.
+- A node carries the acceptance section once, as `accept`, the labelled Given/When/Then
+  block as the author wrote it. The viewer derives `acc`, the same criteria folded to one
+  line each, from it, criterion for criterion as the engine folds them.
 - The viewer renders `accept` — one line per line, as authored. `acc` is for search and
   counting, never the thing a reader is shown when the authored block exists.
 
@@ -340,10 +341,12 @@ CASE-3 — no rank exceeds the node count even on a cyclic registry
   Then   the highest rank is at most the node count minus one, and the canvas width stays
          bounded rather than growing with the number of relaxation passes
 
-CASE-4 — a map node carries both the raw accept block and the folded acc list
-  Given  a confirmed requirement with a labelled `## Cases` block of two criteria
-  When   `_build_map_data` builds the node
-  Then   `node["acc"]` has two folded entries and `node["accept"]` holds the raw block
+CASE-4 — the viewer folds the raw accept block itself
+  Given  a map node whose `accept` holds a labelled `## Cases` block of two criteria and
+         which carries no `acc`
+  When   the viewer adapts the node
+  Then   the adapted requirement's `acc` has two folded entries, each `CASE-N — ` followed
+         by its Given/When/Then text on one line
 
 CASE-5 — the reader sees the authored Given/When/Then lines, not the folded one-liner
   Given  a node whose `accept` field holds a labelled multi-line Given/When/Then case and

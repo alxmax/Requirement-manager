@@ -268,14 +268,14 @@ def _export_doc_for(node):
 _NODE_KEYS = frozenset((
     "id", "area", "title", "layer", "level", "status",
     "intent", "contract", "notes", "current_impl", "verify",
-    "acc", "accept", "desc", "input", "output",
-    "deps", "depends_on", "used_by", "satisfies", "satisfied_by",
+    "accept", "desc", "input", "output",
+    "depends_on", "used_by", "satisfies", "satisfied_by",
     "members", "risks", "test_exempt", "milestone", "priority",
 ))
 # Attached AFTER _build_map_data by cmd_map, so they are absent here and optional in
 # the committed file: _attach_ac_coverage adds clauses/covered only for a requirement
 # with labelled criteria, _attach_translations adds i18n only for a translated one.
-_NODE_KEYS_ATTACHED_LATER = frozenset(("clauses", "covered", "i18n"))
+_NODE_KEYS_ATTACHED_LATER = frozenset(("clauses", "covered", "i18n", "acc"))
 
 
 class MapPayloadShape(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-870
@@ -358,7 +358,7 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             self.assertNotIn("items", doc["planning"]["milestones"]["v2.0"])
             self.assertEqual(doc["planning"]["bars"][0]["start"], "2026-10-01")
             self.assertEqual(doc["planning"]["lanes"], ["Tech"])
-            self.assertEqual(doc["targets"]["lanes"], ["Tech"])
+            self.assertNotIn("targets", doc)          # the legacy alias left in v8.3.0
 
     def test_hostile_title_roundtrips_as_data_not_injection(self):  # bug: id-js-string-breakout-xss  # verifies: REQ-MAP-870#CASE-6  # verifies: ARCH-MAP-007#CASE-3
         doc = _export_doc_for({"id": "a</script><img src=x>", "title": "x\");alert(1)//"})
@@ -369,10 +369,8 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
     def test_node_with_no_members_has_empty_list(self):  # verifies: REQ-MAP-870#CASE-3  # verifies: ARCH-MAP-007#CASE-3
         self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
-    def test_dependency_list_answers_to_both_names(self):  # verifies: REQ-MAP-870#CASE-7
-        # `deps` is what the vendored viewer reads; `depends_on` is what the frontmatter
-        # and every document call it. A consumer asking for the documented name used to
-        # get a silent None and build the wrong graph from it.
+    def test_the_dependency_list_is_emitted_once(self):  # verifies: REQ-MAP-870#CASE-7
+        # Emitted under the documented name only; `deps` was the same list twice over.
         with tempfile.TemporaryDirectory() as d:
             rd = os.path.join(d, "requirements")
             _write(os.path.join(rd, "A-DEP-002.md"),
@@ -382,8 +380,8 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
                               extra="depends_on: [A-DEP-002]\n", title="U"))
             node = next(n for n in R._build_map_data(R.load_requirements(rd), {})["nodes"]
                         if n["id"] == "A-USE-001")
-        self.assertEqual(node["deps"], ["A-DEP-002"])
-        self.assertEqual(node["depends_on"], node["deps"])
+        self.assertEqual(node["depends_on"], ["A-DEP-002"])
+        self.assertNotIn("deps", node)
 
     def test_json_carries_repo_field(self):  # dynamic repo name in viewer header  # verifies: REQ-MAP-870#CASE-5  # verifies: REQ-MAP-871#CASE-1
         doc = json.loads(R._build_json_text(

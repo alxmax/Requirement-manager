@@ -535,7 +535,7 @@ CASE-3 — the gate verb never writes lock updated
 
 ---
 id: REQ-CHECK-1035
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

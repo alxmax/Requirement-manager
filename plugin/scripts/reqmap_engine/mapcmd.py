@@ -80,7 +80,6 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     planning = load_targets(reqs_dir)
     if planning:
         data["planning"] = planning
-        data["targets"] = planning  # legacy alias — one release
     _attach_translations(data, reqs, reqs_dir)
     return data
 
