@@ -2183,7 +2183,7 @@
       "id": "REQ-CHECK-1036",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A bare gate says only what is broken",
       "intent": "A gate that prints advice on every commit teaches its reader to stop reading it. One consumer carried eighteen warnings a commit for three weeks, sixteen of them the same \"confirmed but no tested-by\", and removed the tool. Measured over four corpora, no rule fired on more than half of the confirmed requirements in two of them. The noise was the mix of advice and breakage on one screen, not any single rule firing too often.",
@@ -2223,12 +2223,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -18334,7 +18329,7 @@
       "id": "ARCH-VIEWERFILE-074",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "The viewer ships as one self-contained HTML file",
       "intent": "The Mermaid diagrams render on GitHub, but a richer interactive view needs a browser app. This inlines the map's JSON graph into a single self-contained HTML file you open by double-click — no server, no install. It is optional: absent the vendored template, the engine still emits the diagrams and the JSON. What that file shows is [[ARCH-VIEWER-007]].",
@@ -18399,12 +18394,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-VIEWER-940",
@@ -22165,24 +22155,22 @@
     }
   ],
   "health": {
-    "score": 99,
+    "score": 100,
     "total": 295,
     "scored": 262,
-    "healthy": 260,
+    "healthy": 262,
     "exempt": 21,
     "deprecated": 33,
-    "confirmed": 260,
+    "confirmed": 262,
     "implemented": 254,
     "tested": 252,
-    "drafts": 2,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 260
+    "gate_link_sync_clean": true
   },
   "planning": {
     "lanes": [
