@@ -1,6 +1,6 @@
 ---
 id: ARCH-VIEWERFILE-074
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex

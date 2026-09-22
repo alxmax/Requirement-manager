@@ -583,7 +583,7 @@ CASE-3 — examples and prose links are not links
 
 ---
 id: REQ-CHECK-1036
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -1050,17 +1050,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_misc["misc"]
-    ARCH_VIEWERFILE_074["The viewer ships as one self-contained HTML file<br><small>ARCH-VIEWERFILE-074</small><br>unreviewed"]
-    REQ_CHECK_1036["A bare gate says only what is broken<br><small>REQ-CHECK-1036</small><br>unreviewed"]
-  end
-  style REQ_CHECK_1036 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_VIEWERFILE_074 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-CHECK-1036 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-VIEWERFILE-074 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
