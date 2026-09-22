@@ -18,10 +18,6 @@ Cadență: un release pe săptămână, nu unul pe fiecare merge.
 
 ## Next
 
-### Viewer
-
-- [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
-
 ## Later
 
 ### Suprafața motorului

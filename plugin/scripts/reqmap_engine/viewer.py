@@ -56,12 +56,12 @@ VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
 
 
-def _viewer_template_path():  # implements: ARCH-VIEWER-007  # implements: REQ-VIEWER-940
+def _viewer_template_path():  # implements: ARCH-VIEWERFILE-074  # implements: REQ-VIEWER-940
     return os.path.join(ENGINE_DIR, VIEWER_TEMPLATE)
 
 
 def _inject_viewer(template_text, data):
-    # implements: ARCH-VIEWER-007  # implements: REQ-VIEWER-941
+    # implements: ARCH-VIEWERFILE-074  # implements: REQ-VIEWER-941
     """Replace the data marker with an inline <script> assigning the graph to
     window.__REQMAP_DATA__. Three sequences are escaped so the HTML5 parser
     never changes state mid-blob:
@@ -86,7 +86,7 @@ def _inject_viewer(template_text, data):
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
 
 
-def render_html(data, reqs_dir):  # implements: ARCH-VIEWER-007  # implements: REQ-VIEWER-940
+def render_html(data, reqs_dir):  # implements: ARCH-VIEWERFILE-074  # implements: REQ-VIEWER-940
     """Write the self-contained viewer `_map.html` by injecting `data` into the
     vendored template. Returns the path, or None when no template is present
     (the engine still emits _map.md + _map.json — the viewer is optional)."""

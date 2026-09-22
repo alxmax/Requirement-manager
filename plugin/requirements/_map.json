@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-22.4",
+  "engine_version": "2026-09-22.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -7615,7 +7615,8 @@
         "ARCH-RELEASE-072",
         "ARCH-SITE-026",
         "ARCH-TRANSLATE-044",
-        "ARCH-VIEWER-007"
+        "ARCH-VIEWER-007",
+        "ARCH-VIEWERFILE-074"
       ],
       "satisfies": [
         "SYS-VISUAL-106"
@@ -17338,10 +17339,8 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Self-contained HTML map viewer",
-      "intent": "The Mermaid diagrams render on GitHub, but a richer interactive view needs a browser app. This inlines the map's JSON graph into a single self-contained HTML file you open by double-click — no server, no install. It is optional: absent the vendored template, the engine still emits the diagrams and the JSON.",
+      "intent": "What the viewer shows once it is open: the outline, a requirement's spec, the map, the roadmap and its plan, the inbox of open signals, the commands. The file it ships in, and the escaping that makes that file safe, is [[ARCH-VIEWERFILE-074]].",
       "contract": [
-        "`map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine, and skips it (no crash) when the template is absent. [[REQ-VIEWER-940]]",
-        "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order, each a V8 no-op that reads the same after parsing. [[REQ-VIEWER-941]]",
         "The viewer ranks nodes by longest dependency path so `depends_on` edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. [[REQ-VIEWER-942]]",
         "The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]",
         "The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]",
@@ -17359,9 +17358,8 @@
       ],
       "verify": [],
       "notes": [
-        "`lint_exempt: over-scoped`, and this one is a deferral, not a defence. The check is right: eleven contract clauses and eight criteria describe an architecture requirement that has grown one child per viewer surface, and it fired the moment the eleventh arrived. Splitting it is a real decision — the seam runs between the ARTIFACT (`map` writes one self-contained file, and the escaping that makes it safe to embed) and what that file RENDERS (outline, spec, map, roadmap, problems, commands) — and it deserves its own change and its own ADR, not a side effect of adding a zoom control. Filed in `TODO.md` under v5.13. Until then the exemption keeps the count visible in `gate --audit` instead of the error blocking every commit.",
+        "Split on 2026-09-22 (ADR-0050) along the seam this note used to defer: the ARTIFACT (`_map.html`, its template and the escaping) is [[ARCH-VIEWERFILE-074]]; what the file RENDERS stays here. The `over-scoped` and `ac-count-high` exemptions left with it.",
         "`lint_exempt: file-spread`: the members are one engine function plus the viewer's source tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files by construction; they are built into ONE artifact, so the spread is not diffuseness.",
-        "`lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one artifact — data injection and its three escapes, node placement, UI language, and how the acceptance block is rendered. Splitting them would produce requirements that all point at the same single vendored file, which is the coupling the count is meant to detect, not a fix for it.",
         "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
         "`_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with `map`. `_map.json` (owned by [[ARCH-MAP-007]]) is the committed source of its data.",
         "Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate capability — see [[ARCH-PAGES-021]]."
@@ -17378,7 +17376,7 @@
         "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views Every file under `app/src/` carries an `implements:` tag (this requirement for the shell, views, styles and data loading; `ARCH-SEARCH-036` for `lib/search.js`; `ARCH-TRANSLATE-044` alongside on `lib/i18n.jsx` and `views/SpecView.jsx`), as do `app/scripts/install-viewer.mjs` and `app/vite.viewer.config.js` — the vendoring step and the single-file build are part of this contract. `app/scripts/ssr-smoke.jsx` is the `tested-by` member; `npm run smoke` (app/CLAUDE.md) runs it in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the committed copy differs. The build strips the comments, so the tags never reach `_map_viewer.html`; only `app/dist*`, `app/.vite` and the SSR bundle stay in `.reqmapignore`.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nCASE-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nCASE-7\n  Given  a registry whose `depends_on` edges form a cycle\n  When   the layout is computed\n  Then   every node is placed, no rank exceeds the node count, and the closing edge is drawn\n\nCASE-4\n  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nCASE-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)\n\nCASE-5\n  Given  a requirement whose title or contract contains U+2028 or U+2029\n  When   `map` writes `_map.html`\n  Then   neither character appears raw in the file, and the inlined graph still parses to\n         the original text\n\nCASE-6\n  Given  the viewer rendered with a non-English locale selected\n  When   a requirement's spec is shown\n  Then   the section headers appear in that language while the requirement's own title,\n         contract and acceptance text stay exactly as authored, and `status` / `layer`\n         values stay literal\n\nCASE-8\n  Given  a node carrying both a labelled `accept` block and the folded `acc` list\n  When   its spec is rendered\n  Then   the Given/When/Then lines appear as authored, one per line, and the folded\n         one-line form is not what the reader sees",
+      "accept": "CASE-1\n  Given  a registry whose `depends_on` edges form a cycle\n  When   the layout is computed\n  Then   every node is placed, no rank exceeds the node count, and the closing edge is drawn\n\nCASE-2\n  Given  the viewer rendered with a non-English locale selected\n  When   a requirement's spec is shown\n  Then   the section headers appear in that language while the requirement's own title,\n         contract and acceptance text stay exactly as authored, and `status` / `layer`\n         values stay literal\n\nCASE-3\n  Given  a node carrying both a labelled `accept` block and the folded `acc` list\n  When   its spec is rendered\n  Then   the Given/When/Then lines appear as authored, one per line, and the folded\n         one-line form is not what the reader sees",
       "input": "",
       "output": "",
       "desc": "",
@@ -17393,8 +17391,6 @@
         "SYS-VISUAL-106"
       ],
       "satisfied_by": [
-        "REQ-VIEWER-940",
-        "REQ-VIEWER-941",
         "REQ-VIEWER-942",
         "REQ-VIEWER-943",
         "REQ-VIEWER-944",
@@ -17410,10 +17406,6 @@
         "REQ-PLANDAYS-1021"
       ],
       "members": [
-        {
-          "role": "implements",
-          "loc": "app/vite.viewer.config.js:1"
-        },
         {
           "role": "implements",
           "loc": "app/scripts/run-ssr-smoke.mjs:1"
@@ -17588,19 +17580,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:428"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1784"
-        },
-        {
-          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:2148"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3901"
         },
         {
           "role": "implements",
@@ -17609,149 +17589,12 @@
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/viewer.py:33"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:59"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:64"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:89"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.04",
       "priority": "",
       "risks": []
-    },
-    {
-      "id": "REQ-VIEWER-940",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Writing _map.html from the vendored template",
-      "intent": "The viewer ships as one HTML file so it can be opened by double-click, with no server and no Node/npm dependency for the stdlib engine itself. When the template is not vendored, `map` still succeeds — it degrades to the two artifacts every consumer gets regardless of whether they built the viewer.",
-      "contract": [
-        "`map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine.",
-        "`_map.html` is a self-contained, single-file copy of the React viewer — the Vite + React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.",
-        "`_map.html` opens by double-click, with no server.",
-        "Absent the template, `render_html` emits nothing and returns None without failing.",
-        "`map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no extra files.",
-        "`render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline `<script>window.__REQMAP_DATA__=…</script>` assignment.",
-        "That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "accept": "CASE-1 — render_html writes _map.html when the vendored template exists\n  Given  the vendored `_map_viewer.html` template beside the engine\n  When   `render_html(data, reqs_dir)` runs\n  Then   it returns the path to a written `_map.html` file\n\nCASE-2 — the written _map.html carries the graph as window.__REQMAP_DATA__\n  Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` writing `_map.html`\n  When   the file is read back\n  Then   it contains `\"window.__REQMAP_DATA__=\"` and no leftover `<!--REQMAP_DATA-->`\n         marker, and references no external file — opening by double-click with no server\n\nCASE-3 — render_html returns None, not an error, when the template is missing\n  Given  no `_map_viewer.html` template beside the engine\n  When   `render_html(data, reqs_dir)` runs\n  Then   it returns `None` and raises nothing\n\nCASE-4 — map still writes _map.md and _map.json when the viewer template is absent\n  Given  no vendored `_map_viewer.html` template\n  When   `cmd_map` runs\n  Then   `_map.md` and `_map.json` are written and `map` exits 0\n\nCASE-5 — the marker is consumed and replaced by a script assignment\n  Given  template text `\"<head><!--REQMAP_DATA--></head>\"` and a graph with one node\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the marker is gone and the output contains `\"window.__REQMAP_DATA__=\"`\n\nCASE-6 — the inlined blob's node id matches the graph handed to _inject_viewer\n  Given  a graph `{\"nodes\": [{\"id\": \"A-1\"}], \"edges\": []}`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the injected `<script>` text contains `\"A-1\"`\n\n\n--------------------",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-VIEWER-007"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:428"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3901"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:59"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:89"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": "v3.2",
-      "priority": "",
-      "risks": [],
-      "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Scrierea _map.html din șablonul vendorizat",
-          "intent": "Viewerul se livrează ca un singur fișier HTML astfel poate fi deschis prin dublu-clic, fără server și fără dependență Node/npm pentru motorul stdlib însuși. Când șablonul nu este vendorizat, `map` reușește totuși — se degradează la cele două artefacte pe care fiecare consumator le obține indiferent dacă a construit viewerul.",
-          "contract": "> Viewerul se livrează ca un singur fișier HTML astfel poate fi deschis prin dublu-clic, fără\n> server și fără dependență Node/npm pentru motorul stdlib însuși. Când șablonul nu este\n> vendorizat, `map` reușește totuși — se degradează la cele două artefacte pe care fiecare\n> consumator le obține indiferent dacă a construit viewerul.\n\nFiecare punct de mai jos este obligatoriu.\n- `map` generează `_map.html` când șablonul `_map_viewer.html` este vendorizat lângă\n  motor.\n- `_map.html` este o copie de sine stătătoare, într-un singur fișier, a viewerului React — aplicația Vite +\n  React din `app/` — cu graful acestui repo inclus ca `window.__REQMAP_DATA__`.\n- `_map.html` se deschide prin dublu-clic, fără server.\n- În absența șablonului, `render_html` nu emite nimic și returnează None fără să eșueze.\n- `map` scrie totuși `_map.md` și `_map.json`, astfel motorul stdlib funcționează fără\n  fișiere suplimentare.\n- `render_html` înlocuiește markerul `<!--REQMAP_DATA-->` al șablonului cu o singură\n  atribuire inline `<script>window.__REQMAP_DATA__=…</script>`.\n- Acea atribuire poartă același graf `{nodes, edges}` pe care îl construiește [[ARCH-MAP-007]].",
-          "acceptance": "CASE-1 — render_html scrie _map.html când șablonul vendorizat există\n  Given  șablonul vendorizat `_map_viewer.html` lângă motor\n  When   `render_html(data, reqs_dir)` rulează\n  Then   returnează calea către un fișier `_map.html` scris\n\nCASE-2 — _map.html-ul scris poartă graful ca window.__REQMAP_DATA__\n  Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` scriind `_map.html`\n  When   fișierul este citit înapoi\n  Then   conține `\"window.__REQMAP_DATA__=\"` și niciun rest de marker `<!--REQMAP_DATA-->`,\n         și nu referențiază niciun fișier extern — deschidere prin dublu-clic fără server\n\nCASE-3 — render_html returnează None, nu o eroare, când șablonul lipsește\n  Given  niciun șablon `_map_viewer.html` lângă motor\n  When   `render_html(data, reqs_dir)` rulează\n  Then   returnează `None` și nu ridică nimic\n\nCASE-4 — map scrie totuși _map.md și _map.json când șablonul viewerului este absent\n  Given  niciun șablon vendorizat `_map_viewer.html`\n  When   `cmd_map` rulează\n  Then   `_map.md` și `_map.json` sunt scrise, iar `map` iese cu 0\n\nCASE-5 — markerul este consumat și înlocuit de o atribuire de script\n  Given  textul șablonului `\"<head><!--REQMAP_DATA--></head>\"` și un graf cu un nod\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   markerul a dispărut, iar ieșirea conține `\"window.__REQMAP_DATA__=\"`\n\nCASE-6 — id-ul nodului din blob-ul inclus se potrivește cu graful pasat la _inject_viewer\n  Given  un graf `{\"nodes\": [{\"id\": \"A-1\"}], \"edges\": []}`\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   textul `<script>` injectat conține `\"A-1\"`\n\n\n--------------------"
-        }
-      }
-    },
-    {
-      "id": "REQ-VIEWER-941",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Escaping the inlined graph for embedded <script>",
-      "intent": "The graph is embedded as a `<script>` assignment inside HTML the reader trusts, so any body a requirement author wrote — including one that discusses HTML injection and therefore contains `<!--` literally — must not be able to break out of that script or corrupt the page. Three escapes close three different ways a literal sequence in requirement text could do that, each added after a real failure was found.",
-      "contract": [
-        "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order. All three are V8 no-ops: a backslash is silently ignored before `/`, `!` and `-`.",
-        "`</`   → `<\\/`   — prevents `</script>` from closing the element early",
-        "`<!--` → `<\\!--` — prevents the HTML5 parser entering \"script data escaped\" state",
-        "`-->`  → `-\\->`  — prevents prematurely closing that state if somehow entered",
-        "The first guard alone was the original contract. The `<!--` and `-->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.",
-        "`render_html` also escapes U+2028 and U+2029 to their `\\\\u2028`/`\\\\u2029` forms. Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the assignment into an unterminated string on any engine older than ES2019. The escaped forms denote the same characters in JSON, so the parsed graph is unchanged."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "accept": "CASE-1 — a field carrying all three dangerous sequences is fully escaped and still parses\n  Given  a node title `\"</script><!--x-->\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output has none of `</`, `<!--`, `-->` raw, and re-parsing the blob as JSON\n         yields the original title unchanged\n\nCASE-2 — a </script> breakout attempt in a field is neutralized\n  Given  a node id `\"a</script><img src=x>\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output has no raw `\"</script><img\"` and contains `\"<\\\\/script>\"` instead\n\nCASE-3 — a literal <!-- inside a field is escaped to <\\!--\n  Given  a node contract clause `\"discusses HTML injection via <!-- markers\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output contains `\"<\\\\!--\"` and no raw `\"<!--\"` inside the injected blob,\n         keeping `window.__REQMAP_DATA__` parseable instead of null\n\nCASE-4 — a literal --> inside a field is escaped to -\\->\n  Given  a node title containing the literal sequence `\"-->\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output contains `\"-\\\\->\"` and no raw `\"-->\"` inside the injected blob\n\nCASE-5 — U+2028/U+2029 in a title are escaped and still round-trip through JSON\n  Given  a node title containing U+2028 and a contract clause containing U+2029\n  When   `_inject_viewer(template_text, data)` runs\n  Then   neither raw character appears in the output, the literal 6-character\n         sequences \\u2028 and \\u2029 do, and re-parsing the blob as\n         JSON yields the original title unchanged\n\n\n--------------------",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-VIEWER-007"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:428"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1766"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3901"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/viewer.py:64"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": "v3.2",
-      "priority": "",
-      "risks": [],
-      "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Escaparea grafului inclus pentru <script>-ul înglobat",
-          "intent": "Graful este înglobat ca o atribuire `<script>` în interiorul HTML-ului în care cititorul are încredere, astfel orice corp pe care l-a scris un autor de cerință — inclusiv unul care discută injecția HTML și deci conține `<!--` literal — nu trebuie să poată ieși din acel script sau să corupă pagina. Trei escapări închid trei moduri diferite în care o secvență literală din textul cerinței ar putea face asta, fiecare adăugată după ce a fost găsit un eșec real.",
-          "contract": "> Graful este înglobat ca o atribuire `<script>` în interiorul HTML-ului în care cititorul are\n> încredere, astfel orice corp pe care l-a scris un autor de cerință — inclusiv unul care\n> discută injecția HTML și deci conține `<!--` literal — nu trebuie să poată ieși din acel\n> script sau să corupă pagina. Trei escapări închid trei moduri diferite în care o secvență\n> literală din textul cerinței ar putea face asta, fiecare adăugată după ce a fost găsit un\n> eșec real.\n\nFiecare punct de mai jos este obligatoriu.\n- `render_html` face graful injectat sigur pentru HTML pentru includerea în interiorul `<script>` prin\n  aplicarea a trei escapări în ordine. Toate trei sunt no-op-uri V8: un backslash este ignorat în tăcere\n  înaintea lui `/`, `!` și `-`.\n  - `</`   → `<\\/`   — previne ca `</script>` să închidă elementul prematur\n  - `<!--` → `<\\!--` — previne ca parserul HTML5 să intre în starea \"script data escaped\"\n  - `-->`  → `-\\->`  — previne închiderea prematură a acelei stări dacă totuși a fost intrat în ea\n- Prima gardă singură a fost contractul original. Gărzile `<!--` și `-->` au fost adăugate\n  în v2.3.5 după un bug confirmat: corpurile de cerințe care discută injecția HTML (și\n  deci conțin `<!--` literal) au rupt deschiderea `file://` făcând\n  `window.__REQMAP_DATA__` null.\n- `render_html` de asemenea escapă U+2028 și U+2029 la formele lor `\\\\u2028`/`\\\\u2029`.\n  Acele două caractere termină o linie în JavaScript, dar nu în JSON, astfel neescapate ele\n  transformă atribuirea într-un șir nefinalizat pe orice engine mai vechi decât ES2019. Formele escapate\n  denotă aceleași caractere în JSON, astfel graful parsat rămâne neschimbat.",
-          "acceptance": "CASE-1 — un câmp purtând toate cele trei secvențe periculoase este complet escapat și încă se parsează\n  Given  un titlu de nod `\"</script><!--x-->\"`\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   ieșirea nu are niciunul dintre `</`, `<!--`, `-->` neescapate, iar reparsarea blob-ului ca JSON\n         produce titlul original neschimbat\n\nCASE-2 — o încercare de evadare </script> într-un câmp este neutralizată\n  Given  un id de nod `\"a</script><img src=x>\"`\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   ieșirea nu are niciun `\"</script><img\"` brut și conține `\"<\\\\/script>\"` în loc\n\nCASE-3 — un <!-- literal într-un câmp este escapat la <\\!--\n  Given  o clauză de contract a nodului `\"discusses HTML injection via <!-- markers\"`\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   ieșirea conține `\"<\\\\!--\"` și niciun `\"<!--\"` brut în interiorul blob-ului injectat,\n         păstrând `window.__REQMAP_DATA__` parsabil în loc de null\n\nCASE-4 — un --> literal într-un câmp este escapat la -\\->\n  Given  un titlu de nod conținând secvența literală `\"-->\"`\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   ieșirea conține `\"-\\\\->\"` și niciun `\"-->\"` brut în interiorul blob-ului injectat\n\nCASE-5 — U+2028/U+2029 într-un titlu sunt escapate și încă se recuperează prin JSON\n  Given  un titlu de nod conținând U+2028 și o clauză de contract conținând U+2029\n  When   `_inject_viewer(template_text, data)` rulează\n  Then   niciun caracter brut nu apare în ieșire, secvențele literale de 6 caractere\n         \\u2028 și \\u2029 apar, iar reparsarea blob-ului ca\n         JSON produce titlul original neschimbat\n\n\n--------------------"
-        }
-      }
     },
     {
       "id": "REQ-VIEWER-942",
@@ -18500,6 +18343,191 @@
       "covered": 3
     },
     {
+      "id": "ARCH-VIEWERFILE-074",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "draft",
+      "area": "ARCH",
+      "title": "The viewer ships as one self-contained HTML file",
+      "intent": "The Mermaid diagrams render on GitHub, but a richer interactive view needs a browser app. This inlines the map's JSON graph into a single self-contained HTML file you open by double-click — no server, no install. It is optional: absent the vendored template, the engine still emits the diagrams and the JSON. What that file shows is [[ARCH-VIEWER-007]].",
+      "contract": [
+        "`map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine, and skips it (no crash) when the template is absent. [[REQ-VIEWER-940]]",
+        "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order, each a V8 no-op that reads the same after parsing. [[REQ-VIEWER-941]]"
+      ],
+      "verify": [],
+      "notes": [
+        "Split out of [[ARCH-VIEWER-007]] on 2026-09-22 (ADR-0050). Its two children and its five artifact cases moved here unchanged; only their parent changed.",
+        "The single-file build (`app/` → `npm run build:viewer`, `app/vite.viewer.config.js`, `app/scripts/install-viewer.mjs`) is vendored beside the engine as `scripts/_map_viewer.html`; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
+        "`_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with `sync`. `_map.json` (owned by [[ARCH-MAP-007]]) is the committed source of its data."
+      ],
+      "current_impl": [
+        "`render_html`, `_inject_viewer` and `_viewer_template_path` in `reqmap_engine/viewer.py`; `render_html` is called by `cmd_map` after `_map.json` and `_map.md` are written."
+      ],
+      "accept": "CASE-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nCASE-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nCASE-3\n  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nCASE-4\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)\n\nCASE-5\n  Given  a requirement whose title or contract contains U+2028 or U+2029\n  When   `map` writes `_map.html`\n  Then   neither character appears raw in the file, and the inlined graph still parses to\n         the original text",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [
+        "ARCH-MAP-007"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-VISUAL-106"
+      ],
+      "satisfied_by": [
+        "REQ-VIEWER-940",
+        "REQ-VIEWER-941"
+      ],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "app/vite.viewer.config.js:1"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:428"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:1784"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:3901"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:59"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:64"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:89"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ]
+    },
+    {
+      "id": "REQ-VIEWER-940",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Writing _map.html from the vendored template",
+      "intent": "The viewer ships as one HTML file so it can be opened by double-click, with no server and no Node/npm dependency for the stdlib engine itself. When the template is not vendored, `map` still succeeds — it degrades to the two artifacts every consumer gets regardless of whether they built the viewer.",
+      "contract": [
+        "`map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine.",
+        "`_map.html` is a self-contained, single-file copy of the React viewer — the Vite + React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.",
+        "`_map.html` opens by double-click, with no server.",
+        "Absent the template, `render_html` emits nothing and returns None without failing.",
+        "`map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no extra files.",
+        "`render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline `<script>window.__REQMAP_DATA__=…</script>` assignment.",
+        "That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — render_html writes _map.html when the vendored template exists\n  Given  the vendored `_map_viewer.html` template beside the engine\n  When   `render_html(data, reqs_dir)` runs\n  Then   it returns the path to a written `_map.html` file\n\nCASE-2 — the written _map.html carries the graph as window.__REQMAP_DATA__\n  Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` writing `_map.html`\n  When   the file is read back\n  Then   it contains `\"window.__REQMAP_DATA__=\"` and no leftover `<!--REQMAP_DATA-->`\n         marker, and references no external file — opening by double-click with no server\n\nCASE-3 — render_html returns None, not an error, when the template is missing\n  Given  no `_map_viewer.html` template beside the engine\n  When   `render_html(data, reqs_dir)` runs\n  Then   it returns `None` and raises nothing\n\nCASE-4 — map still writes _map.md and _map.json when the viewer template is absent\n  Given  no vendored `_map_viewer.html` template\n  When   `cmd_map` runs\n  Then   `_map.md` and `_map.json` are written and `map` exits 0\n\nCASE-5 — the marker is consumed and replaced by a script assignment\n  Given  template text `\"<head><!--REQMAP_DATA--></head>\"` and a graph with one node\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the marker is gone and the output contains `\"window.__REQMAP_DATA__=\"`\n\nCASE-6 — the inlined blob's node id matches the graph handed to _inject_viewer\n  Given  a graph `{\"nodes\": [{\"id\": \"A-1\"}], \"edges\": []}`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the injected `<script>` text contains `\"A-1\"`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWERFILE-074"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:428"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:3901"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:59"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:89"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v3.2",
+      "priority": "",
+      "risks": [],
+      "clauses": 6,
+      "covered": 6
+    },
+    {
+      "id": "REQ-VIEWER-941",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Escaping the inlined graph for embedded <script>",
+      "intent": "The graph is embedded as a `<script>` assignment inside HTML the reader trusts, so any body a requirement author wrote — including one that discusses HTML injection and therefore contains `<!--` literally — must not be able to break out of that script or corrupt the page. Three escapes close three different ways a literal sequence in requirement text could do that, each added after a real failure was found.",
+      "contract": [
+        "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order. All three are V8 no-ops: a backslash is silently ignored before `/`, `!` and `-`.",
+        "`</`   → `<\\/`   — prevents `</script>` from closing the element early",
+        "`<!--` → `<\\!--` — prevents the HTML5 parser entering \"script data escaped\" state",
+        "`-->`  → `-\\->`  — prevents prematurely closing that state if somehow entered",
+        "The first guard alone was the original contract. The `<!--` and `-->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.",
+        "`render_html` also escapes U+2028 and U+2029 to their `\\\\u2028`/`\\\\u2029` forms. Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the assignment into an unterminated string on any engine older than ES2019. The escaped forms denote the same characters in JSON, so the parsed graph is unchanged."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a field carrying all three dangerous sequences is fully escaped and still parses\n  Given  a node title `\"</script><!--x-->\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output has none of `</`, `<!--`, `-->` raw, and re-parsing the blob as JSON\n         yields the original title unchanged\n\nCASE-2 — a </script> breakout attempt in a field is neutralized\n  Given  a node id `\"a</script><img src=x>\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output has no raw `\"</script><img\"` and contains `\"<\\\\/script>\"` instead\n\nCASE-3 — a literal <!-- inside a field is escaped to <\\!--\n  Given  a node contract clause `\"discusses HTML injection via <!-- markers\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output contains `\"<\\\\!--\"` and no raw `\"<!--\"` inside the injected blob,\n         keeping `window.__REQMAP_DATA__` parseable instead of null\n\nCASE-4 — a literal --> inside a field is escaped to -\\->\n  Given  a node title containing the literal sequence `\"-->\"`\n  When   `_inject_viewer(template_text, data)` runs\n  Then   the output contains `\"-\\\\->\"` and no raw `\"-->\"` inside the injected blob\n\nCASE-5 — U+2028/U+2029 in a title are escaped and still round-trip through JSON\n  Given  a node title containing U+2028 and a contract clause containing U+2029\n  When   `_inject_viewer(template_text, data)` runs\n  Then   neither raw character appears in the output, the literal 6-character\n         sequences \\u2028 and \\u2029 do, and re-parsing the blob as\n         JSON yields the original title unchanged",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWERFILE-074"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:428"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:1766"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:3901"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/viewer.py:64"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v3.2",
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
+    },
+    {
       "id": "ARCH-VLEVEL-037",
       "layer": "feature",
       "level": "architecture",
@@ -19213,7 +19241,8 @@
         "ARCH-MAP-007",
         "ARCH-MAPDIAGRAMS-055",
         "ARCH-SITE-026",
-        "ARCH-VIEWER-007"
+        "ARCH-VIEWER-007",
+        "ARCH-VIEWERFILE-074"
       ],
       "members": [],
       "test_exempt": null,
@@ -19743,6 +19772,10 @@
     ],
     [
       "ARCH-VIEWER-007",
+      "ARCH-MAP-007"
+    ],
+    [
+      "ARCH-VIEWERFILE-074",
       "ARCH-MAP-007"
     ],
     [
@@ -20824,14 +20857,6 @@
       "SYS-VISUAL-106"
     ],
     [
-      "REQ-VIEWER-940",
-      "ARCH-VIEWER-007"
-    ],
-    [
-      "REQ-VIEWER-941",
-      "ARCH-VIEWER-007"
-    ],
-    [
       "REQ-VIEWER-942",
       "ARCH-VIEWER-007"
     ],
@@ -20882,6 +20907,18 @@
     [
       "REQ-PLANDAYS-1021",
       "ARCH-VIEWER-007"
+    ],
+    [
+      "ARCH-VIEWERFILE-074",
+      "SYS-VISUAL-106"
+    ],
+    [
+      "REQ-VIEWER-940",
+      "ARCH-VIEWERFILE-074"
+    ],
+    [
+      "REQ-VIEWER-941",
+      "ARCH-VIEWERFILE-074"
     ],
     [
       "ARCH-VLEVEL-037",
@@ -20955,16 +20992,6 @@
       "unpark": null,
       "done": false,
       "category": "Adopție",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "Split ARCH-VIEWER-007: artefactul HTML vs. ce randează",
-      "horizon": "next",
-      "req": "ARCH-VIEWER-007",
-      "unpark": null,
-      "done": false,
-      "category": "Viewer",
       "context": "",
       "section_date": null
     },
@@ -21274,7 +21301,7 @@
     },
     {
       "month": "2026-09",
-      "count": 107,
+      "count": 108,
       "first": "2026-09-02",
       "last": "2026-09-22",
       "versions": [
@@ -21384,11 +21411,17 @@
         "v8.2.0",
         "v8.3.0",
         "v8.4.0",
-        "v8.4.1"
+        "v8.4.1",
+        "v8.5.0"
       ],
       "landmark": "v8.0.0",
       "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate",
       "entries": [
+        {
+          "version": "v8.5.0",
+          "date": "2026-09-22",
+          "headline": "Datoria de viewer: split ARCH-VIEWER-007"
+        },
         {
           "version": "v8.4.1",
           "date": "2026-09-22",
@@ -22138,16 +22171,16 @@
     }
   ],
   "health": {
-    "score": 100,
-    "total": 294,
-    "scored": 262,
+    "score": 99,
+    "total": 295,
+    "scored": 263,
     "healthy": 261,
     "exempt": 21,
     "deprecated": 32,
     "confirmed": 261,
-    "implemented": 254,
-    "tested": 252,
-    "drafts": 1,
+    "implemented": 255,
+    "tested": 253,
+    "drafts": 2,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -22158,12 +22191,6 @@
     "reviewed_total": 261
   },
   "planning": {
-    "milestones": {
-      "v8.5.0": {
-        "due": "2026-11-27",
-        "label": "Datoria de viewer: split ARCH-VIEWER-007"
-      }
-    },
     "lanes": [
       "Feature",
       "Fix",
@@ -22177,15 +22204,6 @@
         "lane": "Feature",
         "req": "ARCH-MCP-073",
         "progress": 100
-      },
-      {
-        "title": "Split ARCH-VIEWER-007: artefactul HTML vs. ce randează",
-        "start": "2026-11-02",
-        "end": "2026-11-27",
-        "lane": "Feature",
-        "milestone": "v8.5.0",
-        "req": "ARCH-VIEWER-007",
-        "progress": 0
       }
     ],
     "cadence": {

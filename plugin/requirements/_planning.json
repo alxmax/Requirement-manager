@@ -29,21 +29,7 @@
       "end": "2026-09-16",
       "req": "ARCH-MCP-073",
       "progress": 100
-    },
-    {
-      "title": "Split ARCH-VIEWER-007: artefactul HTML vs. ce randează",
-      "lane": "Feature",
-      "start": "2026-11-02",
-      "end": "2026-11-27",
-      "milestone": "v8.5.0",
-      "req": "ARCH-VIEWER-007",
-      "progress": 0
     }
   ],
-  "milestones": {
-    "v8.5.0": {
-      "due": "2026-11-27",
-      "label": "Datoria de viewer: split ARCH-VIEWER-007"
-    }
-  }
+  "milestones": {}
 }

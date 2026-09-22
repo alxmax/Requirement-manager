@@ -60,6 +60,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0047](0047-design-review-site-and-i18n-detector-leave-the-engine.md) | The design review, the site generator and the i18n detector leave the engine | Accepted |
 | [0048](0048-the-engines-floor-is-what-it-must-keep.md) | The engine's floor is what it must keep, measured by capability | Accepted |
 | [0049](0049-a-bare-gate-says-only-what-is-broken.md) | A bare `gate` says only what is broken | Accepted |
+| [0050](0050-the-viewer-artifact-and-what-it-renders-are-two-capabilities.md) | The viewer artifact and what it renders are two capabilities | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
