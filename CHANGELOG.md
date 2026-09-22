@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.4.0` — 2026-09-22
+
+**Un gate care se citește.**
+
+- `gate` fără zgomot: rulează doar ce spune că ceva e stricat; `--full` rulează tot (ADR-0049) (ARCH-CHECK-006)
+
+`gate` fără argumente rulează acum doar erorile și avertismentele despre legături rupte, drift și harta comisă (`DEFAULT_RULES`), și afișează doar erorile de lizibilitate. Sfaturile (RM007 și celelalte, avertismentele de lint) apar cu `gate --full` sau `gate --audit`. Nicio regulă nu și-a schimbat severitatea. Măsurat pe 4 corpusuri, nicio regulă nu trece de 50% în două dintre ele.
+
 ## plugin `v8.3.0` — 2026-09-22
 
 **Harta fără dubluri.**

@@ -31,6 +31,9 @@ def _add_workspace_and_query_flags(ap):
                          "integrity from warn to error.")
     ap.add_argument("--no-lint", dest="no_lint", action="store_true",
                     help="gate: skip the requirement readability check")
+    ap.add_argument("--full", dest="full", action="store_true",
+                    help="gate: run every rule and print every readability warning, not "
+                         "only what says something is broken")
     ap.add_argument("--no-map-check", dest="no_map_check", action="store_true",
                     help="gate: skip the committed-map freshness check")
     ap.add_argument("--findings", action="store_true",

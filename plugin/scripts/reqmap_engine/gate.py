@@ -21,6 +21,18 @@ from .sections import _legacy_schema_ids
 from .workspace import GateContext, Workspace
 
 
+# The rules a bare `gate` runs (ADR-0049): every error, and the warnings that say a link
+# or the drift baseline is broken. Everything else is advice, and advice printed on
+# every commit is read by nobody: one consumer carried 18 warnings a commit, 16 of them
+# RM007, for three weeks. `gate --full` and `gate --audit` run the whole registry.
+DEFAULT_RULES = frozenset((
+    "RM001", "RM002", "RM003", "RM006",                    # errors
+    "RM005", "RM012", "RM023", "RM033", "RM034", "RM036",  # a link is broken
+    "RM016", "RM018", "RM019", "RM020",                    # the drift baseline
+    "RM022", "RM027",                                      # the committed map
+))
+
+
 def run_gate_rules(ctx, strict=False):
     # implements: ARCH-RULES-059  # implements: REQ-RULES-947
     # implements: REQ-RULES-948  # implements: REQ-RULES-989
@@ -36,10 +48,16 @@ def run_gate_rules(ctx, strict=False):
     registry is module state shared by two `cmd_check` calls inside `audit`, and a
     mutation would leak from the first into the second. `gate_exempt:` is checked
     before any of this, so a requirement's own written-down exemption still wins —
-    a repo-wide dial must not silently overrule a decision made per requirement."""
+    a repo-wide dial must not silently overrule a decision made per requirement.
+
+    A context marked `quiet` runs only DEFAULT_RULES; every other caller gets the
+    whole registry, as it always did."""
+    # implements: REQ-CHECK-1036
     errors, warns = [], []
     for rule in GATE_RULES:
         if rule.only_source_repo and not ctx.source_repo:
+            continue
+        if ctx.quiet and rule.id not in DEFAULT_RULES:
             continue
         for rid, msg in rule.fn(ctx):
             if rid is not None and ctx.req(rid).exempt_from(rule.id):
@@ -224,14 +242,16 @@ def _drift_acceptance(accept_drift):
     return accept_drift is not False, None
 
 
-def cmd_check(ws, update_lock, strict=False, as_json=False, since=None, accept_drift=True):
+def cmd_check(ws, update_lock, strict=False, as_json=False, since=None, accept_drift=True,
+              quiet=False):
     # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832
     # implements: REQ-CHECK-833  # implements: REQ-RULES-948
     """The gate: run GATE_RULES, print findings with their codes, advance the lock when
     asked. Report-only unless `update_lock` (that is `sync`).
 
     `accept_drift` is True, False, or the reason string the flag carried; see
-    `_drift_acceptance` for why an empty reason still accepts."""
+    `_drift_acceptance` for why an empty reason still accepts. `quiet` runs only
+    DEFAULT_RULES — the bare `gate` verb; `sync`, `init` and `audit` never pass it."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     code_root = code_root or "."   # a workspace built without one gates the cwd
     ac_cover, level_cover = ws.ac_cover, ws.level_cover
@@ -245,6 +265,7 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None, accept_d
     ctx = GateContext(Workspace(reqs, members, reqs_dir, code_root,
                                 ac_cover, level_cover),
                       since=since, full_members=full_members, update_lock=update_lock)
+    ctx.quiet = quiet
     # the CALLER's workspace carries the map-document cache, so the freshness rule and
     # the `map --check` that `gate` runs next share one assembly instead of two
     ctx.ws = ws

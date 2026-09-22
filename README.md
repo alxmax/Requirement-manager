@@ -17,7 +17,7 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 13,369 lines across
+map of how everything connects. The engine is stdlib only, 13,417 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 

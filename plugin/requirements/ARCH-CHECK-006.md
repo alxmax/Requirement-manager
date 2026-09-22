@@ -25,6 +25,7 @@ Every bullet below is binding.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
 - `gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.
+- A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour.
 
 ## Cases
 CASE-1
@@ -579,3 +580,49 @@ CASE-3 — examples and prose links are not links
   consumer corpora (191 and 21) and on a third consumer's corpus as it stood before it was
   removed (96). A broken link is wrong by construction, so a fire rate of zero is the
   expected state, not a signal below ADR-0016's floor.
+
+---
+id: REQ-CHECK-1036
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CHECK-006]
+---
+
+# A bare gate says only what is broken
+
+## Description
+> A gate that prints advice on every commit teaches its reader to stop reading it. One
+> consumer carried eighteen warnings a commit for three weeks, sixteen of them the same
+> "confirmed but no tested-by", and removed the tool. Measured over four corpora, no rule
+> fired on more than half of the confirmed requirements in two of them. The noise was the
+> mix of advice and breakage on one screen, not any single rule firing too often.
+
+Every bullet below is binding.
+- A bare `gate` runs only the rules in `DEFAULT_RULES`: every error-severity rule, the
+  warnings that say a link is broken (RM005, RM012, RM023, RM033, RM034, RM036), the
+  warnings about the drift baseline (RM016, RM018, RM019, RM020) and the committed map
+  (RM022, RM027).
+- A bare `gate` prints a requirement's readability findings only when one is an error;
+  warnings are not printed and not counted.
+- `gate --full` and `gate --audit` run every registered rule and print every readability
+  finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.
+- The last line of a bare gate names `gate --full` as where the advice is.
+
+## Cases
+CASE-1 — the default set is exactly the listed rules
+  Given  the rule registry
+  When   `DEFAULT_RULES` is read
+  Then   it equals the listed codes, and every error-severity rule is in it
+
+CASE-2 — breakage still fails a bare gate
+  Given  a corpus with a `depends_on` naming no requirement
+  When   `gate` runs bare
+  Then   it exits 1 and names RM003
+
+CASE-3 — advice is hidden by default and shown by --full
+  Given  a confirmed requirement with an implements member and no `tested-by:` link
+  When   `gate` runs bare, then with `--full`
+  Then   the bare run prints no RM007 and the `--full` run prints it
+

@@ -94,8 +94,9 @@ def check_level_rung(tmpdir, req_dir):  # tested-by: ARCH-VLEVEL-037 @integratio
     # --no-map-check: this check is about the rung rule, and the requirement it just
     # wrote is deliberately not in the committed map. Since v4.0.0 `gate` also verifies
     # map freshness, so without the flag it would fail for the right reason at the
-    # wrong moment.
-    result = subprocess.run([sys.executable, "scripts/reqmap.py", "gate", "--no-map-check"],
+    # wrong moment. --full: RM009 is advice, which a bare gate no longer runs (ADR-0049).
+    result = subprocess.run([sys.executable, "scripts/reqmap.py", "gate", "--full",
+                             "--no-map-check"],
                             cwd=tmpdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if result.returncode != 0:
         print("FAIL [level rung] gate exited {}".format(result.returncode))

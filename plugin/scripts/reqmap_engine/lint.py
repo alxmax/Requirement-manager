@@ -85,7 +85,7 @@ def _apply_decompose(fs, reqs_dir, rid, r, reqs, created):
             print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
 
 
-def cmd_lint(ws, strict=False, decompose=False, only=None):
+def cmd_lint(ws, strict=False, decompose=False, only=None, quiet=False):
     # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050  # implements: REQ-LINT-863
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
@@ -106,7 +106,10 @@ def cmd_lint(ws, strict=False, decompose=False, only=None):
     for that requirement, not for every over-long clause in the corpus. A run that
     scaffolds nothing says which findings the flag acts on: the two checks that are
     ERRORS under `--strict` are not among them, and a reader who has just been told to
-    split something must not read `All clean` as agreement."""
+    split something must not read `All clean` as agreement.
+
+    `quiet` (the bare `gate`, ADR-0049) prints only the requirements carrying an ERROR
+    and only their errors: a warning here is advice, and `gate --full` shows it."""
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES
@@ -117,6 +120,10 @@ def cmd_lint(ws, strict=False, decompose=False, only=None):
     for rid, r in targets:
         fs = lint_requirement(rid, r, (members or {}).get(rid), fanin.get(rid), kids.get(rid))
         exempt = set(_as_list(r["meta"].get("lint_exempt")))
+        if quiet:   # implements: REQ-CHECK-1036
+            fs = [f for f in fs if f["severity"] == "error"
+                  or (strict and f["check"] in LINT_STRICT_PROMOTE)]
+            exempt = set()
         if not fs and not exempt:
             continue
         print("{}   {}".format(rid, _req_file(reqs, rid)))
