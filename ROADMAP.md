@@ -16,11 +16,6 @@ Cadență: un release pe săptămână, nu unul pe fiecare merge.
 - [ ] Consilium-py rămâne verde pe `check@v8`. Gata când: cel puțin 5 rulări verzi pe `main` de la re-vendorizare (2026-09-21, Consilium-py #63) | req: ARCH-SELFGATE-039
 - [ ] Un evaluator din afară, pe repo-ul lui, fără ajutor la gate. Gata când: are `uses: alxmax/requirement-manager/check@v8` pe un tree în care nu faci commit | req: SYS-SSOT-001
 
-### Primul contact
-
-- [ ] Pages deschide pe o pagină de 3 comenzi, nu pe harta cu 292 de noduri; harta rămâne un link. Gata când: `docs/index.html` arată `init` / `gate` / `sync` înainte de orice graf | req: ARCH-SITE-026
-- [ ] Demo `examples/hello-drift`: o cerință, un fișier, o schimbare de contract. Gata când: `gate` rulat acolo tipărește DRIFT | req: ARCH-INIT-012
-
 ## Next
 
 ### Documentație

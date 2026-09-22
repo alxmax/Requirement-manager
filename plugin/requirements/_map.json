@@ -558,7 +558,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4860"
+          "loc": "plugin/scripts/test_reqmap_report.py:4872"
         },
         {
           "role": "implements",
@@ -742,7 +742,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4860"
+          "loc": "plugin/scripts/test_reqmap_report.py:4872"
         },
         {
           "role": "implements",
@@ -2546,11 +2546,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4656"
+          "loc": "plugin/scripts/test_reqmap_report.py:4668"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5083"
+          "loc": "plugin/scripts/test_reqmap_report.py:5095"
         },
         {
           "role": "implements",
@@ -2681,7 +2681,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4656"
+          "loc": "plugin/scripts/test_reqmap_report.py:4668"
         },
         {
           "role": "implements",
@@ -2871,7 +2871,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5083"
+          "loc": "plugin/scripts/test_reqmap_report.py:5095"
         },
         {
           "role": "implements",
@@ -3230,7 +3230,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4894"
+          "loc": "plugin/scripts/test_reqmap_report.py:4906"
         },
         {
           "role": "implements",
@@ -3329,7 +3329,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "implements",
@@ -3710,7 +3710,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         }
       ],
       "test_exempt": null,
@@ -5868,7 +5868,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "implements",
@@ -6425,7 +6425,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "implements",
@@ -7687,7 +7687,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "tested-by",
@@ -9395,7 +9395,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4972"
+          "loc": "plugin/scripts/test_reqmap_report.py:4984"
         },
         {
           "role": "implements",
@@ -9853,7 +9853,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4972"
+          "loc": "plugin/scripts/test_reqmap_report.py:4984"
         },
         {
           "role": "implements",
@@ -10085,7 +10085,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "tested-by",
@@ -12288,7 +12288,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4770"
+          "loc": "plugin/scripts/test_reqmap_report.py:4782"
         },
         {
           "role": "implements",
@@ -14112,7 +14112,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4691"
+          "loc": "plugin/scripts/test_reqmap_report.py:4703"
         },
         {
           "role": "implements",
@@ -14415,7 +14415,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4691"
+          "loc": "plugin/scripts/test_reqmap_report.py:4703"
         },
         {
           "role": "implements",
@@ -20955,26 +20955,6 @@
       "unpark": null,
       "done": false,
       "category": "Adopție",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "Pages deschide pe o pagină de 3 comenzi, nu pe harta cu 292 de noduri; harta rămâne un link. Gata când: `docs/index.html` arată `init` / `gate` / `sync` înainte de orice graf",
-      "horizon": "now",
-      "req": "ARCH-SITE-026",
-      "unpark": null,
-      "done": false,
-      "category": "Primul contact",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "Demo `examples/hello-drift`: o cerință, un fișier, o schimbare de contract. Gata când: `gate` rulat acolo tipărește DRIFT",
-      "horizon": "now",
-      "req": "ARCH-INIT-012",
-      "unpark": null,
-      "done": false,
-      "category": "Primul contact",
       "context": "",
       "section_date": null
     },

@@ -4570,6 +4570,18 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
     def setUp(self):
         self.root = _repo_root()
 
+    def test_the_hello_drift_demo_shows_drift(self):
+        """ROADMAP's first-contact demo: a gate run in examples/hello-drift prints DRIFT and
+        exits 0. A demo that silently stopped demonstrating is worse than none."""
+        demo = os.path.join(self.root, "examples", "hello-drift")
+        engine = os.path.join(self.root, "plugin", "scripts", "reqmap.py")
+        r = subprocess.run([sys.executable, "-X", "utf8", engine, "gate"], cwd=demo,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                           universal_newlines=True, encoding="utf-8")
+        self.assertEqual(0, r.returncode, r.stdout + r.stderr)
+        self.assertIn("RM018 HELLO-GREET-001: DRIFT", r.stdout)
+        self.assertIn("hello.py:1", r.stdout)
+
     def test_every_engine_module_is_tracked_by_git(self):  # verifies: REQ-SELFGATE-990#CASE-2
         """A module the package imports but git does not track ships a DEAD engine, and the
         author's machine structurally cannot see it: the working tree imports fine, and even

@@ -333,7 +333,7 @@
       "plugin/scripts/reqmap_engine/search.py#_text_matches": "dddae0f5fed0799b9704a5e7e633bbbb5706adbd358c1e0f4dbadd3da1953f95"
     },
     "REQ-SELFGATE-990": {
-      "plugin/scripts/test_reqmap_report.py#DocsAreTrue": "9590ea01c2055014108e9ad38854afb3b76066fbb51843e7baec226d288c9618"
+      "plugin/scripts/test_reqmap_report.py#DocsAreTrue": "d265c5114f09a63095a318a5cc60f24b0624027bb04fdc431c4bad51d92d7f35"
     },
     "REQ-SIMILAR-921": {
       "plugin/scripts/reqmap_engine/similar.py#_add_test_suite_links": "e08f67cb1e79680c579f560d48467d011d53e899d5ebbb5f1e1db6c52e265ce7",

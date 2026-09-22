@@ -1,13 +1,85 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=./architecture.html">
-  <link rel="canonical" href="./architecture.html">
-  <title>Requirement Manager</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>requirement-manager</title>
+<meta name="description" content="Stop your AI agent from drifting away from what you already agreed on: one Markdown spec per capability, a one-line tag in the code, and a gate that checks the two still agree.">
+<style>
+:root{
+  --bg:#f8f7f4;--surface:#fff;--ink:#1c1c1a;--muted:#64625d;--line:#e2e0da;
+  --accent:#2f5d8a;--code-bg:#1f2328;--code-ink:#e6e6e3;--warn:#d9a23b;--ok:#6fbf7e;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151514;--surface:#1d1d1b;--ink:#ecebe6;--muted:#a19f98;--line:#33322e;
+  --accent:#86b1da;--code-bg:#0f1113;--code-ink:#e6e6e3;}}
+:root[data-theme="dark"]{
+  --bg:#151514;--surface:#1d1d1b;--ink:#ecebe6;--muted:#a19f98;--line:#33322e;
+  --accent:#86b1da;--code-bg:#0f1113;--code-ink:#e6e6e3;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:48px 16px 72px}
+h1{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 14px}
+h2{font-size:19px;margin:44px 0 12px}
+p{margin:0 0 14px}
+.lede{font-size:18px;color:var(--muted);margin-bottom:28px}
+a{color:var(--accent)}
+code{font:14px ui-monospace,SFMono-Regular,Consolas,monospace}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:8px;
+  padding:16px 18px;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.cmds{display:grid;gap:10px}
+.cmd{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.cmd code{font-size:15px;font-weight:600}
+.cmd p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.warn{color:var(--warn)}.pass{color:var(--ok)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.links a{display:inline-block;text-decoration:none;border:1px solid var(--line);
+  background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600}
+.note{color:var(--muted);font-size:14px}
+</style>
 </head>
 <body>
-  <p>Redirecting to <a href="./architecture.html">Requirement Manager — Architecture</a>…</p>
+<main>
+  <h1>Stop your AI agent from drifting away from what you already agreed on.</h1>
+  <p class="lede">One Markdown spec per capability, a one-line tag in the code that backs it,
+  and a gate that checks the two still agree. Stdlib Python, no install, no AI SDK.</p>
+
+  <h2>Three commands</h2>
+  <div class="cmds">
+    <div class="cmd"><code>python scripts/reqmap.py init</code>
+      <p>Set up <code>requirements/</code> and draft one spec per capability from the code you have.
+      Never clobbers a file you already have.</p></div>
+    <div class="cmd"><code>python scripts/reqmap.py gate</code>
+      <p>The verdict: do the code and the specs still agree? Report-only; wire it into your
+      pre-commit hook and CI. <code>--full</code> adds every advisory check.</p></div>
+    <div class="cmd"><code>python scripts/reqmap.py sync</code>
+      <p>Rebuild everything derived: the drift baseline, the map, the findings. The only
+      command that writes.</p></div>
+  </div>
+
+  <h2>The drift it catches</h2>
+  <p>A confirmed spec says <code>greet(name)</code> must now strip the spaces around
+  <code>name</code>. The code was never touched. From the runnable demo,
+  <a href="https://github.com/alxmax/Requirement-manager/tree/main/examples/hello-drift"><code>examples/hello-drift</code></a>:</p>
+<pre>$ python ../../plugin/scripts/reqmap.py gate
+<span class="warn">WARN  RM018 HELLO-GREET-001: DRIFT</span> — contract changed since lock; re-check 1 member(s): hello.py:1
+
+1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
+...
+gate: <span class="pass">PASS</span> — link sync + drift + test links, readability, map freshness (advice: `gate --full`).</pre>
+
+  <h2>Run it in CI</h2>
+<pre>- uses: alxmax/requirement-manager/check@v8</pre>
+
+  <h2>See more</h2>
+  <div class="links">
+    <a href="./map.html">Live requirement map</a>
+    <a href="./architecture.html">Architecture</a>
+    <a href="https://github.com/alxmax/Requirement-manager">Source on GitHub</a>
+  </div>
+  <p class="note">The map is this repository's own requirement graph, rebuilt on every push to
+  <code>main</code>.</p>
+</main>
 </body>
 </html>
