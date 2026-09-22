@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.5.0` — 2026-09-22
+
+**Datoria de viewer: split ARCH-VIEWER-007.**
+
+- Split ARCH-VIEWER-007: artefactul HTML (ARCH-VIEWERFILE-074) vs. ce randează (ADR-0050) (ARCH-VIEWER-007)
+
 ## plugin `v8.4.1` — 2026-09-22
 
 **Un agent nou pornește din 40 de linii.**

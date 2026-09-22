@@ -425,7 +425,7 @@ class RepoName(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-
                 os.environ["REQMAP_REPO"] = old
 
 
-class ViewerInject(unittest.TestCase):  # tested-by: ARCH-VIEWER-007  # tested-by: REQ-VIEWER-940  # tested-by: REQ-VIEWER-941
+class ViewerInject(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # tested-by: REQ-VIEWER-940  # tested-by: REQ-VIEWER-941
     def test_marker_replaced_with_inline_data(self):  # verifies: REQ-VIEWER-940#CASE-5  # verifies: REQ-VIEWER-940#CASE-6
         out = R._inject_viewer("<head><!--REQMAP_DATA--></head>",
                                {"nodes": [{"id": "A-1"}], "edges": []})
@@ -1781,7 +1781,7 @@ class AdversarialInjection(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tes
                            "status": "confirmed", "layer": "bus", "members": [],
                            "risk": 0, "acc": [], "deps": []}]}
 
-    def test_js_line_terminators_never_reach_the_script_blob_raw(self):  # tested-by: ARCH-VIEWER-007  # verifies: REQ-VIEWER-941#CASE-5
+    def test_js_line_terminators_never_reach_the_script_blob_raw(self):  # tested-by: ARCH-VIEWERFILE-074  # verifies: REQ-VIEWER-941#CASE-5
         """U+2028/U+2029 terminate a line in JavaScript. Raw in the inlined blob they
         are a syntax error on any engine older than ES2019 - the whole viewer dies on
         one character in one requirement title."""
@@ -3898,7 +3898,7 @@ class CasesHealth017(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested
         self.assertEqual(int(m2.group(2)), obj["total"])
 
 
-class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWER-007  # tested-by: REQ-VIEWER-940  # tested-by: REQ-VIEWER-941
+class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # tested-by: REQ-VIEWER-940  # tested-by: REQ-VIEWER-941
     def _node(self, **fields):
         node = {"id": "A-1", "title": "T", "contract": [], "status": "confirmed",
                 "layer": "bus", "members": [], "risk": 0, "acc": [], "deps": []}

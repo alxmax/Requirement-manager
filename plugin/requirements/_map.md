@@ -1,8 +1,8 @@
 ---
 generated: 2026-09-22
-engine: 2026-09-22.4
-nodes: 294
-edges: 120
+engine: 2026-09-22.5
+nodes: 295
+edges: 121
 ---
 
 # Requirement Map
@@ -79,6 +79,7 @@ graph LR
     ARCH_UNREADABLE_070["Source files the scan cannot decode<br><small>ARCH-UNREADABLE-070</small>"]
     ARCH_UNSCANNEDTAG_045["Tags in unscanned file types reported<br><small>ARCH-UNSCANNEDTAG-045</small>"]
     ARCH_VIEWER_007["Self-contained HTML map viewer<br><small>ARCH-VIEWER-007</small>"]
+    ARCH_VIEWERFILE_074["The viewer ships as one self-contained HTML file<br><small>ARCH-VIEWERFILE-074</small>"]
     ARCH_VLEVEL_037["Verification levels<br><small>ARCH-VLEVEL-037</small>"]
   end
   subgraph sg_REQ["REQ"]
@@ -282,8 +283,6 @@ graph LR
     REQ_TRANSLATE_996["Declaring the requirements language<br><small>REQ-TRANSLATE-996</small>"]
     REQ_UNREADABLE_1004["Decoding a source file, or refusing it out loud<br><small>REQ-UNREADABLE-1004</small>"]
     REQ_UNSCANNEDTAG_939["Warning about a tag the scan never reads<br><small>REQ-UNSCANNEDTAG-939</small>"]
-    REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
-    REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
     REQ_VIEWER_942["Ranking nodes and rendering acceptance criteria as authored<br><small>REQ-VIEWER-942</small>"]
     REQ_VIEWER_943["UI chrome language, requirement content untranslated<br><small>REQ-VIEWER-943</small>"]
     REQ_VIEWER_944["Cross-references and header fields in a rendered spec<br><small>REQ-VIEWER-944</small>"]
@@ -297,6 +296,8 @@ graph LR
     REQ_VIEWER_999["A plan bar opens the note its author wrote in ROADMAP.md<br><small>REQ-VIEWER-999</small>"]
     REQ_PLANSTACK_1012["Bars are stacked by what is drawn, not by what is scheduled<br><small>REQ-PLANSTACK-1012</small>"]
     REQ_PLANDAYS_1021["Each day on the Plan is labelled<br><small>REQ-PLANDAYS-1021</small>"]
+    REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
+    REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
     REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
     REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]
@@ -894,8 +895,6 @@ graph LR
   f_plugin_scripts_reqmap_engine_rules_py_365["plugin/scripts/reqmap_engine/rules.py:365"]
   ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_engine_rules_py_365
   ARCH_VIEWER_007["Self-contained HTML map viewer<br><small>ARCH-VIEWER-007</small>"]
-  f_app_vite_viewer_config_js_1["app/vite.viewer.config.js:1"]
-  ARCH_VIEWER_007 -->|implements| f_app_vite_viewer_config_js_1
   f_app_scripts_run_ssr_smoke_mjs_1["app/scripts/run-ssr-smoke.mjs:1"]
   ARCH_VIEWER_007 -->|implements| f_app_scripts_run_ssr_smoke_mjs_1
   f_app_scripts_ssr_smoke_jsx_1["app/scripts/ssr-smoke.jsx:1"]
@@ -982,12 +981,19 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_roadmap_versionsData_js_1
   f_app_src_views_spec_SpecParts_jsx_1["app/src/views/spec/SpecParts.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_spec_SpecParts_jsx_1
-  f_plugin_scripts_test_reqmap_report_py_428_3901["plugin/scripts/test_reqmap_report.py:428-3901"]
-  ARCH_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_428_3901
+  f_plugin_scripts_test_reqmap_report_py_2148["plugin/scripts/test_reqmap_report.py:2148"]
+  ARCH_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2148
   f_plugin_scripts_reqmap_engine_rules_py_269["plugin/scripts/reqmap_engine/rules.py:269"]
   ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_engine_rules_py_269
-  f_plugin_scripts_reqmap_engine_viewer_py_33_89["plugin/scripts/reqmap_engine/viewer.py:33-89"]
-  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_engine_viewer_py_33_89
+  f_plugin_scripts_reqmap_engine_viewer_py_33["plugin/scripts/reqmap_engine/viewer.py:33"]
+  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_engine_viewer_py_33
+  ARCH_VIEWERFILE_074["The viewer ships as one self-contained HTML file<br><small>ARCH-VIEWERFILE-074</small>"]
+  f_app_vite_viewer_config_js_1["app/vite.viewer.config.js:1"]
+  ARCH_VIEWERFILE_074 -->|implements| f_app_vite_viewer_config_js_1
+  f_plugin_scripts_test_reqmap_report_py_428_3901["plugin/scripts/test_reqmap_report.py:428-3901"]
+  ARCH_VIEWERFILE_074 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_428_3901
+  f_plugin_scripts_reqmap_engine_viewer_py_59_89["plugin/scripts/reqmap_engine/viewer.py:59-89"]
+  ARCH_VIEWERFILE_074 -->|implements| f_plugin_scripts_reqmap_engine_viewer_py_59_89
   ARCH_VLEVEL_037["Verification levels<br><small>ARCH-VLEVEL-037</small>"]
   f_plugin_scripts_test_reqmap_gate_py_171_227["plugin/scripts/test_reqmap_gate.py:171-227"]
   ARCH_VLEVEL_037 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_171_227
@@ -1029,7 +1035,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 
 ```mermaid
 graph LR
-  a_ARCH["ARCH<br><small>66 caps</small>"]
+  a_ARCH["ARCH<br><small>67 caps</small>"]
   a_REQ["REQ<br><small>219 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
@@ -1045,9 +1051,11 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 ```mermaid
 graph LR
   subgraph sg_misc["misc"]
+    ARCH_VIEWERFILE_074["The viewer ships as one self-contained HTML file<br><small>ARCH-VIEWERFILE-074</small><br>unreviewed"]
     REQ_CHECK_1036["A bare gate says only what is broken<br><small>REQ-CHECK-1036</small><br>unreviewed"]
   end
   style REQ_CHECK_1036 fill:#fff3cd,stroke:#a66,color:#630
+  style ARCH_VIEWERFILE_074 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
@@ -1055,3 +1063,4 @@ graph LR
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
 | REQ-CHECK-1036 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| ARCH-VIEWERFILE-074 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

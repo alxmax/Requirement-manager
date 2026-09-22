@@ -118,8 +118,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "ARCH-VIEWER-007": {
-      "hash": "60be1b2efc12",
-      "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
+      "hash": "d180720b1b24",
+      "reason": "ARCH-VIEWER-007 split: the artifact (REQ-VIEWER-940/941, five cases) moved to ARCH-VIEWERFILE-074 (ADR-0050)"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
