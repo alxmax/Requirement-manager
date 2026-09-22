@@ -5,7 +5,7 @@ import { useI18n } from "../../lib/i18n.jsx";
 
 const COUNT = { marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11 };
 
-export function ProblemTabBar({ filter, setFilter, counts, designCount, gateMsg }) {
+export function ProblemTabBar({ filter, setFilter, counts, gateMsg }) {
   const { t } = useI18n();
   const Tab = ({ k, label, n }) => (
     <button className={"tab" + (filter === k ? " on" : "")} onClick={() => setFilter(k)}>
@@ -19,55 +19,8 @@ export function ProblemTabBar({ filter, setFilter, counts, designCount, gateMsg 
       <Tab k="WARN" label={t("Warnings")} n={counts.WARN || 0} />
       <Tab k="QUESTION" label={t("Questions")} n={counts.QUESTION || 0} />
       <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW || 0} />
-      {designCount > 0 && <Tab k="DESIGN" label={t("Design")} n={designCount} />}
       <div className="tab-legend">{gateMsg}</div>
     </div>
-  );
-}
-
-function DesignRow({ f }) {
-  return (
-    <div className="prob-row">
-      <span className="prob-sev sev-REVIEW">{f.kind}</span>
-      <div className="prob-body">
-        <div className="prob-head"><span className="prob-id">{f.name}</span></div>
-        <div className="prob-msg">{f.detail}</div>
-      </div>
-      <span className="prob-loc">{f.file}:{f.line}</span>
-    </div>
-  );
-}
-
-/** One OOP pillar: its findings, then the advice for each kind of finding in it. */
-function PillarGroup({ pillar, rows, advice }) {
-  const kinds = [...new Set(rows.map((f) => f.kind))].sort().filter((k) => advice[k]);
-  return (
-    <div>
-      <div className="prob-head" style={{ margin: "14px 0 6px", textTransform: "capitalize" }}>
-        <b>{pillar}</b>
-        <span style={COUNT}>{rows.length}</span>
-      </div>
-      {rows.map((f, i) => <DesignRow key={i} f={f} />)}
-      {kinds.map((k) => (
-        <div className="prob-fix" key={k} style={{ margin: "4px 0 0 4px" }}>
-          <Icon name="arrow-right" size={13} /> {advice[k]}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function DesignProblemsPanel({ byPillar, advice }) {
-  const { t } = useI18n();
-  const note = "Advisory only — a candidate is a shape worth a look, never a defect, "
-    + "and this never enters the gate.";
-  return (
-    <>
-      <div className="prob-chip" style={{ cursor: "default" }}>{t(note)}</div>
-      {Object.keys(byPillar).sort().map((pillar) => (
-        <PillarGroup key={pillar} pillar={pillar} rows={byPillar[pillar]} advice={advice} />
-      ))}
-    </>
   );
 }
 

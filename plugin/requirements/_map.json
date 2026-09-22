@@ -8167,7 +8167,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:56"
+          "loc": "app/src/lib/data.js:55"
         },
         {
           "role": "implements",
@@ -13143,7 +13143,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:60"
+          "loc": "app/src/lib/data.js:59"
         },
         {
           "role": "tested-by",
@@ -16960,7 +16960,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:241"
+          "loc": "app/src/lib/i18n.jsx:237"
         },
         {
           "role": "implements",
@@ -17064,7 +17064,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:270"
+          "loc": "app/src/lib/i18n.jsx:266"
         }
       ],
       "test_exempt": null,
@@ -17347,8 +17347,7 @@
         "The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]",
         "The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]",
         "The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]",
-        "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
-        "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]",
+        "The viewer shows the engine's health reading as a ring in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]",
         "The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]",
         "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]",
@@ -17703,11 +17702,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:230"
+          "loc": "app/src/lib/i18n.jsx:226"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:277"
+          "loc": "app/src/lib/i18n.jsx:273"
         }
       ],
       "test_exempt": null,
@@ -17878,11 +17877,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:201"
+          "loc": "app/src/lib/i18n.jsx:197"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:289"
+          "loc": "app/src/lib/i18n.jsx:285"
         },
         {
           "role": "implements",
@@ -17963,19 +17962,19 @@
       "level": "code",
       "status": "confirmed",
       "area": "REQ",
-      "title": "Two engine-emitted readings in the rail",
-      "intent": "`reqmap.py gate --risk` opens with two numbers — how much of the corpus is green, and how much of the code is free of design candidates — and the viewer showed neither. They belong where a reader already looks for the shape of the repo: the rail, under the navigation. The viewer displays the records the map hands it; recomputing either one here is what would let the terminal and the browser report different repos.",
+      "title": "The engine's health reading in the rail",
+      "intent": "`reqmap.py gate --risk` opens with how much of the corpus is green, and the viewer did not show it. It belongs where a reader already looks for the shape of the repo: the rail, under the navigation. The viewer displays the record the map hands it; recomputing it here is what would let the terminal and the browser report different repos.",
       "contract": [
-        "The rail renders one ring per reading, showing the score, its label and the fraction behind it, from the `health` and `design` records the map carries.",
-        "The health ring is coloured by band, since it is a verdict: green while at or above 90, amber down to 60, red below. The design ring stays in one neutral ink — that score is advice the gate never enforces, and a red ring would read as a failure the repo does not have.",
-        "The health ring opens the Problems inbox, where the reasons behind the score are listed. The design ring is not a control, because there is no view to open.",
-        "A map carrying neither record renders no ring at all. An older map has neither key, and a reading invented client-side would be worse than an absent one.",
-        "Both labels and both captions follow the chosen interface language, like the rest of the chrome."
+        "The rail renders one ring, showing the health score, its label and the fraction behind it, from the `health` record the map carries.",
+        "The ring is coloured by band, since it is a verdict: green while at or above 90, amber down to 60, red below.",
+        "The ring opens the Problems inbox, where the reasons behind the score are listed.",
+        "A map carrying no `health` record renders no ring. An older map has no key, and a reading invented client-side would be worse than an absent one.",
+        "The label and the caption follow the chosen interface language, like the rest of the chrome."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the rings show the numbers the engine emitted\n  Given  a map carrying a health record of 39 of 50 and a design record of 7 of 30\n  When   the rail renders\n  Then   both scores and both fractions appear as given, with nothing recomputed\n\nCASE-2 — the health band follows the score\n  Given  a health score of 78\n  When   the rail renders\n  Then   the health ring is drawn in the partial tone, not the green one\n\nCASE-3 — an older map renders no ring\n  Given  a map carrying neither a health nor a design record\n  When   the rail renders\n  Then   no gauge is present in the output\n\nCASE-4 — only the verdict is a control\n  Given  both records are present\n  When   the rail renders\n  Then   the design row is marked static and carries no click target, while the health row does\n\nCASE-5 — the labels follow the interface language\n  Given  the interface language is Romanian\n  When   a label and a caption are translated\n  Then   both come back in Romanian, numbers interpolated unchanged",
+      "accept": "CASE-1 — the ring shows the numbers the engine emitted\n  Given  a map carrying a health record of 39 of 50\n  When   the rail renders\n  Then   the score and the fraction appear as given, with nothing recomputed\n\nCASE-2 — the band follows the score\n  Given  a health score of 78\n  When   the rail renders\n  Then   the ring is drawn in the partial tone, not the green one\n\nCASE-3 — an older map renders no ring\n  Given  a map carrying no health record\n  When   the rail renders\n  Then   no gauge is present in the output\n\nCASE-4 — the ring is a control\n  Given  a health record\n  When   the rail renders\n  Then   the ring is a button that opens the Problems inbox, and no static ring sits beside it\n\nCASE-5 — the labels follow the interface language\n  Given  the interface language is Romanian\n  When   a label and a caption are translated\n  Then   both come back in Romanian, numbers interpolated unchanged",
       "input": "",
       "output": "",
       "desc": "",
@@ -17996,7 +17995,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:70"
+          "loc": "app/src/lib/data.js:69"
         },
         {
           "role": "implements",
@@ -18014,7 +18013,7 @@
       "id": "REQ-VIEWER-977",
       "layer": "feature",
       "level": "code",
-      "status": "confirmed",
+      "status": "deprecated",
       "area": "REQ",
       "title": "The advisory design tab",
       "intent": "The rail already showed a design score, and a reader who wanted to know which shapes cost the missing points had to leave the viewer for a terminal. The candidates now travel in the map, so the Problems screen lists them — in a tab of their own, because they are the only rows here that are about a file rather than a requirement, and the only ones that gate nothing.",
@@ -18038,22 +18037,11 @@
         "ARCH-VIEWER-007"
       ],
       "satisfied_by": [],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:5"
-        },
-        {
-          "role": "implements",
-          "loc": "app/src/views/ProblemsView.jsx:3"
-        }
-      ],
+      "members": [],
       "test_exempt": null,
       "milestone": "v5.6",
       "priority": "",
-      "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "risks": []
     },
     {
       "id": "REQ-VIEWER-984",
@@ -18206,7 +18194,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:52"
+          "loc": "app/src/lib/data.js:51"
         },
         {
           "role": "implements",
@@ -21301,7 +21289,7 @@
     },
     {
       "month": "2026-09",
-      "count": 108,
+      "count": 109,
       "first": "2026-09-02",
       "last": "2026-09-22",
       "versions": [
@@ -21412,11 +21400,17 @@
         "v8.3.0",
         "v8.4.0",
         "v8.4.1",
-        "v8.5.0"
+        "v8.5.0",
+        "v8.5.1"
       ],
       "landmark": "v8.0.0",
       "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate",
       "entries": [
+        {
+          "version": "v8.5.1",
+          "date": "2026-09-22",
+          "headline": "Viewer-ul fără rămășițe de design"
+        },
         {
           "version": "v8.5.0",
           "date": "2026-09-22",
@@ -22173,13 +22167,13 @@
   "health": {
     "score": 99,
     "total": 295,
-    "scored": 263,
-    "healthy": 261,
+    "scored": 262,
+    "healthy": 260,
     "exempt": 21,
-    "deprecated": 32,
-    "confirmed": 261,
-    "implemented": 255,
-    "tested": 253,
+    "deprecated": 33,
+    "confirmed": 260,
+    "implemented": 254,
+    "tested": 252,
     "drafts": 2,
     "orphans": 0,
     "untested": 0,
@@ -22188,7 +22182,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 261
+    "reviewed_total": 260
   },
   "planning": {
     "lanes": [

@@ -25,8 +25,7 @@ Every bullet below is binding.
 - The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
-- The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
-- The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
+- The viewer shows the engine's health reading as a ring in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
 - The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
@@ -453,49 +452,45 @@ milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
-# Two engine-emitted readings in the rail
+# The engine's health reading in the rail
 
 ## Description
-> `reqmap.py gate --risk` opens with two numbers — how much of the corpus is green, and how much
-> of the code is free of design candidates — and the viewer showed neither. They belong
-> where a reader already looks for the shape of the repo: the rail, under the navigation.
-> The viewer displays the records the map hands it; recomputing either one here is what
-> would let the terminal and the browser report different repos.
+> `reqmap.py gate --risk` opens with how much of the corpus is green, and the viewer did not
+> show it. It belongs where a reader already looks for the shape of the repo: the rail,
+> under the navigation. The viewer displays the record the map hands it; recomputing it here
+> is what would let the terminal and the browser report different repos.
 
 Every bullet below is binding.
-- The rail renders one ring per reading, showing the score, its label and the fraction
-  behind it, from the `health` and `design` records the map carries.
-- The health ring is coloured by band, since it is a verdict: green while at or above 90,
-  amber down to 60, red below. The design ring stays in one neutral ink — that score is
-  advice the gate never enforces, and a red ring would read as a failure the repo does not
-  have.
-- The health ring opens the Problems inbox, where the reasons behind the score are listed.
-  The design ring is not a control, because there is no view to open.
-- A map carrying neither record renders no ring at all. An older map has neither key, and a
-  reading invented client-side would be worse than an absent one.
-- Both labels and both captions follow the chosen interface language, like the rest of the
+- The rail renders one ring, showing the health score, its label and the fraction behind it,
+  from the `health` record the map carries.
+- The ring is coloured by band, since it is a verdict: green while at or above 90, amber
+  down to 60, red below.
+- The ring opens the Problems inbox, where the reasons behind the score are listed.
+- A map carrying no `health` record renders no ring. An older map has no key, and a reading
+  invented client-side would be worse than an absent one.
+- The label and the caption follow the chosen interface language, like the rest of the
   chrome.
 
 ## Cases
-CASE-1 — the rings show the numbers the engine emitted
-  Given  a map carrying a health record of 39 of 50 and a design record of 7 of 30
+CASE-1 — the ring shows the numbers the engine emitted
+  Given  a map carrying a health record of 39 of 50
   When   the rail renders
-  Then   both scores and both fractions appear as given, with nothing recomputed
+  Then   the score and the fraction appear as given, with nothing recomputed
 
-CASE-2 — the health band follows the score
+CASE-2 — the band follows the score
   Given  a health score of 78
   When   the rail renders
-  Then   the health ring is drawn in the partial tone, not the green one
+  Then   the ring is drawn in the partial tone, not the green one
 
 CASE-3 — an older map renders no ring
-  Given  a map carrying neither a health nor a design record
+  Given  a map carrying no health record
   When   the rail renders
   Then   no gauge is present in the output
 
-CASE-4 — only the verdict is a control
-  Given  both records are present
+CASE-4 — the ring is a control
+  Given  a health record
   When   the rail renders
-  Then   the design row is marked static and carries no click target, while the health row does
+  Then   the ring is a button that opens the Problems inbox, and no static ring sits beside it
 
 CASE-5 — the labels follow the interface language
   Given  the interface language is Romanian
@@ -504,7 +499,7 @@ CASE-5 — the labels follow the interface language
 
 ---
 id: REQ-VIEWER-977
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

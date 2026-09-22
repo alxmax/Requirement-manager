@@ -118,8 +118,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "ARCH-VIEWER-007": {
-      "hash": "d180720b1b24",
-      "reason": "ARCH-VIEWER-007 split: the artifact (REQ-VIEWER-940/941, five cases) moved to ARCH-VIEWERFILE-074 (ADR-0050)"
+      "hash": "167be02aece5",
+      "reason": "the design ring and tab left the viewer: REQ-VIEWER-969 is the health ring alone, REQ-VIEWER-977 retired"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -340,6 +340,10 @@
     "REQ-VIEWER-942": {
       "hash": "10d7eaf815db",
       "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
+    },
+    "REQ-VIEWER-969": {
+      "hash": "ad8abe212939",
+      "reason": "the design ring and tab left the viewer: REQ-VIEWER-969 is the health ring alone, REQ-VIEWER-977 retired"
     },
     "REQ-VIEWER-977": {
       "hash": "8c401c2200b5",

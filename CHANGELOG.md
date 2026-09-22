@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.5.1` — 2026-09-22
+
+**Viewer-ul fără rămășițe de design.**
+
+- Viewer-ul nu mai arată inelul și tab-ul de design; motorul nu mai trimite date de design din v8.2.0 (ARCH-VIEWER-007)
+
 ## plugin `v8.5.0` — 2026-09-22
 
 **Datoria de viewer: split ARCH-VIEWER-007.**
