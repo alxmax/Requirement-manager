@@ -18,10 +18,6 @@ Cadență: un release pe săptămână, nu unul pe fiecare merge.
 
 ## Next
 
-### Documentație
-
-- [ ] SKILL.md: primul ecran de 40 de linii; i18n, site, decompose și release trec în `references/`. Gata când: un agent nou citește 40 de linii și rulează corect `init` și `gate` | req: SYS-AUTHOR-101
-
 ### Viewer
 
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007

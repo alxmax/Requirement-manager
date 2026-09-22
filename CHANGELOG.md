@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.4.1` — 2026-09-22
+
+**Un agent nou pornește din 40 de linii.**
+
+- SKILL.md: primul ecran e de 37 de linii și duce un agent nou de la seed la `gate` (SYS-AUTHOR-101)
+
 ## plugin `v8.4.0` — 2026-09-22
 
 **Un gate care se citește.**

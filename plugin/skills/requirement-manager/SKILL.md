@@ -12,9 +12,40 @@ description: >
 
 # Requirement manager
 
-A capability registry that sits between intent and code. Each capability is one
-markdown file (the single source of truth). Code points back to it with a tag.
-A script reconciles the two and generates a navigable map.
+One markdown file per capability in `requirements/` is the source of truth; code points back
+to it with a comment tag; `scripts/reqmap.py` checks the two still agree.
+
+## Start here
+
+**1. Seed the engine** (once per repo; the CLI and its package travel together):
+
+```bash
+mkdir -p scripts
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp -r "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
+```
+
+**2. `python scripts/reqmap.py init`**: creates `requirements/` and `.reqmapignore`, drafts one
+requirement per capability it finds in the code, builds the lock and the map. Safe to re-run.
+
+**3. Tag the code** that implements or tests a requirement, one line each:
+`# implements: AREA-NAME-001`, `# tested-by: AREA-NAME-001` (`//` in brace languages).
+
+**4. Confirming is a person's answer, never yours to assume**: after someone has read a
+draft, set `status: confirmed` in its frontmatter. A confirmed requirement needs an
+`implements:` tag, or the gate fails.
+
+**5. `python scripts/reqmap.py gate`** before every commit. It never writes. Read it so:
+- exit 1 with `ERROR RM001/RM003/RM006`: a tag, a `depends_on` or an implements member is
+  broken. Fix the link.
+- `WARN RM018 … DRIFT`: a confirmed contract changed since the lock. Re-check the file it
+  names; then `sync --accept-drift "why"`.
+- bare, it shows only what is broken; `gate --full` adds every advisory check.
+
+**6. `python scripts/reqmap.py sync`** after editing requirements or tags: the only command
+that writes. Never edit `_map.*` or `_reqlock.json` by hand.
+
+Everything below is for when a step above sends you there.
 
 ## Menu (entry point)
 
@@ -37,7 +68,7 @@ After any action, summarize what changed and, when useful, point to
 | **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py init` → `gate` → report draft count + result |
 | **confirm** (validate a reviewed requirement) | Human-validation step. There is no command: read the requirement, then set `status: confirmed` in its frontmatter. The gate refuses a confirmed requirement with no `implements:` member (RM006), and `sync` demotes an edited contract back to `draft` on its own. | 1. Tag the implementing file. 2. Edit `status:`. 3. `python scripts/reqmap.py sync`. |
 | **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map (plus `_findings.md`, if the repo keeps one) — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
-| **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after `/plugin update` to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py gate` → `map` |
+| **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` and `scripts/reqmap_engine/` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after `/plugin update` to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py`, replace `scripts/reqmap_engine/` with `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine/`, and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item -Recurse`; POSIX: `cp -r`), then `python scripts/reqmap.py sync` → `gate` |
 | **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py gate --risk` (see status). 2. Present C/E/A framework to user (see references/triage.md). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
 
 **Advisory doc-sync and clarify answers** are assistant steps, not engine commands: read [references/assistant-steps.md](references/assistant-steps.md) before relaying a `clarify` or `gate --risk` question to the user.
@@ -274,7 +305,7 @@ expected and acceptable.
 
 ## The gate (run at commit/merge — keep it non-optional)
 
-`python scripts/reqmap.py gate` is report-only: it verifies these syncs and exits non-zero on **link-sync errors only**. It **never** touches `_reqlock.json`. To advance the drift baseline after intentionally editing a requirement, use `sync` (with `--accept-drift` when a confirmed/implemented contract changed).
+`python scripts/reqmap.py gate` is report-only: it verifies these syncs and exits non-zero on **link-sync errors only**. Bare, it runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs every check in the table below (ADR-0049). It **never** touches `_reqlock.json`. To advance the drift baseline after intentionally editing a requirement, use `sync` (with `--accept-drift` when a confirmed/implemented contract changed).
 
 **Rule codes and exemptions.** Every gate line carries the code of the rule that produced it
 (`WARN  RM018 AUTH-LOGIN-001: DRIFT — ...`), `gate --json` lists the same findings as
@@ -334,7 +365,7 @@ chmod +x .git/hooks/pre-commit
 ```
 
 One `gate` is the whole verdict: link sync and drift, then requirement readability
-(strict), then the committed-map freshness check.
+(errors only; `--full` prints the warnings too), then the committed-map freshness check.
 
 The readability check is part of the verdict for the same reason on the prose axis:
 link sync proves the links are real, not that the requirement is readable. It blocks
