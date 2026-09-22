@@ -28,7 +28,7 @@ if ! "$PY" -X utf8 scripts/check_retired_verbs.py; then
   echo "an instruction still names a verb the engine no longer has — fix the line or bring the verb back." >&2
   exit 1
 fi
-if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin --code .; then
+if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --full --root plugin --code .; then
   echo "" >&2
   echo "reqmap: the gate failed — fix the ERRORs above, or run 'python plugin/scripts/reqmap.py" >&2
   echo "        sync --root plugin --code .' when the committed map is merely stale." >&2

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-22.3",
+  "engine_version": "2026-09-22.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -918,7 +918,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:268"
+          "loc": "plugin/scripts/reqmap.py:273"
         },
         {
           "role": "tested-by",
@@ -1532,7 +1532,8 @@
         "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
-        "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour."
+        "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.",
+        "A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour."
       ],
       "verify": [],
       "notes": [
@@ -1586,7 +1587,8 @@
         "REQ-CHECK-831",
         "REQ-CHECK-832",
         "REQ-CHECK-833",
-        "REQ-CHECK-1035"
+        "REQ-CHECK-1035",
+        "REQ-CHECK-1036"
       ],
       "members": [
         {
@@ -1679,27 +1681,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:59"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:77"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:81"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:99"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:134"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:152"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:201"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:219"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:215"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:233"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:228"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:247"
         },
         {
           "role": "implements",
@@ -2025,23 +2027,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:59"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:77"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:81"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:99"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:134"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:152"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:201"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:219"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:228"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:247"
         }
       ],
       "test_exempt": null,
@@ -2094,23 +2096,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:60"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:82"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:100"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:135"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:153"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:220"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:229"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:248"
         }
       ],
       "test_exempt": null,
@@ -2174,6 +2176,59 @@
       "milestone": null,
       "priority": "",
       "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-CHECK-1036",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A bare gate says only what is broken",
+      "intent": "A gate that prints advice on every commit teaches its reader to stop reading it. One consumer carried eighteen warnings a commit for three weeks, sixteen of them the same \"confirmed but no tested-by\", and removed the tool. Measured over four corpora, no rule fired on more than half of the confirmed requirements in two of them. The noise was the mix of advice and breakage on one screen, not any single rule firing too often.",
+      "contract": [
+        "A bare `gate` runs only the rules in `DEFAULT_RULES`: every error-severity rule, the warnings that say a link is broken (RM005, RM012, RM023, RM033, RM034, RM036), the warnings about the drift baseline (RM016, RM018, RM019, RM020) and the committed map (RM022, RM027).",
+        "A bare `gate` prints a requirement's readability findings only when one is an error; warnings are not printed and not counted.",
+        "`gate --full` and `gate --audit` run every registered rule and print every readability finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.",
+        "The last line of a bare gate names `gate --full` as where the advice is."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CHECK-006"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3037"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/gate.py:55"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lint.py:123"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
       "clauses": 3,
       "covered": 3
     },
@@ -2407,7 +2462,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:185"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:203"
         },
         {
           "role": "implements",
@@ -2503,7 +2558,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:77"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:80"
         },
         {
           "role": "implements",
@@ -2657,7 +2712,7 @@
       "title": "`ask` holds the questions, `gate` the verdict",
       "intent": "`gate` was two things under one name: the commit verdict every hook runs, and every question the engine can answer, sixteen flags in all. A reader choosing a flag had to know which of them run the verdict and which never do. ADR-0044 moves the questions to their own verb.",
       "contract": [
-        "The command registry gives `gate` exactly eleven flags: `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint` and `--no-map-check`.",
+        "The command registry gives `gate` exactly twelve flags: `--audit`, `--risk`, `--show`, `--all`, `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint`, `--no-map-check` and `--full`.",
         "`ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and `--json`. `ask --review` with no id plans the whole corpus.",
         "`ask --design` and `ask --i18n` are accepted through v8.x and do nothing but print one stderr line naming v8.2.0 and ADR-0047, exiting 0; so are `init --no-site` and `sync --attach`.",
         "Since v8.0.0, `gate` given one of `ask`'s flags exits 2 with one stderr line naming `ask`, and runs nothing.",
@@ -2680,15 +2735,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:172"
+          "loc": "plugin/scripts/reqmap.py:177"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:186"
+          "loc": "plugin/scripts/reqmap.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:200"
+          "loc": "plugin/scripts/reqmap.py:205"
         },
         {
           "role": "tested-by",
@@ -2700,11 +2755,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:129"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:143"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:146"
         }
       ],
       "test_exempt": null,
@@ -2808,7 +2863,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:304"
+          "loc": "plugin/scripts/reqmap.py:309"
         },
         {
           "role": "tested-by",
@@ -10423,11 +10478,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:353"
+          "loc": "plugin/scripts/reqmap.py:358"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:371"
+          "loc": "plugin/scripts/reqmap.py:376"
         },
         {
           "role": "tested-by",
@@ -10469,7 +10524,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:371"
+          "loc": "plugin/scripts/reqmap.py:376"
         },
         {
           "role": "tested-by",
@@ -10790,19 +10845,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:109"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:159"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:177"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:175"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:193"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:215"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:233"
         }
       ],
       "test_exempt": null,
@@ -11301,7 +11356,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:284"
+          "loc": "plugin/scripts/reqmap.py:289"
         },
         {
           "role": "tested-by",
@@ -13263,27 +13318,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:25"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:37"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:59"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:77"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:81"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:99"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:134"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:152"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:201"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:219"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:228"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:247"
         },
         {
           "role": "implements",
@@ -13349,7 +13404,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:25"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:37"
         },
         {
           "role": "implements",
@@ -13414,27 +13469,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:26"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:38"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:60"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:82"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:100"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:135"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:153"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:220"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:229"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:248"
         },
         {
           "role": "implements",
@@ -13491,7 +13546,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:26"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:38"
         }
       ],
       "test_exempt": null,
@@ -15580,7 +15635,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:258"
+          "loc": "plugin/scripts/reqmap.py:263"
         },
         {
           "role": "tested-by",
@@ -19821,6 +19876,10 @@
       "ARCH-CHECK-006"
     ],
     [
+      "REQ-CHECK-1036",
+      "ARCH-CHECK-006"
+    ],
+    [
       "ARCH-CLARIFY-062",
       "SYS-AUTHOR-101"
     ],
@@ -21245,7 +21304,7 @@
     },
     {
       "month": "2026-09",
-      "count": 105,
+      "count": 106,
       "first": "2026-09-02",
       "last": "2026-09-22",
       "versions": [
@@ -21353,11 +21412,17 @@
         "v8.1.2",
         "v8.1.3",
         "v8.2.0",
-        "v8.3.0"
+        "v8.3.0",
+        "v8.4.0"
       ],
       "landmark": "v8.0.0",
       "headline": "Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate",
       "entries": [
+        {
+          "version": "v8.4.0",
+          "date": "2026-09-22",
+          "headline": "Un gate care se citește"
+        },
         {
           "version": "v8.3.0",
           "date": "2026-09-22",
@@ -21964,6 +22029,10 @@
         {
           "flag": "--no-map-check",
           "help": "Skip the committed-map freshness check."
+        },
+        {
+          "flag": "--full",
+          "help": "Run every gate rule and print every readability warning. Bare, the gate runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only."
         }
       ]
     },
@@ -22094,25 +22163,27 @@
   ],
   "health": {
     "score": 100,
-    "total": 293,
-    "scored": 261,
+    "total": 294,
+    "scored": 262,
     "healthy": 261,
     "exempt": 21,
     "deprecated": 32,
     "confirmed": 261,
-    "implemented": 253,
-    "tested": 251,
-    "drafts": 0,
+    "implemented": 254,
+    "tested": 252,
+    "drafts": 1,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true
+    "gate_link_sync_clean": true,
+    "reviewed_score": 100,
+    "reviewed_total": 261
   },
   "planning": {
     "milestones": {
-      "v8.4.0": {
+      "v8.5.0": {
         "due": "2026-11-27",
         "label": "Datoria de viewer: split ARCH-VIEWER-007"
       }
@@ -22136,7 +22207,7 @@
         "start": "2026-11-02",
         "end": "2026-11-27",
         "lane": "Feature",
-        "milestone": "v8.4.0",
+        "milestone": "v8.5.0",
         "req": "ARCH-VIEWER-007",
         "progress": 0
       }

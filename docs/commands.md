@@ -25,10 +25,13 @@ requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)):
 **`gate` — the bare verdict.** Link sync (every tag resolves, every enforced
 requirement has an `implements:` member, every `depends_on` target exists) then
 requirement readability then committed-map freshness. Exits non-zero on link-sync
-errors only; drift and test-link integrity are warnings. `--strict` promotes those
-two to errors, `--json` emits one machine-readable document, `--since <ref>` scopes
-it to requirements whose members changed since a git ref, and `--no-lint` /
-`--no-map-check` opt out of the two extras.
+errors only; drift and test-link integrity are warnings. Bare, it runs only the rules
+that say a link, the drift baseline or the committed map is broken, and prints
+readability errors only ([ADR-0049](adr/0049-a-bare-gate-says-only-what-is-broken.md));
+`--full` runs every rule and prints every readability warning. `--strict` promotes
+drift and test-link integrity to errors, `--json` emits one machine-readable document,
+`--since <ref>` scopes it to requirements whose members changed since a git ref, and
+`--no-lint` / `--no-map-check` opt out of the two extras.
 
 **`gate` — the reports on the verdict.**
 

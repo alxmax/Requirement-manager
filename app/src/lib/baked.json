@@ -146,7 +146,8 @@
       "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
       "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
       "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
-      "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour."
+      "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.",
+      "A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour."
     ],
     "acc": [
       "A tag referencing a non-existent capability produces an `ERROR` and exit 1.",

@@ -168,6 +168,16 @@ COMMANDS = {
                 "type": "bool",
                 "help": "Skip the committed-map freshness check.",
             },
+            {
+                "name": "full",
+                "flag": "--full",
+                "type": "bool",
+                "help": (
+                    "Run every gate rule and print every readability warning. Bare, the "
+                    "gate runs only the rules that say a link, the drift baseline or the "
+                    "committed map is broken, and prints readability errors only."
+                ),
+            },
         ],
     },
     "ask": {

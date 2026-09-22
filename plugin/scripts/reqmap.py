@@ -152,11 +152,15 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # three commands because they were written on three days, not because a caller
     # ever wanted one without the others (the published Action defaults both extras
     # to on). Report-only throughout: never touches the lock, never writes a map.
-    rc = cmd_check(ws, False, a.strict, a.as_json, getattr(a, "since", None))
+    # Bare, only the rules that say something is broken (ADR-0049); `--full` runs the
+    # whole registry and prints every readability warning, as `gate` did before v8.4.0.
+    quiet = not getattr(a, "full", False)
+    rc = cmd_check(ws, False, a.strict, a.as_json, getattr(a, "since", None),
+                   quiet=quiet)
     if a.as_json:
         return rc                      # one machine-readable document, not three
     if not a.no_lint:
-        rc = cmd_lint(ws, strict=True) or rc
+        rc = cmd_lint(ws, strict=True, quiet=quiet) or rc
     if not a.no_map_check:
         rc = cmd_map(ws, code_root, True) or rc
     # Last, because a reader takes the last line as the verdict. `cmd_check` prints its
@@ -164,10 +168,11 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # corpus — so the line a run finished on was the readability sub-report's count. An
     # auditor read that as the gate under-reporting itself by 32. The sub-reports now say
     # which check they belong to, and this line is the verdict: nothing may print below it.
-    print("\ngate: {} — link sync + drift + test links{}{}.".format(
+    print("\ngate: {} — link sync + drift + test links{}{}{}.".format(
         "PASS" if rc == 0 else "FAIL",
         "" if a.no_lint else ", readability",
-        "" if a.no_map_check else ", map freshness"))
+        "" if a.no_map_check else ", map freshness",
+        "" if not quiet else " (advice: `gate --full`)"))
     return rc
 def _removed_flag(flag):  # implements: REQ-CMDREGISTRY-1031
     """One stderr line for a flag v8.2.0 removed with its capability (ADR-0047), and

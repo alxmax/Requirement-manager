@@ -146,8 +146,8 @@
       "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-CMDREGISTRY-1031": {
-      "hash": "2293822e5f47",
-      "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
+      "hash": "63640fbd5f7e",
+      "reason": "gate owns twelve flags now: --full (ADR-0049)"
     },
     "REQ-CMDREGISTRY-834": {
       "hash": "ad1ac9c0ae6f",

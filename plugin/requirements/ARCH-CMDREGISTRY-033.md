@@ -195,8 +195,9 @@ satisfies: [ARCH-CMDREGISTRY-033]
 > them run the verdict and which never do. ADR-0044 moves the questions to their own verb.
 
 Every bullet below is binding.
-- The command registry gives `gate` exactly eleven flags: `--audit`, `--risk`, `--show`, `--all`,
-  `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint` and `--no-map-check`.
+- The command registry gives `gate` exactly twelve flags: `--audit`, `--risk`, `--show`, `--all`,
+  `--untagged`, `--badge`, `--strict`, `--json`, `--since`, `--no-lint`, `--no-map-check` and
+  `--full`.
 - `ask` owns `--search`, `--dupes`, `--design`, `--review`, `--i18n`, `--top`, `--threshold` and
   `--json`. `ask --review` with no id plans the whole corpus.
 - `ask --design` and `ask --i18n` are accepted through v8.x and do nothing but print one stderr

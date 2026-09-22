@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-22
-engine: 2026-09-22.3
-nodes: 293
+engine: 2026-09-22.4
+nodes: 294
 edges: 120
 ---
 
@@ -105,6 +105,7 @@ graph LR
     REQ_CHECK_832["What the gate prints beyond pass or fail<br><small>REQ-CHECK-832</small>"]
     REQ_CHECK_833["Advancing the lock file<br><small>REQ-CHECK-833</small>"]
     REQ_CHECK_1035["A Description link to a requirement that does not exist<br><small>REQ-CHECK-1035</small>"]
+    REQ_CHECK_1036["A bare gate says only what is broken<br><small>REQ-CHECK-1036</small>"]
     REQ_CLARIFY_956["Detecting what a requirement leaves open<br><small>REQ-CLARIFY-956</small>"]
     REQ_CLARIFY_957["Reporting the open questions<br><small>REQ-CLARIFY-957</small>"]
     REQ_CLARIFY_975["An answer can raise a question the old text never had<br><small>REQ-CLARIFY-975</small>"]
@@ -422,8 +423,8 @@ graph LR
   ARCH_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_645
   f_plugin_scripts_reqmap_engine___init___py_12["plugin/scripts/reqmap_engine/__init__.py:12"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine___init___py_12
-  f_plugin_scripts_reqmap_engine_gate_py_59_228["plugin/scripts/reqmap_engine/gate.py:59-228"]
-  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_gate_py_59_228
+  f_plugin_scripts_reqmap_engine_gate_py_77_247["plugin/scripts/reqmap_engine/gate.py:77-247"]
+  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_gate_py_77_247
   f_plugin_scripts_reqmap_engine_locks_py_174_343["plugin/scripts/reqmap_engine/locks.py:174-343"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_locks_py_174_343
   f_plugin_scripts_reqmap_engine_mapjson_py_9["plugin/scripts/reqmap_engine/mapjson.py:9"]
@@ -444,15 +445,15 @@ graph LR
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_105
   f_plugin_scripts_test_reqmap_report_py_1825_5083["plugin/scripts/test_reqmap_report.py:1825-5083"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1825_5083
-  f_plugin_scripts_reqmap_engine_cliflags_py_16_77["plugin/scripts/reqmap_engine/cliflags.py:16-77"]
-  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_16_77
+  f_plugin_scripts_reqmap_engine_cliflags_py_16_80["plugin/scripts/reqmap_engine/cliflags.py:16-80"]
+  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_16_80
   f_plugin_scripts_reqmap_engine_commands_py_14["plugin/scripts/reqmap_engine/commands.py:14"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_commands_py_14
   f_plugin_scripts_reqmap_engine_registry_py_12_42["plugin/scripts/reqmap_engine/registry.py:12-42"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_registry_py_12_42
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_304["plugin/scripts/reqmap.py:304"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_304
+  f_plugin_scripts_reqmap_py_309["plugin/scripts/reqmap.py:309"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_309
   f_plugin_scripts_test_reqmap_report_py_2952_5083["plugin/scripts/test_reqmap_report.py:2952-5083"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2952_5083
   f_plugin_scripts_reqmap_engine_config_py_163_173["plugin/scripts/reqmap_engine/config.py:163-173"]
@@ -669,8 +670,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_parse_py_7_97["plugin/scripts/reqmap_engine/parse.py:7-97"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_7_97
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_353_371["plugin/scripts/reqmap.py:353-371"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_353_371
+  f_plugin_scripts_reqmap_py_358_376["plugin/scripts/reqmap.py:358-376"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_358_376
   f_plugin_scripts_test_reqmap_gate_py_2057["plugin/scripts/test_reqmap_gate.py:2057"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2057
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]
@@ -754,8 +755,8 @@ graph LR
   ARCH_RULES_059["The gate rule registry<br><small>ARCH-RULES-059</small>"]
   f_plugin_scripts_test_reqmap_gate_py_2169_2589["plugin/scripts/test_reqmap_gate.py:2169-2589"]
   ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2169_2589
-  f_plugin_scripts_reqmap_engine_gate_py_25_228["plugin/scripts/reqmap_engine/gate.py:25-228"]
-  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_gate_py_25_228
+  f_plugin_scripts_reqmap_engine_gate_py_37_247["plugin/scripts/reqmap_engine/gate.py:37-247"]
+  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_gate_py_37_247
   f_plugin_scripts_reqmap_engine_model_py_111_141["plugin/scripts/reqmap_engine/model.py:111-141"]
   ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_model_py_111_141
   f_plugin_scripts_reqmap_engine_workspace_py_83_138["plugin/scripts/reqmap_engine/workspace.py:83-138"]
@@ -1029,7 +1030,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>66 caps</small>"]
-  a_REQ["REQ<br><small>218 caps</small>"]
+  a_REQ["REQ<br><small>219 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1043,5 +1044,14 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  ok["No risk signals detected"]
+  subgraph sg_misc["misc"]
+    REQ_CHECK_1036["A bare gate says only what is broken<br><small>REQ-CHECK-1036</small><br>unreviewed"]
+  end
+  style REQ_CHECK_1036 fill:#fff3cd,stroke:#a66,color:#630
 ```
+
+### Risk Table
+
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| REQ-CHECK-1036 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

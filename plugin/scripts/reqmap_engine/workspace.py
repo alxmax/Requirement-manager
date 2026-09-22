@@ -144,6 +144,8 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
     # caller of run_gate_rules leaves it None and the member-drift rule hashes
     # for itself. Defaulted here so a second caller cannot trip over its absence.
     full_member_hashes = None
+    # Set by `cmd_check` for the bare `gate` verb (ADR-0049): run DEFAULT_RULES only.
+    quiet = False
 
 
     def __init__(self, ws, since=None, full_members=None, update_lock=False):

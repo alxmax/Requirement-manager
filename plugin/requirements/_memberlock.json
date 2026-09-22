@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "938189fcf6a018d89b9e46f3dda0b5eb7a627d8643c57c96f8442b32b684fc91",
+      "plugin/scripts/reqmap_engine/__init__.py": "d28b7a88799b58c6aa7580eeafd3c3400556a023651e82f9904faee3fad3baff",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -20,7 +20,7 @@
     "ARCH-CMDREGISTRY-033": {
       "plugin/scripts/reqmap.py#_build_parser": "4176f079f2b44eb44ba2ee94ee99deefc5d65368a62c8a617d87004fe1c13b27",
       "plugin/scripts/reqmap_engine/cliflags.py#_add_todo_and_mode_flags": "a8e4ecdb8070a6c942a5415ccd04864187e22625bf33f150463d7d7cdd08b7f0",
-      "plugin/scripts/reqmap_engine/cliflags.py#_add_workspace_and_query_flags": "34ac8ddc0a517ff1d6c546515892b7cbbdb60e60801498f4f827cde9b41154ed",
+      "plugin/scripts/reqmap_engine/cliflags.py#_add_workspace_and_query_flags": "23e9e29079770f455ced5e285bdb7bd4c81b704a314af06eaee1565fbe708146",
       "plugin/scripts/reqmap_engine/registry.py#_generate_schema": "89a104020850f98b7b8d80e46f9a2172b8fc4e579ae9b37b90e11f308fa3b777"
     },
     "ARCH-DOCBUNDLE-026": {
@@ -296,7 +296,7 @@
       "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "279ab7be0bd513327506126ae20aa115ae100fc35c130b2ef8702ee449513554"
     },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "ada06f59c92469a67c5af66e804562c33a14b6247a4584ea490e4298932183bc"
+      "plugin/scripts/reqmap.py": "b54c5115cea298fd2054f0c03b0231b93694629f49e2da05f93db242373ca137"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "583fe7d14ee2284248f10ccf0c36a1b9f450ba59ec5bd5edf2dbcc2725f42fbb"

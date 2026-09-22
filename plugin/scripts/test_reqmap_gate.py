@@ -2985,10 +2985,10 @@ class AskVerbRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1031 @un
 
     MOVED = {"--search", "--dupes", "--design", "--review", "--i18n", "--top", "--threshold"}
 
-    def test_gate_owns_eleven_flags_and_ask_the_questions(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-1
+    def test_gate_owns_twelve_flags_and_ask_the_questions(self):  # verifies: REQ-CMDREGISTRY-1031#CASE-1
         gate = {p["flag"] for p in R.COMMANDS["gate"]["params"]}
         ask = {p["flag"] for p in R.COMMANDS["ask"]["params"]}
-        self.assertEqual(11, len(R.COMMANDS["gate"]["params"]))
+        self.assertEqual(12, len(R.COMMANDS["gate"]["params"]))
         self.assertEqual(set(), gate & self.MOVED)
         self.assertLessEqual(self.MOVED, ask)
         self.assertIn("ask", dict(R.COMMAND_GROUPS)["read"])
@@ -3033,3 +3033,50 @@ class NewIsGone(unittest.TestCase):  # tested-by: REQ-NEWGONE-1034 @integration
         names = {tool["name"] for tool in R.mcp.MCP_TOOLS}
         self.assertNotIn("reqmap_new", names)
         self.assertEqual([], [t for t in R.mcp.MCP_TOOLS if t["argv"][0] == "new"])
+
+class QuietGate(unittest.TestCase):  # tested-by: REQ-CHECK-1036
+    """ADR-0049: a bare gate runs DEFAULT_RULES and prints readability errors only."""
+
+    def _gate(self, d, *flags):
+        old = sys.argv
+        sys.argv = ["reqmap", "gate", "--root", d, "--code", d, "--no-map-check"] + list(flags)
+        out = io.StringIO()
+        try:
+            with redirect_stdout(out), redirect_stderr(io.StringIO()):
+                rc = R.main()
+        finally:
+            sys.argv = old
+        return rc, out.getvalue()
+
+    def _corpus(self, d, extra=""):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "REQ-A-001.md"),
+               _spec("REQ-A-001", ["`gate` writes the lock file."], extra=extra))
+        _write(os.path.join(d, "a.py"), "# implements: REQ-A-001\ndef f():\n    return 1\n")
+
+    def test_the_default_set_is_exactly_the_listed_rules(self):  # verifies: REQ-CHECK-1036#CASE-1
+        self.assertEqual(R.gate.DEFAULT_RULES, frozenset((
+            "RM001", "RM002", "RM003", "RM006",
+            "RM005", "RM012", "RM023", "RM033", "RM034", "RM036",
+            "RM016", "RM018", "RM019", "RM020",
+            "RM022", "RM027")))
+        errors = {r.id for r in R.GATE_RULES if r.severity == "error"}
+        self.assertLessEqual(errors, R.gate.DEFAULT_RULES)
+
+    def test_breakage_still_fails_a_bare_gate(self):  # verifies: REQ-CHECK-1036#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d, extra="depends_on: [REQ-GONE-009]\n")
+            rc, out = self._gate(d)
+        self.assertEqual(1, rc, out)
+        self.assertIn("RM003", out)
+
+    def test_advice_is_hidden_by_default_and_shown_by_full(self):  # verifies: REQ-CHECK-1036#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d)
+            rc, bare = self._gate(d)
+            _, full = self._gate(d, "--full")
+        self.assertEqual(0, rc, bare)
+        self.assertNotIn("RM007", bare)
+        self.assertIn("gate --full", bare)
+        self.assertIn("RM007", full)
+
