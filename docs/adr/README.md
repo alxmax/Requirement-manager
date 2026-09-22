@@ -58,6 +58,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0045](0045-new-is-deprecated.md) | `new` is deprecated; a requirement is written, not scaffolded | Accepted |
 | [0046](0046-the-engine-has-a-line-budget.md) | The engine has a line budget, checked when a release is cut | Accepted |
 | [0047](0047-design-review-site-and-i18n-detector-leave-the-engine.md) | The design review, the site generator and the i18n detector leave the engine | Accepted |
+| [0048](0048-the-engines-floor-is-what-it-must-keep.md) | The engine's floor is what it must keep, measured by capability | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

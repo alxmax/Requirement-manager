@@ -36,7 +36,7 @@ class EngineBudget(unittest.TestCase):
         self.assertEqual(0, rc, out)
         self.assertIn("budget", out)
 
-    def test_one_line_under_the_count_fails(self):
+    def test_one_line_under_the_count_fails(self):  # tested-by: ARCH-SELFGATE-039 @integration
         n = CEB.engine_lines()
         rc, out = self._run("--budget", str(n - 1))
         self.assertEqual(1, rc)

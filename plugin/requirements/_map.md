@@ -811,6 +811,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
   f_scripts_test_changelog_notes_py_2["scripts/test_changelog_notes.py:2"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_changelog_notes_py_2
+  f_scripts_test_check_engine_budget_py_39["scripts/test_check_engine_budget.py:39"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_budget_py_39
   f_scripts_test_check_engine_bump_py_56["scripts/test_check_engine_bump.py:56"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_bump_py_56
   f_scripts_test_check_retired_verbs_py_12["scripts/test_check_retired_verbs.py:12"]
