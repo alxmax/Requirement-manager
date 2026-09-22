@@ -9,9 +9,40 @@
 
 import { adoptMapExport } from "./data.js";
 
-/** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
+/* The engine's `_acc_items`, ported: one display string per criterion of the raw
+ * Cases text, a `CASE-N — …` line per labelled block with its indented
+ * Given/When/Then folded in, or the text of a `- ` bullet. The map carried both
+ * forms until v8.3.0, 305 KB of this repo's _map.json twice over; it now carries
+ * `accept` alone and this derives the folded form. Checked identical on every node
+ * of three corpora (497) before the engine stopped emitting `acc`.
+ * implements: REQ-VIEWER-942 */
+export function foldAccept(accept) {
+  if (typeof accept !== "string" || !accept.trim()) return [];
+  const blocks = [];
+  for (const line of accept.split("\n")) {
+    const s = line.trim();
+    const m = /^((?:CASE|AC)-\d+)\b/.exec(s);
+    if (m || s.startsWith("- ")) {
+      const label = m ? m[1] : "";
+      blocks.push({ label, raw: [m ? s.slice(label.length) : s.slice(2)] });
+    } else if (s && blocks.length) {
+      blocks[blocks.length - 1].raw.push(s);
+    }
+  }
+  const items = [];
+  for (const b of blocks) {
+    const text = b.raw.join(" ").trim().replace(/<!--[\s\S]*?-->/g, "").trim();
+    const item = b.label && text ? `${b.label} — ${text}` : (b.label || text);
+    if (item) items.push(item);
+  }
+  return items;
+}
+
+/** engine node ({...used_by, accept}) → app requirement ({...usedBy, acc, gwt}). */
 export function adaptNode(n) {
-  const acc = Array.isArray(n.acc) ? n.acc : [];
+  // An atomic-form requirement has no Cases text to fold, so the engine still emits
+  // its one criterion as `acc`; a map written before v8.3.0 carries `acc` for all.
+  const acc = Array.isArray(n.acc) ? n.acc : foldAccept(n.accept);
   // the engine always emits a string id, but adaptNode is the trust boundary for
   // any external _map.json — guard it so a malformed node can't throw here
   const id = typeof n.id === "string" ? n.id : String(n.id ?? "");
@@ -50,7 +81,9 @@ export function adaptNode(n) {
     // implements: REQ-VIEWER-942
     gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,
     members: Array.isArray(n.members) ? n.members : [],
-    deps: Array.isArray(n.deps) ? n.deps : [],
+    // `depends_on` since v8.3.0; `deps` is the same list under its old name, read from
+    // a map an older engine wrote.
+    deps: Array.isArray(n.depends_on) ? n.depends_on : Array.isArray(n.deps) ? n.deps : [],
     usedBy: Array.isArray(n.used_by) ? n.used_by : [],
     risks: Array.isArray(n.risks) ? n.risks : [],
     // forward the gate's test-exemption so coverageOf() can return "exempt"

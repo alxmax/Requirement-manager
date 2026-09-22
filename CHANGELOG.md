@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.3.0` — 2026-09-22
+
+**Harta fără dubluri.**
+
+- `_map.json` poartă fiecare listă o singură dată: `acc` îl calculează viewer-ul, `deps` și `targets` pleacă (ARCH-MAP-007)
+- RM036 confirmat: un `[[ID]]` fără țintă în Description (ARCH-CHECK-006)
+
+`_map.json` scade de la 1,94 MB la 1,60 MB. Un nod nu mai poartă `acc` (cu excepția formei atomice), `deps`, iar harta nu mai poartă `targets`: citește `accept`, `depends_on` și `planning`. Viewer-ul vendorizat citește și hărțile vechi.
+
 ## plugin `v8.2.0` — 2026-09-22
 
 **Motorul sub buget: 14.910 -> 13.372 de linii.**

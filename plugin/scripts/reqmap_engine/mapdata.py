@@ -72,8 +72,9 @@ def _build_map_data(reqs, members, ac_cover=None):
             "notes": _bullets(r["body"], "notes") or _context_group(r["body"], "notes"),
             "current_impl": (_bullets(r["body"], "current implementation")
                               or _context_group(r["body"], "current implementation")),
-            "acc": _acc_items(r["body"]),                    # AC blocks AND bullets
-            # raw, line breaks kept
+            # raw, line breaks kept. The folded one-line-per-criterion form is derived
+            # by the viewer (`foldAccept`); it is emitted as `acc` below only for an
+            # atomic body, which has no Cases text to fold.
             "accept": _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS),
             # legacy schema (Input / Description / Output) — kept so old docs still render
             "input": _section(r["body"], "input"),
@@ -82,12 +83,8 @@ def _build_map_data(reqs, members, ac_cover=None):
             # `## Description` — which is the Contract and is emitted above.
             "desc": (_section(r["body"], "description")
                      if _has_any(r["body"], ("input", "output")) else ""),
-            # `deps` is the historical name and the one the vendored viewer reads
-            # (`n.deps` in app/src/lib/loadData.js), so it stays. `depends_on` is the
-            # same list under the name the frontmatter and every document use: a
-            # consumer that asked for the documented name got a silent None and built
-            # the wrong graph from it.
-            "deps": _as_list(m.get("depends_on")),
+            # The name the frontmatter and every document use. Until v8.3.0 the list
+            # was emitted twice, also as `deps`; the viewer reads either.
             "depends_on": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "satisfies": _as_list(m.get("satisfies")),       # upstream needs this fulfils
@@ -101,6 +98,10 @@ def _build_map_data(reqs, members, ac_cover=None):
                  "members": members.get(rid, []),
                  "verify": _verify, "test_exempt": m.get("test_exempt")})],
         })
+        if not data["nodes"][-1]["accept"]:         # implements: REQ-MAP-870
+            _acc = _acc_items(r["body"])           # the atomic form: nothing to fold
+            if _acc:
+                data["nodes"][-1]["acc"] = _acc
         _attach_ac_coverage(data["nodes"][-1], r["body"], (ac_cover or {}).get(rid, {}))
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):

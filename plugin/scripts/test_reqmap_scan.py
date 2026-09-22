@@ -583,15 +583,21 @@ class AcParsing(unittest.TestCase):  # tested-by: ARCH-ACVERIFY-019  # tested-by
         body = _ac_body(acceptance="AC-1\n  Given x\n```\n- not a criterion\nAC-9\n```\n")
         self.assertEqual(R._labeled_acs(body), ["AC-1"])
 
-    def test_map_node_emits_acc(self):  # verifies: REQ-MAP-870#CASE-4  # verifies: REQ-VIEWER-942#CASE-4
+    def test_the_acceptance_section_is_emitted_once(self):  # verifies: REQ-MAP-870#CASE-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
                    "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
                    + _ac_body(acceptance=self.GHERKIN))
             reqs = R.load_requirements(d)
             node = R._build_map_data(reqs, {})["nodes"][0]
-            self.assertEqual(len(node["acc"]), 2)
-            self.assertTrue(node["accept"])                # raw section still emitted
+            self.assertNotIn("acc", node)                  # the viewer folds `accept`
+            self.assertTrue(node["accept"])
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   "---\nid: A-FOO-001\nstatus: confirmed\nform: atomic\nlayer: bus\n---\n\n"
+                   "# T\n\n> Why.\n\nScenario: one\n  Given  a\n  When   b\n  Then   c\n")
+            node = R._build_map_data(R.load_requirements(d), {})["nodes"][0]
+            self.assertFalse(node["accept"])
+            self.assertEqual(1, len(node["acc"]))           # nothing to fold: emitted
 
 
 class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-by: REQ-SCANCACHE-911

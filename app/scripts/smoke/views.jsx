@@ -336,3 +336,21 @@ const layoutChecks = [
   ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],
 ];
 for (const [label, ok] of layoutChecks) test(label, ok);
+
+// ---- the map carries accept once; the viewer folds it (v8.3.0) ------------------
+const FOLD_ACCEPT = "CASE-1 — first\n  Given  a\n  When   b\n  Then   c\n\n"
+  + "CASE-2\n  Given  d <!-- verifiable by: automated test -->\n  Then   e";
+const folded = adaptNode({ id: "FOLD-001", title: "t", accept: FOLD_ACCEPT,
+                           depends_on: ["DEP-001"] });
+const legacy = adaptNode({ id: "FOLD-002", title: "t", acc: ["AC-1 — kept"], deps: ["OLD-001"] });
+const foldChecks = [
+  // verifies: REQ-VIEWER-942#CASE-4
+  ["fold: a node with no acc gets one folded entry per criterion",
+    JSON.stringify(folded.acc) === JSON.stringify(
+      ["CASE-1 — — first Given  a When   b Then   c", "CASE-2 — Given  d  Then   e"])],
+  ["fold: an acc the engine still emits (atomic form, older map) is kept as is",
+    JSON.stringify(legacy.acc) === JSON.stringify(["AC-1 — kept"])],
+  ["deps: depends_on is read, and an older map's deps still is",
+    folded.deps[0] === "DEP-001" && legacy.deps[0] === "OLD-001"],
+];
+for (const [label, ok] of foldChecks) test(label, ok);
