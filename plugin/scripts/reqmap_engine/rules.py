@@ -18,7 +18,7 @@ from .sections import (
     _legacy_schema_ids
 )
 from .similar import EXEMPTION_FIELDS, _exemption_reason_recorded
-from .text import _bullets, _distinct_intent, _req_title, _section_raw
+from .text import _bullets
 from .viewer import check_viewer_data_sync
 from .workspace import _test_link_problem
 
