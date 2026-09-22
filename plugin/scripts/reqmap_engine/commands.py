@@ -61,7 +61,10 @@ COMMANDS = {
                 "name": "no_site",
                 "flag": "--no-site",
                 "type": "bool",
-                "help": "Skip the final site step (scaffolding docs/architecture.html).",
+                "help": (
+                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. "
+                    "`init` writes no site page."
+                ),
             },
         ],
     },
@@ -84,7 +87,7 @@ COMMANDS = {
                 "type": "bool",
                 "help": (
                     "Print every pass that discovers a problem as one report: the gate, corpus "
-                    "risk, duplicate contracts, design signals and tag coverage. The exit code "
+                    "risk, duplicate contracts and tag coverage. The exit code "
                     "still comes from the gate alone."
                 ),
             },
@@ -171,10 +174,9 @@ COMMANDS = {
         "summary": (
             "Ask the corpus a question without running the verdict. Read-only, never "
             "writes, and its exit code is the question's, never the gate's: --search ranks "
-            "requirements by relevance, --dupes ranks overlapping contracts, --design reviews "
-            "the code, --review emits the machine-readable review plan, --i18n lists missing "
-            "translations. Exactly one mode per call. Since v8.0.0, `gate` refuses these "
-            "flags and names `ask`. "
+            "requirements by relevance, --dupes ranks overlapping contracts, --review emits "
+            "the machine-readable review plan. Exactly one mode per call. Since v8.0.0, "
+            "`gate` refuses these flags and names `ask`. "
         ),
         "arg": None,
         "params": [
@@ -199,7 +201,7 @@ COMMANDS = {
                 "flag": "--design",
                 "type": "bool",
                 "help": (
-                    "Print the advisory design review of the code. Never part of the verdict."
+                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0."
                 ),
             },
             {
@@ -216,9 +218,7 @@ COMMANDS = {
                 "flag": "--i18n",
                 "type": "bool",
                 "help": (
-                    "List the translations the configured LANGUAGE (en | ro | both, in "
-                    "requirements/_config.json) expects and does not have, missing or stale. "
-                    "--json emits each entry's source fields and cache key for whoever translates."
+                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0."
                 ),
             },
             {
@@ -320,8 +320,8 @@ COMMANDS = {
                 "flag": "--attach",
                 "type": "str",
                 "help": (
-                    "Target HTML to inject the site's engine-owned regions into "
-                    "(scaffolds it if absent)."
+                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. "
+                    "`sync` refreshes no site page."
                 ),
             },
             {
@@ -370,8 +370,8 @@ COMMANDS = {
                 "type": "bool",
                 "help": (
                     "Split a requirement into code-rung children along the bold group labels "
-                    "its author wrote in the Description; --apply writes them and rewrites the "
-                    "parent. With no id, every requirement carrying groups. A requirement with "
+                    "its author wrote in the Description; --apply writes them and never edits "
+                    "the parent. With no id, every requirement carrying groups. A requirement with "
                     "no groups falls back to one draft per over-long clause."
                 ),
             },

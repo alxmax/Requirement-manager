@@ -3,7 +3,6 @@ import json, os
 
 from . import config as cfg
 from .acceptance import _automatable_acs, _labeled_acs
-from .i18n import _load_translations
 from .locks import load_memberlock, lock_path, member_drift, untracked_locks
 from .mapcmd import _absent_tracked_artifacts, _stale_artifacts
 from .model import (
@@ -19,7 +18,7 @@ from .sections import (
     _legacy_schema_ids
 )
 from .similar import EXEMPTION_FIELDS, _exemption_reason_recorded
-from .text import _bullets, _distinct_intent, _req_title, _section_raw
+from .text import _bullets
 from .viewer import check_viewer_data_sync
 from .workspace import _test_link_problem
 
@@ -280,41 +279,6 @@ def _viewer_fixture_rule(ctx):  # implements: ARCH-VIEWER-007
                      "update the viewer's fallback fixture or accept the drift is intentional "
                      "for this demo data."
                      .format(len(drifted), ", ".join(drifted)))
-
-
-@gate_rule("RM029", "warn")
-def _translation_parity_rule(ctx):
-    # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-967
-    """A cached translation carrying a field the requirement itself does not emit.
-
-    `translate` and the map both derive from the same requirement, and each was correct
-    against it: the map emits no intent when the quote IS the obligation, while the
-    translator had been handed the raw quote. Nothing compared the two, so a translated
-    document showed a section the untranslated one hides — invisible until a corpus had
-    both features populated at once. Fields the requirement has and the translation
-    lacks are NOT reported: a partial translation is a normal intermediate state."""
-    translations = _load_translations(ctx.reqs, ctx.reqs_dir)
-    if not translations:
-        return
-    for rid in sorted(translations):
-        r = ctx.reqs.get(rid)
-        if not r:
-            continue
-        body = r["body"]
-        source = {
-            "title": _req_title(body, rid),
-            "intent": _distinct_intent(body),
-            "contract": _from_any(_section_raw, body, CONTRACT_LABELS) or "",
-            "acceptance": _from_any(_section_raw, body, ACCEPTANCE_LABELS) or "",
-        }
-        for locale in sorted(translations[rid]):
-            entry = translations[rid][locale] or {}
-            extra = sorted(f for f, v in source.items()
-                           if not str(v).strip() and str(entry.get(f, "")).strip())
-            if extra:
-                yield rid, ("{}: translation `{}` carries {} the requirement does not emit — "
-                            "re-run `translate` so the two agree, or clear the field"
-                            .format(rid, locale, ", ".join("`" + f + "`" for f in extra)))
 
 
 @gate_rule("RM030", "warn")  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971

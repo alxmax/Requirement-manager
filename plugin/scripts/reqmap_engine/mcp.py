@@ -61,7 +61,7 @@ MCP_TOOLS = (
     {"name": "reqmap_audit", "argv": ["gate", "--audit", *_JSON], "ok": (0, 1),
      "writes": False,
      "description": "Everything the engine can find, as JSON: gate, health, duplicate "
-                    "contracts, design, tag coverage, exemptions and corpus shape.",
+                    "contracts, tag coverage, exemptions and corpus shape.",
      "params": []},
     {"name": "reqmap_dupes", "argv": ["ask", "--dupes", *_JSON], "writes": False,
      "description": "Requirement pairs whose contracts share wording, most similar first, "
@@ -69,9 +69,6 @@ MCP_TOOLS = (
      "params": [_param("threshold", "number", "Cosine cutoff in (0, 1], default 0.35.",
                        "--threshold"),
                 _param("top", "int", "Print only this many pairs.", "--top")]},
-    {"name": "reqmap_design", "argv": ["ask", "--design", *_JSON], "writes": False,
-     "description": "The advisory design review of the repository's code, as JSON.",
-     "params": []},
     {"name": "reqmap_untagged", "argv": ["gate", "--risk", "--untagged"], "writes": False,
      "description": "Tag coverage per directory, and the source files no requirement claims.",
      "params": []},

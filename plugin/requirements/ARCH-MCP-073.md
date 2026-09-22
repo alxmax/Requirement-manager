@@ -116,8 +116,9 @@ Every bullet below is binding.
 - A call's result carries the command's output as text and, when the exit code is not zero,
   a second item naming it. `isError` is set only for an exit code the tool does not count as
   an answer: `reqmap_gate`'s exit 1 is a FAIL verdict, not an error.
-- The tool set is frozen at its fourteen tools until a consumer other than the maintainer
-  uses the server: a fifteenth, or a renamed one, is a change to this clause first.
+- The tool set is frozen at its thirteen tools until a consumer other than the maintainer
+  uses the server: a fourteenth, or a renamed one, is a change to this clause first.
+  `reqmap_design` left with the design review in v8.2.0 (ADR-0047).
 
 ## Cases
 CASE-1 — the tools name only what the CLI has
@@ -148,7 +149,8 @@ CASE-5 — a release plan passes --release with or without a version
 CASE-6 — the tool set is frozen
   Given  the tool table
   When   its names are read
-  Then   they are exactly the fourteen of 2026-09-21, from `reqmap_gate` to `reqmap_release`
+  Then   they are exactly the fourteen of 2026-09-21 less `reqmap_design`, from `reqmap_gate`
+         to `reqmap_release`
 
 
 --------------------

@@ -87,14 +87,6 @@ SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not aut
                            # cache was removed 2026-09-05; the reader below stays)
 
 
-# The repository's declared requirements language: `en`, `ro`, or `both`. Set in
-# `requirements/_config.json` as `"LANGUAGE": "ro"`. It changes what the engine EXPECTS,
-# never what it writes: with `ro` or `both` a requirement without a fresh Romanian entry
-# is a gap `sync` reports and `ask --i18n` lists, and the viewer opens in Romanian
-# (`ro`) or offers both (`both`). The engine still translates nothing — that is
-# REQ-TRANSLATE-937, and it holds because the emitter hands the source text and the
-# cache key to whoever does.
-LANGUAGE = "en"          # implements: REQ-TRANSLATE-996
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
 LINT_CLAUSE_SENTENCES = 3      # a Contract bullet spanning MORE sentences than this is
                                # flagged by `statement-too-long` (warn). Sentence count is
@@ -130,39 +122,6 @@ LINT_BUS_FANOUT_MIN = 3        # a `layer: bus` with ZERO dependents and this ma
 SIMILAR_THRESHOLD = 0.35       # cosine above this -> reported as a probable-duplicate pair
 
 
-# ---------- design: advisory design review of the repo's code ----------
-# Reads the consumer's code and names candidates against the four OOP pillars, the
-# per-class C&K metrics, plus a
-# few house standards. It is advice: read-only, never part of the gate, exit 0, and a
-# finding asserts a SHAPE worth a look ("these six functions share five parameters"),
-# never a defect. Python is read through `ast`; the brace languages (JS/TS, C/C++,
-# Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart, PHP) through heuristics over the
-# source with comments and strings masked out — the engine ships no parser for them
-# and must stay stdlib-only. Every threshold is a CONFIG_KEYS entry.
-DESIGN_FUNC_MAX_LINES = 80      # abstraction: a function longer than this is a split candidate
-DESIGN_NESTING_MAX = 4          # abstraction: blocks nested deeper than this
-DESIGN_PARAMS_MAX = 6           # encapsulation: a parameter list longer than this wants an object
-DESIGN_CLUMP_MIN = 3            # encapsulation: this many parameters travelling together ...
-DESIGN_CLUMP_FUNCS = 3          # ... through this many functions is a data clump
-# abstraction: top-level functions sharing a name prefix -> namespace
-DESIGN_PREFIX_GROUP = 6
-DESIGN_SHARED_METHODS = 3       # inheritance: unrelated classes sharing this many method names
-DESIGN_ISINSTANCE_CHAIN = 3     # polymorphism: type tests on one name in one if/else-if chain
-# polymorphism: `x == literal` branches (or switch cases) on one name
-DESIGN_BRANCH_CHAIN = 4
-DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
-DESIGN_LINE_MAX = 100           # standards: a physical line wider than this
-DESIGN_FILE_MAX_FUNCS = 30      # standards: top-level functions/classes in one file
-# standards (Python): 1 = public defs/classes need a docstring, 0 = off
-DESIGN_DOCSTRING_PUBLIC = 1
-# Chidamber & Kemerer, per class, Python only (see `_class_metrics` for what is absent
-# and why). C&K (1994) proposed the metrics and NO thresholds; these are the conventional
-# textbook numbers, and there is no primary source to cite for them. Calibrated once, on
-# 65 unique classes across 7 Python corpora with an independent review of every flag —
-# see REQ-DESIGN-980. Retune per repo through CONFIG_KEYS like every other threshold.
-DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it calls (C&K RFC)
-
-
 # Prose documents `RM035` re-measures the marked corpus counts in, relative to the scan
 # root. A LIST, not a tuple, because `_config.json` hands JSON lists to `apply_config`
 # and a tuple default would reject every override on a type mismatch. Set it to `[]` to
@@ -185,19 +144,20 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "LINT_STACKED_CONNECTORS", "LINT_CLAUSE_SENTENCES", "LINT_BUS_FANOUT_MIN",
                "SIMILAR_THRESHOLD", "ORPHAN_CODE_MIN_LOC", "DOC_BUNDLE_MIN_BYTES",
                "SYSTEM_HUB_FANIN", "BUS_FANIN_THRESHOLD", "SPLIT_LOC_THRESHOLD",
-               "DESIGN_FUNC_MAX_LINES", "DESIGN_NESTING_MAX", "DESIGN_PARAMS_MAX",
-               "DESIGN_CLUMP_MIN", "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP",
-               "DESIGN_SHARED_METHODS",
-               "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
-               "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE", "DOC_CLAIM_FILES",
+               "DRIFT_SEVERITY", "DOC_CLAIM_FILES",
                "VERSION_FILES")
 
 # A string-valued config key names a behaviour, so its accepted spellings are declared
 # here and a value outside them is reported rather than applied. Without this, a repo
 # that wrote `"eror"` would get the default back in silence — precisely the failure the
 # whole config mechanism exists to avoid.
-CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error"), "LANGUAGE": ("en", "ro", "both")}
+CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error")}
+
+# Keys a released engine once read and v8.2.0 dropped with what they tuned (ADR-0047):
+# the design review's thresholds and the i18n detector's LANGUAGE. A consumer's
+# `_config.json` still carrying one is ignored without a word on every run; the
+# setting simply has nothing left to change.
+RETIRED_CONFIG_PREFIXES = ("DESIGN_", "LANGUAGE")
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
@@ -228,7 +188,8 @@ def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: R
                 print("config: ignoring extra_code_exts (expected a list of strings)", file=out)
             continue
         if key not in CONFIG_KEYS:
-            print("config: ignoring unknown key {!r}".format(key), file=out)
+            if not key.startswith(RETIRED_CONFIG_PREFIXES):
+                print("config: ignoring unknown key {!r}".format(key), file=out)
             continue
         default = g[key]
         # A string-valued key is an ENUM, never free text: every one of them names a

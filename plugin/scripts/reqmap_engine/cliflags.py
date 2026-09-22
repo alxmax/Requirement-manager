@@ -56,8 +56,8 @@ def _add_workspace_and_query_flags(ap):
                     help="ask --search: max ranked matches to show (default 5); ask --dupes: max "
                          "pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="gate (bare, --risk, --audit, --show), ask (--search, --dupes, --design, "
-                         "--i18n), sync --retire/--release, clarify: emit JSON")
+                    help="gate (bare, --risk, --audit, --show), ask (--search, --dupes), "
+                         "sync --retire/--release, clarify: emit JSON")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, "
                          "color)")
@@ -80,10 +80,9 @@ def _add_todo_and_mode_flags(ap):
                          "unchanged files skip re-parsing. Off by default; results are identical "
                          "with or without it.")
     ap.add_argument("--attach", default=None,
-                    help="sync: target HTML to inject the site's engine-owned regions into "
-                         "(scaffolds it if absent)")
+                    help="sync: removed in v8.2.0, ignored")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
-                    help="init: skip the final site step")
+                    help="init: removed in v8.2.0, ignored")
     ap.add_argument("--allow-writes", dest="allow_writes", action="store_true",
                     help="mcp: also offer the tools that write (sync, release)")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
@@ -93,13 +92,11 @@ def _add_todo_and_mode_flags(ap):
     # they do is unchanged — only the entry point moved: `gate` keeps the verdict and
     # the reports on it, `ask` every other question (ADR-0044), `sync` every write.
     ap.add_argument("--audit", dest="mode_audit", action="store_true",
-                    help="gate: also print risk, duplicate contracts, design signals and tag "
-                         "coverage")
+                    help="gate: also print risk, duplicate contracts and tag coverage")
     ap.add_argument("--risk", dest="mode_risk", action="store_true",
                     help="gate: print the corpus risk snapshot and what to do next")
     ap.add_argument("--i18n", dest="mode_i18n", action="store_true",
-                    help="ask: list the translations the configured LANGUAGE expects and does not "
-                         "have")
+                    help="ask: removed in v8.2.0, ignored")
     ap.add_argument("--show", dest="mode_show", metavar="ID", nargs="?", default=None, const="",
                     help="gate: print one requirement's dossier")
     ap.add_argument("--search",
@@ -110,7 +107,7 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
                     help="ask: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
-                    help="ask: print the advisory design review of the code")
+                    help="ask: removed in v8.2.0, ignored")
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
                     help="sync: take one or more requirements out of service; prints the blast "
                          "radius first")

@@ -56,6 +56,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0043](0043-the-engine-is-served-over-mcp.md) | The engine is served over MCP | Accepted |
 | [0044](0044-questions-leave-the-verdict-verb.md) | Questions leave the verdict verb: `ask` | Accepted |
 | [0045](0045-new-is-deprecated.md) | `new` is deprecated; a requirement is written, not scaffolded | Accepted |
+| [0046](0046-the-engine-has-a-line-budget.md) | The engine has a line budget, checked when a release is cut | Accepted |
+| [0047](0047-design-review-site-and-i18n-detector-leave-the-engine.md) | The design review, the site generator and the i18n detector leave the engine | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

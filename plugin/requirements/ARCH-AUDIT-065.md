@@ -5,7 +5,7 @@ level: architecture
 layer: feature
 owner: Alex
 milestone: v4.2
-depends_on: [ARCH-CHECK-006, ARCH-NEXT-013, ARCH-SIMILAR-016, ARCH-COVERAGE-029, ARCH-DESIGN-061]
+depends_on: [ARCH-CHECK-006, ARCH-NEXT-013, ARCH-SIMILAR-016, ARCH-COVERAGE-029]
 satisfies: [SYS-REPORT-105]
 ---
 
@@ -45,7 +45,7 @@ CASE-3
 ## Context
 **Terms**
 - discovery pass  one existing read-only command that finds problems: the gate, `next`,
-- `dupes`, `design`, tag coverage.
+- `dupes`, tag coverage.
 - exemption       a `lint_exempt:`/`gate_exempt:` entry that silences one check for one
 - requirement.
 
@@ -79,8 +79,8 @@ satisfies: [ARCH-AUDIT-065]
 > summary or read the detail without running anything a second time.
 
 Every bullet below is binding.
-- `audit` runs the gate, the corpus risk report, the duplicate-contract scan, the design
-  review and the tag-coverage report, and prints each one's output under its own heading.
+- `audit` runs the gate, the corpus risk report, the duplicate-contract scan and the
+  tag-coverage report, and prints each one's output under its own heading.
 - The report opens with a summary naming, for each signal, what was found and which command
   produces it on its own.
 - The exit code is the gate's. Every other section is advice and can never change it.
@@ -88,17 +88,17 @@ Every bullet below is binding.
   prints. A partial report is worth more than a traceback.
 - A gate section that raises fails the audit. Advice that crashes is missing advice; a gate
   that crashes reached no verdict, and reporting one is worse than reporting nothing.
-- `--json` emits the gate findings, the health record, the design record, the untagged
-  count, the exemptions and the corpus shape as one object.
+- `--json` emits the gate findings, the health record, the untagged count, the
+  exemptions and the corpus shape as one object.
 
 ## Cases
 CASE-1 — one command runs them all
   Given  a corpus with requirements and code
   When   `audit` runs
-  Then   the output carries a section for the gate, risk, duplicates, design and tag coverage
+  Then   the output carries a section for the gate, risk, duplicates and tag coverage
 
 CASE-2 — only the gate decides the exit code
-  Given  a corpus whose gate is clean but which has duplicate contracts and design candidates
+  Given  a corpus whose gate is clean but which has duplicate contracts
   When   `audit` runs
   Then   it exits 0
 
@@ -256,8 +256,8 @@ satisfies: [ARCH-AUDIT-065]
 Every bullet below is binding.
 - After a successful `sync`, one line is printed for each signal that is not clean:
   unjustified exemptions, a flat corpus, requirement-readability errors, rungs still
-  carrying the engine's proposal, design candidates, untagged code, and a TODO file whose
-  newest milestone is behind the requirements'.
+  carrying the engine's proposal, untagged code, and a TODO file whose newest milestone
+  is behind the requirements'.
 - The readability line counts errors only. A style warning never breaks the tail's silence,
   because a corpus can carry one for months and a line that always appears is not news.
 - The proposed-rung line fires only on a corpus that is not flat, and counts the levelled

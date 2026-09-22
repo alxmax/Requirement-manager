@@ -1,5 +1,21 @@
 # Changelog
 
+## plugin `v8.2.0` — 2026-09-22
+
+**Motorul sub buget: 14.910 -> 13.372 de linii.**
+
+- Motorul are un buget de linii, verificat la release (ADR-0046) (ARCH-SELFGATE-039)
+- Review-ul de design iese din motor; `ask --design` nu mai face nimic (ADR-0047) (ARCH-DESIGN-061)
+- Site-ul și detectorul i18n ies din motor; traducerile RO deja făcute rămân (ADR-0047) (ARCH-TRANSLATE-044)
+
+Motorul are 13.372 de linii (`wc -l plugin/scripts/reqmap.py plugin/scripts/reqmap_engine/*.py`), sub bugetul de 13.550. `ask --design`, `ask --i18n`, `init --no-site` și `sync --attach` sunt acceptate până la v9.0.0: afișează o linie pe stderr și ies cu 0. Tool-ul MCP `reqmap_design` a plecat. O cheie `DESIGN_*` sau `LANGUAGE` din `_config.json` e ignorată fără avertisment.
+
+## plugin `v8.1.3` — 2026-09-22
+
+**Descompunerea nu mai pierde contracte.**
+
+- `clarify --decompose` copiază în copii, nu mai golește părintele; RM036 semnalează un `[[ID]]` fără țintă (ARCH-DECOMPOSE-050)
+
 ## plugin `v8.1.2` — 2026-09-21
 
 **SKILL.md sub 400 de linii.**

@@ -2522,61 +2522,6 @@ class RemedyCanAct(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # teste
         self.assertNotIn("nothing scaffolded", out)
 
 
-class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-967
-    """Two derived artifacts, each correct against the requirement, disagreeing with each
-    other. RM017 checks one such pair (the viewer's baked fixture); this is the other."""
-
-    ATOMIC = ("---\nid: AREA-T-001\nstatus: confirmed\nlayer: feature\n---\n\n# T\n\n"
-              "## Description\n> the story IS the obligation.\n\n"
-              "Every bullet below is binding.\n- the story IS the obligation.\n\n"
-              "## Cases\nCASE-1\n  Given  x\n  When   y\n  Then   z\n")
-
-    def _cache(self, rd, entry):
-        reqs = R.load_requirements(rd)
-        body = reqs["AREA-T-001"]["body"]
-        os.makedirs(os.path.join(rd, "_i18n"), exist_ok=True)
-        entry = dict(entry, hash=R.translation_hash(body, R._title(body)))
-        with open(os.path.join(rd, "_i18n", "ro.json"), "w", encoding="utf-8") as f:
-            json.dump({"AREA-T-001": entry}, f)
-
-    def _findings(self, d):
-        rd = os.path.join(d, "requirements")
-        reqs = R.load_requirements(rd)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_check(R.Workspace(reqs, R.scan_members(d, d), rd, d), False)
-        return buf.getvalue()
-
-    def test_translated_field_the_map_does_not_emit_is_reported(self):  # verifies: REQ-TRANSLATE-967#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
-            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
-            self._cache(rd, {"title": "T", "intent": "un motiv pe care harta nu il emite",
-                             "contract": "- povestea", "acceptance": "CASE-1"})
-            out = self._findings(d)
-        self.assertIn("RM029", out)
-        self.assertIn("AREA-T-001", out)
-        self.assertIn("intent", out)
-
-    def test_a_field_the_translation_lacks_is_not_a_finding(self):  # verifies: REQ-TRANSLATE-967#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
-            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
-            self._cache(rd, {"title": "T", "intent": "", "contract": "- povestea", "acceptance": "CASE-1"})
-            out = self._findings(d)
-        self.assertNotIn("RM029", out)
-
-    def test_no_cache_raises_nothing(self):  # verifies: REQ-TRANSLATE-967#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
-            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
-            out = self._findings(d)
-        self.assertNotIn("RM029", out)
-
-
 class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-974
     """An edited confirmed contract loses its confirmation, in sync."""
 
@@ -2859,8 +2804,8 @@ class RetireKeepsTheLineBreak(unittest.TestCase):  # tested-by: ARCH-RETIRE-064 
 
 class DecomposeOnGroups(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: REQ-DECOMPOSE-994
     """`clarify <ID> --decompose` on a Description with bold group labels: one code-rung
-    child per group, cases moved only on an unambiguous name match, no tags written, the
-    parent rewritten only where the split happened."""
+    child per group, cases copied only on an unambiguous name match, no tags written, the
+    parent never edited."""
 
     PARENT = """---
 id: TOOL-UTILS
@@ -2941,11 +2886,12 @@ CASE-3
         rc, out = self._run(apply_it=True)
         child = io.open(os.path.join(self.rd, "TOOL-UTILS-LOAD-JSON-STDIN.md"), encoding="utf-8").read()
         parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
-        self.assertIn("mentions x.py", child)            # CASE-1 named one subject: moved
-        self.assertNotIn("mentions x.py", parent)
-        self.assertIn("CASE-2", parent)                   # named two subjects: stayed
-        self.assertIn("CASE-3", parent)                   # named none: stayed
-        self.assertIn("2 stay on their parents", out)
+        self.assertIn("mentions x.py", child)            # CASE-1 named one subject: copied
+        self.assertIn("mentions x.py", parent)            # ...and still on the parent
+        for other in ("TOOL-UTILS-IS-HEADLESS.md", "TOOL-UTILS-MODULE.md"):
+            text = io.open(os.path.join(self.rd, other), encoding="utf-8").read()
+            self.assertNotIn("both behave", text)         # named two subjects: no child
+        self.assertIn("2 to none", out)
 
     def test_no_tag_is_written_and_expected_members_are_listed(self):  # verifies: REQ-DECOMPOSE-994#CASE-3
         src_before = io.open(os.path.join(self.tmp, "lib", "utils.py"), encoding="utf-8").read()
@@ -2975,32 +2921,33 @@ CASE-3
         after = {f: io.open(os.path.join(self.rd, f), encoding="utf-8").read() for f in self._files()}
         self.assertEqual(before, after)
 
-    def test_the_parent_is_rewritten_only_where_the_split_happened(self):  # verifies: REQ-DECOMPOSE-994#CASE-6
+    def test_the_parent_is_never_edited(self):  # verifies: REQ-DECOMPOSE-994#CASE-6
+        # Moving the text left 33 parents holding only `see [[child]]` pointers; deleting
+        # the children then destroyed their contracts with a green gate. A copy cannot.
+        before = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
         self._run(apply_it=True)
-        parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
-        for line in ("- Module — see [[TOOL-UTILS-MODULE]].",
-                     "- load_json_stdin — see [[TOOL-UTILS-LOAD-JSON-STDIN]].",
-                     "- is_headless — see [[TOOL-UTILS-IS-HEADLESS]]."):
-            self.assertIn(line, parent)
-        self.assertNotIn("**Module**", parent)
-        self.assertNotIn("uses only the standard library", parent)
-        # untouched outside the two sections, and surviving cases keep their labels
-        head = self.PARENT.split("## Description")[0]
-        self.assertTrue(parent.startswith(head))
-        self.assertTrue(parent.rstrip().endswith("- prose that must survive untouched"))
-        self.assertIn("CASE-2\n", parent)
-        self.assertIn("CASE-3\n", parent)
-        self.assertNotIn("CASE-1\n  Given  empty stdin", parent)
+        after = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
+        self.assertEqual(before, after)
+        for f in self._files():
+            if f != "TOOL-UTILS.md":
+                os.remove(os.path.join(self.rd, f))      # reject the split
+        groups = R._contract_groups(R.load_requirements(self.rd)["TOOL-UTILS"]["body"])
+        self.assertEqual(["Module", "`load_json_stdin(name)`", "`is_headless()`"],
+                         [label for label, _ in groups])
+        self.assertIn("On empty stdin it exits 2 naming `name`.", groups[1][1])
 
-    def test_a_parent_stripped_of_every_case_gets_a_placeholder(self):  # verifies: REQ-DECOMPOSE-994#CASE-7
-        body = self.PARENT.replace(
-            "CASE-2\n  Given  `CLAUDE_HEADLESS` unset\n  When   `is_headless()` runs, then `load_json_stdin` runs\n  Then   both behave\n\n", ""
-        ).replace("CASE-3\n  Given  any environment\n  When   the package is imported\n  Then   it imports cleanly\n\n", "")
-        _write(os.path.join(self.rd, "TOOL-UTILS.md"), body)
+    def test_a_label_with_a_note_after_it_is_still_a_group(self):  # verifies: REQ-DECOMPOSE-994#CASE-7
+        # `**Label** (note)` was read as prose and glued onto the previous group's last
+        # clause, label and all: five groups became three children.
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"), self.PARENT.replace(
+            "**`is_headless()`**\n", "**`is_headless()`** (the environment probe)\n"))
         self._run(apply_it=True)
-        parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
-        self.assertIn("work TOGETHER", parent)
-        self.assertEqual(len(R._acc_blocks(parent.split("---", 2)[2])), 1)
+        self.assertIn("TOOL-UTILS-IS-HEADLESS.md", self._files())
+        loader = io.open(os.path.join(self.rd, "TOOL-UTILS-LOAD-JSON-STDIN.md"),
+                         encoding="utf-8").read()
+        self.assertNotIn("is_headless", loader)
+        self.assertNotIn("**", loader.split("## Description")[1].split("## Cases")[0]
+                         .split("binding.")[1])
 
     def test_a_code_requirement_is_not_split(self):  # verifies: REQ-DECOMPOSE-994#CASE-4
         _write(os.path.join(self.rd, "TOOL-UTILS.md"),
@@ -3044,114 +2991,6 @@ CASE-3
         self.assertIn("TOOL-OTHER  (3 contract groups", out)
         self.assertNotIn("TOOL-FLAT  (", out)
         self.assertIn("6 child requirement(s) from 2 parent(s)", out)
-
-
-class LanguageSetting(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-996
-    """`LANGUAGE` (en | ro | both): what the engine EXPECTS translated, never what it writes."""
-
-    BODY = ("# {title}\n\n> why this exists\n\n## Description\nEvery bullet below is binding.\n"
-            "- It does {what}.\n\n## Cases\nCASE-1 - a\n  Given x\n  When y\n  Then z\n")
-
-    def setUp(self):
-        self.tmp = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, self.tmp, True)
-        self.rd = os.path.join(self.tmp, "requirements"); os.makedirs(self.rd)
-        for rid, title, what in (("AREA-FRESH-001", "Fresh", "one"), ("AREA-STALE-002", "Stale", "two"),
-                                 ("AREA-NONE-003", "None", "three")):
-            _write(os.path.join(self.rd, rid + ".md"),
-                   "---\nid: {}\nstatus: confirmed\nlayer: feature\nowner: a\n---\n\n".format(rid)
-                   + self.BODY.format(title=title, what=what))
-        self.reqs = R.load_requirements(self.rd)
-        fresh = self.reqs["AREA-FRESH-001"]["body"]
-        _write(os.path.join(self.rd, "_i18n", "ro.json"), json.dumps({
-            "AREA-FRESH-001": {"title": "Proaspăt", "intent": "i", "contract": "c", "acceptance": "a",
-                               "hash": R.translation_hash(fresh, R._title(fresh))},
-            "AREA-STALE-002": {"title": "Vechi", "intent": "i", "contract": "c", "acceptance": "a",
-                               "hash": "000000000000"},
-        }, ensure_ascii=False))
-        self._saved = R.LANGUAGE
-        self.addCleanup(setattr, R.config, "LANGUAGE", self._saved)
-
-    def _set(self, value):
-        err = io.StringIO()
-        R.apply_config({"LANGUAGE": value}, out=err)
-        return err.getvalue()
-
-    def test_the_setting_is_an_enum(self):  # verifies: REQ-TRANSLATE-996#CASE-1
-        self.assertEqual(self._set("ro"), "")
-        self.assertEqual(R.LANGUAGE, "ro")
-        err = self._set("romanian")
-        self.assertIn("LANGUAGE", err)
-        self.assertEqual(R.LANGUAGE, "ro")
-        self.assertIn("LANGUAGE", R.CONFIG_KEYS)
-        self.assertEqual(R.CONFIG_ENUMS["LANGUAGE"], ("en", "ro", "both"))
-
-    def test_the_map_carries_the_setting(self):  # verifies: REQ-TRANSLATE-996#CASE-2
-        self._set("both")
-        data = R._assemble_map_data(self.reqs, {}, self.rd, self.tmp)
-        self.assertEqual(data["language"], "both")
-
-    def test_missing_and_stale_are_told_apart(self):  # verifies: REQ-TRANSLATE-996#CASE-3
-        self._set("ro")
-        gaps = R._translation_gaps(self.reqs, self.rd)
-        self.assertEqual([(g["id"], g["reason"]) for g in gaps],
-                         [("AREA-NONE-003", "missing"), ("AREA-STALE-002", "stale")])
-        self.assertTrue(all(g["locale"] == "ro" for g in gaps))
-
-    def test_english_means_nothing_is_owed(self):  # verifies: REQ-TRANSLATE-996#CASE-4
-        self._set("en")
-        self.assertEqual(R._translation_gaps(self.reqs, self.rd), [])
-        ws = R.Workspace.load(self.rd, self.tmp)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            rc = R.cmd_i18n(ws)
-        self.assertEqual(rc, 0)
-        self.assertIn("no translation is expected", buf.getvalue())
-        self.assertIn("LANGUAGE", buf.getvalue())
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R._audit_summary(self.reqs, {}, self.rd, None)
-        self.assertNotIn("translation", buf.getvalue())
-
-    def test_the_json_hand_off_carries_source_and_key(self):  # verifies: REQ-TRANSLATE-996#CASE-5
-        self._set("ro")
-        ws = R.Workspace.load(self.rd, self.tmp)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_i18n(ws, as_json=True)
-        doc = json.loads(buf.getvalue())
-        self.assertEqual(doc["language"], "ro")
-        gap = next(g for g in doc["gaps"] if g["id"] == "AREA-NONE-003")
-        for k in ("id", "locale", "reason", "hash", "title", "intent", "contract", "acceptance"):
-            self.assertIn(k, gap)
-        self.assertEqual(gap["title"], "None")
-        self.assertIn("It does three.", gap["contract"])
-        # write the four fields back under that key and the gap closes
-        cache = json.load(io.open(os.path.join(self.rd, "_i18n", "ro.json"), encoding="utf-8"))
-        for g in doc["gaps"]:
-            cache[g["id"]] = {"title": "t", "intent": "i", "contract": "c", "acceptance": "a", "hash": g["hash"]}
-        _write(os.path.join(self.rd, "_i18n", "ro.json"), json.dumps(cache))
-        self.assertEqual(R._translation_gaps(self.reqs, self.rd), [])
-
-    def test_the_sync_tail_names_the_gap(self):  # verifies: REQ-TRANSLATE-996#CASE-6
-        self._set("ro")
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R._audit_summary(self.reqs, {}, self.rd, None)
-        out = buf.getvalue()
-        self.assertIn("2 requirement(s) have no fresh translation for LANGUAGE `ro` (1 missing, 1 stale)", out)
-        self.assertIn("ask --i18n --json", out)
-
-    def test_gate_i18n_lists_every_gap_readably(self):  # verifies: REQ-TRANSLATE-996#CASE-3
-        self._set("both")
-        ws = R.Workspace.load(self.rd, self.tmp)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_i18n(ws)
-        out = buf.getvalue()
-        self.assertIn("2 requirement(s) need a translation (1 missing, 1 stale)", out)
-        self.assertIn("AREA-STALE-002", out); self.assertIn("stale", out)
-        self.assertIn("AREA-NONE-003", out);  self.assertIn("missing", out)
-        self.assertNotIn("AREA-FRESH-001", out)
 
 
 class PlanMatchesWritePath(unittest.TestCase):  # tested-by: REQ-PLANTAGGED-1005 @unit  # tested-by: REQ-PLANLEVEL-1006 @unit  # tested-by: REQ-PLANDRAFTID-1010 @unit
@@ -3358,7 +3197,7 @@ class InitTagsTheSource(unittest.TestCase):  # tested-by: REQ-INITTAG-1008 @unit
         seen = []
         for _ in range(3):
             with redirect_stdout(io.StringIO()):
-                R.cmd_init(reqs, d, wipe=True, no_site=True)
+                R.cmd_init(reqs, d, wipe=True)
             seen.append(self._read(d, "core/engine.py"))
         self.assertEqual(seen[0], seen[1])
         self.assertEqual(seen[1], seen[2])
@@ -3470,11 +3309,11 @@ class ChangelogForms(unittest.TestCase):  # tested-by: REQ-CHANGELOGFORMS-1015 @
         with tempfile.TemporaryDirectory() as d:
             reqs = os.path.join(d, "requirements")
             with redirect_stdout(io.StringIO()):
-                R.cmd_init(reqs, d, no_site=True)
+                R.cmd_init(reqs, d)
             self.assertIn("## [Unreleased]", _text(d, "CHANGELOG.md"))
             _write(os.path.join(d, "CHANGELOG.md"), "# mine\n")
             with redirect_stdout(io.StringIO()):
-                R.cmd_init(reqs, d, no_site=True)
+                R.cmd_init(reqs, d)
             self.assertEqual("# mine\n", _text(d, "CHANGELOG.md"))
             self.assertIn("CHANGELOG.md", _text(d, ".reqmapignore").splitlines())
 
@@ -3622,7 +3461,7 @@ class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019
             with mock.patch.object(R.release, "release_workflow",
                                    return_value="name: release\nsync --release --json\n"):
                 with redirect_stdout(io.StringIO()):
-                    R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+                    R.cmd_init(os.path.join(d, "requirements"), d)
             self.assertEqual("name: release\nsync --release --json\n", _text(d, self.WORKFLOW))
 
     def test_an_existing_workflow_is_never_overwritten(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-2
@@ -3635,7 +3474,7 @@ class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019
     def test_a_repo_off_github_gets_no_workflow(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-3
         with tempfile.TemporaryDirectory() as d:
             with redirect_stdout(io.StringIO()):
-                R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+                R.cmd_init(os.path.join(d, "requirements"), d)
             self.assertFalse(os.path.exists(os.path.join(d, ".github")))
 
     def test_the_workflow_runs_the_vendored_engine_and_releases_once(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-4

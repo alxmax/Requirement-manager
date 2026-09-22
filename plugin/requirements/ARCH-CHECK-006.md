@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
+- `gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.
 
 ## Cases
 CASE-1
@@ -531,3 +532,50 @@ CASE-3 — the gate verb never writes lock updated
 **Notes**
 - `distinct_from: REQ-DRIFT-842` - `REQ-DRIFT-842` is the lock file's read and write layer; this is when `gate` and `sync` advance it.
 
+
+---
+id: REQ-CHECK-1035
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CHECK-006]
+---
+
+# A Description link to a requirement that does not exist
+
+## Description
+> A clause that reads `see [[REQ-X-012]]` hands its obligation to another file. Delete
+> that file and the clause still reads as a contract while binding nothing, and the gate
+> used to pass: it checked `depends_on:` targets and code tags, never the links in prose.
+> A rejected split once destroyed nine confirmed contracts exactly this way.
+
+Every bullet below is binding.
+- `gate` warns (RM036) once per requirement whose Description links an id-shaped
+  `[[ID]]` that no requirement defines, naming every such target.
+- A link inside an inline code span, a link outside the Description, and a target that is
+  not id-shaped (such as `[[child]]`) are not links for this rule.
+- The warning never affects the exit code unless `--strict` promotes it.
+
+## Cases
+CASE-1 — a pointer to a deleted child warns
+  Given  a Description with one `[[ID]]` naming an existing requirement and one naming none
+  When   `gate` runs
+  Then   one RM036 warning names the missing target and not the existing one
+
+CASE-2 — a pointer to an existing requirement is silent
+  Given  a Description whose every `[[ID]]` names a requirement in the corpus
+  When   `gate` runs
+  Then   no RM036 warning is reported
+
+CASE-3 — examples and prose links are not links
+  Given  a Description holding `[[REQ-X-001]]` inside backticks and a bare `[[child]]`
+  When   `gate` runs
+  Then   no RM036 warning is reported
+
+## Context
+**Notes**
+- Measured before shipping, 2026-09-22: 0 requirements fire on this corpus (292), on two
+  consumer corpora (191 and 21) and on a third consumer's corpus as it stood before it was
+  removed (96). A broken link is wrong by construction, so a fire rate of zero is the
+  expected state, not a signal below ADR-0016's floor.

@@ -1765,211 +1765,6 @@ class Round2Polish(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: 
         self.assertNotIn("ac-count-high", checks)
 
 
-class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026  # tested-by: REQ-SITE-924
-    def test_remote_url_normalises_scp_and_https(self):
-        self.assertEqual(R._normalise_remote("git@github.com:alxmax/Requirement-manager.git"),
-                         "https://github.com/alxmax/Requirement-manager")
-        self.assertEqual(R._normalise_remote("https://github.com/alxmax/Requirement-manager.git"),
-                         "https://github.com/alxmax/Requirement-manager")
-        self.assertEqual(R._normalise_remote("ssh://git@example.com/o/r.git"),
-                         "https://example.com/o/r")
-        self.assertIsNone(R._normalise_remote(""))
-
-    def test_remote_url_with_port(self):
-        """An ssh remote carrying an explicit port still yields a clickable https
-        web URL with the port dropped (#14)."""
-        self.assertEqual(
-            R._normalise_remote("ssh://git@github.com:2222/owner/repo.git"),
-            "https://github.com/owner/repo")
-
-    def test_inject_region_refreshes_and_preserves_prose(self):
-        html = "<body>\n<h1>AUTHORED</h1>\n<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n<p>keep</p>\n</body>"
-        out = R._inject_region(html, "nav", "NEW")
-        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
-        self.assertIn("<h1>AUTHORED</h1>", out)
-        self.assertIn("<p>keep</p>", out)
-        self.assertNotIn("old", out)
-
-    def test_inject_region_absent_inserts_after_body(self):
-        html = "<body>\n<h1>hi</h1>\n</body>"
-        out = R._inject_region(html, "nav", "NEW")
-        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
-        self.assertLess(out.index("<body>"), out.index("REQMAP:NAV"))
-
-    def test_extract_region_roundtrip(self):
-        html = R._inject_region("<body></body>", "stats", "DATA")
-        self.assertEqual(R._extract_region(html, "stats"), "DATA")
-        self.assertIsNone(R._extract_region("<body></body>", "stats"))
-
-    def test_inject_region_close_before_open_no_duplicate(self):  # bug: inject-region-malformed-marker
-        """A stray close marker before the open must not trigger a duplicate block
-        on injection (the close is now searched after the open)."""
-        html = ("<body>\n<!--##/REQMAP:NAV##-->stray\n"
-                "<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n</body>")
-        out = R._inject_region(html, "nav", "NEW")
-        self.assertEqual(out.count("<!--##REQMAP:NAV##-->"), 1,
-                         "must rewrite in place, not append a second region block")
-        self.assertIn("NEW", out)
-        self.assertNotIn("old", out)
-
-    def test_scaffold_escapes_repo_name(self):  # bug: cmd-site-scaffold-unescaped
-        """Scaffold mode must HTML-escape the repo name / URL it injects into the
-        template's title and href sinks."""
-        import unittest.mock as mock
-        with tempfile.TemporaryDirectory() as d:
-            target = os.path.join(d, "docs", "architecture.html")
-            with mock.patch.object(R.site, "_repo_name", return_value='x"><script>bad</script>'), \
-                 mock.patch.object(R.site, "_git_remote_web_url", return_value=None):
-                with redirect_stdout(io.StringIO()):
-                    R.cmd_site(R.Workspace(
-                        R.load_requirements(os.path.join(d, "requirements")), {}),
-                        d, target, ["nav"])
-            html = open(target, encoding="utf-8").read()
-            self.assertNotIn("<script>bad</script>", html)
-            self.assertIn("&lt;script&gt;", html)
-
-    def test_render_nav_omits_absent_targets(self):  # verifies: REQ-SITE-924#CASE-3
-        ctx = {"repo_url": None, "map_ok": False, "diagram_rel": None}
-        nav = R._render_region("nav", ctx)
-        self.assertNotIn("<a", nav)
-        ctx = {"repo_url": "https://github.com/o/r", "map_ok": True, "diagram_rel": "d.html"}
-        nav = R._render_region("nav", ctx)
-        self.assertIn('href="https://github.com/o/r"', nav)
-        self.assertIn('href="map.html"', nav)
-        self.assertIn('href="d.html"', nav)
-        self.assertIn('target="_blank"', nav)
-
-    def test_render_stats_counts_from_graph(self):
-        data = {"nodes": [{"id": "A-1", "layer": "bus", "status": "confirmed"},
-                          {"id": "B-2", "layer": "feature", "status": "confirmed"},
-                          {"id": "C-3", "layer": "feature", "status": "draft"}],
-                "edges": [["B-2", "A-1"]]}
-        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
-        stats = R._render_region("stats", ctx)
-        self.assertIn(">3<", stats)   # 3 requirements
-        self.assertIn(">2<", stats)   # 2 confirmed
-        self.assertIn(R.MAP_ENGINE_VERSION, stats)
-
-    def test_render_nav_wraps_in_nav_links_class(self):  # bug: site-region-wrapper-css-mismatch
-        """The injected nav markup must use the `nav-links` class SITE_TEMPLATE's CSS
-        actually targets (`.nav-links` / `.nav-links a`) — a made-up wrapper class
-        matches no selector and leaves the nav unstyled."""
-        ctx = {"repo_url": "https://github.com/o/r", "map_ok": True, "diagram_rel": "d.html"}
-        nav = R._render_region("nav", ctx)
-        self.assertIn('class="nav-links"', nav)
-        self.assertNotIn("reqmap-nav", nav)
-
-    def test_render_stats_has_no_extra_wrapper(self):  # bug: site-region-wrapper-css-mismatch
-        """`.stat` cards must be emitted with NO extra wrapper div: SITE_TEMPLATE
-        already provides the `.stats` grid container around the injected region, and
-        `.stat` must be its DIRECT CHILD for the 6-column grid CSS to apply."""
-        data = {"nodes": [{"id": "A-1", "layer": "bus", "status": "confirmed"}], "edges": []}
-        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
-        stats = R._render_region("stats", ctx)
-        self.assertNotIn("reqmap-stats", stats)
-        self.assertTrue(stats.startswith('<div class="stat">'))
-
-    def _seed(self, d):
-        """Minimal reqs dir with one confirmed requirement so site can build map data."""
-        reqs = os.path.join(d, "requirements"); os.makedirs(reqs)
-        with open(os.path.join(reqs, "AREA-X-001.md"), "w", encoding="utf-8") as f:
-            f.write("---\nid: AREA-X-001\nstatus: confirmed\nlayer: feature\n---\n# X\n> why\n")
-        return reqs
-
-    def test_attach_is_idempotent(self):  # verifies: REQ-SITE-924#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            reqs = self._seed(d)
-            page = os.path.join(d, "page.html")
-            open(page, "w", encoding="utf-8").write("<body>\n<h1>Mine</h1>\n</body>")
-            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(R.Workspace(r, m), d, page, ["nav", "stats"])
-            first = open(page, encoding="utf-8").read()
-            R.cmd_site(R.Workspace(r, m), d, page, ["nav", "stats"])
-            second = open(page, encoding="utf-8").read()
-            self.assertEqual(first, second)
-            self.assertIn("<h1>Mine</h1>", second)
-
-    def test_no_remote_degrades(self):
-        with tempfile.TemporaryDirectory() as d:
-            reqs = self._seed(d)
-            page = os.path.join(d, "page.html")
-            open(page, "w", encoding="utf-8").write("<body></body>")
-            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            rc = R.cmd_site(R.Workspace(r, m), d, page, ["nav"])
-            self.assertEqual(rc, 0)
-            self.assertNotIn("GitHub", open(page, encoding="utf-8").read())
-
-    def test_scaffold_writes_full_page(self):  # verifies: REQ-SITE-924#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            reqs = self._seed(d)
-            target = os.path.join(d, "docs", "architecture.html")
-            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(R.Workspace(r, m), d, target, ["nav", "stats"])
-            html = open(target, encoding="utf-8").read()
-            self.assertIn("<!--##REQMAP:NAV##-->", html)
-            self.assertIn("<!--##REQMAP:STATS##-->", html)
-            self.assertIn("<!-- author me -->", html)
-
-    def test_init_scaffolds_site_when_absent(self):  # verifies: REQ-SITE-924#CASE-5
-        with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "docs"))
-            open(os.path.join(d, "a.py"), "w").write("# implements: AREA-X-001\nx = 1\n")
-            R.cmd_init(os.path.join(d, "requirements"), d, no_site=False)
-            page = os.path.join(d, "docs", "architecture.html")
-            self.assertTrue(os.path.isfile(page))
-            self.assertIn("<!--##REQMAP:NAV##-->", open(page, encoding="utf-8").read())
-
-    def test_init_no_site_flag_skips(self):  # verifies: REQ-SITE-924#CASE-5
-        with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "docs"))
-            open(os.path.join(d, "a.py"), "w").write("x = 1\n")
-            R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
-            self.assertFalse(os.path.isfile(os.path.join(d, "docs", "architecture.html")))
-
-    def test_map_check_flags_stale_stats_region(self):  # verifies: REQ-SITE-924#CASE-6
-        with tempfile.TemporaryDirectory() as d:
-            reqs = self._seed(d); os.makedirs(os.path.join(d, "docs"))
-            page = os.path.join(d, "docs", "architecture.html")
-            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(R.Workspace(r, m), d, page, ["stats"])
-            data = R._build_map_data(r, m); data["repo"] = R._repo_name(d)
-            self.assertEqual(R._map_check(data, R.Workspace(None, None, reqs), d), 0)  # fresh
-            cur = open(page, encoding="utf-8").read()
-            tampered = cur.replace(R._extract_region(cur, "stats"), "TAMPERED")
-            open(page, "w", encoding="utf-8").write(tampered)
-            self.assertEqual(R._map_check(data, R.Workspace(None, None, reqs), d), 1)  # stale
-
-    def test_site_detect_runs(self):
-        """`site` folded into `sync` in v4.0.0; detect mode stays as a function, and
-        `sync` refreshes an existing page through the same call."""
-        import contextlib
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            reqs = R.load_requirements(os.path.join(d, "requirements"))
-            buf = io.StringIO()
-            with contextlib.redirect_stdout(buf):
-                rc = R.cmd_site(R.Workspace(reqs, {}), d, detect=True)
-            self.assertEqual(rc, 0)
-            self.assertIn("suggested:", buf.getvalue())
-
-    def test_render_nav_escapes_repo_url(self):
-        nav = R._render_region("nav", {"repo_url": "https://x/<script>", "map_ok": False, "diagram_rel": None})
-        self.assertNotIn("<script>", nav)
-        self.assertIn("&lt;script&gt;", nav)
-
-    def test_site_diagram_ok_checks_existence(self):
-        with tempfile.TemporaryDirectory() as d:
-            page = os.path.join(d, "p.html")
-            self.assertFalse(R._site_diagram_ok(page, "d.html"))
-            open(os.path.join(d, "d.html"), "w").close()
-            self.assertTrue(R._site_diagram_ok(page, "d.html"))
-            self.assertFalse(R._site_diagram_ok(page, None))
-
-    def test_engine_never_touches_excalidraw_builder(self):  # verifies: REQ-SITE-924#CASE-4
-        src = open(R.__file__, encoding="utf-8").read()
-        self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
-
-
 class AdversarialInjection(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-870  # tested-by: REQ-VIEWER-941
     """Hostile requirement text reaching the generated HTML and JSON.
 
@@ -2348,7 +2143,7 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # teste
             _write(os.path.join(d, "app.py"), "def run():\n    return 1\n")
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+                R.cmd_init(os.path.join(d, "requirements"), d)
         self.assertEqual(1, buf.getvalue().count("the roadmap chart stays empty"))
 
 
@@ -3385,7 +3180,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
     # ---- the report ------------------------------------------------------
     def test_every_section_runs(self):  # verifies: REQ-AUDIT-970#CASE-1
         _, out = self._run(*self._green())
-        for section in ("Gate", "Risk", "Duplicates", "Design", "Tag coverage",
+        for section in ("Gate", "Risk", "Duplicates", "Tag coverage",
                         "Exemptions in force", "Corpus shape"):
             self.assertIn(section, out)
 
@@ -3617,443 +3412,6 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ
             "REQ-H-008": self._req(path="g.md"),
         }
         self.assertEqual(R.relevel_residue_lines(reqs), [])
-
-
-class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-DESIGN-979  # tested-by: REQ-DESIGN-978  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
-    """`design`: advisory design candidates against the four pillars, never the gate."""
-
-    def _kinds(self, src):
-        # the pillar kinds only; the standards block has its own tests below
-        return [f["kind"] for f in R._design_file("m.py", src) if f["pillar"] != "standards"]
-
-    def test_global_state_and_long_parameter_list(self):  # verifies: REQ-DESIGN-950#CASE-1
-        src = ("COUNT = 0\n"
-               "def bump():\n    global COUNT\n    COUNT += 1\n"
-               "def wide(a, b, c, d, e, f, g):\n    return a\n")
-        kinds = self._kinds(src)
-        self.assertIn("global-state", kinds)
-        self.assertIn("long-parameter-list", kinds)
-
-    def test_data_clump_needs_three_carriers(self):  # verifies: REQ-DESIGN-950#CASE-2
-        two = "def f(host, port, user): pass\ndef g(host, port, user): pass\n"
-        self.assertNotIn("data-clump", self._kinds(two))
-        three = two + "def h(host, port, user, x): pass\n"
-        f = [x for x in R._design_file("m.py", three) if x["kind"] == "data-clump"]
-        self.assertEqual(len(f), 1)
-        self.assertIn("host, port, user", f[0]["detail"])
-        self.assertEqual(f[0]["pillar"], "encapsulation")
-
-    def test_long_function_and_deep_nesting(self):  # verifies: REQ-DESIGN-950#CASE-3
-        long_src = "def big():\n" + "".join("    x = {}\n".format(i) for i in range(90))
-        self.assertIn("long-function", self._kinds(long_src))
-        deep = ("def deep(a):\n    if a:\n        for i in a:\n            while i:\n"
-                "                with a:\n                    if i:\n                        pass\n")
-        self.assertIn("deep-nesting", self._kinds(deep))
-        self.assertNotIn("deep-nesting", self._kinds("def ok(a):\n    if a:\n        return 1\n"))
-
-    def test_prefix_family(self):  # verifies: REQ-DESIGN-950#CASE-4
-        src = "".join("def _scan_{}(): pass\n".format(i) for i in range(6))
-        f = [x for x in R._design_file("m.py", src) if x["kind"] == "prefix-family"]
-        self.assertEqual(len(f), 1)
-        self.assertEqual(f[0]["name"], "scan")
-        self.assertEqual(f[0]["pillar"], "abstraction")
-
-    def test_shared_methods_and_duplicate_method(self):  # verifies: REQ-DESIGN-951#CASE-1
-        src = ("class A:\n    def load(self): return 1\n    def save(self): return 2\n    def close(self): pass\n"
-               "class B:\n    def load(self): return 3\n    def save(self): return 2\n    def close(self): pass\n")
-        f = R._design_file("m.py", src)
-        kinds = [x["kind"] for x in f]
-        self.assertIn("shared-methods", kinds)
-        dup = [x for x in f if x["kind"] == "duplicate-method"]
-        self.assertEqual(sorted(x["name"] for x in dup), ["B.close", "B.save"])
-
-    def test_related_classes_are_not_reported(self):  # verifies: REQ-DESIGN-951#CASE-2
-        src = ("class Base:\n    pass\n"
-               "class A(Base):\n    def load(self): pass\n    def save(self): pass\n    def close(self): pass\n"
-               "class B(Base):\n    def load(self): pass\n    def save(self): pass\n    def close(self): pass\n")
-        self.assertNotIn("shared-methods", self._kinds(src))
-
-    def test_isinstance_chain_and_type_switch(self):  # verifies: REQ-DESIGN-951#CASE-3
-        src = ("def f(x, kind):\n"
-               "    if isinstance(x, int):\n        pass\n    elif isinstance(x, str):\n        pass\n"
-               "    elif isinstance(x, list):\n        pass\n"
-               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n"
-               "    elif kind == 'c':\n        pass\n    elif kind == 'd':\n        pass\n")
-        f = [x for x in R._design_file("m.py", src) if x["pillar"] != "standards"]
-        self.assertEqual([x["kind"] for x in f], ["isinstance-chain", "type-switch"])
-        self.assertEqual([x["name"] for x in f], ["x", "kind"])
-        self.assertTrue(all(x["pillar"] == "polymorphism" for x in f))
-
-    def test_short_chains_are_silent(self):  # verifies: REQ-DESIGN-951#CASE-4
-        src = ("def f(x, kind):\n    if isinstance(x, int):\n        pass\n    elif isinstance(x, str):\n        pass\n"
-               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n    elif kind == 'c':\n        pass\n")
-        self.assertEqual(self._kinds(src), [])
-
-    def test_report_groups_by_pillar_and_exits_zero(self):  # verifies: REQ-DESIGN-952#CASE-1  # verifies: ARCH-DESIGN-061#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
-            _write(os.path.join(d, "tests", "test_m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_design(d)
-            out = buf.getvalue()
-        self.assertEqual(code, 0)
-        self.assertIn("Encapsulation (1)", out)
-        self.assertIn("m.py:2  global-state", out)
-        self.assertNotIn("test_m.py", out)
-        self.assertIn("Advisory only", out)
-        self.assertIn("Standards (1)", out)   # `bump` is public and undocumented
-
-    def test_json_output_and_clean_tree(self):  # verifies: REQ-DESIGN-952#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "m.py"), 'def ok():\n    """Returns one."""\n    return 1\n')
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_design(d, as_json=True)
-            data = json.loads(buf.getvalue())
-            self.assertEqual((code, data["files"], data["findings"]), (0, 1, []))
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d)
-            self.assertIn("No design candidates", buf.getvalue())
-
-    def test_syntax_error_yields_nothing(self):  # verifies: REQ-DESIGN-952#CASE-3
-        self.assertEqual(R._design_file("m.py", "def (:\n"), [])
-
-    def test_standards_file_line_docstring_definitions(self):  # verifies: REQ-DESIGN-953#CASE-1
-        saved = (R.DESIGN_FILE_MAX_LINES, R.DESIGN_FILE_MAX_FUNCS)
-        self.addCleanup(lambda: (setattr(R.config, "DESIGN_FILE_MAX_LINES", saved[0]),
-                                 setattr(R.config, "DESIGN_FILE_MAX_FUNCS", saved[1])))
-        R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_FILE_MAX_FUNCS = 5, 2
-        src = ("def a():\n    return 1\n" "def b():\n    return 2\n" "def c():\n    return 3\n"
-               "x = '" + "y" * 120 + "'\n")
-        f = R._design_file("m.py", src)
-        kinds = {x["kind"]: x for x in f}
-        self.assertIn("file-too-long", kinds)
-        self.assertIn("too-many-definitions", kinds)
-        self.assertEqual(kinds["line-too-long"]["line"], 7)
-        self.assertIn("1 line(s) wider than 100", kinds["line-too-long"]["detail"])
-        self.assertIn("3 public definition(s)", kinds["missing-docstring"]["detail"])
-        self.assertTrue(all(x["pillar"] == "standards" for x in f))
-
-    def test_standards_are_silent_on_a_documented_small_file(self):  # verifies: REQ-DESIGN-953#CASE-2
-        src = 'def a():\n    """Says a."""\n    return 1\n\ndef _helper():\n    return 2\n'
-        self.assertEqual(self._kinds(src), [])
-
-    def test_docstring_check_can_be_switched_off(self):  # verifies: REQ-DESIGN-953#CASE-3
-        saved = R.DESIGN_DOCSTRING_PUBLIC
-        self.addCleanup(setattr, R.config, "DESIGN_DOCSTRING_PUBLIC", saved)
-        src = "def a():\n    return 1\n"
-        kinds = lambda: [f["kind"] for f in R._design_file("m.py", src)]
-        self.assertEqual(kinds(), ["missing-docstring"])
-        R.apply_config({"DESIGN_DOCSTRING_PUBLIC": 0}, out=io.StringIO())
-        self.assertEqual(kinds(), [])
-
-    def test_standards_block_comes_last_in_the_report(self):  # verifies: REQ-DESIGN-953#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d)
-            out = buf.getvalue()
-        self.assertLess(out.index("Encapsulation (1)"), out.index("Standards (1)"))
-        self.assertIn("missing-docstring", out)
-
-    def test_design_summary_scores_clean_files(self):  # verifies: REQ-DESIGN-954#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            self.assertIsNone(R._design_summary(d))
-            _write(os.path.join(d, "clean.py"), 'def a():\n    """A."""\n    return 1\n')
-            _write(os.path.join(d, "dirty.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
-            _write(os.path.join(d, "tests", "test_x.py"), "def bump():\n    global COUNT\n")
-            s = R._design_summary(d)
-        self.assertEqual((s["files"], s["clean_files"], s["score"]), (2, 1, 50))
-        self.assertEqual(s["candidates"]["encapsulation"], 1)
-        self.assertEqual(s["candidates"]["standards"], 1)
-
-    @staticmethod
-    def _metric_kinds(src, name="m.py"):
-        """The `metrics` candidates only — the class's own `_kinds` covers the rest."""
-        found = R._design_file(name, src)
-        return sorted(f["kind"] for f in found if f["pillar"] == "metrics")
-
-    def test_design_names_what_it_did_not_measure(self):  # verifies: REQ-DESIGN-978#CASE-4
-        """An empty metrics block on a subclass-heavy repo would otherwise read as 'your
-        classes are fine' when it means 'the two metrics that would have spoken were never
-        computed'. Asserted on both paths: findings present, and none at all."""
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "wide.py"),
-                   "class Wide:\n    def __init__(self):\n        self.x = 1\n"
-                   + "".join("    def m%d(self):\n        return helper%d(self.x)\n" % (i, i)
-                             for i in range(30)))
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d)
-            loud = buf.getvalue()
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "ok.py"), 'def a():\n    """A."""\n    return 1\n')
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d)
-            quiet = buf.getvalue()
-        for out in (loud, quiet):
-            for metric in ("DIT", "NOC", "CBO"):
-                self.assertIn(metric, out)
-
-    def test_unmeasurable_cohesion_is_counted(self):  # verifies: REQ-DESIGN-979#CASE-1
-        """A dict subclass keys its state, so no field exists for two methods to share.
-        Skipping it is right; skipping it in silence is what the count fixes."""
-        src = ("class Bag(dict):\n"
-               "    def a(self):\n        return self['x']\n"
-               "    def b(self):\n        return self['y']\n"
-               "    def c(self):\n        return self['z']\n")
-        self.assertEqual(R._cohesion_skipped(ast.parse(src)), 1)
-
-    def test_a_measurable_class_is_not_counted(self):  # verifies: REQ-DESIGN-979#CASE-2
-        src = ("class Ok:\n"
-               "    def __init__(self):\n        self.x = 1\n"
-               "    def get(self):\n        return self.x\n")
-        self.assertEqual(R._cohesion_skipped(ast.parse(src)), 0)
-
-    def test_json_carries_the_caveats(self):  # verifies: REQ-DESIGN-979#CASE-3
-        """The machine surface must say what the text surface says, or a dashboard
-        renders an empty metrics group as a clean bill of health."""
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "m.py"),
-                   "class Bag(dict):\n"
-                   "    def a(self):\n        return self['x']\n"
-                   "    def b(self):\n        return self['y']\n")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d, as_json=True)
-            doc = json.loads(buf.getvalue())
-        for metric in ("DIT", "NOC", "CBO"):
-            self.assertIn(metric, doc["metrics_scope"])
-        self.assertEqual(doc["cohesion_skipped"], 1)
-
-    def test_an_unparseable_file_is_tolerated(self):  # verifies: REQ-DESIGN-979#CASE-4
-        self.assertEqual(R._cohesion_skipped_in("class ??? broken("), 0)
-
-    def test_a_far_reaching_class_is_named(self):  # verifies: REQ-DESIGN-978#CASE-1
-        body = "".join("    def m%d(self):\n        return helper%d(self.x)\n" % (i, i)
-                       for i in range(30))
-        src = "class Wide:\n    def __init__(self):\n        self.x = 1\n" + body
-        self.assertIn("high-response", self._metric_kinds(src))
-
-    def test_the_rfc_threshold_is_per_repo(self):  # verifies: REQ-DESIGN-978#CASE-2
-        src = ("class Two:\n"
-               "    def __init__(self):\n        self.x = 1\n"
-               "    def a(self):\n        return other(self.x)\n")
-        self.assertNotIn("high-response", self._metric_kinds(src))
-        keep = R.DESIGN_RFC_MAX
-        try:
-            R.apply_config({"DESIGN_RFC_MAX": 2})
-            self.assertIn("high-response", self._metric_kinds(src))
-        finally:
-            R.apply_config({"DESIGN_RFC_MAX": keep})
-
-    def test_a_small_class_reports_no_metric(self):  # verifies: REQ-DESIGN-978#CASE-3
-        src = ("class Small:\n"
-               "    def __init__(self):\n        self.x = 1\n"
-               "    def get(self):\n        return self.x\n")
-        self.assertEqual(self._metric_kinds(src), [])
-
-    def test_field_less_helpers_do_not_create_incohesion(self):  # verifies: REQ-DESIGN-980#CASE-1
-        """A method touching no field has no state to share. Counting it as disjoint
-        from every sibling adds one pair per sibling and measures nothing — an
-        independent review found it dominating the score on two builder classes."""
-        src = ("class H:\n    def __init__(self):\n        self.x = 1\n"
-               "    def use(self):\n        return self.x\n"
-               + "".join("    def h%d(self, a):\n        return a + %d\n" % (i, i)
-                         for i in range(6)))
-        cls = [n for n in ast.walk(ast.parse(src)) if isinstance(n, ast.ClassDef)][0]
-        ms = [m for m in cls.body if isinstance(m, ast.FunctionDef)]
-        self.assertEqual(R._lcom(ms, R._class_fields(cls)), 0)
-
-    def test_one_field_is_not_a_grouping(self):  # verifies: REQ-DESIGN-980#CASE-2
-        src = ("class One:\n    def __init__(self):\n        self.x = 1\n"
-               + "".join("    def m%d(self):\n        return self.x\n" % i for i in range(8)))
-        self.assertEqual(self._metric_kinds(src), [])
-
-    def test_the_dropped_kinds_are_gone(self):  # verifies: REQ-DESIGN-980#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "m.py"),
-                   "class Wide:\n    def __init__(self):\n        self.x = 1\n"
-                   + "".join("    def m%d(self):\n        return helper%d(self.x)\n" % (i, i)
-                             for i in range(30)))
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_design(d, as_json=True)
-            kinds = {f["kind"] for f in json.loads(buf.getvalue())["findings"]}
-        self.assertNotIn("wide-class", kinds)
-        self.assertNotIn("low-field-sharing", kinds)
-
-    def test_metrics_are_python_only(self):  # verifies: REQ-DESIGN-978#CASE-1
-        body = "".join("  m%d() { return this.x; }\n" % i for i in range(60))
-        found = R._design_file("m.js", "class Wide {\n" + body + "}\n")
-        self.assertEqual([f for f in found if f["pillar"] == "metrics"], [])
-
-    def _dirty_repo(self, d):
-        """One clean file and one carrying two candidates, so a record has both a
-        score below 100 and more than one kind to group."""
-        _write(os.path.join(d, "clean.py"), 'def a():\n    """A."""\n    return 1\n')
-        _write(os.path.join(d, "dirty.py"),
-               "COUNT = 0\n"
-               "def bump():\n"
-               "    global COUNT\n"
-               "    COUNT += 1\n")
-
-    def test_design_summary_omits_findings_by_default(self):  # verifies: REQ-DESIGN-976#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            self._dirty_repo(d)
-            s = R._design_summary(d)
-        self.assertEqual(sorted(s), ["candidates", "clean_files", "files", "score"])
-
-    def test_design_summary_with_findings_lists_every_candidate(self):  # verifies: REQ-DESIGN-976#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            self._dirty_repo(d)
-            s = R._design_summary(d, with_findings=True)
-        self.assertEqual(len(s["findings"]), sum(s["candidates"].values()))
-        one = s["findings"][0]
-        self.assertEqual(sorted(one), ["detail", "file", "kind", "line", "name", "pillar"])
-        # advice is a property of the rule, so it is emitted once per kind, not per row
-        self.assertEqual(sorted(s["advice"]), sorted({f["kind"] for f in s["findings"]}))
-        self.assertNotIn("advice", one)
-
-    def test_map_carries_the_candidates_and_health_does_not(self):  # verifies: REQ-DESIGN-976#CASE-2  # verifies: REQ-DESIGN-976#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rq = os.path.join(d, "requirements")
-            _write(os.path.join(rq, "AREA-A-001.md"),
-                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
-            self._dirty_repo(d)
-            data = R._assemble_map_data(R.load_requirements(rq), {}, rq, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_health(R.Workspace(R.load_requirements(rq), {}, rq, d), as_json=True)
-        design = data["design"]
-        self.assertEqual(len(design["findings"]), sum(design["candidates"].values()))
-        self.assertGreater(len(design["findings"]), 0)
-        self.assertNotIn("findings", json.loads(buf.getvalue()).get("design", {}))
-        self.assertNotIn("findings", buf.getvalue())
-
-    def test_design_block_is_byte_stable_across_runs(self):  # verifies: REQ-DESIGN-976#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            rq = os.path.join(d, "requirements")
-            _write(os.path.join(rq, "AREA-A-001.md"),
-                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
-            self._dirty_repo(d)
-            reqs = R.load_requirements(rq)
-            first = R._assemble_map_data(reqs, {}, rq, d)["design"]
-            second = R._assemble_map_data(reqs, {}, rq, d)["design"]
-        self.assertEqual(json.dumps(first, sort_keys=True), json.dumps(second, sort_keys=True))
-
-    def test_map_and_health_carry_the_design_score(self):  # verifies: REQ-DESIGN-954#CASE-2  # verifies: ARCH-DESIGN-061#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            rq = os.path.join(d, "requirements")
-            _write(os.path.join(rq, "AREA-A-001.md"),
-                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
-            _write(os.path.join(d, "m.py"), 'def a():\n    """A."""\n    return 1\n')
-            reqs = R.load_requirements(rq)
-            data = R._assemble_map_data(reqs, {}, rq, d)
-            self.assertEqual(data["design"]["score"], 100)
-            self.assertIn("design pass-rate: 100% (1/1 source files", R._build_md_text(dict(data, todos=[])))
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_health(R.Workspace(reqs, {}, rq, d), True)
-            self.assertEqual(json.loads(buf.getvalue())["design_score"], 100)
-
-    def test_no_program_logic_means_no_design_key(self):  # verifies: REQ-DESIGN-954#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rq = os.path.join(d, "requirements")
-            _write(os.path.join(rq, "AREA-A-001.md"),
-                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
-            _write(os.path.join(d, "site.css"), "body { margin: 0 }\n")
-            data = R._assemble_map_data(R.load_requirements(rq), {}, rq, d)
-            self.assertNotIn("design", data)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R.cmd_health(R.Workspace(R.load_requirements(rq), {}, rq, d), True)
-            self.assertNotIn("design_score", json.loads(buf.getvalue()))
-
-    def test_javascript_functions_classes_and_switch(self):  # verifies: REQ-DESIGN-955#CASE-1  # verifies: ARCH-DESIGN-061#CASE-5
-        src = (
-            "// comment with { brace and 'quote\n"
-            "function wide(a, b, c, d, e, f, g) { return a; }\n"
-            "const arrow = (x, y) => { return x + y; };\n"
-            "class Store { load() { return 1; } save() { return 2; } close() { } }\n"
-            "class Cache { load() { return 3; } save() { return 2; } close() { } }\n"
-            "function pick(kind, v) {\n"
-            "  switch (kind) { case 'a': return 1; case 'b': return 2; case 'c': return 3; case 'd': return 4; }\n"
-            "  if (v instanceof Foo) { } else if (v instanceof Bar) { } else if (v instanceof Baz) { }\n"
-            "}\n")
-        f = R._design_file("m.js", src)
-        kinds = {x["kind"] for x in f}
-        self.assertIn("long-parameter-list", kinds)
-        self.assertIn("shared-methods", kinds)
-        self.assertIn("duplicate-method", kinds)
-        self.assertIn("type-switch", kinds)
-        self.assertIn("isinstance-chain", kinds)
-        self.assertEqual([x["name"] for x in f if x["kind"] == "type-switch"], ["kind"])
-        self.assertEqual([x["name"] for x in f if x["kind"] == "isinstance-chain"], ["v"])
-        self.assertIn("Cache.save", [x["name"] for x in f if x["kind"] == "duplicate-method"])
-
-    def test_cpp_long_function_and_dynamic_cast_chain(self):  # verifies: REQ-DESIGN-955#CASE-2
-        body = "".join("    x += {};\n".format(i) for i in range(90))
-        src = ("#include <x>\n"
-               "int compute(const std::string& name, int n) {\n" + body + "    return x;\n}\n"
-               "void handle(Shape* s) {\n"
-               "    if (dynamic_cast<Circle*>(s)) { } else if (dynamic_cast<Square*>(s)) { }"
-               " else if (dynamic_cast<Tri*>(s)) { }\n}\n")
-        f = R._design_file("shapes.cpp", src)
-        kinds = [x["kind"] for x in f]
-        self.assertIn("long-function", kinds)
-        self.assertEqual([x["name"] for x in f if x["kind"] == "long-function"], ["compute"])
-        self.assertIn("isinstance-chain", kinds)
-        self.assertNotIn("missing-docstring", kinds)   # Python-only rule
-
-    def test_masking_hides_braces_in_strings_and_comments(self):  # verifies: REQ-DESIGN-955#CASE-3
-        src = ('function f() { const s = "{{{"; /* } */ return s; } // {\n'
-               "function g() { return 1; }\n")
-        f = R._design_file("m.js", src)
-        self.assertEqual([x for x in f if x["kind"] in ("long-function", "deep-nesting")], [])
-        masked = R._design_mask(src)
-        self.assertNotIn('"{{{"', masked)
-        self.assertEqual(masked.count("\n"), src.count("\n"))
-
-    def test_other_languages_get_standards_only(self):  # verifies: REQ-DESIGN-955#CASE-4
-        src = "def a\n  1\nend\n" + "x = '" + "y" * 120 + "'\n"
-        f = R._design_file("m.rb", src)
-        self.assertEqual([x["kind"] for x in f], ["line-too-long"])
-        self.assertEqual(R._design_file("m.rb", "def a\n  1\nend\n"), [])
-
-
-    def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
-        saved = R.DESIGN_PARAMS_MAX
-        self.addCleanup(setattr, R.config, "DESIGN_PARAMS_MAX", saved)
-        src = "def f(a, b, c): pass\n"
-        self.assertEqual(self._kinds(src), [])
-        R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
-        self.assertIn("long-parameter-list", self._kinds(src))
-
-    def test_the_requirement_enumerates_every_pillar_that_ships(self):
-        """REQ-DESIGN-952's print-order clause is an exhaustive enumeration, so it goes
-        stale silently the moment a pillar is added: nobody edits it, and `binding_hash`
-        therefore reports no DRIFT. Assert the two agree instead of trusting a reader
-        to notice."""
-        here = os.path.dirname(os.path.abspath(__file__))
-        doc = os.path.join(here, "..", "requirements", "ARCH-DESIGN-061.md")
-        with open(doc, encoding="utf-8") as f:
-            body = f.read()
-        clause = [ln for ln in body.splitlines()
-                  if "prints one block per group in the order" in ln]
-        self.assertEqual(len(clause), 1, "the print-order clause moved or was duplicated")
-        named = [p for p in R.DESIGN_PILLARS if p in clause[0]]
-        self.assertEqual(named, list(R.DESIGN_PILLARS),
-                         "the clause must name every shipped pillar, in DESIGN_PILLARS order")
-
-    def test_design_is_in_the_registry_and_not_in_the_gate(self):  # verifies: ARCH-DESIGN-061#CASE-3
-        # `design` is a mode of `gate`, not a gate RULE: it never decides an exit
-        # code. That is the property this case has always been about.
-        self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
 
 
 class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEXT-883  # tested-by: REQ-NEXT-884  # tested-by: REQ-NEXT-885  # tested-by: REQ-NEXT-886  # tested-by: REQ-NEXT-887
@@ -5036,7 +4394,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                 self.assertIn(flag, known, "{} uses {}".format(tool["name"], flag))
 
     FROZEN_TOOLS = {"reqmap_gate", "reqmap_next", "reqmap_health", "reqmap_show", "reqmap_search",
-                    "reqmap_audit", "reqmap_dupes", "reqmap_design", "reqmap_untagged",
+                    "reqmap_audit", "reqmap_dupes", "reqmap_untagged",
                     "reqmap_review", "reqmap_clarify", "reqmap_release_plan", "reqmap_sync",
                     "reqmap_release"}
 
@@ -5257,30 +4615,6 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
                    if f.endswith(".md") and f != "README.md" and "(" + f + ")" not in index]
         self.assertEqual([], missing, "ADR files with no index row")
 
-    def test_the_engine_reports_the_documented_design_findings(self):  # verifies: REQ-SELFGATE-990#CASE-4
-        """CLAUDE.md says the engine package reports N design findings on itself.
-        That sentence read 'three' while the package reported ten: a 502-line CLI, a
-        32-definition module, fourteen over-wide lines and two functions nested five
-        deep had accumulated under a claim nobody re-measured. Each was arguably fine;
-        the defect was that the document had stopped describing the code, which is the
-        one failure this repo exists to catch. Accepting a finding is a decision to
-        record in CLAUDE.md, and this test is what makes recording it necessary.
-        """
-        claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
-        words = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7}
-        m = re.search(r"reports exactly ([A-Z]+) findings on itself", claude_md)
-        self.assertIsNotNone(m, "CLAUDE.md no longer states the engine's design-finding count")
-        claimed = words.get(m.group(1))
-        self.assertIsNotNone(claimed, "unrecognised count word: " + m.group(1))
-        scripts = os.path.join(self.root, "plugin", "scripts")
-        summary = R.design_report._design_summary(scripts, with_findings=True)
-        found = summary["findings"] if summary else []
-        self.assertEqual(len(found), claimed,
-                         "CLAUDE.md claims {} design finding(s) for the engine package; "
-                         "ask --design reports {}: {}".format(
-                             claimed, len(found),
-                             [(f["file"], f["kind"]) for f in found]))
-
     def test_the_engine_module_count_is_current(self):  # verifies: REQ-SELFGATE-990#CASE-4
         """The same sentence states a module count; it read 49 against 51 files."""
         claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
@@ -5319,148 +4653,6 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         index = open(os.path.join(self.root, "docs", "adr", "README.md"), encoding="utf-8").read()
         head = index.split("| # |")[0]
         self.assertNotRegex(head, r"(?i)\b(twenty|thirty|forty|fourteen|\d+)\s+decisions\b")
-
-
-class AdvisoryDataCarriesNoVerdict(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-991
-    """Issue #243. `_map.json` is ONE freshness-gated artifact carrying three classes of
-    data with three severities: the graph is normative, `health` derived, `design`
-    advisory by its own contract (ARCH-DESIGN-061). The comparison was all-or-nothing,
-    so one blank line in a file no requirement claims moved a `line:` in
-    `design.findings`, made the committed map stale, and failed `gate` with zero
-    requirement errors."""
-
-    def _repo(self, d):
-        rd = os.path.join(d, "requirements")
-        _write(os.path.join(rd, "A-M-001.md"), _spec("A-M-001", ["`gate` writes the lock."]))
-        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
-        reqs = R.load_requirements(rd)
-        data = R._build_map_data(reqs, R.scan_members(d, rd))
-        data["design"] = {"files": 2, "clean_files": 1, "score": 50,
-                          "candidates": {"encapsulation": 1},
-                          "findings": [{"pillar": "encapsulation", "kind": "long-function",
-                                        "file": "untagged.py", "line": 12, "name": "f",
-                                        "detail": "42 lines"}],
-                          "advice": {"long-function": "shorten it"}}
-        data["health"] = {"score": 90, "total": 1}
-        R.render_json(data, rd)
-        R.render_md(data, rd)
-        return rd, data
-
-    def _stale(self, rd, data, root):
-        return R._stale_artifacts(data, R.Workspace(None, None, rd), root)
-
-    def test_baseline_is_fresh(self):
-        with tempfile.TemporaryDirectory() as d:
-            rd, data = self._repo(d)
-            self.assertEqual([], self._stale(rd, data, d))
-
-    def test_a_moved_advisory_line_number_is_not_staleness(self):  # verifies: REQ-DESIGN-991#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            rd, data = self._repo(d)
-            data["design"]["findings"][0]["line"] = 999
-            self.assertEqual([], self._stale(rd, data, d))
-
-    def test_a_changed_design_score_is_not_staleness(self):  # verifies: REQ-DESIGN-991#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            rd, data = self._repo(d)
-            data["design"]["score"] = 3
-            data["design"]["clean_files"] = 0
-            self.assertEqual([], self._stale(rd, data, d))
-
-    def test_a_changed_requirement_still_is(self):  # verifies: REQ-DESIGN-991#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rd, data = self._repo(d)
-            data["nodes"][0]["title"] = "something else entirely"
-            self.assertIn("_map.json", self._stale(rd, data, d))
-
-    def test_a_changed_health_number_still_is(self):  # verifies: REQ-DESIGN-991#CASE-4
-        # health is derived from the corpus, not from line numbers in files nothing
-        # claims, so it stays inside the verdict.
-        with tempfile.TemporaryDirectory() as d:
-            rd, data = self._repo(d)
-            data["health"]["score"] = 12
-            self.assertIn("_map.json", self._stale(rd, data, d))
-
-    def test_the_design_rows_stay_in_the_artifact(self):
-        # Excluding them from the COMPARISON must not delete them from the file: the
-        # viewer renders them in its Design tab (app/src/views/ProblemsView.jsx).
-        with tempfile.TemporaryDirectory() as d:
-            rd, _data = self._repo(d)
-            doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
-        self.assertEqual(1, len(doc["design"]["findings"]))
-        self.assertEqual(12, doc["design"]["findings"][0]["line"])
-
-    def test_the_stripper_drops_the_block_and_keeps_what_follows(self):
-        # The block closes at the first line that is exactly two-space `}` or `},`;
-        # everything nested inside it is deeper, and `health` must survive.
-        text = "\n".join([
-            '{',
-            '  "nodes": [],',
-            '  "design": {',
-            '    "score": 50,',
-            '    "findings": [',
-            '      {',
-            '        "line": 12',
-            '      }',
-            '    ]',
-            '  },',
-            '  "health": {',
-            '    "score": 90',
-            '  }',
-            '}',
-        ])
-        out = R._strip_generated(text)
-        self.assertNotIn("findings", out)
-        self.assertNotIn('"score": 50', out)
-        self.assertIn('"health"', out)
-        self.assertIn('"score": 90', out)
-        self.assertIn('"nodes": []', out)
-
-    def test_a_blank_line_in_an_untagged_file_does_not_fail_the_gate(self):  # verifies: REQ-DESIGN-991#CASE-5
-        """The reproduction from issue #243, end to end. The file carries no membership
-        tag, so no requirement claims it and no member `loc` moves — the only thing that
-        changes is a `line:` inside the advisory design payload."""
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "A-M-001.md"), _spec("A-M-001", ["`gate` writes the lock."]))
-            _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
-            # long enough to be a design candidate, and tagged by nobody
-            long_fn = ("def sprawling():\n"
-                       + "".join("    v{} = {}\n".format(i, i)
-                                 for i in range(R.DESIGN_FUNC_MAX_LINES + 10))
-                       + "    return v0\n")
-            untagged = os.path.join(d, "untagged.py")
-            _write(untagged, long_fn)
-
-            def render():
-                ws = R.Workspace.load(rd, d)
-                data = ws.map_data(d)
-                R.render_json(data, rd)
-                R.render_md(data, rd)
-                return data
-            data = render()
-            self.assertTrue(data.get("design", {}).get("findings"),
-                            "fixture produced no design finding to move")
-            with redirect_stdout(io.StringIO()):
-                self.assertEqual(0, R.cmd_map(R.Workspace.load(rd, d), d, True))
-
-            _write(untagged, "\n" + long_fn)      # one blank line at the top
-            ws2 = R.Workspace.load(rd, d)
-            moved = ws2.map_data(d)["design"]["findings"][0]["line"]
-            self.assertEqual(data["design"]["findings"][0]["line"] + 1, moved,
-                             "the advisory line number did not move; the fixture proves nothing")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                rc = R.cmd_map(ws2, d, True)
-        self.assertEqual(0, rc, buf.getvalue())
-        self.assertNotIn("stale", buf.getvalue())
-
-    def test_the_md_design_summary_line_is_dropped(self):
-        text = "\n".join(["---", "generated: 2026-01-01", "nodes: 3",
-                          "design pass-rate: 29% (9/31 files)", "---", "# Map"])
-        out = R._strip_generated(text)
-        self.assertNotIn("design pass-rate", out)
-        self.assertIn("nodes: 3", out)
 
 
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
@@ -5583,14 +4775,6 @@ class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-
     LONG = " ".join(["alpha"] * 155)
     REQ_BODY = ("# T\n\n## Description\n\nEvery bullet below is binding.\n- {}.\n\n"
                 "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
-
-    def test_design_review_survives_a_deep_expression(self):
-        # a generated 3,000-term chain parses fine but sits deeper than the recursion limit
-        src = "def table():\n    return " + "+".join(["1"] * 3000) + "\n"
-        self.assertIsInstance(R._design_file("t.py", src), list)
-        src = "def d(x):\n" + "".join("    {} x=={}: return {}\n".format("if" if i == 0 else "elif", i, i)
-                                       for i in range(1500))
-        self.assertIsInstance(R._design_file("t.py", src), list)
 
     def test_wipe_strips_only_what_the_scanner_reads_as_a_tag(self):
         with tempfile.TemporaryDirectory() as d:
@@ -5897,3 +5081,58 @@ class PlanBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: R
             _, out_all = self._next(d, rd, show_all=True)
             for i in range(5):
                 self.assertIn("Item {}".format(i), out_all)
+
+class RemovedInV820(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: ARCH-CONFIG-060
+    """ADR-0047: the design review, the site generator and the i18n detector left the engine;
+    their flags stay one release, doing nothing but saying so."""
+
+    def _main(self, *argv):
+        err = io.StringIO()
+        old = sys.argv
+        sys.argv = ["reqmap"] + list(argv)
+        try:
+            with redirect_stdout(io.StringIO()) as out, redirect_stderr(err):
+                rc = R.main()
+        finally:
+            sys.argv = old
+        return rc, out.getvalue(), err.getvalue()
+
+    def test_a_removed_ask_flag_says_so_and_exits_zero(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"))
+            for flag in ("--design", "--i18n"):
+                rc, _, err = self._main("ask", flag, "--root", d)
+                self.assertEqual(0, rc, flag)
+                self.assertIn("removed in v8.2.0", err)
+                self.assertIn("ADR-0047", err)
+
+    def test_sync_names_a_site_page_it_no_longer_refreshes(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"))
+            _write(os.path.join(d, "docs", "architecture.html"),
+                   "<html><!--##REQMAP:STATS##-->1<!--##/REQMAP:STATS##--></html>")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R._unmaintained_site_note(d)
+            self.assertIn("no longer refreshed", buf.getvalue())
+            _write(os.path.join(d, "docs", "architecture.html"), "<html>hand-written</html>")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R._unmaintained_site_note(d)
+            self.assertEqual("", buf.getvalue())
+
+    def test_init_writes_no_site_page(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(os.path.join(d, "requirements"), d)
+            self.assertFalse(os.path.exists(os.path.join(d, "docs", "architecture.html")))
+
+    def test_a_retired_config_key_is_ignored_in_silence(self):
+        err = io.StringIO()
+        applied = R.config.apply_config({"DESIGN_RFC_MAX": 10, "LANGUAGE": "ro",
+                                         "NOT_A_KEY": 1}, out=err)
+        self.assertEqual([], applied)
+        self.assertNotIn("DESIGN_RFC_MAX", err.getvalue())
+        self.assertNotIn("LANGUAGE", err.getvalue())
+        self.assertIn("NOT_A_KEY", err.getvalue())

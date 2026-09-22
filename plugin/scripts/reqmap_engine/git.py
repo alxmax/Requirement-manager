@@ -69,39 +69,6 @@ def _repo_name(root):  # implements: ARCH-MAP-007  # implements: REQ-MAP-871
     return os.path.basename(os.path.abspath(root)) or None
 
 
-def _normalise_remote(url):  # implements: ARCH-SITE-026
-    """Normalise a git remote URL to a https web URL (https://host/owner/repo),
-    or None when empty/unparseable. Handles scp-style (git@host:owner/repo.git),
-    ssh:// and https:// forms; strips a trailing `.git`. Pure string work."""
-    url = (url or "").strip()
-    if not url:
-        return None
-    if url.endswith(".git"):
-        url = url[:-4]
-    m = re.match(r"^[\w.+-]+@([\w.-]+):(.+)$", url)          # scp-style
-    if m:
-        return "https://{}/{}".format(m.group(1), m.group(2))
-    # optional :port (corporate / self-hosted ssh remotes) is dropped, keeping
-    # group(1)=host and group(2)=path so the web URL stays clickable
-    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)(?::\d+)?/(.+)$", url)
-    if m:
-        return "https://{}/{}".format(m.group(1), m.group(2))
-    return url if "://" in url else None
-
-
-def _git_remote_web_url(root):  # implements: ARCH-SITE-026
-    """The project's web URL from git `remote.origin.url`, or None when git is
-    absent / no remote / not a checkout. Honours the REQMAP_REPO override (a
-    bare slug becomes https://github.com/<slug>; empty disables). Never raises."""
-    override = os.environ.get("REQMAP_REPO")
-    if override is not None:
-        if not override:
-            return None
-        return override if "://" in override else "https://github.com/" + override
-    url = _git_remote_url(root)
-    return _normalise_remote(url)
-
-
 def _git_dirty(root):  # implements: REQ-RETIRE-961
     """True when the working tree has uncommitted changes. Fails OPEN (False) when
     git is absent or this is not a repository: a missing safety net must not block a

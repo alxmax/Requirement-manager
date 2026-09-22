@@ -1,6 +1,6 @@
 ---
 id: ARCH-DESIGN-061
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -72,7 +72,7 @@ CASE-5
 
 ---
 id: REQ-DESIGN-950
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -121,7 +121,7 @@ CASE-4 — a prefix family
 
 ---
 id: REQ-DESIGN-951
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -171,7 +171,7 @@ CASE-4 — short chains are silent
 
 ---
 id: REQ-DESIGN-952
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -220,7 +220,7 @@ CASE-4 — thresholds come from the config
 
 ---
 id: REQ-DESIGN-953
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -269,7 +269,7 @@ CASE-4 — standards print last
 
 ---
 id: REQ-DESIGN-954
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -319,7 +319,7 @@ CASE-3 — no program logic, no key
 
 ---
 id: REQ-DESIGN-955
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -367,7 +367,7 @@ CASE-4 — standards only elsewhere
 
 ---
 id: REQ-DESIGN-976
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -418,7 +418,7 @@ CASE-4 — deterministic
 
 ---
 id: REQ-DESIGN-978
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -481,7 +481,7 @@ CASE-4 — the pillar says what it did not measure
 
 ---
 id: REQ-DESIGN-979
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -531,7 +531,7 @@ CASE-4 — an unparseable file is tolerated
 
 ---
 id: REQ-DESIGN-980
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -582,7 +582,7 @@ CASE-3 — the dropped kinds are gone
 
 ---
 id: REQ-DESIGN-991
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
