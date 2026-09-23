@@ -2957,8 +2957,12 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
     """One walk with cache, the config file, and the verified-bug fixes of v3.3.0."""
 
     def _restore(self, *names):
-        saved = {n: getattr(R, n) for n in names}
-        self.addCleanup(lambda: [setattr(R, n, v) for n, v in saved.items()])
+        # restore on `config`, the module every engine reader looks the
+        # value up in (`cfg.NAME`); setting it on the facade left an
+        # override live for every test that ran after this one
+        saved = {n: getattr(R.config, n) for n in names}
+        self.addCleanup(
+            lambda: [setattr(R.config, n, v) for n, v in saved.items()])
 
     def test_config_applies_a_numeric_threshold(self):  # verifies: REQ-CONFIG-949#CASE-1
         self._restore("LINT_AC_MAX")
@@ -5668,3 +5672,66 @@ class HealthRows(unittest.TestCase):  # tested-by: REQ-HEALTHROWS-1083
         rec = self._rec(reqs, {}, with_rows=False)
         self.assertNotIn("unhealthy", rec)
         self.assertNotIn("exempt_ids", rec)
+
+
+class CommandConsumers(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033
+    """Every OPTIONAL verb or flag names where a real use is written down."""
+
+    ROOT = os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))))
+
+    @staticmethod
+    def _entries():
+        """(verb, flag or None, entry dict) for every verb and flag."""
+        for verb, spec in R.COMMANDS.items():
+            yield verb, None, spec
+            for p in spec["params"]:
+                yield verb, p["flag"], p
+
+    @staticmethod
+    def _is_core(verb, flag):
+        from reqmap_engine.commands import CORE_PATH
+        return verb in CORE_PATH and (flag is None or flag in CORE_PATH[verb])
+
+    def test_every_optional_entry_names_a_consumer(self):
+        missing = []
+        for verb, flag, entry in self._entries():
+            if self._is_core(verb, flag):
+                continue
+            c = entry.get("consumer")
+            values = [c] if isinstance(c, str) else list(c or [])
+            if not values or not all(isinstance(v, str) and v.strip()
+                                     for v in values):
+                missing.append("{} {}".format(verb, flag or "").strip())
+        self.assertEqual(missing, [])
+
+    def test_core_path_is_what_the_hook_and_ci_run(self):
+        from reqmap_engine.commands import CORE_PATH
+        self.assertTrue(self._is_core("gate", None))
+        self.assertTrue(self._is_core("gate", "--full"))
+        self.assertTrue(self._is_core("sync", None))
+        self.assertTrue(self._is_core("init", None))
+        # a core entry is not required to carry one: the check skips it
+        self.assertFalse(self._is_core("gate", "--audit"))
+        self.assertFalse(self._is_core("ask", None))
+        for verb, flags in CORE_PATH.items():
+            owned = {p["flag"] for p in R.COMMANDS[verb]["params"]}
+            self.assertLessEqual(set(flags), owned, verb)
+        for rel in (".githooks/pre-commit", ".github/workflows/ci.yml"):
+            with open(os.path.join(self.ROOT, rel), encoding="utf-8") as fh:
+                self.assertIn("reqmap.py gate --full", fh.read(), rel)
+
+    def test_generated_artifacts_ignore_consumer(self):
+        import copy
+        import reqmap_engine.registry as G
+        stripped = copy.deepcopy(R.COMMANDS)
+        for spec in stripped.values():
+            spec.pop("consumer", None)
+            for p in spec["params"]:
+                p.pop("consumer", None)
+        gens = (G._generate_schema, G._generate_command_table,
+                G._generate_command_list)
+        before = [g() for g in gens]
+        with mock.patch.object(G, "COMMANDS", stripped):
+            after = [g() for g in gens]
+        self.assertEqual(before, after)

@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "e6136e2d9bc1276519818612e6842a722a5a745396d932a0a0e368d0fba38621",
+      "plugin/scripts/reqmap_engine/__init__.py": "78e1c1f73de7fb0839a78641bcaa8340f8611d95aeffeaae856cb94b6a1eb27e",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -94,8 +94,9 @@
     },
     "ARCH-SELFGATE-039": {
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "d8a1b479e4592e27976e4a5c6270a17a4d0819d445662a39927d218c90b0274a",
+      "scripts/check_engine_budget.py": "c81e6ad79f00fe46603394868974a523cb302aad67e4323abcfd8ad0f2b07c4a",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
+      "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130"
     },
     "ARCH-SIMILAR-016": {
@@ -183,7 +184,7 @@
       "plugin/scripts/reqmap_engine/locks.py#save_clarifylock": "b6d884f1169d6a92cb2bef147a738bfda14b44572ba938a033faf806405dec81"
     },
     "REQ-CMDREGISTRY-1031": {
-      "plugin/scripts/reqmap.py#_dispatch_ask": "d422ba2aeb286572a072454b80ba3ace49bab3c0971a239890d7c332f86ba58c",
+      "plugin/scripts/reqmap.py#_dispatch_ask": "e0b8e0c6f1164912891ce98938749a14f6c32f36c78c5149bbd701f5f9ca6442",
       "plugin/scripts/reqmap.py#_removed_flag": "cd1a6d963f5179331dc25caac6051186993772e73484094b3bf3130853d8f5a7",
       "plugin/scripts/reqmap_engine/cliflags.py#_foreign_flags": "387750e27b24f0bc12c6f5293be57dab454d58b68537ff32cf99e3bc0ffebac8",
       "plugin/scripts/reqmap_engine/cliflags.py#_verb_scope": "3d0766e6fbd676bc647d7e656ef7d9a457f5b2b782585da73447e16a0c147b71"
@@ -340,7 +341,7 @@
       "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "cba0f092c9473e700e5da56825c11ee4deef30a67ddf7e523955fc5170941dfa"
     },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "1a47cf3fb1e875fd58cd21273297eed904f04272899a257977cb1eeeec890c27"
+      "plugin/scripts/reqmap.py": "8959c743400acd93842ced527a9970387469141c8ac74360b0c747853481985e"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "60a5966ee67c5f4d7ae327036c8a44cd08688e3de46834b4a493f14234e0a817"

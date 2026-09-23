@@ -1,7 +1,6 @@
 """`sync`'s audit tail: one line per corpus-shape signal."""
 import datetime
 
-from .design_report import _design_summary
 from .groups import decomposable
 from .lint import lint_requirement
 from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
@@ -125,6 +124,7 @@ def _auto_level_line(shape):
 def _design_candidate_line(code_root, reqs_dir):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """One line naming source files that carry a design candidate, or None."""
+    from .design_report import _design_summary
     design = _design_summary(code_root, reqs_dir) if code_root else None
     if design is None or design["clean_files"] >= design["files"]:
         return None

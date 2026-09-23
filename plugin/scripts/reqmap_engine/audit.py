@@ -3,7 +3,6 @@ import contextlib, io, json
 
 from . import MAP_ENGINE_VERSION, config as cfg
 from .audittail import _roadmap_lag_lines, _version_lines
-from .design_report import _design_summary, cmd_design
 from .gate import cmd_check, run_gate_rules
 from .health import _exempt_note, _health_record, cmd_coverage
 from .mapdata import _read_roadmap
@@ -255,6 +254,9 @@ def cmd_audit(ws, strict=False, as_json=False):
     the V-model's left arm."""
     reqs = ws.reqs
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
+    # Imported here, not at module top: the gate never loads the design
+    # review, and `gate` imports this module.
+    from .design_report import _design_summary, cmd_design
     exemptions = _exemptions_in_force(reqs)
     unexplained = [e for e in exemptions if not e["reason"]]
     shape = _corpus_shape(reqs)

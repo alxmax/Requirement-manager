@@ -29,6 +29,7 @@ COMMANDS = {
             {
                 "name": "plan",
                 "flag": "--plan",
+                "consumer": "plugin/skills/requirement-manager/SKILL.md",
                 "type": "bool",
                 "help": (
                     "Emit the extraction plan as JSON instead of writing "
@@ -38,6 +39,7 @@ COMMANDS = {
             {
                 "name": "out",
                 "flag": "--out",
+                "consumer": "none recorded",
                 "type": "str",
                 "help": (
                     "With --plan: write the plan JSON here ('-' or omitted = "
@@ -47,6 +49,7 @@ COMMANDS = {
             {
                 "name": "md_glob",
                 "flag": "--md-glob",
+                "consumer": "none recorded",
                 "type": "str",
                 "help": (
                     "With --plan: also scan these non-code globs for "
@@ -56,6 +59,7 @@ COMMANDS = {
             {
                 "name": "wipe",
                 "flag": "--wipe",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "Hard-reset: delete all non-generated requirements and "
@@ -66,6 +70,9 @@ COMMANDS = {
             {
                 "name": "no_site",
                 "flag": "--no-site",
+                "consumer": [
+                    "plugin/skills/requirement-manager/references/site.md",
+                ],
                 "type": "bool",
                 "help": (
                     "Skip the final site step (scaffolding "
@@ -91,6 +98,10 @@ COMMANDS = {
             {
                 "name": "mode_audit",
                 "flag": "--audit",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "Print every pass that discovers a problem as one report: "
@@ -101,6 +112,10 @@ COMMANDS = {
             {
                 "name": "mode_risk",
                 "flag": "--risk",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "Print the corpus risk snapshot and the actionable "
@@ -110,6 +125,10 @@ COMMANDS = {
             {
                 "name": "mode_show",
                 "flag": "--show",
+                "consumer": [
+                    "plugin/skills/requirement-manager/references/mcp.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "str",
                 "help": (
                     "Print one requirement's dossier: intent, contract, "
@@ -120,6 +139,7 @@ COMMANDS = {
             {
                 "name": "show_all",
                 "flag": "--all",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "bool",
                 "help": (
                     "With --risk: expand every bucket instead of the top few."
@@ -128,6 +148,10 @@ COMMANDS = {
             {
                 "name": "untagged",
                 "flag": "--untagged",
+                "consumer": [
+                    "plugin/skills/requirement-manager/references/mcp.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "With --risk: report membership-tag coverage per directory."
@@ -136,6 +160,7 @@ COMMANDS = {
             {
                 "name": "as_badge",
                 "flag": "--badge",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "With --risk: print the coherence score as a badge string."
@@ -144,6 +169,10 @@ COMMANDS = {
             {
                 "name": "strict",
                 "flag": "--strict",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "Promote drift and test-link integrity warnings to errors. "
@@ -153,6 +182,7 @@ COMMANDS = {
             {
                 "name": "json",
                 "flag": "--json",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "bool",
                 "help": (
                     "Emit structured JSON output instead of human-readable "
@@ -162,6 +192,7 @@ COMMANDS = {
             {
                 "name": "since",
                 "flag": "--since",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "str",
                 "help": (
                     "Scope the gate to requirements whose member files changed "
@@ -171,12 +202,14 @@ COMMANDS = {
             {
                 "name": "no_lint",
                 "flag": "--no-lint",
+                "consumer": "check/action.yml",
                 "type": "bool",
                 "help": "Skip the requirement readability check.",
             },
             {
                 "name": "no_map_check",
                 "flag": "--no-map-check",
+                "consumer": "check/action.yml",
                 "type": "bool",
                 "help": "Skip the committed-map freshness check.",
             },
@@ -204,10 +237,19 @@ COMMANDS = {
             "names `ask`. "
         ),
         "arg": None,
+        "consumer": [
+            "plugin/skills/requirement-manager/SKILL.md",
+            "plugin/skills/requirement-quality-review/SKILL.md",
+            "plugin/scripts/reqmap_engine/mcp.py",
+        ],
         "params": [
             {
                 "name": "mode_search",
                 "flag": "--search",
+                "consumer": [
+                    "plugin/skills/requirement-manager/references/mcp.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "str",
                 "help": (
                     "Rank requirements by lexical relevance to a free-text "
@@ -217,6 +259,10 @@ COMMANDS = {
             {
                 "name": "mode_dupes",
                 "flag": "--dupes",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "Rank requirement pairs whose contracts overlap, most "
@@ -226,6 +272,9 @@ COMMANDS = {
             {
                 "name": "mode_design",
                 "flag": "--design",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.universal.md",
+                ],
                 "type": "bool",
                 "help": (
                     "Advisory design review of the code: encapsulation, "
@@ -237,6 +286,10 @@ COMMANDS = {
             {
                 "name": "mode_review",
                 "flag": "--review",
+                "consumer": [
+                    "plugin/skills/requirement-quality-review/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "str",
                 "help": (
                     "Emit the deterministic review plan as JSON: for one "
@@ -246,6 +299,7 @@ COMMANDS = {
             {
                 "name": "mode_i18n",
                 "flag": "--i18n",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "Removed in v8.2.0 (ADR-0047): accepted and ignored, "
@@ -255,6 +309,7 @@ COMMANDS = {
             {
                 "name": "top",
                 "flag": "--top",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "int",
                 "help": (
                     "With --search or --dupes: how many results to print."
@@ -263,6 +318,7 @@ COMMANDS = {
             {
                 "name": "threshold",
                 "flag": "--threshold",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "str",
                 "help": (
                     "With --dupes: override the similarity threshold."
@@ -271,6 +327,7 @@ COMMANDS = {
             {
                 "name": "json",
                 "flag": "--json",
+                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
                 "type": "bool",
                 "help": (
                     "Emit structured JSON output instead of human-readable "
@@ -293,6 +350,7 @@ COMMANDS = {
             {
                 "name": "mode_retire",
                 "flag": "--retire",
+                "consumer": "none recorded",
                 "type": "list",
                 "help": (
                     "Take these requirements out of service instead of "
@@ -305,6 +363,11 @@ COMMANDS = {
             {
                 "name": "mode_release",
                 "flag": "--release",
+                "consumer": [
+                    "docs/planning.md",
+                    "plugin/scripts/reqmap_engine/release.py",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "str",
                 "help": (
                     "Cut a release instead of syncing: the next version "
@@ -320,6 +383,7 @@ COMMANDS = {
             {
                 "name": "delete",
                 "flag": "--delete",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "With --retire: also remove the block, its lock entries "
@@ -329,6 +393,10 @@ COMMANDS = {
             {
                 "name": "do_apply",
                 "flag": "--apply",
+                "consumer": [
+                    "docs/planning.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": (
                     "With --retire or --release: actually write the change. "
@@ -338,6 +406,7 @@ COMMANDS = {
             {
                 "name": "force",
                 "flag": "--force",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "With --retire: proceed even though dependents still point "
@@ -349,6 +418,7 @@ COMMANDS = {
             {
                 "name": "findings",
                 "flag": "--findings",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "Also regenerate the aggregated open-questions file."
@@ -357,6 +427,10 @@ COMMANDS = {
             {
                 "name": "attach",
                 "flag": "--attach",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/skills/requirement-manager/references/site.md",
+                ],
                 "type": "str",
                 "help": (
                     "HTML page to refresh the site's engine-owned regions "
@@ -367,6 +441,10 @@ COMMANDS = {
             {
                 "name": "accept_drift",
                 "flag": "--accept-drift",
+                "consumer": [
+                    "plugin/skills/requirement-manager/SKILL.md",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "str",
                 "help": (
                     "Explicitly advance the baseline when a confirmed or "
@@ -380,6 +458,7 @@ COMMANDS = {
             {
                 "name": "strict",
                 "flag": "--strict",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "Promote drift and test-link integrity from warn to error."
@@ -388,6 +467,10 @@ COMMANDS = {
             {
                 "name": "json",
                 "flag": "--json",
+                "consumer": [
+                    "plugin/scripts/reqmap_engine/release.py",
+                    "plugin/scripts/reqmap_engine/mcp.py",
+                ],
                 "type": "bool",
                 "help": "With --retire or --release: emit the plan as JSON.",
             },
@@ -407,10 +490,16 @@ COMMANDS = {
        
         ),
         "arg": "AREA-NAME-NNN",
+        "consumer": [
+            "plugin/skills/requirement-manager/SKILL.md",
+            "plugin/skills/requirement-manager/references/assistant-steps.md",
+            "plugin/scripts/reqmap_engine/mcp.py",
+        ],
         "params": [
             {
                 "name": "decompose",
                 "flag": "--decompose",
+                "consumer": "plugin/skills/requirement-manager/SKILL.md",
                 "type": "bool",
                 "help": (
                     "Split a requirement into code-rung children along the "
@@ -423,6 +512,7 @@ COMMANDS = {
             {
                 "name": "levels",
                 "flag": "--levels",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": (
                     "Propose a V-model rung for every requirement that "
@@ -434,8 +524,13 @@ COMMANDS = {
                 ),
             },
             {"name": "as_json", "flag": "--json", "type": "bool",
+             "consumer": [
+                 "plugin/skills/requirement-manager/references/mcp.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
              "help": "Emit the questions as JSON for an agent to answer."},
             {"name": "do_apply", "flag": "--apply", "type": "bool",
+             "consumer": "plugin/skills/requirement-manager/SKILL.md",
              "help": (
                  "With --decompose or --levels: write the proposal instead of "
                  "printing it."
@@ -452,11 +547,16 @@ COMMANDS = {
             "invocation in a fresh process. Read-only unless --allow-writes."
         ),
         "arg": None,
+        "consumer": [
+            ".mcp.json",
+            ".vscode/mcp.json",
+        ],
         "tool": False,
         "params": [
             {
                 "name": "allow_writes",
                 "flag": "--allow-writes",
+                "consumer": "none recorded",
                 "type": "bool",
                 "help": "Also offer the tools that write: sync and release.",
             },
@@ -473,3 +573,14 @@ COMMAND_GROUPS = (
     ("build", ("sync",)),
     ("read", ("gate", "ask", "mcp")),
 )
+
+
+# Tiers, read off the automated callers rather than chosen by taste.
+# CORE-path: what `.githooks/pre-commit` and CI's `gate-and-tests` job run
+# (`gate --full`; the global --root/--code are not registry flags), bare
+# `sync` (the write path the hook's failure message sends the author to)
+# and bare `init` (the bootstrap). Every other verb or flag is OPTIONAL and
+# carries a `"consumer"`: where a real use is written down (a workflow, a
+# hook, the shipped skill, a config, a named repo), or "none recorded".
+# `consumer` is registry-only: no generated artifact reads it.
+CORE_PATH = {"init": (), "gate": ("--full",), "sync": ()}
