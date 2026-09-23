@@ -29,7 +29,7 @@
           },
           "no_site": {
             "type": "boolean",
-            "description": "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. `init` writes no site page."
+            "description": "Skip the final site step (scaffolding docs/architecture.html)."
           }
         },
         "required": []
@@ -105,7 +105,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_ask",
-      "description": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --review emits the machine-readable review plan. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`. ",
+      "description": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code against the OOP pillars, --review emits the machine-readable review plan. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -123,7 +123,7 @@
           },
           "mode_design": {
             "type": "boolean",
-            "description": "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0."
+            "description": "Advisory design review of the code: encapsulation, abstraction, inheritance and polymorphism candidates plus file length and line width, grouped by pillar. Read-only, exit 0, never the gate."
           },
           "mode_review": {
             "type": "string",
@@ -191,7 +191,7 @@
           },
           "attach": {
             "type": "string",
-            "description": "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. `sync` refreshes no site page."
+            "description": "HTML page to refresh the site's engine-owned regions in (scaffolds it if absent). Without it, `sync` refreshes docs/architecture.html when that exists."
           },
           "accept_drift": {
             "type": "string",

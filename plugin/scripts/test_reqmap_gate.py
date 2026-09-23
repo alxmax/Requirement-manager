@@ -127,7 +127,9 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
             self.assertIn("re-check 1 member", out)   # actionable count
             self.assertIn("mod.py:1", out)            # names the member location
 
-    def test_confirmed_missing_contract_section_warns(self):  # tested-by: ARCH-CHECK-006  # verifies: ARCH-CHECK-006#CASE-7  # verifies: REQ-CHECK-829#CASE-6
+    def test_confirmed_missing_contract_section_warns(self):
+        # tested-by: ARCH-CHECK-006  # tested-by: REQ-CHECK-1040
+        # verifies: REQ-CHECK-1040#CASE-1
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -140,7 +142,8 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         self.assertIn("missing '## Description'", out)
         self.assertEqual(code, 0)  # WARN, not error
 
-    def test_confirmed_missing_acceptance_section_warns(self):  # tested-by: ARCH-CHECK-006  # verifies: ARCH-CHECK-006#CASE-8  # verifies: REQ-CHECK-829#CASE-7
+    def test_confirmed_missing_acceptance_section_warns(self):
+        # tested-by: ARCH-CHECK-006  # verifies: REQ-CHECK-1040#CASE-2
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -153,7 +156,8 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         self.assertIn("missing '## Cases'", out)
         self.assertEqual(code, 0)  # WARN, not error
 
-    def test_confirmed_with_both_sections_no_section_lint_warn(self):  # tested-by: ARCH-CHECK-006  # verifies: ARCH-CHECK-006#CASE-9
+    def test_confirmed_with_both_sections_no_section_lint_warn(self):
+        # tested-by: ARCH-CHECK-006  # verifies: REQ-CHECK-1040#CASE-3
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -318,7 +322,7 @@ class MemberDrift(unittest.TestCase):  # tested-by: ARCH-MEMBERDRIFT-027  # test
             self.assertNotIn("REQ-BB-001", mh)   # shared.py belongs to two requirements
             self.assertNotIn("REQ-CC-001", mh)
 
-    def test_file_sha_normalizes_line_endings(self):  # CRLF (Windows) == LF (CI)  # verifies: ARCH-MEMBERDRIFT-027#CASE-8  # verifies: REQ-MEMBERDRIFT-879#CASE-4
+    def test_file_sha_normalizes_line_endings(self):  # CRLF (Windows) == LF (CI)  # verifies: REQ-MEMBERDRIFT-879#CASE-4
         with tempfile.TemporaryDirectory() as d:
             lf = os.path.join(d, "lf.py")
             crlf = os.path.join(d, "crlf.py")
@@ -347,7 +351,7 @@ class MemberDrift(unittest.TestCase):  # tested-by: ARCH-MEMBERDRIFT-027  # test
             self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d),
                              [("REQ-MD-001", "src/foo.py")])
 
-    def test_contract_also_changed_not_flagged(self):  # verifies: ARCH-MEMBERDRIFT-027#CASE-4  # verifies: REQ-MEMBERDRIFT-880#CASE-1
+    def test_contract_also_changed_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-880#CASE-1
         with tempfile.TemporaryDirectory() as d:
             self._req(d); self._member(d, "ORIGINAL = 1")
             reqs, members, lock = self._state(d)
@@ -356,7 +360,7 @@ class MemberDrift(unittest.TestCase):  # tested-by: ARCH-MEMBERDRIFT-027  # test
             lock = {"REQ-MD-001": "stale-hash"}   # contract drifted too → forward drift owns it
             self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d), [])
 
-    def test_non_confirmed_not_flagged(self):  # verifies: ARCH-MEMBERDRIFT-027#CASE-5  # verifies: REQ-MEMBERDRIFT-880#CASE-2
+    def test_non_confirmed_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-880#CASE-2
         with tempfile.TemporaryDirectory() as d:
             self._req(d, status="baseline"); self._member(d, "ORIGINAL = 1")
             reqs, members, lock = self._state(d)
@@ -364,14 +368,14 @@ class MemberDrift(unittest.TestCase):  # tested-by: ARCH-MEMBERDRIFT-027  # test
             self._member(d, "CHANGED = 2")
             self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d), [])
 
-    def test_new_member_without_baseline_not_flagged(self):  # verifies: ARCH-MEMBERDRIFT-027#CASE-6  # verifies: REQ-MEMBERDRIFT-880#CASE-3
+    def test_new_member_without_baseline_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-880#CASE-3
         with tempfile.TemporaryDirectory() as d:
             self._req(d); self._member(d, "ORIGINAL = 1")
             reqs, members, lock = self._state(d)
             self._member(d, "CHANGED = 2")
             self.assertEqual(R.member_drift(reqs, members, lock, {}, d), [])   # no baseline yet
 
-    def test_gate_warns_and_strict_promotes(self):  # verifies: ARCH-MEMBERDRIFT-027#CASE-7  # verifies: REQ-MEMBERDRIFT-880#CASE-4
+    def test_gate_warns_and_strict_promotes(self):  # verifies: ARCH-MEMBERDRIFT-027#CASE-4  # verifies: REQ-MEMBERDRIFT-880#CASE-4
         with tempfile.TemporaryDirectory() as d:
             self._req(d); self._member(d, "ORIGINAL = 1")
             reqs = R.load_requirements(d); members = R.scan_members(d, d)
@@ -575,7 +579,8 @@ class GateErrors(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: 
         self.assertIn("no implements", out)
         self.assertEqual(code, 1)
 
-    def test_test_exempt_suppresses_test_warn(self):  # verifies: ARCH-CHECK-006#CASE-10  # verifies: REQ-CHECK-829#CASE-4
+    def test_test_exempt_suppresses_test_warn(self):
+        # verifies: REQ-CHECK-829#CASE-4
         code, out = self._check({
             "A-FOO-001.md": REQ.format(id="A-FOO-001", status="confirmed", layer="bus",
                                        extra="test_exempt: covered by manual QA\n", title="T"),
@@ -583,7 +588,8 @@ class GateErrors(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: 
         self.assertNotIn("tested-by", out)
         self.assertEqual(code, 0)
 
-    def test_untracked_lock_flagged_then_cleared(self):  # uncommitted-lock gap  # verifies: ARCH-CHECK-006#CASE-13  # verifies: REQ-CHECK-830#CASE-5  # verifies: REQ-CHECK-830#CASE-6
+    def test_untracked_lock_flagged_then_cleared(self):  # uncommitted-lock gap
+        # verifies: REQ-CHECK-830#CASE-5  # verifies: REQ-CHECK-830#CASE-6
         import subprocess as _sp
         with tempfile.TemporaryDirectory() as d:
             reqs_dir = os.path.join(d, "requirements")
@@ -599,7 +605,8 @@ class GateErrors(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: 
             _sp.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
             self.assertEqual([], R.untracked_locks(reqs_dir))
 
-    def test_update_lock_writes_hashes(self):  # verifies: ARCH-CHECK-006#CASE-12  # verifies: REQ-CHECK-833#CASE-1
+    def test_update_lock_writes_hashes(self):
+        # verifies: REQ-CHECK-833#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
                    REQ.format(id="A-FOO-001", status="baseline", layer="bus", extra="", title="T"))
@@ -1023,7 +1030,8 @@ class DependsOnCycles(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested
             reqs = self._load(d, {"A-X-001": ["A-X-001"]})
             self.assertEqual(len(R._dependency_cycles(reqs)), 1)
 
-    def test_gate_warns_and_does_not_error(self):  # verifies: ARCH-CHECK-006#CASE-14  # verifies: REQ-CHECK-831#CASE-3
+    def test_gate_warns_and_does_not_error(self):
+        # verifies: ARCH-CHECK-006#CASE-6  # verifies: REQ-CHECK-831#CASE-3
         with tempfile.TemporaryDirectory() as d:
             self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
             reqs, members = R.load_requirements(d), R.scan_members(d, d)
@@ -1234,15 +1242,16 @@ class MilestoneGate(unittest.TestCase):  # tested-by: ARCH-CHECK-006
                 R.cmd_check(R.Workspace(reqs, members, d, d), False)
             return buf.getvalue()
 
-    def test_malformed_milestone_warns(self):  # verifies: ARCH-CHECK-006#CASE-6  # verifies: REQ-CHECK-830#CASE-2
+    def test_malformed_milestone_warns(self):  # verifies: REQ-CHECK-830#CASE-2
         for bad in ("next", "1.14", "V1.0", "v1.14-beta"):
             self.assertIn("malformed", self._warns(bad), bad)
 
-    def test_valid_milestone_silent(self):  # verifies: ARCH-CHECK-006#CASE-6  # verifies: REQ-CHECK-830#CASE-1
+    def test_valid_milestone_silent(self):  # verifies: REQ-CHECK-830#CASE-1
         for ok in ("v1.14", "v1.04", "v2"):
             self.assertNotIn("malformed", self._warns(ok), ok)
 
-    def test_deprecated_milestone_exempt(self):  # verifies: ARCH-CHECK-006#CASE-6  # verifies: REQ-CHECK-830#CASE-3
+    def test_deprecated_milestone_exempt(self):
+        # verifies: REQ-CHECK-830#CASE-3
         self.assertNotIn("malformed", self._warns("next", status="deprecated"))
 
 
@@ -1422,7 +1431,7 @@ class CheckJson(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, as_json=True)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, mode=R.GateMode(as_json=True))
             data = json.loads(buf.getvalue())
             self.assertEqual(rc, 0)
             self.assertTrue(data["ok"])
@@ -1440,7 +1449,7 @@ class CheckJson(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, as_json=True)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, mode=R.GateMode(as_json=True))
             data = json.loads(buf.getvalue())
             self.assertEqual(rc, 1)
             self.assertFalse(data["ok"])
@@ -1455,7 +1464,7 @@ class CheckJson(unittest.TestCase):
             # clean: ok=true ⟺ exit 0
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, as_json=True)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, mode=R.GateMode(as_json=True))
             data = json.loads(buf.getvalue())
             self.assertEqual(data["ok"], (rc == 0),
                              "ok must be True exactly when exit code is 0")
@@ -1469,7 +1478,7 @@ class CheckJson(unittest.TestCase):
             # error: ok=false ⟺ exit 1
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, as_json=True)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir), False, mode=R.GateMode(as_json=True))
             data = json.loads(buf.getvalue())
             self.assertEqual(data["ok"], (rc == 0),
                              "ok must be False exactly when exit code is 1")
@@ -1482,7 +1491,7 @@ class CheckJson(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_check(R.Workspace(reqs, members, rdir), False, as_json=True)
+                R.cmd_check(R.Workspace(reqs, members, rdir), False, mode=R.GateMode(as_json=True))
             data = json.loads(buf.getvalue())
             self.assertIn("warnings", data)
 
@@ -1519,7 +1528,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir), True, since="nonexistent-sha-9999")
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir), True, mode=R.GateMode(since="nonexistent-sha-9999"))
             out = buf.getvalue()
             self.assertIn("WARN", out,
                           "bad --since ref must fall back with a WARN")
@@ -1554,7 +1563,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_check(R.Workspace(reqs, members, rdir, d), True, since=base_ref)
+                R.cmd_check(R.Workspace(reqs, members, rdir, d), True, mode=R.GateMode(since=base_ref))
             # The check ran: REQ-A-001 member (src_a.py) was changed, so it was
             # included; REQ-B-002 was untouched.  Just verify it completes without
             # error (both are clean, no dangling tags).
@@ -1563,7 +1572,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf2 = io.StringIO()
             with redirect_stdout(buf2):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir, d), False, since=base_ref)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir, d), False, mode=R.GateMode(since=base_ref))
             self.assertEqual(rc, 0)
 
     def test_since_fallback_no_git(self):
@@ -1582,7 +1591,7 @@ class CheckSince(unittest.TestCase):
             with mock.patch("subprocess.run", side_effect=FileNotFoundError("git not found")):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
-                    rc = R.cmd_check(R.Workspace(reqs, members, rdir), True, since="HEAD~1")
+                    rc = R.cmd_check(R.Workspace(reqs, members, rdir), True, mode=R.GateMode(since="HEAD~1"))
             out = buf.getvalue()
             self.assertIn("WARN", out, "must WARN when git is unavailable")
             self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
@@ -1627,7 +1636,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(link, lrdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, lrdir, link), False, since=base_ref)
+                rc = R.cmd_check(R.Workspace(reqs, members, lrdir, link), False, mode=R.GateMode(since=base_ref))
             self.assertEqual(rc, 1,
                              "a dangling tag must still be caught when code_root is "
                              "spelled differently than git's toplevel")
@@ -1670,7 +1679,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(sub, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir, sub), False, since=base_ref)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir, sub), False, mode=R.GateMode(since=base_ref))
             self.assertEqual(
                 rc, 1,
                 "a dangling tag in a changed file under a subdir code_root must be caught")
@@ -1706,7 +1715,7 @@ class CheckSince(unittest.TestCase):
             reqs = R.load_requirements(rdir)
             members = R.scan_members(d, rdir)
             with redirect_stdout(io.StringIO()):
-                R.cmd_check(R.Workspace(reqs, members, rdir, d), True, since=base_ref)
+                R.cmd_check(R.Workspace(reqs, members, rdir, d), True, mode=R.GateMode(since=base_ref))
             after_keys = set(R.load_memberlock(rdir))
             self.assertTrue(
                 full_keys <= after_keys,
@@ -1737,7 +1746,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_check(R.Workspace(reqs, members, rdir, d), False, since=base_ref)
+                R.cmd_check(R.Workspace(reqs, members, rdir, d), False, mode=R.GateMode(since=base_ref))
 
 
     def test_since_unrelated_member_change_does_not_false_flag_implements(self):  # bug: check-since-filtered-existence
@@ -1767,7 +1776,7 @@ class CheckSince(unittest.TestCase):
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs, members, rdir, d), False, since=base_ref)
+                rc = R.cmd_check(R.Workspace(reqs, members, rdir, d), False, mode=R.GateMode(since=base_ref))
             self.assertNotIn("no implements: tag found in code", buf.getvalue())
             self.assertEqual(rc, 0)
 
@@ -1941,7 +1950,7 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             reqs2 = R.load_requirements(rdir)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                rc = R.cmd_check(R.Workspace(reqs2, members, rdir, d), True, as_json=True, accept_drift=False)
+                rc = R.cmd_check(R.Workspace(reqs2, members, rdir, d), True, mode=R.GateMode(as_json=True), accept_drift=False)
             # drift no longer blocks the lock, so the json path reports a clean run;
             # the demotion is what carries the signal, and it is printed by name.
             self.assertEqual(rc, 0)
@@ -2253,7 +2262,7 @@ class GateRules(unittest.TestCase):  # tested-by: ARCH-RULES-059  # tested-by: R
     def test_json_carries_findings_records(self):  # verifies: REQ-RULES-948#CASE-2
         files = {"AREA-A-001.md": REQ.format(id="AREA-A-001", status="baseline", layer="feature",
                                              extra="milestone: nope\n", title="T")}
-        _code, out = self._run(files, as_json=True)
+        _code, out = self._run(files, mode=R.GateMode(as_json=True))
         data = json.loads(out)
         f = [x for x in data["findings"] if x["rule"] == "RM004"]
         self.assertEqual(len(f), 1)
@@ -2889,7 +2898,8 @@ class GateVerdictIsLast(unittest.TestCase):  # tested-by: ARCH-CHECK-006
         _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
         return self._run("gate", cwd=d)
 
-    def test_nothing_prints_below_the_verdict(self):  # verifies: ARCH-CHECK-006#CASE-1
+    def test_nothing_prints_below_the_verdict(self):
+        # verifies: REQ-CHECK-1036#CASE-4
         with tempfile.TemporaryDirectory() as d:
             out = self._seeded(d)
         lines = [l for l in out.stdout.strip().splitlines() if l.strip()]
@@ -3080,3 +3090,104 @@ class QuietGate(unittest.TestCase):  # tested-by: REQ-CHECK-1036
         self.assertIn("gate --full", bare)
         self.assertIn("RM007", full)
 
+
+
+class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
+    """GATE_RULES order is output order. It must not depend on which module
+    a caller happens to import first: a split once let RM032 register
+    before RM001, and no other test noticed."""
+
+    ENTRIES = ("axis", "docclaims", "wikilinks", "rulesrepo", "rules",
+               "gate", "audit", "audittail", "relevel", "health")
+
+    def _order_after(self, first):
+        code = ("import reqmap_engine.{}; import reqmap as R; "
+                "print(' '.join(r.id for r in R.GATE_RULES))".format(first))
+        here = os.path.dirname(os.path.abspath(__file__))
+        out = subprocess.run([sys.executable, "-c", code], cwd=here,
+                             capture_output=True, text=True, check=True)
+        return out.stdout.split()
+
+    def test_every_import_entry_yields_one_order(self):
+        orders = {m: self._order_after(m) for m in self.ENTRIES}
+        first = orders["gate"]
+        self.assertEqual(first[:3], ["RM001", "RM002", "RM031"])
+        self.assertEqual(first[-3:], ["RM032", "RM035", "RM036"])
+        for m, order in orders.items():
+            self.assertEqual(order, first, m)
+
+
+class GateSkipsTheDesignReview(unittest.TestCase):  # tested-by: ARCH-MAP-007
+    """The freshness check strips the advisory design record before it
+    compares (REQ-DESIGN-991), so the gate must never compute one: it was
+    about half of every commit's gate time, spent on a result thrown away.
+    `sync` still writes it."""
+
+    def _repo(self, d):
+        rq = os.path.join(d, "requirements")
+        _write(os.path.join(rq, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="confirmed",
+                          layer="feature", extra="", title="T"))
+        _write(os.path.join(d, "impl.py"),
+               "def f(a, b, c, d, e, f, g):\n    return a\n  "
+               + tag("REQ-A-001") + "\n")
+        return rq
+
+    def test_gate_full_never_calls_the_design_review(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._repo(d)
+            ws = R.Workspace.load(rq, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(ws, d)                     # a committed map
+            boom = mock.Mock(side_effect=AssertionError("design ran"))
+            with mock.patch.object(R.design_report, "_design_summary", boom):
+                ws = R.Workspace.load(rq, d)
+                with redirect_stdout(io.StringIO()):
+                    rc = R.cmd_check(ws, False)
+                    rc = R.cmd_map(ws, d, True) or rc
+            self.assertEqual(boom.call_count, 0)
+            self.assertEqual(rc, 0)
+
+    def test_the_gate_map_matches_the_written_one(self):
+        # verifies: ARCH-MAP-007#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._repo(d)
+            ws = R.Workspace.load(rq, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(ws, d)
+            fresh = R.Workspace.load(rq, d).map_data(d, with_design=False)
+            for name, text in (("_map.json", R._build_json_text(fresh)),
+                               ("_map.md", R._build_md_text(fresh))):
+                with open(os.path.join(rq, name), encoding="utf-8") as f:
+                    written = f.read()
+                self.assertEqual(R._strip_generated(written),
+                                 R._strip_generated(text), name)
+
+    def test_a_probe_that_cannot_run_says_so(self):
+        # tested-by: REQ-MAP-871
+        # verifies: REQ-MAP-871#CASE-7
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._repo(d)
+            ws = R.Workspace.load(rq, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(ws, d)
+            broken = mock.Mock(side_effect=OSError("disk gone"))
+            with mock.patch.object(R.workspace, "_assemble_map_data",
+                                   broken):
+                ws = R.Workspace.load(rq, d)
+                with redirect_stdout(io.StringIO()) as out:
+                    rc = R.cmd_check(ws, False)
+            self.assertEqual(rc, 0)
+            self.assertIn("RM027", out.getvalue())
+            self.assertIn("freshness probe failed (OSError: disk gone)",
+                          out.getvalue())
+
+    def test_a_write_after_a_check_still_carries_the_design(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._repo(d)
+            ws = R.Workspace.load(rq, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(ws, d, True)               # check first: no design
+                R.cmd_map(ws, d)                     # then write
+            with open(os.path.join(rq, "_map.json"), encoding="utf-8") as f:
+                self.assertIn("design", json.load(f))

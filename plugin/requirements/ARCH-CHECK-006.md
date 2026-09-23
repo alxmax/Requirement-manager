@@ -7,7 +7,6 @@ owner: Alex
 milestone: v1.02
 depends_on: [ARCH-PARSE-001, ARCH-SCAN-002, ARCH-DRIFT-003]
 satisfies: [SYS-GATE-102]
-lint_exempt: [ac-count-high, over-scoped]
 ---
 
 # The gate
@@ -19,7 +18,8 @@ lint_exempt: [ac-count-high, over-scoped]
 
 Every bullet below is binding.
 - `gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.
-- `gate` warns (not errors) on contract drift against the lock, a confirmed requirement with no `tested-by:` link, or a confirmed requirement missing its `## Description`/`## Cases` section; `--strict` promotes most of these to errors. [[REQ-CHECK-829]] details the behaviour.
+- `gate` warns (not errors) on contract drift against the lock or a confirmed requirement with no `tested-by:` link; `--strict` promotes these to errors. [[REQ-CHECK-829]] details the behaviour.
+- `gate` warns, without affecting the exit code, on a confirmed requirement missing its `## Description` or `## Cases` section. [[REQ-CHECK-1040]] details the behaviour.
 - `gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.
 - `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
@@ -54,47 +54,6 @@ CASE-5
   Then   it produces a `WARN` and does not change the exit code
 
 CASE-6
-  Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)
-  When   `gate` runs
-  Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`
-         requirement produces none
-
-CASE-7
-  Given  a `confirmed` requirement with no `## Description` section
-  When   `gate` runs
-  Then   it produces a `WARN` and does not affect the exit code
-
-CASE-8
-  Given  a `confirmed` requirement with no `## Cases` section
-  When   `gate` runs
-  Then   it produces a `WARN` and does not affect the exit code
-
-CASE-9
-  Given  a `confirmed` requirement with both sections present
-  When   `gate` runs
-  Then   it produces no section-lint warning
-
-CASE-10
-  Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member
-  When   `gate` runs
-  Then   it produces no test warning
-
-CASE-11
-  Given  a requirement without a `## Verify intent` section
-  When   `gate` runs
-  Then   it is counted as legacy-schema in the summary
-
-CASE-12
-  Given  an advancing run (`sync`, or the deprecated `check --update-lock`)
-  When   it runs
-  Then   the current hashes are written to `requirements/_reqlock.json`
-
-CASE-13
-  Given  a `_reqlock.json` (or `_memberlock.json`) present on disk but not git-tracked, inside a git work tree
-  When   `gate` runs
-  Then   it produces a `WARN` naming the file; once the file is tracked, or when run outside a git work tree, it produces none
-
-CASE-14
   Given  two requirements whose `depends_on` fields point at each other
   When   the gate runs
   Then   it warns once, naming the chain, and the exit code stays 0
@@ -110,14 +69,11 @@ CASE-14
 - requirements fulfil, rather than code.
 
 **Notes**
-- Why `ac-count-high` and `over-scoped` are exempt: this requirement is the gate's severity
-  table, not a bundle of checks. Each individual check the gate runs already has its own
-  requirement ([[ARCH-TESTLINK-018]], [[ARCH-ACVERIFY-019]], [[ARCH-MEMBERDRIFT-027]],
-  [[ARCH-DOCBUNDLE-026]], [[ARCH-ORPHANCODE-034]], [[ARCH-DRIFTIMPACT-035]]). What remains here
-  is one behaviour — which condition is an ERROR, which is a WARN, and what that does to the
-  exit code — so every clause and criterion shares a single failure mode. Splitting it would
-  scatter the exit-code contract across files instead of clarifying it. Revisit this exemption
-  if a clause ever lands here that is not about severity or exit code.
+- This requirement is the gate's severity table, not a bundle of checks. Each individual
+  check the gate runs already has its own requirement ([[ARCH-TESTLINK-018]],
+  [[ARCH-ACVERIFY-019]], [[ARCH-MEMBERDRIFT-027]], [[ARCH-DOCBUNDLE-026]],
+  [[ARCH-ORPHANCODE-034]], [[ARCH-DRIFTIMPACT-035]]). Its cases exercise the gate end to end
+  for one condition per severity; the remaining conditions are cases of the children.
 - Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`)
   is not automatable and surfaces at human review.
 - When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed
@@ -228,9 +184,8 @@ distinct_from: [REQ-MEMBERDRIFT-880]
 
 ## Description
 > A `WARN` never blocks a commit on its own, but each one names a real gap: a confirmed
-> contract that moved since its lock, a requirement with no test coverage linked, or a
-> confirmed requirement missing its Description/Cases section. `--strict` turns most of
-> these into hard failures once a team is ready to enforce them.
+> contract that moved since its lock, or a requirement with no test coverage linked.
+> `--strict` turns these into hard failures once a team is ready to enforce them.
 
 Every bullet below is binding.
 - `gate` reports drift as a `WARN` under plain `gate`: a `confirmed` requirement whose
@@ -243,10 +198,6 @@ Every bullet below is binding.
 - A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt
   from that test warning.
 - A `layer: need` requirement is exempt from it too.
-- A `confirmed` requirement missing a `## Description` section is a `WARN`, in both
-  the `bus` and `feature` layers. It does not affect the exit code.
-- A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both
-  the `bus` and `feature` layers. It does not affect the exit code.
 
 ## Cases
 CASE-1 — a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR under plain gate
@@ -279,21 +230,55 @@ CASE-5 — a confirmed need with no tested-by tag raises no test warning
   When   `gate` runs
   Then   its output contains no missing-tested-by warning for that need
 
-CASE-6 — a confirmed requirement missing Description warns and exits 0
+## Context
+**Notes**
+- `distinct_from: REQ-MEMBERDRIFT-880` - `REQ-MEMBERDRIFT-880` is member drift, code ahead of its spec; this is contract drift, the spec ahead of its code.
+
+--------------------
+
+
+---
+id: REQ-CHECK-1040
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CHECK-006]
+---
+
+# A confirmed requirement missing its Description or Cases
+
+## Description
+> A confirmed requirement is a promise that someone read its contract and its cases. One
+> with no `## Description` binds nothing, and one with no `## Cases` has nothing a test can
+> point at, so the gate names the missing section. It stays a warning: the fix is an edit
+> to prose, and dropping the status back is always an equally valid answer.
+
+Every bullet below is binding.
+- A `confirmed` requirement missing a `## Description` section is a `WARN`, in both
+  the `bus` and `feature` layers. It does not affect the exit code.
+- A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both
+  the `bus` and `feature` layers. It does not affect the exit code.
+- A legacy heading (`## Contract`, `## Acceptance`) satisfies the check for its section.
+
+## Cases
+CASE-1 — a confirmed requirement missing Description warns and exits 0
   Given  a confirmed `layer: bus` requirement whose body has no `## Description`/
          `## Contract` section
   When   `gate` runs
   Then   its output contains "missing '## Description'" and it exits 0
 
-CASE-7 — a confirmed requirement missing Cases warns and exits 0
+CASE-2 — a confirmed requirement missing Cases warns and exits 0
   Given  a confirmed `layer: bus` requirement whose body has a Description but no
          `## Cases`/`## Acceptance` section
   When   `gate` runs
   Then   its output contains "missing '## Cases'" and it exits 0
 
-## Context
-**Notes**
-- `distinct_from: REQ-MEMBERDRIFT-880` - `REQ-MEMBERDRIFT-880` is member drift, code ahead of its spec; this is contract drift, the spec ahead of its code.
+CASE-3 — a confirmed requirement with both sections draws no section warning
+  Given  a confirmed requirement whose body has both sections, in the legacy
+         `## WHAT — Contract` / `## HOW — Acceptance` spelling
+  When   `gate` runs
+  Then   its output contains neither "missing '## Description'" nor "missing '## Cases'"
 
 --------------------
 
@@ -608,6 +593,7 @@ Every bullet below is binding.
   warnings are not printed and not counted.
 - `gate --full` and `gate --audit` run every registered rule and print every readability
   finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.
+- The verdict is the last line `gate` prints, and it names each check the run covered.
 - The last line of a bare gate names `gate --full` as where the advice is.
 
 ## Cases
@@ -625,4 +611,9 @@ CASE-3 — advice is hidden by default and shown by --full
   Given  a confirmed requirement with an implements member and no `tested-by:` link
   When   `gate` runs bare, then with `--full`
   Then   the bare run prints no RM007 and the `--full` run prints it
+
+CASE-4 — the verdict is the last line
+  Given  a repository with one confirmed, implemented requirement
+  When   a bare `gate` runs
+  Then   its last line is the `gate:` verdict, naming readability and map freshness
 

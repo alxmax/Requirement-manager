@@ -5,7 +5,6 @@ level: architecture
 layer: feature
 owner: Alex
 milestone: v7.10
-lint_exempt: [file-spread]
 depends_on: [ARCH-SCAN-002, ARCH-CHECK-006]
 satisfies: [SYS-GATE-102]
 ---
@@ -98,7 +97,6 @@ level: code
 layer: feature
 owner: Alex
 milestone: v7.10
-lint_exempt: [file-spread]
 satisfies: [ARCH-UNREADABLE-070]
 ---
 

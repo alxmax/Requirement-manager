@@ -1,5 +1,5 @@
 // implements: ARCH-VIEWER-007
-// implements: ARCH-TRANSLATE-044
+// implements: REQ-TRANSLATE-1080
 /* i18n — UI chrome, plus opt-in, cached, always-marked requirement content.
  *
  * UI chrome (nav, tab labels, section headers, buttons, empty states) is
@@ -11,7 +11,8 @@
  * would put words in the author's mouth and break the match with the .md file
  * on disk. The one exception is opt-in and never silent: `reqmap.py translate`
  * — a separate, MANUAL engine command, never run by gate/sync/lint/CI/the
- * pre-commit hook — caches a `claude -p` translation per requirement, gated by
+ * pre-commit hook — caches a `claude -p` translation per requirement, gated
+ * by
  * a structural-fidelity check, in requirements/_i18n/<locale>.json. `map`
  * inlines that cache onto each node as `node.i18n[locale]`, read-only, no
  * network call of its own. `translatedText()` below is the ONLY thing that
@@ -22,9 +23,10 @@
  * author's own text, exactly as before.
  *
  * The engine's own vocabulary is out of scope too, deliberately: `confirmed`,
- * `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`, and the
- * ERROR/WARN/REVIEW severities are literal values in the requirement files and in
- * the gate's output. A reader who sees "confirmat" here and `status: confirmed`
+ * `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`,
+ * and the ERROR/WARN/REVIEW severities are literal values in the
+ * requirement files and in the gate's output. A reader who sees
+ * "confirmat" here and `status: confirmed`
  * in the file has been given a puzzle, not a translation.
  *
  * The dictionary is keyed by the English source string rather than by an
@@ -53,6 +55,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "Registry": "Registru",
   "Signals": "Indicatori",
   "Health": "Sănătate",
+  "Design OOP": "Design OOP",
   "due {date}": "până la {date}",
   "Roadmap": "Planificare",
   "milestones": "repertori",
@@ -66,7 +69,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Shipped": "Livrat",
   "releases": "release-uri",
   "release": "release",
-  "Nothing planned on this version yet.": "Nimic planificat încă pe versiunea asta.",
+  "Nothing planned on this version yet.":
+    "Nimic planificat încă pe versiunea asta.",
   "Now": "Acum",
   "Next": "Urmează",
   "Later": "Mai târziu",
@@ -82,12 +86,29 @@ const RO = {  // implements: REQ-VIEWER-943
   "lanes": "benzi",
   "today": "azi",
   "Add `bars` with start/end dates to _planning.json for the timeline view.":
-    "Adaugă `bars` cu date start/end în _planning.json pentru vizualizarea timeline.",
+    "Adaugă `bars` cu date start/end în _planning.json pentru "
+      + "vizualizarea timeline.",
   "{a}/{b} green": "{a}/{b} verzi",
   "{n} exempt": "{n} cu scutire",
-  "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
-    "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări "
-      + "deschise, fără drift",
+  "Exempt": "Cu scutire",
+  "not confirmed": "neconfirmată",
+  "not implemented": "neimplementată",
+  "not tested": "netestată",
+  "open question": "întrebare deschisă",
+  "drift": "drift",
+  ["Requirements not green on every axis — confirmed, implemented, "
+    + "tested, no open question, no drift."]:
+    "Cerințe care nu sunt verzi pe toate axele — confirmată, "
+    + "implementată, testată, fără întrebări deschise, fără drift.",
+  "{a}/{b} files clean": "{a}/{b} fișiere curate",
+  ["Requirements green on every axis — confirmed, implemented, tested, no "
+    + "open question, no drift"]:
+    "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, "
+      + "fără întrebări deschise, fără drift",
+  ["Source files with no OOP or house-standard candidate — advisory, "
+    + "never part of the gate"]:
+    "Fișiere sursă fără semnalări OOP sau de standarde — consultativ, "
+      + "niciodată parte din gate",
   "Map": "Hartă",
   "Problems": "Probleme",
   "Spec": "Specificații",
@@ -99,11 +120,13 @@ const RO = {  // implements: REQ-VIEWER-943
   "turning it into code, and proving it": "transformarea ei în cod, și dovada",
   "asking the corpus questions": "Întrebări puse corpusului",
   "Every verb the engine exposes, generated from its own command registry.":
-    "Fiecare verb pe care motorul îl expune, generat din propriul lui registru de comenzi.",
+    "Fiecare verb pe care motorul îl expune, generat din propriul lui "
+      + "registru de comenzi.",
   "No command list in this map.": "Harta nu conține lista de comenzi.",
-  ["Regenerate it with a current engine — `reqmap.py sync` writes the command reference "
-    + "into _map.json."]:
-    "Regenereaz-o cu un motor actual — `reqmap.py sync` scrie referința de comenzi în _map.json.",
+  ["Regenerate it with a current engine — `reqmap.py sync` writes the "
+    + "command reference into _map.json."]:
+    "Regenereaz-o cu un motor actual — `reqmap.py sync` scrie referința "
+      + "de comenzi în _map.json.",
   "Explorer": "Explorator",
   "Findings": "Constatări",
   "{n} members bound": "{n} membri legați",
@@ -114,8 +137,10 @@ const RO = {  // implements: REQ-VIEWER-943
   "expand all": "extinde tot",
   "collapse all": "restrânge tot",
   "{shown} of {total} shown": "{shown} din {total} afișate",
-  "· no hierarchy in this map — flat list": "· fără ierarhie în această hartă — listă plată",
-  "No requirement matches these filters.": "Nicio cerință nu corespunde acestor filtre.",
+  "· no hierarchy in this map — flat list":
+    "· fără ierarhie în această hartă — listă plată",
+  "No requirement matches these filters.":
+    "Nicio cerință nu corespunde acestor filtre.",
   "No requirement selected.": "Nicio cerință selectată.",
   "Links — traceability": "Legături — trasabilitate",
   "satisfies (up)": "satisface (în sus)",
@@ -132,16 +157,19 @@ const RO = {  // implements: REQ-VIEWER-943
   // findings
   "open verify-intent questions": "întrebări de verificare deschise",
   "No open questions.": "Nicio întrebare deschisă.",
-  ["Every requirement's Verify-intent section is either empty or still carries the authored "
-    + "placeholder, which the engine does not count as a finding either."]:
-    "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă "
-      + "textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
+  ["Every requirement's Verify-intent section is either empty or still "
+    + "carries the authored placeholder, which the engine does not count "
+    + "as a finding either."]:
+    "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie "
+      + "conține încă textul-șablon autorat, pe care nici motorul nu îl "
+      + "numără drept constatare.",
   "{n} open question(s) across {m} requirement(s)":
     "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
   "Answer it, fold the answer into the Description, then delete the bullet.":
     "Răspunde, integrează răspunsul în Descriere, apoi șterge punctul.",
   "hide {n} draft review rows": "ascunde {n} rânduri de revizuire draft",
-  "{n} draft review rows hidden — show": "{n} rânduri de revizuire draft ascunse — arată",
+  "{n} draft review rows hidden — show":
+    "{n} rânduri de revizuire draft ascunse — arată",
   // map tabs
   "System Map": "Harta sistemului",
   "Req→Code": "Cerință→Cod",
@@ -182,8 +210,10 @@ const RO = {  // implements: REQ-VIEWER-943
   "Nothing to fix.": "Nimic de reparat.",
   "Nothing in this tab.": "Nimic în această filtrare.",
   "The gate reports no errors, warnings or review items for this registry.":
-    "Poarta nu raportează erori, avertismente sau elemente de revizuit pentru acest registru.",
-  "Other tabs may still have open items.": "Celelalte file pot avea încă elemente deschise.",
+    "Poarta nu raportează erori, avertismente sau elemente de revizuit "
+      + "pentru acest registru.",
+  "Other tabs may still have open items.":
+    "Celelalte file pot avea încă elemente deschise.",
   // roadmap
   "done": "gata",
   "progress": "în lucru",
@@ -191,28 +221,32 @@ const RO = {  // implements: REQ-VIEWER-943
   "planned": "planificat",
 };
 
-/* The CLI's own description of itself is chrome, not an artifact under review, so
- * it translates. Flags stay literal: `--accept-drift` is something you type. A
- * command with no entry here falls back to the registry's English summary. */
+/* The CLI's own description of itself is chrome, not an artifact under
+ * review, so it translates. Flags stay literal: `--accept-drift` is
+ * something you type. A command with no entry here falls back to the
+ * registry's English summary. */
 const COMMAND_RO = {  // implements: REQ-VIEWER-964
   "init":
-    "Prima rulare: creează requirements/ și .reqmapignore dacă lipsesc, scoate "
-      + "cerințe-schiță din codul existent, construiește lock-ul și harta, apoi tipărește "
-      + "pașii următori. Idempotentă.",
+    "Prima rulare: creează requirements/ și .reqmapignore dacă lipsesc, "
+      + "scoate cerințe-schiță din codul existent, construiește lock-ul "
+      + "și harta, apoi tipărește pașii următori. Idempotentă.",
   "new":
-    "Învechită, scoasă în v8.0.0: scrie fișierul cerinței direct sau cere-i asistentului. "
-      + "Până atunci face schelet de cerință nouă din șablon; cu --from-todo și --id o "
-      + "pre-umple dintr-un item din TODO.md.",
+    "Învechită, scoasă în v8.0.0: scrie fișierul cerinței direct sau "
+      + "cere-i asistentului. Până atunci face schelet de cerință nouă "
+      + "din șablon; cu --from-todo și --id o pre-umple dintr-un item "
+      + "din TODO.md.",
   "clarify":
-    "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, numere fără unitate, "
-      + "cantități nemărginite, clauze fără caz, lipsa căii de eșec. Doar citește, iese mereu "
-      + "cu 0.",
+    "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, "
+      + "numere fără unitate, cantități nemărginite, clauze fără caz, "
+      + "lipsa căii de eșec. Doar citește, iese mereu cu 0.",
   "gate":
-    "Verdictul complet: legăturile tag-urilor, driftul, legătura cu testele, apoi "
-      + "lizibilitatea cerințelor și prospețimea hărții comise. Doar raportează.",
+    "Verdictul complet: legăturile tag-urilor, driftul, legătura cu "
+      + "testele, apoi lizibilitatea cerințelor și prospețimea hărții "
+      + "comise. Doar raportează.",
   "sync":
-    "Reconstruiește tot ce e derivat: lock-ul, harta, digestul de constatări, regiunile "
-      + "paginii de prezentare. --accept-drift când un contract confirmat chiar s-a schimbat.",
+    "Reconstruiește tot ce e derivat: lock-ul, harta, digestul de "
+      + "constatări, regiunile paginii de prezentare. --accept-drift "
+      + "când un contract confirmat chiar s-a schimbat.",
 };
 
 const DICT = { ro: RO };
@@ -220,7 +254,8 @@ const DICT = { ro: RO };
 /* `{n}`-style placeholders, so a translated sentence can reorder them. */
 function interpolate(s, params) {
   if (!params) return s;
-  return s.replace(/\{(\w+)\}/g, (m, k) => (k in params ? String(params[k]) : m));
+  return s.replace(
+    /\{(\w+)\}/g, (m, k) => (k in params ? String(params[k]) : m));
 }
 
 export function translate(locale, s, params) {  // implements: REQ-VIEWER-943
@@ -236,8 +271,11 @@ export function translate(locale, s, params) {  // implements: REQ-VIEWER-943
  * decide whether to show the "machine-translated, unreviewed" badge. */
 // implements: REQ-TRANSLATE-938
 export function translatedText(node, locale, field, fallback = null) {
-  const cached = node && node.i18n && node.i18n[locale] && node.i18n[locale][field];
-  return cached ? { text: cached, isTranslated: true } : { text: fallback, isTranslated: false };
+  const cached = node && node.i18n && node.i18n[locale]
+    && node.i18n[locale][field];
+  return cached
+    ? { text: cached, isTranslated: true }
+    : { text: fallback, isTranslated: false };
 }
 
 function readStored() {
@@ -258,30 +296,39 @@ const Ctx = createContext({
 
 /* `initialLocale` lets a host (or a test) preset the language; otherwise the
  * viewer remembers the reader's last choice, and falls back to English. */
-/* The default the ENGINE declares. Read straight from the inlined blob rather than from
- * data.js: the provider mounts before App's effect runs loadData, so the module-level
- * LANGUAGE is still its default at the moment the initial locale is chosen. The single-file
- * viewer — the artifact consumers actually open — always has the blob at mount time. `both`
- * opens in English with the toggle offered; `ro` opens in Romanian. */
-function engineDefault() {                                   // implements: REQ-TRANSLATE-996
+/* The default the ENGINE declares. Read straight from the inlined blob
+ * rather than from data.js: the provider mounts before App's effect runs
+ * loadData, so the module-level LANGUAGE is still its default at the
+ * moment the initial locale is chosen. The single-file viewer — the
+ * artifact consumers actually open — always has the blob at mount time.
+ * `both` opens in English with the toggle offered; `ro` opens in
+ * Romanian. */
+function engineDefault() {
+  // implements: REQ-TRANSLATE-996
   try {
     const d = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
     return d && d.language === "ro" ? "ro" : "en";
   } catch { return "en"; }
 }
 
-export function I18nProvider({ children, initialLocale }) {  // implements: REQ-VIEWER-943
-  const [locale, setLocale] = useState(() => initialLocale || readStored() || engineDefault());
+export function I18nProvider({ children, initialLocale }) {
+  // implements: REQ-VIEWER-943
+  const [locale, setLocale] = useState(
+    () => initialLocale || readStored() || engineDefault());
   useEffect(() => {
-    try { window.localStorage.setItem(STORAGE_KEY, locale); } catch { /* not fatal */ }
+    try { window.localStorage.setItem(STORAGE_KEY, locale); }
+    catch { /* not fatal */ }
     // Keep the document language honest for screen readers and hyphenation.
     try { document.documentElement.lang = locale; } catch { /* SSR */ }
   }, [locale]);
-  const value = { locale, setLocale, t: (s, params) => translate(locale, s, params) };
+  const value = {
+    locale, setLocale, t: (s, params) => translate(locale, s, params),
+  };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-/** A command's summary in `locale`, falling back to the engine's own English. */
+/** A command's summary in `locale`, falling back to the engine's own
+ * English. */
 export function commandSummary(cmd, locale) {  // implements: REQ-VIEWER-964
   const ro = locale === "ro" && cmd && COMMAND_RO[cmd.name];
   return ro || (cmd && cmd.summary) || "";

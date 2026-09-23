@@ -1,13 +1,12 @@
 ---
 id: ARCH-VIEWER-007
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
 milestone: v1.04
 depends_on: [ARCH-MAP-007]
 satisfies: [SYS-VISUAL-106]
-lint_exempt: [file-spread]
 ---
 
 # Self-contained HTML map viewer
@@ -22,10 +21,14 @@ Every bullet below is binding.
 - The viewer ranks nodes by longest dependency path so `depends_on` edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. [[REQ-VIEWER-942]]
 - The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
-- The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
+- The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
+- Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
+- The viewer draws the shipped months the engine emitted on the plan's own timeline, and a month opens to every release in it. [[REQ-HISTORY-1081]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
-- The viewer shows the engine's health reading as a ring in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
+- The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
+- Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
+- The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
 - The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
@@ -117,7 +120,6 @@ CASE-3
 ---
 id: REQ-VIEWER-942
 status: confirmed
-lint_exempt: [file-spread]
 level: code
 layer: feature
 owner: Alex
@@ -301,7 +303,6 @@ layer: feature
 owner: Alex
 milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
-lint_exempt: [file-spread]
 ---
 
 # Scoping the outline from the registry tally
@@ -313,8 +314,7 @@ lint_exempt: [file-spread]
 > list and no idea why.
 
 Every bullet below is binding.
-- Each row of the registry tally scopes the outline to the slice it counts, and opens the outline
-  if another surface was showing.
+- The outline accepts a requested slice: a status value, or `orphan`.
 - The `orphan` row scopes to the gate's own error condition — an enforced requirement with no
   `implements:` member — which is a computed state, not a status value.
 - An applied scope is rendered as an active filter chip, and clearing that chip, or clicking the
@@ -337,11 +337,6 @@ CASE-3 — the applied scope is visible and clearable
   Given  the outline rendered with a slice requested
   When   its filter row is drawn
   Then   the chip naming that slice is drawn active
-
-## Context
-**Notes**
-- `lint_exempt: file-spread` — the tally lives in the rail, the scope in the app shell and
-  the chip in the outline: one click travels through the three components it connects.
 
 ---
 id: REQ-VIEWER-964
@@ -444,7 +439,7 @@ CASE-4 — the origin is offered as a filter, with the question text shown
 
 ---
 id: REQ-VIEWER-969
-status: confirmed
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -452,45 +447,49 @@ milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
-# The engine's health reading in the rail
+# Two engine-emitted readings in the rail
 
 ## Description
-> `reqmap.py gate --risk` opens with how much of the corpus is green, and the viewer did not
-> show it. It belongs where a reader already looks for the shape of the repo: the rail,
-> under the navigation. The viewer displays the record the map hands it; recomputing it here
-> is what would let the terminal and the browser report different repos.
+> `reqmap.py gate --risk` opens with two numbers — how much of the corpus is green, and how much
+> of the code is free of design candidates — and the viewer showed neither. They belong
+> where a reader already looks for the shape of the repo: the rail, under the navigation.
+> The viewer displays the records the map hands it; recomputing either one here is what
+> would let the terminal and the browser report different repos.
 
 Every bullet below is binding.
-- The rail renders one ring, showing the health score, its label and the fraction behind it,
-  from the `health` record the map carries.
-- The ring is coloured by band, since it is a verdict: green while at or above 90, amber
-  down to 60, red below.
-- The ring opens the Problems inbox, where the reasons behind the score are listed.
-- A map carrying no `health` record renders no ring. An older map has no key, and a reading
-  invented client-side would be worse than an absent one.
-- The label and the caption follow the chosen interface language, like the rest of the
+- The rail renders one ring per reading, showing the score, its label and the fraction
+  behind it, from the `health` and `design` records the map carries.
+- The health ring is coloured by band, since it is a verdict: green while at or above 90,
+  amber down to 60, red below. The design ring stays in one neutral ink — that score is
+  advice the gate never enforces, and a red ring would read as a failure the repo does not
+  have.
+- Both rings are controls: the health ring opens the Problems inbox on its Health tab, the
+  design ring on its Design tab, where the rows behind each number are listed.
+- A map carrying neither record renders no ring at all. An older map has neither key, and a
+  reading invented client-side would be worse than an absent one.
+- Both labels and both captions follow the chosen interface language, like the rest of the
   chrome.
 
 ## Cases
-CASE-1 — the ring shows the numbers the engine emitted
-  Given  a map carrying a health record of 39 of 50
+CASE-1 — the rings show the numbers the engine emitted
+  Given  a map carrying a health record of 39 of 50 and a design record of 7 of 30
   When   the rail renders
-  Then   the score and the fraction appear as given, with nothing recomputed
+  Then   both scores and both fractions appear as given, with nothing recomputed
 
-CASE-2 — the band follows the score
+CASE-2 — the health band follows the score
   Given  a health score of 78
   When   the rail renders
-  Then   the ring is drawn in the partial tone, not the green one
+  Then   the health ring is drawn in the partial tone, not the green one
 
 CASE-3 — an older map renders no ring
-  Given  a map carrying no health record
+  Given  a map carrying neither a health nor a design record
   When   the rail renders
   Then   no gauge is present in the output
 
-CASE-4 — the ring is a control
-  Given  a health record
+CASE-4 — both readings are controls
+  Given  both records are present
   When   the rail renders
-  Then   the ring is a button that opens the Problems inbox, and no static ring sits beside it
+  Then   both rows are buttons and neither is marked static
 
 CASE-5 — the labels follow the interface language
   Given  the interface language is Romanian
@@ -499,7 +498,7 @@ CASE-5 — the labels follow the interface language
 
 ---
 id: REQ-VIEWER-977
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -682,7 +681,6 @@ layer: feature
 owner: Alex
 milestone: v7.7
 satisfies: [ARCH-VIEWER-007]
-lint_exempt: [file-spread]
 distinct_from: [REQ-UNPLANNED-1024, REQ-ROADMAP-998, ARCH-ROADMAP-038]
 ---
 
@@ -697,9 +695,8 @@ distinct_from: [REQ-UNPLANNED-1024, REQ-ROADMAP-998, ARCH-ROADMAP-038]
 > horizons were two pictures of one file, and the dated one is the one people read.
 
 Every bullet below is binding.
-- `_map.json` carries `roadmap`, the parsed `ROADMAP.md` items, each with its horizon, its
-  `req:` id when present, its `unpark:` condition when present, whether it is done, and the
-  `context` lines written under it.
+- The panel reads the `roadmap` items the export carries (REQ-ROADMAP-998) and parses
+  none of its own.
 - Selecting a plan bar opens a detail panel below the chart carrying that bar's title, its
   milestone, its horizon when one is known, and the `context` of the matching roadmap item.
 - A bar matches a roadmap item by `req:`, the one id both sides carry.
@@ -734,20 +731,13 @@ CASE-4 — the Horizons mode is gone
   When   the Roadmap tab renders
   Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists
 
-CASE-5 — the roadmap payload survives the mode's removal
-  Given  a repo with a `ROADMAP.md` holding one item
-  When   `sync` writes the export
-  Then   `_map.json` still carries that item under `roadmap`, with its context
-
-CASE-6 — a bar appears in its version's column
+CASE-5 — a bar appears in its version's column
   Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`
   When   the Versions view renders
   Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
 
 ## Context
 **Notes**
-- `lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and
-  the Plan's note panel renders it: one payload crossing the engine/viewer boundary.
 - `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` is an engine line counting unscheduled items; this is the viewer panel for one selected bar.
 - `distinct_from: REQ-ROADMAP-998` - `REQ-ROADMAP-998` parses ROADMAP.md; this renders what it parsed.
 - `distinct_from: ARCH-ROADMAP-038` - `ARCH-ROADMAP-038` is the engine's roadmap capability; this is its viewer side.
@@ -848,3 +838,146 @@ CASE-3 — the day row spans the chart
   When   the Plan renders
   Then   it draws one labelled day cell per day the chart covers
 
+--------------------
+
+
+---
+id: REQ-HISTORY-1081
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# The shipped months, drawn beside the plan
+
+## Description
+> The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader
+> looks at a chart. Drawing the past on the plan's own timeline, from exactly the rows
+> the engine emitted, is what lets "what happened" sit next to "what is next" without a
+> second, drifting copy of either.
+
+Every bullet below is binding.
+- The Plan draws one "Shipped" band row per month the engine emitted in `history`,
+  labelled with that month's landmark version, left of today on the plan's own
+  timeline.
+- The row shows the month's headline, not its list of versions.
+- With no `history` in the export, no Shipped band is drawn.
+- Selecting a shipped month opens a note listing every release in it, newest first,
+  each with its date and headline.
+
+## Cases
+CASE-1 — one band row per shipped month, labelled by its landmark
+  Given  an export whose `history` holds two months
+  When   the Plan renders
+  Then   a Shipped band is drawn with one row per month, each labelled by its landmark
+
+CASE-2 — the month's headline is shown
+  Given  a month whose landmark release has a headline
+  When   the Plan renders
+  Then   that headline is shown on the row
+
+CASE-3 — no history means no band
+  Given  an export with no `history`
+  When   the Plan renders
+  Then   no Shipped band is drawn
+
+CASE-4 — a shipped month opens to what was done in it
+  Given  a month holding two releases, each with a headline
+  When   the reader selects that month on the chart
+  Then   a note lists both releases, newest first, each with its date and headline
+
+
+--------------------
+
+
+---
+id: REQ-VIEWER-1082
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# A registry tally row asks for its slice
+
+## Description
+> The tally answers "how many are drafts?" and the next question is "which ones?".
+> The row that counts them is the natural place to ask, from wherever the reader is:
+> this is the asking half, and the outline applying the answer is REQ-VIEWER-945.
+
+Every bullet below is binding.
+- Each row of the rail's registry tally shows the count of the slice it would scope to.
+- Choosing a row requests that slice and brings the outline forward, whatever surface
+  was showing; choosing the same row again requests no slice.
+- The row whose slice is in force is drawn pressed, and only that row.
+
+## Cases
+CASE-1 — the requested slice's row is drawn pressed
+  Given  the rail rendered with the `draft` slice in force
+  When   its tally is drawn
+  Then   exactly one row is pressed, and it is the `draft` row
+
+CASE-2 — each row shows its slice's count
+  Given  a registry holding some drafts
+  When   the rail's tally is drawn
+  Then   the `draft` row shows the number of draft requirements
+
+CASE-3 — choosing a row scopes the outline and opens it
+  Given  the shell's handler for a tally row
+  When   it is called with `orphan`
+  Then   the slice becomes `orphan` and the outline is the surface shown
+
+
+--------------------
+
+
+---
+id: REQ-VIEWER-1084
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# A rail reading opens the rows behind its number
+
+## Description
+> A score says how the repo is doing and nothing about what to do. The rows behind it
+> are the answer, and they should be one click from the number, already narrowed to
+> what the reader is looking at, never recomputed in the browser.
+
+Every bullet below is binding.
+- Choosing the health ring opens Problems on its Health tab; choosing the design ring
+  opens it on its Design tab.
+- The Health tab lists the `unhealthy` rows the map's health record carries, each with
+  the axes it fails, followed by the `exempt_ids` it carries; its count is the sum of
+  both.
+- The Health tab offers one chip per failing axis, each with its count; a chip narrows
+  the list to the rows failing that axis, and `All` restores it.
+- The Design tab offers one chip per pillar, each with its count; a chip narrows the
+  candidates to that pillar, and `All` restores them.
+
+## Cases
+CASE-1 — each ring opens its own tab
+  Given  the shell's handler for a rail reading
+  When   it is called with `DESIGN`
+  Then   the tab becomes `DESIGN` and Problems is the surface shown
+
+CASE-2 — the Health tab lists the rows the engine emitted
+  Given  a health record whose `unhealthy` holds one draft requirement
+  When   Problems renders on its Health tab
+  Then   that requirement is listed with the axis it fails
+
+CASE-3 — an axis chip narrows the Health list
+  Given  a health record with one row failing `not tested` and one failing `drift`
+  When   the Health tab renders with the `drift` chip chosen
+  Then   only the drifted row is listed and the `drift` chip is drawn pressed
+
+CASE-4 — a pillar chip narrows the Design tab
+  Given  candidates under two pillars
+  When   the Design tab renders with one pillar's chip chosen
+  Then   only that pillar's group is listed

@@ -19,9 +19,9 @@ None of those failed at merge. None failed in CI. Each failed later, at the
 moment a human followed a written instruction. That is the failure this guard
 moves to merge time.
 
-A fifth fold was proposed on 2026-09-08 and audited by nine senators
-(`senate-reqmap-cli-surface-18-to-5`, MODIFY). They found this guard blind to the
-change it would have to catch, in three ways, all fixed here:
+A fifth fold was proposed on 2026-09-08 and reviewed the same day. The
+review found this guard blind to
+the change it would have to catch, in three ways, all fixed here:
 
   - it matched VERBS only, so `gate --show` read as the live verb `gate` and a
     cull of mode FLAGS passed it green;
@@ -57,9 +57,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The engine is the source of truth for what exists; anything else that looks
 # like a verb in an invocation is retired by definition.
 def live_verbs():
-    """The verbs the engine currently registers, read from its COMMANDS registry —
-    `reqmap_engine/commands.py` since the engine became a package (ADR-0035), with the
-    single-file `reqmap.py` still accepted for an older checkout."""
+    """The verbs the engine currently registers, read from its COMMANDS
+    registry — `reqmap_engine/commands.py` since the engine became a package
+    (ADR-0035), with the single-file `reqmap.py` still accepted for an older
+    checkout."""
     block = None
     for rel in (("plugin", "scripts", "reqmap_engine", "commands.py"),
                 ("plugin", "scripts", "reqmap.py")):
@@ -70,7 +71,8 @@ def live_verbs():
             if block:
                 break
     if not block:
-        print("cannot find the COMMANDS registry in reqmap_engine/commands.py or reqmap.py",
+        print("cannot find the COMMANDS registry in reqmap_engine/commands.py "
+              "or reqmap.py",
               file=sys.stderr)
         sys.exit(2)
     return set(re.findall(r'^    "([a-z-]+)": \{', block.group(1), re.M))
@@ -87,9 +89,10 @@ def live_flags(root=None):
     half rather than reporting every flag as retired — a guard that cannot read
     the engine must fail open, not accuse.
 
-    Both sources are scanned because the calls moved: `reqmap_engine/cliflags.py`
-    holds them since v7.13, and reading only `reqmap.py` returned an empty set the
-    moment they did — the guard went silent on every flag instead of one.
+    Both sources are scanned because the calls moved:
+    `reqmap_engine/cliflags.py` holds them since v7.13, and reading only
+    `reqmap.py` returned an empty set the moment they did — the guard went
+    silent on every flag instead of one.
     """
     base = root or ROOT
     src = ""
@@ -103,38 +106,44 @@ def live_flags(root=None):
     return set(re.findall(r'add_argument\(\s*"(--[a-z][a-z0-9-]*)"', src))
 
 
-# Prose that tells someone what to type. Everything else is history or generated.
+# Prose that tells someone what to type. Everything else is history or
+# generated.
 INSTRUCTION_FILES = [
-    # The engine prints instructions too: the audit report names the command that
-    # runs each section on its own. Those strings go stale like any other doc.
+    # The engine prints instructions too: the audit report names the command
+    # that runs each section on its own. Those strings go stale like any other
+    # doc.
     "plugin/scripts/reqmap.py",
     "CLAUDE.md",
     "README.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
-    # The hook shipped to consumers: a retired verb there fails every consumer commit.
+    # The hook shipped to consumers: a retired verb there fails every
+    # consumer commit.
     "plugin/hooks/pre-commit",
-    # NOT one skill by name: the plugin ships three, and naming one is how six dead
-    # invocations reached consumers through `requirement-quality-review`. The glob
-    # below reads every SKILL*.md under plugin/skills/, whatever is added next.
+    # NOT one skill by name: the plugin ships three, and naming one is how six
+    # dead invocations reached consumers through `requirement-quality-review`.
+    # The glob below reads every SKILL*.md under plugin/skills/, whatever is
+    # added next.
     ".githooks/pre-commit",
     ".github/workflows/ci.yml",
     "sync_reqmap.sh",
 ]
-# The engine package prints instructions too (audit sections, decompose, next steps).
+# The engine package prints instructions too (audit sections, decompose, next
+# steps).
 INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml"),
                      ("plugin/scripts/reqmap_engine", ".py")]
-# Every skill the plugin ships, at any depth, and the `references/` pages a SKILL.md
-# links to: each one instructs a reader to run the engine, and each goes stale the same way.
+# Every skill the plugin ships, at any depth, and the `references/` pages a
+# SKILL.md links to: each one instructs a reader to run the engine, and each
+# goes stale the same way.
 INSTRUCTION_TREES = [("plugin/skills", "", ".md")]
 
-# Verbs this project has had and no longer has. Only these are flagged: matching
-# "any word after reqmap" turns every sentence that mentions the file into a
-# finding ("reqmap.py changed", "reqmap links code to requirements").
-# A line that says a verb is GONE is the opposite of an instruction to run it, and
-# this repo writes those deliberately — the migration note for `check` is the reason
-# a reader stops calling it. Matched on the line itself, so a real instruction that
-# happens to sit near one is still reported.
+# Verbs this project has had and no longer has. Only these are flagged:
+# matching "any word after reqmap" turns every sentence that mentions the file
+# into a finding ("reqmap.py changed", "reqmap links code to requirements").
+# A line that says a verb is GONE is the opposite of an instruction to run it,
+# and this repo writes those deliberately — the migration note for `check` is
+# the reason a reader stops calling it. Matched on the line itself, so a real
+# instruction that happens to sit near one is still reported.
 REMOVAL_NOTE = re.compile(
     r"no longer exists|was removed|were removed|is gone|are gone|removed in|"
     r"deprecated alias|folded into|replaced by|renamed to|"
@@ -159,12 +168,14 @@ RETIRED = {
     "new",
 }
 
-# Flags that still parse but moved to another verb: the parser is flat, so the derived
-# flag check cannot see that `gate --search` is stale while `ask --search` is live.
+# Flags that still parse but moved to another verb: the parser is flat, so the
+# derived flag check cannot see that `gate --search` is stale while
+# `ask --search` is live.
 # verb -> {flag: the verb that owns it now}. ADR-0044, v7.22.0.
 MOVED_FLAGS = {
-    "gate": {flag: "ask" for flag in ("--search", "--dupes", "--design", "--review",
-                                      "--i18n", "--top", "--threshold")},
+    "gate": {flag: "ask" for flag in ("--search", "--dupes", "--design",
+                                      "--review", "--i18n", "--top",
+                                      "--threshold")},
 }
 
 # An invocation, not a mention: inside backticks or a quoted string, or after
@@ -175,8 +186,8 @@ INVOCATION = re.compile(
     r"(?:`|\"|python\s+|\$PY\s+)[^`\"\n]*?reqmap(?:\.py)?\s+([a-z][a-z-]*)"
 )
 
-# The same call with no delimiter in front of it. `.githooks/pre-commit` wrote its
-# own repair hint as `(fix: reqmap.py map --root plugin --code .)` — a live
+# The same call with no delimiter in front of it. `.githooks/pre-commit` wrote
+# its own repair hint as `(fix: reqmap.py map --root plugin --code .)` — a live
 # instruction, in a file this guard already scanned, that the delimited pattern
 # above could not see. Kept as a SECOND pattern rather than a relaxation of the
 # first, because only the retired-VERB check may use it: an undelimited match is
@@ -193,17 +204,19 @@ FLAG = re.compile(r"(--[a-z][a-z0-9-]*)")
 END_OF_CALL = re.compile(r"`|\"|&&|\|\||;")
 
 
-# A consumer checkout has no `plugin/` prefix and no skills tree — it vendored the
-# engine and wrote its own instructions around it. Scanned as globs rather than a
-# fixed list because no two consumers lay their docs out the same way.
-CONSUMER_FILES = ["CLAUDE.md", "README.md", "AGENTS.md", "CONTRIBUTING.md", "TODO.md"]
-CONSUMER_TREES = [("scripts", "", ".py"), ("scripts", "", ".sh"), (".githooks", "", ""),
+# A consumer checkout has no `plugin/` prefix and no skills tree — it vendored
+# the engine and wrote its own instructions around it. Scanned as globs rather
+# than a fixed list because no two consumers lay their docs out the same way.
+CONSUMER_FILES = ["CLAUDE.md", "README.md", "AGENTS.md", "CONTRIBUTING.md",
+                  "TODO.md"]
+CONSUMER_TREES = [("scripts", "", ".py"), ("scripts", "", ".sh"),
+                  (".githooks", "", ""),
                   (".github/workflows", "", ".yml"), ("docs", "", ".md"),
                   ("specs", "", ".md"), ("requirements", "", ".md")]
-# The consumer's OWN vendored `reqmap.py` is deliberately not scanned. Its printed
-# strings belong to whatever engine snapshot it holds, so reporting them says only
-# "your copy is old" — which `check/engine_staleness.py` already says, at the
-# version level, where it can be acted on.
+# The consumer's OWN vendored `reqmap.py` is deliberately not scanned. Its
+# printed strings belong to whatever engine snapshot it holds, so reporting
+# them says only "your copy is old" — which `check/engine_staleness.py`
+# already says, at the version level, where it can be acted on.
 CONSUMER_SKIP = ("scripts/reqmap.py", "requirements/_")
 
 
@@ -211,8 +224,8 @@ def _consumer_tree_files(root, sub, prefix, ext):
     # implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-1011
     """Every instruction file under one CONSUMER_TREES entry, as (rel, full).
 
-    Split out of `candidate_files` so that generator stays four levels deep: a walk
-    inside a loop inside a branch was three of them before the filter.
+    Split out of `candidate_files` so that generator stays four levels deep: a
+    walk inside a loop inside a branch was three of them before the filter.
     """
     base = os.path.join(root, sub.replace("/", os.sep))
     if not os.path.isdir(base):
@@ -229,7 +242,8 @@ def _consumer_tree_files(root, sub, prefix, ext):
 
 
 def candidate_files(root=ROOT, consumer=False):
-    """The instruction files to scan — the ones a human or an assistant follows."""
+    """The instruction files to scan — the ones a human or an assistant
+    follows."""
     if consumer:
         for rel in CONSUMER_FILES:
             p = os.path.join(root, rel)
@@ -264,10 +278,10 @@ def candidate_files(root=ROOT, consumer=False):
 def scan_line(line, live, flags):
     """Every retired name this one line instructs a reader to type.
 
-    Yields `(kind, name)`, kind being "verb" or "flag". A line that says a name is
-    GONE is the opposite of an instruction to run it, and is skipped whole — this
-    repo writes those deliberately, and the migration note is the reason a reader
-    stops calling the old name.
+    Yields `(kind, name)`, kind being "verb" or "flag". A line that says a name
+    is GONE is the opposite of an instruction to run it, and is skipped whole —
+    this repo writes those deliberately, and the migration note is the reason
+    a reader stops calling the old name.
     """
     if REMOVAL_NOTE.search(line):
         return
@@ -275,7 +289,8 @@ def scan_line(line, live, flags):
         if verb not in live and verb in RETIRED:
             yield "verb", verb
     if not flags:
-        return                      # engine unreadable: fail open, do not accuse
+        # engine unreadable: fail open, do not accuse
+        return
     for m in INVOCATION.finditer(line):
         if m.group(1) not in live:
             continue                # not a call to a verb that exists
@@ -305,13 +320,13 @@ def check_root(root, live, flags, consumer=False):
 
 
 def main(argv=None):
-    """Scan the instruction files for a verb or flag the engine no longer has, and
-    return an exit code — non-zero when one is named.
+    """Scan the instruction files for a verb or flag the engine no longer has,
+    and return an exit code — non-zero when one is named.
 
     Positional arguments are EXTRA consumer roots. They are read against THIS
-    repo's live surface on purpose: a consumer's instructions are wrong the moment
-    the engine they will re-vendor stops accepting what they say to type, not the
-    moment the consumer notices.
+    repo's live surface on purpose: a consumer's instructions are wrong the
+    moment the engine they will re-vendor stops accepting what they say to
+    type, not the moment the consumer notices.
     """
     extra = list(argv if argv is not None else sys.argv[1:])
     live, flags = live_verbs(), live_flags()
@@ -321,18 +336,24 @@ def main(argv=None):
             print("no such root: %s" % root, file=sys.stderr)
             return 2
         bad += [(root, r) for r in check_root(root, live, flags, consumer=True)]
-    scanned = "this repo" if not extra else "this repo + %d consumer root(s)" % len(extra)
+    scanned = ("this repo" if not extra
+              else "this repo + %d consumer root(s)" % len(extra))
     if not bad:
-        print("OK  no instruction names a retired verb or flag — %s (%d live verb(s): %s)"
+        print("OK  no instruction names a retired verb or flag — %s (%d live "
+              "verb(s): %s)"
               % (scanned, len(live), ", ".join(sorted(live))))
         return 0
-    print("FAIL  %d instruction(s) name something the engine no longer has:" % len(bad))
+    print("FAIL  %d instruction(s) name something the engine no longer has:"
+          % len(bad))
     for root, (rel, n, kind, name, line) in bad:
-        where = rel if root == ROOT else "%s/%s" % (os.path.basename(root.rstrip("/")), rel)
+        where = (rel if root == ROOT
+                else "%s/%s" % (os.path.basename(root.rstrip("/")), rel))
         print("  %s:%d  %s `%s`  %s" % (where, n, kind, name, line))
     print("")
-    print("Either the name came back, or the instruction is stale. A reader who")
-    print("follows one of these lines gets an unknown-command error, or for a moved")
+    print("Either the name came back, or the instruction is stale. A reader "
+          "who")
+    print("follows one of these lines gets an unknown-command error, or for "
+          "a moved")
     print("flag a deprecation notice until the release that removes it.")
     return 1
 

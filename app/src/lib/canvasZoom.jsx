@@ -9,10 +9,12 @@ export const ZOOM_MAX = 150;
 export const ZOOM_DEFAULT = 100;
 export const MAP_ZOOM_KEY = "reqmap.map.zoom";
 
-export const clampZoom = (z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z)));
+export const clampZoom = (z) =>
+  Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z)));
 
 export const ctrlBtn = {
-  border: "none", cursor: "pointer", fontFamily: "inherit", background: "transparent",
+  border: "none", cursor: "pointer", fontFamily: "inherit",
+  background: "transparent",
   color: "var(--fg-muted)", padding: "3px 9px", fontSize: 12, lineHeight: 1.4,
 };
 
@@ -20,7 +22,8 @@ function readStoredZoom(key, fallback) {
   try {
     if (typeof window === "undefined" || !window.localStorage) return fallback;
     const n = Number(window.localStorage.getItem(key));
-    return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : fallback;
+    return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX
+      ? Math.round(n) : fallback;
   } catch { return fallback; }
 }
 
@@ -28,26 +31,33 @@ export function ZoomControl({ zoom, setZoom, onFit, fitLabel = "Fit" }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
-        textTransform: "uppercase", color: "var(--fg-faint)" }}>Zoom</span>
+        textTransform: "uppercase", color: "var(--fg-faint)" }}>
+        Zoom
+      </span>
       <span style={{ display: "inline-flex", alignItems: "center",
-        border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden" }}>
+        border: "1px solid var(--border)", borderRadius: 6,
+        overflow: "hidden" }}>
         <button style={ctrlBtn} title="Zoom out" aria-label="Zoom out"
           onClick={() => setZoom((z) => clampZoom(z / 1.1))}>−</button>
         <button
           onClick={() => setZoom(ZOOM_DEFAULT)}
           title="Reset to 100%"
-          style={{ ...ctrlBtn, minWidth: 48, textAlign: "center", fontWeight: 700,
+          style={{ ...ctrlBtn, minWidth: 48, textAlign: "center",
+            fontWeight: 700,
             color: "var(--fg)", background: "var(--surface-hov)" }}
         >{`${zoom}%`}</button>
         <button style={ctrlBtn} title="Zoom in" aria-label="Zoom in"
           onClick={() => setZoom((z) => clampZoom(z * 1.1))}>+</button>
       </span>
       {onFit && (
-        <button style={{ ...ctrlBtn, border: "1px solid var(--border)", borderRadius: 6,
+        <button style={{ ...ctrlBtn, border: "1px solid var(--border)",
+          borderRadius: 6,
           padding: "3px 12px", fontWeight: 600, color: "var(--fg)" }}
           title="Fit the graph in view" onClick={onFit}>{fitLabel}</button>
       )}
-      <span style={{ fontSize: 10, color: "var(--fg-faint)" }}>ctrl + scroll</span>
+      <span style={{ fontSize: 10, color: "var(--fg-faint)" }}>
+        ctrl + scroll
+      </span>
     </span>
   );
 }
@@ -55,14 +65,18 @@ export function ZoomControl({ zoom, setZoom, onFit, fitLabel = "Fit" }) {
 /** Zoom state + wheel handler + fit-to-view for a scrollable canvas ref. */
 export function useCanvasZoom({ storageKey = MAP_ZOOM_KEY, initialZoom } = {}) {
   const [zoom, setZoom] = useState(() => (
-    initialZoom != null ? clampZoom(initialZoom) : readStoredZoom(storageKey, ZOOM_DEFAULT)
+    initialZoom != null
+      ? clampZoom(initialZoom)
+      : readStoredZoom(storageKey, ZOOM_DEFAULT)
   ));
   const zoomRef = useRef(zoom);
   const canvasRef = useRef(null);
 
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   useEffect(() => {
-    try { window.localStorage.setItem(storageKey, String(zoom)); } catch { /* not fatal */ }
+    try {
+      window.localStorage.setItem(storageKey, String(zoom));
+    } catch { /* not fatal */ }
   }, [zoom, storageKey]);
 
   useEffect(() => {

@@ -7,7 +7,7 @@ owner: Alex
 priority: should-have
 milestone: v2.10
 depends_on: [ARCH-CHECK-006, ARCH-DRIFT-003]
-satisfies: [SYS-GATE-102]
+satisfies: [SYS-DRIFT-109]
 ---
 
 # Drift blast-radius: name dependents

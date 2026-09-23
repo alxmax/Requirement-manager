@@ -5,7 +5,7 @@ level: architecture
 layer: bus
 owner: Alex
 milestone: v1.00
-satisfies: [SYS-GATE-102]
+satisfies: [SYS-DRIFT-109]
 ---
 
 # Contract hashing & lock

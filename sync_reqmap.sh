@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
+# implements: REQ-SELFGATE-1072
 # sync_reqmap.sh — propagate plugin/scripts/reqmap.py to the plugin cache
 # and any registered consumer repos.
 #

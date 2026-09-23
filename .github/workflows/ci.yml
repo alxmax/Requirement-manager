@@ -1,5 +1,5 @@
 name: ci
-# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
+# implements: REQ-SELFGATE-916
 # implements: ARCH-PYFLOOR-040
 # implements: ARCH-REPRO-041
 
@@ -79,6 +79,8 @@ jobs:
         run: python -X utf8 scripts/test_check_engine_bump.py
       - name: Engine line-budget tests
         run: python -X utf8 scripts/test_check_engine_budget.py
+      - name: Pipeline wiring tests
+        run: python -X utf8 scripts/test_pipeline_wiring.py
       # Folding a verb into another one has left a dead instruction behind three
       # times (`map`, `findings`, and the v4.0.0 verb cut). None of them failed at
       # merge; each failed later, when a human typed what the docs told them to.
@@ -139,6 +141,8 @@ jobs:
         run: python -X utf8 scripts/test_check_engine_bump.py
       - name: Engine line-budget tests
         run: python -X utf8 scripts/test_check_engine_budget.py
+      - name: Pipeline wiring tests
+        run: python -X utf8 scripts/test_pipeline_wiring.py
       - name: Engine-staleness probe tests
         run: python -X utf8 scripts/test_engine_staleness.py
       - name: Release-notes extraction tests

@@ -56,11 +56,13 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0043](0043-the-engine-is-served-over-mcp.md) | The engine is served over MCP | Accepted |
 | [0044](0044-questions-leave-the-verdict-verb.md) | Questions leave the verdict verb: `ask` | Accepted |
 | [0045](0045-new-is-deprecated.md) | `new` is deprecated; a requirement is written, not scaffolded | Accepted |
-| [0046](0046-the-engine-has-a-line-budget.md) | The engine has a line budget, checked when a release is cut | Accepted |
-| [0047](0047-design-review-site-and-i18n-detector-leave-the-engine.md) | The design review, the site generator and the i18n detector leave the engine | Accepted |
+| [0046](0046-the-engine-has-a-line-budget.md) | The engine has a line budget, checked when a release is cut | Accepted (budget amended by 0052) |
+| [0047](0047-design-review-site-and-i18n-detector-leave-the-engine.md) | The design review, the site generator and the i18n detector leave the engine | Accepted (design review superseded by 0051) |
 | [0048](0048-the-engines-floor-is-what-it-must-keep.md) | The engine's floor is what it must keep, measured by capability | Accepted |
 | [0049](0049-a-bare-gate-says-only-what-is-broken.md) | A bare `gate` says only what is broken | Accepted |
 | [0050](0050-the-viewer-artifact-and-what-it-renders-are-two-capabilities.md) | The viewer artifact and what it renders are two capabilities | Accepted |
+| [0051](0051-the-oop-design-review-returns-to-the-engine.md) | The OOP design review returns to the engine, with two writing rules | Accepted |
+| [0052](0052-the-line-budget-moves-to-the-measured-size.md) | The line budget moves once, to the measured size | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

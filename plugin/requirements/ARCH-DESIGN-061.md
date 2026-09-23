@@ -1,6 +1,6 @@
 ---
 id: ARCH-DESIGN-061
-status: deprecated
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -15,24 +15,20 @@ satisfies: [SYS-READ-103]
 ## Description
 > Code written in a long AI session drifts toward procedural sprawl: state in module
 > globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that
-> never stop growing. `design` reads the repo's code (Python through `ast`, the brace
-> languages through masked-text heuristics) and names the shapes
-> the four OOP pillars would fix, plus per-class metrics and the house standards a
-> reviewer checks by eye, so the
-> reader who came to understand a file also sees where its design pulls against it. It
-> advises; it never gates.
+> never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's
+> code (Python through `ast`, the brace languages through masked-text heuristics) and
+> names the shapes the four OOP pillars would fix, plus two writing rules — a file of at
+> most 500 lines, a line of at most 80 columns — so the reader who came to understand a
+> file also sees where its design pulls against it. It advises; it never gates.
 
 Every bullet below is binding.
 - `design` reports encapsulation and abstraction candidates: module state written from functions, long parameter lists, data clumps, long or deeply nested functions, prefix families. [[REQ-DESIGN-950]]
 - `design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]
 - `design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]
-- `design` reports house standards per file: length, wide lines, public definitions without a docstring, definitions per file. [[REQ-DESIGN-953]]
-- The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`) and `health`. [[REQ-DESIGN-954]]
+- `design` reports two writing standards per file: more than 500 lines, and lines wider than 80 columns. [[REQ-DESIGN-953]]
+- The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`), `health` and `gate --audit`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 - The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
-- A `metrics` pillar measures each Python class with the one Chidamber & Kemerer metric that survived calibration — RFC. [[REQ-DESIGN-978]]
-- The metrics that did not survive were measured, reviewed and removed on the evidence, and the measurement is on the record. [[REQ-DESIGN-980]]
-- The review reports how many classes it could not measure for cohesion, on every surface, so an absent finding is never read as a measured pass. [[REQ-DESIGN-979]]
 - The design payload is excluded from every freshness comparison, so advisory data can never fail the gate. [[REQ-DESIGN-991]]
 
 ## Cases
@@ -47,16 +43,11 @@ CASE-2
   Then   it reports a long parameter list
 
 CASE-3
-  Given  the engine's command registry and gate rule registry
-  When   both are inspected
-  Then   `design` is a registered command and no gate rule invokes it
+  Given  the gate rule registry and a repo with one module writing a global
+  When   `reqmap.py ask --design` runs and the registry is inspected
+  Then   it exits 0 naming `global-state`, and no gate rule invokes the review
 
 CASE-4
-  Given  a repo with one clean Python module
-  When   `map` and `health --json` run
-  Then   `_map.json` carries `design.score` 100 and the health JSON carries `design_score` 100
-
-CASE-5
   Given  a JavaScript file with a seven-parameter function and a four-case switch
   When   `design` runs
   Then   it reports a long parameter list and a type switch, the same kinds a Python file would
@@ -64,15 +55,16 @@ CASE-5
 ## Context
 **Notes**
 - Python is the only language read through a real parser (`ast`); the brace languages go through heuristics, so a candidate there is a stronger invitation to look than a fact.
-- A candidate is a shape worth a look, never a defect. Run on this repo it reports the engine's own long functions and its ten-thousand-line file honestly; ADR-0014 keeps that file whole on purpose and an advisory line does not reopen a decision — the thing that DID reopen the question is ADR-0014's own numeric trigger firing, recorded in ADR-0032.
-- "Advisory" is a property of the whole path, not of the printer. `cmd_design` always exited 0 and no gate rule read its output, and the review could still fail a build: it was written into `_map.json`, `_map.md` and `docs/map.html`, and those are compared byte-for-byte by the freshness check. Severity is inherited by whatever an artifact is gated on, so the claim has to be defended where the data lands, not only where it is printed (issue #243).
+- A candidate is a shape worth a look, never a defect.
+- "Advisory" is a property of the whole path, not of the printer. The review is printed by `ask --design` and its summary is written into `_map.json`, `_map.md`, `health` and `audit`, where the viewer draws its design ring and Design tab. The committed map is freshness-checked, and before v8.2.0 the design rows in it could fail the gate (issue #243). [[REQ-DESIGN-991]] keeps the design payload out of every freshness comparison, so the data is written but never gated.
+- Retired with ADR-0047 and not restored by ADR-0051: the `metrics` pillar (RFC), the docstring and definitions-per-file standards, and the `reqmap_design` MCP tool. Their requirements stay `deprecated`.
 
 --------------------
 
 
 ---
 id: REQ-DESIGN-950
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -121,7 +113,7 @@ CASE-4 — a prefix family
 
 ---
 id: REQ-DESIGN-951
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -171,7 +163,7 @@ CASE-4 — short chains are silent
 
 ---
 id: REQ-DESIGN-952
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -188,10 +180,10 @@ satisfies: [ARCH-DESIGN-061]
 
 Every bullet below is binding.
 - `design` walks `code_root` with the scanner's walk (`.reqmapignore` honoured), reads the program-logic files (`DESIGN_EXTS`) and skips test paths (`_is_test_path`).
-- `design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, metrics, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
+- `design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
 - `design --json` emits `{"files": N, "findings": [...]}` with every candidate record and nothing on stdout besides the JSON.
 - With no candidate, `design` prints one line saying so and the file count.
-- A file that does not parse yields no candidate and no error.
+- A Python file that does not parse yields no candidate, standards included, and no error.
 - `design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries.
 
 ## Cases
@@ -201,7 +193,7 @@ CASE-1 — grouped report, tests skipped, exit 0
   Then   it returns 0, prints `Encapsulation (1)` with the module's line, omits the test file and ends with the advisory note
 
 CASE-2 — JSON and the clean case
-  Given  a repo with one clean, documented module
+  Given  a repo with one clean module
   When   `cmd_design` runs with and without `--json`
   Then   the JSON reads `files 1, findings []` and the text run says no candidates were found
 
@@ -220,7 +212,7 @@ CASE-4 — thresholds come from the config
 
 ---
 id: REQ-DESIGN-953
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -231,36 +223,34 @@ satisfies: [ARCH-DESIGN-061]
 # Code-writing standards
 
 ## Description
-> The rules a reviewer checks by eye on every file, made mechanical and tunable: how
-> long a file may grow, how wide a line, whether a public name explains itself, how
-> many definitions one module holds. One finding per file per rule, so a 2,000-line
-> file is one line in the report, not two thousand.
+> Two rules a reviewer checks by eye on every file, made mechanical and tunable: a
+> file stays at most 500 lines, a line at most 80 columns. One finding per file per
+> rule, so a 2,000-line file is one line in the report, not two thousand.
 
 Every bullet below is binding.
-- A file with more than `DESIGN_FILE_MAX_LINES` lines is one `file-too-long` candidate at line 1.
-- A file with lines wider than `DESIGN_LINE_MAX` columns is one `line-too-long` candidate reporting the count and the first such line.
-- A file with more than `DESIGN_FILE_MAX_FUNCS` top-level functions and classes is one `too-many-definitions` candidate.
-- With `DESIGN_DOCSTRING_PUBLIC` set, a Python file whose public top-level functions or classes (no leading underscore) lack a docstring is one `missing-docstring` candidate naming them; set to 0, the check is off.
+- A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.
+- A file with lines wider than `DESIGN_LINE_MAX` columns (default 80) is one `line-too-long` candidate reporting the count and the first such line.
+- Both rules apply to every program-logic file the review reads, whatever its language.
 - Standards candidates carry the pillar `standards` and print as the last block of the report.
 
 ## Cases
-CASE-1 — every standard fires once per file
-  Given  thresholds of 5 lines and 2 definitions, a file with three undocumented functions and one 120-column line
+CASE-1 — each standard fires once per file
+  Given  a 501-line Python file whose last line is 86 columns wide
   When   `_design_file` reads it
-  Then   `file-too-long`, `too-many-definitions`, one `line-too-long` at that line and one `missing-docstring` naming three definitions are reported, all under standards
+  Then   one `file-too-long` and one `line-too-long` at line 501 naming 80 columns are reported, both under standards
 
-CASE-2 — a small documented file is silent
-  Given  a short file whose public function has a docstring and whose helper is private
+CASE-2 — the defaults are 500 lines and 80 columns
+  Given  the shipped configuration and a 499-line file of 78-column lines
   When   `_design_file` reads it
-  Then   nothing is reported
+  Then   the thresholds read 500 and 80, and nothing is reported
 
-CASE-3 — the docstring rule can be switched off
-  Given  `DESIGN_DOCSTRING_PUBLIC` set to 0 through `apply_config`
-  When   `_design_file` reads an undocumented public function
-  Then   no `missing-docstring` candidate is reported
+CASE-3 — the writing rules are configurable
+  Given  a file with one 96-column line, then `DESIGN_LINE_MAX` set to 120 through `apply_config`
+  When   `_design_file` reads it before and after
+  Then   `line-too-long` is reported before and nothing after
 
 CASE-4 — standards print last
-  Given  a module with a global write and no docstring
+  Given  a module with a global write on a line wider than 80 columns
   When   `cmd_design` prints its report
   Then   the Encapsulation block precedes the Standards block
 
@@ -269,7 +259,7 @@ CASE-4 — standards print last
 
 ---
 id: REQ-DESIGN-954
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -282,23 +272,24 @@ distinct_from: [REQ-HEALTH-968]
 
 ## Description
 > A list of candidates is something you read once; a number is something you watch.
-> The same walk `design` runs is folded into one record — how many Python files carry
+> The same walk `design` runs is folded into one record — how many source files carry
 > no candidate at all — and that record rides in the committed map next to the
 > requirement graph, in the map's header, and in `health`, so design drift shows up
 > where requirement drift already does.
 
 Every bullet below is binding.
-- `_design_summary(code_root)` returns `{files, clean_files, score, candidates}` over the non-test program-logic files, `score` being the percentage of files with no candidate, `candidates` the count per group; it returns `None` when there is no such file.
-- `_assemble_map_data` attaches that record as `design` in `_map.json`, and omits the key when the record is `None`, so a repo without Python gains no empty key.
-- `_map.md`'s header carries a `design: S/100 (C/F source files without a design candidate)` line when the record exists.
+- `_design_summary(code_root)` returns `{files, clean_files, score, candidates}` over the non-test program-logic files, `score` being the percentage of files with no candidate, `candidates` the count per pillar (encapsulation, abstraction, inheritance, polymorphism, standards); it returns `None` when there is no such file.
+- `_assemble_map_data` attaches that record as `design` in `_map.json`, and omits the key when the record is `None`, so a repo without program logic gains no empty key.
+- `_map.md`'s header carries a `design pass-rate: S% (C/F source files without a design candidate)` line when the record exists.
 - `health` prints a design line and `health --json` carries `design_score` and `design_files` when the record exists; both are absent otherwise.
-- The record is deterministic, so `map --check` treats a changed design score like any other change to the committed map.
+- `gate --audit` prints a design pass-rate line and row, and its JSON carries the record as `design`, when the record exists.
+- The record is deterministic, but it is advisory: a changed design score never makes `map --check` report the map stale (REQ-DESIGN-991).
 
 ## Cases
 CASE-1 — the score counts clean files
-  Given  a clean documented module, a module writing a global, and a test file writing a global
+  Given  a clean module, a module writing a global, and a test file writing a global
   When   `_design_summary` runs
-  Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate
+  Then   it reports 2 files, 1 clean, score 50, one encapsulation candidate and no standards candidate
 
 CASE-2 — the map header and health carry the score
   Given  a corpus and one clean module
@@ -319,7 +310,7 @@ CASE-3 — no program logic, no key
 
 ---
 id: REQ-DESIGN-955
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -342,7 +333,7 @@ Every bullet below is binding.
 - A function is a head matching `_BRACE_FUNC_RE` (`name(params) {`, with optional modifiers, return type or arrow form) whose name is not a control keyword; its length, nesting depth (brace depth inside the body) and parameter names feed `_design_shape_findings` exactly as Python's do.
 - A class, struct or interface body is matched by braces. Its methods are the functions inside it, its bases the identifiers after `extends`/`implements`/`:`. Shared and duplicated methods come from the shared checks.
 - An `if`/`else if` chain collects `instanceof`, `typeof`, `dynamic_cast` and `x is T` tests as type tests, and `x == literal` tests as equality tests; a `switch (x)` counts one equality test per `case`; both feed `_design_chain_findings`.
-- The docstring rule does not apply outside Python; a program-logic file in a language with neither analyzer (Ruby, Elixir) gets the standards checks only.
+- A program-logic file in a language with neither analyzer (Ruby, Elixir) gets the standards checks only.
 
 ## Cases
 CASE-1 — JavaScript shapes
@@ -353,7 +344,7 @@ CASE-1 — JavaScript shapes
 CASE-2 — C++ shapes
   Given  a C++ file with a 90-line function and a three-branch dynamic_cast chain
   When   `_design_file` reads it
-  Then   it reports long-function for `compute` and an isinstance-chain, and no missing-docstring
+  Then   it reports long-function for `compute` and an isinstance-chain
 
 CASE-3 — masking
   Given  a JS function whose string literal and comment contain braces
@@ -367,7 +358,7 @@ CASE-4 — standards only elsewhere
 
 ---
 id: REQ-DESIGN-976
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -389,7 +380,7 @@ Every bullet below is binding.
 - `_design_summary` takes `with_findings`, off by default; when it is on the returned record also carries `findings`, one entry per candidate with its `pillar`, `kind`, `file`, `line`, `name` and `detail`.
 - The advice text is emitted once per `kind` in a sibling `advice` object, never repeated on each entry, because the advice belongs to the rule rather than to the occurrence.
 - `_assemble_map_data` is the only caller that asks for the candidates, so `_map.json` carries them and `health --json` keeps the small score-only record a CI badge reads.
-- The candidates are ordered by the walk that produced them, so a repo that did not change produces a byte-identical `design` block and `map --check` stays quiet.
+- The candidates are ordered by the walk that produced them, so a repo that did not change produces a byte-identical `design` block.
 
 ## Cases
 CASE-1 — off by default
@@ -582,7 +573,7 @@ CASE-3 — the dropped kinds are gone
 
 ---
 id: REQ-DESIGN-991
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -603,7 +594,7 @@ satisfies: [ARCH-DESIGN-061]
 
 Every bullet below is binding.
 - The design payload is excluded from every freshness comparison: the `design` block of
-  `_map.json` and of the injected viewer blob, and `_map.md`'s one-line design summary.
+  `_map.json` and `_map.md`'s one-line design summary.
 - The data itself stays in the artifacts. The viewer renders those rows in its Design tab, so
   removing them would delete a feature to fix a severity mistake.
 - Determinism is not the test for what may be gated. A freshness-checked payload stays
@@ -627,7 +618,7 @@ CASE-2 — a changed design score is not staleness
 CASE-3 — a changed requirement still is
   Given  a committed map and a requirement whose title has changed
   When   the freshness check runs
-  Then   `_map.json` and the published viewer copy are reported stale
+  Then   `_map.json` is reported stale
 
 CASE-4 — a changed health number still is
   Given  a committed map and a different health score

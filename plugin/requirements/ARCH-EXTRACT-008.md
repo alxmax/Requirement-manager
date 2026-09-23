@@ -315,7 +315,6 @@ level: code
 layer: feature
 owner: Alex
 milestone: v7.10
-lint_exempt: [file-spread]
 satisfies: [ARCH-EXTRACT-008]
 ---
 

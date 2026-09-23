@@ -6,7 +6,7 @@ layer: feature
 owner: Alex
 milestone: v7.15
 depends_on: [ARCH-CHECK-006, ARCH-CONFIG-060]
-satisfies: [SYS-GATE-102]
+satisfies: [SYS-DRIFT-109]
 ---
 
 # Corpus counts a document states about itself

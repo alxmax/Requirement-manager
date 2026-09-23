@@ -712,7 +712,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         self.assertIn(("error", "missing-section"),
                       [(f["severity"], f["check"]) for f in fs])
 
-    def test_over_scoped_fires_only_on_both_ceilings(self):  # composite cohesion signal  # verifies: REQ-LINTCHECKS-866#CASE-3  # verifies: ARCH-LINTCHECKS-025#CASE-5
+    def test_over_scoped_fires_only_on_both_ceilings(self):  # composite cohesion signal  # verifies: REQ-LINTCHECKS-866#CASE-3
         big_contract = "".join("- clause {}.\n".format(i) for i in range(R.LINT_CONTRACT_MAX + 1))
         big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
         small_ac = "".join("- AC {}.\n".format(i) for i in range(3))
@@ -721,7 +721,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
         self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
 
-    def test_over_scoped_counts_groups_not_clauses(self):  # verifies: REQ-LINTCHECKS-866#CASE-4  # verifies: ARCH-LINTCHECKS-025#CASE-6
+    def test_over_scoped_counts_groups_not_clauses(self):  # verifies: REQ-LINTCHECKS-866#CASE-4
         # the atomic voice multiplies bullets without widening scope: a grouped contract
         # is measured by its groups, so splitting one clause into three stays silent
         big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
@@ -744,7 +744,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         self.assertNotIn("empty-section",                                    # content present => silent
                          [f["check"] for f in R.lint_requirement("REQ-F-001", self._req("confirmed", self._body()))])
 
-    def test_file_spread_warns_across_many_files(self):  # senate-driven; validates the positive branch via a synthetic multi-file fixture  # verifies: REQ-LINTCHECKS-866#CASE-5  # verifies: REQ-LINTCHECKS-866#CASE-6  # verifies: ARCH-LINTCHECKS-025#CASE-7
+    def test_file_spread_warns_across_many_files(self):  # validates the positive branch via a synthetic multi-file fixture  # verifies: REQ-LINTCHECKS-866#CASE-5  # verifies: REQ-LINTCHECKS-866#CASE-6
         r = self._req("confirmed", self._body())
         spread = [("implements", "x/a.py", 1), ("implements", "y/b.py", 2), ("implements", "z/c.py", 3)]
         self.assertIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-D-001", r, spread)])
@@ -779,7 +779,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=stmt + "\n")))
         self.assertFalse(any(f["check"] == "statement-too-long" for f in fs))
 
-    def test_statement_too_long_fires_on_a_fourth_sentence(self):  # verifies: REQ-LINTCHECKS-865#CASE-1  # verifies: ARCH-LINTCHECKS-025#CASE-3
+    def test_statement_too_long_fires_on_a_fourth_sentence(self):  # verifies: REQ-LINTCHECKS-865#CASE-1  # verifies: ARCH-LINTCHECKS-025#CASE-1
         stmt = ("- `init` creates the folder. The folder holds the lock. "
                 "The lock records one hash per requirement. The hash is the contract.")
         self.assertEqual(len(R._sentences(stmt[2:])), 4)
@@ -789,7 +789,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         self.assertEqual(hits[0]["severity"], "warn")
         self.assertIn("4 sentences", hits[0]["detail"])
 
-    def test_stacked_conditions_warns(self):  # verifies: REQ-LINTCHECKS-865#CASE-2  # verifies: ARCH-LINTCHECKS-025#CASE-2
+    def test_stacked_conditions_warns(self):  # verifies: REQ-LINTCHECKS-865#CASE-2
         line = "- It shall do A and B and C and D."
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
         self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
@@ -800,7 +800,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
         self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
 
-    def test_anonymous_subject_warns_on_unnamed_it(self):  # verifies: REQ-LINT-863#CASE-4  # verifies: REQ-LINT-864#CASE-4  # verifies: REQ-LINTCHECKS-865#CASE-4  # verifies: ARCH-LINTCHECKS-025#CASE-9
+    def test_anonymous_subject_warns_on_unnamed_it(self):  # verifies: REQ-LINT-863#CASE-4  # verifies: REQ-LINT-864#CASE-4  # verifies: REQ-LINTCHECKS-865#CASE-4
         fs = R.lint_requirement(
             "REQ-X-001", self._req("confirmed", self._body(contract="- It creates the folder.\n")))
         hits = [f for f in fs if f["check"] == "anonymous-subject"]
@@ -893,7 +893,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=one + "\n")))
         self.assertFalse(any(f["check"] == "statement-too-long" for f in fs))
 
-    def test_ac_count_low_warns(self):  # verifies: REQ-LINTCHECKS-866#CASE-1  # verifies: ARCH-LINTCHECKS-025#CASE-4
+    def test_ac_count_low_warns(self):  # verifies: REQ-LINTCHECKS-866#CASE-1  # verifies: ARCH-LINTCHECKS-025#CASE-2
         body = self._body(contract="- ok.\n", acceptance="- only one AC.\n")
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         self.assertTrue(any(f["check"] == "ac-count-low" for f in fs))
@@ -914,14 +914,14 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
                 "AC-2\n  Given a\n  When b\n  Then c\n")
         self.assertEqual(R._count_ac(body), 2)
 
-    def test_vague_term_warns(self):  # verifies: REQ-LINTCHECKS-868#CASE-1  # verifies: REQ-LINTCHECKS-868#CASE-3  # verifies: ARCH-LINTCHECKS-025#CASE-1
+    def test_vague_term_warns(self):  # verifies: REQ-LINTCHECKS-868#CASE-1  # verifies: REQ-LINTCHECKS-868#CASE-3  # verifies: ARCH-LINTCHECKS-025#CASE-4
         body = self._body(contract="- It shall be appropriate and user-friendly.\n")
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         vague = [f for f in fs if f["check"] == "vague-term"]
         self.assertEqual(len(vague), 2)            # 'appropriate' + 'user-friendly'
         self.assertEqual(vague[0]["severity"], "warn")
 
-    def test_vague_term_skips_code_spans(self):  # verifies: REQ-LINTCHECKS-868#CASE-2  # verifies: ARCH-LINTCHECKS-025#CASE-8
+    def test_vague_term_skips_code_spans(self):  # verifies: REQ-LINTCHECKS-868#CASE-2  # verifies: ARCH-LINTCHECKS-025#CASE-4
         # a backticked identifier that happens to contain a vague word is not flagged
         body = self._body(contract="- It shall return `fast_path` within the limit.\n")
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
@@ -932,7 +932,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         self.assertFalse(any(f["check"] == "vague-term" for f in fs))
 
-    def test_redundant_modal_warns(self):  # verifies: REQ-LINTCHECKS-869#CASE-1  # verifies: REQ-LINTCHECKS-869#CASE-3  # verifies: ARCH-LINTCHECKS-025#CASE-10
+    def test_redundant_modal_warns(self):  # verifies: REQ-LINTCHECKS-869#CASE-1  # verifies: REQ-LINTCHECKS-869#CASE-3  # verifies: ARCH-LINTCHECKS-025#CASE-5
         body = self._body(contract="- The system shall log the event and must retry once.\n")
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         modal = [f for f in fs if f["check"] == "redundant-modal"]
@@ -2958,7 +2958,7 @@ CASE-3
         self.assertEqual(self._files(), ["TOOL-UTILS.md"])
         reqs = R.load_requirements(self.rd)
         self.assertFalse(R.decomposable(reqs["TOOL-UTILS"]))
-        self.assertIsNone(R.audit._decompose_candidates_line(reqs))
+        self.assertIsNone(R.audittail._decompose_candidates_line(reqs))
 
     def test_a_requirement_with_no_groups_falls_through(self):
         _write(os.path.join(self.rd, "TOOL-UTILS.md"),
@@ -3630,3 +3630,216 @@ class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @
     def test_done_and_later_items_are_never_counted(self):  # verifies: REQ-UNPLANNED-1024#CASE-3
         self.assertEqual(["CSV writer", "Parser speed", "Viewer A", "Viewer B"],
                          [it["name"] for it in R.unplanned_items(self.ITEMS, [])])
+
+
+class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
+    """The project site: `sync` refreshes the engine-owned regions of
+    docs/architecture.html and `init` scaffolds it."""
+    # tested-by: REQ-SITE-924
+
+    def _seed(self, d):
+        reqs = os.path.join(d, "requirements")
+        _write(os.path.join(reqs, "AREA-X-001.md"),
+               "---\nid: AREA-X-001\nstatus: confirmed\nlayer: feature\n"
+               "---\n# X\n> why\n")
+        return reqs
+
+    def _ws(self, d, reqs):
+        return R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs))
+
+    def _site(self, d, reqs, page, regions):
+        with redirect_stdout(io.StringIO()):
+            return R.cmd_site(self._ws(d, reqs), d, page, regions)
+
+    def test_remote_url_normalises_scp_ssh_and_https(self):
+        want = "https://github.com/o/r"
+        self.assertEqual(want, R._normalise_remote("git@github.com:o/r.git"))
+        self.assertEqual(want,
+                         R._normalise_remote("https://github.com/o/r.git"))
+        self.assertEqual(want,
+                         R._normalise_remote("ssh://git@github.com:2222/o/r"))
+        self.assertIsNone(R._normalise_remote(""))
+
+    def test_remote_override(self):
+        with mock.patch.dict(os.environ, {"REQMAP_REPO": "o/r"}):
+            self.assertEqual("https://github.com/o/r",
+                             R._git_remote_web_url("."))
+        with mock.patch.dict(os.environ, {"REQMAP_REPO": ""}):
+            self.assertIsNone(R._git_remote_web_url("."))
+
+    def test_inject_region_refreshes_and_preserves_prose(self):
+        html = ("<body>\n<h1>AUTHORED</h1>\n"
+                "<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n</body>")
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->",
+                      out)
+        self.assertIn("<h1>AUTHORED</h1>", out)
+        self.assertNotIn("old", out)
+
+    def test_inject_region_absent_goes_after_body_with_attributes(self):
+        out = R._inject_region('<body class="x">\n<h1>hi</h1>\n</body>',
+                               "nav", "NEW")
+        self.assertLess(out.index("<body"), out.index("REQMAP:NAV"))
+        self.assertLess(out.index("REQMAP:NAV"), out.index("</body>"))
+
+    def test_inject_region_close_before_open_no_duplicate(self):
+        html = ("<body>\n<!--##/REQMAP:NAV##-->stray\n"
+                "<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n</body>")
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertEqual(1, out.count("<!--##REQMAP:NAV##-->"))
+        self.assertNotIn("old", out)
+
+    def test_extract_region_roundtrip(self):
+        html = R._inject_region("<body></body>", "stats", "DATA")
+        self.assertEqual("DATA", R._extract_region(html, "stats"))
+        self.assertIsNone(R._extract_region("<body></body>", "stats"))
+
+    def test_render_nav_omits_absent_targets(self):
+        # verifies: REQ-SITE-924#CASE-3
+        nav = R._render_region("nav", {"repo_url": None, "map_ok": False})
+        self.assertNotIn("<a", nav)
+        self.assertIn('class="nav-links"', nav)
+        nav = R._render_region("nav", {"repo_url": "https://github.com/o/r",
+                                       "map_ok": True})
+        self.assertIn('href="https://github.com/o/r"', nav)
+        self.assertIn('href="map.html"', nav)
+
+    def test_render_nav_escapes_repo_url(self):
+        nav = R._render_region("nav", {"repo_url": "https://x/<script>",
+                                       "map_ok": False})
+        self.assertNotIn("<script>", nav)
+        self.assertIn("&lt;script&gt;", nav)
+
+    def test_render_stats_counts_from_graph(self):
+        data = {"nodes": [{"id": "A-1", "layer": "bus",
+                           "status": "confirmed"},
+                          {"id": "B-2", "layer": "feature",
+                           "status": "confirmed"},
+                          {"id": "C-3", "layer": "feature",
+                           "status": "draft"}],
+                "edges": [["B-2", "A-1"]]}
+        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False)
+        stats = R._render_region("stats", ctx)
+        self.assertTrue(stats.startswith('<div class="stat">'))
+        self.assertIn("<b>3</b><span>requirements", stats)
+        self.assertIn("<b>2</b><span>confirmed", stats)
+        self.assertIn(R.MAP_ENGINE_VERSION, stats)
+
+    def test_attach_is_idempotent(self):  # verifies: REQ-SITE-924#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            _write(page, "<body>\n<h1>Mine</h1>\n</body>")
+            self._site(d, reqs, page, ["nav", "stats"])
+            first = _text(page)
+            self._site(d, reqs, page, ["nav", "stats"])
+            second = _text(page)
+            self.assertEqual(first, second)
+            self.assertIn("<h1>Mine</h1>", second)
+
+    def test_no_remote_degrades(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            _write(page, "<body></body>")
+            with mock.patch.object(R.site, "_git_remote_web_url",
+                                   return_value=None):
+                rc = self._site(d, reqs, page, ["nav"])
+            self.assertEqual(0, rc)
+            self.assertNotIn("GitHub", _text(page))
+
+    def test_scaffold_writes_full_page(self):  # verifies: REQ-SITE-924#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            target = os.path.join(d, "docs", "architecture.html")
+            self._site(d, reqs, target, ["nav", "stats"])
+            html = _text(target)
+            self.assertIn("<!--##REQMAP:NAV##-->", html)
+            self.assertIn("<!--##REQMAP:STATS##-->", html)
+            self.assertIn("<!-- author me -->", html)
+            self.assertNotIn("%%REPO", html)
+
+    def test_scaffold_escapes_repo_name(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            target = os.path.join(d, "docs", "architecture.html")
+            with mock.patch.object(R.site, "_repo_name",
+                                   return_value='x"><script>bad</script>'), \
+                 mock.patch.object(R.site, "_git_remote_web_url",
+                                   return_value=None):
+                self._site(d, reqs, target, ["nav"])
+            html = _text(target)
+            self.assertNotIn("<script>bad</script>", html)
+            self.assertIn("&lt;script&gt;", html)
+
+    def test_pages_bootstrap_never_clobbers_index(self):
+        # verifies: REQ-SITE-924#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            docs = os.path.join(d, "docs")
+            index = os.path.join(docs, "index.html")
+            _write(index, "<h1>landing</h1>")
+            R._site_pages_bootstrap(docs)
+            self.assertEqual("<h1>landing</h1>",
+                             _text(index))
+            self.assertTrue(os.path.isfile(os.path.join(docs, ".nojekyll")))
+            fresh = os.path.join(d, "fresh")
+            R._site_pages_bootstrap(fresh)
+            self.assertIn("./architecture.html",
+                          _text(os.path.join(fresh, "index.html")))
+            self.assertTrue(os.path.isfile(os.path.join(fresh, ".nojekyll")))
+
+    def test_init_scaffolds_site_when_absent(self):
+        # verifies: REQ-SITE-924#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            _write(os.path.join(d, "a.py"), "x = 1\n")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(os.path.join(d, "requirements"), d, no_site=False)
+            page = os.path.join(d, "docs", "architecture.html")
+            self.assertIn("<!--##REQMAP:NAV##-->",
+                          _text(page))
+            self.assertTrue(os.path.isfile(
+                os.path.join(d, "docs", "index.html")))
+
+    def test_init_no_site_flag_skips(self):  # verifies: REQ-SITE-924#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            _write(os.path.join(d, "a.py"), "x = 1\n")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+            self.assertFalse(os.path.exists(
+                os.path.join(d, "docs", "architecture.html")))
+
+    def test_site_stale_fires_only_after_tampering(self):
+        # verifies: REQ-SITE-924#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "docs", "architecture.html")
+            self._site(d, reqs, page, ["stats"])
+            ws = self._ws(d, reqs)
+            data = R._build_map_data(ws.reqs, ws.members)
+            self.assertIsNone(R.site_stale(data, d))
+            cur = _text(page)
+            _write(page, cur.replace(R._extract_region(cur, "stats"),
+                                     "TAMPERED"))
+            self.assertEqual("architecture.html", R.site_stale(data, d))
+
+    def test_sync_refreshes_the_default_page(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            page = os.path.join(d, "docs", "architecture.html")
+            _write(page, "<body><!--##REQMAP:STATS##-->0"
+                         "<!--##/REQMAP:STATS##--></body>")
+            old = sys.argv
+            sys.argv = ["reqmap", "sync", "--root", d]
+            try:
+                # the verdict is not under test: only what a passing sync does
+                with mock.patch.object(R, "cmd_check", return_value=0), \
+                     redirect_stdout(io.StringIO()), \
+                     redirect_stderr(io.StringIO()):
+                    R.main()
+            finally:
+                sys.argv = old
+            html = _text(page)
+            self.assertIn("<b>1</b><span>requirements", html)
+            self.assertIn("<!--##REQMAP:NAV##-->", html)

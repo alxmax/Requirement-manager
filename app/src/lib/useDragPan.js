@@ -15,7 +15,10 @@ export function useDragPan(externalRef) {
   function onMouseDown(e) {
     if (e.button !== 0) return;
     const el = ref.current; if (!el) return;
-    const d = { x: e.clientX, y: e.clientY, sl: el.scrollLeft, st: el.scrollTop, moved: false };
+    const d = {
+      x: e.clientX, y: e.clientY,
+      sl: el.scrollLeft, st: el.scrollTop, moved: false,
+    };
     drag.current = d;
     const move = (ev) => {
       const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
@@ -36,7 +39,10 @@ export function useDragPan(externalRef) {
   }
 
   function onClickCapture(e) {
-    if (drag.current && drag.current.moved) { e.stopPropagation(); e.preventDefault(); }
+    if (drag.current && drag.current.moved) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
   }
 
   return { ref, onMouseDown, onClickCapture };

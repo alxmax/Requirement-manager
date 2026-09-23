@@ -1,13 +1,15 @@
 #!/usr/bin/env sh
-# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
+# implements: REQ-SELFGATE-1070
 # requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
 #   2. engine bump    — reqmap.py / reqmap_engine/ staged without a MAP_ENGINE_VERSION change (fix: bump it)
 #   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py sync --root plugin --code .)
-#   4. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
+#   4. retired verbs  — an instruction naming a removed verb or flag
+#   5. requirement lint — unreadable/structurally broken spec (fix: rewrite it)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
-#   check_versions.py -> check_engine_bump.py -> gate -> lint --strict -> map --check
+#   check_versions.py -> check_engine_bump.py -> check_retired_verbs.py
+#   -> gate --full (which is the lint and the map-freshness check too)
 #
 # Enable once (from the repo root):  git config core.hooksPath .githooks
 # Bypass once:  git commit --no-verify

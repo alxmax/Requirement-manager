@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 
 // Builds viewer.html into ONE self-contained file (JS + CSS inlined) — the
-// pre-built template the engine injects per-repo data into. See install-viewer.mjs.
+// pre-built template the engine injects per-repo data into. See
+// install-viewer.mjs.
 export default defineConfig({
   base: "./",
   plugins: [react(), viteSingleFile()],

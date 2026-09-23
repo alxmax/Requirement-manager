@@ -5,13 +5,16 @@ import { useI18n } from "../lib/i18n.jsx";
 import { CommandGroup } from "./commands/CommandGroup.jsx";
 
 const GROUPS = [
-  { key: "author", label: "Author", hint: "writing and evolving a requirement" },
-  { key: "build", label: "Build", hint: "turning it into code, and proving it" },
+  { key: "author", label: "Author",
+    hint: "writing and evolving a requirement" },
+  { key: "build", label: "Build",
+    hint: "turning it into code, and proving it" },
   { key: "read", label: "Read", hint: "asking the corpus questions" },
 ];
 
 const EMPTY_NOTE = {
-  marginTop: 6, color: "var(--fg-muted)", font: "var(--text-small)", maxWidth: 460,
+  marginTop: 6, color: "var(--fg-muted)",
+  font: "var(--text-small)", maxWidth: 460,
 };
 
 export function CommandsView() {
@@ -25,8 +28,8 @@ export function CommandsView() {
           <b>{t("No command list in this map.")}</b>
           <div style={EMPTY_NOTE}>
             {t(
-              "Regenerate it with a current engine — `reqmap.py sync` writes the command "
-              + "reference into _map.json.",
+              "Regenerate it with a current engine — `reqmap.py sync` writes "
+              + "the command reference into _map.json.",
             )}
           </div>
         </div>
@@ -38,7 +41,10 @@ export function CommandsView() {
     <div className="main">
       <div className="cmds">
         <p className="cmds-lede">
-          {t("Every verb the engine exposes, generated from its own command registry.")}
+          {t(
+            "Every verb the engine exposes, generated from its own command "
+            + "registry.",
+          )}
         </p>
         {GROUPS.map((g) => (
           <CommandGroup key={g.key} group={g} locale={locale} t={t}
