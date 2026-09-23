@@ -98,8 +98,6 @@ export function computeQuestions() {
   return computeProblems().filter((p) => p.sev === "QUESTION");
 }
 
-const isDraftReview = (p) => p.sev === "REVIEW" && p.signal === "unreviewed";
-
 /* Tabs that render a panel of their own instead of the problem list. */
 const PANELS = new Set(["DESIGN", "HEALTH"]);
 
@@ -108,7 +106,6 @@ export function ProblemsView({
 }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState(initialFilter);
-  const [showDrafts, setShowDrafts] = useState(false);
   const all = (problems || computeProblems()).filter((p) => p.sev !== "DESIGN");
   const counts = all.reduce((a, p) => {
     a[p.sev] = (a[p.sev] || 0) + 1;
@@ -123,10 +120,7 @@ export function ProblemsView({
   }, {});
   const health = (HEALTH && Array.isArray(HEALTH.unhealthy))
     ? HEALTH : null;
-  const draftReviews = all.filter(isDraftReview).length;
-  const byTab = filter === "ALL" ? all : all.filter((p) => p.sev === filter);
-  const shown = showDrafts ? byTab : byTab.filter((p) => !isDraftReview(p));
-  const hidden = byTab.length - shown.length;
+  const shown = filter === "ALL" ? all : all.filter((p) => p.sev === filter);
   const gateMsg = (counts.ERROR || 0) > 0
     ? <>
         <Icon name="triangle-alert" size={14}
@@ -138,9 +132,6 @@ export function ProblemsView({
               style={{ color: "var(--status-confirmed)" }} />
         {" "}{t("gate passes")}
       </>;
-  const draftsLabel = showDrafts
-    ? t("hide {n} draft review rows", { n: draftReviews })
-    : t("{n} draft review rows hidden — show", { n: hidden });
 
   return (
     <div className="main">
@@ -154,13 +145,6 @@ export function ProblemsView({
           && <DesignProblemsPanel byPillar={byPillar} advice={advice} />}
         {filter === "HEALTH" && health
           && <HealthPanel health={health} openSpec={openSpec} />}
-        {!PANELS.has(filter)
-          && (hidden > 0 || (showDrafts && draftReviews > 0)) && (
-          <button type="button" className="prob-chip"
-                  onClick={() => setShowDrafts((s) => !s)}>
-            {draftsLabel}
-          </button>
-        )}
         {!PANELS.has(filter) && shown.map((p, i) => (
           <ProblemRow key={i} p={p} openSpec={openSpec} t={t} />
         ))}

@@ -2,104 +2,104 @@
 
 ## plugin `v8.5.1` — 2026-09-22
 
-**Viewer-ul fără rămășițe de design.**
+**The viewer without design leftovers.**
 
-- Viewer-ul nu mai arată inelul și tab-ul de design; motorul nu mai trimite date de design din v8.2.0 (ARCH-VIEWER-007)
+- The viewer no longer shows the design ring and tab; the engine has sent no design data since v8.2.0 (ARCH-VIEWER-007)
 
 ## plugin `v8.5.0` — 2026-09-22
 
-**Datoria de viewer: split ARCH-VIEWER-007.**
+**Viewer debt: ARCH-VIEWER-007 split.**
 
-- Split ARCH-VIEWER-007: artefactul HTML (ARCH-VIEWERFILE-074) vs. ce randează (ADR-0050) (ARCH-VIEWER-007)
+- Split ARCH-VIEWER-007: the HTML artifact (ARCH-VIEWERFILE-074) vs. what it renders (ADR-0050) (ARCH-VIEWER-007)
 
 ## plugin `v8.4.1` — 2026-09-22
 
-**Un agent nou pornește din 40 de linii.**
+**A new agent starts from 40 lines.**
 
-- SKILL.md: primul ecran e de 37 de linii și duce un agent nou de la seed la `gate` (SYS-AUTHOR-101)
+- SKILL.md: the first screen is 37 lines and takes a new agent from the seed to `gate` (SYS-AUTHOR-101)
 
 ## plugin `v8.4.0` — 2026-09-22
 
-**Un gate care se citește.**
+**A gate you can read.**
 
-- `gate` fără zgomot: rulează doar ce spune că ceva e stricat; `--full` rulează tot (ADR-0049) (ARCH-CHECK-006)
+- `gate` without noise: it runs only what says something is broken; `--full` runs everything (ADR-0049) (ARCH-CHECK-006)
 
-`gate` fără argumente rulează acum doar erorile și avertismentele despre legături rupte, drift și harta comisă (`DEFAULT_RULES`), și afișează doar erorile de lizibilitate. Sfaturile (RM007 și celelalte, avertismentele de lint) apar cu `gate --full` sau `gate --audit`. Nicio regulă nu și-a schimbat severitatea. Măsurat pe 4 corpusuri, nicio regulă nu trece de 50% în două dintre ele.
+`gate` with no arguments now runs only the errors and the warnings about broken links, drift and the committed map (`DEFAULT_RULES`), and prints readability errors only. The advice (RM007 and the rest, and the lint warnings) appears with `gate --full` or `gate --audit`. No rule changed its severity. Measured on 4 corpora, no rule fires above 50% in two of them.
 
 ## plugin `v8.3.0` — 2026-09-22
 
-**Harta fără dubluri.**
+**The map without duplicates.**
 
-- `_map.json` poartă fiecare listă o singură dată: `acc` îl calculează viewer-ul, `deps` și `targets` pleacă (ARCH-MAP-007)
-- RM036 confirmat: un `[[ID]]` fără țintă în Description (ARCH-CHECK-006)
+- `_map.json` carries each list once: the viewer computes `acc`, and `deps` and `targets` go (ARCH-MAP-007)
+- RM036 confirmed: an `[[ID]]` with no target in a Description (ARCH-CHECK-006)
 
-`_map.json` scade de la 1,94 MB la 1,60 MB. Un nod nu mai poartă `acc` (cu excepția formei atomice), `deps`, iar harta nu mai poartă `targets`: citește `accept`, `depends_on` și `planning`. Viewer-ul vendorizat citește și hărțile vechi.
+`_map.json` drops from 1.94 MB to 1.60 MB. A node no longer carries `acc` (except in the atomic form) or `deps`, and the map no longer carries `targets`: read `accept`, `depends_on` and `planning`. The vendored viewer still reads older maps.
 
 ## plugin `v8.2.0` — 2026-09-22
 
-**Motorul sub buget: 14.910 -> 13.372 de linii.**
+**The engine under budget: 14,910 -> 13,372 lines.**
 
-- Motorul are un buget de linii, verificat la release (ADR-0046) (ARCH-SELFGATE-039)
-- Review-ul de design iese din motor; `ask --design` nu mai face nimic (ADR-0047) (ARCH-DESIGN-061)
-- Site-ul și detectorul i18n ies din motor; traducerile RO deja făcute rămân (ADR-0047) (ARCH-TRANSLATE-044)
+- The engine has a line budget, checked at release (ADR-0046) (ARCH-SELFGATE-039)
+- The design review leaves the engine; `ask --design` no longer does anything (ADR-0047) (ARCH-DESIGN-061)
+- The site and the i18n detector leave the engine; the RO translations already made stay (ADR-0047) (ARCH-TRANSLATE-044)
 
-Motorul are 13.372 de linii (`wc -l plugin/scripts/reqmap.py plugin/scripts/reqmap_engine/*.py`), sub bugetul de 13.550. `ask --design`, `ask --i18n`, `init --no-site` și `sync --attach` sunt acceptate până la v9.0.0: afișează o linie pe stderr și ies cu 0. Tool-ul MCP `reqmap_design` a plecat. O cheie `DESIGN_*` sau `LANGUAGE` din `_config.json` e ignorată fără avertisment.
+The engine is 13,372 lines (`wc -l plugin/scripts/reqmap.py plugin/scripts/reqmap_engine/*.py`), under the 13,550 budget. `ask --design`, `ask --i18n`, `init --no-site` and `sync --attach` are accepted until v9.0.0: they print one line on stderr and exit 0. The `reqmap_design` MCP tool is gone. A `DESIGN_*` or `LANGUAGE` key in `_config.json` is ignored without a warning.
 
 ## plugin `v8.1.3` — 2026-09-22
 
-**Descompunerea nu mai pierde contracte.**
+**Decomposing no longer loses contracts.**
 
-- `clarify --decompose` copiază în copii, nu mai golește părintele; RM036 semnalează un `[[ID]]` fără țintă (ARCH-DECOMPOSE-050)
+- `clarify --decompose` copies into the children and no longer empties the parent; RM036 flags an `[[ID]]` with no target (ARCH-DECOMPOSE-050)
 
 ## plugin `v8.1.2` — 2026-09-21
 
-**SKILL.md sub 400 de linii.**
+**SKILL.md under 400 lines.**
 
-- SKILL.md: 683 -> 399 de linii; secțiunile ocazionale trec în references/ (SYS-AUTHOR-101)
+- SKILL.md: 683 -> 399 lines; the occasional sections move to references/ (SYS-AUTHOR-101)
 
 ## plugin `v8.1.1` — 2026-09-21
 
-**ROADMAP pe categorii.**
+**The ROADMAP by category.**
 
-- Un `###` în ROADMAP.md e categoria itemurilor de sub el, nu nota celui de deasupra (ARCH-ROADMAP-038)
+- A `###` in ROADMAP.md is the category of the items under it, not the note of the one above (ARCH-ROADMAP-038)
 
 ## plugin `v8.1.0` — 2026-09-21
 
-**Scorul de health își numește scutirile.**
+**The health score names its exemptions.**
 
-- Scorul de health numește câte cerințe au o scutire (gate --risk, --audit, badge, viewer) (ARCH-HEALTH-017)
+- The health score says how many requirements carry an exemption (gate --risk, --audit, badge, viewer) (ARCH-HEALTH-017)
 
 ## plugin `v8.0.1` — 2026-09-21
 
-**Ce a stricat prima re-vendorizare (Consilium-py).**
+**What the first re-vendoring broke (Consilium-py).**
 
-- Upgrade-ul de motor nu mai retrogradează cerințele cu textul neschimbat (ARCH-PROMOTE-011)
-- Ignorarea lui `reqmap.py` ignoră și `reqmap_engine/` de lângă el (ARCH-SCAN-002)
-- `sync --release` mută și versiunile din `marketplace.json` (ARCH-RELEASE-072)
+- An engine upgrade no longer demotes requirements whose text did not change (ARCH-PROMOTE-011)
+- Ignoring `reqmap.py` also ignores the `reqmap_engine/` beside it (ARCH-SCAN-002)
+- `sync --release` also moves the versions in `marketplace.json` (ARCH-RELEASE-072)
 
 ## plugin `v8.0.0` — 2026-09-21
 
-**Suprafața CLI: `new` și alias-urile `gate --…` scoase, flag-urile străine refuzate.**
+**The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused.**
 
-- Scoate verbul `new` și `new --from-todo` (ADR-0045) (ARCH-NEW-004)
-- Scoate alias-urile `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` (ADR-0044) (ARCH-CMDREGISTRY-033)
-- Fiecare verb refuză flag-urile altui verb (`gate --wipe` iese cu 2) (ARCH-CMDREGISTRY-033)
+- Removes the `new` verb and `new --from-todo` (ADR-0045) (ARCH-NEW-004)
+- Removes the `gate --search` / `--dupes` / `--design` / `--review` / `--i18n` / `--top` / `--threshold` aliases (ADR-0044) (ARCH-CMDREGISTRY-033)
+- Every verb refuses another verb's flags (`gate --wipe` exits with 2) (ARCH-CMDREGISTRY-033)
 
-**Ruptură de compatibilitate.** `new`, `gate --search` / `--dupes` / `--design` / `--review` /
-`--i18n` / `--top` / `--threshold` și `gate --implement` (acceptat fără efect din v7.4.0) nu mai
-există: fiecare iese cu 2 și numește verbul corect. Un flag dat unui verb care nu-l deține (`gate
---wipe`, `sync --search`) nu mai e ignorat în tăcere. Action-ul se folosește ca
-`alxmax/requirement-manager/check@v8`; `@v7` rămâne pe v7.23.0.
+**Breaking change.** `new`, `gate --search` / `--dupes` / `--design` / `--review` /
+`--i18n` / `--top` / `--threshold` and `gate --implement` (accepted with no effect since v7.4.0) no
+longer exist: each exits with 2 and names the right verb. A flag given to a verb that does not own
+it (`gate --wipe`, `sync --search`) is no longer silently ignored. The Action is used as
+`alxmax/requirement-manager/check@v8`; `@v7` stays on v7.23.0.
 
-`--no-lint` și `--no-map-check` (`gate`), `--attach` (`sync`) și `--apply` (`clarify`) intră în
-registrul de comenzi, deci și în `tool_definition.json` și în tabelul din `SKILL.universal.md`.
+`--no-lint` and `--no-map-check` (`gate`), `--attach` (`sync`) and `--apply` (`clarify`) join the
+command registry, and so `tool_definition.json` and the table in `SKILL.universal.md`.
 
 ## plugin `v7.23.0` — 2026-09-20
 
-**README onest + health pe o singura pagina.**
+**An honest README + health on one page.**
 
-- README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran (SYS-SSOT-001)
-- Health: un snapshot, untagged, semnalele noi de orizont (ARCH-HEALTH-017)
+- A 90-line README: the problem, `init` / `sync` / `gate`, the worked example, the Action. No V-model on the first screen (SYS-SSOT-001)
+- Health: one snapshot, untagged files, the new horizon signals (ARCH-HEALTH-017)
 
 ## plugin `v7.22.1` — 2026-09-17
 

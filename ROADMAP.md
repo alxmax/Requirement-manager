@@ -1,43 +1,43 @@
 # Roadmap
 
-Planul produsului. Nu e jurnal: ce s-a livrat trăiește în CHANGELOG și în tag-urile git, iar un
-item bifat pleacă de aici.
+The product plan. It is not a log: what shipped lives in the CHANGELOG and in the git tags, and
+a checked item leaves this file.
 
-Editezi aici, direct. Barele din Gantt-ul viewer-ului se scriu în `plugin/requirements/_planning.json`.
+Edit it here, directly. The bars in the viewer's Gantt are written in `plugin/requirements/_planning.json`.
 
-Format: `- [ ] text | req: ID` pe Now/Next. Later cere `unpark:`.
-Heading-uri rezervate: Now, Next, Later, Not now. Categoriile sunt `###` în interiorul lor.
-Cadență: un release pe săptămână, nu unul pe fiecare merge.
+Format: `- [ ] text | req: ID` under Now/Next. Later needs `unpark:`.
+Reserved headings: Now, Next, Later, Not now. Categories are `###` headings inside them.
+Cadence: one release a week, not one per merge.
 
 ## Now
 
-### Adopție
+### Adoption
 
-- [ ] Consilium-py rămâne verde pe `check@v8`. Gata când: cel puțin 5 rulări verzi pe `main` de la re-vendorizare (2026-09-21, Consilium-py #63) | req: ARCH-SELFGATE-039
-- [ ] Un evaluator din afară, pe repo-ul lui, fără ajutor la gate. Gata când: are `uses: alxmax/requirement-manager/check@v8` pe un tree în care nu faci commit | req: SYS-SSOT-001
+- [ ] Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63) | req: ARCH-SELFGATE-039
+- [ ] An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to | req: SYS-SSOT-001
 
 ## Next
 
 ## Later
 
-### Suprafața motorului
+### Engine surface
 
-- [ ] Următoarea tăietură din motor: o capabilitate din lista celor care pot pleca (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), cu ADR, retire și bugetul coborât în același commit. Podeaua cu ROADMAP, MCP și `init` păstrate: 9.303 linii (ADR-0048) | req: ARCH-SELFGATE-039 | unpark: maintainerul numește capabilitatea
-- [ ] Lista de tool-uri MCP și schema OpenAI generate din același registru `COMMANDS` (ADR-0008) | req: ARCH-MCP-073 | unpark: freeze-ul MCP e ridicat
+- [ ] The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048) | req: ARCH-SELFGATE-039 | unpark: the maintainer names the capability
+- [ ] The MCP tool list and the OpenAI schema generated from the same `COMMANDS` registry (ADR-0008) | req: ARCH-MCP-073 | unpark: the MCP freeze is lifted
 
-### Adopție
+### Adoption
 
-- [ ] Repo-template `hello-reqmap`: „Use this template” produce un gate care trece | req: ARCH-INIT-012 | unpark: un evaluator raportează că `init` l-a lăsat baltă
-- [ ] Licență Apache-2.0 / MIT în loc de BSL 1.1 | unpark: primul evaluator intern într-o firmă care cere grant
+- [ ] Template repo `hello-reqmap`: "Use this template" produces a gate that passes | req: ARCH-INIT-012 | unpark: an evaluator reports that `init` left them stranded
+- [ ] An Apache-2.0 / MIT licence instead of BSL 1.1 | unpark: the first internal evaluator at a company that needs a grant
 
 ### Viewer
 
-- [ ] Search RO: rank pe flexiuni, nu match literal | unpark: un cititor din afara repo-ului care folosește viewer-ul în RO
+- [ ] RO search: rank on inflections, not on literal matches | unpark: a reader from outside the repo who uses the viewer in RO
 
 ## Not now
 
-- Requirement history — `git log -L` pe blocul cerinței ajunge
-- `verifiable by:` umplut de la 2 la 54 — ADR-0016 a respins un marker la 4% adopție
-- Formă atomică (54 → ~665 noduri) — ADR-0025
-- Fan-out hard pe gate — rămâne warn-only (ADR-0023)
-- `clarify --levels` — până la un ADR care îl înlocuiește pe 0031 (revisit 2027-03-06)
+- Requirement history — `git log -L` on the requirement's block is enough
+- `verifiable by:` filled from 2 to 54 — ADR-0016 rejected a marker at 4% adoption
+- Atomic form (54 → ~665 nodes) — ADR-0025
+- A hard fan-out check in the gate — it stays warn-only (ADR-0023)
+- `clarify --levels` — until an ADR replaces 0031 (revisit 2027-03-06)

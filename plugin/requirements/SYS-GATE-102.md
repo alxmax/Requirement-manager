@@ -21,13 +21,11 @@ Scenario: a tag names a requirement that does not exist
   Then   it fails with an error naming the tag and where it is
 
 ## Requirements in this system (auto)
-- `ARCH-DRIFT-003` — Contract hashing & lock  (architecture)  ·  8 detailed design
-- `ARCH-ACVERIFY-019` — Per-criterion test coverage  (architecture)  ·  11 detailed design
-- `ARCH-CHECK-006` — The gate  (architecture)  ·  34 detailed design
-- `ARCH-DOCBUNDLE-026` — Untagged doc-bundle warning  (architecture)  ·  8 detailed design
-- `ARCH-DRIFTIMPACT-035` — Drift blast-radius: name dependents  (architecture)  ·  5 detailed design
-- `ARCH-MEMBERDRIFT-027` — Reverse-direction member drift  (architecture)  ·  8 detailed design
-- `ARCH-ORPHANCODE-034` — Orphan-code warning  (architecture)  ·  10 detailed design
-- `ARCH-TESTLINK-018` — Test-link integrity check  (architecture)  ·  17 detailed design
-- `ARCH-TRACKED-042` — Untracked members reported  (architecture)  ·  5 detailed design
-- `ARCH-UNSCANNEDTAG-045` — Tags in unscanned file types reported  (architecture)  ·  7 detailed design
+- `ARCH-ACVERIFY-019` — Per-criterion test coverage  (architecture)
+- `ARCH-CHECK-006` — The gate  (architecture)
+- `ARCH-GITRUN-067` — Talking to git  (architecture)
+- `ARCH-RETIRE-064` — Taking a requirement out of service  (architecture)
+- `ARCH-RULES-059` — The gate rule registry  (architecture)
+- `ARCH-TESTLINK-018` — Test-link integrity check  (architecture)
+- `ARCH-UNREADABLE-070` — Source files the scan cannot decode  (architecture)
+- `ARCH-UNSCANNEDTAG-045` — Tags in unscanned file types reported  (architecture)
