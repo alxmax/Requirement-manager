@@ -4794,7 +4794,8 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
 
 
 class Audit20260906(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007
-    """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md)."""
+    """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md,
+    removed later; `git show 9863fb9:docs/audit/2026-09-06-full-audit.md`)."""
 
     LONG = " ".join(["alpha"] * 155)
     REQ_BODY = ("# T\n\n## Description\n\nEvery bullet below is binding.\n- {}.\n\n"
