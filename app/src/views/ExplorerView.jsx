@@ -26,30 +26,40 @@ function statusDot(s) {
 function Row({ row, selected, onSelect, onToggle }) {
   const r = row.r;
   const lvl = levelOf(r);
-  const cls = ["ex-row", selected ? "sel" : "", row.context ? "ctx" : ""].join(" ").trim();
+  const cls = ["ex-row", selected ? "sel" : "", row.context ? "ctx" : ""]
+    .join(" ").trim();
   const n = row.childCount;
   const chip = row.codeChildren === n
     ? `${n} ${n === 1 ? "clause" : "clauses"}`
     : `${n} ${n === 1 ? "child" : "children"}`;
   return (
-    <div className={cls} data-req-row={r.id} style={{ paddingLeft: 6 + row.depth * 16 }}
+    <div className={cls} data-req-row={r.id}
+      style={{ paddingLeft: 6 + row.depth * 16 }}
       onClick={() => onSelect(r.id)}>
       {row.hasChildren
-        ? <button type="button" className={"ex-caret" + (row.expanded ? " open" : "")}
+        ? <button type="button"
+            className={"ex-caret" + (row.expanded ? " open" : "")}
             aria-label={row.expanded ? "collapse" : "expand"}
             onClick={(e) => { e.stopPropagation(); onToggle(r.id); }}>
             <Icon name="chevron-right" size={13} />
           </button>
         : <span className="ex-caret empty" />}
-      <span className={"ex-lvl lvl-" + lvl} title={LEVEL_LABEL[lvl]}>{LEVEL_SHORT[lvl]}</span>
+      <span className={"ex-lvl lvl-" + lvl} title={LEVEL_LABEL[lvl]}>
+        {LEVEL_SHORT[lvl]}
+      </span>
       <span className="ex-id">{r.id}</span>
       <span className="ex-title">{r.title}</span>
       <span className="ex-glyphs">
         {hasOpenQuestions(r) && (
-          <span className="ex-q" title="has an open verify-intent question">?</span>
+          <span className="ex-q" title="has an open verify-intent question">
+            ?
+          </span>
         )}
-        {row.hasChildren && !row.expanded && <span className="ex-count">{chip}</span>}
-        <span className="ex-dot" title={r.status} style={{ background: statusDot(r.status) }} />
+        {row.hasChildren && !row.expanded && (
+          <span className="ex-count">{chip}</span>
+        )}
+        <span className="ex-dot" title={r.status}
+              style={{ background: statusDot(r.status) }} />
       </span>
     </div>
   );
@@ -63,7 +73,8 @@ function LinkGroup({ label, ids, count, onNav, emptyLabel }) {
       </div>
       {ids.length
         ? <div className="ex-link-ids">{ids.map((id) => (
-          <button type="button" key={id} className="dep-link" onClick={() => onNav(id)}>
+          <button type="button" key={id} className="dep-link"
+                  onClick={() => onNav(id)}>
             {id}
           </button>
         ))}</div>
@@ -75,30 +86,36 @@ function LinkGroup({ label, ids, count, onNav, emptyLabel }) {
 function ExplorerLinks({ sel, h, setSelId, t }) {
   if (!sel) return null;
   const kids = h.childrenOf[sel.id] || [];
-  const parents = h.parentOf[sel.id] ? [h.parentOf[sel.id]] : (sel.satisfies || []);
+  const parents = h.parentOf[sel.id]
+    ? [h.parentOf[sel.id]] : (sel.satisfies || []);
   return (
     <div className="sec ex-links">
       <div className="eyebrow">{t("Links — traceability")}</div>
       <LinkGroup label={t("satisfies (up)")} ids={parents} onNav={setSelId}
                  emptyLabel={t("— top of the trace")} />
-      <LinkGroup label={t("satisfied by (down)")} ids={kids} count={kids.length} onNav={setSelId}
+      <LinkGroup label={t("satisfied by (down)")} ids={kids}
+                 count={kids.length} onNav={setSelId}
                  emptyLabel={t("— nothing decomposes this")} />
-      <LinkGroup label={t("depends on (out)")} ids={sel.deps || []} onNav={setSelId}
+      <LinkGroup label={t("depends on (out)")} ids={sel.deps || []}
+                 onNav={setSelId}
                  emptyLabel={t("— no outgoing dependency")} />
-      <LinkGroup label={t("used by (in)")} ids={sel.usedBy || []} onNav={setSelId}
+      <LinkGroup label={t("used by (in)")} ids={sel.usedBy || []}
+                 onNav={setSelId}
                  emptyLabel={t("— nothing depends on this")} />
     </div>
   );
 }
 
-/** A key-set toggler: `flip(setter)(key)` adds the key when absent and removes it when set. */
+/** A key-set toggler: `flip(setter)(key)` adds the key when absent and
+ *  removes it when set. */
 const flip = (setter) => (key) => setter((prev) => {
   const next = Object.assign({}, prev);
   if (next[key]) delete next[key]; else next[key] = true;
   return next;
 });
 
-/** The filter state, reset whenever the host focuses a status or the orphans. */
+/** The filter state, reset whenever the host focuses a status or the
+ *  orphans. */
 function useExplorerFilters(focus, clearFocus) {
   const [level, setLevel] = useState({});
   const focused = () => (focus && focus !== "orphan" ? { [focus]: true } : {});
@@ -110,7 +127,8 @@ function useExplorerFilters(focus, clearFocus) {
     setStatus(focused());
   }, [focus]);
   return {
-    level, status, onlyQuestions, onlyOrphans, setOnlyQuestions, setOnlyOrphans, clearFocus,
+    level, status, onlyQuestions, onlyOrphans, setOnlyQuestions,
+    setOnlyOrphans, clearFocus,
     flipLevel: flip(setLevel), flipStatus: flip(setStatus),
   };
 }
@@ -121,7 +139,9 @@ const anyOn = (set) => Object.keys(set).some((k) => set[k]);
 function useMatched(f) {
   const anyLevel = anyOn(f.level), anyStatus = anyOn(f.status);
   return useMemo(() => {
-    if (!anyLevel && !anyStatus && !f.onlyQuestions && !f.onlyOrphans) return null;
+    if (!anyLevel && !anyStatus && !f.onlyQuestions && !f.onlyOrphans) {
+      return null;
+    }
     return REQUIREMENTS.filter((r) =>
       (!anyLevel || f.level[levelOf(r)]) &&
       (!anyStatus || f.status[r.status]) &&
@@ -159,7 +179,8 @@ function Breadcrumb({ h, sel, setSelId }) {
     <div className="ex-crumbs">
       {crumbs.map((id) => (
         <span key={id}>
-          <button type="button" className="ex-crumb" onClick={() => setSelId(id)}>
+          <button type="button" className="ex-crumb"
+                  onClick={() => setSelId(id)}>
             {(h.byId[id] && h.byId[id].title) || id}
           </button>
           <span className="ex-crumb-sep">/</span>
@@ -179,9 +200,14 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
   useEffect(() => { setExpanded(defaultExpanded(h)); }, [h]);
 
   const matched = useMatched(filters);
-  const keep = useMemo(() => (matched ? keepSetFor(h, matched) : null), [h, matched]);
-  const rows = useMemo(() => flattenTree(h, { expanded, keep }), [h, expanded, keep]);
-  const sel = selId && REQ_BY_ID[selId] ? REQ_BY_ID[selId] : (REQUIREMENTS[0] || null);
+  const keep = useMemo(
+    () => (matched ? keepSetFor(h, matched) : null), [h, matched],
+  );
+  const rows = useMemo(
+    () => flattenTree(h, { expanded, keep }), [h, expanded, keep],
+  );
+  const sel = selId && REQ_BY_ID[selId]
+    ? REQ_BY_ID[selId] : (REQUIREMENTS[0] || null);
   const selKey = sel ? sel.id : null;
   useRevealSelection(h, selKey, setExpanded, listRef, rows);
 
@@ -202,18 +228,23 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
         <ExplorerFilters filters={filters} tree={tree} />
         <div className="ex-rows" ref={listRef}>
           {rows.map((row) => (
-            <Row key={row.id} row={row} selected={selKey === row.id} onSelect={setSelId}
+            <Row key={row.id} row={row} selected={selKey === row.id}
+                 onSelect={setSelId}
                  onToggle={toggle} />
           ))}
           {rows.length === 0 && (
-            <div className="ex-none">{t("No requirement matches these filters.")}</div>
+            <div className="ex-none">
+              {t("No requirement matches these filters.")}
+            </div>
           )}
         </div>
       </div>
       <div className="ex-detail">
         {sel
           ? <SpecDoc r={sel} onNav={setSelId} head={head}
-              after={<ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />} />
+              after={
+                <ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />
+              } />
           : <div className="ex-none">{t("No requirement selected.")}</div>}
       </div>
     </div>

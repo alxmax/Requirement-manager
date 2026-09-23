@@ -1097,7 +1097,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: REQ-ATOMICFORM-053
         scen += ["  Then   fact {} holds".format(i + 1) for i in range(thens)]
         return "# T\n\n" + "\n".join(quote) + "\n\n" + "\n".join(scen) + "\n\n## Members in code (auto)\n"
 
-    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11  # verifies: REQ-LINTCHECKS-867#CASE-1
+    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-3  # verifies: REQ-LINTCHECKS-867#CASE-1
         fs = R.lint_requirement("REQ-A-002", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(3, 1)})
         self.assertIn(("warn", "atomic-bullet-then-mismatch"),
@@ -1116,7 +1116,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: REQ-ATOMICFORM-053
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX)})
         self.assertEqual(fs, [])
 
-    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12  # verifies: REQ-LINTCHECKS-867#CASE-2
+    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: REQ-LINTCHECKS-867#CASE-2
         fs = R.lint_requirement("REQ-A-005", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(R.LINT_ATOMIC_STORY_BULLETS_MAX + 1,
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX + 1)})
@@ -1744,3 +1744,25 @@ class UndecodableSources(unittest.TestCase):  # tested-by: ARCH-UNREADABLE-070 @
             self.assertEqual(rc, 0)
             self.assertIn("RM033", out.getvalue())
             self.assertIn("nobom.py", out.getvalue())
+
+
+class StringMaskEdges(unittest.TestCase):  # tested-by: ARCH-SCAN-002
+    """`_strip_py_strings` skips to the next quote or `#` instead of walking
+    every character; these are the edges where a skip could go wrong."""
+
+    CASES = [
+        ('x = 1  # implements: A', ('x = 1  # implements: A', None)),
+        ('s = "a # b"  # c', ('s =          # c', None)),
+        ("s = 'it\\'s' + t", ('s =         + t', None)),
+        ('s = "ends \\\\"', ('s =          ', None)),
+        ('s = "trailing \\', ('s =            ', None)),
+        ('d = """open', ('d =        ', '"""')),
+        ("d = '''one''' # x", ('d =           # x', None)),
+        ('"""', ('   ', '"""')),
+        ('""', ('  ', None)),
+        ('', ('', None)),
+    ]
+
+    def test_each_edge_masks_exactly_the_string_contents(self):
+        for line, want in self.CASES:
+            self.assertEqual(R.tags._strip_py_strings(line), want, line)

@@ -7,7 +7,6 @@ owner: Alex
 milestone: v1.14
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014]
 satisfies: [SYS-QUALITY-104]
-lint_exempt: [ac-count-high]
 ---
 
 # Readability & scope checks
@@ -29,72 +28,32 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1
-  Given  a confirmed requirement whose Contract bullet uses the word "appropriate"
-  When   `gate` runs
-  Then   it reports a `vague-term` warning naming that term
-
-CASE-2
-  Given  a normative line joining four clauses with conjunctions, carrying no modal verb
-  When   `gate` runs
-  Then   it reports a `stacked-conditions` warning
-
-CASE-3
   Given  a Contract bullet spanning four sentences
   When   `gate` runs
   Then   it reports `statement-too-long`; the same bullet cut to three sentences reports
          none, and a single 40-word sentence reports nothing, however long it runs
 
-CASE-4
+CASE-2
   Given  an Acceptance section with one criterion
   When   `gate` runs
   Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither
 
-CASE-5
-  Given  a requirement over both ceilings (more than ten contract scope units and more
-         than seven acceptance criteria)
-  When   `gate` runs
-  Then   it reports `over-scoped`; over only one ceiling, none
-
-CASE-6
-  Given  a Contract holding thirty clauses under three bold group labels, plus eight
-         acceptance criteria
-  When   `gate` runs
-  Then   it reports no `over-scoped`, because three groups is under the ceiling; the same
-         thirty clauses ungrouped do report it
-
-CASE-7
-  Given  a requirement whose `implements` members span three or more distinct directories
-  When   `gate` runs with member data
-  Then   it reports `file-spread`; three files in one directory, or no member data, produce none
-
-CASE-8
-  Given  a Contract bullet containing "appropriate" and "user-friendly"
-  When   `gate` runs
-  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none
-
-CASE-9
-  Given  a Contract bullet reading "It creates the folder."
-  When   `gate` runs
-  Then   it reports an `anonymous-subject` warning; "`init` creates the folder." reports
-         none, and the same bare "It" in an Acceptance criterion reports none
-
-CASE-10
-  Given  a Contract bullet reading "The system shall log the event and must retry once."
-  When   `gate` runs
-  Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked
-         `shall_retry` identifier and a plain present-tense bullet report none
-
-CASE-11
+CASE-3
   Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line
   When   `gate` runs
   Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under
          `--strict`; the same story with 3 matching `Then` lines reports none
 
-CASE-12
-  Given  an atomic-form story quote listing 4 `- ` facts, one over `LINT_ATOMIC_STORY_BULLETS_MAX`
+CASE-4
+  Given  a Contract bullet containing "appropriate" and "user-friendly"
   When   `gate` runs
-  Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, regardless of
-         how many `Then` lines the Scenario carries
+  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none
+
+CASE-5
+  Given  a Contract bullet reading "The system shall log the event and must retry once."
+  When   `gate` runs
+  Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked
+         `shall_retry` identifier and a plain present-tense bullet report none
 
 ## Context
 **Terms**
@@ -125,10 +84,8 @@ CASE-12
   continuation line happens to begin with "It " is flagged as though that line opened a
   clause. Rewriting the sentence is the fix; the alternative — folding continuations first —
   would make every other prose check measure a different unit than the one it measures now.
-- `ac-count-high` is exempted here because this requirement is a table of checks: each of
-  the nine criteria pins exactly one check's behaviour. Merging them to reach the ceiling
-  would leave checks tested only implicitly, which is the outcome the count exists to
-  prevent. Same reasoning as [[ARCH-CHECK-006]]'s severity table.
+- The cases above are one end-to-end probe per child. Each check's full behaviour is pinned
+  in the child that owns it, so no check is tested only implicitly.
 - `atomic-bullet-then-mismatch`/`atomic-story-overlong` fire on 0 of the corpus's atomic-form
   requirements at launch — no existing body enumerates more than one `- ` fact in its story
   quote. [ADR-0022](../../docs/adr/0022-no-minimum-requirement-size-check.md)'s launch
@@ -268,12 +225,13 @@ CASE-3 — over-scoped fires only when both ceilings are crossed
 CASE-4 — over-scoped counts bold groups, not raw clauses
   Given  a Contract holding thirty clauses under three bold group labels
   When   `gate` runs
-  Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty
+  Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty;
+         the same thirty clauses ungrouped do report it
 
 CASE-5 — file-spread fires at the distinct-directory ceiling
   Given  a requirement whose `implements:` members name files in three distinct directories
   When   `gate` runs with member data
-  Then   it reports a `file-spread` warning
+  Then   it reports a `file-spread` warning; three files in one directory report none
 
 CASE-6 — file-spread is silent without member data
   Given  a requirement whose members span three files, but `gate` runs with no member data

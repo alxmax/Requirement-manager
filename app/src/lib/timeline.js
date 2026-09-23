@@ -1,5 +1,6 @@
 // implements: ARCH-VIEWER-007
-/** Calendar helpers for the planning Gantt (day-index layout, month/week headers). */
+/** Calendar helpers for the planning Gantt (day-index layout, month/week
+ *  headers). */
 
 export const PX_PER_DAY = 5;
 export const LANE_LABEL_W = 148;
@@ -37,32 +38,39 @@ export function buildMonthBands(origin, totalDays, locale) {
   let i = 0;
   while (i < totalDays) {
     const d = addDays(origin, i);
-    const label = d.toLocaleDateString(loc, { month: "short", year: "numeric" });
+    const label = d.toLocaleDateString(loc,
+      { month: "short", year: "numeric" });
     const month = d.getMonth();
     let span = 1;
-    while (i + span < totalDays && addDays(origin, i + span).getMonth() === month) span++;
+    while (i + span < totalDays
+      && addDays(origin, i + span).getMonth() === month) span++;
     bands.push({ label, start: i, span });
     i += span;
   }
   return bands;
 }
 
-/** ISO-8601 week number: weeks start Monday, and week 1 is the one holding the year's
- *  first Thursday. Reading the year off that Thursday is what makes the turn of the year
- *  come out right — 1 January can belong to W52 or W53 of the year before. */
+/** ISO-8601 week number: weeks start Monday, and week 1 is the one
+ *  holding the year's first Thursday. Reading the year off that
+ *  Thursday is what makes the turn of the year come out right — 1
+ *  January can belong to W52 or W53 of the year before. */
 export function isoWeek(d) {
   const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));        // this week's Thursday
-  const jan4 = new Date(t.getFullYear(), 0, 4);               // always in week 1
+  // this week's Thursday
+  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+  // always in week 1
+  const jan4 = new Date(t.getFullYear(), 0, 4);
   jan4.setDate(jan4.getDate() + 3 - ((jan4.getDay() + 6) % 7));
   return 1 + Math.round((t - jan4) / (7 * 86400000));
 }
 
-/** Week bands over [origin .. origin+totalDays), labelled with the ISO week of the year
- *  (W23, W24, …) and aligned to real Monday boundaries — so the first band is short
- *  whenever the range does not start on a Monday and every later one is exactly 7 days.
- *  Numbering from the range start instead would give the same calendar week a different
- *  number in two charts, which is the one thing a week label must never do. */
+/** Week bands over [origin .. origin+totalDays), labelled with the ISO
+ *  week of the year (W23, W24, …) and aligned to real Monday boundaries
+ *  — so the first band is short whenever the range does not start on a
+ *  Monday and every later one is exactly 7 days. Numbering from the
+ *  range start instead would give the same calendar week a different
+ *  number in two charts, which is the one thing a week label must
+ *  never do. */
 export function buildWeekBands(origin, totalDays) {
   const bands = [];
   let i = 0;
@@ -75,9 +83,10 @@ export function buildWeekBands(origin, totalDays) {
   return bands;
 }
 
-/** One entry per day on the chart, labelled `day/month` ("15/9"), with its weekday so a
- *  weekend can be told apart. A week band says which week; this says which day, which is
- *  what a reader needs to place a one-day bar or a Friday release.
+/** One entry per day on the chart, labelled `day/month` ("15/9"), with
+ *  its weekday so a weekend can be told apart. A week band says which
+ *  week; this says which day, which is what a reader needs to place a
+ *  one-day bar or a Friday release.
  *  implements: REQ-PLANDAYS-1021 */
 export function buildDayBands(origin, totalDays) {
   const bands = [];
@@ -94,17 +103,21 @@ export function overlaps(a, b) {
 }
 
 /** Assign sub-rows inside a lane so overlapping bars stack vertically. */
-/** Assign each bar a sub-row so that none is drawn over another, and return the row
- *  count. Pass `extent` to compare what is DRAWN rather than what is scheduled.
+/** Assign each bar a sub-row so that none is drawn over another, and
+ *  return the row count. Pass `extent` to compare what is DRAWN rather
+ *  than what is scheduled.
  *
- *  Without it this compared dates, and a bar is not drawn at its date width: the chart
- *  floors a bar at a readable minimum, so a week (7 x 7px - 6 = 43px) renders as 72px.
- *  Two bars a week apart start 49px apart, so they do not overlap as dates, land on one
- *  row, and are then painted 23px on top of each other — the label of the first
- *  disappearing under the second. The row chooser has to know the width the renderer
- *  will use.  implements: REQ-PLANSTACK-1012 */
+ *  Without it this compared dates, and a bar is not drawn at its date
+ *  width: the chart floors a bar at a readable minimum, so a week (7 x
+ *  7px - 6 = 43px) renders as 72px. Two bars a week apart start 49px
+ *  apart, so they do not overlap as dates, land on one row, and are
+ *  then painted 23px on top of each other — the label of the first
+ *  disappearing under the second. The row chooser has to know the
+ *  width the renderer will use.
+ *  implements: REQ-PLANSTACK-1012 */
 export function stackBars(bars, extent) {
-  const sorted = [...bars].sort((a, b) => a.startIdx - b.startIdx || a.endIdx - b.endIdx);
+  const sorted = [...bars].sort((a, b) =>
+    a.startIdx - b.startIdx || a.endIdx - b.endIdx);
   const clash = extent
     ? (a, b) => {
         const pa = extent(a), pb = extent(b);

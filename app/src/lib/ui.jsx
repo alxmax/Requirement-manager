@@ -6,7 +6,12 @@ import { Icon } from "./icons.jsx";
 import { REQ_BY_ID } from "./data.js";
 
 export function Pill({ kind, children }) {
-  return <span className={"pill " + kind}><span className="pdot" />{children || kind}</span>;
+  return (
+    <span className={"pill " + kind}>
+      <span className="pdot" />
+      {children || kind}
+    </span>
+  );
 }
 
 export function Btn({ variant = "secondary", icon, children, ...rest }) {
@@ -41,15 +46,17 @@ export function mdInline(s) {
   return String(s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
-    // `**bold**` is authored prose here — the Context sub-group labels are written that
-    // way — and printed its own asterisks until now. After the code spans, so a
-    // backticked `**literal**` keeps them.
+    // `**bold**` is authored prose here — the Context sub-group labels are
+    // written that way — and printed its own asterisks until now. After the
+    // code spans, so a backticked `**literal**` keeps them.
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(WIKI_RE, (_m, id) => (
       REQ_BY_ID[id]
-        ? `<a class="wikilink" role="button" tabindex="0" data-req="${id}">${id}</a>`
-        // A reference to something this map does not hold is information, not an
-        // error to hide: show the id, marked, rather than a dead bracket pair.
+        ? `<a class="wikilink" role="button" tabindex="0" data-req="${id}">` +
+          `${id}</a>`
+        // A reference to something this map does not hold is information,
+        // not an error to hide: show the id, marked, rather than a dead
+        // bracket pair.
         : `<span class="wikilink off" title="not in this map">${id}</span>`
     ));
 }

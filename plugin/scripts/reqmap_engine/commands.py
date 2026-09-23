@@ -1,4 +1,5 @@
-"""The COMMANDS registry: the CLI's single source of truth, one entry per command (data only).
+"""The COMMANDS registry: the CLI's single source of truth, one entry per
+command (data only).
 """
 
 
@@ -15,11 +16,12 @@
 COMMANDS = {
     "init": {
         "summary": (
-            "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, "
-            "draft requirements from existing code and prose, build the lock and map, and "
-            "print guided next steps. Idempotent — safe to re-run; never clobbers an "
-            "existing .reqmapignore. --plan emits the extraction plan as JSON and writes no "
-            "requirement files, for looking before authoring. "
+            "First-use bootstrap: scaffold requirements/ and .reqmapignore if "
+            "missing, draft requirements from existing code and prose, build "
+            "the lock and map, and print guided next steps. Idempotent — safe "
+            "to re-run; never clobbers an existing .reqmapignore. --plan emits "
+            "the extraction plan as JSON and writes no requirement files, for "
+            "looking before authoring. "
        
         ),
         "arg": None,
@@ -29,7 +31,8 @@ COMMANDS = {
                 "flag": "--plan",
                 "type": "bool",
                 "help": (
-                    "Emit the extraction plan as JSON instead of writing requirement files."
+                    "Emit the extraction plan as JSON instead of writing "
+                    "requirement files."
                 ),
             },
             {
@@ -37,7 +40,8 @@ COMMANDS = {
                 "flag": "--out",
                 "type": "str",
                 "help": (
-                    "With --plan: write the plan JSON here ('-' or omitted = stdout)."
+                    "With --plan: write the plan JSON here ('-' or omitted = "
+                    "stdout)."
                 ),
             },
             {
@@ -45,7 +49,8 @@ COMMANDS = {
                 "flag": "--md-glob",
                 "type": "str",
                 "help": (
-                    "With --plan: also scan these non-code globs for capabilities (repeatable)."
+                    "With --plan: also scan these non-code globs for "
+                    "capabilities (repeatable)."
                 ),
             },
             {
@@ -53,8 +58,9 @@ COMMANDS = {
                 "flag": "--wipe",
                 "type": "bool",
                 "help": (
-                    "Hard-reset: delete all non-generated requirements and strip "
-                    "membership tags from source files before re-extracting."
+                    "Hard-reset: delete all non-generated requirements and "
+                    "strip membership tags from source files before "
+                    "re-extracting."
                 ),
             },
             {
@@ -62,22 +68,23 @@ COMMANDS = {
                 "flag": "--no-site",
                 "type": "bool",
                 "help": (
-                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. "
-                    "`init` writes no site page."
+                    "Skip the final site step (scaffolding "
+                    "docs/architecture.html)."
                 ),
             },
         ],
     },
     "gate": {
         "summary": (
-            "The commit/CI verdict. Bare, it verifies that every code tag resolves to a real "
-            "requirement, that every confirmed requirement has at least one implements: "
-            "member, and that drift has not been introduced since the last sync, then checks "
-            "requirement readability and map freshness. Exits non-zero on link-sync errors "
-            "only. Never writes anything. Three mode flags report on the verdict's own "
-            "subject instead of running it: --audit for the whole problem report, --risk for "
-            "what to do next, --show for one requirement's dossier. Every other question is "
-            "`ask`. "
+            "The commit/CI verdict. Bare, it verifies that every code tag "
+            "resolves to a real requirement, that every confirmed requirement "
+            "has at least one implements: member, and that drift has not been "
+            "introduced since the last sync, then checks requirement "
+            "readability and map freshness. Exits non-zero on link-sync errors "
+            "only. Never writes anything. Three mode flags report on the "
+            "verdict's own subject instead of running it: --audit for the "
+            "whole problem report, --risk for what to do next, --show for one "
+            "requirement's dossier. Every other question is `ask`. "
         ),
         "arg": None,
         "params": [
@@ -86,9 +93,9 @@ COMMANDS = {
                 "flag": "--audit",
                 "type": "bool",
                 "help": (
-                    "Print every pass that discovers a problem as one report: the gate, corpus "
-                    "risk, duplicate contracts and tag coverage. The exit code "
-                    "still comes from the gate alone."
+                    "Print every pass that discovers a problem as one report: "
+                    "the gate, corpus risk, duplicate contracts and tag "
+                    "coverage. The exit code still comes from the gate alone."
                 ),
             },
             {
@@ -96,7 +103,8 @@ COMMANDS = {
                 "flag": "--risk",
                 "type": "bool",
                 "help": (
-                    "Print the corpus risk snapshot and the actionable signals, most urgent first."
+                    "Print the corpus risk snapshot and the actionable "
+                    "signals, most urgent first."
                 ),
             },
             {
@@ -104,8 +112,9 @@ COMMANDS = {
                 "flag": "--show",
                 "type": "str",
                 "help": (
-                    "Print one requirement's dossier: intent, contract, dependencies both ways, "
-                    "code members with file:line, open questions and risk signals."
+                    "Print one requirement's dossier: intent, contract, "
+                    "dependencies both ways, code members with file:line, open "
+                    "questions and risk signals."
                 ),
             },
             {
@@ -145,15 +154,18 @@ COMMANDS = {
                 "name": "json",
                 "flag": "--json",
                 "type": "bool",
-                "help": "Emit structured JSON output instead of human-readable text.",
+                "help": (
+                    "Emit structured JSON output instead of human-readable "
+                    "text."
+                ),
             },
             {
                 "name": "since",
                 "flag": "--since",
                 "type": "str",
                 "help": (
-                    "Scope the gate to requirements whose member files changed since "
-                    "this git ref (e.g. 'main', 'HEAD~1')."
+                    "Scope the gate to requirements whose member files changed "
+                    "since this git ref (e.g. 'main', 'HEAD~1')."
                 ),
             },
             {
@@ -173,20 +185,23 @@ COMMANDS = {
                 "flag": "--full",
                 "type": "bool",
                 "help": (
-                    "Run every gate rule and print every readability warning. Bare, the "
-                    "gate runs only the rules that say a link, the drift baseline or the "
-                    "committed map is broken, and prints readability errors only."
+                    "Run every gate rule and print every readability warning. "
+                    "Bare, the gate runs only the rules that say a link, the "
+                    "drift baseline or the committed map is broken, and prints "
+                    "readability errors only."
                 ),
             },
         ],
     },
     "ask": {
         "summary": (
-            "Ask the corpus a question without running the verdict. Read-only, never "
-            "writes, and its exit code is the question's, never the gate's: --search ranks "
-            "requirements by relevance, --dupes ranks overlapping contracts, --review emits "
-            "the machine-readable review plan. Exactly one mode per call. Since v8.0.0, "
-            "`gate` refuses these flags and names `ask`. "
+            "Ask the corpus a question without running the verdict. Read-only, "
+            "never writes, and its exit code is the question's, never the "
+            "gate's: --search ranks requirements by relevance, --dupes ranks "
+            "overlapping contracts, --design reviews the code against the OOP "
+            "pillars, --review emits the machine-readable review plan. Exactly "
+            "one mode per call. Since v8.0.0, `gate` refuses these flags and "
+            "names `ask`. "
         ),
         "arg": None,
         "params": [
@@ -195,7 +210,8 @@ COMMANDS = {
                 "flag": "--search",
                 "type": "str",
                 "help": (
-                    "Rank requirements by lexical relevance to a free-text query."
+                    "Rank requirements by lexical relevance to a free-text "
+                    "query."
                 ),
             },
             {
@@ -203,7 +219,8 @@ COMMANDS = {
                 "flag": "--dupes",
                 "type": "bool",
                 "help": (
-                    "Rank requirement pairs whose contracts overlap, most similar first."
+                    "Rank requirement pairs whose contracts overlap, most "
+                    "similar first."
                 ),
             },
             {
@@ -211,7 +228,10 @@ COMMANDS = {
                 "flag": "--design",
                 "type": "bool",
                 "help": (
-                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0."
+                    "Advisory design review of the code: encapsulation, "
+                    "abstraction, inheritance and polymorphism candidates plus "
+                    "file length and line width, grouped by pillar. Read-only, "
+                    "exit 0, never the gate."
                 ),
             },
             {
@@ -219,8 +239,8 @@ COMMANDS = {
                 "flag": "--review",
                 "type": "str",
                 "help": (
-                    "Emit the deterministic review plan as JSON: for one requirement, or "
-                    "with no id for the whole corpus."
+                    "Emit the deterministic review plan as JSON: for one "
+                    "requirement, or with no id for the whole corpus."
                 ),
             },
             {
@@ -228,7 +248,8 @@ COMMANDS = {
                 "flag": "--i18n",
                 "type": "bool",
                 "help": (
-                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0."
+                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, "
+                    "refused from v9.0.0."
                 ),
             },
             {
@@ -251,16 +272,20 @@ COMMANDS = {
                 "name": "json",
                 "flag": "--json",
                 "type": "bool",
-                "help": "Emit structured JSON output instead of human-readable text.",
+                "help": (
+                    "Emit structured JSON output instead of human-readable "
+                    "text."
+                ),
             },
         ],
     },
     "sync": {
         "summary": (
-            "The write path. Rescan code members, advance the drift baseline, and "
-            "regenerate the map, the findings file and the generated integration artifacts "
-            "in one step. Run after editing requirement files or tagging new code members. "
-            "--accept-drift is required when a confirmed or implemented contract changed. "
+            "The write path. Rescan code members, advance the drift baseline, "
+            "and regenerate the map, the findings file and the generated "
+            "integration artifacts in one step. Run after editing requirement "
+            "files or tagging new code members. --accept-drift is required "
+            "when a confirmed or implemented contract changed. "
        
         ),
         "arg": None,
@@ -270,10 +295,11 @@ COMMANDS = {
                 "flag": "--retire",
                 "type": "list",
                 "help": (
-                    "Take these requirements out of service instead of confirming them. Accepts "
-                    "one id or many; a batch retires in an order computed from the graph, under "
-                    "one working-tree check. Prints the blast radius; writes nothing without "
-                    "--apply."
+                    "Take these requirements out of service instead of "
+                    "confirming them. Accepts one id or many; a batch retires "
+                    "in an order computed from the graph, under one "
+                    "working-tree check. Prints the blast radius; writes "
+                    "nothing without --apply."
                 ),
             },
             {
@@ -281,12 +307,14 @@ COMMANDS = {
                 "flag": "--release",
                 "type": "str",
                 "help": (
-                    "Cut a release instead of syncing: the next version planned in "
-                    "_planning.json above what is already declared, or the vX.Y.Z named "
-                    "here. Prints the plan - version files to bump, the CHANGELOG entry, "
-                    "the milestone the plan drops - and writes nothing without --apply. "
-                    "With --json it also reports the declared version, whether its tag "
-                    "exists and its notes, which is what a release workflow reads."
+                    "Cut a release instead of syncing: the next version "
+                    "planned in _planning.json above what is already declared, "
+                    "or the vX.Y.Z named here. Prints the plan - version files "
+                    "to bump, the CHANGELOG entry, the milestone the plan "
+                    "drops - and writes nothing without --apply. With --json "
+                    "it also reports the declared version, whether its tag "
+                    "exists and its notes, which is what a release workflow "
+                    "reads."
                 ),
             },
             {
@@ -294,8 +322,8 @@ COMMANDS = {
                 "flag": "--delete",
                 "type": "bool",
                 "help": (
-                    "With --retire: also remove the block, its lock entries and its membership "
-                    "tags. Never a function body."
+                    "With --retire: also remove the block, its lock entries "
+                    "and its membership tags. Never a function body."
                 ),
             },
             {
@@ -303,8 +331,8 @@ COMMANDS = {
                 "flag": "--apply",
                 "type": "bool",
                 "help": (
-                    "With --retire or --release: actually write the change. Without it, "
-                    "the run is a dry report."
+                    "With --retire or --release: actually write the change. "
+                    "Without it, the run is a dry report."
                 ),
             },
             {
@@ -312,9 +340,10 @@ COMMANDS = {
                 "flag": "--force",
                 "type": "bool",
                 "help": (
-                    "With --retire: proceed even though dependents still point at this "
-                    "requirement, or the working tree is dirty. Dependents that are already "
-                    "deprecated, and those retired in the same call, never block."
+                    "With --retire: proceed even though dependents still point "
+                    "at this requirement, or the working tree is dirty. "
+                    "Dependents that are already deprecated, and those retired "
+                    "in the same call, never block."
                 ),
             },
             {
@@ -330,8 +359,9 @@ COMMANDS = {
                 "flag": "--attach",
                 "type": "str",
                 "help": (
-                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, refused from v9.0.0. "
-                    "`sync` refreshes no site page."
+                    "HTML page to refresh the site's engine-owned regions "
+                    "in (scaffolds it if absent). Without it, `sync` "
+                    "refreshes docs/architecture.html when that exists."
                 ),
             },
             {
@@ -339,10 +369,11 @@ COMMANDS = {
                 "flag": "--accept-drift",
                 "type": "str",
                 "help": (
-                    "Explicitly advance the baseline when a confirmed or implemented "
-                    "contract changed. Required when those contracts differ from the "
-                    "lock; sync exits non-zero without it. Takes an optional reason, "
-                    "recorded in requirements/_driftlog.json so the waiver and its "
+                    "Explicitly advance the baseline when a confirmed or "
+                    "implemented contract changed. Required when those "
+                    "contracts differ from the lock; sync exits non-zero "
+                    "without it. Takes an optional reason, recorded in "
+                    "requirements/_driftlog.json so the waiver and its "
                     "justification land in the diff."
                 ),
             },
@@ -350,7 +381,9 @@ COMMANDS = {
                 "name": "strict",
                 "flag": "--strict",
                 "type": "bool",
-                "help": "Promote drift and test-link integrity from warn to error.",
+                "help": (
+                    "Promote drift and test-link integrity from warn to error."
+                ),
             },
             {
                 "name": "json",
@@ -362,14 +395,15 @@ COMMANDS = {
     },
     "clarify": {
         "summary": (
-            "Ask what a requirement has not answered yet: vague terms with no threshold, "
-            "numbers with no unit, unbounded quantities, clauses with no case, a missing "
-            "failure path. Read-only, always exit 0, never a gate rule. --decompose is the "
-            "write half of the same question: it splits a requirement into code-rung "
-            "children along the bold group labels in its Description (--apply writes), or "
-            "scaffolds one draft per over-long clause when it has none. Run it before "
-            "implementing, so the ambiguity is resolved in the requirement instead of "
-            "guessed in code. "
+            "Ask what a requirement has not answered yet: vague terms with no "
+            "threshold, numbers with no unit, unbounded quantities, clauses "
+            "with no case, a missing failure path. Read-only, always exit 0, "
+            "never a gate rule. --decompose is the write half of the same "
+            "question: it splits a requirement into code-rung children along "
+            "the bold group labels in its Description (--apply writes), or "
+            "scaffolds one draft per over-long clause when it has none. Run it "
+            "before implementing, so the ambiguity is resolved in the "
+            "requirement instead of guessed in code. "
        
         ),
         "arg": "AREA-NAME-NNN",
@@ -379,9 +413,10 @@ COMMANDS = {
                 "flag": "--decompose",
                 "type": "bool",
                 "help": (
-                    "Split a requirement into code-rung children along the bold group labels "
-                    "its author wrote in the Description; --apply writes them and never edits "
-                    "the parent. With no id, every requirement carrying groups. A requirement with "
+                    "Split a requirement into code-rung children along the "
+                    "bold group labels its author wrote in the Description; "
+                    "--apply writes them and never edits the parent. With no "
+                    "id, every requirement carrying groups. A requirement with "
                     "no groups falls back to one draft per over-long clause."
                 ),
             },
@@ -390,25 +425,31 @@ COMMANDS = {
                 "flag": "--levels",
                 "type": "bool",
                 "help": (
-                    "Propose a V-model rung for every requirement that declares no `level:`, "
-                    "plus the rungs above: one draft `ARCH-<FAMILY>-001` per id-prefix family, "
-                    "`SYS-NEEDS-A-NAME-001` at the apex, and the `satisfies:` edges between "
-                    "them. --apply writes all of it, each line marked `level_source: auto`."
+                    "Propose a V-model rung for every requirement that "
+                    "declares no `level:`, plus the rungs above: one draft "
+                    "`ARCH-<FAMILY>-001` per id-prefix family, "
+                    "`SYS-NEEDS-A-NAME-001` at the apex, and the `satisfies:` "
+                    "edges between them. --apply writes all of it, each line "
+                    "marked `level_source: auto`."
                 ),
             },
             {"name": "as_json", "flag": "--json", "type": "bool",
              "help": "Emit the questions as JSON for an agent to answer."},
             {"name": "do_apply", "flag": "--apply", "type": "bool",
-             "help": "With --decompose or --levels: write the proposal instead of printing it."},
+             "help": (
+                 "With --decompose or --levels: write the proposal instead of "
+                 "printing it."
+             )},
         ],
     },
-    # `tool: False` — a server is not a function to call, so the generated function-calling
-    # schema leaves it out; the help text and SKILL.md still document it.
+    # `tool: False` — a server is not a function to call, so the generated
+    # function-calling schema leaves it out; the help text and SKILL.md still
+    # document it.
     "mcp": {
         "summary": (
-            "Serve this repository's requirements to an AI assistant over the Model Context "
-            "Protocol (stdio). Each tool is one reqmap invocation in a fresh process. "
-            "Read-only unless --allow-writes."
+            "Serve this repository's requirements to an AI assistant over the "
+            "Model Context Protocol (stdio). Each tool is one reqmap "
+            "invocation in a fresh process. Read-only unless --allow-writes."
         ),
         "arg": None,
         "tool": False,
@@ -424,9 +465,9 @@ COMMANDS = {
 }
 
 
-# Which moment of the workflow each verb belongs to. The registry is the CLI's
-# single source of truth, so the grouping the help text and the viewer both show is
-# declared here once rather than restated in each surface.
+# Which moment of the workflow each verb belongs to. The registry is the
+# CLI's single source of truth, so the grouping the help text and the viewer
+# both show is declared here once rather than restated in each surface.
 COMMAND_GROUPS = (
     ("author", ("init", "clarify")),
     ("build", ("sync",)),

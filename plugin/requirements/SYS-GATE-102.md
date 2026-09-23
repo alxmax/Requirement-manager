@@ -8,18 +8,17 @@ owner: Alex
 milestone: v2.32
 priority: must-have
 satisfies: [SYS-SSOT-001]
-lint_exempt: [fan-out]
 ---
-# Keeping code and specification in step
+# Keeping code and specification linked
 
-> As someone committing a change, I want the engine to tell me when the code and the 
-> requirements have moved apart, so that a spec nobody honours stops passing for 
-> documentation.
+> As someone committing a change, I want the build to fail when a code tag or a
+> requirement points at something that is not there, so that the links between the
+> specification and the code can be trusted without checking them by hand.
 
-Scenario: a confirmed contract changes without its code
-  Given  a confirmed requirement whose contract text has been edited
+Scenario: a tag names a requirement that does not exist
+  Given  a source file tagged `implements:` with an id no requirement declares
   When   the gate runs
-  Then   it reports the drift and names the members and dependents to re-check, without advancing the baseline itself
+  Then   it fails with an error naming the tag and where it is
 
 ## Requirements in this system (auto)
 - `ARCH-DRIFT-003` — Contract hashing & lock  (architecture)  ·  8 detailed design
@@ -32,7 +31,3 @@ Scenario: a confirmed contract changes without its code
 - `ARCH-TESTLINK-018` — Test-link integrity check  (architecture)  ·  17 detailed design
 - `ARCH-TRACKED-042` — Untracked members reported  (architecture)  ·  5 detailed design
 - `ARCH-UNSCANNEDTAG-045` — Tags in unscanned file types reported  (architecture)  ·  7 detailed design
-
-## Context
-**Notes**
-- `lint_exempt: [fan-out]`: eleven architecture requirements satisfy this need since ARCH-RULES-059 joined (ADR-0023's `system` ceiling is ten). One over the band is not a bucket yet; splitting the gate need into link-sync and drift halves is deferred until a twelfth arrives.

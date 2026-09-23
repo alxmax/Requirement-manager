@@ -666,7 +666,9 @@ class HealthLine(unittest.TestCase):  # tested-by: ARCH-CHECK-006
         self.assertIn("0 legacy-schema", out)   # both reqs use the new schema
         self.assertEqual(code, 0)
 
-    def test_legacy_schema_is_flagged_nonblocking(self):  # verifies: ARCH-CHECK-006#CASE-11  # verifies: REQ-CHECK-830#CASE-7  # verifies: REQ-CHECK-831#CASE-1  # verifies: REQ-CHECK-831#CASE-2
+    def test_legacy_schema_is_flagged_nonblocking(self):
+        # verifies: REQ-CHECK-830#CASE-7  # verifies: REQ-CHECK-831#CASE-1
+        # verifies: REQ-CHECK-831#CASE-2
         # a legacy-schema requirement (the Input/Output triad) must warn but not error
         legacy = REQ.format(id="AREA-L-001", status="baseline", layer="feature",
                             extra="", title="Legacy") + "\n## Input\n- x\n## Output\n- y\n"
@@ -946,7 +948,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         self.assertIn("Drafts to review", out)
         self.assertIn("REQ-BAR-002", out)
 
-    def test_draft_intent_deduped_not_in_intent_bucket(self):  # verifies: ARCH-NEXT-013#CASE-3
+    def test_draft_intent_deduped_not_in_intent_bucket(self):  # verifies: REQ-NEXT-884#CASE-5
         # a draft with an open verify bullet must NOT appear under intent review:
         # the source dedup folds it into 'unreviewed' (one bucket, honest count)
         body = "# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
@@ -955,7 +957,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         self.assertIn("Drafts to review", out)
         self.assertNotIn("Needs intent review", out)
 
-    def test_open_verify_intent_lands_in_needs_intent_review(self):  # verifies: REQ-NEXT-884#CASE-1  # verifies: ARCH-NEXT-013#CASE-4
+    def test_open_verify_intent_lands_in_needs_intent_review(self):  # verifies: REQ-NEXT-884#CASE-1
         body = "# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
         reqs = {"CORE-FOO-001": self._req("confirmed", body=body)}
         members = {"CORE-FOO-001": [("implements", "src/foo.py", 1),
@@ -972,14 +974,14 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         _, out = self._next(reqs, members)
         self.assertLess(out.index("ZZZ-HIGH-002"), out.index("AAA-LOW-001"))
 
-    def test_review_flagged_drafts_ordered_first(self):  # verifies: REQ-NEXT-885#CASE-3  # verifies: ARCH-NEXT-013#CASE-6
+    def test_review_flagged_drafts_ordered_first(self):  # verifies: REQ-NEXT-885#CASE-3
         reqs = {"DRAFT-A-001": self._req("draft", "risk: 0"),
                 "DRAFT-B-002": self._req("draft", "risk: 2")}  # REVIEW
         _, out = self._next(reqs, {})
         self.assertLess(out.index("DRAFT-B-002"), out.index("DRAFT-A-001"))  # high-risk first
         self.assertIn("[REVIEW]", out)
 
-    def test_top_n_truncates_and_all_expands(self):  # verifies: REQ-NEXT-886#CASE-1  # verifies: REQ-NEXT-886#CASE-2  # verifies: REQ-NEXT-886#CASE-3  # verifies: ARCH-NEXT-013#CASE-5
+    def test_top_n_truncates_and_all_expands(self):  # verifies: REQ-NEXT-886#CASE-1  # verifies: REQ-NEXT-886#CASE-2  # verifies: REQ-NEXT-886#CASE-3
         reqs = {"DRAFT-{}-00{}".format(c, i): self._req("draft")
                 for i, c in enumerate("ABCDE", 1)}            # 5 drafts > top_n=3
         _, out = self._next(reqs, {})
@@ -1021,7 +1023,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         )
         return {"meta": {"status": "confirmed"}, "body": body}
 
-    def test_granularity_at_threshold_warns(self):  # tested-by: ARCH-NEXT-013  # verifies: ARCH-NEXT-013#CASE-11
+    def test_granularity_at_threshold_warns(self):  # tested-by: ARCH-NEXT-013  # verifies: REQ-NEXT-884#CASE-6
         # threshold unified with lint's LINT_AC_MAX (7, unchanged) via the shared
         # _oversize predicate 2026-09-03 -- "at threshold" is now LINT_AC_MAX + 1
         # (was a hardcoded 5 against the old, next-only AC_SPLIT_THRESHOLD).
@@ -2129,7 +2131,7 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # teste
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "TODO.md"),
                    "# TODO\n\n## v2.16\n- [x] a | lane: feature\n\n## Deferred\n- [ ] b\n")
-            lines = R.audit._roadmap_lag_lines(reqs, d)
+            lines = R.audittail._roadmap_lag_lines(reqs, d)
         self.assertTrue(any("add `milestone:` to the requirements that shipped after v2.13" in x
                             for x in lines), lines)
         self.assertTrue(any("start each with its version" in x and "Deferred" in x
@@ -2310,7 +2312,7 @@ class NextOrphanHint(unittest.TestCase):  # tested-by: ARCH-NEXT-013
     def _reqs(self):
         return {"REQ-A-001": {"meta": {"status": "confirmed"}, "body": "# T\n"}}
 
-    def test_note_names_recorded_member_and_code_flag(self):  # verifies: REQ-NEXT-884#CASE-7  # verifies: ARCH-NEXT-013#CASE-10
+    def test_note_names_recorded_member_and_code_flag(self):  # verifies: REQ-NEXT-884#CASE-4
         with tempfile.TemporaryDirectory() as d:
             rd = os.path.join(d, "requirements"); os.makedirs(rd)
             _write(os.path.join(rd, "_map.json"), json.dumps({"nodes": [
@@ -2322,7 +2324,7 @@ class NextOrphanHint(unittest.TestCase):  # tested-by: ARCH-NEXT-013
             self.assertIn(".githooks/pre-commit:2", out)
             self.assertIn("--code", out)
 
-    def test_no_note_without_committed_map(self):  # verifies: REQ-NEXT-884#CASE-7
+    def test_no_note_without_committed_map(self):  # verifies: REQ-NEXT-884#CASE-4
         with tempfile.TemporaryDirectory() as d:
             rd = os.path.join(d, "requirements"); os.makedirs(rd)
             _, out = self._run(self._reqs(), rd)
@@ -2339,7 +2341,9 @@ class NextOrphanHint(unittest.TestCase):  # tested-by: ARCH-NEXT-013
 
 
 class UntaggedIgnoreBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013
-    def test_meta_prose_is_not_untagged(self):  # verifies: REQ-NEXT-884#CASE-5
+    # tested-by: REQ-NEXTUNTAGGED-1050
+    def test_meta_prose_is_not_untagged(self):
+        # verifies: REQ-NEXTUNTAGGED-1050#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "CLAUDE.md"), "# guide" + chr(10))
             _write(os.path.join(d, "TODO.md"), "- [ ] x" + chr(10))
@@ -2915,7 +2919,7 @@ class Redundancy(unittest.TestCase):  # tested-by: REQ-REDUNDANCY-058
         self.assertEqual(groups, [["A-A-001", "A-B-002", "A-C-003"]])
         self.assertEqual(sum(len(g) - 1 for g in groups), 2)   # two could be folded away
 
-    def test_next_reports_the_group_and_writes_nothing(self):  # verifies: ARCH-NEXT-013#CASE-12  # verifies: REQ-REDUNDANCY-058#CASE-5
+    def test_next_reports_the_group_and_writes_nothing(self):  # verifies: REQ-NEXT-884#CASE-7  # verifies: REQ-REDUNDANCY-058#CASE-5
         with tempfile.TemporaryDirectory() as d:
             for rid in ("AREA-A-001", "AREA-B-002"):
                 _write(os.path.join(d, rid + ".md"),
@@ -3425,7 +3429,7 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
         _, out = self._run(reqs, members)
         self.assertTrue(out.startswith("1 requirement(s)"), out[:60])
 
-    def test_three_way_priority_order(self):  # verifies: ARCH-NEXT-013#CASE-7
+    def test_three_way_priority_order(self):  # verifies: REQ-NEXT-885#CASE-5
         reqs = {
             "AAA-NOPRI-001": {"meta": {"status": "confirmed"}, "body": "# T\n"},
             "BBB-SHOULD-002": {"meta": {"status": "confirmed", "priority": "should-have"}, "body": "# T\n"},
@@ -3436,7 +3440,7 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
         self.assertLess(out.index("CCC-MUST-003"), out.index("BBB-SHOULD-002"))
         self.assertLess(out.index("BBB-SHOULD-002"), out.index("AAA-NOPRI-001"))
 
-    def test_empty_and_clean_write_no_files(self):  # verifies: ARCH-NEXT-013#CASE-8
+    def test_empty_and_clean_write_no_files(self):  # verifies: ARCH-NEXT-013#CASE-3
         with tempfile.TemporaryDirectory() as d:
             rd = os.path.join(d, "requirements")
             os.makedirs(rd)
@@ -3488,7 +3492,8 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
         self.assertLess(out.index("Needs tests"), out.index("Needs intent review"))
         self.assertLess(out.index("Needs intent review"), out.index("Drafts to review"))
 
-    def test_untagged_files_after_drafts(self):  # verifies: REQ-NEXT-884#CASE-4
+    def test_untagged_files_after_drafts(self):
+        # verifies: REQ-NEXTUNTAGGED-1050#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "orphan.py"), "x = 1\n")
             reqs = {"DDD-DRAFT-004": {"meta": {"status": "draft"}, "body": "# T\n"}}
@@ -3496,12 +3501,14 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
             self.assertIn("Untagged files", out)
             self.assertLess(out.index("Drafts to review"), out.index("Untagged files"))
 
-    def test_no_code_root_no_untagged_section(self):  # verifies: REQ-NEXT-884#CASE-6
+    def test_no_code_root_no_untagged_section(self):
+        # verifies: REQ-NEXTUNTAGGED-1050#CASE-4
         reqs = {"DDD-DRAFT-004": {"meta": {"status": "draft"}, "body": "# T\n"}}
         _, out = self._run(reqs, {})
         self.assertNotIn("Untagged files", out)
 
-    def test_untagged_files_bucket_suggests_draft(self):  # verifies: ARCH-NEXT-013#CASE-9
+    def test_untagged_files_bucket_suggests_draft(self):
+        # verifies: REQ-NEXTUNTAGGED-1050#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "orphan.py"), "x = 1\n")
             reqs = {"CORE-FOO-001": {"meta": {"status": "confirmed"}, "body": "# T\n"}}
@@ -4402,6 +4409,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                          "uses the server (ROADMAP V2); change REQ-MCPTOOLS-1028 first")
 
     def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
+        # verifies: ARCH-MCP-073#CASE-2
         writes = {"reqmap_sync", "reqmap_release"}   # reqmap_new went with the verb (ADR-0045)
         out, calls = self._serve([self._req(1, "tools/list"),
                                   self._call(2, "reqmap_sync", {})])
@@ -4447,6 +4455,7 @@ class McpResources(unittest.TestCase):  # tested-by: REQ-MCPRESOURCES-1030 @unit
             {"id": "REQ-A-001", "title": "Alpha"}, {"id": "REQ-B-002", "title": "Beta"}]}))
 
     def test_the_list_comes_from_the_committed_map(self):  # verifies: REQ-MCPRESOURCES-1030#CASE-1
+        # verifies: ARCH-MCP-073#CASE-4
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual([], R.mcp.resource_list(self._server(d)))
             self._map(d)
@@ -4504,6 +4513,7 @@ class McpConfigSeed(unittest.TestCase):  # tested-by: REQ-MCPSEED-1029 @unit
         return mock.patch.object(R.mcpconfig, "ENGINE_DIR", scripts)
 
     def test_both_configs_start_the_vendored_engine(self):  # verifies: REQ-MCPSEED-1029#CASE-1
+        # verifies: ARCH-MCP-073#CASE-3
         with tempfile.TemporaryDirectory() as d, self._repo(d):
             created, notes = R.seed_mcp_files(d, os.path.join(d, "requirements"))
             claude = json.loads(self._read(d, ".mcp.json"))
@@ -4601,7 +4611,7 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         if not self.root:
             self.skipTest("not the source repo")
 
-    def test_the_readme_engine_line_count_is_current(self):  # verifies: ARCH-SELFGATE-039#CASE-9  # verifies: REQ-SELFGATE-990#CASE-1
+    def test_the_readme_engine_line_count_is_current(self):  # verifies: REQ-SELFGATE-990#CASE-1
         readme = open(os.path.join(self.root, "README.md"), encoding="utf-8").read()
         m = re.search(r"stdlib only,\s*([\d,]+)\s+lines", readme)
         self.assertIsNotNone(m, "README no longer states the engine's line count")
@@ -4617,7 +4627,7 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         self.assertEqual(actual, claimed,
                          "README claims {} lines, reqmap.py + reqmap_engine/ have {}".format(claimed, actual))
 
-    def test_every_adr_on_disk_has_an_index_row(self):  # verifies: ARCH-SELFGATE-039#CASE-10  # verifies: REQ-SELFGATE-990#CASE-2
+    def test_every_adr_on_disk_has_an_index_row(self):  # verifies: REQ-SELFGATE-990#CASE-2
         # ADR-0027 existed on disk and in no index for nine days.
         adr = os.path.join(self.root, "docs", "adr")
         index = open(os.path.join(adr, "README.md"), encoding="utf-8").read()
@@ -4779,7 +4789,7 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
-class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007
+class Audit20260906(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007
     """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md)."""
 
     LONG = " ".join(["alpha"] * 155)
@@ -5019,7 +5029,7 @@ class PlanBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: R
             R.cmd_health(R.Workspace(self._reqs(), self._members(), rd, d), as_json=True)
         return json.loads(buf.getvalue())
 
-    def test_unscheduled_now_item_is_named(self):  # verifies: REQ-PLANGAPS-1033#CASE-1  # verifies: ARCH-NEXT-013#CASE-13
+    def test_unscheduled_now_item_is_named(self):  # verifies: REQ-PLANGAPS-1033#CASE-1  # verifies: ARCH-NEXT-013#CASE-4
         with tempfile.TemporaryDirectory() as d:
             rd = self._repo(d, roadmap=self.ROADMAP, planning={"bars": []})
             code, out = self._next(d, rd)
@@ -5093,8 +5103,8 @@ class PlanBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: R
                 self.assertIn("Item {}".format(i), out_all)
 
 class RemovedInV820(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: ARCH-CONFIG-060
-    """ADR-0047: the design review, the site generator and the i18n detector left the engine;
-    their flags stay one release, doing nothing but saying so."""
+    """ADR-0047: the i18n detector left the engine; its flag stays one release, doing
+    nothing but saying so."""
 
     def _main(self, *argv):
         err = io.StringIO()
@@ -5110,39 +5120,551 @@ class RemovedInV820(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # te
     def test_a_removed_ask_flag_says_so_and_exits_zero(self):
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "requirements"))
-            for flag in ("--design", "--i18n"):
-                rc, _, err = self._main("ask", flag, "--root", d)
-                self.assertEqual(0, rc, flag)
-                self.assertIn("removed in v8.2.0", err)
-                self.assertIn("ADR-0047", err)
-
-    def test_sync_names_a_site_page_it_no_longer_refreshes(self):
-        with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "requirements"))
-            _write(os.path.join(d, "docs", "architecture.html"),
-                   "<html><!--##REQMAP:STATS##-->1<!--##/REQMAP:STATS##--></html>")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R._unmaintained_site_note(d)
-            self.assertIn("no longer refreshed", buf.getvalue())
-            _write(os.path.join(d, "docs", "architecture.html"), "<html>hand-written</html>")
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                R._unmaintained_site_note(d)
-            self.assertEqual("", buf.getvalue())
-
-    def test_init_writes_no_site_page(self):
-        with tempfile.TemporaryDirectory() as d:
-            os.makedirs(os.path.join(d, "docs"))
-            with redirect_stdout(io.StringIO()):
-                R.cmd_init(os.path.join(d, "requirements"), d)
-            self.assertFalse(os.path.exists(os.path.join(d, "docs", "architecture.html")))
+            rc, _, err = self._main("ask", "--i18n", "--root", d)
+            self.assertEqual(0, rc)
+            self.assertIn("removed in v8.2.0", err)
+            self.assertIn("ADR-0047", err)
 
     def test_a_retired_config_key_is_ignored_in_silence(self):
         err = io.StringIO()
         applied = R.config.apply_config({"DESIGN_RFC_MAX": 10, "LANGUAGE": "ro",
+                                         "DESIGN_DOCSTRING_PUBLIC": 0,
+                                         "DESIGN_FILE_MAX_FUNCS": 9,
                                          "NOT_A_KEY": 1}, out=err)
         self.assertEqual([], applied)
-        self.assertNotIn("DESIGN_RFC_MAX", err.getvalue())
+        for key in ("DESIGN_RFC_MAX", "DESIGN_DOCSTRING_PUBLIC", "DESIGN_FILE_MAX_FUNCS"):
+            self.assertNotIn(key, err.getvalue())
         self.assertNotIn("LANGUAGE", err.getvalue())
         self.assertIn("NOT_A_KEY", err.getvalue())
+
+
+class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-955
+    """`ask --design`: advisory candidates against the four pillars plus two
+    writing rules, never the gate (ADR-0051)."""
+
+    def _kinds(self, src):
+        return [f["kind"] for f in R._design_file("m.py", src) if f["pillar"] != "standards"]
+
+    def _set(self, **kw):
+        for k, v in kw.items():
+            self.addCleanup(setattr, R.config, k, getattr(R.config, k))
+            setattr(R.config, k, v)
+
+    def test_global_state_and_long_parameter_list(self):  # verifies: REQ-DESIGN-950#CASE-1
+        src = ("COUNT = 0\n"
+               "def bump():\n    global COUNT\n    COUNT += 1\n"
+               "def wide(a, b, c, d, e, f, g):\n    return a\n")
+        kinds = self._kinds(src)
+        self.assertIn("global-state", kinds)
+        self.assertIn("long-parameter-list", kinds)
+
+    def test_data_clump_needs_three_carriers(self):  # verifies: REQ-DESIGN-950#CASE-2
+        two = "def f(host, port, user): pass\ndef g(host, port, user): pass\n"
+        self.assertNotIn("data-clump", self._kinds(two))
+        three = two + "def h(host, port, user, x): pass\n"
+        f = [x for x in R._design_file("m.py", three) if x["kind"] == "data-clump"]
+        self.assertEqual(len(f), 1)
+        self.assertIn("host, port, user", f[0]["detail"])
+        self.assertEqual(f[0]["pillar"], "encapsulation")
+
+    def test_long_function_and_deep_nesting(self):  # verifies: REQ-DESIGN-950#CASE-3
+        long_src = "def big():\n" + "".join("    x = {}\n".format(i) for i in range(90))
+        self.assertIn("long-function", self._kinds(long_src))
+        deep = ("def deep(a):\n    if a:\n        for i in a:\n            while i:\n"
+                "                with a:\n                    if i:\n"
+                "                        pass\n")
+        self.assertIn("deep-nesting", self._kinds(deep))
+        self.assertNotIn("deep-nesting", self._kinds("def ok(a):\n    if a:\n        return 1\n"))
+
+    def test_prefix_family(self):  # verifies: REQ-DESIGN-950#CASE-4
+        src = "".join("def _scan_{}(): pass\n".format(i) for i in range(6))
+        f = [x for x in R._design_file("m.py", src) if x["kind"] == "prefix-family"]
+        self.assertEqual([(x["name"], x["pillar"]) for x in f], [("scan", "abstraction")])
+
+    def test_shared_methods_and_duplicate_method(self):  # verifies: REQ-DESIGN-951#CASE-1
+        src = ("class A:\n    def load(self): return 1\n    def save(self): return 2\n"
+               "    def close(self): pass\n"
+               "class B:\n    def load(self): return 3\n    def save(self): return 2\n"
+               "    def close(self): pass\n")
+        f = R._design_file("m.py", src)
+        self.assertIn("shared-methods", [x["kind"] for x in f])
+        dup = [x for x in f if x["kind"] == "duplicate-method"]
+        self.assertEqual(sorted(x["name"] for x in dup), ["B.close", "B.save"])
+        self.assertEqual({x["pillar"] for x in dup}, {"inheritance"})
+
+    def test_related_classes_are_not_reported(self):  # verifies: REQ-DESIGN-951#CASE-2
+        methods = ("    def load(self): pass\n    def save(self): pass\n"
+                   "    def close(self): pass\n")
+        src = "class Base:\n    pass\nclass A(Base):\n" + methods + "class B(Base):\n" + methods
+        self.assertNotIn("shared-methods", self._kinds(src))
+
+    def test_isinstance_chain_and_type_switch(self):  # verifies: REQ-DESIGN-951#CASE-3
+        src = ("def f(x, kind):\n"
+               "    if isinstance(x, int):\n        pass\n"
+               "    elif isinstance(x, str):\n        pass\n"
+               "    elif isinstance(x, list):\n        pass\n"
+               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n"
+               "    elif kind == 'c':\n        pass\n    elif kind == 'd':\n        pass\n")
+        f = [x for x in R._design_file("m.py", src) if x["pillar"] != "standards"]
+        self.assertEqual([x["kind"] for x in f], ["isinstance-chain", "type-switch"])
+        self.assertEqual([x["name"] for x in f], ["x", "kind"])
+        self.assertTrue(all(x["pillar"] == "polymorphism" for x in f))
+
+    def test_short_chains_are_silent(self):  # verifies: REQ-DESIGN-951#CASE-4
+        src = ("def f(x, kind):\n    if isinstance(x, int):\n        pass\n"
+               "    elif isinstance(x, str):\n        pass\n"
+               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n"
+               "    elif kind == 'c':\n        pass\n")
+        self.assertEqual(self._kinds(src), [])
+
+    def test_report_groups_by_pillar_and_exits_zero(self):  # verifies: REQ-DESIGN-952#CASE-1  # verifies: ARCH-DESIGN-061#CASE-1
+        src = "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n"
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), src)
+            _write(os.path.join(d, "tests", "test_m.py"), src)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_design(d)
+            out = buf.getvalue()
+        self.assertEqual(code, 0)
+        self.assertIn("Encapsulation (1)", out)
+        self.assertIn("m.py:2  global-state", out)
+        self.assertNotIn("test_m.py", out)
+        self.assertIn("Advisory only", out)
+
+    def test_json_output_and_clean_tree(self):  # verifies: REQ-DESIGN-952#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), "def ok():\n    return 1\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual((code, data["files"], data["findings"]), (0, 1, []))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            self.assertIn("No design candidates", buf.getvalue())
+
+    def test_syntax_error_yields_nothing(self):  # verifies: REQ-DESIGN-952#CASE-3
+        self.assertEqual(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"), [])
+
+    def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
+        self._set(DESIGN_PARAMS_MAX=R.config.DESIGN_PARAMS_MAX)
+        src = "def f(a, b, c): pass\n"
+        self.assertEqual(self._kinds(src), [])
+        R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
+        self.assertIn("long-parameter-list", self._kinds(src))
+
+    def test_file_length_and_line_width(self):  # verifies: REQ-DESIGN-953#CASE-1
+        src = ("".join("x{} = 1\n".format(i) for i in range(500))
+               + "y = '" + "z" * 80 + "'\n")
+        f = {x["kind"]: x for x in R._design_file("m.py", src)}
+        self.assertIn("file-too-long", f)
+        self.assertEqual(f["line-too-long"]["line"], 501)
+        self.assertIn("1 line(s) wider than 80", f["line-too-long"]["detail"])
+        self.assertEqual({x["pillar"] for x in f.values()}, {"standards"})
+
+    def test_the_defaults_are_500_lines_and_80_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
+        self.assertEqual((R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_LINE_MAX),
+                         (500, 80))
+        ok = "".join("x = '{}'\n".format("y" * 72) for _ in range(499))
+        self.assertEqual(R._design_file("m.py", ok), [])
+
+    def test_the_writing_rules_are_configurable(self):  # verifies: REQ-DESIGN-953#CASE-3
+        self._set(DESIGN_FILE_MAX_LINES=500, DESIGN_LINE_MAX=80)
+        src = "x = '" + "y" * 90 + "'\n"
+        self.assertEqual([f["kind"] for f in R._design_file("m.py", src)],
+                         ["line-too-long"])
+        R.apply_config({"DESIGN_LINE_MAX": 120}, out=io.StringIO())
+        self.assertEqual(R._design_file("m.py", src), [])
+
+    def test_standards_print_last(self):  # verifies: REQ-DESIGN-953#CASE-4
+        src = ("COUNT = 0\ndef bump():\n    global COUNT\n"
+               "    COUNT += 1  # " + "c" * 80 + "\n")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), src)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            out = buf.getvalue()
+        self.assertLess(out.index("Encapsulation (1)"), out.index("Standards (1)"))
+
+    def test_javascript_functions_classes_and_switch(self):  # verifies: REQ-DESIGN-955#CASE-1  # verifies: ARCH-DESIGN-061#CASE-4
+        src = (
+            "// comment with { brace and 'quote\n"
+            "function wide(a, b, c, d, e, f, g) { return a; }\n"
+            "const arrow = (x, y) => { return x + y; };\n"
+            "class Store { load() { return 1; } save() { return 2; } close() { } }\n"
+            "class Cache { load() { return 3; } save() { return 2; } close() { } }\n"
+            "function pick(kind, v) {\n"
+            "  switch (kind) { case 'a': return 1; case 'b': return 2;\n"
+            "    case 'c': return 3; case 'd': return 4; }\n"
+            "  if (v instanceof Foo) { } else if (v instanceof Bar) { }\n"
+            "  else if (v instanceof Baz) { }\n"
+            "}\n")
+        f = R._design_file("m.js", src)
+        kinds = {x["kind"] for x in f}
+        for k in ("long-parameter-list", "shared-methods", "duplicate-method",
+                  "type-switch", "isinstance-chain"):
+            self.assertIn(k, kinds)
+        self.assertEqual([x["name"] for x in f if x["kind"] == "type-switch"], ["kind"])
+        self.assertEqual([x["name"] for x in f if x["kind"] == "isinstance-chain"], ["v"])
+        self.assertIn("Cache.save",
+                      [x["name"] for x in f if x["kind"] == "duplicate-method"])
+
+    def test_cpp_long_function_and_dynamic_cast_chain(self):  # verifies: REQ-DESIGN-955#CASE-2
+        body = "".join("    x += {};\n".format(i) for i in range(90))
+        src = ("#include <x>\n"
+               "int compute(const std::string& name, int n) {\n" + body
+               + "    return x;\n}\n"
+               "void handle(Shape* s) {\n"
+               "    if (dynamic_cast<Circle*>(s)) { }\n"
+               "    else if (dynamic_cast<Square*>(s)) { }\n"
+               "    else if (dynamic_cast<Tri*>(s)) { }\n}\n")
+        f = R._design_file("shapes.cpp", src)
+        self.assertEqual([x["name"] for x in f if x["kind"] == "long-function"], ["compute"])
+        self.assertIn("isinstance-chain", [x["kind"] for x in f])
+
+    def test_masking_hides_braces_in_strings_and_comments(self):  # verifies: REQ-DESIGN-955#CASE-3
+        src = ('function f() { const s = "{{{"; /* } */ return s; } // {\n'
+               "function g() { return 1; }\n")
+        f = R._design_file("m.js", src)
+        self.assertEqual([x for x in f if x["kind"] in ("long-function", "deep-nesting")], [])
+        masked = R._design_mask(src)
+        self.assertNotIn('"{{{"', masked)
+        self.assertEqual(masked.count("\n"), src.count("\n"))
+
+    def test_other_languages_get_standards_only(self):  # verifies: REQ-DESIGN-955#CASE-4
+        src = "def a\n  1\nend\n" + "x = '" + "y" * 120 + "'\n"
+        self.assertEqual([x["kind"] for x in R._design_file("m.rb", src)], ["line-too-long"])
+        self.assertEqual(R._design_file("m.rb", "def a\n  1\nend\n"), [])
+
+    def test_ask_design_runs_and_is_not_a_gate_rule(self):  # verifies: ARCH-DESIGN-061#CASE-3
+        self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"))
+            _write(os.path.join(d, "m.py"), "def bump():\n    global C\n    C = 1\n")
+            old, sys.argv = sys.argv, ["reqmap", "ask", "--design", "--root", d]
+            try:
+                with redirect_stdout(io.StringIO()) as out, redirect_stderr(io.StringIO()):
+                    rc = R.main()
+            finally:
+                sys.argv = old
+        self.assertEqual(rc, 0)
+        self.assertIn("global-state", out.getvalue())
+
+    def test_the_requirement_names_every_pillar(self):
+        """REQ-DESIGN-952's print-order clause enumerates the pillars; a pillar
+        added without editing it would go stale with no DRIFT."""
+        here = os.path.dirname(os.path.abspath(__file__))
+        doc = os.path.join(here, "..", "requirements", "ARCH-DESIGN-061.md")
+        with open(doc, encoding="utf-8") as f:
+            clause = [ln for ln in f.read().splitlines()
+                      if "prints one block per group in the order" in ln]
+        self.assertEqual(len(clause), 1)
+        named = [p for p in R.DESIGN_PILLARS if p in clause[0]]
+        self.assertEqual(named, list(R.DESIGN_PILLARS))
+
+
+
+def _one_req(rq):
+    _write(os.path.join(rq, "AREA-A-001.md"),
+           REQ.format(id="AREA-A-001", status="baseline", layer="feature",
+                      extra="", title="T"))
+
+
+def _health_json(reqs, rq, d):
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        R.cmd_health(R.Workspace(reqs, {}, rq, d), as_json=True)
+    return buf.getvalue()
+
+
+class DesignSummary(unittest.TestCase):
+    # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-954
+    # tested-by: REQ-DESIGN-976
+    """The design record in `_map.json`, `_map.md`, `health` and `audit`."""
+
+    def _dirty_repo(self, d):
+        """One clean file and one carrying a candidate, so the record has a
+        score below 100."""
+        _write(os.path.join(d, "clean.py"), "def a():\n    return 1\n")
+        _write(os.path.join(d, "dirty.py"),
+               "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
+
+    def test_design_summary_scores_clean_files(self):
+        # verifies: REQ-DESIGN-954#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R._design_summary(d))
+            self._dirty_repo(d)
+            _write(os.path.join(d, "tests", "test_x.py"),
+                   "def bump():\n    global COUNT\n")
+            s = R._design_summary(d)
+        self.assertEqual((s["files"], s["clean_files"], s["score"]),
+                         (2, 1, 50))
+        self.assertEqual(s["candidates"]["encapsulation"], 1)
+        self.assertEqual(s["candidates"]["standards"], 0)
+        self.assertEqual(list(s["candidates"]), list(R.DESIGN_PILLARS))
+        self.assertNotIn("metrics", s["candidates"])
+
+    def test_map_and_health_carry_the_design_score(self):
+        # verifies: REQ-DESIGN-954#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _one_req(rq)
+            _write(os.path.join(d, "m.py"), "def a():\n    return 1\n")
+            reqs = R.load_requirements(rq)
+            data = R._assemble_map_data(reqs, {}, rq, d)
+            self.assertEqual(data["design"]["score"], 100)
+            md = R._build_md_text(dict(data, todos=[]))
+            self.assertIn("design pass-rate: 100% (1/1 source files", md)
+            self.assertIn('"design": {', R._build_json_text(data))
+            out = json.loads(_health_json(reqs, rq, d))
+        self.assertEqual((out["design_score"], out["design_files"]), (100, 1))
+
+    def test_no_program_logic_means_no_design_key(self):
+        # verifies: REQ-DESIGN-954#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _one_req(rq)
+            _write(os.path.join(d, "site.css"), "body { margin: 0 }\n")
+            reqs = R.load_requirements(rq)
+            data = R._assemble_map_data(reqs, {}, rq, d)
+            out = json.loads(_health_json(reqs, rq, d))
+        self.assertNotIn("design", data)
+        self.assertNotIn("design pass-rate", R._build_md_text(data))
+        self.assertNotIn("design_score", out)
+
+    def test_health_text_and_audit_carry_the_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _one_req(rq)
+            self._dirty_repo(d)
+            ws = R.Workspace(R.load_requirements(rq), {}, rq, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(ws)
+            line = R.audittail._design_candidate_line(d, rq)
+        self.assertIn("design pass-rate (files w/o candidate): 50%",
+                      buf.getvalue())
+        self.assertEqual(line, "design pass-rate 50% - 1 of 2 source "
+                               "files carry a candidate")
+
+    def test_design_summary_omits_findings_by_default(self):
+        # verifies: REQ-DESIGN-976#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._dirty_repo(d)
+            s = R._design_summary(d)
+        self.assertEqual(sorted(s),
+                         ["candidates", "clean_files", "files", "score"])
+
+    def test_design_summary_with_findings_lists_every_candidate(self):
+        # verifies: REQ-DESIGN-976#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._dirty_repo(d)
+            s = R._design_summary(d, with_findings=True)
+        self.assertEqual(len(s["findings"]), sum(s["candidates"].values()))
+        one = s["findings"][0]
+        self.assertEqual(sorted(one), ["detail", "file", "kind", "line",
+                                       "name", "pillar"])
+        # advice belongs to the rule: once per kind, never per row
+        self.assertEqual(sorted(s["advice"]),
+                         sorted({f["kind"] for f in s["findings"]}))
+
+    def test_map_carries_the_candidates_and_health_does_not(self):
+        # verifies: REQ-DESIGN-976#CASE-2  # verifies: REQ-DESIGN-976#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _one_req(rq)
+            self._dirty_repo(d)
+            reqs = R.load_requirements(rq)
+            data = R._assemble_map_data(reqs, {}, rq, d)
+            out = _health_json(reqs, rq, d)
+        design = data["design"]
+        self.assertEqual(len(design["findings"]),
+                         sum(design["candidates"].values()))
+        self.assertGreater(len(design["findings"]), 0)
+        self.assertNotIn("findings", out)
+
+    def test_design_block_is_byte_stable_across_runs(self):
+        # verifies: REQ-DESIGN-976#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _one_req(rq)
+            self._dirty_repo(d)
+            reqs = R.load_requirements(rq)
+            first = R._assemble_map_data(reqs, {}, rq, d)["design"]
+            second = R._assemble_map_data(reqs, {}, rq, d)["design"]
+        self.assertEqual(json.dumps(first, sort_keys=True),
+                         json.dumps(second, sort_keys=True))
+
+
+class AdvisoryDataCarriesNoVerdict(unittest.TestCase):
+    # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-991
+    """Issue #243: one blank line in a file no requirement claims moved a
+    `line:` in `design.findings`, made the committed map stale, and failed
+    `gate` with zero requirement errors."""
+
+    def _repo(self, d):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "A-M-001.md"),
+               _spec("A-M-001", ["`gate` writes the lock."]))
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
+        reqs = R.load_requirements(rd)
+        data = R._build_map_data(reqs, R.scan_members(d, rd))
+        data["design"] = {
+            "files": 2, "clean_files": 1, "score": 50,
+            "candidates": {"abstraction": 1},
+            "findings": [{"pillar": "abstraction", "kind": "long-function",
+                          "file": "untagged.py", "line": 12, "name": "f",
+                          "detail": "42 lines"}],
+            "advice": {"long-function": "shorten it"}}
+        data["health"] = {"score": 90, "total": 1}
+        R.render_json(data, rd)
+        R.render_md(data, rd)
+        return rd, data
+
+    def _stale(self, rd, data, root):
+        return R._stale_artifacts(data, R.Workspace(None, None, rd), root)
+
+    def test_baseline_is_fresh(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_moved_advisory_line_number_is_not_staleness(self):
+        # verifies: REQ-DESIGN-991#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["design"]["findings"][0]["line"] = 999
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_changed_design_score_is_not_staleness(self):
+        # verifies: REQ-DESIGN-991#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["design"]["score"] = 3
+            data["design"]["clean_files"] = 0
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_changed_requirement_still_is(self):
+        # verifies: REQ-DESIGN-991#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["nodes"][0]["title"] = "something else entirely"
+            self.assertIn("_map.json", self._stale(rd, data, d))
+
+    def test_a_changed_health_number_still_is(self):
+        # verifies: REQ-DESIGN-991#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["health"]["score"] = 12
+            self.assertIn("_map.json", self._stale(rd, data, d))
+
+    def test_the_design_rows_stay_in_the_artifact(self):
+        # Excluded from the comparison, not from the file: the viewer's
+        # Design tab renders them.
+        with tempfile.TemporaryDirectory() as d:
+            rd, _data = self._repo(d)
+            with open(os.path.join(rd, "_map.json"), encoding="utf-8") as f:
+                doc = json.load(f)
+        self.assertEqual(1, len(doc["design"]["findings"]))
+        self.assertEqual(12, doc["design"]["findings"][0]["line"])
+
+    def test_the_stripper_drops_the_block_and_keeps_what_follows(self):
+        text = "\n".join([
+            '{', '  "nodes": [],', '  "design": {', '    "score": 50,',
+            '    "findings": [', '      {', '        "line": 12', '      }',
+            '    ]', '  },', '  "health": {', '    "score": 90', '  }', '}'])
+        out = R._strip_generated(text)
+        self.assertNotIn("findings", out)
+        self.assertNotIn('"score": 50', out)
+        self.assertIn('"health"', out)
+        self.assertIn('"score": 90', out)
+        self.assertIn('"nodes": []', out)
+
+    def test_a_blank_line_in_an_untagged_file_does_not_fail_the_gate(self):
+        # verifies: REQ-DESIGN-991#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-M-001.md"),
+                   _spec("A-M-001", ["`gate` writes the lock."]))
+            _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
+            n = R.config.DESIGN_FUNC_MAX_LINES + 10
+            long_fn = ("def sprawling():\n"
+                       + "".join("    v{} = {}\n".format(i, i)
+                                 for i in range(n))
+                       + "    return v0\n")
+            untagged = os.path.join(d, "untagged.py")
+            _write(untagged, long_fn)
+            ws = R.Workspace.load(rd, d)
+            data = ws.map_data(d)
+            R.render_json(data, rd)
+            R.render_md(data, rd)
+            self.assertTrue(data.get("design", {}).get("findings"),
+                            "fixture produced no design finding to move")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(0, R.cmd_map(R.Workspace.load(rd, d), d,
+                                              True))
+            _write(untagged, "\n" + long_fn)      # one blank line at the top
+            ws2 = R.Workspace.load(rd, d)
+            moved = ws2.map_data(d)["design"]["findings"][0]["line"]
+            self.assertEqual(data["design"]["findings"][0]["line"] + 1, moved,
+                             "the advisory line did not move")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_map(ws2, d, True)
+        self.assertEqual(0, rc, buf.getvalue())
+        self.assertNotIn("stale", buf.getvalue())
+
+    def test_the_md_design_summary_line_is_dropped(self):
+        text = "\n".join(["---", "generated: 2026-01-01", "nodes: 3",
+                          "design pass-rate: 29% (9/31 files)", "---",
+                          "# Map"])
+        out = R._strip_generated(text)
+        self.assertNotIn("design pass-rate", out)
+        self.assertIn("nodes: 3", out)
+
+
+class HealthRows(unittest.TestCase):  # tested-by: REQ-HEALTHROWS-1083
+    """The rows behind the health score, emitted beside it for the map."""
+
+    BODY = ("# T\n\n## Description\n\nEvery bullet below is binding.\n"
+            "- It works.\n\n## Cases\nCASE-1\n  Given  a\n  When   b\n"
+            "  Then   c\n")
+
+    def _req(self, status, **meta):
+        m = {"status": status, "layer": "feature"}
+        m.update(meta)
+        return {"meta": m, "body": self.BODY}
+
+    def _rec(self, reqs, members, with_rows=True):
+        with tempfile.TemporaryDirectory() as d:
+            return R._health_record(reqs, members, d, with_rows=with_rows)
+
+    def test_a_draft_is_listed_as_not_confirmed(self):
+        # verifies: REQ-HEALTHROWS-1083#CASE-1
+        reqs = {"REQ-A-001": self._req("confirmed"),
+                "REQ-A-002": self._req("draft")}
+        members = {rid: [("implements", "x.py", 1), ("tested-by", "t.py", 2)]
+                   for rid in reqs}
+        rec = self._rec(reqs, members)
+        self.assertEqual(rec["unhealthy"], [
+            {"id": "REQ-A-002", "status": "draft",
+             "why": ["not confirmed"]}])
+
+    def test_a_waiver_is_listed_with_its_keys(self):
+        # verifies: REQ-HEALTHROWS-1083#CASE-2
+        reqs = {"REQ-A-001": self._req("confirmed", test_exempt="wiring")}
+        members = {"REQ-A-001": [("implements", "x.py", 1)]}
+        rec = self._rec(reqs, members)
+        self.assertEqual(rec["exempt_ids"],
+                         [{"id": "REQ-A-001", "keys": ["test_exempt"]}])
+        self.assertEqual(rec["unhealthy"], [])
+
+    def test_no_rows_unless_asked(self):
+        # verifies: REQ-HEALTHROWS-1083#CASE-3
+        reqs = {"REQ-A-001": self._req("draft")}
+        rec = self._rec(reqs, {}, with_rows=False)
+        self.assertNotIn("unhealthy", rec)
+        self.assertNotIn("exempt_ids", rec)

@@ -7,11 +7,6 @@ owner: Alex
 milestone: v2.17
 depends_on: [ARCH-CHECK-006]
 satisfies: [SYS-SHIP-108]
-lint_exempt: [file-spread, ac-count-high]
-# ac-count-high: eight cases, one root cause — this repository gating itself across CI, the
-# two hooks, the published action and the version checks. Splitting by surface would give
-# five requirements that fail together and are read together.
-test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per CASE-1/CASE-2. CASE-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)
 ---
 
 # This repo's own gate wiring
@@ -23,84 +18,46 @@ test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-t
 > "Tag your own pipeline" (v2.9 TODO.md) closes that gap.
 
 Every bullet below is binding.
-- Five repo-root files — `ci.yml`, `check/action.yml`, both dev git hooks, and `sync_reqmap.sh` — each wire the gate into a real entry point (CI, a consumer's Action, a local commit/push, the cache-sync script), and each carries a member tag pointing back at this requirement. [[REQ-SELFGATE-916]]
+- The CI workflow runs the one verdict after the version checks on every push or pull request, then re-points the published Action's major alias on each push to `main`. [[REQ-SELFGATE-916]]
+- The dev git hooks run the same checks in the same order before a commit is created, and refuse a direct push to `main`. [[REQ-SELFGATE-1070]]
+- The published Action runs a consumer's vendored engine through the same `gate` this repo runs on itself. [[REQ-SELFGATE-1071]]
+- The cache-sync script refreshes the engine in the local plugin cache and in every consumer repo that already vendors one. [[REQ-SELFGATE-1072]]
+- The Action's `check@vN` alias is named identically in every file that documents it and equals the plugin's major; `scripts/check_versions.py` refuses a tree where either is untrue.
 - The repo's own documentation is checked against the code it describes, because a drift detector whose own front page has drifted is an argument against itself. [[REQ-SELFGATE-990]]
 - A live instruction that tells a reader to type a CLI name the engine no longer has is found at merge time, read from the engine's own surface rather than from a list kept beside it. [[REQ-SELFGATE-1011]]
 
 ## Cases
-CASE-1  <!-- verifiable by: inspection -->
-  Given  a push or pull request to this repo
-  When   `ci.yml`'s `gate-and-tests` job runs
-  Then   `reqmap.py gate --code ..` exits 0 before any other job runs — since `v4.0.0` that one
-         command IS the lint and the map-freshness check as well
+CASE-1 — one verdict at every entry point
+  Given  `ci.yml`'s `gate-and-tests` job, the dev `.githooks/pre-commit` and the published
+         `check/action.yml`
+  When   each one's gate invocation is read
+  Then   all three run `reqmap.py gate`, the one verdict, with no second copy of its logic
 
-CASE-2  <!-- verifiable by: inspection -->
-  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)
-  When   `.githooks/pre-commit` runs
-  Then   it fails the commit on the same errors CI would fail on, before the commit is created
-
-CASE-3  <!-- verifiable by: inspection -->
-  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v5`
-  When   their own CI runs that step
-  Then   `check/action.yml` invokes the same gate this repo runs on itself
-
-CASE-4  <!-- verifiable by: inspection -->
-  Given  a local push attempt with the dev hook enabled and the target branch is `main`
-  When   `.githooks/pre-push` runs
-  Then   the push is blocked before it reaches the remote
-
-CASE-5  <!-- verifiable by: inspection -->
-  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments
-  When   it completes
-  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
-         plugin cache and every named consumer repo matches this repo's current copy
-
-CASE-6  <!-- verifiable by: inspection -->
-  Given  a push to `main`, whether or not it bumps `plugin.json`
-  When   the `release` job's alias step runs
-  Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the
-         current `plugin.json` version, so `check@vN` resolves to the latest released content
-
-CASE-7
+CASE-2 — a documented alias that disagrees is refused
   Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN`
   When   `scripts/check_versions.py` runs in the `gate-and-tests` job
   Then   it exits 1 and names the file that disagrees, before the alias can be published
 
-CASE-8
+CASE-3 — the alias tracks the plugin's major
   Given  every documented `check@vN` agrees, but names a major other than `plugin.json`'s
   When   `scripts/check_versions.py` runs in the `gate-and-tests` job
   Then   it exits 1 and says the alias must track the plugin's major, so `v4.0.0` cannot
          ship advertised as `@v3`
 
-CASE-9
-  Given  a README stating an engine line count the file no longer has
-  When   the suite runs in the source repo
-  Then   it fails and names both numbers
-
-CASE-10
-  Given  an ADR file with no row in the ADR index
-  When   the suite runs in the source repo
-  Then   it fails and names the file
-
 ## Context
 **Notes**
-- `lint_exempt: ac-count-high` — the capability is "the gate runs at every entry point", and
-  each case is one of those entry points. They cannot fail independently of the obligation
-  they share, which is the test for whether a clause deserves its own requirement.
-- This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own
-  behavior — that contract lives in [[ARCH-CHECK-006]].
-- `lint_exempt: file-spread` — spanning CI, the composite action, both dev hooks and the sync
-  script is the capability (the gate wired at every entry point), not a sign it is diffuse.
+- This requirement does not re-describe `gate`'s own behavior — that contract lives in
+  [[ARCH-CHECK-006]]. It says where this repo runs it, and each place is its own child.
 
 **Example**
 - A contributor enables `git config core.hooksPath .githooks`, edits a requirement with a typo,
   and `git commit` fails locally with the same error CI would have caught later.
 
 **Current implementation**
-- `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`,
-  `sync_reqmap.sh` (all repo root).
+- The wiring: `.github/workflows/ci.yml` ([[REQ-SELFGATE-916]]), `.githooks/`
+  ([[REQ-SELFGATE-1070]]), `check/action.yml` ([[REQ-SELFGATE-1071]]), `sync_reqmap.sh`
+  ([[REQ-SELFGATE-1072]]); `scripts/test_pipeline_wiring.py` reads each one.
 - The alias axis is asserted by `scripts/check_versions.py` (`ACTION_REF_FILES`), covered by
-- The alias major equals the plugin's major, and the same check refuses a release where they disagree.
   `scripts/test_check_versions.py`.
 
 
@@ -110,8 +67,6 @@ CASE-10
 ---
 id: REQ-SELFGATE-916
 status: confirmed
-lint_exempt: [file-spread]
-test_exempt: pipeline wiring (CI, hooks, the Action) observed by running it, not by a unit test
 level: code
 layer: feature
 owner: Alex
@@ -119,40 +74,36 @@ milestone: v3.2
 satisfies: [ARCH-SELFGATE-039]
 ---
 
-# Five files wire the gate into CI, hooks, and a consumer's Action
+# The CI workflow runs the one verdict and moves the Action's alias
 
 ## Description
 > `reqmap.py` ships a gate other repos vendor and run, but until "tag your own pipeline"
-> (v2.9 TODO.md), none of the files that actually invoke it here — CI, the published
-> Action, the local git hooks, the cache-sync script — carried a tag back to that fact.
-> Without the tag, a change to any of these five could silently stop enforcing the gate
-> and nothing in the requirement graph would show it.
+> (v2.9 TODO.md), the workflow that runs it here carried no tag back to that fact. Without
+> it, a change to `ci.yml` could silently stop enforcing the gate, or stop moving the
+> alias consumers pin, and nothing in the requirement graph would show it.
 
 Every bullet below is binding.
-- `.github/workflows/ci.yml`'s `gate-and-tests` job invokes `reqmap.py gate` / `lint --strict`
-  / `map --check` on every push and pull request.
-- `check/action.yml` packages the same invocation as a reusable GitHub Action for consumer repos.
-- `ci.yml`'s `release` job force-moves the action's major-alias tag — the `@vN` named by the
+- `.github/workflows/ci.yml` triggers on every push to `main` and on every pull request.
+- Its `gate-and-tests` job runs `reqmap.py gate --full --code ..` from `plugin/`, the one
+  verdict that since `v4.0.0` carries the lint and the map-freshness check itself.
+- The same job runs `check_versions.py`, `check_engine_bump.py` and
+  `check_retired_verbs.py` before that verdict, in that order.
+- Its `release` job force-moves the action's major-alias tag — the `@vN` named by the
   `uses:` reference in `check/action.yml` — onto the commit the current `plugin.json` version
   is tagged at, on every push to `main`.
-- `.githooks/pre-commit` mirrors the CI order locally, before a commit is created.
-- `.githooks/pre-push` blocks a direct push to `main`.
-- `sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into
-  the local plugin cache and any consumer repos passed as arguments.
 
 ## Cases
 CASE-1 — the CI job runs the one verdict on both triggers
   Given  `.github/workflows/ci.yml`
-  When   its `gate-and-tests` job is read
-  Then   the job invokes `gate` — which since `v4.0.0` carries the lint and the map
-         freshness check itself; the workflow triggers on both push and pull_request
+  When   its triggers and its `gate-and-tests` job are read
+  Then   the workflow triggers on both push and pull_request, and the job runs
+         `reqmap.py gate --full --code ..` from `plugin/`
 
-CASE-2 — the composite action runs the same verdict
-  Given  `check/action.yml`
-  When   its `runs.steps` are read
-  Then   the composite action invokes `reqmap.py gate`, the same command `ci.yml` runs on
-         itself, with the lint and freshness halves switched off by `--no-lint` /
-         `--no-map-check` when its `lint` / `freshness` inputs say so
+CASE-2 — the version and engine checks run before the verdict
+  Given  `ci.yml`'s `gate-and-tests` job
+  When   its steps are read top to bottom
+  Then   `check_versions.py`, `check_engine_bump.py --base HEAD~1` and
+         `check_retired_verbs.py` run in that order, all before the gate
 
 CASE-3 — the release job moves the action's major-alias tag on every push to main
   Given  a push to `main`, whether or not `plugin.json`'s version changed
@@ -160,27 +111,136 @@ CASE-3 — the release job moves the action's major-alias tag on every push to m
   Then   the `@vN` tag named in `check/action.yml`'s `uses:` reference is force-moved onto the
          commit tagged with the current `plugin.json` version
 
-CASE-4 — the hook runs checks in the same relative order as CI
-  Given  `.githooks/pre-commit`
-  When   its script body is read top to bottom
-  Then   it runs `check_versions.py`, `check_engine_bump.py --staged`, `gate`, `lint --strict`, `map --check` in that order, matching `ci.yml`'s `gate-and-tests` job
 
-CASE-5 — the pre-push hook blocks a direct push to main
+---
+id: REQ-SELFGATE-1070
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SELFGATE-039]
+---
+
+# The dev git hooks run CI's checks before a commit and guard `main`
+
+## Description
+> CI is the verdict, but it answers after a push. The dev hooks give the same answer
+> before a commit exists, and refuse the one push the branch model forbids. A hook that
+> drifted from CI's order would pass a commit CI then rejects.
+
+Every bullet below is binding.
+- `.githooks/pre-commit` runs `check_versions.py`, `check_engine_bump.py --staged`,
+  `check_retired_verbs.py` and `reqmap.py gate --full` over the repo root, in the order
+  `ci.yml`'s `gate-and-tests` job runs them.
+- The first check that fails stops the hook with exit 1, so the commit is not created.
+- `.githooks/pre-push` refuses a push whose target is `main` or `master`, and lets every
+  other push through.
+
+## Cases
+CASE-1 — the pre-commit hook runs CI's checks in CI's order
+  Given  `.githooks/pre-commit` and `ci.yml`'s `gate-and-tests` job
+  When   both are read top to bottom
+  Then   the hook runs `check_versions.py`, `check_engine_bump.py --staged`,
+         `check_retired_verbs.py` and `reqmap.py gate --full` in the same relative order
+         as the job
+
+CASE-2 — a failing check refuses the commit
+  Given  `.githooks/pre-commit`
+  When   any one of its checks exits non-zero
+  Then   the hook exits 1 at that check, before the commit is created
+
+CASE-3 — the pre-push hook blocks a direct push to main
   Given  `.githooks/pre-push` enabled and a local push whose target branch is `main`
   When   `git push` runs
-  Then   the hook rejects the push before it reaches the remote
+  Then   the hook exits 1 before the push reaches the remote; a push to any other branch
+         exits 0
 
-CASE-6 — sync_reqmap.sh propagates the engine to the local cache and named consumers
-  Given  `sync_reqmap.sh` run with zero or more consumer-repo paths as arguments
-  When   it completes
-  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
-         plugin cache and every named consumer repo matches this repo's current copy
 
-## Context
-**Notes**
-- `lint_exempt: file-spread` — the five files ARE this requirement. Spanning CI, the
-  composite action, both dev hooks and the sync script is the capability, not a sign it is
-  diffuse; a version of it that touched one file would assert nothing.
+---
+id: REQ-SELFGATE-1071
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SELFGATE-039]
+---
+
+# The published Action runs the consumer's engine through the same gate
+
+## Description
+> A consumer adopts the gate by adding one `uses:` line. What that line runs has to be the
+> verdict this repo runs on itself, not a second, lighter check, and the two halves a
+> consumer may not be ready for have to stay switchable without forking the Action.
+
+Every bullet below is binding.
+- `check/action.yml` is a composite action whose gate step runs the consumer's vendored
+  `reqmap.py` (`scripts/reqmap.py` by default) as `gate`, the command `ci.yml` runs here.
+- Its `lint` and `freshness` inputs default to `'true'`; any other value passes
+  `--no-lint` or `--no-map-check` to that gate.
+- Its header carries the `uses: alxmax/requirement-manager/check@vN` reference the release
+  job derives the alias tag from.
+
+## Cases
+CASE-1 — the composite action runs the same verdict
+  Given  `check/action.yml`
+  When   its `runs.steps` are read
+  Then   it is a composite action whose gate step runs the vendored `reqmap.py gate`
+
+CASE-2 — the lint and freshness inputs switch their halves off
+  Given  the `lint` and `freshness` inputs of `check/action.yml`
+  When   the inputs and the gate step are read
+  Then   both default to `'true'`, and a value other than `true` adds `--no-lint` or
+         `--no-map-check` to the gate's flags
+
+CASE-3 — the file names the alias the release job moves
+  Given  `check/action.yml`
+  When   it is searched the way the `release` job's alias step searches it
+  Then   it yields one `requirement-manager/check@vN` reference
+
+
+---
+id: REQ-SELFGATE-1072
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SELFGATE-039]
+---
+
+# The cache-sync script refreshes an engine, never seeds one
+
+## Description
+> A change to the engine reaches this machine's installed plugin and the consumer repos it
+> works on only when someone copies it there. `sync_reqmap.sh` is that copy. It must
+> carry the whole engine, the CLI and its package, and it must never plant an engine in a
+> repo that did not ask for one.
+
+Every bullet below is binding.
+- `sync_reqmap.sh` copies `plugin/scripts/reqmap.py` and the `reqmap_engine/` package, less
+  `__pycache__`, into the local plugin cache directory named by `plugin.json`'s version,
+  with the vendored viewer template when it exists.
+- For each consumer repo passed as an argument it refreshes an engine already vendored
+  there, wherever it is located, and skips a repo that has none rather than seeding one.
+- `sync_reqmap.sh` refreshes a consumer's viewer template only where that repo already has
+  one.
+
+## Cases
+CASE-1 — the plugin cache gets the whole engine
+  Given  `sync_reqmap.sh`
+  When   its cache step is read
+  Then   the cache directory is derived from `plugin.json`'s version, and `reqmap.py`, the
+         `reqmap_engine/` package without `__pycache__` and the viewer template are copied
+         into it
+
+CASE-2 — a consumer with no engine is skipped, not seeded
+  Given  a consumer-repo argument where no vendored `reqmap.py` is found
+  When   the consumer loop reaches it
+  Then   the script warns and moves to the next repo before anything is copied
+
+CASE-3 — a viewer template is refreshed only where one exists
+  Given  a consumer repo whose vendored engine has no `_map_viewer.html` beside it
+  When   the script refreshes that repo
+  Then   no viewer template is copied into it
 
 
 ---

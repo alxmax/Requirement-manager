@@ -3,16 +3,17 @@ import { buildHierarchy } from "./tree.js";
 
 /* Graph layout computed from the live registry — no hand-tuned coordinates.
  *
- * Produces a layered "main-bus" layout: nodes are ranked by dependency depth so
- * `depends_on` edges flow left→right (consumers on the left, shared foundation /
- * bus-layer nodes on the right). A barycenter pass orders each rank to cut edge
- * crossings; edge-less nodes are parked in a side grid. The same routine drives
- * the System Map, the Risk tab (on the flagged subset) and the area-level
- * Dependency tab (on an area-collapsed graph). */
+ * Produces a layered "main-bus" layout: nodes are ranked by dependency
+ * depth so `depends_on` edges flow left→right (consumers on the left,
+ * shared foundation / bus-layer nodes on the right). A barycenter pass
+ * orders each rank to cut edge crossings; edge-less nodes are parked in
+ * a side grid. The same routine drives the System Map, the Risk tab (on
+ * the flagged subset) and the area-level Dependency tab (on an
+ * area-collapsed graph). */
 
 export const NODE_W = 152;
-// vertical offset used as the card's connection point (cards are ~80-134px tall;
-// this approximates their centre for edge attachment).
+// vertical offset used as the card's connection point (cards are
+// ~80-134px tall; this approximates their centre for edge attachment).
 export const NODE_CY = 46;
 
 /** depends_on edges between members of `ids` (both endpoints present). */
@@ -20,27 +21,31 @@ export function edgesWithin(reqs, ids) {
   const set = ids instanceof Set ? ids : new Set(ids);
   const out = [];
   for (const r of reqs) {
-    for (const d of r.deps || []) if (set.has(d) && set.has(r.id)) out.push([r.id, d]);
+    for (const d of r.deps || []) {
+      if (set.has(d) && set.has(r.id)) out.push([r.id, d]);
+    }
   }
   return out;
 }
 
-/** Edges that close a cycle, found by DFS: an edge into a node still on the
- * recursion stack. Returned as a Set of "a\u0000b" keys.
+/** Edges that close a cycle, found by DFS: an edge into a node still on
+ * the recursion stack. Returned as a Set of "a\u0000b" keys.
  *
- * A `depends_on` cycle is a modelling error the gate reports, but the viewer must
- * still draw such a registry, and draw it legibly. Ranking a cyclic graph by
- * longest-path relaxation never converges: every pass adds one to every node
- * around the cycle, so the loop runs its full `ids.length` passes and the ranks
- * come out as high as it was allowed to count. A real corpus of 59 requirements
- * with three cycles produced maxRank 236 — where a DAG of 59 nodes cannot exceed
- * 58 — which is a 71,000px-wide canvas with ~230 empty columns, and edges drawn
- * as near-endless horizontal lines stepping through every one of them. */
+ * A `depends_on` cycle is a modelling error the gate reports, but the
+ * viewer must still draw such a registry, and draw it legibly. Ranking a
+ * cyclic graph by longest-path relaxation never converges: every pass
+ * adds one to every node around the cycle, so the loop runs its full
+ * `ids.length` passes and the ranks come out as high as it was allowed
+ * to count. A real corpus of 59 requirements with three cycles produced
+ * maxRank 236 — where a DAG of 59 nodes cannot exceed 58 — which is a
+ * 71,000px-wide canvas with ~230 empty columns, and edges drawn as
+ * near-endless horizontal lines stepping through every one of them. */
 function backEdges(ids, edges) {  // implements: REQ-VIEWER-942
   const out = {};
   ids.forEach((id) => (out[id] = []));
   for (const [a, b] of edges) if (out[a]) out[a].push(b);
-  const state = {}, back = new Set();          // 0/undef = unseen, 1 = on stack, 2 = done
+  const state = {}, back = new Set();
+  // 0/undef = unseen, 1 = on stack, 2 = done
   const visit = (root) => {
     // iterative DFS: a deep chain must not blow the JS stack in a viewer
     const stack = [[root, 0]];
@@ -59,10 +64,11 @@ function backEdges(ids, edges) {  // implements: REQ-VIEWER-942
   return back;
 }
 
-/** Longest-path rank so that for every edge a→b (a depends_on b), rank(b) > rank(a).
- * Cycle-closing edges are excluded from the ranking (they are still drawn), so the
- * remaining graph is a DAG and the relaxation converges in at most `ids.length`
- * passes with rank <= ids.length - 1. */
+/** Longest-path rank so that for every edge a→b (a depends_on b),
+ * rank(b) > rank(a). Cycle-closing edges are excluded from the ranking
+ * (they are still drawn), so the remaining graph is a DAG and the
+ * relaxation converges in at most `ids.length` passes with
+ * rank <= ids.length - 1. */
 function rankNodes(ids, edges) {  // implements: REQ-VIEWER-942
   const back = backEdges(ids, edges);
   const acyclic = edges.filter(([a, b]) => !back.has(a + "\u0000" + b));
@@ -80,9 +86,35 @@ function rankNodes(ids, edges) {  // implements: REQ-VIEWER-942
 
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 
+/** Barycenter crossing-minimisation: order each rank by the mean position
+ * of its neighbours in adjacent ranks, sweeping down then up a few times. */
+function orderRanks(cols, maxRank, inc, out, deg) {
+  // implements: REQ-VIEWER-942
+  const ord = {};
+  for (let r = 0; r <= maxRank; r++) {
+    (cols[r] || []).forEach((id, i) => (ord[id] = i));
+  }
+  const reorder = (r, useInc) => {
+    const c = cols[r]; if (!c || !c.length) return;
+    const bc = {};
+    for (const id of c) {
+      const nb = (useInc ? inc : out)[id]
+        .filter((x) => deg[x]).map((x) => ord[x]);
+      const m = mean(nb); bc[id] = m == null ? ord[id] : m;
+    }
+    c.sort((a, b) => bc[a] - bc[b]); c.forEach((id, i) => (ord[id] = i));
+  };
+  for (let it = 0; it < 6; it++) {
+    for (let r = 1; r <= maxRank; r++) reorder(r, true);
+    for (let r = maxRank - 1; r >= 0; r--) reorder(r, false);
+  }
+  return ord;
+}
+
 /**
  * @param {Array} reqs  list of {id, deps, ...}
- * @returns {{pos:Object<string,[number,number]>, edges:Array, width:number, height:number}}
+ * @returns {{pos:Object<string,[number,number]>, edges:Array,
+ *   width:number, height:number}}
  */
 export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
   const COLW = opts.colW || 300, ROWH = opts.rowH || 170;
@@ -93,7 +125,9 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
 
   const deg = {}, inc = {}, out = {};
   ids.forEach((id) => { deg[id] = 0; inc[id] = []; out[id] = []; });
-  for (const [a, b] of edges) { deg[a]++; deg[b]++; out[a].push(b); inc[b].push(a); }
+  for (const [a, b] of edges) {
+    deg[a]++; deg[b]++; out[a].push(b); inc[b].push(a);
+  }
 
   const rank = rankNodes(ids, edges);
   const cols = {}; let maxRank = 0; const iso = [];
@@ -104,26 +138,12 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
     if (r > maxRank) maxRank = r;
   }
 
-  // barycenter crossing-minimisation: order each rank by the mean position of its
-  // neighbours in adjacent ranks, sweeping down then up a few times.
-  const ord = {};
-  for (let r = 0; r <= maxRank; r++) (cols[r] || []).forEach((id, i) => (ord[id] = i));
-  const reorder = (r, useInc) => {
-    const c = cols[r]; if (!c || !c.length) return;
-    const bc = {};
-    for (const id of c) {
-      const nb = (useInc ? inc : out)[id].filter((x) => deg[x]).map((x) => ord[x]);
-      const m = mean(nb); bc[id] = m == null ? ord[id] : m;
-    }
-    c.sort((a, b) => bc[a] - bc[b]); c.forEach((id, i) => (ord[id] = i));
-  };
-  for (let it = 0; it < 6; it++) {
-    for (let r = 1; r <= maxRank; r++) reorder(r, true);
-    for (let r = maxRank - 1; r >= 0; r--) reorder(r, false);
-  }
+  const ord = orderRanks(cols, maxRank, inc, out, deg);
 
   let maxN = 1;
-  for (let r = 0; r <= maxRank; r++) if (cols[r] && cols[r].length > maxN) maxN = cols[r].length;
+  for (let r = 0; r <= maxRank; r++) {
+    if (cols[r] && cols[r].length > maxN) maxN = cols[r].length;
+  }
   const yMid = Y0 + ((maxN - 1) / 2) * ROWH;
 
   const pos = {};
@@ -135,7 +155,8 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
   const isoX = X0 + (maxRank + 1) * COLW + 30;
   const isoY0 = yMid - ((Math.ceil(iso.length / ISO_COLS) - 1) / 2) * ROWH;
   iso.forEach((id, k) => {
-    pos[id] = [isoX + (k % ISO_COLS) * ISO_W, isoY0 + Math.floor(k / ISO_COLS) * ROWH];
+    pos[id] = [isoX + (k % ISO_COLS) * ISO_W,
+               isoY0 + Math.floor(k / ISO_COLS) * ROWH];
   });
 
   let width = 1000, height = 600;
@@ -144,32 +165,38 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
     height = Math.max(height, y + 160);
   }
 
-  // metadata the edge router needs: column x per rank, sorted card tops per rank.
+  // metadata the edge router needs: column x per rank, sorted card tops
+  // per rank.
   const colX = {}, colYs = {};
   for (let r = 0; r <= maxRank; r++) {
     colX[r] = X0 + r * COLW;
     colYs[r] = (cols[r] || []).map((id) => pos[id][1]).sort((a, b) => a - b);
   }
   return {
-    pos, edges, width, height, hasIsolated: iso.length > 0, colX, colYs, rankOf: rank,
-    colW: COLW, lo: 0, hi: height,
+    pos, edges, width, height, hasIsolated: iso.length > 0, colX, colYs,
+    rankOf: rank, colW: COLW, lo: 0, hi: height,
   };
 }
 
-/* ---- card-avoiding orthogonal edge routing -------------------------------- */
+/* ---- card-avoiding orthogonal edge routing ------------------------------ */
 
 const CARD_H = 128; // conservative card height for gap detection
 
-/** A y near `wantY` that is clear of every card in `tops` (their top-y list). */
+/** A y near `wantY` that is clear of every card in `tops` (their top-y
+ *  list). */
 function clearY(tops, wantY, lo, hi) {
-  const occ = (tops || []).map((y) => [y - 6, y + CARD_H + 6]).sort((a, b) => a[0] - b[0]);
+  const occ = (tops || []).map((y) => [y - 6, y + CARD_H + 6])
+    .sort((a, b) => a[0] - b[0]);
   if (!occ.some(([a, b]) => wantY >= a && wantY <= b)) return wantY;
   const gaps = []; let prev = lo;
-  for (const [a, b] of occ) { if (a > prev) gaps.push([prev, a]); prev = Math.max(prev, b); }
+  for (const [a, b] of occ) {
+    if (a > prev) gaps.push([prev, a]); prev = Math.max(prev, b);
+  }
   if (prev < hi) gaps.push([prev, hi]);
   let best = wantY, bd = Infinity;
   for (const [a, b] of gaps) {
-    const c = b - a >= 20 ? Math.max(a + 10, Math.min(b - 10, wantY)) : (a + b) / 2;
+    const c = b - a >= 20
+      ? Math.max(a + 10, Math.min(b - 10, wantY)) : (a + b) / 2;
     const dd = Math.abs(c - wantY);
     if (dd < bd) { bd = dd; best = c; }
   }
@@ -228,12 +255,15 @@ export function buildEdgePath(meta, a, b) {
   return null;
 }
 
-/** Deterministic distinct colour per id. `line` is a saturated stroke for edges
- * (each edge is drawn in its source requirement's colour so overlapping lines stay
- * traceable); `bg`/`border` are light tints kept available for other surfaces. */
+/** Deterministic distinct colour per id. `line` is a saturated stroke for
+ * edges (each edge is drawn in its source requirement's colour so
+ * overlapping lines stay traceable); `bg`/`border` are light tints kept
+ * available for other surfaces. */
 export function colorFor(id) {
   let h = 2166136261;
-  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i); h = Math.imul(h, 16777619);
+  }
   const hue = (h >>> 0) % 360;
   const sat = 60 + ((h >>> 8) % 18);
   return {
@@ -243,10 +273,51 @@ export function colorFor(id) {
   };
 }
 
-/** Top-down V-model tree: system → architecture via `satisfies` / `satisfied_by`.
- * The code level is counted per node but not drawn — same scope as _map.md's
- * Specification Hierarchy diagram. */
-export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
+/** DFS-place each visible node into (x-unit, depth) coordinates, sized by
+ * its visible subtree width, then converted to pixel positions. `grid` is
+ * the pixel geometry: { COLW, ROWH, X0, Y0 }. */
+function placeHierarchy(h, visible, visSet, grid) {
+  // implements: REQ-VIEWER-942
+  const { COLW, ROWH, X0, Y0 } = grid;
+  const subtreeW = {};
+  const widthOf = (id) => {
+    if (subtreeW[id] != null) return subtreeW[id];
+    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
+    subtreeW[id] = kids.length ? kids.reduce((s, c) => s + widthOf(c), 0) : 1;
+    return subtreeW[id];
+  };
+
+  const pos = {};
+  const depthOf = {};
+  const place = (id, xUnit, depth) => {
+    depthOf[id] = depth;
+    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
+    const w = widthOf(id);
+    pos[id] = [X0 + xUnit * COLW + Math.max(0, (w * COLW - NODE_W) / 2),
+               Y0 + depth * ROWH];
+    let cx = xUnit;
+    kids.forEach((c) => { place(c, cx, depth + 1); cx += widthOf(c); });
+  };
+
+  let xUnit = 0;
+  h.roots.filter((id) => visSet.has(id))
+    .forEach((id) => {
+      widthOf(id); place(id, xUnit, 0); xUnit += widthOf(id);
+    });
+  visible.forEach((r) => {
+    if (pos[r.id]) return;
+    widthOf(r.id);
+    place(r.id, xUnit, 0);
+    xUnit += widthOf(r.id);
+  });
+  return { pos, depthOf };
+}
+
+/** Top-down V-model tree: system → architecture via `satisfies` /
+ * `satisfied_by`. The code level is counted per node but not drawn —
+ * same scope as _map.md's Specification Hierarchy diagram. */
+export function computeHierarchyLayout(reqs, opts = {}) {
+  // implements: REQ-VIEWER-942
   const COLW = opts.colW || 220;
   const ROWH = opts.rowH || 130;
   const X0 = 50, Y0 = 40;
@@ -277,34 +348,8 @@ export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VI
     }).length;
   });
 
-  const subtreeW = {};
-  const widthOf = (id) => {
-    if (subtreeW[id] != null) return subtreeW[id];
-    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
-    subtreeW[id] = kids.length ? kids.reduce((s, c) => s + widthOf(c), 0) : 1;
-    return subtreeW[id];
-  };
-
-  const pos = {};
-  const depthOf = {};
-  const place = (id, xUnit, depth) => {
-    depthOf[id] = depth;
-    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
-    const w = widthOf(id);
-    pos[id] = [X0 + xUnit * COLW + Math.max(0, (w * COLW - NODE_W) / 2), Y0 + depth * ROWH];
-    let cx = xUnit;
-    kids.forEach((c) => { place(c, cx, depth + 1); cx += widthOf(c); });
-  };
-
-  let xUnit = 0;
-  h.roots.filter((id) => visSet.has(id))
-    .forEach((id) => { widthOf(id); place(id, xUnit, 0); xUnit += widthOf(id); });
-  visible.forEach((r) => {
-    if (pos[r.id]) return;
-    widthOf(r.id);
-    place(r.id, xUnit, 0);
-    xUnit += widthOf(r.id);
-  });
+  const { pos, depthOf } = placeHierarchy(
+    h, visible, visSet, { COLW, ROWH, X0, Y0 });
 
   let width = 800, height = 520;
   for (const [x, y] of Object.values(pos)) {
@@ -320,7 +365,8 @@ export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VI
       .map((r) => pos[r.id][1]).sort((a, b) => a - b);
   }
   return {
-    pos, edges, width, height, codeCounts, depthOf, colX, colYs, rankOf: depthOf,
+    pos, edges, width, height, codeCounts, depthOf, colX, colYs,
+    rankOf: depthOf,
     lo: 0, hi: height, colW: COLW,
   };
 }

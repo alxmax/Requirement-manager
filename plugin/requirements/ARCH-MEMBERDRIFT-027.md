@@ -7,8 +7,7 @@ owner: Alex
 priority: should-have
 milestone: v1.18
 depends_on: [ARCH-DRIFT-003, ARCH-SCAN-002, ARCH-CHECK-006]
-satisfies: [SYS-GATE-102]
-lint_exempt: [ac-count-high]
+satisfies: [SYS-DRIFT-109]
 ---
 
 # Reverse-direction member drift
@@ -41,32 +40,16 @@ CASE-3
   When   member drift is computed
   Then   that (requirement, file) pair is reported
 CASE-4
-  Given  a requirement whose contract also drifted since the lock
-  When   member drift is computed
-  Then   it is not reported (forward drift owns it)
-CASE-5
-  Given  a non-confirmed requirement whose member changed
-  When   member drift is computed
-  Then   it is not reported
-CASE-6
-  Given  a member file with no recorded baseline in the sidecar
-  When   member drift is computed
-  Then   it is not reported
-CASE-7
   Given  a baselined dedicated member that is then edited
   When   the gate runs
   Then   it warns (exit 0) and, under `--strict`, exits non-zero
-CASE-8
-  Given  the same member content saved once with LF and once with CRLF line endings
-  When   the member hash is computed for each
-  Then   the two hashes are identical (line endings are normalized before hashing)
 
 ## Context
 **Notes**
-- Why `ac-count-high` is exempt: the eight criteria are the branch table of one decision —
-  which (requirement, file) pair is reported as member drift — not eight behaviours that can
-  break apart. Six of them (CASE-2 through CASE-6, CASE-8) are the suppression rules of that same
-  decision. A split would produce two requirements sharing one contract.
+- The cases above are the end-to-end path. The suppression rules of the same decision —
+  forward drift owns a contract that also moved, a non-confirmed requirement or an
+  unbaselined member stays silent, line endings never read as drift — are pinned in
+  [[REQ-MEMBERDRIFT-879]] and [[REQ-MEMBERDRIFT-880]].
 - File-level granularity with a mono-requirement filter trades reach for silence: drift in
   a file shared by many requirements (e.g. a single engine file) is not attributed, by
   design. Repos with one file per capability get the most value.

@@ -7,7 +7,6 @@ owner: Alex
 milestone: v2.25
 depends_on: [ARCH-PARSE-001, ARCH-MAP-007, ARCH-VIEWER-007]
 satisfies: [SYS-SHIP-108]
-lint_exempt: [file-spread]
 ---
 
 # Reading a cached requirement translation into the map
@@ -31,6 +30,8 @@ Every bullet below is binding.
 - A cached entry is served only while its stored hash still matches the
   requirement's current content; a stale or malformed cache degrades to no
   translation, never to a wrong one. [[REQ-TRANSLATE-938]]
+- The viewer shows a cached entry only in the locale it was cached for, and always
+  beside a visible "machine-translated, unreviewed" marker. [[REQ-TRANSLATE-1080]]
 - Nothing measures the cache: since v8.2.0 (ADR-0047) there is no `ask --i18n`, no
   parity rule and no `LANGUAGE` key. A translation already cached is shown while it is
   fresh and silently dropped once its requirement changes.
@@ -150,7 +151,6 @@ CASE-3 — bumping `TRANSLATOR_VERSION` invalidates every cached entry at once
 ---
 id: REQ-TRANSLATE-938
 status: confirmed
-lint_exempt: [file-spread]
 level: code
 layer: feature
 owner: Alex
@@ -281,7 +281,6 @@ layer: feature
 owner: Alex
 milestone: v7.2
 satisfies: [ARCH-TRANSLATE-044]
-lint_exempt: [file-spread]
 ---
 
 # Declaring the requirements language
@@ -360,3 +359,50 @@ CASE-7 — the viewer's default follows the setting, the reader's choice beats i
   When   the viewer mounts with no stored locale
   Then   it opens in Romanian, then English, then English; a stored or explicit locale
          is kept regardless
+
+
+--------------------
+
+
+---
+id: REQ-TRANSLATE-1080
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-TRANSLATE-044]
+---
+
+# Showing a cached translation, always marked
+
+## Description
+> The engine only reads the cache (REQ-TRANSLATE-937, REQ-TRANSLATE-938); what a
+> reader sees is decided here. A translation nobody reviewed must never pass for the
+> author's words, so it appears only in the locale it was made for, and never without
+> the marker that says so.
+
+Every bullet below is binding.
+- In the viewer, a requirement's title, intent, contract and cases are shown from
+  `node.i18n.<locale>` when the active locale has a cached entry for that field, and
+  from the authored text otherwise.
+- Every field shown from the cache carries the "machine-translated, unreviewed"
+  marker beside it.
+- A field with no cached entry in the active locale shows the authored text and no
+  marker.
+
+## Cases
+CASE-1 — a cached title renders in its locale, with the marker
+  Given  a requirement whose `i18n.ro.title` is cached
+  When   its document renders with the locale `ro`
+  Then   the heading shows the cached title and the "machine-translated, unreviewed"
+         marker
+
+CASE-2 — the authored locale shows the source, unmarked
+  Given  the same requirement
+  When   its document renders with the locale `en`
+  Then   the heading shows the authored title and no marker
+
+CASE-3 — no cache entry means the source and no marker
+  Given  a requirement with no `i18n` entry
+  When   its document renders with the locale `ro`
+  Then   no marker is shown

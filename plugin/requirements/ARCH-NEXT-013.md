@@ -7,7 +7,6 @@ owner: Alex
 milestone: v1.12
 depends_on: [ARCH-MAP-007]
 satisfies: [SYS-REPORT-105]
-lint_exempt: [ac-count-high]
 ---
 
 # What-should-I-do-next report
@@ -21,7 +20,8 @@ lint_exempt: [ac-count-high]
 
 Every bullet below is binding.
 - `next` groups every requirement's open risk signals — read from the same `_risk_signals`/`RISK_ADVICE` source the Risk tab uses — into action buckets, behind a progress header. [[REQ-NEXT-883]]
-- `next` surfaces exactly the actionable buckets, most urgent first: `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review), plus advisory Granularity/Redundancy buckets and an Untagged-files bucket. [[REQ-NEXT-884]]
+- `next` surfaces exactly the actionable buckets, most urgent first: `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review), plus advisory Granularity/Redundancy buckets. [[REQ-NEXT-884]]
+- `next` lists every scannable file that carries no membership tag in an Untagged-files bucket, ranked lowest, with a suggestion to run `init`. [[REQ-NEXTUNTAGGED-1050]]
 - Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:` score, then by id, and names the file to open. [[REQ-NEXT-885]]
 - By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]
 - With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]
@@ -39,57 +39,12 @@ CASE-2
   Then   it is listed under "Needs tests" with `requirements/<ID>.md`
 
 CASE-3
-  Given  a draft requirement with an open verify bullet
-  When   `next` runs
-  Then   it is listed under "Drafts to review" and NOT under "Needs intent review" (source dedup)
-
-CASE-4
-  Given  a confirmed requirement with an open Verify-intent bullet
-  When   `next` runs
-  Then   it is listed under "Needs intent review"
-
-CASE-5
-  Given  a bucket with more items than the top-N
-  When   `next` runs
-  Then   the default view truncates and prints a `... N more` line; `--all` lists every item
-
-CASE-6
-  Given  a draft with `risk: 2` (REVIEW) and a `risk: 0` draft in one bucket
-  When   `next` runs
-  Then   the REVIEW draft is ordered first and tagged `[REVIEW]`
-
-CASE-7
-  Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket
-  When   `next` runs
-  Then   they are ordered must-have, should-have, then no-priority
-
-CASE-8
   Given  an empty registry, or one with no open signals
   When   `next` runs
   Then   it prints the "no requirements yet" message or the all-clear line respectively,
          writes no files, and returns 0
 
-CASE-9
-  Given  scannable files in the repo with no membership tag
-  When   `next` runs with a code_root
-  Then   they are listed under "Untagged files" with a `reqmap.py init` suggestion
-
-CASE-10
-  Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one
-  When   `next` runs with a `reqs_dir`
-  Then   the Orphans bucket carries a note naming that member and `--code`
-
-CASE-11
-  Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`, not exempt
-  When   `next` runs
-  Then   it is listed under "Granularity" with its AC count and `requirements/<ID>.md`
-
-CASE-12
-  Given  two confirmed requirements whose Description states the same obligation, word for word
-  When   `next` runs
-  Then   they are listed together under "Redundancy" as one group
-
-CASE-13
+CASE-4
   Given  an open `ROADMAP.md` item that `_planning.json` does not schedule
   When   `next` runs with a code root
   Then   it is listed last, under "Plan", with what the item is missing
@@ -104,9 +59,7 @@ CASE-13
 - code_root       the directory `next` walks to find files; a caller may omit it.
 
 **Notes**
-- `lint_exempt: ac-count-high` — the twelve cases are twelve buckets of ONE report, not twelve
-  capabilities. `next` prints a single output and each case pins one line of it; splitting
-  it would mint a requirement per bucket for a command that has one behaviour.
+- The cases above exercise the report end to end; each bucket's own cases live on the child that owns that bucket.
 - Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
 - The dedup of a draft's intent question lives inside the shared `_risk_signals` source, which is why `next` and the Risk tab report the same signals for the same requirement.
 - The untagged-files scan is skipped when no `code_root` is supplied — the usual case for unit-test callers.
@@ -192,18 +145,20 @@ milestone: v3.2
 satisfies: [ARCH-NEXT-013]
 ---
 
-# Four action buckets, two advisory ones, and untagged files
+# Four action buckets and two advisory ones
 
 ## Description
 > The four action buckets — Orphans, Needs tests, Needs intent review, Drafts to review —
 > print most urgent first, because that order is the point of the whole command: start at
 > the top. Granularity and Redundancy print below them, sharing their exact thresholds with
 > `lint` and `dupes` so the three commands never disagree about which requirement is
-> oversize or duplicated. Untagged files ranks lowest of all.
+> oversize or duplicated.
 
 Every bullet below is binding.
 - `next` surfaces exactly the actionable buckets: `unimplemented` (Orphans), `untested`
   (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review).
+- A draft with an open Verify-intent bullet is listed under Drafts to review only, never
+  also under Needs intent review.
 - `next` prints those four buckets in that order, most urgent first.
 - `next` also prints two advisory buckets below the four action buckets: `Granularity` (a
   requirement with more acceptance criteria than lint's `LINT_AC_MAX`) and `Redundancy`
@@ -216,14 +171,6 @@ Every bullet below is binding.
 - Redundancy's set comes from `_redundant_groups`, the exact-match floor `dupes` also uses.
 - Neither advisory bucket changes `next`'s exit code.
 - `next` omits `blast-radius`, because that signal is a caution, not a task.
-- `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
-  bucket, ranked lowest of all.
-- That bucket omits prose in the auto-draft "ignore" bucket (`CLAUDE.md`, `TODO.md`,
-  `CHANGELOG.md`, `LICENSE`, `_`-prefixed files): those are invisible to reqmap by contract.
-- That bucket also omits repository boilerplate that never carries a tag by design: decision
-  records under an `adr/` or `decisions/` directory, issue and pull-request templates,
-  `SECURITY.md`, `CODE_OF_CONDUCT.md` and dependabot configuration (`_UNTAGGED_NOISE`).
-- `next` skips that untagged scan when the caller gives no `code_root`.
 - An Orphans item may have members recorded in the committed `_map.json` that this scan did
   not find. Then `next` adds a note naming one such member and suggesting `--code <dir>`.
   The note is advice; the item stays in the bucket.
@@ -244,25 +191,78 @@ CASE-3 — a high-fan-in requirement's blast-radius signal never prints
   When   `cmd_next` runs
   Then   its output never contains the word "blast-radius"
 
-CASE-4 — Untagged files prints after every action bucket
+CASE-4 — an Orphans note names the map-recorded member and --code
+  Given  a confirmed requirement with no locally scanned member, whose `_map.json` node records `src/foo.py` as a member
+  When   `cmd_next` runs with that `reqs_dir`
+  Then   the Orphans bucket still lists the requirement, plus a note naming `src/foo.py` and suggesting `--code <dir>`
+
+CASE-5 — a draft's open intent question is not listed twice
+  Given  a draft requirement with an open Verify-intent bullet
+  When   `cmd_next` runs
+  Then   it is listed under "Drafts to review" and NOT under "Needs intent review" (source dedup)
+
+CASE-6 — an oversize requirement is listed under Granularity
+  Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`
+  When   `cmd_next` runs
+  Then   it is listed under "Granularity" with a split suggestion
+
+CASE-7 — identical obligations are listed as one Redundancy group
+  Given  two confirmed requirements whose Description states the same obligation, word for word
+  When   `next` runs
+  Then   they are listed together under "Redundancy" as one group
+
+
+--------------------
+
+
+---
+id: REQ-NEXTUNTAGGED-1050
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-NEXT-013]
+---
+
+# Untagged files, ranked lowest
+
+## Description
+> A file that carries no membership tag is invisible to every other bucket, so `next`
+> names it. It ranks below every requirement bucket, because tagging a file is housekeeping
+> next to a requirement with no code, and it leaves out the prose and boilerplate that never
+> carry a tag by design, or the list would bury the real gaps.
+
+Every bullet below is binding.
+- `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
+  bucket, ranked lowest of all.
+- That bucket's advice line suggests running `reqmap.py init`.
+- That bucket omits prose in the auto-draft "ignore" bucket (`CLAUDE.md`, `TODO.md`,
+  `CHANGELOG.md`, `LICENSE`, `_`-prefixed files): those are invisible to reqmap by contract.
+- That bucket also omits repository boilerplate that never carries a tag by design: decision
+  records under an `adr/` or `decisions/` directory, issue and pull-request templates,
+  `SECURITY.md`, `CODE_OF_CONDUCT.md` and dependabot configuration (`_UNTAGGED_NOISE`).
+- `next` skips that untagged scan when the caller gives no `code_root`.
+
+## Cases
+CASE-1 — an untagged file is listed with an init suggestion
+  Given  a clean confirmed-tested requirement and an untagged `orphan.py` in the code root
+  When   `cmd_next` runs with that code root
+  Then   "Untagged files" lists `orphan.py` with a `reqmap.py init` suggestion
+
+CASE-2 — Untagged files prints after every action bucket
   Given  a draft requirement (triggers "Drafts to review") plus an untagged `orphan.py` in the code root
   When   `cmd_next` runs with that code root
   Then   "Untagged files" appears after "Drafts to review" in the output
 
-CASE-5 — CLAUDE.md and TODO.md never appear as untagged
+CASE-3 — CLAUDE.md and TODO.md never appear as untagged
   Given  an untagged `CLAUDE.md`, `TODO.md`, `README.md` and `a.py` in the code root
   When   `_scan_untagged` runs
   Then   it lists `a.py` and `README.md` but neither `CLAUDE.md` nor `TODO.md`
 
-CASE-6 — no code_root means no Untagged files section at all
+CASE-4 — no code_root means no Untagged files section at all
   Given  a draft requirement, called without a `code_root` argument
   When   `cmd_next` runs
   Then   its output never contains "Untagged files"
-
-CASE-7 — an Orphans note names the map-recorded member and --code
-  Given  a confirmed requirement with no locally scanned member, whose `_map.json` node records `src/foo.py` as a member
-  When   `cmd_next` runs with that `reqs_dir`
-  Then   the Orphans bucket still lists the requirement, plus a note naming `src/foo.py` and suggesting `--code <dir>`
 
 
 --------------------
@@ -314,6 +314,11 @@ CASE-4 — an item's line names its requirement file
   Given  a confirmed, untested requirement `CORE-FOO-001`
   When   `cmd_next` runs
   Then   its "Needs tests" line contains "requirements/CORE-FOO-001.md"
+
+CASE-5 — must-have, then should-have, then no priority
+  Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket
+  When   `cmd_next` runs
+  Then   they are ordered must-have, should-have, then no-priority
 
 
 --------------------

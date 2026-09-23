@@ -11,8 +11,12 @@
  * Everything below is pure: the explorer memoizes on the registry reference. */
 
 export const LEVELS = ["system", "architecture", "code"];
-export const LEVEL_LABEL = { system: "System", architecture: "Architecture", code: "Code" };
-export const LEVEL_SHORT = { system: "SYS", architecture: "ARC", code: "COD" };
+export const LEVEL_LABEL = {
+  system: "System", architecture: "Architecture", code: "Code",
+};
+export const LEVEL_SHORT = {
+  system: "SYS", architecture: "ARC", code: "COD",
+};
 
 export function levelOf(r) {
   const l = r && r.level;
@@ -42,11 +46,11 @@ export function hasOpenQuestions(r) {
 }
 
 /* ---- hierarchy -------------------------------------------------------------
- * `satisfies` is authoritative; `satisfied_by` fills a parent in for a node that
- * declares none (the two are mirrors in a well-formed export, but a hand-edited
- * or partial map can carry one side only). A node whose parent id is not in the
- * registry stays a root — a dangling trace edge is the gate's problem to report,
- * not a reason for the outline to lose the row. */
+ * `satisfies` is authoritative; `satisfied_by` fills a parent in for a node
+ * that declares none (the two are mirrors in a well-formed export, but a
+ * hand-edited or partial map can carry one side only). A node whose parent id
+ * is not in the registry stays a root — a dangling trace edge is the gate's
+ * problem to report, not a reason for the outline to lose the row. */
 export function buildHierarchy(reqs) {
   const list = Array.isArray(reqs) ? reqs : [];
   const byId = Object.create(null);
@@ -63,7 +67,10 @@ export function buildHierarchy(reqs) {
   });
   list.forEach((r) => {
     (Array.isArray(r.satisfiedBy) ? r.satisfiedBy : []).forEach((c) => {
-      if (c !== r.id && byId[c] && !parentOf[c]) { parentOf[c] = r.id; declared++; }
+      if (c !== r.id && byId[c] && !parentOf[c]) {
+        parentOf[c] = r.id;
+        declared++;
+      }
     });
   });
 
@@ -82,7 +89,10 @@ export function buildHierarchy(reqs) {
 
   const childrenOf = Object.create(null);
   list.forEach((r) => { childrenOf[r.id] = []; });
-  list.forEach((r) => { const p = parentOf[r.id]; if (p) childrenOf[p].push(r.id); });
+  list.forEach((r) => {
+    const p = parentOf[r.id];
+    if (p) childrenOf[p].push(r.id);
+  });
 
   const cmp = (a, b) => {
     const d = levelRank(levelOf(byId[a])) - levelRank(levelOf(byId[b]));
@@ -98,7 +108,10 @@ export function buildHierarchy(reqs) {
 export function ancestorsOf(h, id) {
   const out = [];
   let cur = h.parentOf[id];
-  while (cur && out.indexOf(cur) < 0) { out.unshift(cur); cur = h.parentOf[cur]; }
+  while (cur && out.indexOf(cur) < 0) {
+    out.unshift(cur);
+    cur = h.parentOf[cur];
+  }
   return out;
 }
 
@@ -109,23 +122,30 @@ export function defaultExpanded(h) {
   const out = Object.create(null);
   Object.keys(h.childrenOf).forEach((id) => {
     const kids = h.childrenOf[id];
-    if (kids.length && kids.some((c) => levelOf(h.byId[c]) !== "code")) out[id] = true;
+    if (kids.length && kids.some((c) => levelOf(h.byId[c]) !== "code")) {
+      out[id] = true;
+    }
   });
   return out;
 }
 
 export function allExpanded(h) {
   const out = Object.create(null);
-  Object.keys(h.childrenOf).forEach((id) => { if (h.childrenOf[id].length) out[id] = true; });
+  Object.keys(h.childrenOf).forEach((id) => {
+    if (h.childrenOf[id].length) out[id] = true;
+  });
   return out;
 }
 
-/** matched ∪ every ancestor of a match — so a deep hit keeps its context rows. */
+/** matched ∪ every ancestor of a match — so a deep hit keeps its
+ *  context rows. */
 export function keepSetFor(h, ids) {
   const keep = Object.create(null);
   ids.forEach((id) => {
     keep[id] = true;
-    ancestorsOf(h, id).forEach((a) => { if (!keep[a]) keep[a] = "context"; });
+    ancestorsOf(h, id).forEach((a) => {
+      if (!keep[a]) keep[a] = "context";
+    });
   });
   return keep;
 }

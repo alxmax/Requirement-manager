@@ -7,7 +7,7 @@ owner: Alex
 priority: should-have
 milestone: v1.17
 depends_on: [ARCH-CHECK-006, ARCH-SCAN-002]
-satisfies: [SYS-GATE-102]
+satisfies: [SYS-DRIFT-109]
 ---
 
 # Untagged doc-bundle warning

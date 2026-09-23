@@ -1,6 +1,6 @@
 ---
 id: ARCH-SITE-026
-status: deprecated
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -18,28 +18,28 @@ satisfies: [SYS-VISUAL-106]
 > and scaffolding one when none exists — so the page never drifts from the registry.
 
 Every bullet below is binding.
-- `site --attach <page.html>` injects the requested marker-delimited regions (`nav`, `stats`; default `nav`) into the page idempotently, replacing only the bytes between each region's paired markers and preserving all other authored content. [[REQ-SITE-924]]
+- `sync` refreshes the marker-delimited `nav` and `stats` regions of the project's presentation page idempotently, replacing only the bytes between each region's paired markers and preserving all other authored content; `init` scaffolds the page when it is absent. [[REQ-SITE-924]]
 
 ## Cases
 CASE-1
   Given  a page with `nav`/`stats` markers
-  When   `site --attach` runs twice
+  When   `sync --attach` runs twice
   Then   the second run leaves the file byte-identical and authored prose intact
 
 CASE-2
   Given  a repo with no git remote
-  When   `site --attach` injects `nav`
+  When   `sync --attach` injects `nav`
   Then   it exits 0 and emits no GitHub link
 
 CASE-3
   Given  an absent `--attach` target
-  When   `sync` runs
+  When   `sync --attach` runs
   Then   it scaffolds a full page with the regions + the placeholder-hero marker
 
 CASE-4
   Given  a generated site page
   When   its `stats` region is edited to differ from a fresh render
-  Then   `map --check` exits non-zero and names the page (it exits 0 before the edit)
+  Then   the site freshness check names the page (it names nothing before the edit)
 
 CASE-5
   Given  `docs/` present and no `--no-site`
@@ -48,15 +48,18 @@ CASE-5
 
 ## Context
 **Notes**
-- v1 engine-owns `nav` + `stats`; `commands`/`layers` render as authored content in the
-  scaffold and may be promoted to engine-owned regions later.
-- The interactive "scan docs/ and ask which target + regions" flow lives in the
+- The engine owns `nav` + `stats` only; everything else on the page, the
+  scaffold's hero included, is authored content.
+- Plugin v8.2.0 removed this capability (ADR-0047); it was restored at the
+  maintainer's direction. `sync --attach` replaces the old `site` verb.
+- The interactive "scan docs/ and ask which target" flow lives in the
   requirement-manager skill, not the engine (the engine is headless-safe).
 
 **Current implementation**
-- `cmd_site`, `_render_region`, `_inject_region`/`_extract_region`, `_git_remote_web_url`,
-  `_site_default_target`, `_site_pages_bootstrap`, the `cmd_init` hook, and the `_map_check`
-  site branch in `reqmap.py`.
+- `cmd_site`, `_render_region`, `_inject_region`/`_extract_region` and
+  `site_stale` in `site.py`; `_git_remote_web_url` in `git.py`;
+  `_site_default_target`, `_site_pages_bootstrap`, `_init_site` in `init.py`
+  and the `sync` step in `reqmap.py`.
 
 
 --------------------
@@ -64,7 +67,7 @@ CASE-5
 
 ---
 id: REQ-SITE-924
-status: deprecated
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -75,31 +78,33 @@ satisfies: [ARCH-SITE-026]
 # Inject engine-owned regions into a presentation page
 
 ## Description
-> `site --attach docs/architecture.html` writes the `nav` and `stats` regions into a page
+> `sync` writes the `nav` and `stats` regions into `docs/architecture.html`, a page
 > the author still edits by hand, touching only the bytes between each region's markers.
 > Without it, keeping a hand-authored page's links and counts in sync with the registry
 > would mean either regenerating the whole page (losing authored prose) or manually
 > copying numbers every time the corpus changes.
 
 Every bullet below is binding.
-- `site --attach <page.html>` injects the requested marker-delimited regions
-  (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each
-  region's paired markers and preserving all other (authored) content. A re-run with no
-  underlying change produces a byte-identical file (idempotent).
+- `sync --attach <page.html>` injects the marker-delimited `nav` and `stats` regions
+  into the page, replacing only the bytes between each region's paired markers and
+  preserving all other (authored) content. A re-run with no underlying change produces
+  a byte-identical file (idempotent). Without `--attach`, `sync` refreshes
+  `docs/architecture.html` at the git root when that file exists, and writes nothing
+  when it does not.
 - When the `--attach` target does not exist, `sync` scaffolds a self-contained default
   page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.
 - The `nav` region emits a link only when its target resolves: Live Map when a sibling
-  `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git
-  remote resolves. A missing git remote, missing artifact, or non-checkout never raises.
-- The engine never imports or executes the excalidraw skill's builder; the Diagram entry
-  is a link only.
-- `init`, unless `--no-site` is given, runs a best-effort `sync` step after `map`:
+  `map.html` exists, GitHub when a git remote resolves. A missing git remote, missing
+  artifact, or non-checkout never raises.
+- `init`, unless `--no-site` is given, runs a best-effort site step after `map`:
   refreshes `nav`+`stats` in `docs/architecture.html` if it exists, else scaffolds it plus a
-  Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step does not
-  abort `init`.
-- `map --check` flags the site page stale when its on-disk `stats` region differs from a
-  fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page
-  that was never generated, or that lacks a `stats` region, is not stale.
+  Pages signal (`.nojekyll` + an `index.html` redirect, each only when absent — an
+  existing `index.html` is never overwritten). A failure in this step does not abort
+  `init`.
+- `site_stale` names the site page when its on-disk `stats` region differs from a fresh
+  render. The `nav` region and the `engine` cell are excluded (the first embeds the
+  fork-specific repo URL, the second moves on every engine bump). A page that was never
+  generated, or that lacks a `stats` region, is not stale.
 
 ## Cases
 CASE-1 — a second attach run with no change is byte-identical
@@ -115,14 +120,15 @@ CASE-2 — site scaffolds a full page when the attach target is absent
          placeholder hero
 
 CASE-3 — an absent nav target is omitted, not an error
-  Given  a rendering context with no repo URL, no map, and no diagram
+  Given  a rendering context with no repo URL and no map
   When   `_render_region("nav", ctx)` runs
   Then   it returns markup with no `<a` link and raises nothing
 
-CASE-4 — reqmap.py's own source never references the excalidraw builder
-  Given  the `reqmap.py` source file
-  When   its text is searched for "excalidraw_builder"
-  Then   no occurrence is found
+CASE-4 — init writes the Pages signal without clobbering a landing page
+  Given  a `docs/` directory holding a hand-written `index.html` and no `.nojekyll`
+  When   `_site_pages_bootstrap` runs on it, and separately on an empty `docs/`
+  Then   the first leaves `index.html` unchanged and creates `.nojekyll`; the second
+         creates both, the index redirecting to `architecture.html`
 
 CASE-5 — init scaffolds the site page unless --no-site is passed
   Given  a `docs/` directory with no `architecture.html`
@@ -130,9 +136,8 @@ CASE-5 — init scaffolds the site page unless --no-site is passed
   Then   the first run creates `docs/architecture.html` with a `##REQMAP:NAV##` region;
          the second run creates no such file
 
-CASE-6 — map --check fails only after the stats region is tampered with
+CASE-6 — the freshness check fires only after the stats region is tampered with
   Given  a freshly generated site page with a `stats` region
-  When   `_map_check` runs before and after the `stats` region is overwritten with
+  When   `site_stale` runs before and after the `stats` region is overwritten with
          "TAMPERED"
-  Then   it exits 0 before the edit and exits 1 after it
-
+  Then   it returns None before the edit and the page's file name after it

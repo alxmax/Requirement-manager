@@ -279,6 +279,9 @@ Every bullet below is binding.
   `### ` or horizon; it is never read as prose belonging to the item above it.
 - `gate --audit` reports an item whose `req:` names an id absent from the corpus.
 - `gate --audit` reports an open `Later` item carrying no `unpark:`.
+- `_map.json` carries `roadmap`: every parsed item with its horizon, its `req:` id
+  and its `unpark:` condition when present, whether it is done, and the `context`
+  lines written under it; a repo with no `ROADMAP.md` carries an empty list.
 - Both signals are read-only and advisory: they never change an exit code, and a repo with
   no `ROADMAP.md` sees nothing.
 
@@ -313,6 +316,11 @@ CASE-6 — a category heading groups the items under it
   When   the roadmap is parsed
   Then   the first item has no category and empty context, the second is in `Viewer`, and the
          Later item has no category
+
+CASE-7 — the parsed items ride in the map export
+  Given  a repo with a `ROADMAP.md` holding one item
+  When   `sync` writes the export
+  Then   `_map.json` carries that item under `roadmap`, with its context
 
 ---
 id: REQ-PLANHORIZON-1010

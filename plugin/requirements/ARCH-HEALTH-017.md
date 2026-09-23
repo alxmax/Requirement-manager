@@ -1,6 +1,6 @@
 ---
 id: ARCH-HEALTH-017
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -23,6 +23,7 @@ Every bullet below is binding.
 - The headline score is the percentage of requirements that are green — passing status, coverage, a test signal, no open verify-intent question, and no drift, all at once. [[REQ-HEALTH-858]]
 - `next` prints component counts alongside the score (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift), matches them in `--json`, and always exits 0. [[REQ-HEALTH-859]]
 - The same snapshot is written into `_map.json` as a `health` record, so a viewer reads the score rather than defining a second one. [[REQ-HEALTH-968]]
+- The map's `health` record also carries the requirements behind the score and the waivers in force. [[REQ-HEALTHROWS-1083]]
 - A reviewed-only score, over confirmed requirements alone, rides beside the headline and is absent when it would only restate it. [[REQ-REVIEWEDSCORE-109]]
 ## Cases
 CASE-1
@@ -409,3 +410,49 @@ CASE-5
 **Current implementation**
 - The `reviewed_total` / `reviewed_score` block in `cmd_health` (`reqmap.py`), emitted into
   `data` and printed as the `reviewed only:` line under the conditions above.
+
+
+--------------------
+
+
+---
+id: REQ-HEALTHROWS-1083
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-HEALTH-017]
+---
+
+# The rows behind the health score
+
+## Description
+> The score is a count of requirements green on every axis; a reader who wants to act
+> needs the requirements themselves. Emitting them beside the number, from the same
+> flags the number counts, is what keeps the list and the score from ever disagreeing.
+
+Every bullet below is binding.
+- With rows requested, the health record carries `unhealthy`: every requirement that is
+  not `deprecated` and not green on every axis, sorted by id, each with its `status` and
+  `why`, the axes it fails, from `not confirmed`, `not implemented`, `not tested`,
+  `open question` and `drift`.
+- With rows requested, it also carries `exempt_ids`: every requirement that is not
+  `deprecated` and carries a waiver key, with the keys it carries.
+- The map requests rows; `health --json` does not, so a badge payload stays one small
+  object.
+
+## Cases
+CASE-1 — a draft is listed as not confirmed
+  Given  a corpus of one confirmed, implemented, tested requirement and one draft
+  When   the health record is built with rows
+  Then   `unhealthy` holds only the draft, with `why` equal to `not confirmed`
+
+CASE-2 — a waiver is listed with its keys
+  Given  a confirmed requirement carrying `test_exempt`
+  When   the health record is built with rows
+  Then   `exempt_ids` holds it with the key `test_exempt`
+
+CASE-3 — no rows unless asked
+  Given  any corpus
+  When   the health record is built without rows
+  Then   it carries neither `unhealthy` nor `exempt_ids`

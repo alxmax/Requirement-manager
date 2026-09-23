@@ -1,5 +1,5 @@
 # Requirement-manager drift gate — published GitHub Action.
-# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
+# implements: REQ-SELFGATE-1071
 # implements: ARCH-STALEENGINE-043
 #
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to

@@ -6,7 +6,6 @@ layer: need
 owner: Alex
 priority: must-have
 milestone: v1.00
-lint_exempt: [ac-count-low]
 ---
 # Stakeholder need — specs and code stay in sync
 
@@ -21,31 +20,28 @@ lint_exempt: [ac-count-low]
 - A reader can navigate from any capability to the code that implements it and the tests that verify it.
 
 ## Notes & known limitations (informative)
-- `lint_exempt: ac-count-low` — a stakeholder need is verified by the requirements that
-  satisfy it, not by cases of its own, so the floor that catches an under-specified
-  capability measures the wrong thing here.
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
 
 ## Cases (= tests)
-AC-1a
+CASE-1
   Given  a repo where a tag points to a non-existent requirement (dangling ref)
          or an enforced requirement (in-progress, implemented, or confirmed) has
          no implements: member (structural gap)
   When   the gate runs
   Then   the build fails (exit 1 — link-sync is an ERROR)
 
-AC-1b
+CASE-2
   Given  a repo where a confirmed requirement's contract was edited after the lock
   When   the gate runs
   Then   the drift is surfaced (WARN: "DRIFT — contract changed since lock") and
          the gate exits 0 — drift is reported, not blocking, by design
 
-CASE-2
+CASE-3
   Given  a confirmed capability
   When   the gate runs
   Then   it has linked, existing code and tests
 
-CASE-3
+CASE-4
   Given  any capability
   When   a reader runs `show`
   Then   they see its code locations and what depends on it

@@ -1,5 +1,6 @@
-"""The translation cache (`_i18n/<locale>.json`), read-only: hashes, and attaching the entries
-still fresh to the map's nodes so the viewer can show them.
+"""The translation cache (`_i18n/<locale>.json`), read-only: hashes, and
+attaching the entries still fresh to the map's nodes so the viewer can
+show them.
 """
 import hashlib, json, os
 
@@ -16,16 +17,18 @@ from .text import _first_quote, _section_raw, _title
 # code path in this engine starts a subprocess and the gate/sync/CI path stays
 # usable on a machine that has never heard of `claude`. A cache entry is served
 # only while its hash matches the requirement, so the cache decays as
-# requirements are edited and refreshing it is a manual step. Since v8.2.0 (ADR-0047)
-# nothing measures that decay either: `ask --i18n`, RM029 and LANGUAGE are gone.
+# requirements are edited and refreshing it is a manual step. Since v8.2.0
+# (ADR-0047) nothing measures that decay either: `ask --i18n`, RM029 and
+# LANGUAGE are gone.
 # ---------------------------------------------------------------------------
-TRANSLATOR_VERSION = "1"   # part of the cache key: bump to invalidate every cached
+# part of the cache key: bump to invalidate every cached
+TRANSLATOR_VERSION = "1"
 
 
 def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
     """The exact span that gets translated and hashed: title + WHY + Contract +
-    Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance only) —
-    a title-only edit must also invalidate a cached translation."""
+    Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance
+    only) — a title-only edit must also invalidate a cached translation."""
     return "\n".join([
         title, _first_quote(body),
         _from_any(_section_raw, body, CONTRACT_LABELS),
@@ -35,9 +38,10 @@ def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
 
 def translation_hash(body, title):
     # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """Cache-invalidation key for one requirement's translation. NOT binding_hash() —
-    see _translation_source_text. Includes TRANSLATOR_VERSION so bumping the prompt
-    or the model invalidates every cached entry in one step, not file-by-file."""
+    """Cache-invalidation key for one requirement's translation. NOT
+    binding_hash() — see _translation_source_text. Includes
+    TRANSLATOR_VERSION so bumping the prompt or the model invalidates
+    every cached entry in one step, not file-by-file."""
     h = hashlib.sha256()
     h.update(_translation_source_text(body, title).encode("utf-8"))
     h.update(TRANSLATOR_VERSION.encode("utf-8"))
@@ -76,7 +80,9 @@ def _load_translations(reqs, reqs_dir):
             if entry.get("hash") != translation_hash(r["body"], title):
                 continue
             out.setdefault(rid, {})[locale] = {
-                k: entry.get(k, "") for k in ("title", "intent", "contract", "acceptance")
+                k: entry.get(k, "") for k in (
+                    "title", "intent", "contract", "acceptance"
+                )
             }
     return out
 

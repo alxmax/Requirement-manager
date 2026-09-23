@@ -5,7 +5,9 @@ function CommandArticle({ c, locale }) {
   return (
     <article className="cmd">
       <div className="cmd-head">
-        <code className="cmd-name">{"reqmap.py " + c.name + (c.arg ? " " + c.arg : "")}</code>
+        <code className="cmd-name">
+          {"reqmap.py " + c.name + (c.arg ? " " + c.arg : "")}
+        </code>
       </div>
       <p className="cmd-sum">{commandSummary(c, locale)}</p>
       {c.flags.length > 0 && (

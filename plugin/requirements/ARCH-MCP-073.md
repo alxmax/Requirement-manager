@@ -32,6 +32,24 @@ CASE-1
   Then   it answers all three on stdout, lists no writing tool, and the call returns the
          gate's verdict
 
+CASE-2
+  Given  a server started without `--allow-writes`, and one started with it
+  When   each lists its tools and the first is asked to call `reqmap_sync`
+  Then   the first lists no writing tool and refuses the call with -32602 without running
+         anything; the second lists `reqmap_sync` and `reqmap_release`
+
+CASE-3
+  Given  a repository vendoring the engine
+  When   the client configs are seeded
+  Then   `.mcp.json` and `.vscode/mcp.json` each start `reqmap.py mcp` with the repository's
+         `--reqs`
+
+CASE-4
+  Given  a committed `_map.json` naming two requirements, and separately no map
+  When   `resources/list` is asked
+  Then   the first offers `reqmap://map` and one `reqmap://requirement/<id>` per requirement;
+         the second offers nothing
+
 ## Context
 **Notes**
 - The decision, and the Senate deferral it supersedes, are ADR-0043.

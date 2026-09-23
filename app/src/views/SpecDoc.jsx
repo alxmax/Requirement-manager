@@ -1,9 +1,10 @@
 // implements: ARCH-VIEWER-007
-/* SpecDoc — one requirement, rendered in full. Was `SpecView.jsx`, whose own tab
-   was a 220px flat nav beside this component; the Explorer shows the SAME component
-   beside a hierarchy tree with filters, a breadcrumb and the link panel, so the tab
-   was the poorer half of a duplicate. The document stayed; the tab went. */
-// implements: ARCH-TRANSLATE-044
+/* SpecDoc — one requirement, rendered in full. Was `SpecView.jsx`, whose
+   own tab was a 220px flat nav beside this component; the Explorer
+   shows the SAME component beside a hierarchy tree with filters, a
+   breadcrumb and the link panel, so the tab was the poorer half of a
+   duplicate. The document stayed; the tab went. */
+// implements: REQ-TRANSLATE-1080
 // implements: REQ-VIEWER-944
 import { Pill, statusKind, mdInline, reqLinkProps } from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
@@ -13,8 +14,8 @@ import { TranslatedProse, CovStrip, SpecMeta } from "./spec/SpecParts.jsx";
 function TranslatedBadge() {
   return (
     <span className="i18n-badge"
-      title={"Machine-translated, not reviewed by the author — the source .md is the artifact "
-        + "of record."}>
+      title={"Machine-translated, not reviewed by the author — the "
+        + "source .md is the artifact of record."}>
       machine-translated, unreviewed
     </span>
   );
@@ -28,31 +29,41 @@ const PRIORITY_COLOR = {
 };
 
 const PRIORITY_BADGE = {
-  display: "inline-flex", alignItems: "center", font: "var(--text-caption)", fontSize: 12,
-  fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-pill)", whiteSpace: "nowrap",
+  display: "inline-flex", alignItems: "center", font: "var(--text-caption)",
+  fontSize: 12,
+  fontWeight: 600, padding: "3px 10px", borderRadius: "var(--radius-pill)",
+  whiteSpace: "nowrap",
 };
 
 function PriorityBadge({ priority }) {
   const c = PRIORITY_COLOR[priority];
   if (!c) return null;
   return (
-    <span style={{ ...PRIORITY_BADGE, background: c.bg, color: c.color }}>{priority}</span>
+    <span style={{ ...PRIORITY_BADGE, background: c.bg, color: c.color }}>
+      {priority}
+    </span>
   );
 }
 
-export const ENFORCED = { confirmed: true, "in-progress": true, implemented: true };
+export const ENFORCED = {
+  confirmed: true, "in-progress": true, implemented: true,
+};
 
 /** A list of Markdown-inline bullets whose requirement ids are links. */
 function MdList({ items, onNav }) {
   return (
     <ul {...reqLinkProps(onNav)}>
-      {items.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}
+      {items.map((c, i) => (
+        <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />
+      ))}
     </ul>
   );
 }
 
 const Lines = ({ text }) => (
-  <div className="gwt">{text.split("\n").map((ln, i) => <div key={i}>{ln}</div>)}</div>
+  <div className="gwt">
+    {text.split("\n").map((ln, i) => <div key={i}>{ln}</div>)}
+  </div>
 );
 
 function CasesBody({ r, acceptance, onNav }) {
@@ -67,7 +78,9 @@ const MUTED = { color: "var(--fg-muted)" };
 function MembersBody({ r, t }) {
   if (r.members.length) {
     return r.members.map((m, i) => (
-      <div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>
+      <div className="member" key={i}>
+        <span className="role">{m.role}:</span> {m.loc}
+      </div>
     ));
   }
   if (r.layer === "need" || r.layer === "aggregate") {
@@ -76,7 +89,11 @@ function MembersBody({ r, t }) {
   }
   if (ENFORCED[r.status]) {
     const why = t("(no members found — orphan)");
-    return <div className="member" style={{ color: "var(--status-error)" }}>{why}</div>;
+    return (
+      <div className="member" style={{ color: "var(--status-error)" }}>
+        {why}
+      </div>
+    );
   }
   const why = t("(not linked to code yet — not enforced at this status)");
   return <div className="member" style={MUTED}>{why}</div>;
@@ -146,7 +163,8 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
           </div>
         )}
         <div className="sec">
-          <Eyebrow label={t("Cases")} extra={<><span className="rule" /> {t("= tests")}</>}
+          <Eyebrow label={t("Cases")}
+                   extra={<><span className="rule" /> {t("= tests")}</>}
                    translated={acceptance.isTranslated} />
           <CasesBody r={r} acceptance={acceptance} onNav={onNav} />
         </div>
@@ -156,7 +174,9 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
         </div>
         {questions.length > 0 && (
           <div className="sec">
-            <div className="eyebrow warn">{t("Open questions — verify intent")}</div>
+            <div className="eyebrow warn">
+              {t("Open questions — verify intent")}
+            </div>
             <MdList items={questions} onNav={onNav} />
           </div>
         )}

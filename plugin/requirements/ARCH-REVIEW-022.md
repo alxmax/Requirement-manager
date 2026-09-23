@@ -7,7 +7,6 @@ owner: Alex
 milestone: v1.14
 depends_on: [ARCH-PARSE-001]
 satisfies: [SYS-QUALITY-104]
-lint_exempt: [file-spread]
 ---
 
 # AI requirement-quality review (deterministic plan + advisory pass)

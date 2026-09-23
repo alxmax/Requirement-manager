@@ -1,6 +1,6 @@
 ---
 id: ARCH-MAP-007
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -23,7 +23,7 @@ Every bullet below is binding.
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
-- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan, and a month opens to every release in it. [[REQ-HISTORY-1003]]
+- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
 
 ## Cases
 CASE-1
@@ -54,6 +54,11 @@ CASE-5
   Given  a sectioned requirement whose quote is rationale distinct from its clauses
   When   `map` runs
   Then   that node's `intent` carries the quote unchanged
+
+CASE-6 — the gate's map matches the written one
+  Given  a repository whose map `sync` has just written
+  When   the gate builds its fresh map for the freshness check
+  Then   it equals the written map once the generated fields are stripped from both
 
 ## Context
 **Terms**
@@ -163,7 +168,7 @@ CASE-6 — a hostile id or title round-trips as inert data
 
 ---
 id: REQ-MAP-871
-status: confirmed
+status: draft
 level: code
 layer: feature
 owner: Alex
@@ -197,6 +202,10 @@ Every bullet below is binding.
   requirements.
 - `map --check` fails and names the stale file when a committed generated file differs from a
   fresh render.
+- The gate's check builds the fresh map without the advisory design record, which the
+  comparison strips from both sides anyway, so the gate never runs the design review.
+- When the gate cannot build the fresh map for that check, it warns that the freshness
+  probe failed, naming the error, instead of reporting the map fresh.
 - The gate reports that same staleness as a warning, without failing the commit, and never
   regenerates the map itself — only `sync` or `map` does that.
 
@@ -234,6 +243,10 @@ CASE-6 — the gate warns about a stale map without failing the commit
 
 --------------------
 
+CASE-7 — a probe that cannot run says so
+  Given  a corpus whose map cannot be built
+  When   `gate` runs
+  Then   it warns that the freshness probe failed, names the error, and exits 0
 
 ---
 id: REQ-MAP-872
@@ -416,7 +429,6 @@ layer: feature
 owner: Alex
 milestone: v7.8
 satisfies: [ARCH-MAP-007]
-lint_exempt: [file-spread]
 ---
 
 # What already shipped, read from the CHANGELOG and grouped by month
@@ -442,8 +454,6 @@ Every bullet below is binding.
   each release's version, date and headline, newest first.
 - The landmark is the month's biggest step — a major over a minor over a patch, newest among
   equals — never simply its first or last release.
-- The viewer places the rows the engine emitted, on the same timeline as the plan, and
-  derives none of its own. Selecting a month opens its `entries` below the chart.
 
 ## Cases
 CASE-1 — dated headings are read, newest first
@@ -471,13 +481,3 @@ CASE-5 — a repo with no CHANGELOG yields nothing
   When   the history is read
   Then   it is empty and the chart draws no shipped band
 
-CASE-6 — a shipped month opens to what was done in it
-  Given  a month holding two releases, each with a headline
-  When   the reader selects that month on the chart
-  Then   a note lists both releases, newest first, each with its date and headline
-
-## Context
-**Notes**
-- `lint_exempt: file-spread` — the engine reads the CHANGELOG, the viewer's data layer
-  adopts the rows, and the Plan draws them: three directories because the capability is
-  one payload crossing the engine/viewer boundary, which is the shape every map feature has.

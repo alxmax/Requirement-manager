@@ -7,7 +7,6 @@ owner: Alex
 milestone: v2.19
 depends_on: [ARCH-SELFGATE-039]
 satisfies: [SYS-SHIP-108]
-test_exempt: pipeline wiring (a CI job that rebuilds and compares) — the behavior IS the comparison, observed by CI running it; a unit test would only re-assert that a byte compare compares
 ---
 
 # Committed build artifacts stay re-derivable
@@ -28,9 +27,9 @@ CASE-1
   Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command
 
 CASE-2
-  Given  a commit that changes the architecture generator without re-committing its output
+  Given  a commit whose viewer throws while rendering this repo's committed registry
   When   the `artifacts` job runs
-  Then   it fails and names the stale file and the command that regenerates it
+  Then   its SSR smoke fails the job before the vendored viewer is rebuilt
 
 CASE-3
   Given  a tree whose committed artifacts match their sources
@@ -51,9 +50,8 @@ CASE-3
 - The check assumes both builds stay byte-reproducible. A Node major bump or a Vite upgrade
   can break that, and the job reports it as a stale artifact — re-vendor the viewer in the
   same commit that moves the toolchain.
-- The diagram half compares against a temp directory rather than regenerating in place,
-  because the generator writes a sibling `.excalidraw` and `.gitignore` blocks
-  `docs/*.excalidraw`.
+- The architecture-diagram half left with the diagram skill at plugin `v6.1.0`; the job now
+  covers the vendored viewer only.
 
 **Example**
 - A contributor edits a React view, forgets `npm run build:viewer`, and CI names the stale
@@ -69,7 +67,6 @@ CASE-3
 ---
 id: REQ-REPRO-905
 status: confirmed
-test_exempt: pipeline wiring observed by the CI artifacts job, not by a unit test
 level: code
 layer: feature
 owner: Alex
