@@ -94,7 +94,7 @@
     },
     "ARCH-SELFGATE-039": {
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "dbf73a4aed2cceb31d10349d6c803b57f7a5bd43358c636070ef33f7395b362d",
+      "scripts/check_engine_budget.py": "d8a1b479e4592e27976e4a5c6270a17a4d0819d445662a39927d218c90b0274a",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130"
     },

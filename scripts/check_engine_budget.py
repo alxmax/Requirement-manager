@@ -26,7 +26,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ENGINE_DIR = REPO_ROOT / "plugin" / "scripts"
 # The stage reached, lowered only by the change that earns it (ADR-0046):
 # 14,962 before design review, site generation and the i18n detector left.
-ENGINE_LINE_BUDGET = 13550
+# Raised once, to the measured size, by ADR-0052: the design review and the
+# site came back, all code was rewrapped to 80 columns and four modules were
+# split. A stop-gap until the metric itself is replaced; see that record.
+ENGINE_LINE_BUDGET = 16753
 
 
 def engine_files(scripts_dir):
