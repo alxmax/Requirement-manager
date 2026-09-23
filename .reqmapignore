@@ -87,6 +87,9 @@ docs/architecture.html
 # (Excalidraw viewer). It describes the code; it is not generated from any
 # requirement, so it carries no generated-from: tag and is not scanned.
 docs/engine_components.html
+# docs/plan-source-audit.html is a local working page (gitignored): a CI checkout
+# never has it, so scanning it here would make the committed map disagree.
+docs/plan-source-audit.html
 
 # The suite's entry point and its shared fixtures hold no test function of their own
 # (the parts do, and carry the tested-by tags), so a tag here would fail RM012.

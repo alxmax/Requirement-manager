@@ -202,6 +202,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Questions": "Întrebări",
   "ASKED": "NOTAT",
   "Review": "De revizuit",
+  "{n} only await confirmation — see Review.":
+    "{n} așteaptă doar confirmarea — vezi De revizuit.",
   "gate passes": "poarta trece",
   "gate blocks the build — {n} error": "poarta blochează build-ul — {n} erori",
   "Nothing to fix.": "Nimic de reparat.",

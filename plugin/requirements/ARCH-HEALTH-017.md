@@ -1,6 +1,6 @@
 ---
 id: ARCH-HEALTH-017
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -417,7 +417,7 @@ CASE-5
 
 ---
 id: REQ-HEALTHROWS-1083
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

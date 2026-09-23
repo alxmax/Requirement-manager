@@ -405,7 +405,7 @@ footer a:hover{color:var(--accent)}
 <body>
 <div class="stats-bar">
 <!--##REQMAP:STATS##-->
-<div class="stat"><b>306</b><span>requirements</span></div><div class="stat"><b>257</b><span>confirmed</span></div><div class="stat"><b>3</b><span>layers</span></div><div class="stat"><b>121</b><span>edges</span></div><div class="stat"><b>2026-09-23.1</b><span>engine</span></div>
+<div class="stat"><b>306</b><span>requirements</span></div><div class="stat"><b>285</b><span>confirmed</span></div><div class="stat"><b>3</b><span>layers</span></div><div class="stat"><b>121</b><span>edges</span></div><div class="stat"><b>2026-09-23.2</b><span>engine</span></div>
 <!--##/REQMAP:STATS##-->
 </div>
 
@@ -438,7 +438,7 @@ footer a:hover{color:var(--accent)}
 <!-- HERO -->
 <div class="hero">
   <div class="wrap">
-    <div class="badge"><div class="badge-dot"></div>v7.21.0 · Claude Code Plugin · stdlib-only</div>
+    <div class="badge"><div class="badge-dot"></div>v8.6.0 · Claude Code Plugin · stdlib-only</div>
     <h1>Keep your specs and<br>your code <em>honest.</em></h1>
     <p class="hero-lead">
       A capability registry that sits between intent and code. One Markdown file per capability as
@@ -509,8 +509,8 @@ footer a:hover{color:var(--accent)}
         <!-- Box 4: Viewer -->
         <rect x="659" y="30" width="151" height="86" rx="10" fill="#1d1a17" stroke="#3d3730" stroke-width="1.5"/>
         <text x="734" y="56" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#78c4a0">_map.html</text>
-        <text x="734" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#7a7268">Map · Problems</text>
-        <text x="734" y="89" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#7a7268">Spec · Roadmap</text>
+        <text x="734" y="74" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#7a7268">Explorer · Problems</text>
+        <text x="734" y="89" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9.5" fill="#7a7268">Map · Roadmap</text>
         <text x="734" y="108" text-anchor="middle" font-family="IBM Plex Sans,sans-serif" font-size="9" fill="#5a5248">double-click to open</text>
       </svg>
     </div>
@@ -625,12 +625,12 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">Seven verbs</h2>
+      <h2 class="reveal">Six verbs</h2>
       <p class="lead reveal">
         One stdlib-only Python engine. No installation, no dependencies. The verdict and its
         reports are flags on <code>gate</code>, every other read-only question a flag on
         <code>ask</code>, every write a flag on <code>sync</code>, so the shape of a command tells
-        you whether it can change a file. The seventh verb, <code>mcp</code>, serves the same
+        you whether it can change a file. The sixth verb, <code>mcp</code>, serves the same
         commands to an AI assistant.
       </p>
     </div>
@@ -640,21 +640,17 @@ has not been re-touched.</pre></div>
         <div class="cmd-n"><code>init</code></div>
         <div class="cmd-d">First-time setup: scaffold <code>requirements/</code> and <code>.reqmapignore</code>, draft the SYS → ARCH → CODE pyramid from untagged code, build the lock and map. Seeds <code>ROADMAP.md</code>, <code>_planning.json</code> (weekly Friday cadence) and a <code>CHANGELOG.md</code>, prints where the version is read from, and on GitHub writes a release workflow. Never clobbers an existing file. <span class="fl">--wipe</span> hard reset · <span class="fl">--no-site</span></div>
       </div>
-      <div class="cmd">
-        <div class="cmd-n"><code>new AREA-NAME-NNN</code></div>
-        <div class="cmd-d"><strong>Deprecated, removed in v8.0.0:</strong> write the requirement file yourself or ask your assistant. Until then it scaffolds one blank requirement from the built-in template. <span class="fl">--from-todo "name" --id ID</span> pre-fills it from a <code>TODO.md</code> item; <span class="fl">--mark-done</span> ticks it off.</div>
-      </div>
       <div class="cmd gate">
         <div class="cmd-n"><code>gate</code></div>
         <div class="cmd-d">
-          <strong>The verdict.</strong> Every tag resolves, every confirmed requirement has code, every <code>depends_on</code> exists; then readability and map freshness. Run before every commit and in CI; never writes.<br>
+          <strong>The verdict.</strong> Every tag resolves, every confirmed requirement has code, every <code>depends_on</code> exists; then readability and map freshness. Run before every commit and in CI; never writes. Bare, it runs only what says something is broken; <span class="fl">--full</span> runs every rule.<br>
           <span class="fl">--strict</span> · <span class="fl">--json</span> · <span class="fl">--since &lt;ref&gt;</span><br>
           Reports: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span>, each with <span class="fl">--json</span> for an agent
         </div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>ask</code></div>
-        <div class="cmd-d"><strong>Every other question.</strong> Read-only; its exit code is the question's, never the verdict's. <span class="fl">--search "query"</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review [ID]</span>, each with <span class="fl">--json</span> for an agent. Until v8.0.0 <code>gate</code> still takes these flags, with one line on stderr.</div>
+        <div class="cmd-d"><strong>Every other question.</strong> Read-only; its exit code is the question's, never the verdict's. <span class="fl">--search "query"</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review [ID]</span>, each with <span class="fl">--json</span> for an agent. Every verb refuses a flag that belongs to another one, names its owner and exits 2.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>sync</code></div>
@@ -666,7 +662,7 @@ has not been re-touched.</pre></div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>mcp</code></div>
-        <div class="cmd-d">Serve the engine to an AI assistant over the Model Context Protocol on stdio: fifteen tools and a resource per requirement. Read-only by default. <span class="fl">--allow-writes</span> adds sync, new and release · see <a href="#mcp">MCP</a></div>
+        <div class="cmd-d">Serve the engine to an AI assistant over the Model Context Protocol on stdio: thirteen tools and a resource per requirement. Read-only by default. <span class="fl">--allow-writes</span> adds sync and release · see <a href="#mcp">MCP</a></div>
       </div>
     </div>
   </div>
@@ -678,8 +674,10 @@ has not been re-touched.</pre></div>
     <div class="label reveal">Layer Model</div>
     <h2 class="reveal">Bus and feature</h2>
     <p class="lead reveal">
-      Two layers, like a factory's main bus and the machines that connect to it.
+      Two layers carry code, like a factory's main bus and the machines that connect to it.
       The bus is defined once and shared; features compose the bus via <code>depends_on</code>.
+      Two more carry none: <code>need</code>, a stakeholder need that features satisfy, and
+      <code>aggregate</code>, covered by the requirements it depends on.
     </p>
 
     <div class="layers reveal">
@@ -698,7 +696,7 @@ has not been re-touched.</pre></div>
     </div>
 
     <div class="callout reveal">
-      <strong>Split heuristic.</strong> If a requirement accumulates more than four or five acceptance criteria
+      <strong>Split heuristic.</strong> If a requirement accumulates more than seven acceptance criteria
       that cover behaviors which could break <em>independently</em>, it's a split candidate.
       Author two requirements, each with its own contract and its own failure mode.
       <code>gate --risk</code> flags these automatically.
@@ -814,7 +812,7 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
     <span class="kw">runs-on</span><span class="pu">:</span> <span class="vl">ubuntu-latest</span>
     <span class="kw">steps</span><span class="pu">:</span>
       <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/checkout@v4</span>
-      <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">alxmax/requirement-manager/check@v7</span></pre></div>
+      <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">alxmax/requirement-manager/check@v8</span></pre></div>
         </div>
         <p style="font-size:.82rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.55">
           Uses <code style="font-size:.8em">permissions: contents: read</code> — least privilege,
@@ -842,10 +840,10 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
     <span class="kw">id-token</span><span class="pu">:</span> <span class="vl">write</span>       <span class="cm"># mint the short-lived OIDC token</span>
   <span class="kw">environment</span><span class="pu">:</span> <span class="pu">{</span> <span class="kw">name</span><span class="pu">:</span> <span class="vl">github-pages</span> <span class="pu">}</span>
   <span class="kw">steps</span><span class="pu">:</span>
-    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/checkout@34e1148…</span>        <span class="cm"># pinned to commit SHA</span>
-    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/configure-pages@983d773…</span>
-    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/upload-pages-artifact@56afc60…</span>
-    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/deploy-pages@d6db901…</span>     <span class="cm"># consumes the OIDC token</span></pre></div>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/checkout@3d3c42e…</span>        <span class="cm"># pinned to commit SHA</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/configure-pages@45bfe01…</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/upload-pages-artifact@fc324d3…</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/deploy-pages@368f825…</span>     <span class="cm"># consumes the OIDC token</span></pre></div>
       </div>
       <p style="font-size:.82rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.55">
         This repo dogfoods its own map: the published <code style="font-size:.8em">docs/</code> site deploys to
@@ -876,7 +874,7 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
       </div>
       <div class="vtab">
         <div class="vtab-name">Problems</div>
-        <div class="vtab-desc">Linter-style inbox of every open signal: errors, warnings, needs-review, cautions. Each row jumps to its spec.</div>
+        <div class="vtab-desc">Linter-style inbox of every open signal: errors, warnings, questions, needs-review. A Health tab lists what keeps a requirement from green, a Design tab the advisory OOP candidates. Each row jumps to its spec.</div>
       </div>
       <div class="vtab">
         <div class="vtab-name">Map</div>
@@ -937,7 +935,7 @@ python scripts/reqmap.py sync
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>3 · tools</code></div>
-        <div class="cmd-d">Read: <code>reqmap_gate</code> · <code>reqmap_next</code> · <code>reqmap_health</code> · <code>reqmap_show</code> · <code>reqmap_search</code> · <code>reqmap_audit</code> · <code>reqmap_dupes</code> · <code>reqmap_design</code> · <code>reqmap_untagged</code> · <code>reqmap_review</code> · <code>reqmap_clarify</code> · <code>reqmap_release_plan</code>. Write, only with <span class="fl">--allow-writes</span>: <code>reqmap_sync</code> · <code>reqmap_new</code> · <code>reqmap_release</code>. A test holds every verb and flag they use to the command registry.</div>
+        <div class="cmd-d">Read: <code>reqmap_gate</code> · <code>reqmap_next</code> · <code>reqmap_health</code> · <code>reqmap_show</code> · <code>reqmap_search</code> · <code>reqmap_audit</code> · <code>reqmap_dupes</code> · <code>reqmap_untagged</code> · <code>reqmap_review</code> · <code>reqmap_clarify</code> · <code>reqmap_release_plan</code>. Write, only with <span class="fl">--allow-writes</span>: <code>reqmap_sync</code> · <code>reqmap_release</code>. A test holds every verb and flag they use to the command registry.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>4 · resources</code></div>
@@ -990,6 +988,7 @@ python scripts/reqmap.py sync
         <p>
           Install the Claude Code plugin once. On first use in any repo, it copies
           <code style="color:rgba(241,237,227,.7);background:rgba(255,255,255,.08)">scripts/reqmap.py</code>
+          and the <code style="color:rgba(241,237,227,.7);background:rgba(255,255,255,.08)">reqmap_engine/</code> package beside it
           into that repo — stdlib only, nothing to install. Then <code style="color:rgba(241,237,227,.7);background:rgba(255,255,255,.08)">init</code>
           bootstraps everything and prints guided next steps.
         </p>
@@ -1008,7 +1007,7 @@ python scripts/reqmap.py sync
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <span class="foot-copy">requirement-manager v7.21.0 · Business Source License 1.1</span>
+      <span class="foot-copy">requirement-manager v8.6.0 · Business Source License 1.1</span>
       <div class="foot-links">
         <a href="https://github.com/alxmax/requirement-manager">GitHub</a>
         <a href="https://github.com/alxmax/requirement-manager/blob/main/plugin/skills/requirement-manager/SKILL.md">SKILL.md</a>

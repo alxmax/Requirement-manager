@@ -217,7 +217,7 @@ CASE-7 — identical obligations are listed as one Redundancy group
 
 ---
 id: REQ-NEXTUNTAGGED-1050
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

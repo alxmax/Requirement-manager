@@ -1,6 +1,6 @@
 ---
 id: ARCH-VIEWER-007
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -439,7 +439,7 @@ CASE-4 — the origin is offered as a filter, with the question text shown
 
 ---
 id: REQ-VIEWER-969
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -498,7 +498,7 @@ CASE-5 — the labels follow the interface language
 
 ---
 id: REQ-VIEWER-977
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -843,7 +843,7 @@ CASE-3 — the day row spans the chart
 
 ---
 id: REQ-HISTORY-1081
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -894,7 +894,7 @@ CASE-4 — a shipped month opens to what was done in it
 
 ---
 id: REQ-VIEWER-1082
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -936,7 +936,7 @@ CASE-3 — choosing a row scopes the outline and opens it
 
 ---
 id: REQ-VIEWER-1084
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -956,6 +956,9 @@ Every bullet below is binding.
 - The Health tab lists the `unhealthy` rows the map's health record carries, each with
   the axes it fails, followed by the `exempt_ids` it carries; its count is the sum of
   both.
+- A row whose only failing axis is `not confirmed` is left out of the Health tab and
+  its count, because the Review tab already lists it; the tab says how many it left
+  out.
 - The Health tab offers one chip per failing axis, each with its count; a chip narrows
   the list to the rows failing that axis, and `All` restores it.
 - The Design tab offers one chip per pillar, each with its count; a chip narrows the
@@ -981,3 +984,10 @@ CASE-4 — a pillar chip narrows the Design tab
   Given  candidates under two pillars
   When   the Design tab renders with one pillar's chip chosen
   Then   only that pillar's group is listed
+
+CASE-5 — a row that only awaits confirmation stays in Review
+  Given  a health record with one row failing only `not confirmed` and one failing
+         `not tested`
+  When   Problems renders on its Health tab
+  Then   only the untested row is listed, the Health count is 1, and the tab says 1
+         row only awaits confirmation

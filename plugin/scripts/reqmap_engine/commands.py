@@ -26,59 +26,31 @@ COMMANDS = {
         ),
         "arg": None,
         "params": [
-            {
-                "name": "plan",
-                "flag": "--plan",
-                "consumer": "plugin/skills/requirement-manager/SKILL.md",
-                "type": "bool",
-                "help": (
-                    "Emit the extraction plan as JSON instead of writing "
-                    "requirement files."
-                ),
-            },
-            {
-                "name": "out",
-                "flag": "--out",
-                "consumer": "none recorded",
-                "type": "str",
-                "help": (
-                    "With --plan: write the plan JSON here ('-' or omitted = "
-                    "stdout)."
-                ),
-            },
-            {
-                "name": "md_glob",
-                "flag": "--md-glob",
-                "consumer": "none recorded",
-                "type": "str",
-                "help": (
-                    "With --plan: also scan these non-code globs for "
-                    "capabilities (repeatable)."
-                ),
-            },
-            {
-                "name": "wipe",
-                "flag": "--wipe",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "Hard-reset: delete all non-generated requirements and "
-                    "strip membership tags from source files before "
-                    "re-extracting."
-                ),
-            },
-            {
-                "name": "no_site",
-                "flag": "--no-site",
-                "consumer": [
-                    "plugin/skills/requirement-manager/references/site.md",
-                ],
-                "type": "bool",
-                "help": (
-                    "Skip the final site step (scaffolding "
-                    "docs/architecture.html)."
-                ),
-            },
+            {"name": "plan", "flag": "--plan",
+             "consumer": "plugin/skills/requirement-manager/SKILL.md",
+             "type": "bool",
+             "help": "Emit the extraction plan as JSON instead of writing "
+                     "requirement files."},
+            {"name": "out", "flag": "--out", "consumer": "none recorded",
+             "type": "str",
+             "help": "With --plan: write the plan JSON here ('-' or omitted "
+                     "= stdout)."},
+            {"name": "md_glob", "flag": "--md-glob",
+             "consumer": "none recorded", "type": "str",
+             "help": "With --plan: also scan these non-code globs for "
+                     "capabilities (repeatable)."},
+            {"name": "wipe", "flag": "--wipe", "consumer": "none recorded",
+             "type": "bool",
+             "help": "Hard-reset: delete all non-generated requirements and "
+                     "strip membership tags from source files before "
+                     "re-extracting."},
+            {"name": "no_site", "flag": "--no-site",
+             "consumer": [
+                 "plugin/skills/requirement-manager/references/site.md",
+             ],
+             "type": "bool",
+             "help": "Skip the final site step (scaffolding "
+                     "docs/architecture.html)."},
         ],
     },
     "gate": {
@@ -95,135 +67,77 @@ COMMANDS = {
         ),
         "arg": None,
         "params": [
-            {
-                "name": "mode_audit",
-                "flag": "--audit",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "Print every pass that discovers a problem as one report: "
-                    "the gate, corpus risk, duplicate contracts and tag "
-                    "coverage. The exit code still comes from the gate alone."
-                ),
-            },
-            {
-                "name": "mode_risk",
-                "flag": "--risk",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "Print the corpus risk snapshot and the actionable "
-                    "signals, most urgent first."
-                ),
-            },
-            {
-                "name": "mode_show",
-                "flag": "--show",
-                "consumer": [
-                    "plugin/skills/requirement-manager/references/mcp.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "str",
-                "help": (
-                    "Print one requirement's dossier: intent, contract, "
-                    "dependencies both ways, code members with file:line, open "
-                    "questions and risk signals."
-                ),
-            },
-            {
-                "name": "show_all",
-                "flag": "--all",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "bool",
-                "help": (
-                    "With --risk: expand every bucket instead of the top few."
-                ),
-            },
-            {
-                "name": "untagged",
-                "flag": "--untagged",
-                "consumer": [
-                    "plugin/skills/requirement-manager/references/mcp.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "With --risk: report membership-tag coverage per directory."
-                ),
-            },
-            {
-                "name": "as_badge",
-                "flag": "--badge",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "With --risk: print the coherence score as a badge string."
-                ),
-            },
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "Promote drift and test-link integrity warnings to errors. "
-                    "Useful in CI when all requirements are confirmed."
-                ),
-            },
-            {
-                "name": "json",
-                "flag": "--json",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "bool",
-                "help": (
-                    "Emit structured JSON output instead of human-readable "
-                    "text."
-                ),
-            },
-            {
-                "name": "since",
-                "flag": "--since",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "str",
-                "help": (
-                    "Scope the gate to requirements whose member files changed "
-                    "since this git ref (e.g. 'main', 'HEAD~1')."
-                ),
-            },
-            {
-                "name": "no_lint",
-                "flag": "--no-lint",
-                "consumer": "check/action.yml",
-                "type": "bool",
-                "help": "Skip the requirement readability check.",
-            },
-            {
-                "name": "no_map_check",
-                "flag": "--no-map-check",
-                "consumer": "check/action.yml",
-                "type": "bool",
-                "help": "Skip the committed-map freshness check.",
-            },
-            {
-                "name": "full",
-                "flag": "--full",
-                "type": "bool",
-                "help": (
-                    "Run every gate rule and print every readability warning. "
-                    "Bare, the gate runs only the rules that say a link, the "
-                    "drift baseline or the committed map is broken, and prints "
-                    "readability errors only."
-                ),
-            },
+            {"name": "mode_audit", "flag": "--audit",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "Print every pass that discovers a problem as one "
+                     "report: the gate, corpus risk, duplicate contracts and "
+                     "tag coverage. The exit code still comes from the gate "
+                     "alone."},
+            {"name": "mode_risk", "flag": "--risk",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "Print the corpus risk snapshot and the actionable "
+                     "signals, most urgent first."},
+            {"name": "mode_show", "flag": "--show",
+             "consumer": [
+                 "plugin/skills/requirement-manager/references/mcp.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "str",
+             "help": "Print one requirement's dossier: intent, contract, "
+                     "dependencies both ways, code members with file:line, "
+                     "open questions and risk signals."},
+            {"name": "show_all", "flag": "--all",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "bool",
+             "help": "With --risk: expand every bucket instead of the top "
+                     "few."},
+            {"name": "untagged", "flag": "--untagged",
+             "consumer": [
+                 "plugin/skills/requirement-manager/references/mcp.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "With --risk: report membership-tag coverage per "
+                     "directory."},
+            {"name": "as_badge", "flag": "--badge", "consumer": "none recorded",
+             "type": "bool",
+             "help": "With --risk: print the coherence score as a badge "
+                     "string."},
+            {"name": "strict", "flag": "--strict",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "Promote drift and test-link integrity warnings to "
+                     "errors. Useful in CI when all requirements are "
+                     "confirmed."},
+            {"name": "json", "flag": "--json",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "bool",
+             "help": "Emit structured JSON output instead of human-readable "
+                     "text."},
+            {"name": "since", "flag": "--since",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "str",
+             "help": "Scope the gate to requirements whose member files "
+                     "changed since this git ref (e.g. 'main', 'HEAD~1')."},
+            {"name": "no_lint", "flag": "--no-lint",
+             "consumer": "check/action.yml", "type": "bool",
+             "help": "Skip the requirement readability check."},
+            {"name": "no_map_check", "flag": "--no-map-check",
+             "consumer": "check/action.yml", "type": "bool",
+             "help": "Skip the committed-map freshness check."},
+            {"name": "full", "flag": "--full", "type": "bool",
+             "help": "Run every gate rule and print every readability "
+                     "warning. Bare, the gate runs only the rules that say a "
+                     "link, the drift baseline or the committed map is "
+                     "broken, and prints readability errors only."},
         ],
     },
     "ask": {
@@ -243,97 +157,53 @@ COMMANDS = {
             "plugin/scripts/reqmap_engine/mcp.py",
         ],
         "params": [
-            {
-                "name": "mode_search",
-                "flag": "--search",
-                "consumer": [
-                    "plugin/skills/requirement-manager/references/mcp.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "str",
-                "help": (
-                    "Rank requirements by lexical relevance to a free-text "
-                    "query."
-                ),
-            },
-            {
-                "name": "mode_dupes",
-                "flag": "--dupes",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "Rank requirement pairs whose contracts overlap, most "
-                    "similar first."
-                ),
-            },
-            {
-                "name": "mode_design",
-                "flag": "--design",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.universal.md",
-                ],
-                "type": "bool",
-                "help": (
-                    "Advisory design review of the code: encapsulation, "
-                    "abstraction, inheritance and polymorphism candidates plus "
-                    "file length and line width, grouped by pillar. Read-only, "
-                    "exit 0, never the gate."
-                ),
-            },
-            {
-                "name": "mode_review",
-                "flag": "--review",
-                "consumer": [
-                    "plugin/skills/requirement-quality-review/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "str",
-                "help": (
-                    "Emit the deterministic review plan as JSON: for one "
-                    "requirement, or with no id for the whole corpus."
-                ),
-            },
-            {
-                "name": "mode_i18n",
-                "flag": "--i18n",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "Removed in v8.2.0 (ADR-0047): accepted and ignored, "
-                    "refused from v9.0.0."
-                ),
-            },
-            {
-                "name": "top",
-                "flag": "--top",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "int",
-                "help": (
-                    "With --search or --dupes: how many results to print."
-                ),
-            },
-            {
-                "name": "threshold",
-                "flag": "--threshold",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "str",
-                "help": (
-                    "With --dupes: override the similarity threshold."
-                ),
-            },
-            {
-                "name": "json",
-                "flag": "--json",
-                "consumer": "plugin/scripts/reqmap_engine/mcp.py",
-                "type": "bool",
-                "help": (
-                    "Emit structured JSON output instead of human-readable "
-                    "text."
-                ),
-            },
+            {"name": "mode_search", "flag": "--search",
+             "consumer": [
+                 "plugin/skills/requirement-manager/references/mcp.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "str",
+             "help": "Rank requirements by lexical relevance to a free-text "
+                     "query."},
+            {"name": "mode_dupes", "flag": "--dupes",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "Rank requirement pairs whose contracts overlap, most "
+                     "similar first."},
+            {"name": "mode_design", "flag": "--design",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.universal.md",
+             ],
+             "type": "bool",
+             "help": "Advisory design review of the code: encapsulation, "
+                     "abstraction, inheritance and polymorphism candidates "
+                     "plus file length and line width, grouped by pillar. "
+                     "Read-only, exit 0, never the gate."},
+            {"name": "mode_review", "flag": "--review",
+             "consumer": [
+                 "plugin/skills/requirement-quality-review/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "str",
+             "help": "Emit the deterministic review plan as JSON: for one "
+                     "requirement, or with no id for the whole corpus."},
+            {"name": "mode_i18n", "flag": "--i18n", "consumer": "none recorded",
+             "type": "bool",
+             "help": "Removed in v8.2.0 (ADR-0047): accepted and ignored, "
+                     "refused from v9.0.0."},
+            {"name": "top", "flag": "--top",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "int",
+             "help": "With --search or --dupes: how many results to print."},
+            {"name": "threshold", "flag": "--threshold",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "str",
+             "help": "With --dupes: override the similarity threshold."},
+            {"name": "json", "flag": "--json",
+             "consumer": "plugin/scripts/reqmap_engine/mcp.py", "type": "bool",
+             "help": "Emit structured JSON output instead of human-readable "
+                     "text."},
         ],
     },
     "sync": {
@@ -347,133 +217,81 @@ COMMANDS = {
         ),
         "arg": None,
         "params": [
-            {
-                "name": "mode_retire",
-                "flag": "--retire",
-                "consumer": "none recorded",
-                "type": "list",
-                "help": (
-                    "Take these requirements out of service instead of "
-                    "confirming them. Accepts one id or many; a batch retires "
-                    "in an order computed from the graph, under one "
-                    "working-tree check. Prints the blast radius; writes "
-                    "nothing without --apply."
-                ),
-            },
-            {
-                "name": "mode_release",
-                "flag": "--release",
-                "consumer": [
-                    "docs/planning.md",
-                    "plugin/scripts/reqmap_engine/release.py",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "str",
-                "help": (
-                    "Cut a release instead of syncing: the next version "
-                    "planned in _planning.json above what is already declared, "
-                    "or the vX.Y.Z named here. Prints the plan - version files "
-                    "to bump, the CHANGELOG entry, the milestone the plan "
-                    "drops - and writes nothing without --apply. With --json "
-                    "it also reports the declared version, whether its tag "
-                    "exists and its notes, which is what a release workflow "
-                    "reads."
-                ),
-            },
-            {
-                "name": "delete",
-                "flag": "--delete",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "With --retire: also remove the block, its lock entries "
-                    "and its membership tags. Never a function body."
-                ),
-            },
-            {
-                "name": "do_apply",
-                "flag": "--apply",
-                "consumer": [
-                    "docs/planning.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": (
-                    "With --retire or --release: actually write the change. "
-                    "Without it, the run is a dry report."
-                ),
-            },
-            {
-                "name": "force",
-                "flag": "--force",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "With --retire: proceed even though dependents still point "
-                    "at this requirement, or the working tree is dirty. "
-                    "Dependents that are already deprecated, and those retired "
-                    "in the same call, never block."
-                ),
-            },
-            {
-                "name": "findings",
-                "flag": "--findings",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "Also regenerate the aggregated open-questions file."
-                ),
-            },
-            {
-                "name": "attach",
-                "flag": "--attach",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/skills/requirement-manager/references/site.md",
-                ],
-                "type": "str",
-                "help": (
-                    "HTML page to refresh the site's engine-owned regions "
-                    "in (scaffolds it if absent). Without it, `sync` "
-                    "refreshes docs/architecture.html when that exists."
-                ),
-            },
-            {
-                "name": "accept_drift",
-                "flag": "--accept-drift",
-                "consumer": [
-                    "plugin/skills/requirement-manager/SKILL.md",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "str",
-                "help": (
-                    "Explicitly advance the baseline when a confirmed or "
-                    "implemented contract changed. Required when those "
-                    "contracts differ from the lock; sync exits non-zero "
-                    "without it. Takes an optional reason, recorded in "
-                    "requirements/_driftlog.json so the waiver and its "
-                    "justification land in the diff."
-                ),
-            },
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "Promote drift and test-link integrity from warn to error."
-                ),
-            },
-            {
-                "name": "json",
-                "flag": "--json",
-                "consumer": [
-                    "plugin/scripts/reqmap_engine/release.py",
-                    "plugin/scripts/reqmap_engine/mcp.py",
-                ],
-                "type": "bool",
-                "help": "With --retire or --release: emit the plan as JSON.",
-            },
+            {"name": "mode_retire", "flag": "--retire",
+             "consumer": "none recorded", "type": "list",
+             "help": "Take these requirements out of service instead of "
+                     "confirming them. Accepts one id or many; a batch "
+                     "retires in an order computed from the graph, under one "
+                     "working-tree check. Prints the blast radius; writes "
+                     "nothing without --apply."},
+            {"name": "mode_release", "flag": "--release",
+             "consumer": [
+                 "docs/planning.md",
+                 "plugin/scripts/reqmap_engine/release.py",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "str",
+             "help": "Cut a release instead of syncing: the next version "
+                     "planned in _planning.json above what is already "
+                     "declared, or the vX.Y.Z named here. Prints the plan - "
+                     "version files to bump, the CHANGELOG entry, the "
+                     "milestone the plan drops - and writes nothing without "
+                     "--apply. With --json it also reports the declared "
+                     "version, whether its tag exists and its notes, which "
+                     "is what a release workflow reads."},
+            {"name": "delete", "flag": "--delete", "consumer": "none recorded",
+             "type": "bool",
+             "help": "With --retire: also remove the block, its lock entries "
+                     "and its membership tags. Never a function body."},
+            {"name": "do_apply", "flag": "--apply",
+             "consumer": [
+                 "docs/planning.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "With --retire or --release: actually write the change. "
+                     "Without it, the run is a dry report."},
+            {"name": "force", "flag": "--force", "consumer": "none recorded",
+             "type": "bool",
+             "help": "With --retire: proceed even though dependents still "
+                     "point at this requirement, or the working tree is "
+                     "dirty. Dependents that are already deprecated, and "
+                     "those retired in the same call, never block."},
+            {"name": "findings", "flag": "--findings",
+             "consumer": "none recorded", "type": "bool",
+             "help": "Also regenerate the aggregated open-questions file."},
+            {"name": "attach", "flag": "--attach",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/skills/requirement-manager/references/site.md",
+             ],
+             "type": "str",
+             "help": "HTML page to refresh the site's engine-owned regions "
+                     "in (scaffolds it if absent). Without it, `sync` "
+                     "refreshes docs/architecture.html when that exists."},
+            {"name": "accept_drift", "flag": "--accept-drift",
+             "consumer": [
+                 "plugin/skills/requirement-manager/SKILL.md",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "str",
+             "help": "Explicitly advance the baseline when a confirmed or "
+                     "implemented contract changed. Required when those "
+                     "contracts differ from the lock; sync exits non-zero "
+                     "without it. Takes an optional reason, recorded in "
+                     "requirements/_driftlog.json so the waiver and its "
+                     "justification land in the diff."},
+            {"name": "strict", "flag": "--strict", "consumer": "none recorded",
+             "type": "bool",
+             "help": "Promote drift and test-link integrity from warn to "
+                     "error."},
+            {"name": "json", "flag": "--json",
+             "consumer": [
+                 "plugin/scripts/reqmap_engine/release.py",
+                 "plugin/scripts/reqmap_engine/mcp.py",
+             ],
+             "type": "bool",
+             "help": "With --retire or --release: emit the plan as JSON."},
         ],
     },
     "clarify": {
@@ -496,33 +314,23 @@ COMMANDS = {
             "plugin/scripts/reqmap_engine/mcp.py",
         ],
         "params": [
-            {
-                "name": "decompose",
-                "flag": "--decompose",
-                "consumer": "plugin/skills/requirement-manager/SKILL.md",
-                "type": "bool",
-                "help": (
-                    "Split a requirement into code-rung children along the "
-                    "bold group labels its author wrote in the Description; "
-                    "--apply writes them and never edits the parent. With no "
-                    "id, every requirement carrying groups. A requirement with "
-                    "no groups falls back to one draft per over-long clause."
-                ),
-            },
-            {
-                "name": "levels",
-                "flag": "--levels",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": (
-                    "Propose a V-model rung for every requirement that "
-                    "declares no `level:`, plus the rungs above: one draft "
-                    "`ARCH-<FAMILY>-001` per id-prefix family, "
-                    "`SYS-NEEDS-A-NAME-001` at the apex, and the `satisfies:` "
-                    "edges between them. --apply writes all of it, each line "
-                    "marked `level_source: auto`."
-                ),
-            },
+            {"name": "decompose", "flag": "--decompose",
+             "consumer": "plugin/skills/requirement-manager/SKILL.md",
+             "type": "bool",
+             "help": "Split a requirement into code-rung children along the "
+                     "bold group labels its author wrote in the Description; "
+                     "--apply writes them and never edits the parent. With "
+                     "no id, every requirement carrying groups. A "
+                     "requirement with no groups falls back to one draft per "
+                     "over-long clause."},
+            {"name": "levels", "flag": "--levels", "consumer": "none recorded",
+             "type": "bool",
+             "help": "Propose a V-model rung for every requirement that "
+                     "declares no `level:`, plus the rungs above: one draft "
+                     "`ARCH-<FAMILY>-001` per id-prefix family, "
+                     "`SYS-NEEDS-A-NAME-001` at the apex, and the "
+                     "`satisfies:` edges between them. --apply writes all of "
+                     "it, each line marked `level_source: auto`."},
             {"name": "as_json", "flag": "--json", "type": "bool",
              "consumer": [
                  "plugin/skills/requirement-manager/references/mcp.md",
@@ -553,13 +361,9 @@ COMMANDS = {
         ],
         "tool": False,
         "params": [
-            {
-                "name": "allow_writes",
-                "flag": "--allow-writes",
-                "consumer": "none recorded",
-                "type": "bool",
-                "help": "Also offer the tools that write: sync and release.",
-            },
+            {"name": "allow_writes", "flag": "--allow-writes",
+             "consumer": "none recorded", "type": "bool",
+             "help": "Also offer the tools that write: sync and release."},
         ],
     },
 }
