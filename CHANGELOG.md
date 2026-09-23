@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v8.6.0` — 2026-09-23
+
+**The design review and the site are back, with no exemptions.**
+
+- `ask --design` works again: OOP candidates plus files of at most 500 lines and lines of at most 80 columns, advisory and outside the gate (ADR-0051) (ARCH-DESIGN-061)
+- `sync` refreshes docs/architecture.html again; `init` writes the site, `sync --attach` and `init --no-site` work again (ARCH-SITE-026)
+- The Health and Design rings open Problems on their own tabs, filterable by axis and by pillar; Health leaves out what Review already lists (ARCH-VIEWER-007)
+- Every `lint_exempt`, `test_exempt` and `gate_exempt` in this corpus is gone and the finding each one silenced is fixed
+- The engine's core is budgeted in logical lines, and its speed is reported (ADR-0052, ADR-0053)
+- The roadmap and the changelog are in English
+
+The engine is 16,680 lines, and `ask --design` finds no candidate in its own 117 source files. `gate --full` is 27% faster. Health is 100: 285 of 306 requirements are confirmed.
+
 ## plugin `v8.5.1` — 2026-09-22
 
 **The viewer without design leftovers.**

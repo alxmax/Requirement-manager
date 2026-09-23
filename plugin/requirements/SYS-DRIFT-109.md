@@ -1,6 +1,6 @@
 ---
 id: SYS-DRIFT-109
-status: draft
+status: confirmed
 form: atomic
 level: system
 layer: need

@@ -11,7 +11,7 @@ import { useI18n } from "../lib/i18n.jsx";
 import { openQuestions } from "../lib/tree.js";
 import {
   ProblemTabBar, DesignProblemsPanel, HealthPanel, ProblemRow,
-  ProblemsEmpty,
+  ProblemsEmpty, onlyUnconfirmed,
 } from "./problems/ProblemsPanels.jsx";
 
 const SEV = {
@@ -137,7 +137,8 @@ export function ProblemsView({
     <div className="main">
       <ProblemTabBar filter={filter} setFilter={setFilter} counts={counts}
                      designCount={design.length}
-                     healthCount={health ? health.unhealthy.length
+                     healthCount={health ? health.unhealthy
+                       .filter((u) => !onlyUnconfirmed(u)).length
                        + (health.exempt_ids || []).length : null}
                      gateMsg={gateMsg} />
       <div className="problems">

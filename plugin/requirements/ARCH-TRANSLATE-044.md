@@ -366,7 +366,7 @@ CASE-7 — the viewer's default follows the setting, the reader's choice beats i
 
 ---
 id: REQ-TRANSLATE-1080
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

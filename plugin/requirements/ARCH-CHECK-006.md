@@ -239,7 +239,7 @@ CASE-5 — a confirmed need with no tested-by tag raises no test warning
 
 ---
 id: REQ-CHECK-1040
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

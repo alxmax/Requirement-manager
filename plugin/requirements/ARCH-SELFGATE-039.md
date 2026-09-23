@@ -114,7 +114,7 @@ CASE-3 — the release job moves the action's major-alias tag on every push to m
 
 ---
 id: REQ-SELFGATE-1070
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -158,7 +158,7 @@ CASE-3 — the pre-push hook blocks a direct push to main
 
 ---
 id: REQ-SELFGATE-1071
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -200,7 +200,7 @@ CASE-3 — the file names the alias the release job moves
 
 ---
 id: REQ-SELFGATE-1072
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

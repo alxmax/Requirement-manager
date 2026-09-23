@@ -1,9 +1,9 @@
 ---
 generated: 2026-09-23
-engine: 2026-09-23.1
+engine: 2026-09-23.2
 nodes: 306
 edges: 121
-design pass-rate: 99% (116/117 source files without a design candidate)
+design pass-rate: 100% (117/117 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -765,8 +765,6 @@ graph LR
   f_plugin_skills_requirement_quality_review_SKILL_universal_md_9["plugin/skills/requirement-quality-review/SKILL.universal.md:9"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_9
   ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
-  f_docs_plan_source_audit_html_6["docs/plan-source-audit.html:6"]
-  ARCH_ROADMAP_038 -->|generated-from| f_docs_plan_source_audit_html_6
   f_plugin_scripts_test_reqmap_report_py_2071_4089["plugin/scripts/test_reqmap_report.py:2071-4089"]
   ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2071_4089
   f_plugin_scripts_reqmap_engine_health_py_326["plugin/scripts/reqmap_engine/health.py:326"]
@@ -1043,7 +1041,7 @@ graph LR
   SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small>"]
   style SYS_AUTHOR_101 fill:#fee,stroke:#c66
   SYS_DRIFT_109["Noticing what moved without the specification<br><small>SYS-DRIFT-109</small>"]
-  style SYS_DRIFT_109 fill:#eee,stroke:#bbb,color:#888
+  style SYS_DRIFT_109 fill:#fee,stroke:#c66
   SYS_GATE_102["Keeping code and specification linked<br><small>SYS-GATE-102</small>"]
   style SYS_GATE_102 fill:#fee,stroke:#c66
   SYS_QUALITY_104["Keeping requirements readable<br><small>SYS-QUALITY-104</small>"]
@@ -1083,99 +1081,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_ARCH["ARCH"]
-    ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small><br>unreviewed"]
-    ARCH_HEALTH_017["Corpus health snapshot<br><small>ARCH-HEALTH-017</small><br>unreviewed"]
-    ARCH_MAP_007["Requirement graph (_map.json)<br><small>ARCH-MAP-007</small><br>unreviewed"]
-    ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small><br>unreviewed"]
-    ARCH_VIEWER_007["Self-contained HTML map viewer<br><small>ARCH-VIEWER-007</small><br>unreviewed"]
-  end
-  subgraph sg_REQ["REQ"]
-    REQ_CHECK_1040["A confirmed requirement missing its Description or Cases<br><small>REQ-CHECK-1040</small><br>unreviewed"]
-    REQ_DESIGN_950["Encapsulation and abstraction candidates<br><small>REQ-DESIGN-950</small><br>unreviewed"]
-    REQ_DESIGN_951["Inheritance and polymorphism candidates<br><small>REQ-DESIGN-951</small><br>unreviewed"]
-    REQ_DESIGN_952["The 'design' report<br><small>REQ-DESIGN-952</small><br>unreviewed"]
-    REQ_DESIGN_953["Code-writing standards<br><small>REQ-DESIGN-953</small><br>unreviewed"]
-    REQ_DESIGN_954["Design health in the map<br><small>REQ-DESIGN-954</small><br>unreviewed"]
-    REQ_DESIGN_955["Brace-language heuristics<br><small>REQ-DESIGN-955</small><br>unreviewed"]
-    REQ_DESIGN_976["Design candidates in the map<br><small>REQ-DESIGN-976</small><br>unreviewed"]
-    REQ_DESIGN_991["Advisory data cannot inherit a verdict<br><small>REQ-DESIGN-991</small><br>unreviewed"]
-    REQ_HEALTHROWS_1083["The rows behind the health score<br><small>REQ-HEALTHROWS-1083</small><br>unreviewed"]
-    REQ_MAP_871["Repo, engine version, todos, and freshness checking<br><small>REQ-MAP-871</small><br>unreviewed"]
-    REQ_NEXTUNTAGGED_1050["Untagged files, ranked lowest<br><small>REQ-NEXTUNTAGGED-1050</small><br>unreviewed"]
-    REQ_SELFGATE_1070["The dev git hooks run CI's checks before a commit and guard 'main'<br><small>REQ-SELFGATE-1070</small><br>unreviewed"]
-    REQ_SELFGATE_1071["The published Action runs the consumer's engine through the same gate<br><small>REQ-SELFGATE-1071</small><br>unreviewed"]
-    REQ_SELFGATE_1072["The cache-sync script refreshes an engine, never seeds one<br><small>REQ-SELFGATE-1072</small><br>unreviewed"]
-    REQ_SITE_924["Inject engine-owned regions into a presentation page<br><small>REQ-SITE-924</small><br>unreviewed"]
-    REQ_TRANSLATE_1080["Showing a cached translation, always marked<br><small>REQ-TRANSLATE-1080</small><br>unreviewed"]
-    REQ_VIEWER_969["Two engine-emitted readings in the rail<br><small>REQ-VIEWER-969</small><br>unreviewed"]
-    REQ_VIEWER_977["The advisory design tab<br><small>REQ-VIEWER-977</small><br>unreviewed"]
-    REQ_HISTORY_1081["The shipped months, drawn beside the plan<br><small>REQ-HISTORY-1081</small><br>unreviewed"]
-    REQ_VIEWER_1082["A registry tally row asks for its slice<br><small>REQ-VIEWER-1082</small><br>unreviewed"]
-    REQ_VIEWER_1084["A rail reading opens the rows behind its number<br><small>REQ-VIEWER-1084</small><br>unreviewed"]
-  end
-  subgraph sg_misc["misc"]
-    SYS_DRIFT_109["Noticing what moved without the specification<br><small>SYS-DRIFT-109</small><br>unreviewed"]
-  end
-  style REQ_CHECK_1040 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_DESIGN_061 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_950 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_951 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_952 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_953 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_954 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_955 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_976 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DESIGN_991 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_HEALTH_017 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTHROWS_1083 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_MAP_007 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_871 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXTUNTAGGED_1050 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_1070 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_1071 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_1072 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_SITE_026 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_924 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_1080 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_VIEWER_007 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_969 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_977 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HISTORY_1081 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1082 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1084 fill:#fff3cd,stroke:#a66,color:#630
-  style SYS_DRIFT_109 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-CHECK-1040 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-DESIGN-061 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-950 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-951 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-952 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-953 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-954 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-955 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-976 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DESIGN-991 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-HEALTH-017 | draft | 14 | 2 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTHROWS-1083 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-MAP-007 | draft | 42 | 9 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-871 | draft | 12 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXTUNTAGGED-1050 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-1070 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-1071 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-1072 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-SITE-026 | draft | 19 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-924 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-1080 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-VIEWER-007 | draft | 46 | 2 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-969 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-977 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HISTORY-1081 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1082 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1084 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| SYS-DRIFT-109 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

@@ -348,5 +348,16 @@ const rowFilterChecks = [
       && !designOnly.includes("global-state")],
 ];
 for (const [label, ok] of rowFilterChecks) test(label, ok);
+adoptMapExport({ health: { ...HROWS, unhealthy: [
+  { id: "AREA-H-003", status: "draft", why: ["not confirmed"] },
+  { id: "AREA-H-001", status: "confirmed", why: ["not tested"] },
+] }, design: null });
+const reviewOnly = renderToString(
+  <ProblemsView openSpec={noop} initialFilter="HEALTH" />);
+// verifies: REQ-VIEWER-1084#CASE-5
+test("filters: a row that only awaits confirmation stays in Review",
+  reviewOnly.includes("AREA-H-001") && !reviewOnly.includes("AREA-H-003")
+    && /Health<span[^>]*>1</.test(reviewOnly)
+    && reviewOnly.includes("1 only await confirmation"));
 adoptMapExport({ nodes: json.nodes.map(adaptNode),
                  health: json.health || null, design: json.design || null });

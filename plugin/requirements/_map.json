@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-23.1",
+  "engine_version": "2026-09-23.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1889,7 +1889,7 @@
       "id": "REQ-CHECK-1040",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A confirmed requirement missing its Description or Cases",
       "intent": "A confirmed requirement is a promise that someone read its contract and its cases. One with no `## Description` binds nothing, and one with no `## Cases` has nothing a test can point at, so the gate names the missing section. It stays a warning: the fix is an edit to prose, and dropping the status back is always an equally valid answer.",
@@ -1924,12 +1924,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -3728,7 +3723,7 @@
       "id": "ARCH-DESIGN-061",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Advisory design review",
       "intent": "Code written in a long AI session drifts toward procedural sprawl: state in module globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's code (Python through `ast`, the brace languages through masked-text heuristics) and names the shapes the four OOP pillars would fix, plus two writing rules — a file of at most 500 lines, a line of at most 80 columns — so the reader who came to understand a file also sees where its design pulls against it. It advises; it never gates.",
@@ -3810,12 +3805,7 @@
       "test_exempt": null,
       "milestone": "v3.4",
       "priority": "could-have",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -3823,7 +3813,7 @@
       "id": "REQ-DESIGN-950",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Encapsulation and abstraction candidates",
       "intent": "Encapsulation asks who owns a piece of state; abstraction asks whether a name says what a block does. `_design_file` answers both from the syntax tree alone, with thresholds a repo can tune, so the signals stay cheap and deterministic.",
@@ -3881,12 +3871,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "i18n": {
@@ -3902,7 +3887,7 @@
       "id": "REQ-DESIGN-951",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Inheritance and polymorphism candidates",
       "intent": "Two classes with the same three method names describe one interface nobody wrote down; a chain of `isinstance` tests is dispatch done by hand. Both are visible in the tree without running anything, and both are exactly the shapes a reader new to the file has to reconstruct in their head.",
@@ -3960,12 +3945,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "i18n": {
@@ -3981,7 +3961,7 @@
       "id": "REQ-DESIGN-952",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The `design` report",
       "intent": "The report is read by a person deciding what to refactor next, and by a tool that wants the same list as data. It walks the same tree the scanner walks, leaves test files out (a long test is not a design smell), and never changes an exit code.",
@@ -4027,12 +4007,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -4040,7 +4015,7 @@
       "id": "REQ-DESIGN-953",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Code-writing standards",
       "intent": "Two rules a reviewer checks by eye on every file, made mechanical and tunable: a file stays at most 500 lines, a line at most 80 columns. One finding per file per rule, so a 2,000-line file is one line in the report, not two thousand.",
@@ -4080,12 +4055,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -4093,7 +4063,7 @@
       "id": "REQ-DESIGN-954",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Design health in the map",
       "intent": "A list of candidates is something you read once; a number is something you watch. The same walk `design` runs is folded into one record — how many source files carry no candidate at all — and that record rides in the committed map next to the requirement graph, in the map's header, and in `health`, so design drift shows up where requirement drift already does.",
@@ -4150,12 +4120,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -4163,7 +4128,7 @@
       "id": "REQ-DESIGN-955",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Brace-language heuristics",
       "intent": "The engine ships no parser for JavaScript, C++ or Java and never will (stdlib only), but a reviewer's eye does not need one: a function head, a matched pair of braces, a `switch` with many cases, two classes listing the same methods. `_design_brace` reads those shapes from the source with comments and strings masked out, and feeds the same shape checks the Python analyzer feeds, so every language reports the same kinds at the same thresholds.",
@@ -4220,12 +4185,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -4233,7 +4193,7 @@
       "id": "REQ-DESIGN-976",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Design candidates in the map",
       "intent": "The score told a reader that design was at 23/100 and stopped there. To learn *which* shapes cost the other 77 they had to leave the map and run `ask --design` in a terminal, which is the moment most readers stop looking. The candidates now travel in the committed map beside the score they explain, so the viewer can list them in a tab of their own.",
@@ -4275,12 +4235,7 @@
       "test_exempt": null,
       "milestone": "v5.6",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -4405,7 +4360,7 @@
       "id": "REQ-DESIGN-991",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Advisory data cannot inherit a verdict",
       "intent": "`_map.json` is one freshness-gated artifact carrying three classes of data with three different severities: the requirement graph is normative, `health` is derived, and `design` is advisory by its own contract. The freshness comparison was all-or-nothing, so anything that landed in that document acquired ERROR severity by construction, whatever its own contract said about itself. One blank line inserted into a file no requirement claims moved a `line:` in `design.findings`, which made the committed map stale, which failed `gate` with zero requirement errors and zero lint errors.",
@@ -4442,12 +4397,7 @@
       "test_exempt": null,
       "milestone": "v6.3",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5
     },
@@ -6113,7 +6063,7 @@
       "id": "ARCH-HEALTH-017",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Corpus health snapshot",
       "intent": "A project can have dozens of requirements slowly rotting — some never coded, some untested, some out of sync with the code — and nobody notices until it is a mess. This boils the whole registry down to a single health score plus a few counts, so a CI badge or a reviewer sees at a glance whether things are in good shape. Without it, corpus decay stays invisible until it is expensive to fix.",
@@ -6221,12 +6171,7 @@
       "test_exempt": null,
       "milestone": "v1.14",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-HEALTH-857",
@@ -6566,7 +6511,7 @@
       "id": "REQ-HEALTHROWS-1083",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The rows behind the health score",
       "intent": "The score is a count of requirements green on every axis; a reader who wants to act needs the requirements themselves. Emitting them beside the number, from the same flags the number counts, is what keeps the list and the score from ever disagreeing.",
@@ -6601,12 +6546,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -7958,7 +7898,7 @@
       "id": "ARCH-MAP-007",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Requirement graph (_map.json)",
       "intent": "A list of requirement files tells you what exists but not how it all connects. This builds the graph: one node per requirement, one edge per dependency, each node carrying what the requirement says, what code backs it and what is at risk. Everything that draws or publishes a picture reads this file; nothing draws from the corpus directly.",
@@ -8183,12 +8123,7 @@
       "test_exempt": null,
       "milestone": "v1.04",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6
     },
@@ -8279,7 +8214,7 @@
       "id": "REQ-MAP-871",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Repo, engine version, todos, and freshness checking",
       "intent": "`repo` and `engine_version` describe the environment the map was built in, not the corpus itself — so both are excluded from the freshness diff, or a plain clone into a different fork, or bumping the vendored engine, would make every committed map falsely look stale. `todos` rides alongside for the same reason a picture needs planned work next to what already exists. `map --check` is the freshness gate that reads all of this: a committed file that no longer matches a fresh render is stale, and the gate surfaces that as a warning so a commit prepared with `gate` alone is never surprised by it later in CI.",
@@ -8361,12 +8296,7 @@
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 7,
       "covered": 7
     },
@@ -9991,7 +9921,7 @@
       "id": "REQ-NEXTUNTAGGED-1050",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Untagged files, ranked lowest",
       "intent": "A file that carries no membership tag is invisible to every other bucket, so `next` names it. It ranks below every requirement bucket, because tagging a file is housekeeping next to a requirement with no code, and it leaves out the prose and boilerplate that never carry a tag by design, or the list would bury the real gaps.",
@@ -10032,12 +9962,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -13240,10 +13165,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/plan-source-audit.html:6"
-        },
-        {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:2071"
         },
@@ -15259,7 +15180,7 @@
       "id": "REQ-SELFGATE-1070",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The dev git hooks run CI's checks before a commit and guard `main`",
       "intent": "CI is the verdict, but it answers after a push. The dev hooks give the same answer before a commit exists, and refuse the one push the branch model forbids. A hook that drifted from CI's order would pass a commit CI then rejects.",
@@ -15298,12 +15219,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -15311,7 +15227,7 @@
       "id": "REQ-SELFGATE-1071",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The published Action runs the consumer's engine through the same gate",
       "intent": "A consumer adopts the gate by adding one `uses:` line. What that line runs has to be the verdict this repo runs on itself, not a second, lighter check, and the two halves a consumer may not be ready for have to stay switchable without forking the Action.",
@@ -15346,12 +15262,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -15359,7 +15270,7 @@
       "id": "REQ-SELFGATE-1072",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The cache-sync script refreshes an engine, never seeds one",
       "intent": "A change to the engine reaches this machine's installed plugin and the consumer repos it works on only when someone copies it there. `sync_reqmap.sh` is that copy. It must carry the whole engine, the CLI and its package, and it must never plant an engine in a repo that did not ask for one.",
@@ -15394,12 +15305,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -16266,7 +16172,7 @@
       "id": "ARCH-SITE-026",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Generate & maintain a project presentation page",
       "intent": "A project is easier to grasp from one presentation page than from a folder of files. This capability lets the engine keep that page's links and key numbers current — injecting engine-owned regions into a page the author still controls, and scaffolding one when none exists — so the page never drifts from the registry.",
@@ -16379,18 +16285,13 @@
       "test_exempt": null,
       "milestone": "v1.35",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-SITE-924",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Inject engine-owned regions into a presentation page",
       "intent": "`sync` writes the `nav` and `stats` regions into `docs/architecture.html`, a page the author still edits by hand, touching only the bytes between each region's markers. Without it, keeping a hand-authored page's links and counts in sync with the registry would mean either regenerating the whole page (losing authored prose) or manually copying numbers every time the corpus changes.",
@@ -16447,12 +16348,7 @@
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6
     },
@@ -17660,7 +17556,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:269"
+          "loc": "app/src/lib/i18n.jsx:271"
         },
         {
           "role": "implements",
@@ -17764,7 +17660,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:304"
+          "loc": "app/src/lib/i18n.jsx:306"
         }
       ],
       "test_exempt": null,
@@ -17779,7 +17675,7 @@
       "id": "REQ-TRANSLATE-1080",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Showing a cached translation, always marked",
       "intent": "The engine only reads the cache (REQ-TRANSLATE-937, REQ-TRANSLATE-938); what a reader sees is decided here. A translation nobody reviewed must never pass for the author's words, so it appears only in the locale it was made for, and never without the marker that says so.",
@@ -17818,12 +17714,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -18088,7 +17979,7 @@
       "id": "ARCH-VIEWER-007",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Self-contained HTML map viewer",
       "intent": "What the viewer shows once it is open: the outline, a requirement's spec, the map, the roadmap and its plan, the inbox of open signals, the commands. The file it ships in, and the escaping that makes that file safe, is [[ARCH-VIEWERFILE-074]].",
@@ -18352,12 +18243,7 @@
       "test_exempt": null,
       "milestone": "v1.04",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-VIEWER-942",
@@ -18474,11 +18360,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:258"
+          "loc": "app/src/lib/i18n.jsx:260"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:312"
+          "loc": "app/src/lib/i18n.jsx:314"
         }
       ],
       "test_exempt": null,
@@ -18631,11 +18517,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:225"
+          "loc": "app/src/lib/i18n.jsx:227"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:329"
+          "loc": "app/src/lib/i18n.jsx:331"
         },
         {
           "role": "implements",
@@ -18714,7 +18600,7 @@
       "id": "REQ-VIEWER-969",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Two engine-emitted readings in the rail",
       "intent": "`reqmap.py gate --risk` opens with two numbers — how much of the corpus is green, and how much of the code is free of design candidates — and the viewer showed neither. They belong where a reader already looks for the shape of the repo: the rail, under the navigation. The viewer displays the records the map hands it; recomputing either one here is what would let the terminal and the browser report different repos.",
@@ -18759,12 +18645,7 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5
     },
@@ -18772,7 +18653,7 @@
       "id": "REQ-VIEWER-977",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The advisory design tab",
       "intent": "The rail already showed a design score, and a reader who wanted to know which shapes cost the missing points had to leave the viewer for a terminal. The candidates now travel in the map, so the Problems screen lists them — in a tab of their own, because they are the only rows here that are about a file rather than a requirement, and the only ones that gate nothing.",
@@ -18809,12 +18690,7 @@
       "test_exempt": null,
       "milestone": "v5.6",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -19096,7 +18972,7 @@
       "id": "REQ-HISTORY-1081",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The shipped months, drawn beside the plan",
       "intent": "The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader looks at a chart. Drawing the past on the plan's own timeline, from exactly the rows the engine emitted, is what lets \"what happened\" sit next to \"what is next\" without a second, drifting copy of either.",
@@ -19148,12 +19024,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -19161,7 +19032,7 @@
       "id": "REQ-VIEWER-1082",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A registry tally row asks for its slice",
       "intent": "The tally answers \"how many are drafts?\" and the next question is \"which ones?\". The row that counts them is the natural place to ask, from wherever the reader is: this is the asking half, and the outline applying the answer is REQ-VIEWER-945.",
@@ -19204,12 +19075,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -19217,20 +19083,21 @@
       "id": "REQ-VIEWER-1084",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A rail reading opens the rows behind its number",
       "intent": "A score says how the repo is doing and nothing about what to do. The rows behind it are the answer, and they should be one click from the number, already narrowed to what the reader is looking at, never recomputed in the browser.",
       "contract": [
         "Choosing the health ring opens Problems on its Health tab; choosing the design ring opens it on its Design tab.",
         "The Health tab lists the `unhealthy` rows the map's health record carries, each with the axes it fails, followed by the `exempt_ids` it carries; its count is the sum of both.",
+        "A row whose only failing axis is `not confirmed` is left out of the Health tab and its count, because the Review tab already lists it; the tab says how many it left out.",
         "The Health tab offers one chip per failing axis, each with its count; a chip narrows the list to the rows failing that axis, and `All` restores it.",
         "The Design tab offers one chip per pillar, each with its count; a chip narrows the candidates to that pillar, and `All` restores them."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each ring opens its own tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-3 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-4 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed",
+      "accept": "CASE-1 — each ring opens its own tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-3 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-4 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed\n\nCASE-5 — a row that only awaits confirmation stays in Review\n  Given  a health record with one row failing only `not confirmed` and one failing\n         `not tested`\n  When   Problems renders on its Health tab\n  Then   only the untested row is listed, the Health count is 1, and the tab says 1\n         row only awaits confirmation",
       "input": "",
       "output": "",
       "desc": "",
@@ -19263,20 +19130,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/ProblemsPanels.jsx:154"
+          "loc": "app/src/views/problems/ProblemsPanels.jsx:158"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 4,
-      "covered": 4
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "ARCH-VIEWERFILE-074",
@@ -19836,7 +19698,7 @@
       "id": "SYS-DRIFT-109",
       "layer": "need",
       "level": "system",
-      "status": "draft",
+      "status": "confirmed",
       "area": "SYS",
       "title": "Noticing what moved without the specification",
       "intent": "",
@@ -19871,12 +19733,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "must-have",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "acc": [
         "Scenario: a confirmed contract changes without its code Given  a confirmed requirement whose contract text has been edited When   the gate runs Then   it reports the drift and names the members and dependents to re-check, without advancing the baseline itself"
       ]
@@ -22299,9 +22156,9 @@
     },
     {
       "month": "2026-09",
-      "count": 109,
+      "count": 110,
       "first": "2026-09-02",
-      "last": "2026-09-22",
+      "last": "2026-09-23",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -22411,11 +22268,17 @@
         "v8.4.0",
         "v8.4.1",
         "v8.5.0",
-        "v8.5.1"
+        "v8.5.1",
+        "v8.6.0"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.6.0",
+          "date": "2026-09-23",
+          "headline": "The design review and the site are back, with no exemptions"
+        },
         {
           "version": "v8.5.1",
           "date": "2026-09-22",
@@ -23176,246 +23039,36 @@
   ],
   "design": {
     "files": 117,
-    "clean_files": 116,
-    "score": 99,
+    "clean_files": 117,
+    "score": 100,
     "candidates": {
       "encapsulation": 0,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 1
+      "standards": 0
     },
-    "findings": [
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "plugin/scripts/reqmap_engine/commands.py",
-        "line": 1,
-        "name": "commands.py",
-        "detail": "587 lines (over 500)"
-      }
-    ],
-    "advice": {
-      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows"
-    }
+    "findings": [],
+    "advice": {}
   },
   "health": {
-    "score": 90,
+    "score": 100,
     "total": 306,
     "scored": 285,
-    "healthy": 257,
+    "healthy": 285,
     "exempt": 0,
     "deprecated": 21,
-    "confirmed": 257,
+    "confirmed": 285,
     "implemented": 276,
     "tested": 276,
-    "drafts": 28,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 257,
-    "unhealthy": [
-      {
-        "id": "ARCH-DESIGN-061",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "ARCH-HEALTH-017",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "ARCH-MAP-007",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "ARCH-SITE-026",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "ARCH-VIEWER-007",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CHECK-1040",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-950",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-951",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-952",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-953",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-954",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-955",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-976",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DESIGN-991",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-HEALTHROWS-1083",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-HISTORY-1081",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-MAP-871",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-NEXTUNTAGGED-1050",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SELFGATE-1070",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SELFGATE-1071",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SELFGATE-1072",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SITE-924",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-TRANSLATE-1080",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1082",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1084",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-969",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-977",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "SYS-DRIFT-109",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      }
-    ],
+    "unhealthy": [],
     "exempt_ids": []
   },
   "planning": {

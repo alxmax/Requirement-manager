@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "78e1c1f73de7fb0839a78641bcaa8340f8611d95aeffeaae856cb94b6a1eb27e",
+      "plugin/scripts/reqmap_engine/__init__.py": "133e99ed6f3e07e415c198cd585d14caf0734aa1b5884ecda938ff1cf5132084",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -80,9 +80,6 @@
     },
     "ARCH-REVIEW-022": {
       "plugin/skills/requirement-quality-review/SKILL.universal.md": "a40ea50be8db8989769f2256d919e5e9c2fa355f4e8e08f3906d451c98cce88a"
-    },
-    "ARCH-ROADMAP-038": {
-      "docs/plan-source-audit.html": "f0b810b38b7c6caa9e4c4bcdf2b983da7557ffb62e7a46634e5665306c8c9e49"
     },
     "ARCH-RULES-059": {
       "plugin/scripts/reqmap_engine/model.py#Rule": "c63b20e16c2ab8681bbd2d5f261e752be3e22e1259456c9892f41152be7f9afd",

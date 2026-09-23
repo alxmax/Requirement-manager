@@ -1,6 +1,6 @@
 ---
 id: ARCH-SITE-026
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -67,7 +67,7 @@ CASE-5
 
 ---
 id: REQ-SITE-924
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -39,3 +39,7 @@ TODO-feedback-*.md
 # and the vendored viewer template. One rendered viewer exists (requirements/_map.html,
 # itself gitignored); a second committed copy was 2 MB of churn per requirement edit.
 docs/map.html
+
+# Working pages kept local, off the published site.
+docs/engine_components.html
+docs/plan-source-audit.html

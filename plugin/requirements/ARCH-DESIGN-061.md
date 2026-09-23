@@ -1,6 +1,6 @@
 ---
 id: ARCH-DESIGN-061
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -64,7 +64,7 @@ CASE-4
 
 ---
 id: REQ-DESIGN-950
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -113,7 +113,7 @@ CASE-4 — a prefix family
 
 ---
 id: REQ-DESIGN-951
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -163,7 +163,7 @@ CASE-4 — short chains are silent
 
 ---
 id: REQ-DESIGN-952
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -212,7 +212,7 @@ CASE-4 — thresholds come from the config
 
 ---
 id: REQ-DESIGN-953
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -259,7 +259,7 @@ CASE-4 — standards print last
 
 ---
 id: REQ-DESIGN-954
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -310,7 +310,7 @@ CASE-3 — no program logic, no key
 
 ---
 id: REQ-DESIGN-955
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -358,7 +358,7 @@ CASE-4 — standards only elsewhere
 
 ---
 id: REQ-DESIGN-976
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -573,7 +573,7 @@ CASE-3 — the dropped kinds are gone
 
 ---
 id: REQ-DESIGN-991
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

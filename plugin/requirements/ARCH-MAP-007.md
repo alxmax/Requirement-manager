@@ -1,6 +1,6 @@
 ---
 id: ARCH-MAP-007
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -168,7 +168,7 @@ CASE-6 — a hostile id or title round-trips as inert data
 
 ---
 id: REQ-MAP-871
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

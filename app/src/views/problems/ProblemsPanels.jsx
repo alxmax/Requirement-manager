@@ -136,14 +136,18 @@ const AXIS_FIX = {
     + "still holds.",
 };
 
+/** A row whose only failing axis is confirmation — the Review tab already
+ * lists it, so the Health tab leaves it out. */
+export function onlyUnconfirmed(u) {
+  return u.why.length === 1 && u.why[0] === "not confirmed";
+}
+
 /** One requirement that is not green, as a problem row. */
 function healthProblem(u) {
-  const only = u.why.length === 1 && u.why[0] === "not confirmed";
   return {
     id: u.id, title: (REQ_BY_ID[u.id] || {}).title || "",
     status: u.status,
-    sev: u.why.includes("not implemented") ? "ERROR"
-      : only ? "REVIEW" : "WARN",
+    sev: u.why.includes("not implemented") ? "ERROR" : "WARN",
     msg: u.why.join(" · "),
     fix: u.why.map((w) => AXIS_FIX[w] || "").join(" "),
   };
@@ -155,7 +159,9 @@ function healthProblem(u) {
 export function HealthPanel({ health, openSpec, initialAxis = null }) {
   const { t } = useI18n();
   const [axis, setAxis] = useState(initialAxis);
-  const rows = health.unhealthy || [];
+  const all = health.unhealthy || [];
+  const rows = all.filter((u) => !onlyUnconfirmed(u));
+  const inReview = all.length - rows.length;
   const exempt = health.exempt_ids || [];
   const counts = {};
   rows.forEach((u) => u.why.forEach((w) => {
@@ -168,6 +174,8 @@ export function HealthPanel({ health, openSpec, initialAxis = null }) {
     <>
       <div className="prob-chip" style={{ cursor: "default" }}>
         {t(note)}
+        {inReview > 0 && <>{" "}{t("{n} only await confirmation — see "
+          + "Review.", { n: inReview })}</>}
       </div>
       <ChipRow counts={counts} total={rows.length} value={axis}
         setValue={setAxis} label={(k) => t(k)} />
