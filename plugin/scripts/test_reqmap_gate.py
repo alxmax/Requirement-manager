@@ -3191,3 +3191,43 @@ class GateSkipsTheDesignReview(unittest.TestCase):  # tested-by: ARCH-MAP-007
                 R.cmd_map(ws, d)                     # then write
             with open(os.path.join(rq, "_map.json"), encoding="utf-8") as f:
                 self.assertIn("design", json.load(f))
+
+
+class GateNeverImportsTheDesignReview(unittest.TestCase):
+    # tested-by: ARCH-MAP-007
+    """`gate --full` must not even LOAD the design review: the four
+    `reqmap_engine.design*` modules are imported on first use, and the gate
+    never uses them. Run in a fresh interpreter, because this one has
+    imported them already."""
+
+    _PROBE = "\n".join((
+        "import json, sys",
+        "sys.path.insert(0, sys.argv[1])",
+        "import reqmap as R",
+        "sys.argv = ['reqmap.py', 'gate', '--full', '--root', sys.argv[2]]",
+        "rc = R.main()",
+        "loaded = sorted(m for m in sys.modules",
+        "                if m.startswith('reqmap_engine.design'))",
+        "ok = (R.design_report.__name__ == 'reqmap_engine.design_report'",
+        "      and callable(R.cmd_design))",
+        "sys.stdout.write('\\nPROBE ' + json.dumps([rc, loaded, ok]))",
+    ))
+
+    def test_gate_full_loads_no_design_module(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="confirmed",
+                              layer="feature", extra="", title="T"))
+            _write(os.path.join(d, "impl.py"),
+                   "def f(a):\n    return a\n  " + tag("REQ-A-001") + "\n")
+            here = os.path.dirname(os.path.abspath(__file__))
+            p = subprocess.run(
+                [sys.executable, "-X", "utf8", "-c", self._PROBE, here, d],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                universal_newlines=True, encoding="utf-8")
+            line = p.stdout.rpartition("PROBE ")[2]
+            self.assertTrue(line, p.stdout + p.stderr)
+            rc, loaded, ok = json.loads(line)
+            self.assertIn("gate:", p.stdout)
+            self.assertEqual(loaded, [])
+            self.assertTrue(ok)

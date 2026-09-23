@@ -38,7 +38,7 @@ the command line (parser, dispatch, the Python floor) and the flat namespace
 `import reqmap` has always offered.
 
 """
-import argparse, errno, os, sys
+import argparse, errno, importlib, os, sys
 
 from reqmap_engine import config as cfg
 from reqmap_engine.audit import cmd_audit
@@ -51,7 +51,6 @@ from reqmap_engine.cliflags import (
 )
 from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
-from reqmap_engine.design_report import cmd_design
 from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import GateMode, cmd_check
 from reqmap_engine.groups import cmd_decompose_groups
@@ -80,8 +79,7 @@ from reqmap_engine import (
     gate, audit, audittail, init, retire, retireapply, levels, review,
     targets, plandrift, history,
     pyramid, cliflags, docclaims, versions, release, mcp, mcpconfig, search,
-    design, design_python, design_brace, design_report, healthrows,
-    site, site_template,
+    healthrows, site, site_template,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually
 # runs (the `tests` matrix in .github/workflows/ci.yml). The code itself needs
@@ -209,6 +207,8 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     if a.mode_i18n:
         return _removed_flag("ask --i18n")
     if a.mode_design:
+        # Imported on use: no other verb loads the design review.
+        from reqmap_engine.design_report import cmd_design
         return cmd_design(ws.code_root, reqs_dir, as_json=a.as_json)
     if a.mode_search is not None:
         if not a.mode_search:
@@ -427,15 +427,25 @@ _ENGINE_MODULES = (
     gate, audit, audittail, init, retire, retireapply, levels, pyramid,
     review, targets, plandrift, history,
     cliflags, docclaims, versions, release, mcp, mcpconfig, search,
-    design, design_python, design_brace, design_report, healthrows,
-    site, site_template,
+    healthrows, site, site_template,
 )
+# The design review is imported only when a name is looked up in it, so a
+# command that never asks for it (`gate` above all) never loads it. Searched
+# after every eager module, in this order.
+_LAZY_MODULES = ("design", "design_python", "design_brace", "design_report")
 
 
 def __getattr__(name):
     for _m in _ENGINE_MODULES:
         if hasattr(_m, name):
             return getattr(_m, name)
+    if not name.startswith("__"):     # a dunder probe never loads a module
+        if name in _LAZY_MODULES:
+            return importlib.import_module("reqmap_engine." + name)
+        for _lazy in _LAZY_MODULES:
+            _m = importlib.import_module("reqmap_engine." + _lazy)
+            if hasattr(_m, name):
+                return getattr(_m, name)
     raise AttributeError("module 'reqmap' has no attribute {!r}".format(name))
 
 

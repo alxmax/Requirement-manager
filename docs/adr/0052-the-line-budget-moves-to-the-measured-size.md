@@ -1,8 +1,8 @@
 # ADR-0052 — The line budget moves once, to the measured size
 
 - **Status:** Accepted. Amends [ADR-0046](0046-the-engine-has-a-line-budget.md): its budget
-  is raised once, and its staged targets (12,500, then 8,000 by v9.0.0) are withdrawn until
-  the metric itself is replaced. Nothing else in ADR-0046 changes.
+  is raised once. Its staged targets (12,500, then 8,000 by v9.0.0) were already withdrawn by
+  [ADR-0048](0048-the-engines-floor-is-what-it-must-keep.md). Nothing else changes.
 - **Decided:** 2026-09-23, at the maintainer's direction, as a stop-gap. The alternative,
   cutting 3,203 lines, would undo the work that caused the overrun.
 - **Evidence:** `python scripts/check_engine_budget.py` on 2026-09-23 reports 16,753 lines
@@ -33,8 +33,8 @@ measure.
 
 1. **`ENGINE_LINE_BUDGET` becomes 16,753**, the measured size, with no headroom. It is
    lowered only by a change that earns it, as ADR-0046 says.
-2. **The 12,500 and 8,000 stages are withdrawn.** They were set against a count that now
-   includes formatting.
+2. **The 12,500 and 8,000 stages stay withdrawn**, as ADR-0048 decided. They were set
+   against a count that now includes formatting.
 3. **This is not the target metric.** A later record replaces it. The planned direction is:
    - a performance budget on the hook path, set from measured medians and report-only at
      first;

@@ -167,9 +167,6 @@ const RO = {  // implements: REQ-VIEWER-943
     "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
   "Answer it, fold the answer into the Description, then delete the bullet.":
     "Răspunde, integrează răspunsul în Descriere, apoi șterge punctul.",
-  "hide {n} draft review rows": "ascunde {n} rânduri de revizuire draft",
-  "{n} draft review rows hidden — show":
-    "{n} rânduri de revizuire draft ascunse — arată",
   // map tabs
   "System Map": "Harta sistemului",
   "Req→Code": "Cerință→Cod",

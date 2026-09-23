@@ -78,21 +78,20 @@ CASE-6
   5.10. The signal that would have said so did not exist.
 - Neither signal is a gate. The v1.35 roadmap-hygiene note chose manual upkeep over
   automation when demand was n=1; this is the read-only middle ground after n=2.
-- Un singur izvor pentru plan (ROADMAP.md și `_planning.json` topite într-unul,
-  docs/plan-source-audit.html) a fost respins pe 2026-09-14: 5 din 6 bare se potrivesc
-  deja cu un item, deci divergența măsurată e 1, nu 10. Se redeschide numai la ≥ 2
-  divergențe item/bară și ≥ 1 recurență de prospețime (o bară rămasă în urma item-ului
-  ei după ce a fost corectată o dată). Dacă pe 2027-03-14 cele două numere citesc
-  sub 2 și zero, propunerea se marchează respinsă — nu re-argumentată.
-- Precedente: Senate `2026-06-21_122415-reqmap-todo-roadmap-coherence` (MODIFY, outcome OK:
-  semnal read-only la n=2, niciodată gate) și `2026-09-14_225939-senate-reqmap-plan-single-source`
-  (MODIFY, outcome OVR: ștergerea `scores` nu fusese livrată). Auditul
-  `2026-09-16_160109-rm-planning-audit` (MODIFY 9-0) a cerut REQ-PLANSTALE-1013.
-- Citirea condiției de redeschidere la 2026-09-16: recurențe de prospețime a planului = 2
-  (v7.9 în 830df0f, v7.19 cu `plugin.json` deja la 7.19.0), după prima (v7.4);
-  divergențe item/bară măsurate = 1 (bara „Server MCP” era planificată pe v7.19 în timp ce
-  item-ul ei stă în `Later` cu `unpark:`). Sub pragul de ≥ 2 divergențe: condiția NU e
-  îndeplinită, merge-ul rămâne respins.
+- A single source for the plan (ROADMAP.md and `_planning.json` merged into one,
+  docs/plan-source-audit.html) was rejected on 2026-09-14: 5 of 6 bars already match an
+  item, so the measured divergence is 1, not 10. It reopens only at >= 2 item/bar
+  divergences and >= 1 freshness recurrence (a bar left behind its item after being
+  corrected once). If on 2027-03-14 the two numbers read under 2 and zero, the proposal
+  is marked rejected, not re-argued.
+- Precedents: a review on 2026-06-21 (read-only signal at n=2, never a gate) and one on
+  2026-09-14 (the deletion of `scores` had not shipped). An audit on 2026-09-16 asked for
+  REQ-PLANSTALE-1013.
+- Reading the reopening condition on 2026-09-16: plan freshness recurrences = 2
+  (v7.9 in 830df0f, v7.19 with `plugin.json` already at 7.19.0), after the first (v7.4);
+  measured item/bar divergences = 1 (the "MCP server" bar was planned on v7.19 while
+  its item sits in `Later` with `unpark:`). Under the >= 2 divergence threshold: the
+  condition is NOT met, and the merge stays rejected.
 
 **Current implementation**
 - `_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by
