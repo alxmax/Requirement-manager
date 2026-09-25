@@ -46,6 +46,9 @@ def _add_query_flags(ap):
                     help="gate: run every rule and print every "
                          "readability warning, not "
                          "only what says something is broken")
+    ap.add_argument("--if-affected", dest="if_affected", action="store_true",
+                    help="gate: skip when the diff does not touch "
+                         "requirements, the engine, or a locked member")
     ap.add_argument("--no-map-check", dest="no_map_check", action="store_true",
                     help="gate: skip the committed-map freshness check")
     ap.add_argument("--findings", action="store_true",
@@ -125,10 +128,6 @@ def _add_todo_and_mode_flags(ap):
                     help="sync --retire / --release: actually write the "
                          "change (without it, "
                          "the run is a dry report)")
-    # Mode flags: the read-only queries that used to be their own verbs.
-    # The work they do is unchanged — only the entry point moved: `gate`
-    # keeps the verdict and the reports on it, `ask` every other question
-    # (ADR-0044), `sync` every write.
     ap.add_argument("--audit", dest="mode_audit", action="store_true",
                     help="gate: also print risk, duplicate contracts and "
                          "tag coverage")
@@ -168,8 +167,6 @@ def _add_todo_and_mode_flags(ap):
                          "the plan first")
 
 
-# The flags every verb accepts: where the workspace is, and whether to
-# cache the scan.
 WORKSPACE_FLAGS = ("--root", "--reqs", "--code", "--cache")
 
 
