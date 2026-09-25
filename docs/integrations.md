@@ -89,14 +89,25 @@ and asserts a valid `_map.json` is produced. If this passes, the engine works un
 any assistant — or with no assistant at all.
 
 
-Fail the build on drift, on every push and pull request:
+Run the gate on demand, or on a pull request that touches requirements or the
+vendored engine. Drift stays advisory unless `DRIFT_SEVERITY` is `"error"`.
+Put the expensive app CI (API, Docker, frontend) in a different workflow.
 
 ```yaml
 # .github/workflows/reqmap.yml
 name: reqmap gate
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "requirements/**"
+      - "scripts/reqmap.py"
+      - "scripts/reqmap_engine/**"
 permissions:
-  contents: read            # least privilege — the gate only reads the tree
+  contents: read
+concurrency:
+  group: reqmap-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -104,6 +115,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: alxmax/requirement-manager/check@v8
 ```
+
+`reqmap hook install` writes this file when it is absent. Locally the managed
+pre-push block runs `gate --if-affected`.
 
 The action runs `reqmap.py gate`, which since `v4.0.0` *is* the lint and the map
 freshness check as well — both default-on, both switchable off with
@@ -116,8 +130,7 @@ run instead of staying green in silence (`stale-engine: 'error'` to fail the bui
 you vendored the engine — see [`check/action.yml`](../check/action.yml). Or skip the action
 entirely: `- run: python -X utf8 scripts/reqmap.py gate`.
 
-`@v2` is a major-alias tag: it is force-moved onto every released commit, so it always
-resolves to the latest release on that interface line. Pin an exact `vX.Y.Z` tag or a
+`@v8` is the current major-alias tag: it is force-moved onto every released commit of that line. Pin an exact `vX.Y.Z` tag or a
 commit SHA instead if you want a frozen ref. `@v1` still works and still runs the
 gate-only step list it always did, but it no longer moves — it needs an engine seeded
 from plugin v2.0.0+, and `@v2` needs v2.3.4+ (the release that added `lint_exempt:`).
