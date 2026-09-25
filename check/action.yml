@@ -10,7 +10,7 @@
 # Usage (in a consumer repo that has vendored scripts/reqmap.py per the skill setup):
 #
 #     name: reqmap gate
-#     on: [push, pull_request]
+#     on: [workflow_dispatch, pull_request]
 #     permissions:
 #       contents: read            # least privilege — the gate only reads the tree
 #     jobs:
@@ -26,7 +26,7 @@
 # release job reads the major from this file and force-moves the tag onto every commit
 # it releases, so the alias always resolves to the latest released content on that line
 # and cannot silently rot behind the repo again. scripts/check_versions.py asserts this
-# file, README.md and CLAUDE.md all name the same major. Pin to `@v2` (moves with backward-compatible fixes) or to an exact
+# file, README.md and CLAUDE.md all name the same major. Pin to `@v8` (current interface line) or to an exact
 # `vX.Y.Z` tag / commit SHA for full reproducibility. The alias is independent of the
 # plugin semver and of reqmap.py's MAP_ENGINE_VERSION.
 #
@@ -100,25 +100,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # Pinned to a full commit SHA (not @v5) so a compromised tag re-point cannot
-    # execute in any consumer's run. Dependabot (github-actions, weekly) keeps it
-    # current — see .github/dependabot.yml.
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ inputs.python-version }}
-    # First, so the rest of the run reads in context: a checker that shipped after the
-    # vendored engine simply is not running, and this is the only place that says so.
-    # Warn-only by default — a new step that could newly fail a green build would be a
-    # breaking change for an existing @v2 pin. Fails open (exit 0) when either version
-    # is unreadable; see check/engine_staleness.py.
     - name: reqmap engine staleness  # implements: REQ-STALEENGINE-925
       if: ${{ inputs.stale-engine != 'off' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      # The `|| status=$?` dance is what makes "warn-only" true of the STEP and not just
-      # of the script: in warn mode nothing here — a probe that isn't where we expect it,
-      # a python that won't start — may turn a previously green build red, because that
-      # would be a breaking change for a pin that did not move. `error` opted into loud.
       run: |
         probe="$GITHUB_ACTION_PATH/engine_staleness.py"
         status=0
@@ -137,10 +125,6 @@ runs:
     - name: reqmap gate
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      # One verdict since engine v4.0.0: link sync + drift + test links, requirement
-      # readability, committed-map freshness. The `lint` and `freshness` inputs stay,
-      # and now switch the corresponding half of `gate` off — so a caller's existing
-      # `lint: 'false'` keeps meaning what it meant.
       run: |
         set -e
         FLAGS=""
