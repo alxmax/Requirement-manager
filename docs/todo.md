@@ -26,6 +26,15 @@ Decis: Consilium sequential (`unconventional_default_path`) + Trias 2–1 (`defa
 - [x] E4. versions + CORE budget în job-ul scurt.
 - [ ] E5. Release / `@v8` doar pe push `main` sau tag, nu și pe PR.
 
+## P. Plan rigid (după A–C, nu în locul lor)
+- [ ] P0. Un plan: `ROADMAP.md`. Nu ține un al doilea TODO pe `main`. După merge, mută Now/Next aici și retrage `docs/todo.md`.
+- [ ] P1. `sync --release --apply` bifează în `ROADMAP.md` itemele `| req: ID` ale barelor din milestone-ul tăiat. Nu le mai lista doar în stdout.
+- [ ] P2. `gate --strict` (opt-in) pică pe plan stale: milestone ≤ versiunea declarată. Implicit rămâne warn (`REQ-PLANSTALE-1013`).
+- [ ] P3. `sync --release` exit 2 dacă un item Now/Next din milestone nu are bară în `_planning.json`.
+- [ ] P4. Un drum de release în *acest* repo: ori CI citește `sync --release --json` (ADR-0040), ori docs nu mai zic că planul taie tag-ul. Acum tagează din `plugin.json`.
+
+Nu: Roadmap generat din git, gate roșu implicit pe plan sub `@v8`, al treilea fișier de sync, cadence săptămânală cât ești singur.
+
 ## D. Mai târziu
 - [ ] D1. Licență (amânat).
 - [ ] D2–D4. Outreach, lazy imports, prag AC pe draft.
