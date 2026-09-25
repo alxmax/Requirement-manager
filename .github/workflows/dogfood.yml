@@ -1,0 +1,34 @@
+# Dogfood the published Action with the same pin the README names.
+# If this job is red, the README is lying.
+name: dogfood
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "plugin/scripts/**"
+      - "plugin/requirements/**"
+      - "check/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - "plugin/scripts/**"
+      - "plugin/requirements/**"
+      - "check/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+permissions:
+  contents: read
+concurrency:
+  group: dogfood-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  published-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: alxmax/requirement-manager/check@v8
+        with:
+          reqmap-path: scripts/reqmap.py
+          working-directory: plugin
