@@ -9,6 +9,8 @@ Format: `- [ ] text | req: ID` under Now/Next. Later needs `unpark:`.
 Reserved headings: Now, Next, Later, Not now. Categories are `###` headings inside them.
 Cadence: one release a week, not one per merge.
 
+Implementation detail and stacked delivery: [simplification plan](docs/simplification-plan.md).
+
 ## Now
 
 ### Adoption
