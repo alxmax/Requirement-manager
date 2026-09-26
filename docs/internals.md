@@ -38,8 +38,8 @@ ROADMAP.md                                  the live plan — Now / Next / Later
 CHANGELOG.md                                one dated entry per release; read as the shipped history, written by `sync --release`
 ```
 
-`SKILL.md` (authoritative for authoring rules, statuses, and the gate):
-[`plugin/skills/requirement-manager/SKILL.md`](../plugin/skills/requirement-manager/SKILL.md).
+The skill's shared workflow (authoritative for authoring rules, statuses, and the gate):
+[`plugin/skills/requirement-manager/references/workflow.md`](../plugin/skills/requirement-manager/references/workflow.md).
 
 
 Measured, not asserted — `python -X utf8 scripts/benchmark_scan.py` builds a synthetic

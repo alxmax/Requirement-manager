@@ -112,7 +112,7 @@ The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any 
 ## Architecture
 
 This repo is a Claude Code plugin that ships **two skills** under `plugin/skills/`:
-- `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` is the authoritative contract.
+- `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` (Claude) and `SKILL.universal.md` (any other assistant) are short entry points; both load `references/workflow.md`, the authoritative contract.
 - `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: ARCH-REVIEW-022`).
 
 **Diagrams of this repo** are no longer generated here. The `excalidraw-diagram` skill was
@@ -203,7 +203,7 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 **A semver bump must ship with a CHANGELOG entry.** CI fails the build when `plugin/.claude-plugin/plugin.json`'s version changed in the commit but `CHANGELOG.md` has no heading containing `` `vX.Y.Z` `` (the backticked form is what the grep matches). On pushes to `main` the `release` job then cuts tag `vX.Y.Z` from `plugin.json` — idempotent, so a non-bumping push creates nothing — with notes extracted from that same CHANGELOG section by `scripts/changelog_notes.py`. Tags therefore follow `plugin.json`, never the other way round.
 
-The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
+The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/references/workflow.md`.
 
 **GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v8`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v8` ships with plugin `8.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
 ```yaml

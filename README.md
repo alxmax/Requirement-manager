@@ -82,7 +82,7 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 | [Integrations](docs/integrations.md) | plain CLI, the Claude Code plugin, the MCP server, other assistants, the CI action |
 | [Planning and releasing](docs/planning.md) | `ROADMAP.md`, `_planning.json`, `CHANGELOG.md` and `sync --release` |
 | [Internals](docs/internals.md) | how this repo is laid out, and measured numbers on a 10,000-file tree |
-| [`SKILL.md`](plugin/skills/requirement-manager/SKILL.md) | the authoritative contract: authoring rules, statuses, the gate |
+| [`workflow.md`](plugin/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |
 | [Decision records](docs/adr/README.md) | why it works the way it does — including four things considered and not built |
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md) · security: [`SECURITY.md`](SECURITY.md)
