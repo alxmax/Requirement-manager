@@ -385,6 +385,10 @@
       "hash": "242c5a7aa921",
       "reason": "JSON for show/search/dupes; MCP resources"
     },
+    "REQ-SITE-924": {
+      "hash": "0cf310579c78",
+      "reason": "Bare sync leaves a page with no engine region alone"
+    },
     "REQ-TRACE-934": {
       "hash": "2ccdcdb3fec3",
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"

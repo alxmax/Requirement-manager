@@ -178,11 +178,13 @@ def _strip_engine_stat(html):  # implements: ARCH-SITE-026
     return _ENGINE_STAT_RE.sub("", html)
 
 
-def cmd_site(ws, root=".", attach=None, regions=None):
+def cmd_site(ws, root=".", attach=None, regions=None, refresh_only=False):
     # implements: ARCH-SITE-026  # implements: REQ-SITE-924
     """Inject engine-owned regions into `attach`, or scaffold a default page
-    there when it does not exist. Deterministic and headless-safe: never
-    prompts, never raises on a missing git or remote."""
+    there when it does not exist. With `refresh_only`, an existing page that
+    carries no engine region is left alone: another tool may own it.
+    Deterministic and headless-safe: never prompts, never raises on a
+    missing git or remote."""
     if not attach:
         print("usage: reqmap sync --attach <page.html>")
         return 0
@@ -195,6 +197,8 @@ def cmd_site(ws, root=".", attach=None, regions=None):
     if os.path.isfile(attach):
         with open(attach, encoding="utf-8") as f:
             html = f.read()
+        if refresh_only and "<!--##REQMAP:" not in html:
+            return 0
         mode = "refreshed"
     else:
         os.makedirs(page_dir, exist_ok=True)

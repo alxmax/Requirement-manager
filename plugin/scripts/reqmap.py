@@ -245,10 +245,12 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
                 os.path.join(reqs_dir, "_findings.md")):
             cmd_findings(reqs, reqs_dir, raw=False)
         # implements: ARCH-SITE-026 — an explicit --attach page is scaffolded
-        # when absent; the default docs/architecture.html only if it exists.
+        # when absent; the default docs/architecture.html only if it exists
+        # and already carries an engine region.
         page = a.attach or _site_default_target(code_root)
         if page and (a.attach or os.path.isfile(page)):
-            cmd_site(ws, code_root, attach=page, regions=["nav", "stats"])
+            cmd_site(ws, code_root, attach=page, regions=["nav", "stats"],
+                     refresh_only=not a.attach)
         # Deliberately here and not in cmd_check: `gate` runs on every commit
         # via the hook, and a corpus-shape advisory there is noise on work that
         # is already correct. `sync` is the moment the corpus was just

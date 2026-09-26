@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "1fd60446b8c0cb9e5139c2cddf96006e725f6e03840469bf2879e05405a6e6e7",
+      "plugin/scripts/reqmap_engine/__init__.py": "84375ea0da79e5a59db1c9c8521d99642e04c3042ed6e5b953456e69dfbede60",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -92,7 +92,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "25e4247342f7e9ad8f25fcbddc4007f56d0635816da459d29362d8ea4ea09135",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "62f9f01e42d73523e225b5fe9ea23c4d7d4cccae2ffec48a6929397332aa61b9",
+      "scripts/check_engine_budget.py": "ec1fdc0035325425fc9d594302a5ccb0aa845d3a97df8407e6a1d5deff6cc6ac",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130"
@@ -102,9 +102,9 @@
       "plugin/scripts/reqmap_engine/similar.py#_threshold_arg": "78f44005010205879f9e5dbc8ddade9f956e5e33d9866e6715689d92aeaa4799"
     },
     "ARCH-SITE-026": {
-      "plugin/scripts/reqmap_engine/git.py#_git_remote_web_url": "6242f55ba2c425311c018fd4c8cc81a491a75ef1facf46909eb8178a17ae2339",
+      "plugin/scripts/reqmap_engine/git.py#_git_remote_web_url": "26e1d790366b1adfd1097174975af181135241a59ed4923ccaf4f6ca258b2dd4",
       "plugin/scripts/reqmap_engine/git.py#_normalise_remote": "e9f25864ebcf6ef7916d58732c2c6d0db55f3ee59b3acedcdf8f188c9b946df1",
-      "plugin/scripts/reqmap_engine/site.py": "15883890bd28a023f5423d5329bc6e2b436d75b3351c6de4da7dac3e9c740232",
+      "plugin/scripts/reqmap_engine/site.py": "a42114ac8abc300445925c4755744a308ce592aa1cd64b1d6839f84280fcf848",
       "plugin/scripts/reqmap_engine/site.py#_extract_region": "caf953cdb20f5ae8e38b687ed8e8970a0f17dcf333a93e37ad71492294746385",
       "plugin/scripts/reqmap_engine/site.py#_html_escape": "48935aca11993bf93da55c718c70a075511324d893c6038a7153e2546db8451d",
       "plugin/scripts/reqmap_engine/site.py#_region_markers": "f3d9f4545fd0b4212e919bddcfbdd99042e33cbcdbafb38f9b28aa7ee1c70f14",
@@ -350,14 +350,14 @@
       "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "cba0f092c9473e700e5da56825c11ee4deef30a67ddf7e523955fc5170941dfa"
     },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "5fb1c5db733a05cdbf8ab9ccc95e0eefce83d64223411a415f3635a21c688ce3"
+      "plugin/scripts/reqmap.py": "3a7cc52b0e5227d48e59f4345881670373ad3c1bc60a5366ca52e30049d5d7fc"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "60a5966ee67c5f4d7ae327036c8a44cd08688e3de46834b4a493f14234e0a817"
     },
     "REQ-RELEASECMD-1018": {
       "plugin/scripts/reqmap_engine/history.py#changelog_style": "0867fdcaf205c1716525ee2f5f85bc200b959fbba884307446a690f35b24afbe",
-      "plugin/scripts/reqmap_engine/history.py#release_heading": "bad1c9c88445c436bc5c30ce2a11ebbf46789c1f7874d9d773b89c3dffe8afa8",
+      "plugin/scripts/reqmap_engine/history.py#release_heading": "d9c796ec4d5ef2dc02a50ac98057c37d558ff7b81d7d56aafc052bc5aa784bc3",
       "plugin/scripts/reqmap_engine/release.py#_changelog_entry": "e7727c7bea11788e0391d6f2cf451cab88eba8c21afa57efaee68730dd5704ce",
       "plugin/scripts/reqmap_engine/release.py#_insert_entry": "8daca2d1081ca462babc9dada67c055b0115521b22c796166e8580ca48cbfc28",
       "plugin/scripts/reqmap_engine/versions.py#write_version_file": "5c8c5ea5abe18ec223528e11d889645f696ce6d16c0ed5366cab4c59445a419a"
