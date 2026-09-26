@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-23.2",
+  "engine_version": "2026-09-24",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -922,7 +922,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:290"
+          "loc": "plugin/scripts/reqmap.py:276"
         },
         {
           "role": "tested-by",
@@ -1719,7 +1719,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:334"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
         },
         {
           "role": "implements",
@@ -1739,7 +1739,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:214"
+          "loc": "plugin/scripts/reqmap_engine/model.py:228"
         },
         {
           "role": "implements",
@@ -2102,7 +2102,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:335"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
         }
       ],
       "test_exempt": null,
@@ -2175,7 +2175,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:335"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
         }
       ],
       "test_exempt": null,
@@ -2254,13 +2254,14 @@
         "A bare `gate` runs only the rules in `DEFAULT_RULES`: every error-severity rule, the warnings that say a link is broken (RM005, RM012, RM023, RM033, RM034, RM036), the warnings about the drift baseline (RM016, RM018, RM019, RM020) and the committed map (RM022, RM027).",
         "A bare `gate` prints a requirement's readability findings only when one is an error; warnings are not printed and not counted.",
         "`gate --full` and `gate --audit` run every registered rule and print every readability finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.",
-        "The verdict is the last line `gate` prints, and it names each check the run covered.",
+        "Text and `--json` derive their exit code from one structured result. Both formats execute every enabled stage, honoring explicit opt-outs. JSON includes all effective findings; formatting never disables a check.",
+        "The verdict is the last line a text `gate` prints, and it names each check the run covered.",
         "The last line of a bare gate names `gate --full` as where the advice is."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness",
+      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness\n\n\nCASE-5 — formatting does not bypass lint\n  Given  an implemented requirement with eight acceptance criteria\n  When   text and JSON gates run, including strict and full modes\n  Then   both fail with the lint finding; both honor `--no-lint` and write nothing\n\nCASE-6 — formatting does not bypass map freshness\n  Given  a stale generated map\n  When   text and JSON gates run\n  Then   both fail and identify the stale map; both honor `--no-map-check`",
       "input": "",
       "output": "",
       "desc": "",
@@ -2276,20 +2277,28 @@
           "loc": "plugin/scripts/test_reqmap_gate.py:3047"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3237"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/gate.py:73"
         },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lint.py:119"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/model.py:140"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-CLARIFY-062",
@@ -2593,7 +2602,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:113"
+          "loc": "plugin/scripts/reqmap.py:91"
         },
         {
           "role": "tested-by",
@@ -2802,11 +2811,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:193"
+          "loc": "plugin/scripts/reqmap.py:179"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:203"
+          "loc": "plugin/scripts/reqmap.py:189"
         },
         {
           "role": "tested-by",
@@ -2926,7 +2935,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:328"
+          "loc": "plugin/scripts/reqmap.py:314"
         },
         {
           "role": "tested-by",
@@ -3436,7 +3445,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:144"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -4106,7 +4115,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:94"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:95"
         },
         {
           "role": "implements",
@@ -4229,7 +4238,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:94"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:95"
         }
       ],
       "test_exempt": null,
@@ -4391,7 +4400,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:120"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:121"
         }
       ],
       "test_exempt": null,
@@ -5696,11 +5705,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:48"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:207"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:208"
         },
         {
           "role": "implements",
@@ -5927,11 +5936,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:23"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:183"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:184"
         }
       ],
       "test_exempt": null,
@@ -6425,7 +6434,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:101"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:102"
         },
         {
           "role": "implements",
@@ -7343,7 +7352,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:144"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -7425,7 +7434,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:145"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:149"
         },
         {
           "role": "implements",
@@ -8033,27 +8042,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:23"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:57"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:119"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:120"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:157"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:183"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:184"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:229"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:230"
         },
         {
           "role": "implements",
@@ -8081,7 +8090,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:261"
+          "loc": "plugin/scripts/reqmap_engine/model.py:275"
         },
         {
           "role": "implements",
@@ -8172,11 +8181,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:24"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:25"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:57"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:58"
         },
         {
           "role": "implements",
@@ -8274,19 +8283,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:119"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:120"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:157"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:184"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:185"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:229"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:230"
         },
         {
           "role": "implements",
@@ -8527,7 +8536,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:91"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:92"
         },
         {
           "role": "implements",
@@ -8949,6 +8958,10 @@
         "REQ-MCPRESOURCES-1030"
       ],
       "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3284"
+        },
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:4551"
@@ -10458,7 +10471,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:183"
+          "loc": "plugin/scripts/reqmap_engine/model.py:197"
         },
         {
           "role": "implements",
@@ -10831,11 +10844,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:379"
+          "loc": "plugin/scripts/reqmap.py:366"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:400"
+          "loc": "plugin/scripts/reqmap.py:387"
         },
         {
           "role": "tested-by",
@@ -10877,7 +10890,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:400"
+          "loc": "plugin/scripts/reqmap.py:387"
         },
         {
           "role": "tested-by",
@@ -11650,7 +11663,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:70"
         },
         {
           "role": "tested-by",
@@ -11701,15 +11714,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:90"
+          "loc": "plugin/scripts/reqmap.py:68"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:70"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:307"
+          "loc": "plugin/scripts/reqmap.py:293"
         },
         {
           "role": "tested-by",
@@ -13399,7 +13412,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:86"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:87"
         },
         {
           "role": "implements",
@@ -13528,7 +13541,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:77"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:78"
         }
       ],
       "test_exempt": null,
@@ -13720,7 +13733,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:334"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
         },
         {
           "role": "implements",
@@ -13728,11 +13741,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:140"
+          "loc": "plugin/scripts/reqmap_engine/model.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:159"
+          "loc": "plugin/scripts/reqmap_engine/model.py:173"
         },
         {
           "role": "implements",
@@ -13794,7 +13807,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:159"
+          "loc": "plugin/scripts/reqmap_engine/model.py:173"
         },
         {
           "role": "implements",
@@ -13875,7 +13888,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:336"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:329"
         },
         {
           "role": "implements",
@@ -15093,6 +15106,14 @@
           "loc": "scripts/check_versions.py:2"
         },
         {
+          "role": "implements",
+          "loc": "scripts/measure_plugin.py:3"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/measure_plugin.py:14"
+        },
+        {
           "role": "tested-by",
           "loc": "scripts/test_changelog_notes.py:2"
         },
@@ -16142,7 +16163,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:278"
+          "loc": "plugin/scripts/reqmap.py:264"
         },
         {
           "role": "tested-by",
@@ -16207,7 +16228,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:269"
+          "loc": "plugin/scripts/reqmap.py:255"
         },
         {
           "role": "tested-by",
@@ -16227,7 +16248,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:222"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:223"
         },
         {
           "role": "implements",
@@ -17107,7 +17128,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:201"
+          "loc": "plugin/scripts/reqmap_engine/model.py:215"
         },
         {
           "role": "implements",
@@ -17258,7 +17279,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:201"
+          "loc": "plugin/scripts/reqmap_engine/model.py:215"
         },
         {
           "role": "implements",
@@ -22156,9 +22177,9 @@
     },
     {
       "month": "2026-09",
-      "count": 110,
+      "count": 111,
       "first": "2026-09-02",
-      "last": "2026-09-23",
+      "last": "2026-09-24",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -22269,11 +22290,17 @@
         "v8.4.1",
         "v8.5.0",
         "v8.5.1",
-        "v8.6.0"
+        "v8.6.0",
+        "v8.6.1"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.6.1",
+          "date": "2026-09-24",
+          "headline": ""
+        },
         {
           "version": "v8.6.0",
           "date": "2026-09-23",
@@ -23038,8 +23065,8 @@
     }
   ],
   "design": {
-    "files": 117,
-    "clean_files": 117,
+    "files": 118,
+    "clean_files": 118,
     "score": 100,
     "candidates": {
       "encapsulation": 0,

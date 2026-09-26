@@ -146,8 +146,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "REQ-CHECK-1036": {
-      "hash": "34a70deb46b9",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "8b9ebb1ff39b",
+      "reason": "Clarify reviewed format-parity contract"
     },
     "REQ-CHECK-829": {
       "hash": "0e8902f7179e",

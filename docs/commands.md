@@ -29,7 +29,8 @@ errors only; drift and test-link integrity are warnings. Bare, it runs only the 
 that say a link, the drift baseline or the committed map is broken, and prints
 readability errors only ([ADR-0049](adr/0049-a-bare-gate-says-only-what-is-broken.md));
 `--full` runs every rule and prints every readability warning. `--strict` promotes
-drift and test-link integrity to errors, `--json` emits one machine-readable document,
+drift and test-link integrity to errors, `--json` emits one machine-readable document with the same rule, lint and map
+verdict as text output,
 `--since <ref>` scopes it to requirements whose members changed since a git ref, and
 `--no-lint` / `--no-map-check` opt out of the two extras.
 

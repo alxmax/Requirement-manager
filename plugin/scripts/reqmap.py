@@ -1,33 +1,9 @@
 #!/usr/bin/env python3
 """reqmap — requirement manager engine (stdlib only).
 
-Subcommands: init              first-use bootstrap: scaffold requirements/ +
-.reqmapignore, draft requirements from existing code, build the lock + map,
-print next steps scan              list code members
-(implements/generated-from/... tags) per capability gate              the gate:
-link sync + drift + test-link integrity; exit non-zero on error (pre-commit/CI)
-sync              rescan + advance the drift baseline + regen the map and a
-committed _findings.md (--accept-drift for an edited contract) map
-generate requirements/_map.md (Mermaid) + _map.json (graph) [+ _map.html viewer]
-export            emit the registry graph as requirements/_map.json (for a
-front-end) next              terminal 'what should I do next': counted,
-actionable risk buckets lint [--strict]   readability/structure check on
-non-draft requirements (warn; --strict fails on errors) show <ID>
-consolidated dossier for one requirement (contract, deps, members, risk) dupes
-[--threshold T]  flag requirement pairs with overlapping contracts (TF-IDF
-cosine) health [--json]   corpus coherence score + component counts (--json for
-a CI badge) draft             draft requirements from legacy code (status:
-draft, risk-scored) plan              read-only JSON capability-extraction plan
-(writes no .md) findings          aggregate open verify-intent items into
-requirements/_findings.md mcp [--allow-writes]  serve the requirements to an AI
-assistant over MCP (stdio) confirm <ID>      flip a reviewed requirement's
-status to confirmed (one frontmatter edit) review [ID]       emit a JSON review
-plan (intent/contract/acceptance/anchors) for AI-assisted quality review
-translate [--to ro|en]  manual, opt-in: cache a `claude -p` translation of the
-corpus's majority-language requirements into requirements/_i18n/<locale>.json.
-Never called by gate/sync/lint/map/the pre-commit hook. check
-DEPRECATED alias for `gate` (report) / `sync` (with --update-lock); removed in
-v4.0.0
+Commands: init (setup), gate (verdict), sync (writes), ask (questions),
+clarify (requirement questions), mcp (stdio server). The COMMANDS registry
+owns their flags and generates the assistant-facing reference.
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
 requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
@@ -39,6 +15,8 @@ the command line (parser, dispatch, the Python floor) and the flat namespace
 
 """
 import argparse, errno, importlib, os, sys
+import io, json
+from contextlib import redirect_stdout
 
 from reqmap_engine import config as cfg
 from reqmap_engine.audit import cmd_audit
@@ -53,13 +31,13 @@ from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
 from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import GateMode, cmd_check
+from reqmap_engine.model import GateResult
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
 from reqmap_engine.init import cmd_init
 from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
-from reqmap_engine.mcp import serve as cmd_mcp
 from reqmap_engine.registry import _cli_choices, cmd_gen_integration
 from reqmap_engine.release import cmd_release
 from reqmap_engine.retire import cmd_retire
@@ -78,7 +56,7 @@ from reqmap_engine import (
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audit, audittail, init, retire, retireapply, levels, review,
     targets, plandrift, history,
-    pyramid, cliflags, docclaims, versions, release, mcp, mcpconfig, search,
+    pyramid, cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually
@@ -170,14 +148,22 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # something is broken (ADR-0049); `--full` runs the whole registry and
     # prints every readability warning, as `gate` did before v8.4.0.
     quiet = not getattr(a, "full", False)
-    rc = cmd_check(ws, False, a.strict,
-                   mode=GateMode(a.as_json, getattr(a, "since", None), quiet))
+    result, report = GateResult(), io.StringIO()
+    # Run exactly the same stages for both formats. Collect structured
+    # findings directly; the captured human report is never parsed.
+    with redirect_stdout(report):
+        cmd_check(ws, False, a.strict,
+                  mode=GateMode(False, getattr(a, "since", None), quiet),
+                  findings=result)
+        if not a.no_lint:
+            cmd_lint(ws, strict=True, quiet=quiet, findings=result)
+        if not a.no_map_check:
+            cmd_map(ws, code_root, True, findings=result)
     if a.as_json:
-        return rc                  # one machine-readable document, not three
-    if not a.no_lint:
-        rc = cmd_lint(ws, strict=True, quiet=quiet) or rc
-    if not a.no_map_check:
-        rc = cmd_map(ws, code_root, True) or rc
+        print(json.dumps(result.payload()))
+        return result.exit_code
+    print(report.getvalue(), end="")
+    rc = result.exit_code
     # Last, because a reader takes the last line as the verdict. `cmd_check`
     # prints its own counts where it runs, which is FIRST — a hundred lines
     # above the end on this corpus — so the line a run finished on was the
@@ -334,7 +320,8 @@ def main():
         tmpl = None
 
     if a.cmd == "mcp":      # a long-running server: no workspace of its own
-        return cmd_mcp(a)
+        from reqmap_engine.mcp import serve
+        return serve(a)
     if a.cmd == "init" and not a.plan:
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
@@ -426,13 +413,14 @@ _ENGINE_MODULES = (
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audit, audittail, init, retire, retireapply, levels, pyramid,
     review, targets, plandrift, history,
-    cliflags, docclaims, versions, release, mcp, mcpconfig, search,
+    cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
 )
 # The design review is imported only when a name is looked up in it, so a
 # command that never asks for it (`gate` above all) never loads it. Searched
 # after every eager module, in this order.
-_LAZY_MODULES = ("design", "design_python", "design_brace", "design_report")
+_LAZY_MODULES = ("mcp", "design", "design_python", "design_brace",
+                 "design_report")
 
 
 def __getattr__(name):

@@ -13,13 +13,14 @@ from .history import by_month, read_history
 from .mapdata import _read_roadmap, _build_map_data
 from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
+from .model import Finding
 from .scan import scan_ac_verifies
 from .site import site_stale
 from .targets import load_targets
 from .viewer import render_html
 
 
-def cmd_map(ws, root=".", check=False):
+def cmd_map(ws, root=".", check=False, findings=None):
     # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856
     # implements: REQ-MAP-870
     """Regenerate every derived view of the corpus — `_map.md`,
@@ -35,7 +36,7 @@ def cmd_map(ws, root=".", check=False):
     data = ws.map_data(root, with_design=not check)
 
     if check:
-        return _map_check(data, ws, root)
+        return _map_check(data, ws, root, findings)
 
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
@@ -225,7 +226,7 @@ def _stale_artifacts(data, ws, root="."):
     return stale
 
 
-def _map_check(data, ws, root="."):
+def _map_check(data, ws, root=".", findings=None):
     # implements: ARCH-MAP-007  # implements: REQ-MAP-871
     """Freshness gate: regenerate the map in memory and compare to the committed
     files. Stale (committed != freshly-built) -> exit 1 so a
@@ -239,17 +240,15 @@ def _map_check(data, ws, root="."):
     freshness it did not measure."""
     reqs_dir = ws.reqs_dir
     absent = _absent_tracked_artifacts(reqs_dir, root)
-    if absent:
-        print("FAIL  committed map is missing from the working tree: "
-              "{} — git tracks "
-              "it; restore it or run `reqmap.py sync`."
-              .format(", ".join(absent)))
-        return 1
-    stale = _stale_artifacts(data, ws, root)
-    if stale:
-        print("FAIL  map is stale: {} — run `reqmap.py sync` and "
-              "commit the result."
-              .format(", ".join(stale)))
+    stale = [] if absent else _stale_artifacts(data, ws, root)
+    if absent or stale:
+        kind = "missing" if absent else "stale"
+        message = ("committed map is missing from the working tree: "
+                   if absent else "map is stale: ")
+        message += ", ".join(absent or stale) + " — run `reqmap.py sync`."
+        if findings is not None:
+            findings.append(Finding("MAP:" + kind, "error", None, message))
+        print("FAIL  " + message)
         return 1
     if not any(os.path.exists(os.path.join(reqs_dir, n))
                for n in _MAP_ARTIFACTS):

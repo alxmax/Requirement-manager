@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.6.1` — 2026-09-24
+
+- Collect rule, readability and map findings into one gate result before choosing text or JSON. JSON no longer skips lint or the map-freshness verdict.
+- Document the approved simplification backlog and its four stacked review increments.
+- Add format-parity, opt-out and read-only regression cases.
+- Load the MCP server only when requested; core falls to 7,466 logical lines, and its budget falls with it. The complete engine has 16,680 physical lines.
+
+
 ## plugin `v8.6.0` — 2026-09-23
 
 **The design review and the site are back, with no exemptions.**

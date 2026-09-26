@@ -3231,3 +3231,60 @@ class GateNeverImportsTheDesignReview(unittest.TestCase):
             self.assertIn("gate:", p.stdout)
             self.assertEqual(loaded, [])
             self.assertTrue(ok)
+
+
+class GateFormatParity(unittest.TestCase):
+    # tested-by: REQ-CHECK-1036
+    def _run(self, root, *args):
+        engine = os.path.join(os.path.dirname(__file__), "reqmap.py")
+        return subprocess.run([sys.executable, engine, "gate", *args],
+                              cwd=root, capture_output=True, text=True)
+
+    def test_lint_failure_is_identical_in_json_and_text(self):
+        # verifies: REQ-CHECK-1036#CASE-5
+        with tempfile.TemporaryDirectory() as root:
+            cases = ["CASE-%d\n  Given x\n  When y\n  Then z" % i
+                     for i in range(1, 9)]
+            _write(os.path.join(root, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["The function returns 1."], cases))
+            _write(os.path.join(root, "a.py"), tag("REQ-A-001") + "\nx = 1\n")
+            before = {p: open(os.path.join(d, p), "rb").read()
+                      for d, _, fs in os.walk(root) for p in fs}
+            for options in ([], ["--strict"], ["--full"]):
+                plain = self._run(root, *options)
+                machine = self._run(root, *options, "--json")
+                self.assertEqual(plain.returncode, 1, plain.stdout)
+                self.assertEqual(machine.returncode, plain.returncode)
+                payload = json.loads(machine.stdout)
+                self.assertFalse(payload["ok"])
+                self.assertTrue(any(f["rule"] == "LINT:ac-count-high"
+                                    for f in payload["findings"]))
+            clean = self._run(root, "--json", "--no-lint")
+            self.assertEqual(clean.returncode, 0, clean.stdout)
+            after = {p: open(os.path.join(d, p), "rb").read()
+                     for d, _, fs in os.walk(root) for p in fs}
+            self.assertEqual(before, after)
+
+    def test_map_failure_and_opt_out_match_in_both_formats(self):
+        # verifies: REQ-CHECK-1036#CASE-6
+        with tempfile.TemporaryDirectory() as root:
+            _write(os.path.join(root, "requirements", "_map.md"), "stale\n")
+            for options, expected in (([], 1), (["--no-map-check"], 0)):
+                plain = self._run(root, *options)
+                machine = self._run(root, *options, "--json")
+                payload = json.loads(machine.stdout)
+                self.assertEqual(plain.returncode, expected, plain.stdout)
+                self.assertEqual(machine.returncode, expected, machine.stdout)
+                self.assertEqual(payload["ok"], expected == 0)
+                if expected:
+                    self.assertIn("MAP:stale", [f["rule"] for f in payload["findings"]])
+
+
+    def test_mcp_is_not_imported_by_the_cli_until_requested(self):
+        # tested-by: ARCH-MCP-073
+        scripts = os.path.dirname(os.path.abspath(__file__))
+        p = subprocess.run([sys.executable, "-c",
+            "import sys, reqmap; assert 'reqmap_engine.mcp' not in sys.modules; "
+            "assert reqmap.mcp.MCP_TOOLS"], cwd=scripts,
+            capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stderr)

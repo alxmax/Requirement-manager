@@ -62,7 +62,8 @@ existence.
 
 ## Run the gate in CI
 
-Fail the build on drift, on every push and pull request:
+Run the gate on every push and pull request. Drift is advisory by default;
+set `DRIFT_SEVERITY` to `"error"` in `requirements/_config.json` to block it:
 
 ```yaml
 - uses: alxmax/requirement-manager/check@v8

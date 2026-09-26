@@ -593,7 +593,8 @@ Every bullet below is binding.
   warnings are not printed and not counted.
 - `gate --full` and `gate --audit` run every registered rule and print every readability
   finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.
-- The verdict is the last line `gate` prints, and it names each check the run covered.
+- Text and `--json` derive their exit code from one structured result. Both formats execute every enabled stage, honoring explicit opt-outs. JSON includes all effective findings; formatting never disables a check.
+- The verdict is the last line a text `gate` prints, and it names each check the run covered.
 - The last line of a bare gate names `gate --full` as where the advice is.
 
 ## Cases
@@ -617,3 +618,13 @@ CASE-4 — the verdict is the last line
   When   a bare `gate` runs
   Then   its last line is the `gate:` verdict, naming readability and map freshness
 
+
+CASE-5 — formatting does not bypass lint
+  Given  an implemented requirement with eight acceptance criteria
+  When   text and JSON gates run, including strict and full modes
+  Then   both fail with the lint finding; both honor `--no-lint` and write nothing
+
+CASE-6 — formatting does not bypass map freshness
+  Given  a stale generated map
+  When   text and JSON gates run
+  Then   both fail and identify the stale map; both honor `--no-map-check`

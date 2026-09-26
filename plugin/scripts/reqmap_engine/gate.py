@@ -12,7 +12,7 @@ from .locks import (
     save_memberlock, warn_if_stale
 )
 from .mapjson import _path_key, _since_changed_files
-from .model import Finding, GATE_RULES
+from .model import Finding, GateResult, GATE_RULES
 from .registry import _check_integration_fresh
 from .rulesrepo import DRIFT_RULES
 from . import axis  # noqa: F401 — registers RM032 after every rule in `rules`
@@ -298,16 +298,12 @@ def _print_gate_verdict(as_json, errors, warns, _stale, reqs, members):
                       if r["meta"].get("status") == "confirmed")
 
     if as_json:
-        print(json.dumps({"ok": not errors,
-                          "errors": [str(e) for e in errors],
-                          "warnings": [str(w) for w in warns],
-                          "findings": [dict(f) for f in errors + warns]}))
+        print(json.dumps(GateResult(errors + warns).payload()))
         return 1 if errors else 0
 
-    for w in warns:
-        print("WARN ", w["rule"], str(w))
-    for e in errors:
-        print("ERROR", e["rule"], str(e))
+    for finding in warns + errors:
+        print("ERROR" if finding["severity"] == "error" else "WARN ",
+              finding["rule"], str(finding))
     if _stale:
         print("ERROR: stale generated integration artifact(s): "
               + ", ".join(_stale)
@@ -319,10 +315,6 @@ def _print_gate_verdict(as_json, errors, warns, _stale, reqs, members):
         print(f"info  {n_find} open verify-intent finding(s) — run "
               f"`reqmap.py sync`")
 
-    # recompute: the demotion loop above may have flipped some status from
-    # "confirmed" to "draft" since n_confirmed was first snapshotted.
-    n_confirmed = sum(1 for r in reqs.values()
-                      if r["meta"].get("status") == "confirmed")
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, "
           f"{len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "
@@ -330,7 +322,8 @@ def _print_gate_verdict(as_json, errors, warns, _stale, reqs, members):
     return 1 if errors else 0
 
 
-def cmd_check(ws, update_lock, strict=False, accept_drift=True, mode=None):
+def cmd_check(ws, update_lock, strict=False, accept_drift=True, mode=None,
+              findings=None):
     # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059
     # implements: REQ-CHECK-832  # implements: REQ-CHECK-833
     # implements: REQ-RULES-948
@@ -383,5 +376,7 @@ def cmd_check(ws, update_lock, strict=False, accept_drift=True, mode=None):
         errors = list(errors) + [Finding("RM028", "error", None,
                                          "stale integration artifact(s): "
                                          + ", ".join(_stale))]
+    if findings is not None:
+        findings.extend(errors + warns)
     return _print_gate_verdict(as_json, errors, warns, _stale, reqs,
                                members)
