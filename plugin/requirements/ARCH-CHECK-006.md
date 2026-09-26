@@ -244,6 +244,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-CHECK-006]
+distinct_from: [REQ-DESCRIPTION-057]
 ---
 
 # A confirmed requirement missing its Description or Cases
@@ -279,6 +280,10 @@ CASE-3 — a confirmed requirement with both sections draws no section warning
          `## WHAT — Contract` / `## HOW — Acceptance` spelling
   When   `gate` runs
   Then   its output contains neither "missing '## Description'" nor "missing '## Cases'"
+
+## Context
+**Notes**
+- `distinct_from: REQ-DESCRIPTION-057` - `REQ-DESCRIPTION-057` names the sections and keeps the old spellings parsing; this is the gate rule that errors when a confirmed requirement lacks one.
 
 --------------------
 

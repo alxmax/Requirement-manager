@@ -7,7 +7,7 @@ from .healthrows import EXEMPT_KEYS, _health_rows, _is_healthy
 from .locks import load_lock
 from .mapdata import _roadmap_behind, _roadmap_signals
 from .model import _as_list, _impl_exempt, gate_rule_by_id
-from .orphans import _scan_untagged, untaggable_by_design
+from .orphans import _scan_untagged, git_ignored, untaggable_by_design
 from .risk import _member_roles, _plan_gaps
 from .scan import _walk_code
 from .sections import binding_hash
@@ -63,10 +63,11 @@ def cmd_coverage(ws, as_json=False):
                 os.path.abspath(os.path.join(code_root, fp))))
 
     buckets = {}  # dir_label -> [total, tagged]
-    by_design = 0
+    by_design, ignored = 0, git_ignored(code_root)
     for fp, rel in _walk_code(code_root, reqs_dir):
         norm_fp = os.path.normcase(os.path.abspath(fp))
-        if reqs_abs and norm_fp.startswith(reqs_abs + os.sep):
+        if (reqs_abs and norm_fp.startswith(reqs_abs + os.sep)
+                or rel.startswith(ignored)):
             continue
         # implements: REQ-UNTAGGEDSET-1007 — the same exclusion the
         # "Untagged files" bucket applies. Counting a file that will never

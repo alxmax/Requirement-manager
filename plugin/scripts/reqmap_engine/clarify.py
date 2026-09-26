@@ -63,6 +63,8 @@ CLARIFY_UNIT_RE = re.compile(
 # word or a dot (`v4.0.0`, `CASE-2`, `utf-8`), because those are identifiers,
 # not quantities.
 _CLARIFY_NUM_RE = re.compile(r"(?<![\w.\-#])(\d+(?:\.\d+)?)\s*([A-Za-z%]*)")
+# An exit code is a value, not a quantity: "exits 2" has no unit to ask for.
+_CLARIFY_EXIT_RE = re.compile(r"\bexit(?:s|\s+code|\s+status)?\s*$", re.I)
 
 
 # Every case of ARCH-SEARCH-036 described its input as prose to be matched:
@@ -153,7 +155,8 @@ def _clause_questions(clauses):
                 # one hedge per clause is enough to start the
                 # conversation
                 break
-        m = _CLARIFY_NUM_RE.search(c)
+        m = next((n for n in _CLARIFY_NUM_RE.finditer(c)
+                  if not _CLARIFY_EXIT_RE.search(c, 0, n.start())), None)
         if m and not CLARIFY_UNIT_RE.match(m.group(2) or ""):
             out.append(_clarify_item(
                 "number-without-unit", "advisory", where, c,

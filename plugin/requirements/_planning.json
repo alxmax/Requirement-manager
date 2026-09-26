@@ -26,9 +26,25 @@
       "title": "MCP server: expose reqmap as a tool",
       "lane": "Feature",
       "start": "2026-09-16",
-      "end": "2026-09-16",
+      "end": "2026-09-23",
       "req": "ARCH-MCP-073",
       "progress": 100
+    },
+    {
+      "title": "Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63)",
+      "lane": "Feature",
+      "start": "2026-09-21",
+      "end": "2026-10-09",
+      "req": "ARCH-SELFGATE-039",
+      "progress": 40
+    },
+    {
+      "title": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
+      "lane": "Feature",
+      "start": "2026-09-28",
+      "end": "2026-10-30",
+      "req": "SYS-SSOT-001",
+      "progress": 0
     }
   ],
   "milestones": {}

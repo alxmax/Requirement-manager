@@ -41,9 +41,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):
     findings += _shape_lint(rid, r, body, children)
     findings += _terms_lint(body)
     findings += _graph_lint(r, member_list, fanin)
-    if exempt:
-        findings = [f for f in findings if f["check"] not in exempt]
-    return findings
+    return [f for f in findings if f["check"] not in exempt]
 
 
 # NOTE: `--decompose` deliberately covers `statement-size` ONLY. An

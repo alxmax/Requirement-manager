@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "7ebbe80082650dde6034b8d18bd62c9820ead93781305de40dd3c3bcc1e8b8cb",
+      "plugin/scripts/reqmap_engine/__init__.py": "1fd60446b8c0cb9e5139c2cddf96006e725f6e03840469bf2879e05405a6e6e7",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -92,7 +92,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "25e4247342f7e9ad8f25fcbddc4007f56d0635816da459d29362d8ea4ea09135",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "fc5e26697810ed72dd474b7a41d020ae9ffc0496475294e6d05462e66fa942f1",
+      "scripts/check_engine_budget.py": "62f9f01e42d73523e225b5fe9ea23c4d7d4cccae2ffec48a6929397332aa61b9",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130"
@@ -211,7 +211,7 @@
       "plugin/scripts/reqmap_engine/groups.py#_group_child_id": "e8398d3330787cca62def31023537ba950287f30e09411a67735d4bb37cd629a",
       "plugin/scripts/reqmap_engine/groups.py#_group_label": "0650b5459bc95e305e46f951a697d1710c32cdf5f72f4590334cf7ab4a9d7229",
       "plugin/scripts/reqmap_engine/groups.py#_group_slug": "a35e018e8134df23d05068d7e3de4ce457bc12e9099cb5498058267cb1978e54",
-      "plugin/scripts/reqmap_engine/groups.py#_group_subject": "419a8b47c3dc2a0fbe625f30e3bcca3ec6340a8506b0b6cc5078f84f91741eed",
+      "plugin/scripts/reqmap_engine/groups.py#_group_subject": "19066ca990629b2f8cf5daa8f648dd8fb6683d1f71fab8ef1e903fb63a97cc12",
       "plugin/scripts/reqmap_engine/groups.py#_plan_group_split": "74b518e0e7f58d968f23d7f36ba13c0dba3ee09da695221f3de98675b6c04517",
       "plugin/scripts/reqmap_engine/groups.py#_render_group_child": "80dfbe99caec9ff6455729555eb582a0d1a169d9c18460204cac0b2af923aee9"
     },
@@ -350,7 +350,7 @@
       "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "cba0f092c9473e700e5da56825c11ee4deef30a67ddf7e523955fc5170941dfa"
     },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "3cd944a5f37e35004ece2191094662327f3966e75685b96cf534797be5630c41"
+      "plugin/scripts/reqmap.py": "5fb1c5db733a05cdbf8ab9ccc95e0eefce83d64223411a415f3635a21c688ce3"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "60a5966ee67c5f4d7ae327036c8a44cd08688e3de46834b4a493f14234e0a817"
@@ -404,7 +404,8 @@
       "plugin/scripts/reqmap_engine/plandrift.py#unplanned_line": "bbe22c4d0e419425979c7dbb67dc2f4b3e2aac98ab1f069bdd3dd15e11c249e7"
     },
     "REQ-UNTAGGEDSET-1007": {
-      "plugin/scripts/reqmap_engine/health.py#cmd_coverage": "a35687a103ff213bf463f250ca293bd1dd5fb043ca316ec1525be3e39e883298"
+      "plugin/scripts/reqmap_engine/health.py#cmd_coverage": "97eb9a22fc4984877f583d6f520a3a7fae5280d51868d5cb5ac483a7c3ab6e84",
+      "plugin/scripts/reqmap_engine/orphans.py#git_ignored": "e67871434bc65eb65bc4e5fed7e843fc2d3e7a2aa97e354318395239f168f93d"
     },
     "REQ-VERSIONALIGN-1016": {
       "plugin/scripts/reqmap_engine/versions.py#newest_changelog": "29ed7a3911c79951c78812acdf6ace8639999413fd193b53245e154af297f08b",

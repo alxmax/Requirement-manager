@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.8.1` — 2026-09-26
+
+**What the engine said about its own repository, fixed.**
+
+- The untagged-files report and the per-directory coverage ratio skip what git ignores: a file kept out of the repo is not code the repo forgot to trace. Without git nothing is skipped (REQ-UNTAGGEDSET-1007)
+- `clarify` no longer asks for the unit of an exit code: the number after "exit", "exits" or "exit code" is a value, not a quantity (REQ-CLARIFY-956)
+- ARCH-CONFIG-060 and REQ-CONFIG-949 state one condition per clause, clearing two `stacked-conditions` warnings
+- Six requirement pairs `ask --dupes` flagged are recorded as distinct: in each, one side is the engine's data and the other its rendering, or one defines a list and the other ranks it
+- The two Now items of the roadmap have dated bars in `_planning.json`; the MCP bar ends on the day it shipped
+- The engine's core is 7,049 logical lines, and its budget with it
+
 ## plugin `v8.8.0` — 2026-09-26
 
 **Help drawn from the command registry.**

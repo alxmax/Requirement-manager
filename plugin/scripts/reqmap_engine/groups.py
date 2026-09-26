@@ -114,9 +114,7 @@ def _group_subject(label):  # implements: REQ-DECOMPOSE-994
     `load_json_stdin(script_name)` -> `load_json_stdin`; `Falsifiability
     anchor (Law 8)` -> `Falsifiability anchor`. Backticks and a
     parenthesised tail are presentation, not identity."""
-    s = label.replace("`", "").strip()
-    s = re.sub(r"\s*\(.*$", "", s).strip()
-    return s
+    return re.sub(r"\s*\(.*$", "", label.replace("`", "").strip()).strip()
 
 
 def _group_slug(label):  # implements: REQ-DECOMPOSE-994

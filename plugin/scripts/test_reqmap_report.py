@@ -4947,7 +4947,8 @@ class OneUntaggedList(unittest.TestCase):  # tested-by: REQ-UNTAGGEDSET-1007 @un
         out = []
         for fp, rel in R.scan._walk_code(d, reqs):
             n = os.path.normcase(os.path.abspath(fp))
-            if n.startswith(reqs_abs + os.sep) or R.orphans.untaggable_by_design(rel):
+            if (n.startswith(reqs_abs + os.sep) or R.orphans.untaggable_by_design(rel)
+                    or rel.startswith(R.orphans.git_ignored(d))):
                 continue
             if n not in tagged:
                 out.append(rel)
@@ -4973,6 +4974,22 @@ class OneUntaggedList(unittest.TestCase):  # tested-by: REQ-UNTAGGEDSET-1007 @un
         out = buf.getvalue()
         self.assertIn("excluded", out)          # the difference is stated, not hidden
         self.assertIn("gate --risk", out)
+
+    @unittest.skipUnless(shutil.which("git"), "needs git")
+    def test_a_file_git_ignores_is_not_a_gap(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-5
+        d, reqs = self._repo()
+        _write(os.path.join(d, "notes.py"), "def h(): pass\n")
+        self.assertIn("notes.py", R.orphans._scan_untagged(d, reqs))  # no git yet
+        subprocess.run(["git", "init", "-q", d], check=True)
+        _write(os.path.join(d, ".git", "info", "exclude"), "notes.py\n")
+        self.assertEqual(R.orphans._scan_untagged(d, reqs), ["loose.py"])
+        self.assertEqual(self._ratio_untagged(d, reqs), ["loose.py"])
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_coverage(ws, as_json=True)
+        self.assertEqual(sum(r["total"] for r in json.loads(buf.getvalue())["rows"]),
+                         2)  # app.py and loose.py: notes.py is not counted
 
     def test_the_ratio_can_reach_a_hundred_percent(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-4
         d, reqs = self._repo()

@@ -26,8 +26,8 @@
       "reason": "Help rendered from the registry"
     },
     "ARCH-CONFIG-060": {
-      "hash": "4b04873a91d0",
-      "reason": null
+      "hash": "2815463426d3",
+      "reason": "Findings from running the engine on its own repository"
     },
     "ARCH-COVERAGE-029": {
       "hash": "25d7127a672c",
@@ -169,6 +169,10 @@
       "hash": "b6348e2ee27e",
       "reason": "distinct_from; CHECK-831 fold"
     },
+    "REQ-CLARIFY-956": {
+      "hash": "42f713887fca",
+      "reason": "Findings from running the engine on its own repository"
+    },
     "REQ-CMDREGISTRY-1031": {
       "hash": "63640fbd5f7e",
       "reason": "gate owns twelve flags now: --full (ADR-0049)"
@@ -178,8 +182,8 @@
       "reason": "Shared assistant workflow and discoverable adapters"
     },
     "REQ-CONFIG-949": {
-      "hash": "a783b75a2065",
-      "reason": null
+      "hash": "268d8fc44951",
+      "reason": "Findings from running the engine on its own repository"
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
@@ -396,6 +400,10 @@
     "REQ-UNPLANNED-1024": {
       "hash": "f4c83e90aff2",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-UNTAGGEDSET-1007": {
+      "hash": "17fc26a52451",
+      "reason": "Findings from running the engine on its own repository"
     },
     "REQ-VERSIONFILES-1014": {
       "hash": "ebb1422db3b0",

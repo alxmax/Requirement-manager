@@ -2147,8 +2147,10 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
     def test_bare_number_asked_identifier_not(self):  # verifies: REQ-CLARIFY-956#CASE-2
         numbered = self._qs(["`gate` retries 3 times before it fails."])
         ident = self._qs(["`gate` emits CASE-2 for v4.0.0 when the input is invalid."])
+        code = self._qs(["`gate` prints the list and exits 2."])
         self.assertIn("number-without-unit", _rules(numbered))
         self.assertNotIn("number-without-unit", _rules(ident))
+        self.assertNotIn("number-without-unit", _rules(code))
 
     def test_happy_path_only_asks_about_failure(self):  # verifies: REQ-CLARIFY-956#CASE-3
         happy = self._qs(["`gate` writes the lock."],
