@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-26
-engine: 2026-09-26.4
+engine: 2026-09-26.5
 nodes: 307
 edges: 121
 design pass-rate: 98% (116/118 source files without a design candidate)
@@ -468,8 +468,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_registry_py_13_48["plugin/scripts/reqmap_engine/registry.py:13-48"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_registry_py_13_48
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_309["plugin/scripts/reqmap.py:309"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_309
+  f_plugin_scripts_reqmap_py_311["plugin/scripts/reqmap.py:311"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_311
   f_plugin_scripts_test_reqmap_report_py_2955_5126["plugin/scripts/test_reqmap_report.py:2955-5126"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2955_5126
   f_plugin_scripts_reqmap_engine_config_py_242_260["plugin/scripts/reqmap_engine/config.py:242-260"]
@@ -564,8 +564,8 @@ graph LR
   ARCH_GITRUN_067["Talking to git<br><small>ARCH-GITRUN-067</small>"]
   f_plugin_scripts_test_reqmap_scan_py_1500["plugin/scripts/test_reqmap_scan.py:1500"]
   ARCH_GITRUN_067 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_1500
-  f_plugin_scripts_reqmap_engine_git_py_7_132["plugin/scripts/reqmap_engine/git.py:7-132"]
-  ARCH_GITRUN_067 -->|implements| f_plugin_scripts_reqmap_engine_git_py_7_132
+  f_plugin_scripts_reqmap_engine_git_py_7_131["plugin/scripts/reqmap_engine/git.py:7-131"]
+  ARCH_GITRUN_067 -->|implements| f_plugin_scripts_reqmap_engine_git_py_7_131
   ARCH_HEALTH_017["Corpus health snapshot<br><small>ARCH-HEALTH-017</small>"]
   f_plugin_scripts_test_reqmap_report_py_1351_4795["plugin/scripts/test_reqmap_report.py:1351-4795"]
   ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1351_4795
@@ -696,8 +696,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_parse_py_8_120["plugin/scripts/reqmap_engine/parse.py:8-120"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_8_120
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_370_391["plugin/scripts/reqmap.py:370-391"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_370_391
+  f_plugin_scripts_reqmap_py_372_393["plugin/scripts/reqmap.py:372-393"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_372_393
   f_plugin_scripts_test_reqmap_gate_py_2121["plugin/scripts/test_reqmap_gate.py:2121"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2121
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]

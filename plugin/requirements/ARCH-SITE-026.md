@@ -88,9 +88,10 @@ Every bullet below is binding.
 - `sync --attach <page.html>` injects the marker-delimited `nav` and `stats` regions
   into the page, replacing only the bytes between each region's paired markers and
   preserving all other (authored) content. A re-run with no underlying change produces
-  a byte-identical file (idempotent). Without `--attach`, `sync` refreshes
-  `docs/architecture.html` at the git root when that file exists, and writes nothing
-  when it does not.
+  a byte-identical file (idempotent).
+- Without `--attach`, `sync` refreshes `docs/architecture.html` only when that file
+  already carries an engine region. A page with no region, which another tool may
+  generate, is left byte-identical, and an absent page is not created.
 - When the `--attach` target does not exist, `sync` scaffolds a self-contained default
   page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.
 - The `nav` region emits a link only when its target resolves: Live Map when a sibling
@@ -141,3 +142,8 @@ CASE-6 — the freshness check fires only after the stats region is tampered wit
   When   `site_stale` runs before and after the `stats` region is overwritten with
          "TAMPERED"
   Then   it returns None before the edit and the page's file name after it
+
+CASE-7 — a bare sync leaves a page with no engine region alone
+  Given  `docs/architecture.html` holding `<h1>Built elsewhere</h1>` and no region marker
+  When   `sync` runs without `--attach`, then with `--attach` naming that page
+  Then   the first run leaves the file byte-identical; the second adds both regions

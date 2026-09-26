@@ -49,7 +49,7 @@ ENGINE_DIR = REPO_ROOT / "plugin" / "scripts"
 PACKAGE = "reqmap_engine"
 # The stage reached, lowered only by the change that earns it (ADR-0046).
 # Set by ADR-0053 to the measured core, in logical lines, with no headroom.
-CORE_LOGICAL_BUDGET = 7049
+CORE_LOGICAL_BUDGET = 7047
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 17000

@@ -118,9 +118,8 @@ def release_heading(style, version, date):  # implements: REQ-RELEASECMD-1018
     """One dated release heading in `style`; `version` is `vX.Y.Z`."""
     if style == "plugin":
         return "## plugin `{}` \u2014 {}".format(version, date)
-    if style == "bare":
-        return "## {} - {}".format(version, date)
-    return "## [{}] - {}".format(version.lstrip("v"), date)
+    return ("## {} - {}".format(version, date) if style == "bare"
+            else "## [{}] - {}".format(version.lstrip("v"), date))
 
 
 def entry_body(text, version):  # implements: REQ-RELEASEWORKFLOW-1019

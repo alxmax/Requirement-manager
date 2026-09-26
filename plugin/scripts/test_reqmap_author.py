@@ -3846,6 +3846,28 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
             self.assertIn("<b>1</b><span>requirements", html)
             self.assertIn("<!--##REQMAP:NAV##-->", html)
 
+    def test_bare_sync_leaves_a_page_with_no_region_alone(self):
+        # verifies: REQ-SITE-924#CASE-7
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            page = os.path.join(d, "docs", "architecture.html")
+            foreign = "<body><h1>Built elsewhere</h1></body>"
+            _write(page, foreign)
+            for extra in ([], ["--attach", page]):
+                old = sys.argv
+                sys.argv = ["reqmap", "sync", "--root", d] + extra
+                try:
+                    with mock.patch.object(R, "cmd_check", return_value=0), \
+                         redirect_stdout(io.StringIO()), \
+                         redirect_stderr(io.StringIO()):
+                        R.main()
+                finally:
+                    sys.argv = old
+                if not extra:
+                    self.assertEqual(_text(page), foreign)
+            self.assertIn("<!--##REQMAP:STATS##-->", _text(page))
+            self.assertIn("<h1>Built elsewhere</h1>", _text(page))
+
 
 class MinimalInit(unittest.TestCase):
     # tested-by: REQ-INIT-861

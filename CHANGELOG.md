@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.8.2` — 2026-09-26
+
+**`sync` no longer writes into a page another tool owns.**
+
+- Without `--attach`, `sync` refreshes `docs/architecture.html` only when the page already carries an engine region. Before, it inserted the `nav` and `stats` regions into any page at that path: in a consumer that builds its own `docs/architecture.html`, every `sync` made that builder's freshness check fail. `--attach` and `init` still insert the regions (REQ-SITE-924)
+- The engine's core is 7,047 logical lines, and its budget with it
+
 ## plugin `v8.8.1` — 2026-09-26
 
 **What the engine said about its own repository, fixed.**

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-26.4",
+  "engine_version": "2026-09-26.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -922,7 +922,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:268"
+          "loc": "plugin/scripts/reqmap.py:270"
         },
         {
           "role": "tested-by",
@@ -2997,7 +2997,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:309"
+          "loc": "plugin/scripts/reqmap.py:311"
         },
         {
           "role": "tested-by",
@@ -6062,7 +6062,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/git.py:132"
+          "loc": "plugin/scripts/reqmap_engine/git.py:131"
         }
       ],
       "test_exempt": null,
@@ -6930,7 +6930,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3851"
+          "loc": "plugin/scripts/test_reqmap_author.py:3873"
         },
         {
           "role": "implements",
@@ -8600,11 +8600,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:138"
+          "loc": "plugin/scripts/reqmap_engine/history.py:137"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:155"
+          "loc": "plugin/scripts/reqmap_engine/history.py:154"
         },
         {
           "role": "implements",
@@ -10925,11 +10925,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:370"
+          "loc": "plugin/scripts/reqmap.py:372"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:391"
+          "loc": "plugin/scripts/reqmap.py:393"
         },
         {
           "role": "tested-by",
@@ -10971,7 +10971,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:391"
+          "loc": "plugin/scripts/reqmap.py:393"
         },
         {
           "role": "tested-by",
@@ -11787,7 +11787,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:285"
+          "loc": "plugin/scripts/reqmap.py:287"
         },
         {
           "role": "tested-by",
@@ -12393,7 +12393,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/history.py:126"
+          "loc": "plugin/scripts/reqmap_engine/history.py:125"
         },
         {
           "role": "implements",
@@ -12859,7 +12859,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/git.py:122"
+          "loc": "plugin/scripts/reqmap_engine/git.py:121"
         },
         {
           "role": "implements",
@@ -13594,7 +13594,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/git.py:132"
+          "loc": "plugin/scripts/reqmap_engine/git.py:131"
         },
         {
           "role": "implements",
@@ -16217,7 +16217,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:256"
+          "loc": "plugin/scripts/reqmap.py:258"
         },
         {
           "role": "tested-by",
@@ -16371,7 +16371,8 @@
       "title": "Inject engine-owned regions into a presentation page",
       "intent": "`sync` writes the `nav` and `stats` regions into `docs/architecture.html`, a page the author still edits by hand, touching only the bytes between each region's markers. Without it, keeping a hand-authored page's links and counts in sync with the registry would mean either regenerating the whole page (losing authored prose) or manually copying numbers every time the corpus changes.",
       "contract": [
-        "`sync --attach <page.html>` injects the marker-delimited `nav` and `stats` regions into the page, replacing only the bytes between each region's paired markers and preserving all other (authored) content. A re-run with no underlying change produces a byte-identical file (idempotent). Without `--attach`, `sync` refreshes `docs/architecture.html` at the git root when that file exists, and writes nothing when it does not.",
+        "`sync --attach <page.html>` injects the marker-delimited `nav` and `stats` regions into the page, replacing only the bytes between each region's paired markers and preserving all other (authored) content. A re-run with no underlying change produces a byte-identical file (idempotent).",
+        "Without `--attach`, `sync` refreshes `docs/architecture.html` only when that file already carries an engine region. A page with no region, which another tool may generate, is left byte-identical, and an absent page is not created.",
         "When the `--attach` target does not exist, `sync` scaffolds a self-contained default page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.",
         "The `nav` region emits a link only when its target resolves: Live Map when a sibling `map.html` exists, GitHub when a git remote resolves. A missing git remote, missing artifact, or non-checkout never raises.",
         "`init`, unless `--no-site` is given, runs a best-effort site step after `map`: refreshes `nav`+`stats` in `docs/architecture.html` if it exists, else scaffolds it plus a Pages signal (`.nojekyll` + an `index.html` redirect, each only when absent — an existing `index.html` is never overwritten). A failure in this step does not abort `init`.",
@@ -16380,7 +16381,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a second attach run with no change is byte-identical\n  Given  a page carrying `<h1>Mine</h1>` and no underlying data change\n  When   `cmd_site(..., attach=page, regions=[\"nav\", \"stats\"])` runs twice\n  Then   the file's content after the second run equals the content after the first, and\n         `<h1>Mine</h1>` is still present\n\nCASE-2 — site scaffolds a full page when the attach target is absent\n  Given  no file at `docs/architecture.html`\n  When   `cmd_site(..., attach=target, regions=[\"nav\", \"stats\"])` runs\n  Then   the written page contains both region markers and the \"<!-- author me -->\"\n         placeholder hero\n\nCASE-3 — an absent nav target is omitted, not an error\n  Given  a rendering context with no repo URL and no map\n  When   `_render_region(\"nav\", ctx)` runs\n  Then   it returns markup with no `<a` link and raises nothing\n\nCASE-4 — init writes the Pages signal without clobbering a landing page\n  Given  a `docs/` directory holding a hand-written `index.html` and no `.nojekyll`\n  When   `_site_pages_bootstrap` runs on it, and separately on an empty `docs/`\n  Then   the first leaves `index.html` unchanged and creates `.nojekyll`; the second\n         creates both, the index redirecting to `architecture.html`\n\nCASE-5 — init scaffolds the site page unless --no-site is passed\n  Given  a `docs/` directory with no `architecture.html`\n  When   `cmd_init(..., no_site=False)` runs, and separately `cmd_init(..., no_site=True)`\n  Then   the first run creates `docs/architecture.html` with a `##REQMAP:NAV##` region;\n         the second run creates no such file\n\nCASE-6 — the freshness check fires only after the stats region is tampered with\n  Given  a freshly generated site page with a `stats` region\n  When   `site_stale` runs before and after the `stats` region is overwritten with\n         \"TAMPERED\"\n  Then   it returns None before the edit and the page's file name after it",
+      "accept": "CASE-1 — a second attach run with no change is byte-identical\n  Given  a page carrying `<h1>Mine</h1>` and no underlying data change\n  When   `cmd_site(..., attach=page, regions=[\"nav\", \"stats\"])` runs twice\n  Then   the file's content after the second run equals the content after the first, and\n         `<h1>Mine</h1>` is still present\n\nCASE-2 — site scaffolds a full page when the attach target is absent\n  Given  no file at `docs/architecture.html`\n  When   `cmd_site(..., attach=target, regions=[\"nav\", \"stats\"])` runs\n  Then   the written page contains both region markers and the \"<!-- author me -->\"\n         placeholder hero\n\nCASE-3 — an absent nav target is omitted, not an error\n  Given  a rendering context with no repo URL and no map\n  When   `_render_region(\"nav\", ctx)` runs\n  Then   it returns markup with no `<a` link and raises nothing\n\nCASE-4 — init writes the Pages signal without clobbering a landing page\n  Given  a `docs/` directory holding a hand-written `index.html` and no `.nojekyll`\n  When   `_site_pages_bootstrap` runs on it, and separately on an empty `docs/`\n  Then   the first leaves `index.html` unchanged and creates `.nojekyll`; the second\n         creates both, the index redirecting to `architecture.html`\n\nCASE-5 — init scaffolds the site page unless --no-site is passed\n  Given  a `docs/` directory with no `architecture.html`\n  When   `cmd_init(..., no_site=False)` runs, and separately `cmd_init(..., no_site=True)`\n  Then   the first run creates `docs/architecture.html` with a `##REQMAP:NAV##` region;\n         the second run creates no such file\n\nCASE-6 — the freshness check fires only after the stats region is tampered with\n  Given  a freshly generated site page with a `stats` region\n  When   `site_stale` runs before and after the `stats` region is overwritten with\n         \"TAMPERED\"\n  Then   it returns None before the edit and the page's file name after it\n\nCASE-7 — a bare sync leaves a page with no engine region alone\n  Given  `docs/architecture.html` holding `<h1>Built elsewhere</h1>` and no region marker\n  When   `sync` runs without `--attach`, then with `--attach` naming that page\n  Then   the first run leaves the file byte-identical; the second adds both regions",
       "input": "",
       "output": "",
       "desc": "",
@@ -16424,8 +16425,8 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "ARCH-STALEENGINE-043",
@@ -22331,7 +22332,7 @@
     },
     {
       "month": "2026-09",
-      "count": 113,
+      "count": 114,
       "first": "2026-09-02",
       "last": "2026-09-26",
       "versions": [
@@ -22447,11 +22448,17 @@
         "v8.6.0",
         "v8.7.0",
         "v8.8.0",
-        "v8.8.1"
+        "v8.8.1",
+        "v8.8.2"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.8.2",
+          "date": "2026-09-26",
+          "headline": "`sync` no longer writes into a page another tool owns"
+        },
         {
           "version": "v8.8.1",
           "date": "2026-09-26",
@@ -23250,7 +23257,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap.py",
-        "line": 279,
+        "line": 281,
         "name": "main",
         "detail": "`main` is 90 lines (over 80)"
       },

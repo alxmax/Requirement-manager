@@ -113,9 +113,8 @@ def _git_remote_web_url(root):  # implements: ARCH-SITE-026
     if override is not None:
         if not override:
             return None
-        if "://" in override:
-            return override
-        return "https://github.com/" + override
+        return (override if "://" in override
+                else "https://github.com/" + override)
     return _normalise_remote(_git_remote_url(root))
 
 
