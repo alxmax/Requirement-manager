@@ -167,16 +167,27 @@ def untaggable_by_design(rel):
     return any(fnmatch.fnmatch(rel, pat) for pat in _UNTAGGED_NOISE)
 
 
+def git_ignored(code_root):  # implements: REQ-UNTAGGEDSET-1007
+    # The rel paths git ignores (a directory ends in `/`), for
+    # `str.startswith`: a file kept out of the repo is not code the repo
+    # forgot to trace. Empty without git, so nothing is skipped.
+    return tuple(p for p in (_git(
+        ["-c", "core.quotepath=off", "ls-files", "-z", "--others",
+         "--ignored", "--exclude-standard", "--directory"],
+        cwd=code_root, timeout=30) or "").split("\0") if p)
+
+
 def _scan_untagged(code_root, reqs_dir=None):
     # implements: ARCH-NEXT-013  # implements: ARCH-COVERAGE-029
     # implements: REQ-NEXT-886  # implements: REQ-COVERAGE-836
     # implements: REQ-UNTAGGEDSET-1007  # implements: REQ-NEXTUNTAGGED-1050
     """Scannable files that carry no membership tag at all, as sorted
-    rel paths. Skips whatever `untaggable_by_design` excludes — the
-    same set the coverage ratio excludes."""
+    rel paths. Skips whatever `untaggable_by_design` excludes and
+    whatever git ignores — the same set the coverage ratio skips."""
+    ignored = git_ignored(code_root)
     untagged = []
     for fp, rel in _walk_code(code_root, reqs_dir):
-        if untaggable_by_design(rel):
+        if untaggable_by_design(rel) or rel.startswith(ignored):
             continue
         tags = _scan_file_tags(fp)
         if tags is not None and not tags:

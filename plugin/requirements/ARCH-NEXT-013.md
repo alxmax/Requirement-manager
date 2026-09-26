@@ -222,6 +222,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-NEXT-013]
+distinct_from: [REQ-UNTAGGEDSET-1007]
 ---
 
 # Untagged files, ranked lowest
@@ -263,6 +264,10 @@ CASE-4 — no code_root means no Untagged files section at all
   Given  a draft requirement, called without a `code_root` argument
   When   `cmd_next` runs
   Then   its output never contains "Untagged files"
+
+## Context
+**Notes**
+- `distinct_from: REQ-UNTAGGEDSET-1007` - `REQ-UNTAGGEDSET-1007` defines which files are untagged; this orders that list for the risk report.
 
 
 --------------------

@@ -297,10 +297,9 @@ def main():
             _stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError, OSError):
             pass
-    argv = sys.argv[1:]
-    if not argv or {"-h", "--help"} & set(argv):
+    if not sys.argv[1:] or {"-h", "--help"} & set(sys.argv[1:]):
         from reqmap_engine.usage import intercept
-        return intercept(argv)
+        return intercept(sys.argv[1:])
     ap = _build_parser()
     a = ap.parse_args()
     if _verb_scope(ap, a):    # a foreign flag is refused before any scan runs

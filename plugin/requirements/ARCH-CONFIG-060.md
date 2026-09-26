@@ -21,7 +21,7 @@ satisfies: [SYS-AUTHOR-101]
 > fails on it.
 
 Every bullet below is binding.
-- `requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; an absent file keeps the defaults; a malformed file or an invalid entry is reported and skipped, stops no command, and fails only `gate --strict`. [[REQ-CONFIG-949]]
+- `requirements/_config.json` overrides the constants named in `CONFIG_KEYS`, and a bad entry in it is reported and skipped, failing only `gate --strict`. [[REQ-CONFIG-949]]
 
 ## Cases
 CASE-1
@@ -67,7 +67,9 @@ Every bullet below is binding.
 - A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.
 - `extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.
 - A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.
-- `main` collects the diagnostics of `load_config` and `apply_config` before scanning, through an optional `problems` list both accept, and prints each on stderr. The bare `gate` verdict reports each as an `INPUT:config` finding, a warning in text and JSON alike that `--strict` promotes to an error; no other command changes its exit code because of them.
+- `main` collects the diagnostics of `load_config` and `apply_config` in one `problems` list before scanning, and prints each on stderr.
+- The bare `gate` reports each diagnostic as an `INPUT:config` warning in text and JSON; `--strict` makes it an error.
+- No other command changes its exit code because of a diagnostic.
 
 ## Cases
 CASE-1 — a numeric threshold applies

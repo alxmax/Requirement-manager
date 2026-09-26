@@ -165,6 +165,8 @@ Every bullet below is binding.
 - The coverage report states how many files it excluded and why, and points at the other
   report, so the exclusion is visible rather than silent.
 - The JSON form carries `excluded_by_design` alongside the per-directory rows.
+- Both reports skip what git ignores: a file kept out of the repo is not code the repo
+  forgot to trace. Without git, nothing is skipped.
 
 ## Cases
 CASE-1 — the two reports agree
@@ -188,6 +190,11 @@ CASE-4 — the ratio is reachable
   Given  every file the bucket names has been tagged
   When   the coverage report runs
   Then   it reads 100% and the bucket is empty
+
+CASE-5 — a file git ignores is not a gap
+  Given  a git work tree holding an untagged `notes.py` that `.git/info/exclude` names
+  When   the untagged bucket and the coverage ratio are both computed
+  Then   neither counts `notes.py`, and the same tree without git lists it in the bucket
 
 ## Context
 **Notes**

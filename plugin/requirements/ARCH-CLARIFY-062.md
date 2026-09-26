@@ -63,6 +63,8 @@ Every bullet below is binding.
 - A clause carrying a hedge word with no measurable threshold raises one question naming that word.
 - A bare number in a clause with no unit beside it raises a question asking for the unit; an
   identifier such as a version or a case label is not a bare number.
+- The number after "exit", "exits" or "exit code" is a value, not a quantity, and raises
+  no unit question.
 - A clause quantified over "all", "every" or "any" with no stated limit raises a question about
   the upper bound.
 - A clause whose subject is "It" or "the system" raises a question asking which component acts.
@@ -84,9 +86,10 @@ CASE-1 — a hedge word is questioned by name
   Then   one question names "quickly" and asks for the measurable threshold
 
 CASE-2 — a bare number is questioned, an identifier is not
-  Given  one clause reading "retries 3 times" and one reading "emits CASE-2 for v4.0.0"
+  Given  one clause reading "retries 3 times", one reading "emits CASE-2 for v4.0.0"
+         and one reading "prints the list and exits 2"
   When   the detectors run
-  Then   the first raises a missing-unit question and the second raises none
+  Then   the first raises a missing-unit question and the other two raise none
 
 CASE-3 — a happy-path-only acceptance raises the failure question
   Given  a requirement whose cases mention no invalid, missing or failing input

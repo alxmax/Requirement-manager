@@ -504,6 +504,7 @@ layer: feature
 owner: Alex
 milestone: v5.6
 satisfies: [ARCH-VIEWER-007]
+distinct_from: [REQ-DESIGN-954]
 ---
 
 # The advisory design tab
@@ -537,6 +538,10 @@ CASE-3 — the candidates are counted, and listed only in their tab
   Given  a map carrying both corpus signals and two design candidates
   When   the open signals are computed and the `All` tab renders
   Then   exactly two computed signals carry the `design` signal at their own severity, each with its `file:line`; neither is rendered in `All`; and a map with no candidates adds none
+
+## Context
+**Notes**
+- `distinct_from: REQ-DESIGN-954` - `REQ-DESIGN-954` is the design data the engine writes into the map; this is the viewer tab that draws it.
 
 
 --------------------
@@ -848,6 +853,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
+distinct_from: [REQ-HISTORY-1003]
 ---
 
 # The shipped months, drawn beside the plan
@@ -887,6 +893,10 @@ CASE-4 — a shipped month opens to what was done in it
   Given  a month holding two releases, each with a headline
   When   the reader selects that month on the chart
   Then   a note lists both releases, newest first, each with its date and headline
+
+## Context
+**Notes**
+- `distinct_from: REQ-HISTORY-1003` - `REQ-HISTORY-1003` reads the CHANGELOG into `history`; this draws those rows on the plan.
 
 
 --------------------

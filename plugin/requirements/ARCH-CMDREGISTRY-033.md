@@ -313,6 +313,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-CMDREGISTRY-033]
+distinct_from: [REQ-SELFGATE-1011]
 ---
 
 # Help is rendered from the registry, one verb at a time
@@ -360,3 +361,7 @@ CASE-4 — help is written once
   When   their help texts are read
   Then   no parser action carries help text, and no registry help opens with the name of
          a verb the CLI refuses
+
+## Context
+**Notes**
+- `distinct_from: REQ-SELFGATE-1011` - `REQ-SELFGATE-1011` refuses an instruction that names a retired verb; this renders the help for the live ones.

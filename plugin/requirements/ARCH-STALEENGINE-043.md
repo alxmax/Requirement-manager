@@ -92,6 +92,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-STALEENGINE-043]
+distinct_from: [REQ-SELFGATE-1071]
 ---
 
 # The gate action reports a stale vendored engine
@@ -150,6 +151,10 @@ CASE-7 — GitHub Actions gets an annotation, elsewhere a plain line
   Given  a stale vendored engine, once with `GITHUB_ACTIONS` set and once without
   When   the probe reports it
   Then   the first prints a `::warning::` annotation and the second a plain `WARN` line
+
+## Context
+**Notes**
+- `distinct_from: REQ-SELFGATE-1071` - `REQ-SELFGATE-1071` is the Action's gate step; this is the separate warn-only step that compares engine versions.
 
 
 --------------------
