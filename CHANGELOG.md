@@ -159,7 +159,7 @@ with no mode. The MCP tools `reqmap_search`, `reqmap_dupes`, `reqmap_design` and
 `reqmap_review` now run `ask`, and `check_retired_verbs.py` reports a moved flag passed to its
 old verb (REQ-SELFGATE-1011), so every doc, skill, engine hint and requirement was moved with it.
 
-**Condition (Senate `2026-09-17_081414-senate-reqmap-cli-surface-gate-flags-to-9`):** the seven
+**Condition (review of 2026-09-17):** the seven
 spellings `gate --search`, `gate --dupes`, `gate --design`, `gate --review`, `gate --i18n`,
 `gate --top` and `gate --threshold` are accepted through v7.22.x only, each printing one
 migration line on stderr, and are removed in **v8.0.0**, where `gate` with any of them exits 2.
@@ -215,7 +215,7 @@ Stdlib only, protocol revision `2025-06-18`, with a conformance test over real s
 writes `.mcp.json` (Claude Code) and `.vscode/mcp.json` (VS Code with Copilot) when absent,
 with paths under each client's project-root variable. The plugin does not declare the server,
 and the gate does not warn when the configs are missing. ADR-0043 records why, and supersedes
-the Senate deferral of 2026-06-21. `sync` gained `--json` in the registry: `--retire` and
+the deferral of 2026-06-21. `sync` gained `--json` in the registry: `--retire` and
 `--release` already emitted it.
 
 ## plugin `v7.21.11` — 2026-09-16
@@ -425,7 +425,7 @@ read `TODO.md`, which this repo archived. `gate --audit` and `health --json`
 `plugin.json`, the newest `v*` tag and the newest CHANGELOG heading. Every version is
 compared in one form, `vX.Y.Z`: `plugin.json`'s `7.19.0` reads as `v7.19.0` and a short
 key `vX.Y` as `vX.Y.0`. It is read-only and registers no gate rule (REQ-PLANSTALE-1013). This was the
-blocking finding of the Senate audit `2026-09-16_160109-rm-planning-audit`, 9-0 MODIFY.
+blocking finding of a review of 2026-09-16.
 
 **Plan and Versions read one list.** A bar planned for a version created that version's
 column and never appeared in it, because the column read `milestones[].items[]`, a second
@@ -451,7 +451,7 @@ band and every empty lane. This repo's milestones now fall on Fridays (2 Oct, 30
 The design ring on the rail is drawn in one neutral ink, as REQ-VIEWER-969 always said:
 it is advice the gate never enforces, and a red ring read as a failure.
 
-**The hand-typed `scores` targets are gone.** The Senate run of 2026-09-14 accepted their
+**The hand-typed `scores` targets are gone.** A review of 2026-09-14 accepted their
 deletion, and it had not shipped. Nothing calibrated 95 and 85 against a measured reading.
 The rail's rings show the engine's numbers without a target mark.
 
@@ -773,8 +773,7 @@ by reading `gate --design`'s own output instead of the paragraph about it.
 ## plugin `v7.12.0` — 2026-09-14
 
 **The Gantt header now says which week of the year it is, and two dead things stopped
-pretending to be alive.** Bundle:
-`runs/senate/2026-09-14_233104-senate-plan-single-source.json` (MODIFY, 9-0-0).
+pretending to be alive.** (Review of 2026-09-14.)
 
 - **ISO week-of-year labels on the plan Gantt.** `buildWeekBands` was dead code that took
   a day count and numbered from 1, so the same calendar week read `W1` in one chart and
@@ -803,10 +802,10 @@ pretending to be alive.** Bundle:
 
 ## plugin `v7.11.0` — 2026-09-14
 
-**What a nine-senator audit of three open items actually returned: one of them was a
+**What a review of three open items actually returned: one of them was a
 release-blocking bug filed as a courtesy, one was a capability this repo deleted six days
 earlier, and the cheap one surfaced three broken links in our own corpus.**
-Bundle: `runs/senate/2026-09-14_205651-senate-reqmap-three-open-items.json` (MODIFY, 9-0-0).
+(Review of 2026-09-14.)
 
 - **`pyramid.py` was untracked while `levels.py` imported it.** `levels.py:7` does
   `from .pyramid import (...)` at module scope and sits in the CLI's startup chain, so a
@@ -1218,8 +1217,7 @@ skipped. A milestone is real once `TODO.md` groups anything under it, done or no
 ## plugin `v7.3.0` — 2026-09-08
 
 **Pass 1 of the command-surface cut: `sync --suggest-verifies` is retired.** The first and,
-for now, only mode the 2026-09-08 audit cleared — bundle
-`2026-09-08_163116-senate-reqmap-cli-surface-18-to-5` (MODIFY, GO 1 / MODIFY 8 / STOP 0),
+for now, only mode the 2026-09-08 review cleared,
 recorded as [ADR-0037](docs/adr/0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md).
 It was chosen over the smaller `gate --review` because blast radius measured in test
 functions missed that `--review` is the only engine command a shipped skill invokes:
@@ -1256,13 +1254,12 @@ deleting it without re-pointing is RM006), and `init --plan` (one registry entry
 ## plugin `v7.2.1` — 2026-09-08
 
 **The stale-instruction guard learns flags, reads the consumer, and finds fifteen live
-defects at home.** A fifth verb/flag fold was proposed and audited by nine senators
-(Senate bundle `2026-09-08_163116-senate-reqmap-cli-surface-18-to-5`, verdict **MODIFY**,
-GO 1 / MODIFY 8 / STOP 0, superseding the still-open `senate-reqmap-cli-surface-18-to-4`
-of 2026-09-05). The cut itself did not ship — the audit measured its ceiling at ~854
+defects at home.** A fifth verb/flag fold was proposed and reviewed
+(review of 2026-09-08, superseding the still-open review
+of 2026-09-05). The cut itself did not ship — the review measured its ceiling at ~854
 engine lines, not the bulk the TODO item assumed, because `sync` runs `_audit_summary`
 on every clean gate and eleven of the eighteen mode flags therefore free nothing. What
-shipped is the precondition the senators made blocking: the guard that has to be able to
+shipped is the precondition the review made blocking: the guard that has to be able to
 see such a cut before anyone makes one.
 
 - **`check_retired_verbs.py` checks retired FLAGS, not just verbs.** The verb-only form
@@ -1313,8 +1310,7 @@ blast-radius questions are settled; `sync --retire` is permanently KEEP under AD
   requirement rather than gated by a bolted-on early return. Stays report-only forever,
   by design: ADR-0031's "Why not on sync" already refused a write path inside the hook
   every commit runs, and ADR-0036 keeps the axis a decision the author makes by hand,
-  not one the engine infers and applies. From bundle `2026-09-07_163654`, Senate run
-  `senate-reqmap-relevel-promote-demote`.
+  not one the engine infers and applies. From the review of 2026-09-07.
 
 ## plugin `v7.1.1` — 2026-09-07
 
@@ -1330,8 +1326,8 @@ blast-radius questions are settled; `sync --retire` is permanently KEEP under AD
 **The pyramid is built upward, and the gate says when a rung is empty.** The maintainer's
 model: the code is what matters; because there is a lot of it, it is grouped into
 architecture teams, and the teams into system needs. Every SYS has at least one ARCH, every
-ARCH at least one REQ, and every REQ and ARCH belongs to a group one rung up. A nine-senator
-Senate audit the same day ([ADR-0036](docs/adr/0036-decomposition-builds-downward-the-system-rung-is-the-authors.md))
+ARCH at least one REQ, and every REQ and ARCH belongs to a group one rung up. A review
+the same day ([ADR-0036](docs/adr/0036-decomposition-builds-downward-the-system-rung-is-the-authors.md))
 had refused to let the engine invent the missing top; this release keeps that refusal and adds
 the check.
 
@@ -1340,7 +1336,7 @@ the check.
   an `architecture` requirement no `code` requirement satisfies, a `code` or `architecture`
   requirement that satisfies nothing, or a parent on the wrong rung. Only for enforced
   requirements that declare a `level:`; a corpus without the axis sees nothing (ADR-0019).
-  It fired on 5 of 67 architecture requirements the day it was written; the Senate had
+  It fired on 5 of 67 architecture requirements the day it was written; the review had
   refused the upward half alone (A2) at 0 of 67, and ADR-0036 records both the refusal and
   the maintainer's decision.
 - **Six childless architecture requirements became code-rung members of their teams.**
@@ -1357,7 +1353,7 @@ the check.
   they shared vocabulary by construction and were 23 of the 38 pairs the report named on the
   committed corpus. They join the tested-by and parent-child pairs in the skipped count; a
   cousin under another parent is still compared (`REQ-SIMILAR-921` CASE-7). The one lever
-  the Senate authorised from a five-lever menu.
+  the review authorised from a five-lever menu.
 - **The corpus answers its own report.** `gate --risk` listed 16 files traced to no
   requirement: the five that implement something are tagged (`reqmap_engine/__init__.py`,
   the shipped `plugin/hooks/pre-commit`, `scripts/changelog_notes.py` and its test, the two
@@ -1684,8 +1680,8 @@ down with it, which is the chain [ADR-0031](docs/adr/0031-a-tagged-corpus-can-be
 recorded. It now says so, with the count and the command that can reach them.
 
 Both are read-only. Nothing writes a `level:` without `--apply`, which is what
-[ADR-0030](docs/adr/0030-the-engine-drafts-the-pyramid.md) rule 4 and the nine-senator
-audit behind it require.
+[ADR-0030](docs/adr/0030-the-engine-drafts-the-pyramid.md) rule 4 and the review
+behind it require.
 
 ## plugin `v5.19.1` — 2026-09-06
 
@@ -2115,7 +2111,7 @@ dropping the compact truncation fails CASE-2, and moving the default off 100% fa
   It needs an ADR, and it is exactly the change that must not happen as a side effect of
   the next viewer feature, which is how it reached eleven.
 
-Also filed for v5.13, from the Senate repo (a real consumer, 42 hand-authored confirmed
+Also filed for v5.13, from a consumer repo (a real consumer, 42 hand-authored confirmed
 requirements): an already-tagged corpus has no path to the three rungs. ADR-0030 works, but
 rung 1 fires only on a requirement `init` extracts from an untagged source file, and the
 architecture and system rungs are minted from those drafts — so zero drafts is zero
@@ -2398,19 +2394,19 @@ Nothing is enforced. Every node minted is `status: draft`, which the gate never 
 and a second `init` overwrites nothing. On a three-file fixture the result is `1 system /
 2 architecture / 3 code` with 5 `satisfies:` edges and a clean gate.
 
-The audit that preceded this was MODIFY (GO 1 / MODIFY 6 / STOP 2) and blocked automatic
+The review that preceded this blocked automatic
 assignment. Three of the blocking objections are answered in ADR-0030 on their own terms;
-**Deming's STOP is recorded unanswered** — whether the three-level shape pays is still
+**one objection is recorded unanswered** — whether the three-level shape pays is still
 calibrated on one corpus, this one. This changes what `init` produces, not what is known
 about whether the shape is worth producing.
 
 ## plugin `v5.7.0` — 2026-09-06
 
 **The skill contract now says the specification-level axis exists — and that a flat
-corpus is a supported end state, not a waypoint.** A nine-senator audit asked why the
-engine does not produce a three-rung corpus on a consumer repo. The verdict was MODIFY
-(GO 1 / MODIFY 6 / STOP 2) and every code candidate was refused. What survived was
-documentation, and the audit corrected the proposal that raised it.
+corpus is a supported end state, not a waypoint.** A review asked why the
+engine does not produce a three-rung corpus on a consumer repo, and
+every code candidate was refused. What survived was
+documentation, and the review corrected the proposal that raised it.
 
 **What the audit found, verified by running it:** the read-only advisory the proposal
 wanted to build **already ships**. On a throwaway three-file repo with no prior
@@ -2434,9 +2430,9 @@ target, cites ADR-0019's dated review (**2027-03-03**, whose pre-committed remed
 *removal*, not more documentation), and carries current counts (68/159/236, not
 62/126/197).
 
-**One correction to the record:** ADR-0019's Evidence line cited
-`runs/senate/2026-09-02_*-v-model*.json`, a glob matching no file. It now names the two
-real bundles. The decision is untouched — only the citation was wrong.
+**One correction to the record:** ADR-0019's Evidence line cited a run-file
+glob matching no file. It now names the two
+real reviews. The decision is untouched — only the citation was wrong.
 
 Nothing in the engine changed. No new verb, no new flag, no new gate rule.
 
@@ -2557,7 +2553,7 @@ same equivalence check — `cmd_check` is the gate's core and is deliberately la
 
 **The metrics pillar was calibrated, independently reviewed, and is now one metric
 instead of three.** v5.2.0 shipped WMC, RFC and LCOM1 on the strength of one repo and no
-review; the Senate refused that (`OVR`, two blocking requests undelivered). All three have
+review; the review refused that (two blocking requests undelivered). All three have
 now been measured over seven Python corpora and every flag judged by a reviewer who did
 not write them. Two metrics failed and are gone.
 
@@ -2598,7 +2594,7 @@ builder DSL over one shared accumulator. The pillar now names those three shapes
 output, so a reader who meets one can dismiss the flag in seconds. That is the most an
 advisory signal at 71% can honestly ask for.
 
-**The coverage signal Dimon's blocking request asked for** (`v5.3.0` delivered half of it):
+**The coverage signal the review's blocking request asked for** (`v5.3.0` delivered half of it):
 `design --json` now carries `metrics_scope` and `cohesion_skipped` beside `findings`, so a
 machine reading the output gets the same caveats as a human reading the text, and the count
 of classes whose cohesion could not be measured is stated rather than inferred.
@@ -2609,9 +2605,8 @@ analysis scripts.
 
 ## plugin `v5.3.0` — 2026-09-05
 
-**The C&K metrics pillar went through a nine-senator audit and came back MODIFY**
-(GO 4 · MODIFY 4 · STOP 1, two rounds —
-`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`). Four of the
+**The C&K metrics pillar went through a review** (two rounds —
+review of 2026-09-05). Four of the
 requests are discharged here; two are left open on the record rather than quietly
 dropped.
 
@@ -2650,7 +2645,7 @@ visits — so the band is cited as context, not as a bar this cleared.
 
 **Left open, on the record and not silently dropped:** the confirmation sample is 1 of 1
 and was made by the pillar's own author, which ADR-0022 does not accept as independent;
-and Musk's request to delete WMC and LCOM1 as redundant with RFC (all three fire on the
+and a request to delete WMC and LCOM1 as redundant with RFC (all three fire on the
 same single class, so two of the three have never carried independent signal here) is
 recorded, not actioned. Both are tracked in `TODO.md`.
 
@@ -2673,8 +2668,8 @@ no field). Run on this repo it finds exactly one class, `Scene`, on all three co
 noticed.** DIT and NOC measure an inheritance tree, and a codebase that composes instead
 of subclassing has none — they would report zero forever and teach a reader to ignore the
 pillar. CBO needs type inference to resolve which class a Python name refers to, and a
-coupling number that is wrong is worse than no coupling number. A TODO item asks the
-`senate` skill to argue that decision, including whether silence on DIT/NOC reads as
+coupling number that is wrong is worse than no coupling number. A TODO item asks for a
+further review to argue that decision, including whether silence on DIT/NOC reads as
 "clean" on a consumer repo where it means "not measured".
 
 **Cohesion is measured over real fields.** A class's state is what `self.<name> = ...`
@@ -3123,7 +3118,7 @@ Corpus: 221 requirements (9 SYS, 65 ARCH, 147 REQ), 2 deprecated.
 
 ## plugin `v3.1.1` — 2026-09-03
 
-**The `architecture` level is promoted into `system`** ([ADR-0024](docs/adr/0024-architecture-level-promoted-into-system.md), superseding [ADR-0023](docs/adr/0023-fan-out-per-level-ceilings-no-floor.md)'s `system` ceiling). A `/senate` audit rejected an earlier, literal 2-level proposal that froze the `system` tier at 9 requirements: flattening 573 `level: code` requirements onto 9 parents averages ~64 children each (one node hits 107), 2–3.5x over any proposed ceiling. The revised design that survived promotes the 62 `level: architecture` requirements into `level: system` instead of deleting them — the middle rung's grouping is unchanged, only its label moves, so no `satisfies:` edge is repointed and no confirmed contract's fan-out changes.
+**The `architecture` level is promoted into `system`** ([ADR-0024](docs/adr/0024-architecture-level-promoted-into-system.md), superseding [ADR-0023](docs/adr/0023-fan-out-per-level-ceilings-no-floor.md)'s `system` ceiling). A review rejected an earlier, literal 2-level proposal that froze the `system` tier at 9 requirements: flattening 573 `level: code` requirements onto 9 parents averages ~64 children each (one node hits 107), 2–3.5x over any proposed ceiling. The revised design that survived promotes the 62 `level: architecture` requirements into `level: system` instead of deleting them — the middle rung's grouping is unchanged, only its label moves, so no `satisfies:` edge is repointed and no confirmed contract's fan-out changes.
 
 - `fan-out`'s `system` ceiling moves from 10 to 50 (`LINT_FANOUT_BANDS` in `plugin/scripts/reqmap.py`); the `architecture` ceiling (30) is unchanged for a consumer repo that still uses a real 3-tier split.
 - This corpus now has 71 `level: system` requirements (9 original `layer: need` stakeholder requirements, fan-out 5–10, plus the 62 promoted `layer: bus`/`feature` requirements, fan-out up to 32), 0 at `level: architecture`, 573 at `level: code`. `level: system` now spans two populations distinguished by `layer:`, not `level:` — see CLAUDE.md's "Ids carry their level" section.
@@ -3135,7 +3130,7 @@ Corpus: 221 requirements (9 SYS, 65 ARCH, 147 REQ), 2 deprecated.
 
 **`next` and `lint` could report a different set of oversize requirements for the same corpus, and `lint --decompose` only ever acted on `statement-size`.** `next`'s Granularity bucket iterated every status with no `lint_exempt` check and its own hardcoded 5-AC threshold; `lint`'s `ac-count-high` check used `LINT_AC_MAX` (7), scoped to non-draft statuses, and honored `lint_exempt: [ac-count-high]`. Two commands, two answers to the same question.
 
-**Corrections from the nine-senator branch audit** (`runs/senate/2026-09-03_155528-senate-reqmap-pr208-branch-audit.json`, MODIFY, two rounds). The audit found no defect in the engineering — gate 0 errors, `lint --strict` 0 errors, `map --check` fresh, suite green — and four defects in the *record*, three of them in text this release would have shipped as normative:
+**Corrections from a branch review** (two rounds, review of 2026-09-03). The review found no defect in the engineering — gate 0 errors, `lint --strict` 0 errors, `map --check` fresh, suite green — and four defects in the *record*, three of them in text this release would have shipped as normative:
 
 - **`health`'s reviewed-only denominator counted the wrong population.** `reviewed_total` was `total - drafts`, but `healthy`'s first axis is `status == confirmed`, so a `baseline`/`in-progress`/`implemented`/`deprecated` requirement entered the denominator and could never enter the numerator — it depressed the score with nothing rotting, and a `deprecated` requirement capped it permanently. The denominator is now `confirmed`. Invisible in this repo (all 72 non-drafts are `confirmed`), so `ARCH-REVIEWEDSCORE-109` gains CASE-5 and a test covering all four statuses.
 - **A withdrawn measurement is out of a binding contract.** `ARCH-FANOUT-052`'s Description carried "a blind review of all nine findings the old floor produced confirmed none of them as real" — an unfalsifiable historical assertion inside a hash-locked normative span. The number does not reproduce (the floor produced 4, then 6, then 7; nine was a floor-plus-ceiling total) and the one flag it called plausibly real, `ARCH-CHECK-006`, is a *ceiling* finding. The clause now states the behaviour only; the history moved to ADR-0023, and the claim is retracted in ADR-0022 and here.
@@ -3157,7 +3152,7 @@ Corpus: 221 requirements (9 SYS, 65 ARCH, 147 REQ), 2 deprecated.
 - **Grow-only asymmetry recorded as [ADR-0021](docs/adr/0021-corpus-grows-only-by-design.md).** Five paths create a requirement file; none removes one. The single `os.remove` lives in `_wipe` (`init --wipe`), which resets to zero rather than pruning. The decision is to keep that asymmetry — growth writes a reversible draft, shrink deletes a file and rewrites `satisfies:`/`depends_on:` edges across a possible drift boundary — pinned by a `NoShrinkVerb` test that fails when a second delete path appears. The record also corrects two figures the deliberation got wrong: dropping the `ac-count-low` atomic exemption fires on 14/70 lintable (20.0%), not 621/691 (90%), because `lint` never examines drafts; and the 621 detailed-design leaves do *not* cost nothing — they are why the headline score reads 10.
 - **`intent` no longer duplicates the Contract.** In the atomic form the `>` quote IS the single obligation, so `_build_map_data` emitted it as both `intent` and `contract` and every surface printed one sentence twice — the viewer drew a `Why — Intent` blockquote directly above an identical `Description` bullet, and `show` printed the line under the title and again under `Contract:`. Measured: **588 of 646 nodes, 91% of the corpus**. New shared `_distinct_intent` returns `""` when the quote and the joined Contract are the same text (whitespace-normalised), read by both `_build_map_data` and `cmd_show`; the viewer now omits the block rather than drawing an empty one. Sectioned requirements, whose quote is real rationale, are untouched — 58 keep theirs. `ARCH-MAP-007` gained CASE-4 and CASE-5.
 - **Authoring rule: split by failure mode, never by sentence.** `SKILL.md` and `SKILL.universal.md` now state that a clause earns its own requirement only when it names a behavior that can fail on its own, and name the three shapes that never do — an element of an enumeration ("a Rust `#[test]` counts" is one arm of *the engine recognises a test function*), an attribute of a behavior ("warn-only and never changes the exit code"), and a rationale that restates a sibling's obligation. The test is mechanical: try to write the `Then`; if the observable only repeats the clause, the clause is not a capability.
-- **[ADR-0022](docs/adr/0022-no-minimum-requirement-size-check.md) — no minimum-size lint check, and a standing launch discipline for every future one.** A nine-senator audit (2 rounds, GO 3 · MODIFY 3 · STOP 3, three senators reversing to STOP on the evidence) rejected a word-count floor: measured over the 72 requirements `lint` actually visits, it fires on **1 — 1.4% — identically at N = 8, 10, 12, 15 and 20**, below ADR-0016's floor at every threshold, and its single flag is a correct 8-word contract (day-one precision 0/1). "Contract" also has two live senses on the atomic form — 140 findings under one reading, **zero** under the one `binding_hash` uses. The standing rule adopted instead: **no lint check ships without publishing both a fire rate and a human-confirmation sample of its own findings.** Verified across the whole lint surface — every check carrying an exemption launched without a sample (`ac-count-high` 6, `file-spread` 4, `over-scoped` 1, `ac-count-low` 1); `fan-out`, the one that published both halves, carries none.
+- **[ADR-0022](docs/adr/0022-no-minimum-requirement-size-check.md) — no minimum-size lint check, and a standing launch discipline for every future one.** A review (2 rounds, three reversals to a blocking position on the evidence) rejected a word-count floor: measured over the 72 requirements `lint` actually visits, it fires on **1 — 1.4% — identically at N = 8, 10, 12, 15 and 20**, below ADR-0016's floor at every threshold, and its single flag is a correct 8-word contract (day-one precision 0/1). "Contract" also has two live senses on the atomic form — 140 findings under one reading, **zero** under the one `binding_hash` uses. The standing rule adopted instead: **no lint check ships without publishing both a fire rate and a human-confirmation sample of its own findings.** Verified across the whole lint surface — every check carrying an exemption launched without a sample (`ac-count-high` 6, `file-spread` 4, `over-scoped` 1, `ac-count-low` 1); `fan-out`, the one that published both halves, carries none.
 - **`fan-out` gets per-level ceilings and loses its floor.** One band for the whole hierarchy was wrong in both directions: an `architecture` requirement groups detailed design, where a dozen children is ordinary, while a `system` need groups architecture, where ten is already a lot. Ceilings are now **30** for `architecture` and **10** for `system`; a parent declaring no `level:` keeps the old uniform 5–20 band, so a repo that never adopts the level axis sees exactly what it saw before (ADR-0019's doubly-opt-in rule). The **floor is dropped, not retuned** — measured at `b0ce92b` the old uniform band produced **10** findings, **7** of them below the floor, and several of those had appeared *because* commits `e254a34` and `72213fc` correctly folded away leaves that should not have existed. A check that gets louder as the corpus gets better is measuring the wrong thing; the distribution (3:1, 4:6, 5:5, 6:8, 7:5, 8:9) has no natural floor to find, while the ceiling has a real break at 19 → 22 → 23 → 32. Findings go **10 → 1**, the survivor being `ARCH-CHECK-006` at 32. ADR-0019 pre-committed this response: "the band is wrong for this shape of corpus and should be widened or dropped — not lived with." Recorded as **ADR-0023**, which supersedes ADR-0019's fan-out band and withdraws its claim that the band's seven findings were confirmed real.
 - **[ADR-0022](docs/adr/0022-no-minimum-requirement-size-check.md) gains the procedure for discharging its own confirmation half**, applied for the first time on the change above: an independent reviewer decides (AI is allowed — independence and executed evidence are what mattered, not species), every verdict cites executed output, "false positive" is a costless answer, a person ratifies the batch, and the refusal rate is recorded so a rubber stamp is detectable. The reviewer's most useful output was two corrections to the proposal — a comment carrying a false measurement, and an unreachable floor — both fixed before shipping.
 - **Two new atomic-form checks close a blind spot every existing signal shared: `_count_ac` counts the one `Scenario` regardless of how many facts an atomic story's `>` quote bundles into it, and `ac-count-low` explicitly exempts the atomic form, so a story listing 3 facts with a Scenario proving 1 passed every check that existed before this — the same shape as `REQ-FANOUT-391`/`-392` (a leaf asserting behaviour its parent forbade, unnoticed). `atomic-bullet-then-mismatch` warns when a story's `- ` bullet count does not equal its Scenario's `Then`-line count; `atomic-story-overlong` warns past `LINT_ATOMIC_STORY_BULLETS_MAX` (3) bullets — a story may enumerate up to 3 facts, not just 1. Both are `warn`, promoted to error under `--strict` via `STRICT_PROMOTE`, the same mechanism `ac-count-high`/`over-scoped` already use — not unconditional error, since `missing-section` is the only unconditional-error check across all 17 severity assignments in `lint_requirement` and every other structural/count check in the file, including these two's closest relatives, is `warn`-based.** Fires on **0** of the corpus's atomic-form requirements today — no existing story lists more than one fact — so [ADR-0022](docs/adr/0022-no-minimum-requirement-size-check.md)'s launch discipline is satisfied only on the fire-rate half; there is no live finding to sample against. Recorded as an explicit exception, not a silent one: the check is deterministic and structural (a bullet count either equals the `Then` count or it does not), the same class as `missing-section` rather than a heuristic threshold like the rejected minimum-size proposal, and it ships `warn`-first so a plain `lint` run stays exactly as quiet as before. `ARCH-LINTCHECKS-025` gains a new "Atomic-form parity checks" bullet group, CASE-11/CASE-12, and two new leaf `REQ-LINTCHECKS-476`/`-477`.
@@ -3231,9 +3226,9 @@ This release folds what was developed as `v2.32.0`–`v2.34.0`; none of those th
 
 ## plugin `v2.30.0` — 2026-09-02
 
-**A nine-senator Senate audit on "make requirements simpler, more objective, clearer" split into two decisions — one shipped, one rejected.** `runs/senate/2026-09-02_191837-reqmap-schema-simplify-context-merge-and-traceability.json`, two rounds, verdict MODIFY (8 blocking / 1).
+**A review on "make requirements simpler, more objective, clearer" split into two decisions — one shipped, one rejected.** Two rounds, review of 2026-09-02.
 
-- **New consolidated `## Context (non-binding)` section**, replacing `## WHAT — Notes & known limitations`, `## Example — in practice`, and `## WHERE — Current implementation` as three near-synonymous informative buckets with one, grouped by bold `**Notes**`/`**Example**`/`**Current implementation**` sub-labels (the same clause-group convention the Contract section already uses). `reqmap.py new`'s template scaffolds it for every new requirement. **Purely additive, not a migration**: the Senate found the originally-audited proposal's "no enforcement change" premise false — `_build_map_data` reads the legacy headings by label to populate `_map.json`'s `notes`/`current_impl` fields, so renaming them without a fallback would have silently emptied those fields corpus-wide. The legacy three-heading form stays fully valid forever; new `_context_group` is tried only when the legacy heading is absent, and no existing requirement file (in this repo or any consumer) needs to change. `git diff --stat` on this repo's 51 pre-existing requirement files for this release: zero lines. [ADR-0017](docs/adr/0017-consolidated-context-section.md), `REQ-CONTEXT-048`.
+- **New consolidated `## Context (non-binding)` section**, replacing `## WHAT — Notes & known limitations`, `## Example — in practice`, and `## WHERE — Current implementation` as three near-synonymous informative buckets with one, grouped by bold `**Notes**`/`**Example**`/`**Current implementation**` sub-labels (the same clause-group convention the Contract section already uses). `reqmap.py new`'s template scaffolds it for every new requirement. **Purely additive, not a migration**: the review found the originally-reviewed proposal's "no enforcement change" premise false — `_build_map_data` reads the legacy headings by label to populate `_map.json`'s `notes`/`current_impl` fields, so renaming them without a fallback would have silently emptied those fields corpus-wide. The legacy three-heading form stays fully valid forever; new `_context_group` is tried only when the legacy heading is absent, and no existing requirement file (in this repo or any consumer) needs to change. `git diff --stat` on this repo's 51 pre-existing requirement files for this release: zero lines. [ADR-0017](docs/adr/0017-consolidated-context-section.md), `REQ-CONTEXT-048`.
 - **Rejected: a Contract-clause-to-Acceptance-criterion traceability marker** (`{#C<n>}` anchors + `covers: C<n>` tags, a new opt-in `uncovered-clause` lint check). This is the third attempt at a mechanism this repo has already rejected twice — [ADR-0012](docs/adr/0012-internal-consistency-lint-rejected.md) (78.6% false-positive rate measured) and [ADR-0016](docs/adr/0016-no-edge-case-marker.md) (decided one day earlier; comparable opt-in in-file markers measured at 2/51 adoption vs. 12/51 for test-file-based `# verifies:` tags) — and the proposed `{#C<n>}` syntax was independently found to leak into `acc`/the viewer, reproducing the `REQ-VIEWER-007` AC-8 regression class already fixed once. [ADR-0018](docs/adr/0018-no-contract-acceptance-traceability-marker-yet.md) records the numeric revisit bar for a future attempt.
 - `MAP_ENGINE_VERSION` → `2026-09-02.1`.
 
@@ -3288,9 +3283,9 @@ This release folds what was developed as `v2.32.0`–`v2.34.0`; none of those th
 
 ## plugin `v2.28.1` — 2026-08-27
 
-**`dupes` reported a requirement and its own test suite as probable duplicates.** On a consumer corpus that keeps one requirement per script *and* one per test module (Senate: `SCRIPTS-X` / `SCRIPTS-TEST-X`), 9 of 32 flagged pairs were exactly that — scores 0.42–0.60, near the top of the list — and the reviewer learned to scroll past the report. The two share vocabulary by construction, and the corpus already says so: the test requirement's `implements` file is the other's `tested-by` file.
+**`dupes` reported a requirement and its own test suite as probable duplicates.** On a consumer corpus that keeps one requirement per script *and* one per test module (`SCRIPTS-X` / `SCRIPTS-TEST-X`), 9 of 32 flagged pairs were exactly that — scores 0.42–0.60, near the top of the list — and the reviewer learned to scroll past the report. The two share vocabulary by construction, and the corpus already says so: the test requirement's `implements` file is the other's `tested-by` file.
 
-- `cmd_similar` now takes the member map (`dupes` passes it from the scan) and skips a pair linked by `tested-by`, printing `skipped N pair(s) linked by tested-by` instead. Without a member map (library callers, the existing tests) behaviour is unchanged. `REQ-SIMILAR-016` +AC-7; Senate corpus 32 → 23 pairs, and every pair still involving a test requirement is a genuine cross-link (e.g. two different test suites), not a suite reported against its own subject.
+- `cmd_similar` now takes the member map (`dupes` passes it from the scan) and skips a pair linked by `tested-by`, printing `skipped N pair(s) linked by tested-by` instead. Without a member map (library callers, the existing tests) behaviour is unchanged. `REQ-SIMILAR-016` +AC-7; that corpus 32 → 23 pairs, and every pair still involving a test requirement is a genuine cross-link (e.g. two different test suites), not a suite reported against its own subject.
 - `MAP_ENGINE_VERSION` → `2026-08-27`.
 
 ## plugin `v2.28.0` — 2026-08-25
@@ -3618,10 +3613,9 @@ show `brightgreen` while `gate` would fail; it turns `red` with a `gate:N` suffi
 at all (the actual shape of the incident that motivated this — an unsourced monetary-constant
 edit) produces neither a dangling reference nor a missing-`implements` error, so it stays
 invisible to this signal; pinned by a dedicated test. Closing that gap needs a sourced /
-`validated-against:`-staleness convention, deliberately out of scope here — Senate run
-`reqmap-health-gate-cleanliness` (verdict `GO_WITH_CONDITIONS`) rejected folding it into this
-change, citing a 2026-06-21 precedent (`reqmap-enforce-all-code-has-requirements`,
-`DEEPLY_SPLIT`) against granting `gate` new blocking authority without its own deliberation.
+`validated-against:`-staleness convention, deliberately out of scope here — a review
+rejected folding it into this
+change, citing a 2026-06-21 precedent against granting `gate` new blocking authority without its own deliberation.
 
 `MAP_ENGINE_VERSION` → `2026-07-03`.
 

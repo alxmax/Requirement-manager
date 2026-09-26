@@ -1,7 +1,7 @@
 # ADR-0016 — No first-class edge-case marker, section, or heuristic
 
 - **Status:** Rejected (considered, deliberately not built)
-- **Decided:** 2026-09-02, after a nine-senator Senate audit (`runs/senate/2026-09-02_084505-reqmap-edge-case-handling.json`, two rounds, verdict MODIFY, 7 MODIFY / 2 GO, six of the MODIFY votes blocking)
+- **Decided:** 2026-09-02, after a two-round review on that date
 - **Evidence:** measurements below, each reproducible by the command named beside it
 
 ## Context
@@ -32,7 +32,7 @@ Four shapes were audited:
 | requirements already carrying a bold `**Edge cases**` contract clause-group | **1 / 51** (`CORE-PARSE-001`) | `grep -l "\*\*Edge cases\*\*" plugin/requirements/*.md` |
 | occurrences of the word `edge` in the corpus meaning a *graph* edge | **25 of 26** | `grep -in "edge" plugin/requirements/*.md` |
 | real incidents traced to an edge case absent from a requirement | **1** (`REQ-INIT-012` AC-7: an isolated subagent worktree doubling every member, v2.29.2) | `CHANGELOG.md` |
-| same-family precedents, resolved | **4 / 4** shipped only the read-only or advisory variant ([ADR-0012](0012-internal-consistency-lint-rejected.md), `REQ-COVERAGE-029`, the MCP deferral, [ADR-0014](0014-engine-stays-one-file.md)) | `runs/senate/outcomes.jsonl` |
+| same-family precedents, resolved | **4 / 4** shipped only the read-only or advisory variant ([ADR-0012](0012-internal-consistency-lint-rejected.md), `REQ-COVERAGE-029`, the MCP deferral, [ADR-0014](0014-engine-stays-one-file.md)) | the maintainer's review log |
 
 ## Decision
 
@@ -66,8 +66,8 @@ Four findings decided it:
 4. **Shape (C) is not free either.** The three existing review categories judge text that is
    *present*; "a missing edge case" is an open-world absence judgement an LLM can always
    populate with a plausible invented case. It cannot join a skill whose prime directive is a
-   near-zero false-positive rate without that rate being measured first. Musk's second-round
-   position — that even (C) duplicates rule 7's exact words — is recorded as the strict
+   near-zero false-positive rate without that rate being measured first. A second-round
+   objection — that even (C) duplicates rule 7's exact words — is recorded as the strict
    reading; the majority left (C) eligible on the condition below.
 
 Demand was the other axis. The one real incident (`REQ-INIT-012` AC-7) was not a failure of any

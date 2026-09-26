@@ -6,7 +6,7 @@
   requirement that does x, y, z."
 - **Evidence:** the maintainer's own usage (never), and the way requirements in this repo are
   actually authored: written into a module file by hand or by an assistant, then `sync`. Not
-  measured further; no Senate audit was asked for.
+  measured further; no further review was asked for.
 
 ## Context
 

@@ -68,7 +68,7 @@ CASE-5
   branches) were updated to scaffold the Context form too, so a promoted draft needs no
   reshaping — matching the existing "emission schema matches `REQUIREMENT_TEMPLATE`" intent.
 - [ADR-0017](../../docs/adr/0017-consolidated-context-section.md) records the decision and
-  the Senate audit it came out of, including why the `>` WHY blockquote was deliberately
+  the review it came out of, including why the `>` WHY blockquote was deliberately
   left alone (it is not heading-based — `_first_quote` reads the first blockquote in the
   file regardless of section — so merging it into `## Context` would not have simplified
   anything a parser cares about).

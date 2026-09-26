@@ -112,7 +112,7 @@ CASE-3 — classify_prose buckets README/docs/html paths as sync_only
   Then   each returns `"sync_only"`
 
 CASE-4 — classify_prose buckets prompt/spec prose as capability
-  Given  the paths `prompts/senators/aurelius.md`, `specs/foo.md`, and `notes.md`
+  Given  the paths `prompts/reviewers/editor.md`, `specs/foo.md`, and `notes.md`
   When   `classify_prose` runs on each
   Then   each returns `"capability"`
 
@@ -157,9 +157,9 @@ CASE-1 — an explicit generated-from tag registers a sync_only file as a member
   Then   the file appears as a member of `REQ-DOCS-001`, despite being sync_only
 
 CASE-2 — _prose_facts prefers frontmatter title, then collects the H2 headings
-  Given  a source with frontmatter `title: Senator Aurelius` and two `## ` headings
+  Given  a source with frontmatter `title: Senior Editor` and two `## ` headings
   When   `_prose_facts(src)` runs
-  Then   it returns `("Senator Aurelius", ["Role", "Specialty"])`
+  Then   it returns `("Senior Editor", ["Role", "Specialty"])`
 
 CASE-3 — later H1 headings become the section hint when no H2 exists
   Given  `"# IDENTITY and PURPOSE\n\ntext\n\n# STEPS\n\n# OUTPUT INSTRUCTIONS\n"` (no `##` anywhere)

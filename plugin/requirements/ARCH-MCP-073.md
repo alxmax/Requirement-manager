@@ -52,7 +52,7 @@ CASE-4
 
 ## Context
 **Notes**
-- The decision, and the Senate deferral it supersedes, are ADR-0043.
+- The decision, and the earlier deferral it supersedes, are ADR-0043.
 
 
 --------------------

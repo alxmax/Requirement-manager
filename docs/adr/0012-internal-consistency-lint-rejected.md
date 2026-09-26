@@ -1,7 +1,7 @@
 # ADR-0012 — No internal-consistency lint
 
 - **Status:** Rejected (considered, deliberately not built)
-- **Decided:** 2026-06-19, after a Senate deliberation; tracked and closed as issue #120
+- **Decided:** 2026-06-19, after a deliberation; tracked and closed as issue #120
 - **Evidence:** `TODO.md` v1.18, item 4
 
 ## Context

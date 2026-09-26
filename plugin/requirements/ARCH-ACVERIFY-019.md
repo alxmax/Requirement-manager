@@ -299,8 +299,8 @@ CASE-5 — a tag naming no requirement at all is reported here
   exists; reporting it would be a false finding.
 - Warn, never error: a stale label is a documentation slip, and the gate's errors stay
   reserved for link integrity between requirements and code members.
-- This closes a condition first raised as blocking in the Senate run
-  `2026-09-02_201621`, recorded there as an override and never built. It is a precondition
+- This closes a condition first raised as blocking on 2026-09-02, recorded then as
+  an override and never built. It is a precondition
   for any future tool that writes `verifies:` tags in bulk: without it, a generated wrong
   label is indistinguishable from a correct one.
 

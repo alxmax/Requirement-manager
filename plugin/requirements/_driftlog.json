@@ -3,7 +3,7 @@
   "accepted": {
     "ARCH-ACVERIFY-019": {
       "hash": "bb4111bf675e",
-      "reason": "senate actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
+      "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-AUDIT-065": {
       "hash": "23fd3d396c67",
@@ -11,7 +11,7 @@
     },
     "ARCH-CANDIDATES-009": {
       "hash": "fe6645d2ba41",
-      "reason": "senate actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
+      "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-CHECK-006": {
       "hash": "ff35bb69ae43",
@@ -19,7 +19,7 @@
     },
     "ARCH-CLARIFY-062": {
       "hash": "aa1955386c1b",
-      "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
+      "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (review 2026-09-07)"
     },
     "ARCH-CMDREGISTRY-033": {
       "hash": "93c7a2a3ece7",
@@ -273,6 +273,10 @@
       "hash": "2a6143ec1cdd",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
+    "REQ-ORPHANCODE-888": {
+      "hash": "622bf0f8879e",
+      "reason": "Cite the decision date instead of the review tool"
+    },
     "REQ-PARSE-890": {
       "hash": "9700e309881c",
       "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
@@ -308,6 +312,14 @@
     "REQ-PROMOTE-974": {
       "hash": "68bb32619455",
       "reason": "REQ-PROMOTE-974: unchanged-since-lock-commit files keep their confirmation (CASE-4)"
+    },
+    "REQ-PROSE-900": {
+      "hash": "880304bce879",
+      "reason": "Cite the decision date instead of the review tool"
+    },
+    "REQ-PROSE-901": {
+      "hash": "6098b6e85625",
+      "reason": "Cite the decision date instead of the review tool"
     },
     "REQ-RELEASECMD-1018": {
       "hash": "23eeba192147",

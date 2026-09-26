@@ -16,20 +16,19 @@ requirements promoted to `level: system`, 0 requirements remaining at `level: ar
 graph: max 32 (`ARCH-CHECK-006`), next `ARCH-NEXT-013` 23, `ARCH-VIEWER-007` 22,
 `ARCH-LINTCHECKS-025` 21, `ARCH-SEARCH-036` 18 — none over 50. Fan-out of the 9 original
 stakeholder-need requirements (children now counted among the promoted 62, an edge this
-migration does not touch): 5 to 10. A `/senate` audit (9 senators, 2 rounds,
-`senate-reqmap-drop-arch-level-2level-model`) and a Consilium Dialectic deliberation
+migration does not touch): 5 to 10. A two-round review and a Consilium Dialectic deliberation
 (`.consilium/runs/2026-09-03_dialectic_vmodel-2level-arch-promote-migration.json`) preceded
 this decision.
 
 ## Context
 
 A proposal to collapse the three-level V-model (`system` → `architecture` → `code`) to two
-levels went to Senate first, in its most literal form: freeze the `system` tier at its
+levels went to review first, in its most literal form: freeze the `system` tier at its
 existing 9 requirements, raise their fan-out ceiling to ~30, and re-point all 573
-`level: code` `satisfies:` edges directly at those 9. The Senate rejected that form
-outright — five senators independently computed that 573 children over 9 parents averages
+`level: code` `satisfies:` edges directly at those 9. The review rejected that form
+outright — five reviewers independently computed that 573 children over 9 parents averages
 ~64 per node (one node would carry 107), 2–3.5× over any proposed ceiling, before a single
-file moved. Two senators (Confucius, Tacitus) read `docs/adr/0007` and `docs/adr/0019`
+file moved. Two reviewers read `docs/adr/0007` and `docs/adr/0019`
 directly and found the 3-level model's own stated rationale — "a flat list has no place to
 say that the second is why the first exists" — directly contradicted by flattening to a
 9-node top tier.
@@ -37,7 +36,7 @@ say that the second is why the first exists" — directly contradicted by flatte
 The revised proposal that survived: raise the ceiling, but do not freeze the tier. Promote
 the 62 `level: architecture` requirements into `level: system` instead of deleting them —
 the middle rung's *grouping* stays exactly as populated as it was, only its label at the
-top of the pyramid changes. This resolves the arithmetic the Senate found fatal without
+top of the pyramid changes. This resolves the arithmetic the review found fatal without
 inventing new structure: the average child count per `level: system` parent, restricted to
 the promoted population, is what it always was (a handful to 32), because the `satisfies:`
 edges from `level: code` children to their `architecture`-turned-`system` parents are not

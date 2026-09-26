@@ -1,7 +1,7 @@
 # ADR-0018 — No Contract-to-Acceptance traceability marker, yet
 
 - **Status:** Rejected (considered, deliberately not built — revisit conditions below)
-- **Decided:** 2026-09-02, after a nine-senator Senate audit (`runs/senate/2026-09-02_191837-reqmap-schema-simplify-context-merge-and-traceability.json`, two rounds, verdict MODIFY, 8 MODIFY / 1 GO, all eight blocking)
+- **Decided:** 2026-09-02, after a two-round review on that date
 - **Companion record:** [ADR-0017](0017-consolidated-context-section.md) — the other half of the audited proposal, accepted in modified form
 - **Evidence:** measurements below, each reproducible by the command named beside it
 

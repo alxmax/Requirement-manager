@@ -1222,7 +1222,7 @@ class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: R
     def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7  # verifies: REQ-SIMILAR-923#CASE-6  # verifies: REQ-SIMILAR-921#CASE-6
         # A requirement and the requirement that IS its test suite share vocabulary by
         # construction; with the member map the pair is a known tested-by link, not a dupe.
-        c = "resolve the dispatch model for each senator from prompt frontmatter"
+        c = "resolve the dispatch model for each reviewer from prompt frontmatter"
         reqs = {"SCRIPTS-MODELS": self._req("Model resolution", c),
                 "SCRIPTS-TEST-MODELS": self._req("Model resolution tests", c)}
         members = {"SCRIPTS-MODELS": [("implements", "scripts/models.py", 1),
@@ -1292,11 +1292,11 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         self.assertEqual(code, 0)
         lines = self._score_lines(out)
         self.assertTrue(lines, "expected at least one ranked hit")
-        # top hit is the drift requirement, printed with its cosine score (Dimon:
-        # a match is shown WITH its score, never as a bare id)
+        # top hit is the drift requirement, printed with its cosine score
+        # (a match is shown WITH its score, never as a bare id)
         self.assertRegex(lines[0].strip(), r"^\d\.\d{3}\s+REQ-DRIFT-001\b")
 
-    def test_no_lexical_overlap_reports_no_strong_match(self):  # AC-2 — Dimon blocking condition  # verifies: REQ-SEARCH-913#CASE-4  # verifies: REQ-SEARCH-913#CASE-5  # verifies: REQ-SEARCH-915#CASE-1
+    def test_no_lexical_overlap_reports_no_strong_match(self):  # AC-2  # verifies: REQ-SEARCH-913#CASE-4  # verifies: REQ-SEARCH-913#CASE-5  # verifies: REQ-SEARCH-915#CASE-1
         reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash"),
                 "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
         code, out = self._search(reqs, "photosynthesis quarterly dividend wombat")
@@ -1654,7 +1654,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertEqual(obj["healthy"], 2)
         self.assertEqual(obj["score"], 100)
 
-    # tested-by: ARCH-HEALTH-017 (RM-6 / Senate reqmap-health-gate-cleanliness)
+    # tested-by: ARCH-HEALTH-017 (RM-6)
     def test_gate_errors_reflect_dangling_tag(self):
         # a code tag pointing at a nonexistent requirement is one of gate's two
         # ERROR-level link-sync predicates — health must surface it, informational
@@ -1701,8 +1701,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertNotIn("gate:", badge["message"])
 
     def test_does_NOT_catch_untagged_value_edit(self):
-        # RM-6's documented limitation (Senate reqmap-health-gate-cleanliness,
-        # Round 2 — Socrate/Dimon): a value changed in a file that carries no
+        # RM-6's documented limitation: a value changed in a file that carries no
         # membership tag at all produces no dangling reference and no missing-
         # implements error, so it is invisible to this signal. This test pins
         # that gap so it is never silently "closed" by a future refactor without
@@ -2586,7 +2585,7 @@ class PlanStale(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by:
                           "milestones": ["v7.19.0"]}, got)
 
     def test_the_signal_is_not_a_gate_rule(self):  # verifies: REQ-PLANSTALE-1013#CASE-6
-        # Precedent (Senate run 2026-09-14_225939): roadmap coherence is reported, never
+        # Precedent (decided 2026-09-14): roadmap coherence is reported, never
         # gated, so the planning module registers no rule and the gate stays green.
         self.assertFalse([r.id for r in R.GATE_RULES if r.fn.__module__.endswith("versions")])
         with open(R.versions.__file__, encoding="utf-8") as f:

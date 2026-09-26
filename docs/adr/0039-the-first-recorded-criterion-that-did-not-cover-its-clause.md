@@ -4,9 +4,7 @@
   [ADR-0018](0018-no-contract-acceptance-traceability-marker-yet.md)'s third revisit
   trigger, and fixes the two defects the incident exposed.
 - **Decided:** 2026-09-14 (`REQ-TRANSLATE-938`, `ARCH-TRANSLATE-044`)
-- **Evidence:** the Senate bundle
-  `runs/senate/2026-09-14_221641-senate-reqmap-i18n-case-four.json` (MODIFY, 9 senators,
-  2 rounds), and the mutation matrix reproduced below.
+- **Evidence:** the review of 2026-09-14, and the mutation matrix reproduced below.
 
 ## Why this record exists
 
@@ -86,10 +84,9 @@ drift detection hashes the contract against its own previous text, never against
 
 ## What this cost, and who said so first
 
-`RM034` was demanded as a blocking condition in Senate run
-`2026-09-02_201621-senate-reqmap-vmodel-req-size-and-3-classes` — a reverse
-dangling-`verifies:` check. That run shipped `OVR`: the condition was overridden and the
-check was not built. It was built twelve days later, and its **first** run found this
+`RM034` was demanded as a blocking condition in the review of 2026-09-02 — a reverse
+dangling-`verifies:` check. That review's condition was overridden and the check was not
+built. It was built twelve days later, and its **first** run found this
 defect, on the requirement the same audit had been about. The gap between the override and
 the find is the measured cost of overriding a blocking condition, and it is the clearest
 such datum the corpus holds.
