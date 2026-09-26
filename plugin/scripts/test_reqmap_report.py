@@ -3255,6 +3255,14 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         self.assertIn("REQ-B-002", found[0][1])
         self.assertIn("distinct_from", [e["field"] for e in R._exemptions_in_force(reqs)])
 
+    def test_a_test_exemption_is_counted_with_its_reason(self):  # verifies: REQ-AUDIT-971#CASE-5
+        r = self._req()
+        r["meta"]["test_exempt"] = "integration-only"
+        found = [e for e in R._exemptions_in_force({"REQ-A-001": r})
+                 if e["field"] == "test_exempt"]
+        self.assertEqual(found, [{"id": "REQ-A-001", "field": "test_exempt",
+                                  "check": "tested-by", "reason": True}])
+
     def test_exemption_rule_is_never_promoted_by_strict(self):  # verifies: REQ-AUDIT-971#CASE-3
         rule = R.gate_rule_by_id("RM030")
         self.assertEqual(rule.severity, "warn")

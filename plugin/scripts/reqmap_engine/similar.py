@@ -54,9 +54,9 @@ EXEMPTION_FIELDS = ("lint_exempt", "gate_exempt", "distinct_from")
 
 def _exemptions_in_force(reqs):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971
-    """Every `lint_exempt:`/`gate_exempt:` entry in the corpus, as
-    records carrying the requirement, the field, the silenced check and
-    whether a reason is recorded.
+    """Every `lint_exempt:`/`gate_exempt:`/`distinct_from:` entry and every
+    `test_exempt:` in the corpus, as records carrying the requirement, the
+    field, the silenced check and whether a reason is recorded.
 
     An exemption is a finding somebody decided not to see. Listing them
     is what keeps "silenced" from becoming "invisible": a corpus that
@@ -70,6 +70,12 @@ def _exemptions_in_force(reqs):
             for check in _as_list(meta.get(field)):
                 out.append({"id": rid, "field": field, "check": check,
                             "reason": _exemption_reason_recorded(body, check)})
+        # `test_exempt: <reason>` waives the tested-by check; the value is
+        # the reason, so it is recorded exactly when it is written text.
+        if meta.get("test_exempt"):
+            out.append({"id": rid, "field": "test_exempt",
+                        "check": "tested-by",
+                        "reason": isinstance(meta["test_exempt"], str)})
     return out
 
 

@@ -21,10 +21,8 @@ def _exemption_line(reqs):
     """One line naming exemptions with no reason recorded, or None."""
     exemptions = _exemptions_in_force(reqs)
     unexplained = [e for e in exemptions if not e["reason"]]
-    if not unexplained:
-        return None
     return ("{} exemption(s) silence a check with no reason recorded"
-            .format(len(unexplained)))
+            .format(len(unexplained)) if unexplained else None)
 
 
 def _lint_error_line(reqs, members):
@@ -138,9 +136,8 @@ def _untagged_files_line(code_root, reqs_dir):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """One line naming code files traced to no requirement, or None."""
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
-    if not untagged:
-        return None
-    return "{} code file(s) traced to no requirement".format(len(untagged))
+    return ("{} code file(s) traced to no requirement".format(len(untagged))
+            if untagged else None)
 
 
 def _plan_stale_line(code_root, reqs_dir):
