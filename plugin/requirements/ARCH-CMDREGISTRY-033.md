@@ -23,6 +23,7 @@ Every bullet below is binding.
 - The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]
 - `gate` owns the verdict and the reports on it, and `ask` owns every other read-only question; `gate`'s old spellings of those questions run the same call with one migration line on stderr until v8.0.0. [[REQ-CMDREGISTRY-1031]]
 - The registry holds six verbs: `new` and `new --from-todo` are removed, and the template they stamped stays as the documented shape. [[REQ-NEWGONE-1034]]
+- The CLI's help is rendered from the registry: `--help` lists the six verbs, `<verb> --help` that verb's own flags, and a bare call points to where to start, without scanning. [[REQ-CMDREGISTRY-1085]]
 
 ## Cases
 CASE-1
@@ -301,3 +302,61 @@ CASE-4 — the template outlives the verb
   `cmd_new` and `cmd_promote_todo` were gone. `_parse_todos`, `_set_frontmatter_status`
   and `_write_frontmatter_status` stay: `gate`, `retire`, `mapcmd` and `mapdata` read them
   (ADR-0045 decision 3).
+
+--------------------
+
+
+---
+id: REQ-CMDREGISTRY-1085
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CMDREGISTRY-033]
+---
+
+# Help is rendered from the registry, one verb at a time
+
+## Description
+> The parser is flat, so `--help` printed 113 lines: every flag of every verb, eight of
+> them still described as flags of verbs removed in v4.0.0, and `gate --help` printed the
+> same wall. A bare call printed that wall and an argparse error. The registry already
+> held each verb's summary and flags, so the help is drawn from it, and a person who typed
+> nothing is pointed at where to start instead.
+
+Every bullet below is binding.
+- `reqmap.py --help` prints the six verbs grouped as the registry groups them, one headline
+  each, marks `ask` and `mcp` as for assistants, names `init --minimal`, `gate`,
+  `gate --risk` and `sync` as where to start, and exits 0.
+- `reqmap.py <verb> --help` prints that verb's summary, every flag the registry gives it,
+  and the workspace flags `--root --reqs --code --cache`, and no flag another verb owns;
+  it exits 0.
+- A bare `reqmap.py` prints the same overview on stderr and exits 2, without loading the
+  workspace or scanning, so a script that forgot its verb still fails.
+- No help text is written twice: the parser's flags carry none, and every flag's help is
+  read from the registry.
+
+## Cases
+CASE-1 — the overview lists the verbs and where to start
+  Given  the command registry
+  When   `reqmap.py --help` runs
+  Then   it exits 0 and prints the six verbs, `(for assistants)` beside `ask` and `mcp`,
+         and `gate --risk`
+
+CASE-2 — a verb's help lists only its own flags
+  Given  each of the six verbs
+  When   `reqmap.py <verb> --help` runs
+  Then   it exits 0 and prints every flag the registry gives that verb and the workspace
+         flags, and no flag only another verb owns
+
+CASE-3 — a bare call points to where to start and still fails
+  Given  an empty directory
+  When   `reqmap.py` runs with no arguments
+  Then   it exits 2, stderr names the six verbs and `gate --risk`, stdout is empty and no
+         file is written
+
+CASE-4 — help is written once
+  Given  the parser and the registry
+  When   their help texts are read
+  Then   no parser action carries help text, and no registry help opens with the name of
+         a verb the CLI refuses

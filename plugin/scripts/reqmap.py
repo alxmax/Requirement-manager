@@ -26,7 +26,6 @@ from reqmap_engine.cliflags import (
     _add_query_flags, _add_todo_and_mode_flags, _add_workspace_flags,
     _verb_scope
 )
-from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
 from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import GateMode, cmd_check
@@ -87,23 +86,10 @@ def _python_floor_error(version_info=None):
 
 def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     """The argument parser for every verb and flag, built from the command
-    registry; flag registration lives in the `_add_*_flags` helpers below."""
-    # The epilog is rendered from the registry: a hand-written one listed twelve
-    # verbs argparse rejected (`draft`, `confirm`, `translate`, ...) for a whole
-    # release.
-    epilog = []
-    for group, names in COMMAND_GROUPS:
-        epilog.append(group.capitalize() + ":")
-        for name in names:
-            spec = COMMANDS[name]
-            verb = name + (" " + spec["arg"] if spec.get("arg") else "")
-            flags = " ".join(p["flag"] for p in spec["params"])
-            epilog.append("  {:<22} {}".format(
-                verb, spec["summary"].split(". ")[0]))
-            if flags: epilog.append("  {:<22} flags: {}".format("", flags))
-    ap = argparse.ArgumentParser(
-        prog="reqmap", formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="\n".join(epilog))
+    registry; flag registration lives in the `_add_*_flags` helpers below.
+    Help is not its job: `reqmap_engine/usage.py` renders it from the
+    registry before this parser runs."""
+    ap = argparse.ArgumentParser(prog="reqmap", add_help=False)
     ap.add_argument("cmd", choices=_cli_choices())
     ap.add_argument("arg", nargs="?")
     _add_workspace_flags(ap)
@@ -311,6 +297,10 @@ def main():
             _stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError, OSError):
             pass
+    argv = sys.argv[1:]
+    if not argv or {"-h", "--help"} & set(argv):
+        from reqmap_engine.usage import intercept
+        return intercept(argv)
     ap = _build_parser()
     a = ap.parse_args()
     if _verb_scope(ap, a):    # a foreign flag is refused before any scan runs
@@ -434,8 +424,8 @@ _ENGINE_MODULES = (
 # The design review is imported only when a name is looked up in it, so a
 # command that never asks for it (`gate` above all) never loads it. Searched
 # after every eager module, in this order.
-_LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design", "design_python", "design_brace",
-                 "design_report")
+_LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
+                 "design_python", "design_brace", "design_report", "usage")
 
 
 def __getattr__(name):
