@@ -3334,17 +3334,28 @@ class InputIntegrity(unittest.TestCase):
                 self.assertEqual(1, R.cmd_check(ws, True))
             self.assertFalse(os.path.exists(os.path.join(d, "requirements", "_reqlock.json")))
 
-    def test_bad_config_never_silently_disables_policy(self):
+    def test_bad_config_is_reported_and_fails_only_strict(self):
+        # verifies: REQ-CONFIG-949#CASE-5
         with tempfile.TemporaryDirectory() as d:
             for text in ('{broken', '[]', '{"DRIFT_SEVERITY":"eror"}',
-                         '{"LINT_AC_MAX":"seven"}', '{"UNKNOWN_SETTING":1}'):
+                         '{"LINT_AC_MAX":"seven"}', '{"MAP_PROFIL":1}'):
                 _write(os.path.join(d, "requirements", "_config.json"), text)
-                for flags in ([], ["--strict"]):
+                for flags, rc in (([], 0), (["--strict"], 1)):
                     plain = self._gate(d, *flags)
                     machine = self._gate(d, *flags, "--json")
-                    self.assertEqual((plain.returncode, machine.returncode), (1, 1))
-                    self.assertFalse(json.loads(machine.stdout)["ok"])
-                    self.assertIn("INPUT:config", machine.stdout)
+                    self.assertEqual((plain.returncode, machine.returncode),
+                                     (rc, rc), text + plain.stdout)
+                    self.assertIn("INPUT:config", plain.stdout)
+                    self.assertIn("config:", plain.stderr)
+                    payload = json.loads(machine.stdout)
+                    self.assertEqual(payload["ok"], rc == 0)
+                    self.assertIn("INPUT:config",
+                                  [f["rule"] for f in payload["findings"]])
+                ask = subprocess.run([sys.executable,
+                    os.path.join(os.path.dirname(__file__), "reqmap.py"),
+                    "ask", "--search", "x"], cwd=d, capture_output=True,
+                    text=True)
+                self.assertEqual(ask.returncode, 0, ask.stderr)
 
     def test_absent_baseline_is_allowed_but_corrupt_strict_baseline_fails(self):
         # verifies: REQ-CHECK-830#CASE-4

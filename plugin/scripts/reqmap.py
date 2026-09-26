@@ -147,6 +147,9 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # prints every readability warning, as `gate` did before v8.4.0.
     quiet = not getattr(a, "full", False)
     result, report = GateResult(), io.StringIO()
+    result.extend(Finding("INPUT:config", "error" if a.strict else "warn",
+                          None, msg)
+                  for msg in getattr(a, "config_problems", ()))
     # Run exactly the same stages for both formats. Collect structured
     # findings directly; the captured human report is never parsed.
     try:
@@ -166,6 +169,10 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     if a.as_json:
         print(json.dumps(result.payload()))
         return result.exit_code
+    for f in result:
+        if f["rule"] == "INPUT:config":
+            print("ERROR" if f["severity"] == "error" else "WARN ",
+                  f["rule"], str(f))
     print(report.getvalue(), end="")
     rc = result.exit_code
     # Last, because a reader takes the last line as the verdict. `cmd_check`
@@ -318,14 +325,14 @@ def main():
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
     # implements: ARCH-CONFIG-060
-    problems = []
-    apply_config(load_config(reqs_dir, problems), problems=problems)
-    if problems:
-        result = GateResult(Finding("INPUT:config", "error", None, msg)
-                            for msg in problems)
-        print(json.dumps(result.payload()) if a.as_json else
-              "\n".join("ERROR " + msg for msg in problems))
-        return result.exit_code
+    # A bad entry is reported and skipped, as it always was, so no command
+    # stops on a typo; the verdict carries it as INPUT:config, a warning that
+    # `gate --strict` promotes (ADR-0054).
+    a.config_problems = []
+    loaded = load_config(reqs_dir, a.config_problems)
+    for msg in a.config_problems:
+        print("config: " + msg, file=sys.stderr)
+    apply_config(loaded, problems=a.config_problems)
     # prefer an on-disk templates/requirement.md if present (back-compat), else
     # the built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
     here = os.path.dirname(os.path.abspath(__file__))

@@ -222,7 +222,8 @@ expected and acceptable.
 with `gate_exempt: [RM013]` in its frontmatter — the same shape as `lint_exempt:`. Codes are
 permanent. Thresholds (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, the fan-out
 bands, extra scanned extensions) can be set per repo in `requirements/_config.json`; an
-invalid active key or mistyped value stops the CLI before writes.
+unknown key or mistyped value is reported on stderr and skipped, and the gate lists it as
+`INPUT:config`.
 
 | Check | Level | Effect on exit code |
 |---|---|---|
@@ -232,7 +233,8 @@ invalid active key or mistyped value stops the CLI before writes.
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
 | committed `_map.md` / `_map.json` missing or stale | **ERROR** | exit 1 |
-| invalid configuration, duplicate IDs or unreadable requirements | **ERROR** | exit 1 |
+| duplicate IDs or unreadable requirements | **ERROR** | exit 1 |
+| invalid `_config.json` entry (reported and skipped) | **WARN** (error under `--strict`) | exit 0 / 1 |
 | corrupt requirement baseline | **WARN** (error under `--strict`) | exit 0 / 1 |
 | `depends_on` cycle (the dependency order is unsatisfiable) | **WARN** | exit 0 |
 | member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
@@ -241,8 +243,8 @@ invalid active key or mistyped value stops the CLI before writes.
 | orphan code (150+-line program file with no membership tag) | **WARN** (never strict-promoted) | exit 0 |
 | `layer: aggregate` claiming the coverage exemption with an empty `depends_on` | **WARN** | exit 0 |
 
-Use `gate --strict` to promote test-link integrity, drift and corrupt requirement
-baselines to errors. `DRIFT_SEVERITY: "error"` also makes drift blocking without
+Use `gate --strict` to promote test-link integrity, drift, invalid configuration and
+corrupt requirement baselines to errors. `DRIFT_SEVERITY: "error"` also makes drift blocking without
 strict mode. An absent initial baseline is valid.
 
 - **link sync** — every code tag points to a real requirement; every `confirmed`

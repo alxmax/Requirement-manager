@@ -36,7 +36,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0023](0023-fan-out-per-level-ceilings-no-floor.md) | `fan-out` gets per-level ceilings and no floor | Accepted (`system` ceiling superseded by 0024, restored by 0025) |
 | [0024](0024-architecture-level-promoted-into-system.md) | The `architecture` level is promoted into `system`; `fan-out`'s `system` ceiling becomes fifty | Superseded by 0025 |
 | [0025](0025-three-levels-restored-corpus-folded-to-two-hundred.md) | Three levels restored, the corpus folded from 644 to ~200, and the lean requirement form | Accepted |
-| [0026](0026-gate-rule-registry-and-config-file.md) | The gate is a rule registry; thresholds come from a config file | Accepted |
+| [0026](0026-gate-rule-registry-and-config-file.md) | The gate is a rule registry; thresholds come from a config file | Accepted (amended by 0054) |
 | [0027](0027-retiring-a-requirement-supersedes-grow-only.md) | A requirement can be retired, and the engine removes only what it can prove | Accepted |
 | [0028](0028-one-inbox-for-every-open-signal.md) | One inbox for every open signal, with origin as a tab | Accepted |
 | [0029](0029-action-alias-tracks-the-plugin-major.md) | The Action's major alias tracks the plugin's major | Accepted |
@@ -64,9 +64,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0051](0051-the-oop-design-review-returns-to-the-engine.md) | The OOP design review returns to the engine, with two writing rules | Accepted |
 | [0052](0052-the-line-budget-moves-to-the-measured-size.md) | The line budget moves once, to the measured size | Superseded by 0053 |
 | [0053](0053-the-budget-measures-the-core-in-logical-lines.md) | The budget measures the core in logical lines, under a total-lines ceiling | Accepted |
-
 | [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
-
 | [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,

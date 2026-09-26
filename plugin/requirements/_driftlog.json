@@ -26,8 +26,8 @@
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
     "ARCH-CONFIG-060": {
-      "hash": "db7d3c657b32",
-      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
+      "hash": "4b04873a91d0",
+      "reason": null
     },
     "ARCH-COVERAGE-029": {
       "hash": "25d7127a672c",
@@ -178,8 +178,8 @@
       "reason": "Shared assistant workflow and discoverable adapters"
     },
     "REQ-CONFIG-949": {
-      "hash": "d17c9318afd9",
-      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
+      "hash": "a783b75a2065",
+      "reason": null
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
