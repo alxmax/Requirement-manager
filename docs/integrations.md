@@ -113,11 +113,12 @@ It also warns when the `reqmap.py` you vendored is older than the engine the pin
 `check@vN` ships, so a copy that quietly stopped running half the checks says so on the
 run instead of staying green in silence (`stale-engine: 'error'` to fail the build on it,
 `'off'` to silence it). Inputs `reqmap-path` and `working-directory` adapt it to wherever
-you vendored the engine — see [`check/action.yml`](../check/action.yml). Or skip the action
+you vendored the engine, and `code` widens the scan (`--code`) when tagged code lives
+outside `working-directory` — see [`check/action.yml`](../check/action.yml). Or skip the action
 entirely: `- run: python -X utf8 scripts/reqmap.py gate`.
 
-`@v2` is a major-alias tag: it is force-moved onto every released commit, so it always
-resolves to the latest release on that interface line. Pin an exact `vX.Y.Z` tag or a
+`@v8` is the current major-alias tag: it is force-moved onto every released commit, so it
+always resolves to the latest release on that interface line. Pin an exact `vX.Y.Z` tag or a
 commit SHA instead if you want a frozen ref. `@v1` still works and still runs the
 gate-only step list it always did, but it no longer moves — it needs an engine seeded
 from plugin v2.0.0+, and `@v2` needs v2.3.4+ (the release that added `lint_exempt:`).

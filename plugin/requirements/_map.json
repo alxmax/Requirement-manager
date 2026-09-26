@@ -15092,6 +15092,10 @@
       ],
       "members": [
         {
+          "role": "implements",
+          "loc": ".github/workflows/dogfood.yml:2"
+        },
+        {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:4579"
         },
@@ -16486,7 +16490,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "check/action.yml:114"
+          "loc": "check/action.yml:118"
         },
         {
           "role": "implements",
@@ -21943,6 +21947,56 @@
       "unpark": "the MCP freeze is lifted",
       "done": false,
       "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --release --apply` ticks the `ROADMAP.md` items whose bars it drops, instead of only listing them",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "a Now item describes work that already shipped",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --release` refuses a milestone that has Now/Next items with no bar",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "a release is cut from an incomplete plan",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`gate --strict` fails on a stale plan (a milestone at or below the declared version); the bare gate keeps it a warning",
+      "horizon": "later",
+      "req": "ARCH-ROADMAP-038",
+      "unpark": "a stale milestone is found by a person before the signal",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "the maintainer picks one",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell",
+      "horizon": "later",
+      "req": "ARCH-PYFLOOR-040",
+      "unpark": "CI minutes become a constraint",
+      "done": false,
+      "category": "CI of this repository",
       "context": "",
       "section_date": null
     },

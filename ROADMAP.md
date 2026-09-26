@@ -29,6 +29,17 @@ Cadence: one release a week, not one per merge.
 - [ ] Compatibility aliases retired deliberately: inventory the consumers, publish the migration, then remove | req: ARCH-CMDREGISTRY-033 | unpark: an alias blocks a change
 - [ ] The MCP tool list and the OpenAI schema generated from the same `COMMANDS` registry (ADR-0008) | req: ARCH-MCP-073 | unpark: the MCP freeze is lifted
 
+### Planning and releasing
+
+- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose bars it drops, instead of only listing them | req: ARCH-RELEASE-072 | unpark: a Now item describes work that already shipped
+- [ ] `sync --release` refuses a milestone that has Now/Next items with no bar | req: ARCH-RELEASE-072 | unpark: a release is cut from an incomplete plan
+- [ ] `gate --strict` fails on a stale plan (a milestone at or below the declared version); the bare gate keeps it a warning | req: ARCH-ROADMAP-038 | unpark: a stale milestone is found by a person before the signal
+- [ ] One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag | req: ARCH-RELEASE-072 | unpark: the maintainer picks one
+
+### CI of this repository
+
+- [ ] The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell | req: ARCH-PYFLOOR-040 | unpark: CI minutes become a constraint
+
 ### Adoption
 
 - [ ] Template repo `hello-reqmap`: "Use this template" produces a gate that passes | req: ARCH-INIT-012 | unpark: an evaluator reports that `init` left them stranded

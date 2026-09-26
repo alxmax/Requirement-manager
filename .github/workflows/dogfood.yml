@@ -1,0 +1,32 @@
+name: dogfood
+# implements: ARCH-SELFGATE-039
+#
+# Runs this repository's own gate through the Action consumers pin, so a change
+# that breaks the Action fails here before `check@v8` is moved onto it. It uses
+# `./check`, the Action at this commit: the release job force-moves `@v8` onto
+# every released commit of `main`, so on `main` the two are the same code.
+# `code: ..` widens the scan to the repo root, as ci.yml's `gate --code ..` does;
+# without it every requirement whose members live outside plugin/ fails RM006.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dogfood-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  published-action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./check
+        with:
+          reqmap-path: scripts/reqmap.py
+          working-directory: plugin
+          code: ..

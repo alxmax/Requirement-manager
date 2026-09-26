@@ -90,6 +90,7 @@
       "plugin/scripts/reqmap_engine/tags.py#_is_code_file": "459b8ee6dc8c63bff02c1b99a3d588e5fbde56f8d52c6c6892a30df2b10e94a1"
     },
     "ARCH-SELFGATE-039": {
+      ".github/workflows/dogfood.yml": "25e4247342f7e9ad8f25fcbddc4007f56d0635816da459d29362d8ea4ea09135",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
       "scripts/check_engine_budget.py": "8b0b85b3f1aa251191af7cc3b45035361a3340a12d8850a94a5be102edd18485",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",

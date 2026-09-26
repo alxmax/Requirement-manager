@@ -20,6 +20,7 @@ jobs:
         # with:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives
+        #   code: ..                         # only if tagged code lives outside working-directory
         #   freshness: 'true'                # check committed map freshness (default; set 'false' to skip)
         #   lint: 'true'                     # check requirement readability (default; needs engine >= 2.3.4)
         #   reqmap-repo: owner/name          # only if your committed map targets a different slug

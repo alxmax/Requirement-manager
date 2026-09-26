@@ -815,6 +815,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_sections_py_51_81["plugin/scripts/reqmap_engine/sections.py:51-81"]
   ARCH_SECTIONS_068 -->|implements| f_plugin_scripts_reqmap_engine_sections_py_51_81
   ARCH_SELFGATE_039["This repo's own gate wiring<br><small>ARCH-SELFGATE-039</small>"]
+  f__github_workflows_dogfood_yml_2[".github/workflows/dogfood.yml:2"]
+  ARCH_SELFGATE_039 -->|implements| f__github_workflows_dogfood_yml_2
   f_plugin_scripts_test_reqmap_report_py_4579["plugin/scripts/test_reqmap_report.py:4579"]
   ARCH_SELFGATE_039 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4579
   f_scripts_changelog_notes_py_2["scripts/changelog_notes.py:2"]
