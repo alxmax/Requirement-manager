@@ -24,6 +24,7 @@ def measure():
             _inject_viewer(template, data).encode("utf-8")),
         "skill_entry_bytes": sum((skill / n).stat().st_size for n in
                                  ("SKILL.md", "SKILL.universal.md")),
+        "skill_bundle_bytes": sum(p.stat().st_size for p in skill.rglob("*.md")),
         "requirement_count": len(data["nodes"]),
     }
 

@@ -1,5 +1,7 @@
 # Setup details: `.reqmapignore`, re-seeding, plugin authors
 
+Set `REQMAP_PLUGIN_ROOT` to the installed plugin directory as described in the entry point.
+
 Part of the `requirement-manager` skill; [SKILL.md](../SKILL.md) links here.
 
 **Create `.reqmapignore` immediately after the copy** — `reqmap.py` carries its own
@@ -27,9 +29,9 @@ Commit the script, the package and `.reqmapignore` so the gate works in CI witho
 the plugin present. When the plugin ships a newer engine, re-seed with:
 
 ```bash
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
-rm -rf scripts/reqmap_engine && cp -r "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # if you use the viewer
+cp "${REQMAP_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+rm -rf scripts/reqmap_engine && cp -r "${REQMAP_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
+cp "${REQMAP_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # if you use the viewer
 ```
 
 **Plugin authors** — use `sync_reqmap.sh` (in the plugin source repo) to propagate

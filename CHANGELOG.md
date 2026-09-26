@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.7.1` — 2026-09-25
+
+- Share one authoring and gate workflow across Claude and universal skill entries.
+- Preserve generated command references and move detailed rules behind explicit links.
+- Correct stale gate/configuration, setup and CI instructions; document compact exports.
+
 ## plugin `v8.7.0` — 2026-09-25
 
 - Add `init --minimal` without optional planning, release, MCP or site scaffolding.

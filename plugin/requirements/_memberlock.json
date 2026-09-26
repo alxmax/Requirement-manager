@@ -95,8 +95,8 @@
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130",
-      "scripts/measure_plugin.py": "a53ad85c7c548e01d07294685436bec5c43762ecf73bbae5900daae8ab52ba7f",
-      "scripts/measure_plugin.py#measure": "47f1b7ea8ea415a94acd8c02951a757c3da09f3ab1cc15f09b26c5cb796c4496"
+      "scripts/measure_plugin.py": "18e9d8b7859eb07a56306255716928c9924bbd27bad80385745848afc76acd46",
+      "scripts/measure_plugin.py#measure": "b1278cedf839e3589b2086e2654faf96de09635145bbe64aef9afb3d7194e586"
     },
     "ARCH-SIMILAR-016": {
       "plugin/scripts/reqmap_engine/similar.py#_placeholder_contract": "8da20d58cf3045618e116dcfb06a7c62b6fbfb5803df3bca8e253708db2df17e",

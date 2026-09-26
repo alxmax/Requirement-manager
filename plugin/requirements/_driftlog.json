@@ -174,8 +174,8 @@
       "reason": "gate owns twelve flags now: --full (ADR-0049)"
     },
     "REQ-CMDREGISTRY-834": {
-      "hash": "ad1ac9c0ae6f",
-      "reason": "MCP server: registry tool:False clause, GITRUN case scope"
+      "hash": "7e6c909fe620",
+      "reason": "Shared assistant workflow and discoverable adapters"
     },
     "REQ-CONFIG-949": {
       "hash": "d17c9318afd9",

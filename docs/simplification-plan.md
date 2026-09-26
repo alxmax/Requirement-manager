@@ -67,6 +67,7 @@ new/updated requirements and links needed to describe the implementation.
 | PR 1 | 90,999 | 1,575,539 | 1,871,240 | 72,492 |
 | PR 2 | 90,998 | 1,565,220 | 1,860,933 | 72,492 |
 | PR 3 | 925 | 1,028,989 | 1,324,680 | 72,568 |
+| PR 4 | 925 | 1,029,456 | 1,325,147 | 18,003 |
 
 Each PR appends its actual measured row. Growth in the first two correctness changes
 is reported honestly; it is not hidden by removing requirement evidence.
@@ -121,3 +122,17 @@ The stage table includes updated requirements and tests, not only format savings
 PR 3 passes 1,239 engine tests, cross-tool integration and the viewer render smoke
 against compact data. CORE falls from 7,338 to 7,057 logical lines by demand-loading
 retirement and review modules; the vendored engine remains below 17,000 lines.
+
+### PR 4 instruction footprint
+
+Both entry points retain their trigger metadata, platform setup, essential review
+rules and generated command regions. Detailed authoring/status/gate policy now
+lives once in `references/workflow.md`; task-specific references remain linked.
+All relative links are checked in the regression suite. The policy extraction also
+corrects obsolete statements about ignored invalid configuration, passing stale
+maps, the universal adapter's missing engine-package copy and repeated CI commands.
+
+Entry points: 72,568 → 18,003 bytes (75.2% smaller). The entire skill folder's
+Markdown, including every reference: 87,926 → 57,881 bytes (34.2% smaller).
+This measures the total shipped instructions as well as the initial reading cost.
+No token or runtime speed improvement is claimed without measuring that workload.

@@ -5781,3 +5781,24 @@ class CompactExports(unittest.TestCase):
             with mock.patch.object(R.config, 'MAP_LOCALES', []):
                 self.assertEqual(R._load_translations(reqs, d), {})
             self.assertEqual(reqs['R-1']['body'], '# Title\n')
+
+
+class SharedSkillWorkflow(unittest.TestCase):
+    # tested-by: REQ-CMDREGISTRY-834
+    def test_both_adapters_ship_the_same_workflow_reference(self):
+        # verifies: REQ-CMDREGISTRY-834#CASE-7
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1] / "skills" / "requirement-manager"
+        target = root / "references" / "workflow.md"
+        self.assertTrue(target.is_file())
+        for name in ("SKILL.md", "SKILL.universal.md"):
+            entry = (root / name).read_text(encoding="utf-8")
+            self.assertIn("(references/workflow.md)", entry)
+            self.assertIn("<!--##REQMAP:COMMANDS##-->", entry)
+        for source in root.rglob("*.md"):
+            text = source.read_text(encoding="utf-8")
+            for link in re.findall(r"\]\(([^)]+)\)", text):
+                path = link.split("#", 1)[0]
+                if path and "://" not in path:
+                    self.assertTrue((source.parent / path).exists(),
+                                    "{} -> {}".format(source.name, path))
