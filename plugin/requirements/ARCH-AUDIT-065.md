@@ -149,6 +149,8 @@ satisfies: [ARCH-AUDIT-065]
 Every bullet below is binding.
 - The report lists every `lint_exempt:`, `gate_exempt:` and `distinct_from:` entry in the
   corpus with its requirement and the check, or the requirement, it silences.
+- The report lists every `test_exempt:` too, as silencing the tested-by check. Its value is
+  the reason, so the reason counts as recorded when the value is text.
 - A reason counts as recorded when the requirement's own prose mentions the silenced
   check by name. The test cannot judge whether the reason is a good one, and does not try
   to: it makes the exemption cost a sentence, no more.
@@ -182,6 +184,12 @@ CASE-4 — the split findings name a remedy that can act on them
   Given  a requirement with more acceptance criteria than the ceiling
   When   the linter reports it
   Then   the finding says what to move and says that `--decompose` does not cover it
+
+CASE-5 — a test exemption is counted with its reason
+  Given  a requirement carrying `test_exempt: "integration-only"`
+  When   the exemptions in force are listed
+  Then   one entry names the requirement, `test_exempt` and `tested-by`, with its reason
+         recorded
 
 
 --------------------

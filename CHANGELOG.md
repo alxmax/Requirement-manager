@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.8.3` — 2026-09-26
+
+**`gate --audit` counts the exemptions `gate --risk` counts.**
+
+- The audit's exemptions list now includes `test_exempt:`, as silencing the tested-by check, with the value as its reason. On Consilium-Dev the audit read "0 in force" while the health line read "21 with an exemption": all 21 were `test_exempt` (REQ-AUDIT-971)
+- The engine's core is 7,045 logical lines, and its budget with it
+
 ## plugin `v8.8.2` — 2026-09-26
 
 **`sync` no longer writes into a page another tool owns.**

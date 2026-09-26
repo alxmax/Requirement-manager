@@ -146,8 +146,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "REQ-AUDIT-971": {
-      "hash": "195c3fc8e449",
-      "reason": "distinct_from; CHECK-831 fold"
+      "hash": "002116926d7b",
+      "reason": "Audit counts test_exempt"
     },
     "REQ-AUDIT-973": {
       "hash": "4a1331189f6f",
