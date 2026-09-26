@@ -20,7 +20,7 @@ Every bullet below is binding.
 - `gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.
 - `gate` warns (not errors) on contract drift against the lock or a confirmed requirement with no `tested-by:` link; `--strict` promotes these to errors. [[REQ-CHECK-829]] details the behaviour.
 - `gate` warns, without affecting the exit code, on a confirmed requirement missing its `## Description` or `## Cases` section. [[REQ-CHECK-1040]] details the behaviour.
-- `gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.
+- `gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file; a corrupt lock is an error under `--strict`. [[REQ-CHECK-830]] details the behaviour.
 - `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
@@ -51,7 +51,7 @@ CASE-4
 CASE-5
   Given  a present-but-corrupt lock file
   When   `gate` runs
-  Then   it produces a `WARN` and does not change the exit code
+  Then   it produces a `WARN`; `--strict` promotes it to an error
 
 CASE-6
   Given  two requirements whose `depends_on` fields point at each other
@@ -307,7 +307,7 @@ Every bullet below is binding.
 - A malformed `milestone:` value is a `WARN`, because that field is roadmap-only
   metadata and never build-critical.
 - A `deprecated` requirement is exempt from the `milestone:` shape check.
-- A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run
+- A present-but-unreadable `_reqlock.json` is a `WARN`, promoted to an error by `--strict`. An absent initial baseline is allowed. Drift is skipped for that run
   rather than crashing.
 - A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is
   **not git-tracked** is a `WARN` naming the file.
@@ -336,10 +336,10 @@ CASE-3 — a deprecated requirement's malformed milestone is silent
   When   `gate` runs
   Then   its output contains no "malformed" finding
 
-CASE-4 — a corrupt _reqlock.json warns and does not crash the gate
+CASE-4 — a corrupt _reqlock.json warns normally and fails strict mode
   Given  a `_reqlock.json` containing invalid JSON ("{ not json")
   When   `gate` runs
-  Then   its output contains "unreadable" and it exits 0
+  Then   its output contains "unreadable" and it exits 0 normally, or 1 with --strict
 
 CASE-5 — an untracked lock file is flagged, then clears once tracked
   Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed
@@ -593,7 +593,8 @@ Every bullet below is binding.
   warnings are not printed and not counted.
 - `gate --full` and `gate --audit` run every registered rule and print every readability
   finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.
-- The verdict is the last line `gate` prints, and it names each check the run covered.
+- Text and `--json` derive their exit code from one structured result. Both formats execute every enabled stage, honoring explicit opt-outs. JSON includes all effective findings; formatting never disables a check.
+- The verdict is the last line a text `gate` prints, and it names each check the run covered.
 - The last line of a bare gate names `gate --full` as where the advice is.
 
 ## Cases
@@ -617,3 +618,13 @@ CASE-4 — the verdict is the last line
   When   a bare `gate` runs
   Then   its last line is the `gate:` verdict, naming readability and map freshness
 
+
+CASE-5 — formatting does not bypass lint
+  Given  an implemented requirement with eight acceptance criteria
+  When   text and JSON gates run, including strict and full modes
+  Then   both fail with the lint finding; both honor `--no-lint` and write nothing
+
+CASE-6 — formatting does not bypass map freshness
+  Given  a stale generated map
+  When   text and JSON gates run
+  Then   both fail and identify the stale map; both honor `--no-map-check`

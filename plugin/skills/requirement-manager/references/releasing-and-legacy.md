@@ -9,7 +9,7 @@ Before merging a feature branch, bump the semver **on that branch** so the versi
 3. Run `python scripts/check_versions.py` from repo root — must print `OK semver aligned at 'X.Y.Z'`
 4. Mark shipped `TODO.md` items `[x]` so they disappear from the Roadmap tab
 5. Commit: `chore: bump version to X.Y.Z`
-6. After merge: `git tag vX.Y.Z <merge-sha> && git push origin vX.Y.Z`
+6. After merge, this repository's release workflow creates the version tag. Do not create or push tags manually.
 
 **When to bump which digit:**
 - **patch** (X.Y.**Z**) — bug fixes, doc corrections, gate/map regen with no new behavior

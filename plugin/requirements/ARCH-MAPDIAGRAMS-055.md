@@ -25,7 +25,7 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1
-  Given  the generated `_map.md`
+  Given  the generated `_map.md` in the full profile
   When   it is inspected
   Then   it contains exactly 4 Mermaid code blocks, each with a legend
 
@@ -96,9 +96,11 @@ satisfies: [ARCH-MAPDIAGRAMS-055]
 
 Every bullet below is binding.
 - `map` generates `_map.md` under `requirements/`, rendered from the graph and never edited.
-- `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
+- In the default full profile, `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
   and Risk.
 - Each of those 4 blocks carries a legend.
+
+- With `MAP_PROFILE: compact`, Markdown is a status and system-needs summary linking to complete JSON and offline HTML; full is the default.
 
 ## Cases
 CASE-1 — map writes _map.md from the graph, overwriting any manual edit
@@ -107,18 +109,23 @@ CASE-1 — map writes _map.md from the graph, overwriting any manual edit
   Then   the file is fully regenerated from the graph, discarding the manual edit
 
 CASE-2 — _map.md carries exactly the four named diagrams
-  Given  the generated `_map.md`
+  Given  the generated `_map.md` in the full profile
   When   its Mermaid code blocks are counted
   Then   there are exactly 4: System Map, Req→Code, Dependencies, Risk
 
 CASE-3 — every diagram block ships its own legend
-  Given  the generated `_map.md`
+  Given  the generated `_map.md` in the full profile
   When   each of the 4 Mermaid blocks is inspected
   Then   each one carries a legend describing its symbols
 
 
 --------------------
 
+
+CASE-4 — compact summary links to the complete exports
+  Given the compact map profile
+  When Markdown is rendered
+  Then it links to JSON and HTML without emitting the full diagrams
 
 ---
 id: REQ-MAPDIAGRAMS-875

@@ -1,7 +1,7 @@
 """_map.json: the JSON registry graph and `--since` file keys."""
 import json, os
 
-from . import MAP_ENGINE_VERSION
+from . import MAP_ENGINE_VERSION, config as cfg
 from .git import _git, _git_root
 from .registry import commands_manifest
 
@@ -80,7 +80,7 @@ def _utf8_safe(text):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
             "\uFFFD" if 0xD800 <= ord(c) <= 0xDFFF else c for c in text)
 
 
-def _build_json_text(data):
+def _build_json_text(data, compact=None):
     # implements: ARCH-MAP-007  # implements: REQ-MAP-870
     """The registry graph as a JSON string:
     {engine_version, repo, nodes, edges, upstream_edges, todos, roadmap,
@@ -111,7 +111,10 @@ def _build_json_text(data):
         payload["health"] = data["health"]
     if data.get("planning"):
         payload["planning"] = data["planning"]
-    return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
+    compact = cfg.MAP_PROFILE == "compact" if compact is None else compact
+    return _utf8_safe(json.dumps(
+        payload, indent=None if compact else 2, ensure_ascii=False,
+        separators=(",", ":") if compact else None))
 
 
 def render_json(data, reqs_dir):

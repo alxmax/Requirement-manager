@@ -9,7 +9,7 @@ from .lintrules import (
     LINT_STATUSES, LINT_STRICT_PROMOTE, _acceptance_lint, _graph_lint,
     _sections_lint, _shape_lint
 )
-from .model import _as_list
+from .model import Finding, _as_list
 from .text import _req_file
 
 
@@ -103,7 +103,7 @@ def _apply_decompose(fs, reqs_dir, rid, r, reqs, created):
 # accumulate into the caller's list exactly as before.
 _LintRun = namedtuple("_LintRun", [
     "reqs", "members", "reqs_dir", "fanin", "kids", "strict", "quiet",
-    "decompose", "created"])
+    "decompose", "created", "findings"])
 
 
 def _lint_target(rid, r, run):
@@ -130,6 +130,9 @@ def _lint_target(rid, r, run):
         effective = f["severity"]
         if run.strict and f["check"] in LINT_STRICT_PROMOTE:
             effective = "error"
+        if run.findings is not None:
+            run.findings.append(Finding(
+                "LINT:" + f["check"], effective, rid, f["detail"]))
         if effective == "error":
             errors += 1; mark = "ERROR"
         else:
@@ -140,7 +143,8 @@ def _lint_target(rid, r, run):
     return errors, warns
 
 
-def cmd_lint(ws, strict=False, decompose=False, only=None, quiet=False):
+def cmd_lint(ws, strict=False, decompose=False, only=None, quiet=False,
+             findings=None):
     # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050
     # implements: REQ-LINT-863
     """Report readability/structure violations on non-draft requirements
@@ -181,7 +185,7 @@ def cmd_lint(ws, strict=False, decompose=False, only=None, quiet=False):
     errors = warns = 0
     created = []
     run = _LintRun(reqs, members, reqs_dir, fanin, kids, strict, quiet,
-                   decompose, created)
+                   decompose, created, findings)
     for rid, r in targets:
         e, w = _lint_target(rid, r, run)
         errors += e; warns += w

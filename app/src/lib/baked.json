@@ -143,7 +143,7 @@
       "`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.",
       "`gate` warns (not errors) on contract drift against the lock or a confirmed requirement with no `tested-by:` link; `--strict` promotes these to errors. [[REQ-CHECK-829]] details the behaviour.",
       "`gate` warns, without affecting the exit code, on a confirmed requirement missing its `## Description` or `## Cases` section. [[REQ-CHECK-1040]] details the behaviour.",
-      "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.",
+      "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file; a corrupt lock is an error under `--strict`. [[REQ-CHECK-830]] details the behaviour.",
       "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
       "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
       "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",

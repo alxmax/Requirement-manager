@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-23.2",
+  "engine_version": "2026-09-26.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -922,7 +922,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:290"
+          "loc": "plugin/scripts/reqmap.py:282"
         },
         {
           "role": "tested-by",
@@ -1537,7 +1537,7 @@
         "`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.",
         "`gate` warns (not errors) on contract drift against the lock or a confirmed requirement with no `tested-by:` link; `--strict` promotes these to errors. [[REQ-CHECK-829]] details the behaviour.",
         "`gate` warns, without affecting the exit code, on a confirmed requirement missing its `## Description` or `## Cases` section. [[REQ-CHECK-1040]] details the behaviour.",
-        "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.",
+        "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file; a corrupt lock is an error under `--strict`. [[REQ-CHECK-830]] details the behaviour.",
         "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
@@ -1555,7 +1555,7 @@
         "`cmd_check`, `warn_if_stale` in `reqmap.py`.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  a tag referencing a non-existent capability\n  When   `gate` runs\n  Then   it produces an `ERROR` and exit 1\n\nCASE-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `gate` runs\n  Then   it produces an `ERROR`\n\nCASE-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `gate` runs\n  Then   each produces an `ERROR`\n\nCASE-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `gate` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nCASE-5\n  Given  a present-but-corrupt lock file\n  When   `gate` runs\n  Then   it produces a `WARN` and does not change the exit code\n\nCASE-6\n  Given  two requirements whose `depends_on` fields point at each other\n  When   the gate runs\n  Then   it warns once, naming the chain, and the exit code stays 0",
+      "accept": "CASE-1\n  Given  a tag referencing a non-existent capability\n  When   `gate` runs\n  Then   it produces an `ERROR` and exit 1\n\nCASE-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `gate` runs\n  Then   it produces an `ERROR`\n\nCASE-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `gate` runs\n  Then   each produces an `ERROR`\n\nCASE-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `gate` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nCASE-5\n  Given  a present-but-corrupt lock file\n  When   `gate` runs\n  Then   it produces a `WARN`; `--strict` promotes it to an error\n\nCASE-6\n  Given  two requirements whose `depends_on` fields point at each other\n  When   the gate runs\n  Then   it warns once, naming the chain, and the exit code stays 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -1719,7 +1719,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:334"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
         },
         {
           "role": "implements",
@@ -1739,7 +1739,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:214"
+          "loc": "plugin/scripts/reqmap_engine/model.py:228"
         },
         {
           "role": "implements",
@@ -1940,7 +1940,7 @@
         "The requirement `milestone:` field is optional. When present it matches the version shape `v<digits>[.<digits>…]`, for example `v1.14`.",
         "A malformed `milestone:` value is a `WARN`, because that field is roadmap-only metadata and never build-critical.",
         "A `deprecated` requirement is exempt from the `milestone:` shape check.",
-        "A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run rather than crashing.",
+        "A present-but-unreadable `_reqlock.json` is a `WARN`, promoted to an error by `--strict`. An absent initial baseline is allowed. Drift is skipped for that run rather than crashing.",
         "A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not git-tracked** is a `WARN` naming the file.",
         "An uncommitted lock silently disables drift detection on a fresh CI checkout, which has no baseline to compare against.",
         "That git-tracking check is fail-open: `gate` stays silent when git is unavailable or the tree is not a work tree.",
@@ -1949,7 +1949,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a well-shaped milestone value is silent\n  Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-2 — a malformed milestone value warns\n  Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` runs\n  Then   its output contains \"malformed\"\n\nCASE-3 — a deprecated requirement's malformed milestone is silent\n  Given  a `status: deprecated` requirement with `milestone: next` (malformed shape)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-4 — a corrupt _reqlock.json warns and does not crash the gate\n  Given  a `_reqlock.json` containing invalid JSON (\"{ not json\")\n  When   `gate` runs\n  Then   its output contains \"unreadable\" and it exits 0\n\nCASE-5 — an untracked lock file is flagged, then clears once tracked\n  Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed\n  When   `untracked_locks(reqs_dir)` runs before and after `git add -A`\n  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap\n         where a fresh CI checkout would otherwise have no baseline for drift detection\n\nCASE-6 — the untracked-lock check is silent outside a git work tree\n  Given  a `_reqlock.json` written to a plain directory that is not yet a git repository\n  When   `untracked_locks(reqs_dir)` runs\n  Then   it returns `[]`, not an error\n\nCASE-7 — a sectioned-form requirement missing Verify intent is named in the legacy-schema warning\n  Given  a sectioned-form requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" naming that requirement's id, and \"findings`\n         is inactive\"\n\n\n--------------------",
+      "accept": "CASE-1 — a well-shaped milestone value is silent\n  Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-2 — a malformed milestone value warns\n  Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` runs\n  Then   its output contains \"malformed\"\n\nCASE-3 — a deprecated requirement's malformed milestone is silent\n  Given  a `status: deprecated` requirement with `milestone: next` (malformed shape)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-4 — a corrupt _reqlock.json warns normally and fails strict mode\n  Given  a `_reqlock.json` containing invalid JSON (\"{ not json\")\n  When   `gate` runs\n  Then   its output contains \"unreadable\" and it exits 0 normally, or 1 with --strict\n\nCASE-5 — an untracked lock file is flagged, then clears once tracked\n  Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed\n  When   `untracked_locks(reqs_dir)` runs before and after `git add -A`\n  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap\n         where a fresh CI checkout would otherwise have no baseline for drift detection\n\nCASE-6 — the untracked-lock check is silent outside a git work tree\n  Given  a `_reqlock.json` written to a plain directory that is not yet a git repository\n  When   `untracked_locks(reqs_dir)` runs\n  Then   it returns `[]`, not an error\n\nCASE-7 — a sectioned-form requirement missing Verify intent is named in the legacy-schema warning\n  Given  a sectioned-form requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" naming that requirement's id, and \"findings`\n         is inactive\"\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -1965,6 +1965,10 @@
           "loc": "plugin/scripts/test_reqmap_gate.py:540"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3316"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/locks.py:192"
         }
@@ -1974,15 +1978,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Forma milestone-ului și avertismentele fișierului lock",
-          "intent": "Greșelile de tastare la milestone și problemele fișierului lock sunt probleme de foaie de parcurs sau de contabilitate, nu rupturi de contract, deci avertizează în loc să eșueze build-ul. Un lock corupt sau ne-urmărit de git merită totuși semnalat — dezactivarea silențioasă a detecției drift-ului la un checkout curat este mai rea decât un avertisment zgomotos.",
-          "contract": "> Greșelile de tastare la milestone și problemele fișierului lock sunt probleme de foaie de\n> parcurs sau de contabilitate, nu rupturi de contract, deci avertizează în loc să eșueze\n> build-ul. Un lock corupt sau ne-urmărit de git merită totuși semnalat — dezactivarea\n> silențioasă a detecției drift-ului la un checkout curat este mai rea decât un avertisment\n> zgomotos.\n\nFiecare punct de mai jos este obligatoriu.\n- Câmpul `milestone:` al cerinței este opțional. Când este prezent se potrivește cu forma de\n  versiune `v<digits>[.<digits>…]`, de exemplu `v1.14`.\n- O valoare `milestone:` malformată este un `WARN`, pentru că acel câmp este metadate\n  doar de foaie de parcurs și niciodată critic pentru build.\n- O cerință `deprecated` este scutită de verificarea formei `milestone:`.\n- Un `_reqlock.json` prezent dar necitibil este un `WARN`. Drift-ul este sărit pentru acea\n  rulare în loc să provoace un crash.\n- Un sidecar de lock (`_reqlock.json` sau `_memberlock.json`) care există pe disc dar nu este\n  **urmărit de git** este un `WARN` care numește fișierul.\n- Un lock necomis dezactivează silențios detecția drift-ului la un checkout CI curat, care\n  nu are nicio bază de comparație.\n- Acea verificare de urmărire git este fail-open: `gate` rămâne tăcut când git nu este\n  disponibil sau arborele nu este un work tree.\n- `gate` numește fiecare cerință în formă sectionată al cărei corp nu are secțiune\n  `## Verify intent` într-un singur `WARN` agregat de schemă legacy. Cerințele în formă\n  atomică (`form:\n  atomic`) nu poartă niciun astfel de titlu prin design și sunt excluse\n  din această verificare.",
-          "acceptance": "CASE-1 — o valoare milestone bine formată este tăcută\n  Given  o cerință confirmată cu `milestone: v1.14` (încercat și cu: `v1.04`, `v2`)\n  When   `gate` rulează\n  Then   ieșirea lui nu conține nicio constatare \"malformed\"\n\nCASE-2 — o valoare milestone malformată avertizează\n  Given  o cerință confirmată cu `milestone: next` (încercat și cu: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` rulează\n  Then   ieșirea lui conține \"malformed\"\n\nCASE-3 — milestone-ul malformat al unei cerințe deprecate este tăcut\n  Given  o cerință `status: deprecated` cu `milestone: next` (formă malformată)\n  When   `gate` rulează\n  Then   ieșirea lui nu conține nicio constatare \"malformed\"\n\nCASE-4 — un _reqlock.json corupt avertizează și nu provoacă un crash al gate-ului\n  Given  un `_reqlock.json` conținând JSON invalid (\"{ not json\")\n  When   `gate` rulează\n  Then   ieșirea lui conține \"unreadable\" și iese cu 0\n\nCASE-5 — un fișier lock ne-urmărit este semnalat, apoi se curăță odată urmărit\n  Given  un work tree git cu `_reqlock.json` scris pe disc dar niciodată adăugat prin `git add`\n  When   `untracked_locks(reqs_dir)` rulează înainte și după `git add -A`\n  Then   numește `_reqlock.json` înainte de adăugare și returnează `[]` după ea, închizând\n         lacuna în care un checkout CI curat nu ar avea altfel nicio bază pentru detecția drift-ului\n\nCASE-6 — verificarea lock-ului ne-urmărit este tăcută în afara unui work tree git\n  Given  un `_reqlock.json` scris într-un director simplu care nu este încă un repozitoriu git\n  When   `untracked_locks(reqs_dir)` rulează\n  Then   returnează `[]`, nu o eroare\n\nCASE-7 — o cerință în formă sectionată căreia îi lipsește Verify intent este numită în avertismentul de schemă legacy\n  Given  o cerință în formă sectionată al cărei corp nu are secțiune `## Verify intent`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"legacy schema\" numind id-ul acelei cerințe, și \"findings`\n         is inactive\"\n\n\n--------------------"
-        }
-      }
+      "covered": 7
     },
     {
       "id": "REQ-CHECK-831",
@@ -2102,7 +2098,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:335"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
         }
       ],
       "test_exempt": null,
@@ -2175,7 +2171,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:335"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
         }
       ],
       "test_exempt": null,
@@ -2254,13 +2250,14 @@
         "A bare `gate` runs only the rules in `DEFAULT_RULES`: every error-severity rule, the warnings that say a link is broken (RM005, RM012, RM023, RM033, RM034, RM036), the warnings about the drift baseline (RM016, RM018, RM019, RM020) and the committed map (RM022, RM027).",
         "A bare `gate` prints a requirement's readability findings only when one is an error; warnings are not printed and not counted.",
         "`gate --full` and `gate --audit` run every registered rule and print every readability finding, exactly as the bare gate did before v8.4.0. `sync` and `init` run every rule.",
-        "The verdict is the last line `gate` prints, and it names each check the run covered.",
+        "Text and `--json` derive their exit code from one structured result. Both formats execute every enabled stage, honoring explicit opt-outs. JSON includes all effective findings; formatting never disables a check.",
+        "The verdict is the last line a text `gate` prints, and it names each check the run covered.",
         "The last line of a bare gate names `gate --full` as where the advice is."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness",
+      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness\n\n\nCASE-5 — formatting does not bypass lint\n  Given  an implemented requirement with eight acceptance criteria\n  When   text and JSON gates run, including strict and full modes\n  Then   both fail with the lint finding; both honor `--no-lint` and write nothing\n\nCASE-6 — formatting does not bypass map freshness\n  Given  a stale generated map\n  When   text and JSON gates run\n  Then   both fail and identify the stale map; both honor `--no-map-check`",
       "input": "",
       "output": "",
       "desc": "",
@@ -2276,20 +2273,28 @@
           "loc": "plugin/scripts/test_reqmap_gate.py:3047"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3237"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/gate.py:73"
         },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lint.py:119"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/model.py:140"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-CLARIFY-062",
@@ -2593,7 +2598,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:113"
+          "loc": "plugin/scripts/reqmap.py:88"
         },
         {
           "role": "tested-by",
@@ -2658,6 +2663,7 @@
         "Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.",
         "`tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the `gen-integration` command.",
         "The `SKILL.universal.md` command table is generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is never touched.",
+        "Both skill entry points link to one shared authoring and gate workflow; their setup adapters and generated command regions remain local.",
         "The `SKILL.md` command list is generated the same way, into the same region marker, as a grouped bullet list. It is the contract an assistant reads on a fresh repo, so a verb that exists is documented there and one that does not, is not.",
         "Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated artifacts.",
         "A command marked `tool: False` — `mcp`, a server rather than a function to call — is left out of the function-calling schema and still documented in both SKILL command regions.",
@@ -2667,7 +2673,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — argparse choices trace back to COMMANDS with no hardcoded list\n  Given  the live argparse parser built from `COMMANDS`\n  When   `_cli_choices()` is called\n  Then   its return value equals `list(COMMANDS)` in insertion order\n\nCASE-2 — gen-integration derives tool_definition.json from COMMANDS\n  Given  a `COMMANDS` entry with a summary, a positional arg and a flag\n  When   `gen-integration` runs\n  Then   `tool_definition.json` carries a matching function-calling schema entry for that command\n\nCASE-3 — gen-integration rewrites only the marked command-table region\n  Given  `SKILL.universal.md` with hand-written prose outside `<!--##REQMAP:COMMANDS##-->`\n  When   `gen-integration` runs\n  Then   the region's table refreshes, the surrounding prose is byte-identical, and the\n         written body carries the file's own line endings, so a rerun leaves no diff\n\nCASE-4 — gen-integration omits internal commands from AI-facing output\n  Given  `COMMANDS` including the internal `gen-integration` entry itself\n  When   `gen-integration` runs\n  Then   `tool_definition.json` lists no `gen-integration` function\n\nCASE-5 — gate fails on a stale generated artifact\n  Given  a committed `tool_definition.json` that differs from a fresh generation\n  When   `gate` runs\n  Then   it exits non-zero, naming the stale artifact\n\nCASE-6 — the generator and gate-check code import no third-party module\n  Given  the source of `_generate_schema`, `_generate_command_table` and `_check_integration_fresh`\n  When   their imports are inspected\n  Then   every import resolves to the Python standard library\n\nCASE-7 — SKILL.md documents exactly the registry\n  Given  the committed `SKILL.md`\n  When   its command region is compared with a fresh rendering from `COMMANDS`\n  Then   they match, every non-internal verb appears exactly once, and no other verb appears",
+      "accept": "CASE-1 — argparse choices trace back to COMMANDS with no hardcoded list\n  Given  the live argparse parser built from `COMMANDS`\n  When   `_cli_choices()` is called\n  Then   its return value equals `list(COMMANDS)` in insertion order\n\nCASE-2 — gen-integration derives tool_definition.json from COMMANDS\n  Given  a `COMMANDS` entry with a summary, a positional arg and a flag\n  When   `gen-integration` runs\n  Then   `tool_definition.json` carries a matching function-calling schema entry for that command\n\nCASE-3 — gen-integration rewrites only the marked command-table region\n  Given  `SKILL.universal.md` with hand-written prose outside `<!--##REQMAP:COMMANDS##-->`\n  When   `gen-integration` runs\n  Then   the region's table refreshes, the surrounding prose is byte-identical, and the\n         written body carries the file's own line endings, so a rerun leaves no diff\n\nCASE-4 — gen-integration omits internal commands from AI-facing output\n  Given  `COMMANDS` including the internal `gen-integration` entry itself\n  When   `gen-integration` runs\n  Then   `tool_definition.json` lists no `gen-integration` function\n\nCASE-5 — gate fails on a stale generated artifact\n  Given  a committed `tool_definition.json` that differs from a fresh generation\n  When   `gate` runs\n  Then   it exits non-zero, naming the stale artifact\n\nCASE-6 — the generator and gate-check code import no third-party module\n  Given  the source of `_generate_schema`, `_generate_command_table` and `_check_integration_fresh`\n  When   their imports are inspected\n  Then   every import resolves to the Python standard library\n\nCASE-7 — skill adapters share policy and document the registry\n  Given  the committed `SKILL.md`\n  When   its command region is compared with a fresh rendering from `COMMANDS`\n  Then   they match, every non-internal verb appears exactly once, and no other verb appears",
       "input": "",
       "output": "",
       "desc": "",
@@ -2685,6 +2691,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:3667"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5787"
         },
         {
           "role": "implements",
@@ -2802,11 +2812,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:193"
+          "loc": "plugin/scripts/reqmap.py:183"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:203"
+          "loc": "plugin/scripts/reqmap.py:193"
         },
         {
           "role": "tested-by",
@@ -2818,11 +2828,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:182"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:184"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:196"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:198"
         }
       ],
       "test_exempt": null,
@@ -2899,14 +2909,14 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Per-repo configuration file",
-      "intent": "Every threshold the engine judges by (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) was a module constant, so a consumer could change none of them without forking `reqmap.py`. A small JSON file next to the requirements sets the named constants at startup, read fail-open, so a repo tunes the engine without rewiring it.",
+      "intent": "Every threshold the engine judges by (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) was a module constant, so a consumer could change none of them without forking `reqmap.py`. A small JSON file next to the requirements sets the named constants at startup, read fail-open, so a repo tunes the engine without rewiring it. A bad entry is reported and skipped, never fatal, and only `gate --strict` fails on it.",
       "contract": [
-        "`requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; a missing, malformed or wrongly-typed entry never breaks a command. [[REQ-CONFIG-949]]"
+        "`requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; an absent file keeps the defaults; a malformed file or an invalid entry is reported and skipped, stops no command, and fails only `gate --strict`. [[REQ-CONFIG-949]]"
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1\n  Given  a `requirements/_config.json` setting `LINT_AC_MAX` to 12\n  When   any command starts\n  Then   `lint` and `next` judge oversize at 12 criteria\n\nCASE-2\n  Given  a config file that is not valid JSON\n  When   any command starts\n  Then   the defaults apply and the command runs\n\nCASE-3\n  Given  a config key the engine does not know\n  When   any command starts\n  Then   one line on stderr names the ignored key and nothing else changes\n\n--------------------",
+      "accept": "CASE-1\n  Given  a `requirements/_config.json` setting `LINT_AC_MAX` to 12\n  When   any command starts\n  Then   `lint` and `next` judge oversize at 12 criteria\n\nCASE-2\n  Given  a config file that is not valid JSON\n  When   any command starts\n  Then   the defaults apply, stderr names the problem and the command runs\n\nCASE-3\n  Given  a config key the engine does not know\n  When   any command starts\n  Then   stderr names the key; `gate` exits 0 with an `INPUT:config` warning and\n         `gate --strict` exits 1; a retired setting stays silent\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2926,7 +2936,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:328"
+          "loc": "plugin/scripts/reqmap.py:320"
         },
         {
           "role": "tested-by",
@@ -2938,25 +2948,17 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:240"
+          "loc": "plugin/scripts/reqmap_engine/config.py:242"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:252"
+          "loc": "plugin/scripts/reqmap_engine/config.py:260"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.3",
       "priority": "should-have",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Fișier de configurare per-repo",
-          "intent": "Fiecare prag după care judecă motorul (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) era o constantă de modul, astfel încât un consumator nu putea schimba niciuna dintre ele fără a face fork la `reqmap.py`. Un fișier JSON mic, alături de cerințe, setează constantele numite la pornire, citit fail-open, astfel încât un repo reglează motorul fără a-l recabla.",
-          "contract": "> Fiecare prag după care judecă motorul (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`,\n> `ORPHAN_CODE_MIN_LOC`, ...) era o constantă de modul, astfel încât un consumator nu\n> putea schimba niciuna dintre ele fără a face fork la `reqmap.py`. Un fișier JSON mic,\n> alături de cerințe, setează constantele numite la pornire, citit fail-open, astfel\n> încât un repo reglează motorul fără a-l recabla.\n\nFiecare punct de mai jos este obligatoriu.\n- `requirements/_config.json` suprascrie constantele numite în `CONFIG_KEYS` și extinde extensiile scanate; o intrare lipsă, malformată sau cu tip greșit nu strică niciodată o comandă. [[REQ-CONFIG-949]]",
-          "acceptance": "CASE-1\n  Given  un `requirements/_config.json` care setează `LINT_AC_MAX` la 12\n  When   orice comandă pornește\n  Then   `lint` și `next` judecă supradimensionarea la 12 criterii\n\nCASE-2\n  Given  un fișier de configurare care nu este JSON valid\n  When   orice comandă pornește\n  Then   valorile implicite se aplică și comanda rulează\n\nCASE-3\n  Given  o cheie de configurare pe care motorul nu o cunoaște\n  When   orice comandă pornește\n  Then   o linie pe stderr numește cheia ignorată și nimic altceva nu se schimbă\n\n--------------------"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-CONFIG-949",
@@ -2972,12 +2974,12 @@
         "A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.",
         "`extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.",
         "A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.",
-        "`main` calls `apply_config(load_config(reqs_dir))` before loading requirements or scanning, so every command reads the configured values."
+        "`main` collects the diagnostics of `load_config` and `apply_config` before scanning, through an optional `problems` list both accept, and prints each on stderr. The bare `gate` verdict reports each as an `INPUT:config` finding, a warning in text and JSON alike that `--strict` promotes to an error; no other command changes its exit code because of them."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a numeric threshold applies\n  Given  `{\"LINT_AC_MAX\": 12}`\n  When   `apply_config` runs\n  Then   it returns `[\"LINT_AC_MAX\"]`, the constant reads 12 and stderr stays empty\n\nCASE-2 — unknown and mistyped keys are reported and skipped\n  Given  `{\"NOPE\": 1, \"LINT_AC_MAX\": \"seven\"}`\n  When   `apply_config` runs\n  Then   nothing is applied, the constant keeps its default and stderr names both keys\n\nCASE-3 — dictionaries merge and extensions extend\n  Given  `{\"LINT_FANOUT_BANDS\": {\"system\": [null, 12]}, \"extra_code_exts\": [\"foo\", \".bar\"]}`\n  When   `apply_config` runs\n  Then   the `system` band reads `(None, 12)`, the `architecture` band is unchanged and `x.foo` counts as a code file\n\nCASE-4 — the file is read fail-open\n  Given  no file, a malformed file, a JSON list, and a valid object in turn\n  When   `load_config` reads each\n  Then   it returns `{}` for the first three and the object for the last",
+      "accept": "CASE-1 — a numeric threshold applies\n  Given  `{\"LINT_AC_MAX\": 12}`\n  When   `apply_config` runs\n  Then   it returns `[\"LINT_AC_MAX\"]`, the constant reads 12 and stderr stays empty\n\nCASE-2 — unknown and mistyped keys are reported and skipped\n  Given  `{\"NOPE\": 1, \"LINT_AC_MAX\": \"seven\"}`\n  When   `apply_config` runs\n  Then   nothing is applied, the constant keeps its default and stderr names both keys\n\nCASE-3 — dictionaries merge and extensions extend\n  Given  `{\"LINT_FANOUT_BANDS\": {\"system\": [null, 12]}, \"extra_code_exts\": [\"foo\", \".bar\"]}`\n  When   `apply_config` runs\n  Then   the `system` band reads `(None, 12)`, the `architecture` band is unchanged and `x.foo` counts as a code file\n\nCASE-4 — the file is read fail-open\n  Given  no file, a malformed file, a JSON list, and a valid object in turn\n  When   `load_config` reads each\n  Then   it returns `{}` for the first three and the object for the last\n\nCASE-5 — the verdict carries a bad entry\n  Given  `{\"MAP_PROFIL\": 1}`\n  When   `gate`, `gate --strict` and `ask --search x` run, in text and JSON\n  Then   `gate` and `ask` exit 0, `gate --strict` exits 1, and both gate formats list `INPUT:config`",
       "input": "",
       "output": "",
       "desc": "",
@@ -2990,31 +2992,27 @@
       "members": [
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3315"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:2956"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:240"
+          "loc": "plugin/scripts/reqmap_engine/config.py:242"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:252"
+          "loc": "plugin/scripts/reqmap_engine/config.py:260"
         }
       ],
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Citirea și aplicarea `_config.json`",
-          "intent": "`load_config` citește fișierul; `apply_config` setează constantele modulului pe baza lui. Separarea păstrează formatul fișierului și regulile de aplicare testabile independent, iar `main` apelează ambele o singură dată înainte de rularea oricărei comenzi. O greșeală de scriere ignorată silențios ar fi mai rea decât lipsa completă a configurației, așa că o cheie necunoscută sau scrisă greșit este raportată.",
-          "contract": "> `load_config` citește fișierul; `apply_config` setează constantele modulului pe baza lui. Separarea\n> păstrează formatul fișierului și regulile de aplicare testabile independent, iar `main`\n> apelează ambele o singură dată înainte de rularea oricărei comenzi. O greșeală de scriere ignorată silențios\n> ar fi mai rea decât lipsa completă a configurației, așa că o cheie necunoscută sau scrisă greșit este raportată.\n\nFiecare punct de mai jos este obligatoriu.\n- `load_config(reqs_dir)` returnează obiectul parsat din `requirements/_config.json`, sau `{}` când fișierul este absent, nu poate fi citit, nu este JSON sau nu este un obiect JSON.\n- `apply_config(cfg)` setează pe modul fiecare cheie numită în `CONFIG_KEYS` și returnează lista numelor pe care le-a aplicat.\n- O constantă numerică acceptă un număr de același tip; o constantă de tip dicționar precum `LINT_FANOUT_BANDS` este îmbinată cheie cu cheie, o listă JSON devenind un tuple.\n- `extra_code_exts`, o listă de extensii cu sau fără punctul inițial, este adăugată la `CODE_EXTS`, astfel încât fiecare loc de scanare vede noile tipuri de fișiere.\n- O cheie care nu se află în `CONFIG_KEYS`, sau o valoare de tip greșit, este raportată pe stderr ca `config: ignoring ...` și este ignorată; orice altă cheie tot se aplică.\n- `main` apelează `apply_config(load_config(reqs_dir))` înainte de a încărca cerințele sau de a scana, astfel încât fiecare comandă citește valorile configurate.",
-          "acceptance": "CASE-1 — un prag numeric se aplică\n  Given  `{\"LINT_AC_MAX\": 12}`\n  When   `apply_config` rulează\n  Then   returnează `[\"LINT_AC_MAX\"]`, constanta are valoarea 12, iar stderr rămâne gol\n\nCASE-2 — cheile necunoscute și cele scrise greșit sunt raportate și ignorate\n  Given  `{\"NOPE\": 1, \"LINT_AC_MAX\": \"seven\"}`\n  When   `apply_config` rulează\n  Then   nu se aplică nimic, constanta își păstrează valoarea implicită, iar stderr numește ambele chei\n\nCASE-3 — dicționarele se îmbină, iar extensiile se extind\n  Given  `{\"LINT_FANOUT_BANDS\": {\"system\": [null, 12]}, \"extra_code_exts\": [\"foo\", \".bar\"]}`\n  When   `apply_config` rulează\n  Then   banda `system` are valoarea `(None, 12)`, banda `architecture` rămâne neschimbată, iar `x.foo` contează ca fișier de cod\n\nCASE-4 — fișierul este citit fail-open\n  Given  pe rând: niciun fișier, un fișier malformat, o listă JSON și un obiect valid\n  When   `load_config` citește fiecare caz\n  Then   returnează `{}` pentru primele trei și obiectul pentru ultimul"
-        }
-      }
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "ARCH-CONTEXT-048",
@@ -3436,7 +3434,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:144"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -4106,7 +4104,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:94"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:96"
         },
         {
           "role": "implements",
@@ -4229,7 +4227,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:94"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:96"
         }
       ],
       "test_exempt": null,
@@ -4391,7 +4389,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:120"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:122"
         }
       ],
       "test_exempt": null,
@@ -5696,11 +5694,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:48"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:50"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:207"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:217"
         },
         {
           "role": "implements",
@@ -5927,11 +5925,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:23"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:25"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:183"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:193"
         }
       ],
       "test_exempt": null,
@@ -6425,7 +6423,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:101"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:103"
         },
         {
           "role": "implements",
@@ -6837,12 +6835,13 @@
         "`init` ends with a short summary naming one next command: `reqmap.py gate --risk`. Not a list of every option.",
         "If nothing was drafted, `init` says so in plain words and points at `new`. It never prints a count summary that hides an empty result.",
         "Running `init` twice is safe. The second run refreshes the lock and the map, then prints the summary again.",
-        "A second run never deletes a requirement someone wrote, and never edits an existing `.reqmapignore`."
+        "A second run never deletes a requirement someone wrote, and never edits an existing `.reqmapignore`.",
+        "`init --minimal` skips planning, release, MCP and site scaffolding, preserving existing files. Ordinary init retains full setup."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the lock and map cover the requirements init just drafted\n  Given  an untagged `app.py` in a repo with no `requirements/`\n  When   `cmd_init` runs\n  Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written\n\nCASE-2 — the summary names next, not the full command list\n  Given  a repo with extractable code\n  When   `cmd_init` runs\n  Then   its output contains \"reqmap.py gate --risk\" but names none of \"confirm\", \"dupes\", \"search\" or \"coverage\"\n\nCASE-3 — an extraction-free repo gets a distinct empty-result message\n  Given  a repo containing only `README.txt` (no extractable code)\n  When   `cmd_init` runs\n  Then   its output says \"no requirements were extracted\" and points at writing `requirements/AREA-NAME-NNN.md`, never \"0 requirement(s) tracked\"\n\nCASE-4 — a second init run exits clean and reprints the summary\n  Given  a repo already initialized by one `cmd_init` run\n  When   `cmd_init` runs again\n  Then   it exits 0 and its output again contains \"reqmap.py gate --risk\"\n\nCASE-5 — a hand-authored requirement and .reqmapignore survive a re-run\n  Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`\n  When   `cmd_init` runs (no `--wipe`)\n  Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged",
+      "accept": "CASE-1 — the lock and map cover the requirements init just drafted\n  Given  an untagged `app.py` in a repo with no `requirements/`\n  When   `cmd_init` runs\n  Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written\n\nCASE-2 — the summary names next, not the full command list\n  Given  a repo with extractable code\n  When   `cmd_init` runs\n  Then   its output contains \"reqmap.py gate --risk\" but names none of \"confirm\", \"dupes\", \"search\" or \"coverage\"\n\nCASE-3 — an extraction-free repo gets a distinct empty-result message\n  Given  a repo containing only `README.txt` (no extractable code)\n  When   `cmd_init` runs\n  Then   its output says \"no requirements were extracted\" and points at writing `requirements/AREA-NAME-NNN.md`, never \"0 requirement(s) tracked\"\n\nCASE-4 — a second init run exits clean and reprints the summary\n  Given  a repo already initialized by one `cmd_init` run\n  When   `cmd_init` runs again\n  Then   it exits 0 and its output again contains \"reqmap.py gate --risk\"\n\nCASE-5 — a hand-authored requirement and .reqmapignore survive a re-run\n  Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`\n  When   `cmd_init` runs (no `--wipe`)\n  Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged\n\n\nCASE-5 — minimal initialization preserves existing optional files\n  Given a repository with an existing roadmap\n  When minimal init runs twice\n  Then maps and locks exist, no optional scaffolding is added, and the roadmap is unchanged",
       "input": "",
       "output": "",
       "desc": "",
@@ -6862,6 +6861,10 @@
           "loc": "plugin/scripts/test_reqmap_author.py:2093"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3849"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/init.py:312"
         }
@@ -6870,8 +6873,8 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-LEVEL-051",
@@ -7343,7 +7346,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:144"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -7425,7 +7428,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:145"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:149"
         },
         {
           "role": "implements",
@@ -8033,27 +8036,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:23"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:25"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:57"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:59"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:119"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:121"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:157"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:183"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:193"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:229"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:239"
         },
         {
           "role": "implements",
@@ -8073,7 +8076,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:118"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:121"
         },
         {
           "role": "implements",
@@ -8081,7 +8084,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:261"
+          "loc": "plugin/scripts/reqmap_engine/model.py:275"
         },
         {
           "role": "implements",
@@ -8142,12 +8145,13 @@
         "Each node carries its requirement's id, layer, status, area, title, intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `depends_on`, `used_by`, and risk signals.",
         "The dependency list is emitted once, as `depends_on`, the name the frontmatter and every document use. Until v8.3.0 it was emitted a second time as `deps`.",
         "The acceptance section is emitted once, as `accept`, the raw Cases text. The folded one-line-per-criterion list is emitted as `acc` only for an atomic body, which has no Cases text to fold; every other reader folds `accept` itself.",
-        "All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body by construction — there is no markup context for it to break out of."
+        "All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body by construction — there is no markup context for it to break out of.",
+        "`MAP_PROFILE: compact` emits whitespace-free JSON with the same source fields and links. Full remains the default."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — map produces _map.json\n  Given  a corpus of requirements\n  When   `map` runs\n  Then   it writes `requirements/_map.json`\n\nCASE-2 — the graph has one node per requirement and one edge per dependency\n  Given  a corpus of N requirements carrying a total of M `depends_on` links\n  When   `map` runs\n  Then   `_map.json` holds exactly N nodes and M edges\n\nCASE-3 — a node carries its full requirement metadata\n  Given  a requirement with an id, layer, status, area, title, Contract clauses and members\n  When   `map` runs\n  Then   its node carries all of those fields plus `depends_on`, `used_by` and any risk signals\n\nCASE-7 — the dependency list is emitted once, under its documented name\n  Given  a requirement declaring `depends_on: [X]`\n  When   `map` runs\n  Then   its node's `depends_on` reads `[X]` and the node carries no `deps` key\n\nCASE-4 — the acceptance section is emitted once\n  Given  one requirement with labelled `CASE-N` blocks and one in the atomic form\n  When   `map` runs\n  Then   the first node carries `accept` and no `acc`, and the atomic node carries `acc`\n         with its one criterion\n\nCASE-5 — repo resolves to the git remote's owner/repo\n  Given  a git checkout whose remote `origin` points at `owner/repo`\n  When   `map` runs\n  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project\n         for display in the viewer header\n\nCASE-6 — a hostile id or title round-trips as inert data\n  Given  a requirement whose id contains `</script>` and whose title contains a raw quote\n  When   `map` runs\n  Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup\n         break-out\n\n\n--------------------",
+      "accept": "CASE-1 — map produces _map.json\n  Given  a corpus of requirements\n  When   `map` runs\n  Then   it writes `requirements/_map.json`\n\nCASE-2 — the graph has one node per requirement and one edge per dependency\n  Given  a corpus of N requirements carrying a total of M `depends_on` links\n  When   `map` runs\n  Then   `_map.json` holds exactly N nodes and M edges\n\nCASE-3 — a node carries its full requirement metadata\n  Given  a requirement with an id, layer, status, area, title, Contract clauses and members\n  When   `map` runs\n  Then   its node carries all of those fields plus `depends_on`, `used_by` and any risk signals\n\nCASE-7 — the dependency list is emitted once, under its documented name\n  Given  a requirement declaring `depends_on: [X]`\n  When   `map` runs\n  Then   its node's `depends_on` reads `[X]` and the node carries no `deps` key\n\nCASE-4 — the acceptance section is emitted once\n  Given  one requirement with labelled `CASE-N` blocks and one in the atomic form\n  When   `map` runs\n  Then   the first node carries `accept` and no `acc`, and the atomic node carries `acc`\n         with its one criterion\n\nCASE-5 — repo resolves to the git remote's owner/repo\n  Given  a git checkout whose remote `origin` points at `owner/repo`\n  When   `map` runs\n  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project\n         for display in the viewer header\n\nCASE-6 — a hostile id or title round-trips as inert data\n  Given  a requirement whose id contains `</script>` and whose title contains a raw quote\n  When   `map` runs\n  Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup\n         break-out; full and compact JSON decode to equal graphs, with compact using fewer bytes\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -8171,12 +8175,16 @@
           "loc": "plugin/scripts/test_reqmap_report.py:1768"
         },
         {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:24"
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5742"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:57"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:26"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:59"
         },
         {
           "role": "implements",
@@ -8200,7 +8208,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:118"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:121"
         }
       ],
       "test_exempt": null,
@@ -8228,12 +8236,13 @@
         "`map --check` fails and names the stale file when a committed generated file differs from a fresh render.",
         "The gate's check builds the fresh map without the advisory design record, which the comparison strips from both sides anyway, so the gate never runs the design review.",
         "When the gate cannot build the fresh map for that check, it warns that the freshness probe failed, naming the error, instead of reporting the map fresh.",
-        "The gate reports that same staleness as a warning, without failing the commit, and never regenerates the map itself — only `sync` or `map` does that."
+        "The gate reports that same staleness as a warning, without failing the commit, and never regenerates the map itself — only `sync` or `map` does that.",
+        "JSON freshness compares content across full and compact formats, still excluding volatile metadata and advisory design."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a changed repo field never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-2 — map succeeds when the tree has no git remote\n  Given  a working tree with no `.git` directory\n  When   `map` runs\n  Then   it completes without raising, and `_map.json`'s `repo` field is null\n\nCASE-3 — a changed engine_version never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-4 — map derives the todos array from TODO.md\n  Given  a `TODO.md` with one open item under a milestone section\n  When   `map` runs\n  Then   `_map.json`'s top-level `todos` array contains that item\n\nCASE-5 — map --check fails on a genuinely stale committed map\n  Given  a committed `_map.json` generated from one requirement title, then that title changed\n  When   `map --check` runs\n  Then   it exits non-zero and reports the file as stale\n\nCASE-6 — the gate warns about a stale map without failing the commit\n  Given  a committed `_map.json` that no longer matches a fresh render\n  When   `gate` runs\n  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself\n\n\n--------------------\n\nCASE-7 — a probe that cannot run says so\n  Given  a corpus whose map cannot be built\n  When   `gate` runs\n  Then   it warns that the freshness probe failed, names the error, and exits 0",
+      "accept": "CASE-1 — a changed repo field never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-2 — map succeeds when the tree has no git remote\n  Given  a working tree with no `.git` directory\n  When   `map` runs\n  Then   it completes without raising, and `_map.json`'s `repo` field is null\n\nCASE-3 — a changed engine_version never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-4 — map derives the todos array from TODO.md\n  Given  a `TODO.md` with one open item under a milestone section\n  When   `map` runs\n  Then   `_map.json`'s top-level `todos` array contains that item\n\nCASE-5 — map --check fails on a genuinely stale committed map\n  Given  a committed `_map.json` generated from one requirement title, then that title changed\n  When   `map --check` runs\n  Then   it exits non-zero and reports the file as stale; formatting and advisory design\n         alone never make full or compact JSON stale\n\nCASE-6 — the gate warns about a stale map without failing the commit\n  Given  a committed `_map.json` that no longer matches a fresh render\n  When   `gate` runs\n  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself\n\n\n--------------------\n\nCASE-7 — a probe that cannot run says so\n  Given  a corpus whose map cannot be built\n  When   `gate` runs\n  Then   it warns that the freshness probe failed, names the error, and exits 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -8265,6 +8274,10 @@
           "loc": "plugin/scripts/test_reqmap_report.py:870"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5742"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/author.py:224"
         },
@@ -8274,19 +8287,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:119"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:121"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:157"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:184"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:229"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:239"
         },
         {
           "role": "implements",
@@ -8527,7 +8540,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:91"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:93"
         },
         {
           "role": "implements",
@@ -8564,7 +8577,7 @@
         "`_mermaid_hierarchy`, `_grouped_areas`, `_mermaid_system`, `_mermaid_deps`, `_mermaid_req_to_code`, `_mermaid_risk`, `_build_md_text` and `render_md` in `reqmap.py`.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  the generated `_map.md`\n  When   it is inspected\n  Then   it contains exactly 4 Mermaid code blocks, each with a legend\n\nCASE-2\n  Given  the System Map diagram\n  When   it is rendered\n  Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges\n         whose target is a bus node are omitted\n\nCASE-3\n  Given  the Dependency Map diagram\n  When   it is rendered\n  Then   it is area-level: one node per area (with a count), an edge A→B when some capability\n         in A depends on one in B; per-capability hub edges are not drawn\n\nCASE-4\n  Given  the Risk diagram\n  When   it is rendered\n  Then   it shows only requirements with at least one risk signal, each with a scripted\n         recommendation, and a draft's open question is not shown twice",
+      "accept": "CASE-1\n  Given  the generated `_map.md` in the full profile\n  When   it is inspected\n  Then   it contains exactly 4 Mermaid code blocks, each with a legend\n\nCASE-2\n  Given  the System Map diagram\n  When   it is rendered\n  Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges\n         whose target is a bus node are omitted\n\nCASE-3\n  Given  the Dependency Map diagram\n  When   it is rendered\n  Then   it is area-level: one node per area (with a count), an edge A→B when some capability\n         in A depends on one in B; per-capability hub edges are not drawn\n\nCASE-4\n  Given  the Risk diagram\n  When   it is rendered\n  Then   it shows only requirements with at least one risk signal, each with a scripted\n         recommendation, and a draft's open question is not shown twice",
       "input": "",
       "output": "",
       "desc": "",
@@ -8621,7 +8634,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapmd.py:342"
+          "loc": "plugin/scripts/reqmap_engine/mapmd.py:345"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapmd.py:356"
         }
       ],
       "test_exempt": null,
@@ -8641,13 +8658,14 @@
       "intent": "`_map.md` is the picture that goes with the graph — System Map, Req→Code, Dependencies, Risk — rendered fresh from the registry on every `map` run so it can never drift into a hand-edited state. It renders on GitHub with no tooling, so a pull request reviewer sees the shape of the system without cloning anything.",
       "contract": [
         "`map` generates `_map.md` under `requirements/`, rendered from the graph and never edited.",
-        "`_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies and Risk.",
-        "Each of those 4 blocks carries a legend."
+        "In the default full profile, `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies and Risk.",
+        "Each of those 4 blocks carries a legend.",
+        "With `MAP_PROFILE: compact`, Markdown is a status and system-needs summary linking to complete JSON and offline HTML; full is the default."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — map writes _map.md from the graph, overwriting any manual edit\n  Given  a `requirements/_map.md` a human hand-edited since the last run\n  When   `map` runs\n  Then   the file is fully regenerated from the graph, discarding the manual edit\n\nCASE-2 — _map.md carries exactly the four named diagrams\n  Given  the generated `_map.md`\n  When   its Mermaid code blocks are counted\n  Then   there are exactly 4: System Map, Req→Code, Dependencies, Risk\n\nCASE-3 — every diagram block ships its own legend\n  Given  the generated `_map.md`\n  When   each of the 4 Mermaid blocks is inspected\n  Then   each one carries a legend describing its symbols\n\n\n--------------------",
+      "accept": "CASE-1 — map writes _map.md from the graph, overwriting any manual edit\n  Given  a `requirements/_map.md` a human hand-edited since the last run\n  When   `map` runs\n  Then   the file is fully regenerated from the graph, discarding the manual edit\n\nCASE-2 — _map.md carries exactly the four named diagrams\n  Given  the generated `_map.md` in the full profile\n  When   its Mermaid code blocks are counted\n  Then   there are exactly 4: System Map, Req→Code, Dependencies, Risk\n\nCASE-3 — every diagram block ships its own legend\n  Given  the generated `_map.md` in the full profile\n  When   each of the 4 Mermaid blocks is inspected\n  Then   each one carries a legend describing its symbols\n\n\n--------------------\n\n\nCASE-4 — compact summary links to the complete exports\n  Given the compact map profile\n  When Markdown is rendered\n  Then it links to JSON and HTML without emitting the full diagrams",
       "input": "",
       "output": "",
       "desc": "",
@@ -8671,20 +8689,28 @@
           "loc": "plugin/scripts/test_reqmap_report.py:4130"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5742"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/mapmd.py:282"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapmd.py:342"
+          "loc": "plugin/scripts/reqmap_engine/mapmd.py:345"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapmd.py:356"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "REQ-MAPDIAGRAMS-875",
@@ -8949,6 +8975,10 @@
         "REQ-MCPRESOURCES-1030"
       ],
       "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3304"
+        },
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:4551"
@@ -10458,7 +10488,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:183"
+          "loc": "plugin/scripts/reqmap_engine/model.py:197"
         },
         {
           "role": "implements",
@@ -10474,7 +10504,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:109"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:120"
         }
       ],
       "test_exempt": null,
@@ -10493,6 +10523,7 @@
       "title": "load_requirements returns one meta/body/path record per file",
       "intent": "Every other command — gate, map, next — works from an in-memory dict of requirement records, not the raw Markdown. `load_requirements` builds that dict once: one entry per file, keyed by id, holding the parsed frontmatter (`meta`), the prose after it (`body`), and the file's path. Everything downstream assumes this shape.",
       "contract": [
+        "Duplicate IDs, non-scalar IDs and unreadable requirement files are retained as input diagnostics. The gate reports them as errors in both output formats; sync does not advance the lock from such a corpus.",
         "`load_requirements` parses each `requirements/*.md` file into a record `{meta, body, path}`.",
         "`meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter block.",
         "The `id` comes from the frontmatter `id:` field, falling back to the filename stem."
@@ -10513,6 +10544,10 @@
       "members": [
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3314"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
@@ -10521,7 +10556,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:110"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:108"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/parse.py:121"
         }
       ],
       "test_exempt": null,
@@ -10529,15 +10568,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3,
-      "i18n": {
-        "ro": {
-          "title": "load_requirements returnează o înregistrare meta/body/path per fișier",
-          "intent": "Fiecare altă comandă — gate, map, next — lucrează dintr-un dicționar în memorie de înregistrări de cerință, nu din Markdown-ul brut. `load_requirements` construiește acel dicționar o dată: o intrare per fișier, cheiată după id, purtând frontmatter-ul parsat (`meta`), proza de după el (`body`), și calea fișierului. Tot ce urmează presupune această formă.",
-          "contract": "> Fiecare altă comandă — gate, map, next — lucrează dintr-un dicționar în memorie de\n> înregistrări de cerință, nu din Markdown-ul brut. `load_requirements` construiește acel\n> dicționar o dată: o intrare per fișier, cheiată după id, purtând frontmatter-ul parsat\n> (`meta`), proza de după el (`body`), și calea fișierului. Tot ce urmează presupune\n> această formă.\n\nFiecare bullet de mai jos este obligatoriu.\n- `load_requirements` parsează fiecare fișier `requirements/*.md` într-o înregistrare\n  `{meta, body, path}`.\n- `meta` este frontmatter-ul parsat, iar `body` este markdown-ul de după blocul de\n  frontmatter.\n- `id`-ul vine din câmpul frontmatter `id:`, căzând înapoi la stem-ul numelui de fișier.",
-          "acceptance": "CASE-1 — load_requirements returnează o înregistrare meta/body/path per fișier\n  Given  un director `requirements/` cu un `REQ-A-001.md` valid\n  When   rulează `load_requirements(dir)`\n  Then   intrarea dicționarului returnat poartă cheile `meta`, `body`, și `path`\n\nCASE-2 — parse_frontmatter desparte câmpurile de header de markdown-ul care urmează\n  Given  `\"---\\nid: REQ-A-001\\nstatus: draft\\n---\\nbody text\\n\"`\n  When   rulează `parse_frontmatter(text)`\n  Then   `meta[\"id\"] == \"REQ-A-001\"` și `body == \"body text\\n\"`, fără niciun marcator `---` în niciunul\n\nCASE-3 — un fișier fără câmp id: este cheiat după stem-ul numelui de fișier\n  Given  `REQ-A-001.md` al cărui frontmatter nu poartă nicio linie `id:`\n  When   rulează `load_requirements(dir)`\n  Then   dicționarul returnat are cheia `\"REQ-A-001\"`, luată din numele fișierului\n\n\n--------------------"
-        }
-      }
+      "covered": 3
     },
     {
       "id": "REQ-PARSE-891",
@@ -10632,7 +10663,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:110"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:121"
         }
       ],
       "test_exempt": null,
@@ -10773,7 +10804,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:109"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:120"
         },
         {
           "role": "implements",
@@ -10831,11 +10862,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:379"
+          "loc": "plugin/scripts/reqmap.py:381"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:400"
+          "loc": "plugin/scripts/reqmap.py:402"
         },
         {
           "role": "tested-by",
@@ -10877,7 +10908,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:400"
+          "loc": "plugin/scripts/reqmap.py:402"
         },
         {
           "role": "tested-by",
@@ -11650,7 +11681,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:67"
         },
         {
           "role": "tested-by",
@@ -11701,15 +11732,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:90"
+          "loc": "plugin/scripts/reqmap.py:65"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:67"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:307"
+          "loc": "plugin/scripts/reqmap.py:299"
         },
         {
           "role": "tested-by",
@@ -12534,7 +12565,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:232"
+          "loc": "scripts/test_pipeline_wiring.py:238"
         }
       ],
       "test_exempt": null,
@@ -12591,7 +12622,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:232"
+          "loc": "scripts/test_pipeline_wiring.py:238"
         }
       ],
       "test_exempt": null,
@@ -13399,7 +13430,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:86"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:88"
         },
         {
           "role": "implements",
@@ -13528,7 +13559,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:77"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:79"
         }
       ],
       "test_exempt": null,
@@ -13720,7 +13751,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:334"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
         },
         {
           "role": "implements",
@@ -13728,11 +13759,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:140"
+          "loc": "plugin/scripts/reqmap_engine/model.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:159"
+          "loc": "plugin/scripts/reqmap_engine/model.py:173"
         },
         {
           "role": "implements",
@@ -13794,7 +13825,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:159"
+          "loc": "plugin/scripts/reqmap_engine/model.py:173"
         },
         {
           "role": "implements",
@@ -13875,7 +13906,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:336"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:329"
         },
         {
           "role": "implements",
@@ -15061,6 +15092,10 @@
       ],
       "members": [
         {
+          "role": "implements",
+          "loc": ".github/workflows/dogfood.yml:2"
+        },
+        {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:4579"
         },
@@ -15234,12 +15269,13 @@
       "contract": [
         "`check/action.yml` is a composite action whose gate step runs the consumer's vendored `reqmap.py` (`scripts/reqmap.py` by default) as `gate`, the command `ci.yml` runs here.",
         "Its `lint` and `freshness` inputs default to `'true'`; any other value passes `--no-lint` or `--no-map-check` to that gate.",
+        "Its `code` input defaults to empty; a non-empty value is passed to that gate as `--code`, so tagged code outside `working-directory` is scanned.",
         "Its header carries the `uses: alxmax/requirement-manager/check@vN` reference the release job derives the alias tag from."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the composite action runs the same verdict\n  Given  `check/action.yml`\n  When   its `runs.steps` are read\n  Then   it is a composite action whose gate step runs the vendored `reqmap.py gate`\n\nCASE-2 — the lint and freshness inputs switch their halves off\n  Given  the `lint` and `freshness` inputs of `check/action.yml`\n  When   the inputs and the gate step are read\n  Then   both default to `'true'`, and a value other than `true` adds `--no-lint` or\n         `--no-map-check` to the gate's flags\n\nCASE-3 — the file names the alias the release job moves\n  Given  `check/action.yml`\n  When   it is searched the way the `release` job's alias step searches it\n  Then   it yields one `requirement-manager/check@vN` reference",
+      "accept": "CASE-1 — the composite action runs the same verdict\n  Given  `check/action.yml`\n  When   its `runs.steps` are read\n  Then   it is a composite action whose gate step runs the vendored `reqmap.py gate`\n\nCASE-2 — the lint and freshness inputs switch their halves off\n  Given  the `lint` and `freshness` inputs of `check/action.yml`\n  When   the inputs and the gate step are read\n  Then   both default to `'true'`, and a value other than `true` adds `--no-lint` or\n         `--no-map-check` to the gate's flags\n\nCASE-3 — the file names the alias the release job moves\n  Given  `check/action.yml`\n  When   it is searched the way the `release` job's alias step searches it\n  Then   it yields one `requirement-manager/check@vN` reference\n\nCASE-4 — the code input widens the scan\n  Given  the `code` input of `check/action.yml`\n  When   the input and the gate step are read\n  Then   it defaults to empty, and a non-empty value is passed to the gate as `--code`",
       "input": "",
       "output": "",
       "desc": "",
@@ -15263,8 +15299,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "REQ-SELFGATE-1072",
@@ -15299,7 +15335,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:189"
+          "loc": "scripts/test_pipeline_wiring.py:195"
         }
       ],
       "test_exempt": null,
@@ -16142,7 +16178,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:278"
+          "loc": "plugin/scripts/reqmap.py:270"
         },
         {
           "role": "tested-by",
@@ -16207,7 +16243,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:269"
+          "loc": "plugin/scripts/reqmap.py:261"
         },
         {
           "role": "tested-by",
@@ -16227,7 +16263,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:222"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:232"
         },
         {
           "role": "implements",
@@ -16455,7 +16491,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "check/action.yml:114"
+          "loc": "check/action.yml:118"
         },
         {
           "role": "implements",
@@ -17107,7 +17143,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:201"
+          "loc": "plugin/scripts/reqmap_engine/model.py:215"
         },
         {
           "role": "implements",
@@ -17258,7 +17294,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:201"
+          "loc": "plugin/scripts/reqmap_engine/model.py:215"
         },
         {
           "role": "implements",
@@ -17450,23 +17486,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:12"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:13"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:28"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:29"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:40"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:41"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:52"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:53"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:91"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:94"
         }
       ],
       "test_exempt": null,
@@ -17509,7 +17545,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:40"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:41"
         }
       ],
       "test_exempt": null,
@@ -17531,7 +17567,8 @@
         "`map` and `export` read `requirements/_i18n/*.json` when present and attach `node.i18n[locale] = {title, intent, contract, acceptance}` for any node whose cached hash still matches its current content.",
         "**A stale entry is silently dropped, never served.** This is what keeps `map --check` deterministic: it only ever reads a file already on disk, and it never serves a translation known to be out of date.",
         "A malformed cache file — unreadable, not JSON, or not an object — yields no translations at all rather than an exception. The map still builds.",
-        "Every viewer path that RENDERS `node.i18n` as displayed prose goes through `translatedText()` (`i18n.jsx`), which reports `isTranslated` alongside the text, and each such caller renders the \"machine-translated, unreviewed\" badge beside its own field — one badge per translated field, not one somewhere on the page. A non-rendering reader may read `node.i18n` directly: the search index does, to match a query against cached translations. Absent a cache entry, content renders in the author's own language exactly as before this capability existed."
+        "Every viewer path that RENDERS `node.i18n` as displayed prose goes through `translatedText()` (`i18n.jsx`), which reports `isTranslated` alongside the text, and each such caller renders the \"machine-translated, unreviewed\" badge beside its own field — one badge per translated field, not one somewhere on the page. A non-rendering reader may read `node.i18n` directly: the search index does, to match a query against cached translations. Absent a cache entry, content renders in the author's own language exactly as before this capability existed.",
+        "`MAP_LOCALES` selects cached locales for export: `[\"*\"]` includes all (default), `[]` excludes all, and named locales include only those caches. Source requirements are unchanged."
       ],
       "verify": [],
       "notes": [
@@ -17539,7 +17576,7 @@
         "-------------------"
       ],
       "current_impl": [],
-      "accept": "CASE-1 — the map attaches a fresh cache entry without calling anything external\n  Given  a `requirements/_i18n/en.json` entry whose hash matches the requirement's\n         current content\n  When   `_build_map_data` runs with `subprocess.run` mocked to raise on any call\n  Then   the node carries `node.i18n.en` and no external call was made\n\nCASE-2 — a stale cache entry is dropped, never served\n  Given  a `requirements/_i18n/en.json` entry whose stored hash does not match the\n         requirement's current content\n  When   `_load_translations` runs\n  Then   that entry is absent from the result, so `map`/`export` never attach it to\n         the node\n\nCASE-3 — a malformed cache file yields no translations, never an exception\n  Given  a `requirements/_i18n/en.json` that holds valid JSON which is not an\n         object (a list, say)\n  When   `_load_translations` runs\n  Then   it returns no translations at all and raises nothing, so the map still\n         builds\n\nCASE-4 — a translated field carries its own badge; an untranslated one carries none\n  Given  a node whose `i18n.en` entry covers title, intent, contract and acceptance,\n         and a node with no cache entry at all\n  When   the spec document is server-rendered at locale `en` and at locale `ro`\n  Then   the cached node renders the translated title and the badge string appears\n         exactly once per translated field, the uncached node renders the author's own\n         title with no badge anywhere, and removing any single badge render site fails\n         the suite",
+      "accept": "CASE-1 — the map attaches a fresh cache entry without calling anything external\n  Given  a `requirements/_i18n/en.json` entry whose hash matches the requirement's\n         current content\n  When   `_build_map_data` runs with `subprocess.run` mocked to raise on any call\n  Then   the node carries `node.i18n.en` and no external call was made\n\nCASE-2 — a stale cache entry is dropped, never served\n  Given  a `requirements/_i18n/en.json` entry whose stored hash does not match the\n         requirement's current content\n  When   `_load_translations` runs\n  Then   that entry is absent from the result, so `map`/`export` never attach it to\n         the node\n\nCASE-3 — a malformed cache file yields no translations, never an exception\n  Given  a `requirements/_i18n/en.json` that holds valid JSON which is not an\n         object (a list, say)\n  When   `_load_translations` runs\n  Then   it returns no translations at all and raises nothing, so the map still\n         builds\n\nCASE-4 — a translated field carries its own badge; an untranslated one carries none\n  Given  a node whose `i18n.en` entry covers title, intent, contract and acceptance,\n         and a node with no cache entry at all\n  When   the spec document is server-rendered at locale `en` and at locale `ro`\n  Then   the cached node renders the translated title and the badge string appears\n         exactly once per translated field, the uncached node renders the author's own\n         title with no badge anywhere, and removing any single badge render site fails\n         the suite\n\nCASE-4 — locale selection changes exports only\n  Given a fresh Romanian cache\n  When MAP_LOCALES selects ro or no locales\n  Then the cache appears only in the selected export and source content is unchanged",
       "input": "",
       "output": "",
       "desc": "",
@@ -17567,20 +17604,24 @@
           "loc": "plugin/scripts/test_reqmap_author.py:975"
         },
         {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:52"
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5771"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/i18n.py:91"
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:53"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/i18n.py:94"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "REQ-TRANSLATE-967",
@@ -21861,12 +21902,102 @@
       "section_date": null
     },
     {
+      "name": "Checking separated from report generation: `gate` computes the verdict and nothing else, rendering lives outside the critical path",
+      "horizon": "later",
+      "req": "ARCH-CHECK-006",
+      "unpark": "a gate run is measured slower because of report code it does not need",
+      "done": false,
+      "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Configuration read into one explicit object instead of module globals mutated by `apply_config`",
+      "horizon": "later",
+      "req": "ARCH-CONFIG-060",
+      "unpark": "a config bug traced to a stale global",
+      "done": false,
+      "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Schema-upgrade fixtures: an engine upgrade keeps every confirmation unless the contract itself changed",
+      "horizon": "later",
+      "req": "ARCH-CHECK-006",
+      "unpark": "a consumer loses confirmations on an upgrade",
+      "done": false,
+      "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Compatibility aliases retired deliberately: inventory the consumers, publish the migration, then remove",
+      "horizon": "later",
+      "req": "ARCH-CMDREGISTRY-033",
+      "unpark": "an alias blocks a change",
+      "done": false,
+      "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
       "name": "The MCP tool list and the OpenAI schema generated from the same `COMMANDS` registry (ADR-0008)",
       "horizon": "later",
       "req": "ARCH-MCP-073",
       "unpark": "the MCP freeze is lifted",
       "done": false,
       "category": "Engine surface",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --release --apply` ticks the `ROADMAP.md` items whose bars it drops, instead of only listing them",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "a Now item describes work that already shipped",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --release` refuses a milestone that has Now/Next items with no bar",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "a release is cut from an incomplete plan",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`gate --strict` fails on a stale plan (a milestone at or below the declared version); the bare gate keeps it a warning",
+      "horizon": "later",
+      "req": "ARCH-ROADMAP-038",
+      "unpark": "a stale milestone is found by a person before the signal",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag",
+      "horizon": "later",
+      "req": "ARCH-RELEASE-072",
+      "unpark": "the maintainer picks one",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell",
+      "horizon": "later",
+      "req": "ARCH-PYFLOOR-040",
+      "unpark": "CI minutes become a constraint",
+      "done": false,
+      "category": "CI of this repository",
       "context": "",
       "section_date": null
     },
@@ -22156,9 +22287,9 @@
     },
     {
       "month": "2026-09",
-      "count": 110,
+      "count": 111,
       "first": "2026-09-02",
-      "last": "2026-09-23",
+      "last": "2026-09-26",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -22269,11 +22400,17 @@
         "v8.4.1",
         "v8.5.0",
         "v8.5.1",
-        "v8.6.0"
+        "v8.6.0",
+        "v8.7.0"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.7.0",
+          "date": "2026-09-26",
+          "headline": "One verdict in text and JSON, input the gate can trust, a smaller skill"
+        },
         {
           "version": "v8.6.0",
           "date": "2026-09-23",
@@ -22851,6 +22988,10 @@
           "help": "Hard-reset: delete all non-generated requirements and strip membership tags from source files before re-extracting."
         },
         {
+          "flag": "--minimal",
+          "help": "Skip planning, release, MCP and site scaffolding."
+        },
+        {
           "flag": "--no-site",
           "help": "Skip the final site step (scaffolding docs/architecture.html)."
         }
@@ -23039,17 +23180,53 @@
   ],
   "design": {
     "files": 117,
-    "clean_files": 117,
-    "score": 100,
+    "clean_files": 114,
+    "score": 97,
     "candidates": {
       "encapsulation": 0,
-      "abstraction": 0,
+      "abstraction": 1,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 0
+      "standards": 3
     },
-    "findings": [],
-    "advice": {}
+    "findings": [
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 293,
+        "name": "main",
+        "detail": "`main` is 87 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 437,
+        "name": "reqmap.py",
+        "detail": "1 line(s) wider than 80 columns, first at line 437"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap_engine/cliflags.py",
+        "line": 121,
+        "name": "cliflags.py",
+        "detail": "1 line(s) wider than 80 columns, first at line 121"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap_engine/config.py",
+        "line": 208,
+        "name": "config.py",
+        "detail": "2 line(s) wider than 80 columns, first at line 208"
+      }
+    ],
+    "advice": {
+      "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
+      "long-function": "a function this long hides several steps: extract each step under a name that says what it does"
+    }
   },
   "health": {
     "score": 100,

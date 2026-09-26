@@ -5736,3 +5736,69 @@ class CommandConsumers(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033
         with mock.patch.object(G, "COMMANDS", stripped):
             after = [g() for g in gens]
         self.assertEqual(before, after)
+
+
+class CompactExports(unittest.TestCase):
+    # tested-by: REQ-MAP-870, REQ-MAP-871, REQ-MAPDIAGRAMS-874
+    def test_compact_preserves_graph_and_freshness(self):
+        # verifies: REQ-MAP-870#CASE-6
+        # verifies: REQ-MAP-871#CASE-5
+        data = Rendering()._data('Unicode ș </script>')
+        data['nodes'][0]['contract'] = ['Keep the entire contract.']
+        pretty = R._build_json_text(data, compact=False)
+        compact = R._build_json_text(data, compact=True)
+        self.assertEqual(json.loads(pretty), json.loads(compact))
+        self.assertLess(len(compact), len(pretty))
+        self.assertEqual(R._strip_generated(pretty), R._strip_generated(compact))
+        changed = json.loads(compact)
+        changed['nodes'][0]['contract'] = ['Changed contract.']
+        self.assertNotEqual(R._strip_generated(compact),
+                            R._strip_generated(json.dumps(changed)))
+        changed = json.loads(compact)
+        changed['design'] = {'score': 5}
+        self.assertEqual(R._strip_generated(compact),
+                         R._strip_generated(json.dumps(changed)))
+
+    def test_compact_markdown_links_to_full_content(self):
+        # verifies: REQ-MAPDIAGRAMS-874#CASE-4
+        with mock.patch.object(R.config, 'MAP_PROFILE', 'compact'):
+            md = R._build_md_text(Rendering()._data('Title'))
+        self.assertIn('_map.json', md)
+        self.assertIn('_map.html', md)
+        self.assertNotIn('```mermaid', md)
+
+    def test_locale_selection_preserves_source(self):
+        # tested-by: REQ-TRANSLATE-938
+        # verifies: REQ-TRANSLATE-938#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            reqs = {'R-1': {'body': '# Title\n', 'meta': {}}}
+            entry = {'hash': R.translation_hash('# Title\n', 'Title'),
+                     'title': 'Titlu'}
+            _write(os.path.join(d, '_i18n', 'ro.json'),
+                   json.dumps({'R-1': entry}))
+            with mock.patch.object(R.config, 'MAP_LOCALES', ['ro']):
+                self.assertIn('ro', R._load_translations(reqs, d)['R-1'])
+            with mock.patch.object(R.config, 'MAP_LOCALES', []):
+                self.assertEqual(R._load_translations(reqs, d), {})
+            self.assertEqual(reqs['R-1']['body'], '# Title\n')
+
+
+class SharedSkillWorkflow(unittest.TestCase):
+    # tested-by: REQ-CMDREGISTRY-834
+    def test_both_adapters_ship_the_same_workflow_reference(self):
+        # verifies: REQ-CMDREGISTRY-834#CASE-7
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1] / "skills" / "requirement-manager"
+        target = root / "references" / "workflow.md"
+        self.assertTrue(target.is_file())
+        for name in ("SKILL.md", "SKILL.universal.md"):
+            entry = (root / name).read_text(encoding="utf-8")
+            self.assertIn("(references/workflow.md)", entry)
+            self.assertIn("<!--##REQMAP:COMMANDS##-->", entry)
+        for source in root.rglob("*.md"):
+            text = source.read_text(encoding="utf-8")
+            for link in re.findall(r"\]\(([^)]+)\)", text):
+                path = link.split("#", 1)[0]
+                if path and "://" not in path:
+                    self.assertTrue((source.parent / path).exists(),
+                                    "{} -> {}".format(source.name, path))

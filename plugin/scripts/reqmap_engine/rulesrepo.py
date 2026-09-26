@@ -18,7 +18,7 @@ from .text import _bullets
 from .viewer import check_viewer_data_sync
 
 
-@gate_rule("RM016", "warn")
+@gate_rule("RM016", "warn", strict=True)
 def _corrupt_lock_rule(ctx):
     # load_lock fails open ({}) on an absent OR corrupt lock; surface the
     # corrupt case so a silently-disabled drift signal is visible.
@@ -33,7 +33,7 @@ def _corrupt_lock_rule(ctx):
             yield None, (
                 "_reqlock.json present but unreadable "
                 "(corrupt/merge-conflicted) — drift detection skipped "
-                "this run; re-run with --update-lock")
+                "this run; restore it or run `reqmap.py sync`")
 
 
 @gate_rule("RM017", "warn", only_source_repo=True)

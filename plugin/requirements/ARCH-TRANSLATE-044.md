@@ -183,6 +183,8 @@ Every bullet below is binding.
   a query against cached translations. Absent a cache entry, content renders in the
   author's own language exactly as before this capability existed.
 
+- `MAP_LOCALES` selects cached locales for export: `["*"]` includes all (default), `[]` excludes all, and named locales include only those caches. Source requirements are unchanged.
+
 ## Cases
 CASE-1 — the map attaches a fresh cache entry without calling anything external
   Given  a `requirements/_i18n/en.json` entry whose hash matches the requirement's
@@ -212,6 +214,11 @@ CASE-4 — a translated field carries its own badge; an untranslated one carries
          exactly once per translated field, the uncached node renders the author's own
          title with no badge anywhere, and removing any single badge render site fails
          the suite
+
+CASE-4 — locale selection changes exports only
+  Given a fresh Romanian cache
+  When MAP_LOCALES selects ro or no locales
+  Then the cache appears only in the selected export and source content is unchanged
 
 ## Context
 **Notes**

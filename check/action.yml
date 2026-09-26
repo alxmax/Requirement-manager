@@ -76,6 +76,10 @@ inputs:
     description: 'Directory the gate runs from (where requirements/ lives).'
     required: false
     default: '.'
+  code:
+    description: 'Directory the scan starts from, relative to working-directory; passed to the gate as --code. Set it (e.g. "..") when code carrying implements: tags lives outside working-directory, or every requirement whose members all live there fails RM006. Empty keeps the default, working-directory itself.'
+    required: false
+    default: ''
   python-version:
     description: 'Python to set up for the gate (stdlib-only; 3.9+, the engine''s declared floor).'
     required: false
@@ -149,4 +153,6 @@ runs:
         if [ -n "${{ inputs.reqmap-repo }}" ]; then
           export REQMAP_REPO="${{ inputs.reqmap-repo }}"
         fi
-        python -X utf8 "${{ inputs.reqmap-path }}" gate $FLAGS
+        CODE_ARGS=()
+        if [ -n "${{ inputs.code }}" ]; then CODE_ARGS=(--code "${{ inputs.code }}"); fi
+        python -X utf8 "${{ inputs.reqmap-path }}" gate $FLAGS "${CODE_ARGS[@]}"

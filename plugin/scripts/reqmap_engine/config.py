@@ -202,8 +202,10 @@ DESIGN_LINE_MAX = 80            # standards: a physical line wider than this
 # the named ones — read fail-open, applied once at startup, a key of the wrong
 # type or an unknown name is reported and ignored. Set constants without
 # rewiring: the circuit network.
+MAP_PROFILE = "full"
+MAP_LOCALES = ["*"]
 CONFIG_FILE = "_config.json"
-CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
+CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
                "LINT_CONTRACT_MAX",
                "LINT_FILE_SPREAD_MAX", "LINT_FANOUT_MIN", "LINT_FANOUT_MAX",
                "LINT_FANOUT_BANDS",
@@ -225,7 +227,7 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
 # declared here and a value outside them is reported rather than applied.
 # Without this, a repo that wrote `"eror"` would get the default back in silence
 # — precisely the failure the whole config mechanism exists to avoid.
-CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error")}
+CONFIG_ENUMS = {"MAP_PROFILE": ("full", "compact"), "DRIFT_SEVERITY": ("warn", "error")}
 
 # Keys a released engine once read and then dropped with what they tuned
 # (ADR-0047, ADR-0051): the design metrics, the docstring and definition-count
@@ -236,25 +238,36 @@ RETIRED_CONFIG_PREFIXES = ("DESIGN_RFC_MAX", "DESIGN_FILE_MAX_FUNCS",
                            "DESIGN_DOCSTRING_PUBLIC", "LANGUAGE")
 
 
-def load_config(reqs_dir):
+def load_config(reqs_dir, problems=None):
     # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
     """The parsed `requirements/_config.json`, or {} when absent,
     unreadable or not an object."""
     try:
         with open(os.path.join(reqs_dir, CONFIG_FILE), encoding="utf-8") as f:
             data = json.load(f)
-    except (OSError, ValueError):
+        if not isinstance(data, dict):
+            raise ValueError("expected a JSON object")
+        return data
+    except FileNotFoundError:
         return {}
-    return data if isinstance(data, dict) else {}
+    except (OSError, ValueError) as exc:
+        if problems is not None:
+            problems.append("invalid _config.json: {}".format(exc))
+        return {}
 
 
-def apply_config(cfg, out=None):
+def apply_config(cfg, out=None, problems=None):
     # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
     """Apply `cfg` to the module constants. Returns the names applied. A
     key that is not in CONFIG_KEYS, or whose value has a different type
     than the default, is reported on `out` (stderr) and skipped — a typo
     must never silently change nothing."""
     out = out or sys.stderr
+    def reject(message):
+        print(message, file=out)
+        if problems is not None:
+            problems.append(message)
+
     applied = []
     g = globals()
     for key, value in (cfg or {}).items():
@@ -267,12 +280,12 @@ def apply_config(cfg, out=None):
                     e for e in extra if e not in g["CODE_EXTS"])
                 applied.append(key)
             else:
-                print("config: ignoring extra_code_exts (expected a "
-                     "list of strings)", file=out)
+                reject("config: ignoring extra_code_exts (expected a "
+                     "list of strings)")
             continue
         if key not in CONFIG_KEYS:
             if not key.startswith(RETIRED_CONFIG_PREFIXES):
-                print("config: ignoring unknown key {!r}".format(key), file=out)
+                reject("config: ignoring unknown key {!r}".format(key))
             continue
         default = g[key]
         # A string-valued key is an ENUM, never free text: every one of them
@@ -282,8 +295,8 @@ def apply_config(cfg, out=None):
         if isinstance(default, str):
             allowed = CONFIG_ENUMS.get(key, ())
             if not isinstance(value, str) or (allowed and value not in allowed):
-                print("config: ignoring {} (expected one of {})".format(
-                    key, ", ".join(allowed) or "a string"), file=out)
+                reject("config: ignoring {} (expected one of {})".format(
+                    key, ", ".join(allowed) or "a string"))
                 continue
             g[key] = value
             applied.append(key)
@@ -294,16 +307,16 @@ def apply_config(cfg, out=None):
             # override.
             if not (isinstance(value, list)
                    and all(isinstance(x, str) for x in value)):
-                print("config: ignoring {} (expected a list of strings)"
-                     .format(key), file=out)
+                reject("config: ignoring {} (expected a list of strings)"
+                     .format(key))
                 continue
             g[key] = list(value)
             applied.append(key)
             continue
         if isinstance(default, dict):
             if not isinstance(value, dict):
-                print("config: ignoring {} (expected an object)"
-                     .format(key), file=out)
+                reject("config: ignoring {} (expected an object)"
+                     .format(key))
                 continue
             merged = dict(default)
             for k, v in value.items():
@@ -313,8 +326,8 @@ def apply_config(cfg, out=None):
              or not isinstance(default, (int, float))
              or isinstance(value, bool)
              or not isinstance(value, (int, float))):
-            print("config: ignoring {} (expected {})".format(
-                key, type(default).__name__), file=out)
+            reject("config: ignoring {} (expected {})".format(
+                key, type(default).__name__))
             continue
         else:
             g[key] = type(default)(value)

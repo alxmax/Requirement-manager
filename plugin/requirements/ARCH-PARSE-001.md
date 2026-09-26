@@ -92,6 +92,7 @@ satisfies: [ARCH-PARSE-001]
 > and the file's path. Everything downstream assumes this shape.
 
 Every bullet below is binding.
+- Duplicate IDs, non-scalar IDs and unreadable requirement files are retained as input diagnostics. The gate reports them as errors in both output formats; sync does not advance the lock from such a corpus.
 - `load_requirements` parses each `requirements/*.md` file into a record
   `{meta, body, path}`.
 - `meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter

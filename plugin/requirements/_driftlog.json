@@ -14,8 +14,8 @@
       "reason": "senate actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-CHECK-006": {
-      "hash": "e60bb6c50642",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "ff35bb69ae43",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
       "hash": "aa1955386c1b",
@@ -24,6 +24,10 @@
     "ARCH-CMDREGISTRY-033": {
       "hash": "e43c656396b8",
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+    },
+    "ARCH-CONFIG-060": {
+      "hash": "4b04873a91d0",
+      "reason": null
     },
     "ARCH-COVERAGE-029": {
       "hash": "25d7127a672c",
@@ -64,6 +68,10 @@
     "ARCH-MAP-007": {
       "hash": "4f93ce5f5feb",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "ARCH-MAPDIAGRAMS-055": {
+      "hash": "0e45d4b8d45e",
+      "reason": "Compact export contracts and cases"
     },
     "ARCH-MCP-073": {
       "hash": "bf318590b46e",
@@ -146,12 +154,16 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "REQ-CHECK-1036": {
-      "hash": "34a70deb46b9",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "8b9ebb1ff39b",
+      "reason": "Clarify reviewed format-parity contract"
     },
     "REQ-CHECK-829": {
       "hash": "0e8902f7179e",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "REQ-CHECK-830": {
+      "hash": "606236963bdf",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "REQ-CHECK-831": {
       "hash": "b6348e2ee27e",
@@ -162,8 +174,12 @@
       "reason": "gate owns twelve flags now: --full (ADR-0049)"
     },
     "REQ-CMDREGISTRY-834": {
-      "hash": "ad1ac9c0ae6f",
-      "reason": "MCP server: registry tool:False clause, GITRUN case scope"
+      "hash": "7e6c909fe620",
+      "reason": "Shared assistant workflow and discoverable adapters"
+    },
+    "REQ-CONFIG-949": {
+      "hash": "a783b75a2065",
+      "reason": null
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
@@ -210,8 +226,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "REQ-INIT-861": {
-      "hash": "74293b79d18b",
-      "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
+      "hash": "5151412a4deb",
+      "reason": "Compact exports and minimal initialization"
     },
     "REQ-INITTAG-1008": {
       "hash": "8b464f058897",
@@ -230,8 +246,16 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "REQ-MAP-870": {
-      "hash": "750addc172b2",
-      "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
+      "hash": "af329c57d766",
+      "reason": "Compact export contracts and cases"
+    },
+    "REQ-MAP-871": {
+      "hash": "7e73678111e9",
+      "reason": "Compact export contracts and cases"
+    },
+    "REQ-MAPDIAGRAMS-874": {
+      "hash": "68d4a52da578",
+      "reason": "Compact export contracts and cases"
     },
     "REQ-MCPTOOLS-1028": {
       "hash": "938eb7ec8f3e",
@@ -248,6 +272,10 @@
     "REQ-NEXT-885": {
       "hash": "2a6143ec1cdd",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "REQ-PARSE-890": {
+      "hash": "9700e309881c",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "REQ-PLANADVANCE-1020": {
       "hash": "a45b85b812db",
@@ -317,6 +345,10 @@
       "hash": "01428251f82d",
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
+    "REQ-SELFGATE-1071": {
+      "hash": "fd0724ff7b10",
+      "reason": "Action code input"
+    },
     "REQ-SELFGATE-916": {
       "hash": "0ea295ef13c9",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
@@ -342,8 +374,8 @@
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
     },
     "REQ-TRANSLATE-938": {
-      "hash": "25c9549e479a",
-      "reason": "senate i18n sequence: clause 4 corrected against search.js, CASE-4 authored at the mutation evidence, counting check added"
+      "hash": "bbe7e87b21bf",
+      "reason": "Compact exports and minimal initialization"
     },
     "REQ-TRANSLATE-996": {
       "hash": "cd9ffcc8e0ce",

@@ -44,6 +44,9 @@ COMMANDS = {
              "help": "Hard-reset: delete all non-generated requirements and "
                      "strip membership tags from source files before "
                      "re-extracting."},
+            {"name": "minimal", "flag": "--minimal", "type": "bool",
+             "consumer": "docs/commands.md",
+             "help": "Skip planning, release, MCP and site scaffolding."},
             {"name": "no_site", "flag": "--no-site",
              "consumer": [
                  "plugin/skills/requirement-manager/references/site.md",

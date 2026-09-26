@@ -177,6 +177,8 @@ Every bullet below is binding.
   `reqmap.py` (`scripts/reqmap.py` by default) as `gate`, the command `ci.yml` runs here.
 - Its `lint` and `freshness` inputs default to `'true'`; any other value passes
   `--no-lint` or `--no-map-check` to that gate.
+- Its `code` input defaults to empty; a non-empty value is passed to that gate as
+  `--code`, so tagged code outside `working-directory` is scanned.
 - Its header carries the `uses: alxmax/requirement-manager/check@vN` reference the release
   job derives the alias tag from.
 
@@ -196,6 +198,11 @@ CASE-3 — the file names the alias the release job moves
   Given  `check/action.yml`
   When   it is searched the way the `release` job's alias step searches it
   Then   it yields one `requirement-manager/check@vN` reference
+
+CASE-4 — the code input widens the scan
+  Given  the `code` input of `check/action.yml`
+  When   the input and the gate step are read
+  Then   it defaults to empty, and a non-empty value is passed to the gate as `--code`
 
 
 ---

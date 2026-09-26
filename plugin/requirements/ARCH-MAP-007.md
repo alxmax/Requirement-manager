@@ -123,6 +123,8 @@ Every bullet below is binding.
 - All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body
   by construction — there is no markup context for it to break out of.
 
+- `MAP_PROFILE: compact` emits whitespace-free JSON with the same source fields and links. Full remains the default.
+
 ## Cases
 CASE-1 — map produces _map.json
   Given  a corpus of requirements
@@ -160,7 +162,7 @@ CASE-6 — a hostile id or title round-trips as inert data
   Given  a requirement whose id contains `</script>` and whose title contains a raw quote
   When   `map` runs
   Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup
-         break-out
+         break-out; full and compact JSON decode to equal graphs, with compact using fewer bytes
 
 
 --------------------
@@ -209,6 +211,8 @@ Every bullet below is binding.
 - The gate reports that same staleness as a warning, without failing the commit, and never
   regenerates the map itself — only `sync` or `map` does that.
 
+- JSON freshness compares content across full and compact formats, still excluding volatile metadata and advisory design.
+
 ## Cases
 CASE-1 — a changed repo field never trips map --check
   Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field
@@ -233,7 +237,8 @@ CASE-4 — map derives the todos array from TODO.md
 CASE-5 — map --check fails on a genuinely stale committed map
   Given  a committed `_map.json` generated from one requirement title, then that title changed
   When   `map --check` runs
-  Then   it exits non-zero and reports the file as stale
+  Then   it exits non-zero and reports the file as stale; formatting and advisory design
+         alone never make full or compact JSON stale
 
 CASE-6 — the gate warns about a stale map without failing the commit
   Given  a committed `_map.json` that no longer matches a fresh render

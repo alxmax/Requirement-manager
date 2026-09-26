@@ -3843,3 +3843,24 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
             html = _text(page)
             self.assertIn("<b>1</b><span>requirements", html)
             self.assertIn("<!--##REQMAP:NAV##-->", html)
+
+
+class MinimalInit(unittest.TestCase):
+    # tested-by: REQ-INIT-861
+    def test_minimal_skips_optional_scaffolding_and_keeps_existing_files(self):
+        # verifies: REQ-INIT-861#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            reqs = os.path.join(d, 'requirements')
+            _write(os.path.join(d, 'ROADMAP.md'), '# Existing roadmap\n')
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(R.cmd_init(reqs, d, minimal=True), 0)
+                self.assertEqual(R.cmd_init(reqs, d, minimal=True), 0)
+            for path in ('_map.md', '_map.json', '_reqlock.json'):
+                self.assertTrue(os.path.exists(os.path.join(reqs, path)))
+            for path in ('CHANGELOG.md', '.mcp.json', '.vscode/mcp.json',
+                         'requirements/_planning.json', 'docs/architecture.html'):
+                self.assertFalse(os.path.exists(os.path.join(d, path)), path)
+            with open(os.path.join(d, 'ROADMAP.md')) as f:
+                self.assertEqual(f.read(), '# Existing roadmap\n')
+            args = R._build_parser().parse_args(['init', '--minimal'])
+            self.assertTrue(args.minimal)

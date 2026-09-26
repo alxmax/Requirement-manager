@@ -137,6 +137,20 @@ class Finding(dict):
         return self["msg"]
 
 
+class GateResult(list):  # implements: REQ-CHECK-1036
+    """The complete verdict; presentation never selects the checks to run."""
+
+    def payload(self):
+        errors = [str(f) for f in self if f["severity"] == "error"]
+        warnings = [str(f) for f in self if f["severity"] == "warn"]
+        return {"ok": not errors, "errors": errors, "warnings": warnings,
+                "findings": list(self)}
+
+    @property
+    def exit_code(self):
+        return int(any(f["severity"] == "error" for f in self))
+
+
 class Rule(object):  # implements: ARCH-RULES-059
     """A gate rule: a stable code, a default severity, whether `--strict`
     promotes it to an error, and the function that yields `(rid, msg)`

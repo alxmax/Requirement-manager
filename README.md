@@ -17,7 +17,7 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 16,680 lines across
+map of how everything connects. The engine is stdlib only, 16,769 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 
@@ -27,7 +27,7 @@ this repo's own requirement graph, republished on every push to `main`.
 ## Three commands
 
 ```bash
-python scripts/reqmap.py init     # set up requirements/, draft one per capability from the code you have
+python scripts/reqmap.py init --minimal  # set up requirements/, draft one per capability from the code you have
 python scripts/reqmap.py gate     # THE verdict: do the code and the specs still agree? (report-only)
 python scripts/reqmap.py sync     # rebuild everything derived: drift baseline, map, findings
 ```
@@ -62,7 +62,8 @@ existence.
 
 ## Run the gate in CI
 
-Fail the build on drift, on every push and pull request:
+Run the gate on every push and pull request. Drift is advisory by default;
+set `DRIFT_SEVERITY` to `"error"` in `requirements/_config.json` to block it:
 
 ```yaml
 - uses: alxmax/requirement-manager/check@v8
@@ -81,7 +82,7 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 | [Integrations](docs/integrations.md) | plain CLI, the Claude Code plugin, the MCP server, other assistants, the CI action |
 | [Planning and releasing](docs/planning.md) | `ROADMAP.md`, `_planning.json`, `CHANGELOG.md` and `sync --release` |
 | [Internals](docs/internals.md) | how this repo is laid out, and measured numbers on a 10,000-file tree |
-| [`SKILL.md`](plugin/skills/requirement-manager/SKILL.md) | the authoritative contract: authoring rules, statuses, the gate |
+| [`workflow.md`](plugin/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |
 | [Decision records](docs/adr/README.md) | why it works the way it does — including four things considered and not built |
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md) · security: [`SECURITY.md`](SECURITY.md)

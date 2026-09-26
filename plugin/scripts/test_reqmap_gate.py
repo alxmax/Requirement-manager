@@ -3231,3 +3231,149 @@ class GateNeverImportsTheDesignReview(unittest.TestCase):
             self.assertIn("gate:", p.stdout)
             self.assertEqual(loaded, [])
             self.assertTrue(ok)
+
+
+class GateFormatParity(unittest.TestCase):
+    # tested-by: REQ-CHECK-1036
+    def _run(self, root, *args):
+        engine = os.path.join(os.path.dirname(__file__), "reqmap.py")
+        return subprocess.run([sys.executable, engine, "gate", *args],
+                              cwd=root, capture_output=True, text=True)
+
+    def test_lint_failure_is_identical_in_json_and_text(self):
+        # verifies: REQ-CHECK-1036#CASE-5
+        with tempfile.TemporaryDirectory() as root:
+            cases = ["CASE-%d\n  Given x\n  When y\n  Then z" % i
+                     for i in range(1, 9)]
+            _write(os.path.join(root, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["The function returns 1."], cases))
+            _write(os.path.join(root, "a.py"), tag("REQ-A-001") + "\nx = 1\n")
+            before = {p: open(os.path.join(d, p), "rb").read()
+                      for d, _, fs in os.walk(root) for p in fs}
+            for options in ([], ["--strict"], ["--full"]):
+                plain = self._run(root, *options)
+                machine = self._run(root, *options, "--json")
+                self.assertEqual(plain.returncode, 1, plain.stdout)
+                self.assertEqual(machine.returncode, plain.returncode)
+                payload = json.loads(machine.stdout)
+                self.assertFalse(payload["ok"])
+                self.assertTrue(any(f["rule"] == "LINT:ac-count-high"
+                                    for f in payload["findings"]))
+            clean = self._run(root, "--json", "--no-lint")
+            self.assertEqual(clean.returncode, 0, clean.stdout)
+            after = {p: open(os.path.join(d, p), "rb").read()
+                     for d, _, fs in os.walk(root) for p in fs}
+            self.assertEqual(before, after)
+
+    def test_map_failure_and_opt_out_match_in_both_formats(self):
+        # verifies: REQ-CHECK-1036#CASE-6
+        with tempfile.TemporaryDirectory() as root:
+            _write(os.path.join(root, "requirements", "_map.md"), "stale\n")
+            for options, expected in (([], 1), (["--no-map-check"], 0)):
+                plain = self._run(root, *options)
+                machine = self._run(root, *options, "--json")
+                payload = json.loads(machine.stdout)
+                self.assertEqual(plain.returncode, expected, plain.stdout)
+                self.assertEqual(machine.returncode, expected, machine.stdout)
+                self.assertEqual(payload["ok"], expected == 0)
+                if expected:
+                    self.assertIn("MAP:stale", [f["rule"] for f in payload["findings"]])
+
+    def test_a_stage_that_raises_keeps_the_report_printed_before_it(self):
+        # The text report is buffered until every stage ran; a crash in the
+        # last stage must still show what the first one printed.
+        probe = ("import sys; sys.path.insert(0, %r); import reqmap\n"
+                 "def boom(*a, **k): raise RuntimeError('boom')\n"
+                 "reqmap.cmd_map = boom\n"
+                 "sys.argv = ['reqmap.py', 'gate']\n"
+                 "sys.exit(reqmap.main())\n"
+                 % os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as root:
+            _write(os.path.join(root, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["The function returns 1."],
+                         ["CASE-1\n  Given x\n  When y\n  Then z"]))
+            _write(os.path.join(root, "a.py"), tag("REQ-A-001") + "\nx = 1\n")
+            p = subprocess.run([sys.executable, "-X", "utf8", "-c", probe],
+                               cwd=root, capture_output=True, text=True,
+                               encoding="utf-8")
+            self.assertNotEqual(p.returncode, 0)
+            self.assertIn("boom", p.stderr)
+            self.assertIn("1 requirements", p.stdout)
+
+    def test_mcp_is_not_imported_by_the_cli_until_requested(self):
+        # tested-by: ARCH-MCP-073
+        scripts = os.path.dirname(os.path.abspath(__file__))
+        p = subprocess.run([sys.executable, "-c",
+            "import sys, reqmap; assert 'reqmap_engine.mcp' not in sys.modules; "
+            "assert reqmap.mcp.MCP_TOOLS"], cwd=scripts,
+            capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stderr)
+
+
+class InputIntegrity(unittest.TestCase):
+    # tested-by: REQ-PARSE-890
+    # tested-by: REQ-CONFIG-949
+    # tested-by: REQ-CHECK-830
+    def _gate(self, root, *flags):
+        return subprocess.run([sys.executable,
+            os.path.join(os.path.dirname(__file__), "reqmap.py"),
+            "gate", *flags], cwd=root, capture_output=True, text=True)
+
+    def test_duplicate_id_is_a_structured_error_in_both_formats(self):
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("a.md", "b.md"):
+                _write(os.path.join(d, "requirements", name),
+                       _spec("REQ-A-001", ["A contract."], status="draft"))
+            plain, machine = self._gate(d), self._gate(d, "--json")
+            self.assertEqual((plain.returncode, machine.returncode), (1, 1))
+            fs = json.loads(machine.stdout)["findings"]
+            self.assertIn("INPUT:requirements", [f["rule"] for f in fs])
+            self.assertIn("duplicate requirement id", str(fs))
+            ws = R.Workspace.load(os.path.join(d, "requirements"), d)
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(1, R.cmd_check(ws, True))
+            self.assertFalse(os.path.exists(os.path.join(d, "requirements", "_reqlock.json")))
+
+    def test_bad_config_is_reported_and_fails_only_strict(self):
+        # verifies: REQ-CONFIG-949#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            for text in ('{broken', '[]', '{"DRIFT_SEVERITY":"eror"}',
+                         '{"LINT_AC_MAX":"seven"}', '{"MAP_PROFIL":1}'):
+                _write(os.path.join(d, "requirements", "_config.json"), text)
+                for flags, rc in (([], 0), (["--strict"], 1)):
+                    plain = self._gate(d, *flags)
+                    machine = self._gate(d, *flags, "--json")
+                    self.assertEqual((plain.returncode, machine.returncode),
+                                     (rc, rc), text + plain.stdout)
+                    self.assertIn("INPUT:config", plain.stdout)
+                    self.assertIn("config:", plain.stderr)
+                    payload = json.loads(machine.stdout)
+                    self.assertEqual(payload["ok"], rc == 0)
+                    self.assertIn("INPUT:config",
+                                  [f["rule"] for f in payload["findings"]])
+                ask = subprocess.run([sys.executable,
+                    os.path.join(os.path.dirname(__file__), "reqmap.py"),
+                    "ask", "--search", "x"], cwd=d, capture_output=True,
+                    text=True)
+                self.assertEqual(ask.returncode, 0, ask.stderr)
+
+    def test_absent_baseline_is_allowed_but_corrupt_strict_baseline_fails(self):
+        # verifies: REQ-CHECK-830#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(self._gate(d, "--strict").returncode, 0)
+            _write(os.path.join(d, "requirements", "_reqlock.json"), '{broken')
+            self.assertEqual(self._gate(d).returncode, 0)
+            for flags in (["--strict"], ["--strict", "--json"]):
+                r = self._gate(d, *flags)
+                self.assertEqual(r.returncode, 1, r.stdout)
+                self.assertIn("RM016", r.stdout)
+
+    def test_unreadable_requirement_is_not_a_clean_corpus(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "requirements", "REQ-BAD-001.md")
+            os.makedirs(os.path.dirname(path))
+            with open(path, "wb") as f:
+                f.write(b"\xff\xfe\xff")
+            r = self._gate(d, "--json")
+            self.assertEqual(r.returncode, 1, r.stdout)
+            self.assertIn("INPUT:requirements", r.stdout)

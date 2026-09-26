@@ -89,6 +89,7 @@ Every bullet below is binding.
 - Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.
 - `tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the `gen-integration` command.
 - The `SKILL.universal.md` command table is generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is never touched.
+- Both skill entry points link to one shared authoring and gate workflow; their setup adapters and generated command regions remain local.
 - The `SKILL.md` command list is generated the same way, into the same region marker, as a grouped bullet list. It is the contract an assistant reads on a fresh repo, so a verb that exists is documented there and one that does not, is not.
 - Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated artifacts.
 - A command marked `tool: False` — `mcp`, a server rather than a function to call — is left out
@@ -128,7 +129,7 @@ CASE-6 — the generator and gate-check code import no third-party module
   When   their imports are inspected
   Then   every import resolves to the Python standard library
 
-CASE-7 — SKILL.md documents exactly the registry
+CASE-7 — skill adapters share policy and document the registry
   Given  the committed `SKILL.md`
   When   its command region is compared with a fresh rendering from `COMMANDS`
   Then   they match, every non-internal verb appears exactly once, and no other verb appears

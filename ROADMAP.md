@@ -23,7 +23,22 @@ Cadence: one release a week, not one per merge.
 ### Engine surface
 
 - [ ] The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048) | req: ARCH-SELFGATE-039 | unpark: the maintainer names the capability
+- [ ] Checking separated from report generation: `gate` computes the verdict and nothing else, rendering lives outside the critical path | req: ARCH-CHECK-006 | unpark: a gate run is measured slower because of report code it does not need
+- [ ] Configuration read into one explicit object instead of module globals mutated by `apply_config` | req: ARCH-CONFIG-060 | unpark: a config bug traced to a stale global
+- [ ] Schema-upgrade fixtures: an engine upgrade keeps every confirmation unless the contract itself changed | req: ARCH-CHECK-006 | unpark: a consumer loses confirmations on an upgrade
+- [ ] Compatibility aliases retired deliberately: inventory the consumers, publish the migration, then remove | req: ARCH-CMDREGISTRY-033 | unpark: an alias blocks a change
 - [ ] The MCP tool list and the OpenAI schema generated from the same `COMMANDS` registry (ADR-0008) | req: ARCH-MCP-073 | unpark: the MCP freeze is lifted
+
+### Planning and releasing
+
+- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose bars it drops, instead of only listing them | req: ARCH-RELEASE-072 | unpark: a Now item describes work that already shipped
+- [ ] `sync --release` refuses a milestone that has Now/Next items with no bar | req: ARCH-RELEASE-072 | unpark: a release is cut from an incomplete plan
+- [ ] `gate --strict` fails on a stale plan (a milestone at or below the declared version); the bare gate keeps it a warning | req: ARCH-ROADMAP-038 | unpark: a stale milestone is found by a person before the signal
+- [ ] One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag | req: ARCH-RELEASE-072 | unpark: the maintainer picks one
+
+### CI of this repository
+
+- [ ] The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell | req: ARCH-PYFLOOR-040 | unpark: CI minutes become a constraint
 
 ### Adoption
 
