@@ -1894,6 +1894,61 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertIn("gate", r.stdout)
             self.assertIn("sync", r.stdout)
 
+
+class RegistryHelp(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-1085
+    """Help drawn from the command registry, one verb at a time."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args],
+                              cwd=cwd, capture_output=True, text=True,
+                              encoding="utf-8")
+
+    def test_overview_lists_verbs_and_where_to_start(self):
+        # verifies: REQ-CMDREGISTRY-1085#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run("--help", cwd=d)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        for verb in R.COMMANDS:
+            self.assertIn("  " + verb, r.stdout)
+        self.assertEqual(r.stdout.count("(for assistants)"), 2)
+        self.assertIn("gate --risk", r.stdout)
+
+    def test_verb_help_lists_only_its_own_flags(self):
+        # verifies: REQ-CMDREGISTRY-1085#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            for verb, spec in R.COMMANDS.items():
+                r = self._run(verb, "--help", cwd=d)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                listed = set(re.findall(r"^  (--[a-z0-9-]+)", r.stdout, re.M))
+                own = {p["flag"] for p in spec["params"]}
+                self.assertEqual(listed, own, verb)
+                for flag in R.WORKSPACE_FLAGS:
+                    self.assertIn(flag, r.stdout, verb)
+
+    def test_bare_call_points_to_start_and_fails(self):
+        # verifies: REQ-CMDREGISTRY-1085#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run(cwd=d)
+            self.assertEqual(os.listdir(d), [])
+        self.assertEqual(r.returncode, 2)
+        self.assertEqual(r.stdout, "")
+        for verb in R.COMMANDS:
+            self.assertIn(verb, r.stderr)
+        self.assertIn("gate --risk", r.stderr)
+
+    def test_help_is_written_once(self):
+        # verifies: REQ-CMDREGISTRY-1085#CASE-4
+        ap = R._build_parser()
+        self.assertEqual([a.dest for a in ap._actions if a.help], [])
+        live = set(R.COMMANDS)
+        for spec in R.COMMANDS.values():
+            for p in spec["params"]:
+                m = re.match(r"([a-z]+)( --[a-z-]+)?: ", p.get("help", ""))
+                if m:
+                    self.assertIn(m.group(1), live, p["flag"])
+
 class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     """sync must not silently re-baseline an edited confirmed contract."""
 

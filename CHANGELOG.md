@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.8.0` — 2026-09-26
+
+**Help drawn from the command registry.**
+
+- `reqmap.py <verb> --help` lists that verb's summary and its own flags; `reqmap.py --help` lists the six verbs, one line each, with `ask` and `mcp` marked for assistants and `init --minimal`, `gate`, `gate --risk` and `sync` named as where to start (REQ-CMDREGISTRY-1085)
+- A bare `reqmap.py` prints that overview instead of an argparse error, still exits 2 and scans nothing
+- The parser's flags carry no help text of their own: eight of them still described flags of verbs removed in v4.0.0. The engine's core falls to 7,050 logical lines, and its budget with it
+
 ## plugin `v8.7.0` — 2026-09-26
 
 **One verdict in text and JSON, input the gate can trust, a smaller skill.**

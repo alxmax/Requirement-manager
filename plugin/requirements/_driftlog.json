@@ -22,8 +22,8 @@
       "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
     },
     "ARCH-CMDREGISTRY-033": {
-      "hash": "e43c656396b8",
-      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+      "hash": "93c7a2a3ece7",
+      "reason": "Help rendered from the registry"
     },
     "ARCH-CONFIG-060": {
       "hash": "4b04873a91d0",

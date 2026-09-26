@@ -13,6 +13,10 @@ serves those same commands to an AI assistant. A seventh, `new`, scaffolded a bl
 requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)): write
 `requirements/<ID>.md` yourself, or ask your assistant to.
 
+`reqmap.py --help` lists the six verbs and where to start; `reqmap.py <verb> --help` lists
+that verb's own flags. Both are drawn from the command registry, as is this page's table
+of flags.
+
 | Verb | What it does |
 |---|---|
 | `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first. `--minimal` skips the planning, release, MCP and site scaffolding and keeps the rest. |
