@@ -19,7 +19,6 @@ import io, json
 from contextlib import redirect_stdout
 
 from reqmap_engine import config as cfg
-from reqmap_engine.audit import cmd_audit
 from reqmap_engine.audittail import _audit_summary
 from reqmap_engine.candidates import cmd_candidates
 from reqmap_engine.clarify import cmd_clarify
@@ -31,7 +30,7 @@ from reqmap_engine.commands import COMMANDS, COMMAND_GROUPS
 from reqmap_engine.config import apply_config, load_config
 from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import GateMode, cmd_check
-from reqmap_engine.model import GateResult
+from reqmap_engine.model import Finding, GateResult
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
 from reqmap_engine.init import cmd_init
@@ -54,7 +53,7 @@ from reqmap_engine import (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audit, audittail, init, retire, retireapply, levels, review,
+    gate, audittail, init, retire, retireapply, levels, review,
     targets, plandrift, history,
     pyramid, cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
@@ -121,6 +120,7 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     if a.cmd == "ask":
         return _dispatch_ask(a, ws)
     if a.mode_audit:
+        from reqmap_engine.audit import cmd_audit
         return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
     if a.mode_risk:
         if a.as_badge:
@@ -311,7 +311,15 @@ def main():
         return 2
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
-    apply_config(load_config(reqs_dir))   # implements: ARCH-CONFIG-060
+    # implements: ARCH-CONFIG-060
+    problems = []
+    apply_config(load_config(reqs_dir, problems), problems=problems)
+    if problems:
+        result = GateResult(Finding("INPUT:config", "error", None, msg)
+                            for msg in problems)
+        print(json.dumps(result.payload()) if a.as_json else
+              "\n".join("ERROR " + msg for msg in problems))
+        return result.exit_code
     # prefer an on-disk templates/requirement.md if present (back-compat), else
     # the built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
     here = os.path.dirname(os.path.abspath(__file__))
@@ -411,7 +419,7 @@ _ENGINE_MODULES = (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audit, audittail, init, retire, retireapply, levels, pyramid,
+    gate, audittail, init, retire, retireapply, levels, pyramid,
     review, targets, plandrift, history,
     cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
@@ -419,7 +427,7 @@ _ENGINE_MODULES = (
 # The design review is imported only when a name is looked up in it, so a
 # command that never asks for it (`gate` above all) never loads it. Searched
 # after every eager module, in this order.
-_LAZY_MODULES = ("mcp", "design", "design_python", "design_brace",
+_LAZY_MODULES = ("mcp", "audit", "design", "design_python", "design_brace",
                  "design_report")
 
 

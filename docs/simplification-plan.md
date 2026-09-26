@@ -65,6 +65,7 @@ new/updated requirements and links needed to describe the implementation.
 |---|---:|---:|---:|---:|
 | Baseline | 90,707 | 1,574,184 | 1,869,883 | 72,492 |
 | PR 1 | 90,999 | 1,575,539 | 1,871,240 | 72,492 |
+| PR 2 | 90,998 | 1,565,220 | 1,860,933 | 72,492 |
 
 Each PR appends its actual measured row. Growth in the first two correctness changes
 is reported honestly; it is not hidden by removing requirement evidence.

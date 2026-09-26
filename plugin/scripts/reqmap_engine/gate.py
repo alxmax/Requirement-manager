@@ -364,9 +364,11 @@ def cmd_check(ws, update_lock, strict=False, accept_drift=True, mode=None,
     ctx.full_member_hashes = (compute_member_hashes(code_root, full_members)
                               if _reuse_full_hashes else None)
     errors, warns = run_gate_rules(ctx, strict=strict)
+    errors.extend(Finding("INPUT:requirements", "error", None, message)
+                  for message in getattr(reqs, "problems", ()))
     warns = pre_warns + warns
 
-    if update_lock:
+    if update_lock and not getattr(reqs, "problems", ()):
         _advance_lock_and_report(ctx, *_drift_acceptance(accept_drift))
 
     # Integration-artifact freshness must run BEFORE the as_json early-return so

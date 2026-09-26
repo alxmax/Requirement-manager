@@ -14,8 +14,8 @@
       "reason": "senate actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-CHECK-006": {
-      "hash": "e60bb6c50642",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "ff35bb69ae43",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
       "hash": "aa1955386c1b",
@@ -24,6 +24,10 @@
     "ARCH-CMDREGISTRY-033": {
       "hash": "e43c656396b8",
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+    },
+    "ARCH-CONFIG-060": {
+      "hash": "db7d3c657b32",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-COVERAGE-029": {
       "hash": "25d7127a672c",
@@ -153,6 +157,10 @@
       "hash": "0e8902f7179e",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
+    "REQ-CHECK-830": {
+      "hash": "606236963bdf",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
+    },
     "REQ-CHECK-831": {
       "hash": "b6348e2ee27e",
       "reason": "distinct_from; CHECK-831 fold"
@@ -164,6 +172,10 @@
     "REQ-CMDREGISTRY-834": {
       "hash": "ad1ac9c0ae6f",
       "reason": "MCP server: registry tool:False clause, GITRUN case scope"
+    },
+    "REQ-CONFIG-949": {
+      "hash": "d17c9318afd9",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
@@ -248,6 +260,10 @@
     "REQ-NEXT-885": {
       "hash": "2a6143ec1cdd",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "REQ-PARSE-890": {
+      "hash": "9700e309881c",
+      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "REQ-PLANADVANCE-1020": {
       "hash": "a45b85b812db",

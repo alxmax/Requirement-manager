@@ -1,9 +1,9 @@
 ---
-generated: 2026-09-24
-engine: 2026-09-24
+generated: 2026-09-25
+engine: 2026-09-25
 nodes: 306
 edges: 121
-design pass-rate: 100% (118/118 source files without a design candidate)
+design pass-rate: 99% (117/118 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -456,8 +456,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_clarify_py_130_288["plugin/scripts/reqmap_engine/clarify.py:130-288"]
   ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_130_288
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
-  f_plugin_scripts_reqmap_py_91["plugin/scripts/reqmap.py:91"]
-  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_91
+  f_plugin_scripts_reqmap_py_90["plugin/scripts/reqmap.py:90"]
+  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_90
   f_plugin_scripts_test_reqmap_report_py_1827_5678["plugin/scripts/test_reqmap_report.py:1827-5678"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1827_5678
   f_plugin_scripts_reqmap_engine_cliflags_py_18_110["plugin/scripts/reqmap_engine/cliflags.py:18-110"]
@@ -471,8 +471,8 @@ graph LR
   ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_314
   f_plugin_scripts_test_reqmap_report_py_2956_5110["plugin/scripts/test_reqmap_report.py:2956-5110"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2956_5110
-  f_plugin_scripts_reqmap_engine_config_py_240_252["plugin/scripts/reqmap_engine/config.py:240-252"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_240_252
+  f_plugin_scripts_reqmap_engine_config_py_240_258["plugin/scripts/reqmap_engine/config.py:240-258"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_240_258
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
   f_plugin_scripts_test_reqmap_report_py_455_3653["plugin/scripts/test_reqmap_report.py:455-3653"]
   ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_455_3653
@@ -692,11 +692,11 @@ graph LR
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_32_877
   f_plugin_scripts_reqmap_engine_model_py_71_197["plugin/scripts/reqmap_engine/model.py:71-197"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_model_py_71_197
-  f_plugin_scripts_reqmap_engine_parse_py_8_109["plugin/scripts/reqmap_engine/parse.py:8-109"]
-  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_8_109
+  f_plugin_scripts_reqmap_engine_parse_py_8_120["plugin/scripts/reqmap_engine/parse.py:8-120"]
+  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_8_120
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_366_387["plugin/scripts/reqmap.py:366-387"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_366_387
+  f_plugin_scripts_reqmap_py_374_395["plugin/scripts/reqmap.py:374-395"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_374_395
   f_plugin_scripts_test_reqmap_gate_py_2066["plugin/scripts/test_reqmap_gate.py:2066"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2066
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]
@@ -725,8 +725,8 @@ graph LR
   ARCH_PYFLOOR_040["Declared Python support floor<br><small>ARCH-PYFLOOR-040</small>"]
   f__github_workflows_ci_yml_3[".github/workflows/ci.yml:3"]
   ARCH_PYFLOOR_040 -->|implements| f__github_workflows_ci_yml_3
-  f_plugin_scripts_reqmap_py_70["plugin/scripts/reqmap.py:70"]
-  ARCH_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_70
+  f_plugin_scripts_reqmap_py_69["plugin/scripts/reqmap.py:69"]
+  ARCH_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_69
   f_plugin_scripts_test_reqmap_gate_py_1784_2437["plugin/scripts/test_reqmap_gate.py:1784-2437"]
   ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_1784_2437
   ARCH_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>ARCH-REGISTRYLAG-035</small>"]

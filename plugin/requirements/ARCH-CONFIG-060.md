@@ -16,11 +16,11 @@ satisfies: [SYS-AUTHOR-101]
 > Every threshold the engine judges by (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`,
 > `ORPHAN_CODE_MIN_LOC`, ...) was a module constant, so a consumer could change none of
 > them without forking `reqmap.py`. A small JSON file next to the requirements sets the
-> named constants at startup, read fail-open, so a repo tunes the engine without
+> named constants at startup, with invalid input reported, so a repo tunes the engine without
 > rewiring it.
 
 Every bullet below is binding.
-- `requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; a missing, malformed or wrongly-typed entry never breaks a command. [[REQ-CONFIG-949]]
+- `requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; an absent file keeps defaults; a malformed file or invalid entry fails the CLI before any write. [[REQ-CONFIG-949]]
 
 ## Cases
 CASE-1
@@ -31,12 +31,12 @@ CASE-1
 CASE-2
   Given  a config file that is not valid JSON
   When   any command starts
-  Then   the defaults apply and the command runs
+  Then   the CLI reports a structured input error and exits 1 before any write
 
 CASE-3
   Given  a config key the engine does not know
   When   any command starts
-  Then   one line on stderr names the ignored key and nothing else changes
+  Then   the key is named and the CLI exits 1; retired settings remain ignored
 
 --------------------
 
@@ -65,7 +65,7 @@ Every bullet below is binding.
 - A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.
 - `extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.
 - A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.
-- `main` calls `apply_config(load_config(reqs_dir))` before loading requirements or scanning, so every command reads the configured values.
+- `main` collects loader/application diagnostics before scanning. Invalid configuration exits 1, using the same structured error in text or JSON. Library callers retain the optional diagnostic collector and compatible return values.
 
 ## Cases
 CASE-1 — a numeric threshold applies

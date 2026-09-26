@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-24",
+  "engine_version": "2026-09-25",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1537,7 +1537,7 @@
         "`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.",
         "`gate` warns (not errors) on contract drift against the lock or a confirmed requirement with no `tested-by:` link; `--strict` promotes these to errors. [[REQ-CHECK-829]] details the behaviour.",
         "`gate` warns, without affecting the exit code, on a confirmed requirement missing its `## Description` or `## Cases` section. [[REQ-CHECK-1040]] details the behaviour.",
-        "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.",
+        "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file; a corrupt lock is an error under `--strict`. [[REQ-CHECK-830]] details the behaviour.",
         "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
@@ -1555,7 +1555,7 @@
         "`cmd_check`, `warn_if_stale` in `reqmap.py`.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  a tag referencing a non-existent capability\n  When   `gate` runs\n  Then   it produces an `ERROR` and exit 1\n\nCASE-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `gate` runs\n  Then   it produces an `ERROR`\n\nCASE-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `gate` runs\n  Then   each produces an `ERROR`\n\nCASE-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `gate` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nCASE-5\n  Given  a present-but-corrupt lock file\n  When   `gate` runs\n  Then   it produces a `WARN` and does not change the exit code\n\nCASE-6\n  Given  two requirements whose `depends_on` fields point at each other\n  When   the gate runs\n  Then   it warns once, naming the chain, and the exit code stays 0",
+      "accept": "CASE-1\n  Given  a tag referencing a non-existent capability\n  When   `gate` runs\n  Then   it produces an `ERROR` and exit 1\n\nCASE-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `gate` runs\n  Then   it produces an `ERROR`\n\nCASE-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `gate` runs\n  Then   each produces an `ERROR`\n\nCASE-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `gate` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nCASE-5\n  Given  a present-but-corrupt lock file\n  When   `gate` runs\n  Then   it produces a `WARN`; `--strict` promotes it to an error\n\nCASE-6\n  Given  two requirements whose `depends_on` fields point at each other\n  When   the gate runs\n  Then   it warns once, naming the chain, and the exit code stays 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -1940,7 +1940,7 @@
         "The requirement `milestone:` field is optional. When present it matches the version shape `v<digits>[.<digits>…]`, for example `v1.14`.",
         "A malformed `milestone:` value is a `WARN`, because that field is roadmap-only metadata and never build-critical.",
         "A `deprecated` requirement is exempt from the `milestone:` shape check.",
-        "A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run rather than crashing.",
+        "A present-but-unreadable `_reqlock.json` is a `WARN`, promoted to an error by `--strict`. An absent initial baseline is allowed. Drift is skipped for that run rather than crashing.",
         "A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not git-tracked** is a `WARN` naming the file.",
         "An uncommitted lock silently disables drift detection on a fresh CI checkout, which has no baseline to compare against.",
         "That git-tracking check is fail-open: `gate` stays silent when git is unavailable or the tree is not a work tree.",
@@ -1949,7 +1949,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a well-shaped milestone value is silent\n  Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-2 — a malformed milestone value warns\n  Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` runs\n  Then   its output contains \"malformed\"\n\nCASE-3 — a deprecated requirement's malformed milestone is silent\n  Given  a `status: deprecated` requirement with `milestone: next` (malformed shape)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-4 — a corrupt _reqlock.json warns and does not crash the gate\n  Given  a `_reqlock.json` containing invalid JSON (\"{ not json\")\n  When   `gate` runs\n  Then   its output contains \"unreadable\" and it exits 0\n\nCASE-5 — an untracked lock file is flagged, then clears once tracked\n  Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed\n  When   `untracked_locks(reqs_dir)` runs before and after `git add -A`\n  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap\n         where a fresh CI checkout would otherwise have no baseline for drift detection\n\nCASE-6 — the untracked-lock check is silent outside a git work tree\n  Given  a `_reqlock.json` written to a plain directory that is not yet a git repository\n  When   `untracked_locks(reqs_dir)` runs\n  Then   it returns `[]`, not an error\n\nCASE-7 — a sectioned-form requirement missing Verify intent is named in the legacy-schema warning\n  Given  a sectioned-form requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" naming that requirement's id, and \"findings`\n         is inactive\"\n\n\n--------------------",
+      "accept": "CASE-1 — a well-shaped milestone value is silent\n  Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-2 — a malformed milestone value warns\n  Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` runs\n  Then   its output contains \"malformed\"\n\nCASE-3 — a deprecated requirement's malformed milestone is silent\n  Given  a `status: deprecated` requirement with `milestone: next` (malformed shape)\n  When   `gate` runs\n  Then   its output contains no \"malformed\" finding\n\nCASE-4 — a corrupt _reqlock.json warns normally and fails strict mode\n  Given  a `_reqlock.json` containing invalid JSON (\"{ not json\")\n  When   `gate` runs\n  Then   its output contains \"unreadable\" and it exits 0 normally, or 1 with --strict\n\nCASE-5 — an untracked lock file is flagged, then clears once tracked\n  Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed\n  When   `untracked_locks(reqs_dir)` runs before and after `git add -A`\n  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap\n         where a fresh CI checkout would otherwise have no baseline for drift detection\n\nCASE-6 — the untracked-lock check is silent outside a git work tree\n  Given  a `_reqlock.json` written to a plain directory that is not yet a git repository\n  When   `untracked_locks(reqs_dir)` runs\n  Then   it returns `[]`, not an error\n\nCASE-7 — a sectioned-form requirement missing Verify intent is named in the legacy-schema warning\n  Given  a sectioned-form requirement whose body has no `## Verify intent` section\n  When   `gate` runs\n  Then   its output contains \"legacy schema\" naming that requirement's id, and \"findings`\n         is inactive\"\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -1965,6 +1965,10 @@
           "loc": "plugin/scripts/test_reqmap_gate.py:540"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3296"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/locks.py:192"
         }
@@ -1974,15 +1978,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Forma milestone-ului și avertismentele fișierului lock",
-          "intent": "Greșelile de tastare la milestone și problemele fișierului lock sunt probleme de foaie de parcurs sau de contabilitate, nu rupturi de contract, deci avertizează în loc să eșueze build-ul. Un lock corupt sau ne-urmărit de git merită totuși semnalat — dezactivarea silențioasă a detecției drift-ului la un checkout curat este mai rea decât un avertisment zgomotos.",
-          "contract": "> Greșelile de tastare la milestone și problemele fișierului lock sunt probleme de foaie de\n> parcurs sau de contabilitate, nu rupturi de contract, deci avertizează în loc să eșueze\n> build-ul. Un lock corupt sau ne-urmărit de git merită totuși semnalat — dezactivarea\n> silențioasă a detecției drift-ului la un checkout curat este mai rea decât un avertisment\n> zgomotos.\n\nFiecare punct de mai jos este obligatoriu.\n- Câmpul `milestone:` al cerinței este opțional. Când este prezent se potrivește cu forma de\n  versiune `v<digits>[.<digits>…]`, de exemplu `v1.14`.\n- O valoare `milestone:` malformată este un `WARN`, pentru că acel câmp este metadate\n  doar de foaie de parcurs și niciodată critic pentru build.\n- O cerință `deprecated` este scutită de verificarea formei `milestone:`.\n- Un `_reqlock.json` prezent dar necitibil este un `WARN`. Drift-ul este sărit pentru acea\n  rulare în loc să provoace un crash.\n- Un sidecar de lock (`_reqlock.json` sau `_memberlock.json`) care există pe disc dar nu este\n  **urmărit de git** este un `WARN` care numește fișierul.\n- Un lock necomis dezactivează silențios detecția drift-ului la un checkout CI curat, care\n  nu are nicio bază de comparație.\n- Acea verificare de urmărire git este fail-open: `gate` rămâne tăcut când git nu este\n  disponibil sau arborele nu este un work tree.\n- `gate` numește fiecare cerință în formă sectionată al cărei corp nu are secțiune\n  `## Verify intent` într-un singur `WARN` agregat de schemă legacy. Cerințele în formă\n  atomică (`form:\n  atomic`) nu poartă niciun astfel de titlu prin design și sunt excluse\n  din această verificare.",
-          "acceptance": "CASE-1 — o valoare milestone bine formată este tăcută\n  Given  o cerință confirmată cu `milestone: v1.14` (încercat și cu: `v1.04`, `v2`)\n  When   `gate` rulează\n  Then   ieșirea lui nu conține nicio constatare \"malformed\"\n\nCASE-2 — o valoare milestone malformată avertizează\n  Given  o cerință confirmată cu `milestone: next` (încercat și cu: `1.14`, `V1.0`,\n         `v1.14-beta`)\n  When   `gate` rulează\n  Then   ieșirea lui conține \"malformed\"\n\nCASE-3 — milestone-ul malformat al unei cerințe deprecate este tăcut\n  Given  o cerință `status: deprecated` cu `milestone: next` (formă malformată)\n  When   `gate` rulează\n  Then   ieșirea lui nu conține nicio constatare \"malformed\"\n\nCASE-4 — un _reqlock.json corupt avertizează și nu provoacă un crash al gate-ului\n  Given  un `_reqlock.json` conținând JSON invalid (\"{ not json\")\n  When   `gate` rulează\n  Then   ieșirea lui conține \"unreadable\" și iese cu 0\n\nCASE-5 — un fișier lock ne-urmărit este semnalat, apoi se curăță odată urmărit\n  Given  un work tree git cu `_reqlock.json` scris pe disc dar niciodată adăugat prin `git add`\n  When   `untracked_locks(reqs_dir)` rulează înainte și după `git add -A`\n  Then   numește `_reqlock.json` înainte de adăugare și returnează `[]` după ea, închizând\n         lacuna în care un checkout CI curat nu ar avea altfel nicio bază pentru detecția drift-ului\n\nCASE-6 — verificarea lock-ului ne-urmărit este tăcută în afara unui work tree git\n  Given  un `_reqlock.json` scris într-un director simplu care nu este încă un repozitoriu git\n  When   `untracked_locks(reqs_dir)` rulează\n  Then   returnează `[]`, nu o eroare\n\nCASE-7 — o cerință în formă sectionată căreia îi lipsește Verify intent este numită în avertismentul de schemă legacy\n  Given  o cerință în formă sectionată al cărei corp nu are secțiune `## Verify intent`\n  When   `gate` rulează\n  Then   ieșirea lui conține \"legacy schema\" numind id-ul acelei cerințe, și \"findings`\n         is inactive\"\n\n\n--------------------"
-        }
-      }
+      "covered": 7
     },
     {
       "id": "REQ-CHECK-831",
@@ -2602,7 +2598,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:91"
+          "loc": "plugin/scripts/reqmap.py:90"
         },
         {
           "role": "tested-by",
@@ -2908,14 +2904,14 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Per-repo configuration file",
-      "intent": "Every threshold the engine judges by (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) was a module constant, so a consumer could change none of them without forking `reqmap.py`. A small JSON file next to the requirements sets the named constants at startup, read fail-open, so a repo tunes the engine without rewiring it.",
+      "intent": "Every threshold the engine judges by (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) was a module constant, so a consumer could change none of them without forking `reqmap.py`. A small JSON file next to the requirements sets the named constants at startup, with invalid input reported, so a repo tunes the engine without rewiring it.",
       "contract": [
-        "`requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; a missing, malformed or wrongly-typed entry never breaks a command. [[REQ-CONFIG-949]]"
+        "`requirements/_config.json` overrides the constants named in `CONFIG_KEYS` and extends the scanned extensions; an absent file keeps defaults; a malformed file or invalid entry fails the CLI before any write. [[REQ-CONFIG-949]]"
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1\n  Given  a `requirements/_config.json` setting `LINT_AC_MAX` to 12\n  When   any command starts\n  Then   `lint` and `next` judge oversize at 12 criteria\n\nCASE-2\n  Given  a config file that is not valid JSON\n  When   any command starts\n  Then   the defaults apply and the command runs\n\nCASE-3\n  Given  a config key the engine does not know\n  When   any command starts\n  Then   one line on stderr names the ignored key and nothing else changes\n\n--------------------",
+      "accept": "CASE-1\n  Given  a `requirements/_config.json` setting `LINT_AC_MAX` to 12\n  When   any command starts\n  Then   `lint` and `next` judge oversize at 12 criteria\n\nCASE-2\n  Given  a config file that is not valid JSON\n  When   any command starts\n  Then   the CLI reports a structured input error and exits 1 before any write\n\nCASE-3\n  Given  a config key the engine does not know\n  When   any command starts\n  Then   the key is named and the CLI exits 1; retired settings remain ignored\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2951,21 +2947,13 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:252"
+          "loc": "plugin/scripts/reqmap_engine/config.py:258"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.3",
       "priority": "should-have",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Fișier de configurare per-repo",
-          "intent": "Fiecare prag după care judecă motorul (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, ...) era o constantă de modul, astfel încât un consumator nu putea schimba niciuna dintre ele fără a face fork la `reqmap.py`. Un fișier JSON mic, alături de cerințe, setează constantele numite la pornire, citit fail-open, astfel încât un repo reglează motorul fără a-l recabla.",
-          "contract": "> Fiecare prag după care judecă motorul (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`,\n> `ORPHAN_CODE_MIN_LOC`, ...) era o constantă de modul, astfel încât un consumator nu\n> putea schimba niciuna dintre ele fără a face fork la `reqmap.py`. Un fișier JSON mic,\n> alături de cerințe, setează constantele numite la pornire, citit fail-open, astfel\n> încât un repo reglează motorul fără a-l recabla.\n\nFiecare punct de mai jos este obligatoriu.\n- `requirements/_config.json` suprascrie constantele numite în `CONFIG_KEYS` și extinde extensiile scanate; o intrare lipsă, malformată sau cu tip greșit nu strică niciodată o comandă. [[REQ-CONFIG-949]]",
-          "acceptance": "CASE-1\n  Given  un `requirements/_config.json` care setează `LINT_AC_MAX` la 12\n  When   orice comandă pornește\n  Then   `lint` și `next` judecă supradimensionarea la 12 criterii\n\nCASE-2\n  Given  un fișier de configurare care nu este JSON valid\n  When   orice comandă pornește\n  Then   valorile implicite se aplică și comanda rulează\n\nCASE-3\n  Given  o cheie de configurare pe care motorul nu o cunoaște\n  When   orice comandă pornește\n  Then   o linie pe stderr numește cheia ignorată și nimic altceva nu se schimbă\n\n--------------------"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-CONFIG-949",
@@ -2981,7 +2969,7 @@
         "A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.",
         "`extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.",
         "A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.",
-        "`main` calls `apply_config(load_config(reqs_dir))` before loading requirements or scanning, so every command reads the configured values."
+        "`main` collects loader/application diagnostics before scanning. Invalid configuration exits 1, using the same structured error in text or JSON. Library callers retain the optional diagnostic collector and compatible return values."
       ],
       "verify": [],
       "notes": [],
@@ -2999,6 +2987,10 @@
       "members": [
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3295"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:2956"
         },
         {
@@ -3007,7 +2999,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:252"
+          "loc": "plugin/scripts/reqmap_engine/config.py:258"
         }
       ],
       "test_exempt": null,
@@ -3015,15 +3007,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Citirea și aplicarea `_config.json`",
-          "intent": "`load_config` citește fișierul; `apply_config` setează constantele modulului pe baza lui. Separarea păstrează formatul fișierului și regulile de aplicare testabile independent, iar `main` apelează ambele o singură dată înainte de rularea oricărei comenzi. O greșeală de scriere ignorată silențios ar fi mai rea decât lipsa completă a configurației, așa că o cheie necunoscută sau scrisă greșit este raportată.",
-          "contract": "> `load_config` citește fișierul; `apply_config` setează constantele modulului pe baza lui. Separarea\n> păstrează formatul fișierului și regulile de aplicare testabile independent, iar `main`\n> apelează ambele o singură dată înainte de rularea oricărei comenzi. O greșeală de scriere ignorată silențios\n> ar fi mai rea decât lipsa completă a configurației, așa că o cheie necunoscută sau scrisă greșit este raportată.\n\nFiecare punct de mai jos este obligatoriu.\n- `load_config(reqs_dir)` returnează obiectul parsat din `requirements/_config.json`, sau `{}` când fișierul este absent, nu poate fi citit, nu este JSON sau nu este un obiect JSON.\n- `apply_config(cfg)` setează pe modul fiecare cheie numită în `CONFIG_KEYS` și returnează lista numelor pe care le-a aplicat.\n- O constantă numerică acceptă un număr de același tip; o constantă de tip dicționar precum `LINT_FANOUT_BANDS` este îmbinată cheie cu cheie, o listă JSON devenind un tuple.\n- `extra_code_exts`, o listă de extensii cu sau fără punctul inițial, este adăugată la `CODE_EXTS`, astfel încât fiecare loc de scanare vede noile tipuri de fișiere.\n- O cheie care nu se află în `CONFIG_KEYS`, sau o valoare de tip greșit, este raportată pe stderr ca `config: ignoring ...` și este ignorată; orice altă cheie tot se aplică.\n- `main` apelează `apply_config(load_config(reqs_dir))` înainte de a încărca cerințele sau de a scana, astfel încât fiecare comandă citește valorile configurate.",
-          "acceptance": "CASE-1 — un prag numeric se aplică\n  Given  `{\"LINT_AC_MAX\": 12}`\n  When   `apply_config` rulează\n  Then   returnează `[\"LINT_AC_MAX\"]`, constanta are valoarea 12, iar stderr rămâne gol\n\nCASE-2 — cheile necunoscute și cele scrise greșit sunt raportate și ignorate\n  Given  `{\"NOPE\": 1, \"LINT_AC_MAX\": \"seven\"}`\n  When   `apply_config` rulează\n  Then   nu se aplică nimic, constanta își păstrează valoarea implicită, iar stderr numește ambele chei\n\nCASE-3 — dicționarele se îmbină, iar extensiile se extind\n  Given  `{\"LINT_FANOUT_BANDS\": {\"system\": [null, 12]}, \"extra_code_exts\": [\"foo\", \".bar\"]}`\n  When   `apply_config` rulează\n  Then   banda `system` are valoarea `(None, 12)`, banda `architecture` rămâne neschimbată, iar `x.foo` contează ca fișier de cod\n\nCASE-4 — fișierul este citit fail-open\n  Given  pe rând: niciun fișier, un fișier malformat, o listă JSON și un obiect valid\n  When   `load_config` citește fiecare caz\n  Then   returnează `{}` pentru primele trei și obiectul pentru ultimul"
-        }
-      }
+      "covered": 4
     },
     {
       "id": "ARCH-CONTEXT-048",
@@ -10487,7 +10471,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:109"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:120"
         }
       ],
       "test_exempt": null,
@@ -10506,6 +10490,7 @@
       "title": "load_requirements returns one meta/body/path record per file",
       "intent": "Every other command — gate, map, next — works from an in-memory dict of requirement records, not the raw Markdown. `load_requirements` builds that dict once: one entry per file, keyed by id, holding the parsed frontmatter (`meta`), the prose after it (`body`), and the file's path. Everything downstream assumes this shape.",
       "contract": [
+        "Duplicate IDs, non-scalar IDs and unreadable requirement files are retained as input diagnostics. The gate reports them as errors in both output formats; sync does not advance the lock from such a corpus.",
         "`load_requirements` parses each `requirements/*.md` file into a record `{meta, body, path}`.",
         "`meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter block.",
         "The `id` comes from the frontmatter `id:` field, falling back to the filename stem."
@@ -10526,6 +10511,10 @@
       "members": [
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:3294"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
@@ -10534,7 +10523,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:110"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:108"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/parse.py:121"
         }
       ],
       "test_exempt": null,
@@ -10542,15 +10535,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3,
-      "i18n": {
-        "ro": {
-          "title": "load_requirements returnează o înregistrare meta/body/path per fișier",
-          "intent": "Fiecare altă comandă — gate, map, next — lucrează dintr-un dicționar în memorie de înregistrări de cerință, nu din Markdown-ul brut. `load_requirements` construiește acel dicționar o dată: o intrare per fișier, cheiată după id, purtând frontmatter-ul parsat (`meta`), proza de după el (`body`), și calea fișierului. Tot ce urmează presupune această formă.",
-          "contract": "> Fiecare altă comandă — gate, map, next — lucrează dintr-un dicționar în memorie de\n> înregistrări de cerință, nu din Markdown-ul brut. `load_requirements` construiește acel\n> dicționar o dată: o intrare per fișier, cheiată după id, purtând frontmatter-ul parsat\n> (`meta`), proza de după el (`body`), și calea fișierului. Tot ce urmează presupune\n> această formă.\n\nFiecare bullet de mai jos este obligatoriu.\n- `load_requirements` parsează fiecare fișier `requirements/*.md` într-o înregistrare\n  `{meta, body, path}`.\n- `meta` este frontmatter-ul parsat, iar `body` este markdown-ul de după blocul de\n  frontmatter.\n- `id`-ul vine din câmpul frontmatter `id:`, căzând înapoi la stem-ul numelui de fișier.",
-          "acceptance": "CASE-1 — load_requirements returnează o înregistrare meta/body/path per fișier\n  Given  un director `requirements/` cu un `REQ-A-001.md` valid\n  When   rulează `load_requirements(dir)`\n  Then   intrarea dicționarului returnat poartă cheile `meta`, `body`, și `path`\n\nCASE-2 — parse_frontmatter desparte câmpurile de header de markdown-ul care urmează\n  Given  `\"---\\nid: REQ-A-001\\nstatus: draft\\n---\\nbody text\\n\"`\n  When   rulează `parse_frontmatter(text)`\n  Then   `meta[\"id\"] == \"REQ-A-001\"` și `body == \"body text\\n\"`, fără niciun marcator `---` în niciunul\n\nCASE-3 — un fișier fără câmp id: este cheiat după stem-ul numelui de fișier\n  Given  `REQ-A-001.md` al cărui frontmatter nu poartă nicio linie `id:`\n  When   rulează `load_requirements(dir)`\n  Then   dicționarul returnat are cheia `\"REQ-A-001\"`, luată din numele fișierului\n\n\n--------------------"
-        }
-      }
+      "covered": 3
     },
     {
       "id": "REQ-PARSE-891",
@@ -10645,7 +10630,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:110"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:121"
         }
       ],
       "test_exempt": null,
@@ -10786,7 +10771,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:109"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:120"
         },
         {
           "role": "implements",
@@ -10844,11 +10829,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:366"
+          "loc": "plugin/scripts/reqmap.py:374"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:387"
+          "loc": "plugin/scripts/reqmap.py:395"
         },
         {
           "role": "tested-by",
@@ -10890,7 +10875,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:387"
+          "loc": "plugin/scripts/reqmap.py:395"
         },
         {
           "role": "tested-by",
@@ -11663,7 +11648,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:70"
+          "loc": "plugin/scripts/reqmap.py:69"
         },
         {
           "role": "tested-by",
@@ -11714,11 +11699,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:68"
+          "loc": "plugin/scripts/reqmap.py:67"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:70"
+          "loc": "plugin/scripts/reqmap.py:69"
         },
         {
           "role": "implements",
@@ -22177,9 +22162,9 @@
     },
     {
       "month": "2026-09",
-      "count": 111,
+      "count": 112,
       "first": "2026-09-02",
-      "last": "2026-09-24",
+      "last": "2026-09-25",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -22291,11 +22276,17 @@
         "v8.5.0",
         "v8.5.1",
         "v8.6.0",
-        "v8.6.1"
+        "v8.6.1",
+        "v8.6.2"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.6.2",
+          "date": "2026-09-25",
+          "headline": ""
+        },
         {
           "version": "v8.6.1",
           "date": "2026-09-24",
@@ -23066,17 +23057,28 @@
   ],
   "design": {
     "files": 118,
-    "clean_files": 118,
-    "score": 100,
+    "clean_files": 117,
+    "score": 99,
     "candidates": {
       "encapsulation": 0,
-      "abstraction": 0,
+      "abstraction": 1,
       "inheritance": 0,
       "polymorphism": 0,
       "standards": 0
     },
-    "findings": [],
-    "advice": {}
+    "findings": [
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 287,
+        "name": "main",
+        "detail": "`main` is 86 lines (over 80)"
+      }
+    ],
+    "advice": {
+      "long-function": "a function this long hides several steps: extract each step under a name that says what it does"
+    }
   },
   "health": {
     "score": 100,

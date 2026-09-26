@@ -65,6 +65,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0052](0052-the-line-budget-moves-to-the-measured-size.md) | The line budget moves once, to the measured size | Superseded by 0053 |
 | [0053](0053-the-budget-measures-the-core-in-logical-lines.md) | The budget measures the core in logical lines, under a total-lines ceiling | Accepted |
 
+| [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
+
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
 never rewritten to match a later change: it gains a superseding record instead, because the

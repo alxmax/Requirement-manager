@@ -105,6 +105,17 @@ def split_requirement_blocks(text):  # implements: REQ-MODULEFILE-056
     return out or [text]
 
 
+class RequirementIndex(dict):  # implements: REQ-PARSE-890
+    """Retain recoverable parse failures beside the usable requirements."""
+    def __init__(self):
+        super().__init__()
+        self.problems = []
+
+    def problem(self, message):
+        self.problems.append(message)
+        print("WARNING: " + message, file=sys.stderr)
+
+
 def load_requirements(reqs_dir):
     # implements: ARCH-PARSE-001  # implements: REQ-MODULEFILE-056
     # implements: REQ-PARSE-890  # implements: REQ-PARSE-892
@@ -113,7 +124,7 @@ def load_requirements(reqs_dir):
     (REQ-MODULEFILE-056); an unreadable or id-less file is skipped
     rather than raising, so one bad file cannot blind the whole
     corpus."""
-    reqs = {}
+    reqs = RequirementIndex()
     if not os.path.isdir(reqs_dir):
         return reqs
     for name in sorted(os.listdir(reqs_dir)):
@@ -126,8 +137,8 @@ def load_requirements(reqs_dir):
                 text = f.read()
         except (OSError, ValueError) as exc:
             # ValueError covers UnicodeDecodeError
-            print("WARNING: skipping unreadable requirement file "
-                  "{!r}: {}".format(name, exc), file=sys.stderr)
+            reqs.problem("skipping unreadable requirement file "
+                         "{!r}: {}".format(name, exc))
             continue
         for _i, _blk in enumerate(split_requirement_blocks(text)):
             meta, body = parse_frontmatter(_blk)
@@ -146,16 +157,15 @@ def load_requirements(reqs_dir):
                 if _i == 0 and _blk.startswith("---") else None)
             if not rid:
                 continue
+            if not isinstance(rid, str):
+                reqs.problem("invalid requirement id in {!r}: {!r}"
+                             .format(name, rid))
+                continue
             if rid in reqs:
-                # two blocks claim the same id: keep the first (sorted)
-                # and warn, rather than let the later one silently
-                # shadow it (the gate can't catch this — the id still
-                # resolves, just to the wrong block).
-                print("WARNING: duplicate requirement id {!r} in {!r} "
-                      "— keeping {!r}".format(
-                          rid, name,
-                          os.path.basename(reqs[rid]["path"])),
-                      file=sys.stderr)
+                reqs.problem("duplicate requirement id {!r} in {!r} — "
+                             "keeping {!r}".format(
+                                 rid, name,
+                                 os.path.basename(reqs[rid]["path"])))
                 continue
             reqs[rid] = Requirement(meta=meta, body=body, path=path, block=_i)
     return reqs

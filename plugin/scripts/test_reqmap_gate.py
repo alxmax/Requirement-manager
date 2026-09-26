@@ -3288,3 +3288,61 @@ class GateFormatParity(unittest.TestCase):
             "assert reqmap.mcp.MCP_TOOLS"], cwd=scripts,
             capture_output=True, text=True)
         self.assertEqual(p.returncode, 0, p.stderr)
+
+
+class InputIntegrity(unittest.TestCase):
+    # tested-by: REQ-PARSE-890
+    # tested-by: REQ-CONFIG-949
+    # tested-by: REQ-CHECK-830
+    def _gate(self, root, *flags):
+        return subprocess.run([sys.executable,
+            os.path.join(os.path.dirname(__file__), "reqmap.py"),
+            "gate", *flags], cwd=root, capture_output=True, text=True)
+
+    def test_duplicate_id_is_a_structured_error_in_both_formats(self):
+        with tempfile.TemporaryDirectory() as d:
+            for name in ("a.md", "b.md"):
+                _write(os.path.join(d, "requirements", name),
+                       _spec("REQ-A-001", ["A contract."], status="draft"))
+            plain, machine = self._gate(d), self._gate(d, "--json")
+            self.assertEqual((plain.returncode, machine.returncode), (1, 1))
+            fs = json.loads(machine.stdout)["findings"]
+            self.assertIn("INPUT:requirements", [f["rule"] for f in fs])
+            self.assertIn("duplicate requirement id", str(fs))
+            ws = R.Workspace.load(os.path.join(d, "requirements"), d)
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(1, R.cmd_check(ws, True))
+            self.assertFalse(os.path.exists(os.path.join(d, "requirements", "_reqlock.json")))
+
+    def test_bad_config_never_silently_disables_policy(self):
+        with tempfile.TemporaryDirectory() as d:
+            for text in ('{broken', '[]', '{"DRIFT_SEVERITY":"eror"}',
+                         '{"LINT_AC_MAX":"seven"}', '{"UNKNOWN_SETTING":1}'):
+                _write(os.path.join(d, "requirements", "_config.json"), text)
+                for flags in ([], ["--strict"]):
+                    plain = self._gate(d, *flags)
+                    machine = self._gate(d, *flags, "--json")
+                    self.assertEqual((plain.returncode, machine.returncode), (1, 1))
+                    self.assertFalse(json.loads(machine.stdout)["ok"])
+                    self.assertIn("INPUT:config", machine.stdout)
+
+    def test_absent_baseline_is_allowed_but_corrupt_strict_baseline_fails(self):
+        # verifies: REQ-CHECK-830#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(self._gate(d, "--strict").returncode, 0)
+            _write(os.path.join(d, "requirements", "_reqlock.json"), '{broken')
+            self.assertEqual(self._gate(d).returncode, 0)
+            for flags in (["--strict"], ["--strict", "--json"]):
+                r = self._gate(d, *flags)
+                self.assertEqual(r.returncode, 1, r.stdout)
+                self.assertIn("RM016", r.stdout)
+
+    def test_unreadable_requirement_is_not_a_clean_corpus(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "requirements", "REQ-BAD-001.md")
+            os.makedirs(os.path.dirname(path))
+            with open(path, "wb") as f:
+                f.write(b"\xff\xfe\xff")
+            r = self._gate(d, "--json")
+            self.assertEqual(r.returncode, 1, r.stdout)
+            self.assertIn("INPUT:requirements", r.stdout)

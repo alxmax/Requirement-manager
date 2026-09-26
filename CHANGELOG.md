@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.6.2` — 2026-09-25
+
+- Reject invalid configuration before dispatch; expose duplicate IDs and unreadable requirements as structured gate errors.
+- Strict gates reject corrupt drift baselines, while an absent initial baseline remains supported.
+- Demand-load the optional audit report; keep its CLI and library access.
+
+
 ## plugin `v8.6.1` — 2026-09-24
 
 - Collect rule, readability and map findings into one gate result before choosing text or JSON. JSON no longer skips lint or the map-freshness verdict.
