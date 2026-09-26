@@ -130,6 +130,3 @@ docs/history/**
 # requirement that lives in examples/hello-drift/requirements, not in this corpus, so
 # scanning it here would report a dangling tag.
 examples/**
-
-# Approved implementation plan, not a source capability.
-docs/simplification-plan.md

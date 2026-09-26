@@ -15,7 +15,7 @@ requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)):
 
 | Verb | What it does |
 |---|---|
-| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first. |
+| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first. `--minimal` skips the planning, release, MCP and site scaffolding and keeps the rest. |
 | `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
 | `ask` | **Every other read-only question**: search, overlapping contracts, the review plan. Never writes anything, and its exit code is the question's, never the verdict's. Since v8.0.0 `gate` refuses them and names `ask` ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)); every verb refuses a flag another verb owns. |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md` and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
@@ -63,6 +63,14 @@ Confirming a requirement is **not** a command — it is a human's answer. Edit
 `status: confirmed` in the frontmatter once someone has actually read it. The gate
 enforces the invariant (a confirmed requirement with no `implements:` member is an
 error), and `sync` demotes an edited contract back to `draft` on its own.
+
+**Map size — `MAP_PROFILE` and `MAP_LOCALES`.** Two keys in `requirements/_config.json`
+choose how much the committed map carries. The defaults, `"full"` and every cached locale,
+write all four Mermaid diagrams to `_map.md`. `{"MAP_PROFILE": "compact", "MAP_LOCALES": []}`
+writes a short `_map.md` (status totals, system needs, links to `_map.json` and the offline
+viewer) and minified JSON without cached translations; `["ro"]` keeps Romanian only.
+Compact JSON keeps every contract, case, note and link. The offline `_map.html` embeds
+minified JSON in either profile, and map freshness compares JSON by content, not bytes.
 
 > Removed in `v4.0.0`: the old one-verb-per-question CLI (`map`, `next`, `scan`,
 > `lint`, `show`, `health`, `export`, `draft`, `plan`, `findings`, `confirm`,

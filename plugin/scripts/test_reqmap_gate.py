@@ -3279,6 +3279,26 @@ class GateFormatParity(unittest.TestCase):
                 if expected:
                     self.assertIn("MAP:stale", [f["rule"] for f in payload["findings"]])
 
+    def test_a_stage_that_raises_keeps_the_report_printed_before_it(self):
+        # The text report is buffered until every stage ran; a crash in the
+        # last stage must still show what the first one printed.
+        probe = ("import sys; sys.path.insert(0, %r); import reqmap\n"
+                 "def boom(*a, **k): raise RuntimeError('boom')\n"
+                 "reqmap.cmd_map = boom\n"
+                 "sys.argv = ['reqmap.py', 'gate']\n"
+                 "sys.exit(reqmap.main())\n"
+                 % os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as root:
+            _write(os.path.join(root, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["The function returns 1."],
+                         ["CASE-1\n  Given x\n  When y\n  Then z"]))
+            _write(os.path.join(root, "a.py"), tag("REQ-A-001") + "\nx = 1\n")
+            p = subprocess.run([sys.executable, "-X", "utf8", "-c", probe],
+                               cwd=root, capture_output=True, text=True,
+                               encoding="utf-8")
+            self.assertNotEqual(p.returncode, 0)
+            self.assertIn("boom", p.stderr)
+            self.assertIn("1 requirements", p.stdout)
 
     def test_mcp_is_not_imported_by_the_cli_until_requested(self):
         # tested-by: ARCH-MCP-073

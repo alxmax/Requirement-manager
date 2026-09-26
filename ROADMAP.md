@@ -9,8 +9,6 @@ Format: `- [ ] text | req: ID` under Now/Next. Later needs `unpark:`.
 Reserved headings: Now, Next, Later, Not now. Categories are `###` headings inside them.
 Cadence: one release a week, not one per merge.
 
-Implementation detail and stacked delivery: [simplification plan](docs/simplification-plan.md).
-
 ## Now
 
 ### Adoption
@@ -25,6 +23,10 @@ Implementation detail and stacked delivery: [simplification plan](docs/simplific
 ### Engine surface
 
 - [ ] The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048) | req: ARCH-SELFGATE-039 | unpark: the maintainer names the capability
+- [ ] Checking separated from report generation: `gate` computes the verdict and nothing else, rendering lives outside the critical path | req: ARCH-CHECK-006 | unpark: a gate run is measured slower because of report code it does not need
+- [ ] Configuration read into one explicit object instead of module globals mutated by `apply_config` | req: ARCH-CONFIG-060 | unpark: a config bug traced to a stale global
+- [ ] Schema-upgrade fixtures: an engine upgrade keeps every confirmation unless the contract itself changed | req: ARCH-CHECK-006 | unpark: a consumer loses confirmations on an upgrade
+- [ ] Compatibility aliases retired deliberately: inventory the consumers, publish the migration, then remove | req: ARCH-CMDREGISTRY-033 | unpark: an alias blocks a change
 - [ ] The MCP tool list and the OpenAI schema generated from the same `COMMANDS` registry (ADR-0008) | req: ARCH-MCP-073 | unpark: the MCP freeze is lifted
 
 ### Adoption

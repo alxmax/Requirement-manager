@@ -45,7 +45,7 @@ COMMANDS = {
                      "strip membership tags from source files before "
                      "re-extracting."},
             {"name": "minimal", "flag": "--minimal", "type": "bool",
-             "consumer": "docs/simplification-plan.md",
+             "consumer": "docs/commands.md",
              "help": "Skip planning, release, MCP and site scaffolding."},
             {"name": "no_site", "flag": "--no-site",
              "consumer": [

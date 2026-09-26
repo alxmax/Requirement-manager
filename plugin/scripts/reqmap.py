@@ -149,14 +149,20 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     result, report = GateResult(), io.StringIO()
     # Run exactly the same stages for both formats. Collect structured
     # findings directly; the captured human report is never parsed.
-    with redirect_stdout(report):
-        cmd_check(ws, False, a.strict,
-                  mode=GateMode(False, getattr(a, "since", None), quiet),
-                  findings=result)
-        if not a.no_lint:
-            cmd_lint(ws, strict=True, quiet=quiet, findings=result)
-        if not a.no_map_check:
-            cmd_map(ws, code_root, True, findings=result)
+    try:
+        with redirect_stdout(report):
+            cmd_check(ws, False, a.strict,
+                      mode=GateMode(False, getattr(a, "since", None), quiet),
+                      findings=result)
+            if not a.no_lint:
+                cmd_lint(ws, strict=True, quiet=quiet, findings=result)
+            if not a.no_map_check:
+                cmd_map(ws, code_root, True, findings=result)
+    except BaseException:
+        # A stage that raises must not swallow what the earlier ones printed.
+        print(report.getvalue(), end="",
+              file=sys.stderr if a.as_json else sys.stdout)
+        raise
     if a.as_json:
         print(json.dumps(result.payload()))
         return result.exit_code
