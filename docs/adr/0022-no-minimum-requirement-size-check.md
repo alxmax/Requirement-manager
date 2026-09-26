@@ -2,9 +2,8 @@
 
 - **Status:** Accepted (the check is **Rejected**; the launch discipline is **Adopted**)
 - **Decided:** 2026-09-03
-- **Evidence:** nine-senator audit `runs/senate/2026-09-03_143319-senate-reqmap-min-requirement-size.json`
-  (2 rounds, GO 3 · MODIFY 3 · STOP 3, three senators reversing to STOP after the
-  between-round measurement); execution against this repo's live corpus, reproduced below;
+- **Evidence:** a two-round review on 2026-09-03, three reviewers reversing their vote
+  after the between-round measurement; execution against this repo's live corpus, reproduced below;
   [ADR-0016](0016-no-edge-case-marker.md); [ADR-0012](0012-internal-consistency-lint-rejected.md);
   [ADR-0020](0020-redundancy-signal-below-the-fire-rate-bar.md); [ADR-0021](0021-corpus-grows-only-by-design.md)
 
@@ -110,7 +109,7 @@ confirmation real while making it affordable:
   may be an AI: what separated the reliable judgements from the unreliable ones in the
   2026-09-03 audit was not the species of the reviewer but two properties — independence
   from the proposal, and verdicts grounded in executed output rather than reasoning. Three
-  senators reversed their own vote that day after running code; the single assertion that
+  reviewers reversed their own vote that day after running code; the single assertion that
   proved false was the one nobody had measured, and its author retracted it.
 - **Every verdict cites what was executed** — a file:line, a command's output, a count —
   not an argument.
@@ -132,9 +131,9 @@ intermediate commit, and the one flag that reading called plausibly real is a *c
 finding that cannot belong to a floor sample. No artifact in the tree records who reviewed
 what, so it cannot be repaired — only retracted. The `fan-out` row above is the same story
 one rung earlier: [ADR-0019](0019-v-model-left-arm-adopted.md) recorded the band's seven
-findings as real on the proposing author's own verdict, while the Senate auditing that very
-proposal (`runs/senate/2026-09-02_223252-...`, MODIFY 8–1) had already recorded the
-confirmation half as skipped and the sample "pre-failed". It shipped anyway; that run's
+findings as real on the proposing author's own verdict, while the review auditing that very
+proposal had already recorded the
+confirmation half as skipped and the sample "pre-failed". It shipped anyway; that review's
 outcome row is `OVR`.
 
 So this rule is adopted **prospectively**, binding the next check, with no check yet having

@@ -1,9 +1,8 @@
 # ADR-0043 — The engine is served over MCP
 
-- **Status:** Accepted. **Supersedes** the deferral of the Senate run
-  `2026-06-21_110220-reqmap-multiplatform-mcp` (verdict MODIFY), which built the MCP server
-  only once "a named consumer that genuinely cannot use direct-CLI" appeared. Its four other
-  conditions are kept, three as written and one changed (below).
+- **Status:** Accepted. **Supersedes** the deferral of the review of 2026-06-21, which built
+  the MCP server only once "a named consumer that genuinely cannot use direct-CLI" appeared.
+  Its four other conditions are kept, three as written and one changed (below).
 - **Decided:** 2026-09-16, at the maintainer's direction: "MCP is a must have", for a repo on
   Copilot as much as for one on Claude Code.
 - **Evidence:** the deferral's premise holds and is not what decides this. Every shell-capable
@@ -30,7 +29,7 @@ read-only.
    so a long-lived importer would carry one call's state into the next. A test holds every
    verb and flag a tool uses to the command registry, so the tool list cannot name a flag
    the CLI dropped.
-3. **Read-only unless `--allow-writes`** (Senate condition 3). `reqmap_sync`, `reqmap_new`
+3. **Read-only unless `--allow-writes`** (review condition 3). `reqmap_sync`, `reqmap_new`
    and `reqmap_release` are neither listed nor callable without it. Retiring a requirement
    is not offered at all: it deletes or deprecates contracts and stays a human's command.
 4. **Stdlib, stdio, one pinned protocol revision, `2025-06-18`** (condition 5), with a

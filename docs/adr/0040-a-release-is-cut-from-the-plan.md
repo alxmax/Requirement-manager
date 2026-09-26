@@ -2,13 +2,11 @@
 
 - **Status:** Accepted. **Supersedes in part** the "never generation" rung of the ladder in
   `ARCH-ROADMAP-038`'s Notes (n=1 manual upkeep, n=2 read-only signal, never generation),
-  and the "no generator" ruling of the Senate run
-  `2026-09-14_225939-senate-reqmap-plan-single-source` — for releasing only. Everything
+  and the "no generator" ruling of the review of 2026-09-14 — for releasing only. Everything
   else in both stands: no roadmap signal is a gate rule, and ROADMAP.md and
   `_planning.json` stay two files.
 - **Decided:** 2026-09-16, at the maintainer's direction ("do all seven, in order"),
-  after the gap analysis that followed the Senate audit
-  `2026-09-16_160109-rm-planning-audit` (MODIFY 9-0).
+  after the gap analysis that followed the review of 2026-09-16.
 - **Evidence:** the plan scheduled an already-shipped version three times (v7.4, v7.9,
   v7.19). Each was found by a human rereading the file; the read-only signal
   `REQ-PLANSTALE-1013` now finds the fourth. What it cannot do is prevent it: the bump,

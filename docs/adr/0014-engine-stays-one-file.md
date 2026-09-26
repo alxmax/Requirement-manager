@@ -1,7 +1,7 @@
 # ADR-0014 — The engine stays one file, and gets no size gate
 
 - **Status:** Superseded by [ADR-0035](0035-the-engine-is-a-package-behind-a-thin-cli.md) (2026-09-07). Was: Accepted — closes the open question [ADR-0001](0001-single-file-stdlib-engine.md) left standing
-- **Decided:** 2026-08-21, after a nine-senator Senate audit (`runs/senate/2026-08-21_004654-reqmap-module-size.json`, two rounds, verdict MODIFY, 7 MODIFY / 2 GO)
+- **Decided:** 2026-08-21, after a two-round review on that date
 - **Evidence:** measurements below, all reproducible by the command named beside them
 
 ## Context

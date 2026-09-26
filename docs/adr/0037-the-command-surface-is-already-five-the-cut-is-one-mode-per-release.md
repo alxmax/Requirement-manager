@@ -2,15 +2,12 @@
 
 - **Status:** Accepted — closes the TODO item "reduce the engine's command surface from 18
   modes to 5 commands" as filed, and replaces it with a bounded, measured cut
-- **Decided:** 2026-09-08, after a nine-senator Senate audit, all seats on Opus
-  (`runs/senate/2026-09-08_163116-senate-reqmap-cli-surface-18-to-5.json`, one round,
-  verdict **MODIFY**, 8 blocking MODIFY / 1 GO / 0 STOP; Law 8 promoted one vote on a
-  transcription artifact, not on substance). It supersedes nothing and closes the still-open
-  `senate-reqmap-cli-surface-18-to-4` of 2026-09-05, whose nine conditions this record either
-  discharges or restates.
+- **Decided:** 2026-09-08, after a review on that date. It supersedes nothing and closes the
+  still-open review of 2026-09-05, whose nine conditions this record either discharges or
+  restates.
 - **Owner:** Alex
 - **Evidence:** every number below was measured on the committed tree (`d61da7d`) by the
-  command named beside it, and five senators reproduced the central table independently.
+  command named beside it, and five reviewers reproduced the central table independently.
 
 ## Context
 
@@ -66,7 +63,7 @@ property of `REQ-AUDIT-973`'s coupling decision, not of the engine.
 **The cost side was measured too low, in the direction that matters.** Zero of the 18 mode
 flags is invoked by any automated caller in either repo — but that is the surface no cut would
 break. Every prior breakage happened on the human/assistant instruction surface, and the guard
-built after the 2026-09-05 audit was verb-scoped, so it was blind to a flag cull and green over
+built after the 2026-09-05 review was verb-scoped, so it was blind to a flag cull and green over
 a live broken instruction in a file it already scanned (`.githooks/pre-commit:7`).
 
 ## Decision
@@ -81,7 +78,7 @@ a live broken instruction in a file it already scanned (`.githooks/pre-commit:7`
    artifacts and consumer doc edits to free nothing.
 3. **`ALIAS` is split into two verdicts.** `KEEP` = byte-identical dispatch, no notice.
    `DEPRECATE` = argparse still accepts the flag for one release and prints a one-line
-   migration notice, removed in the release after. The 2026-09-05 audit recorded "deprecated
+   migration notice, removed in the release after. The 2026-09-05 review recorded "deprecated
    aliases must survive one release" and v5.0.0 shipped none; a consumer met `invalid choice`
    instead.
 4. **One mode per release, ascending by measured blast radius**, each pass proven under 500
@@ -125,7 +122,7 @@ it gets its own item with a numeric ceiling, so it can be passed or failed.
 - `leaves_unused` in the retire plan is a graph artefact, not a dead-code finding. Retiring
   `ARCH-SUGGESTVERIFIES-047` reports `ARCH-ACVERIFY-019`, which backs gate rule RM013 on the
   bare-gate path. Do not act on that line without checking the module closure.
-- The nine conditions of the 2026-09-05 audit are discharged or restated here rather than
+- The nine conditions of the 2026-09-05 review are discharged or restated here rather than
   inherited a second time. Conditions ride on CHANGELOG lines, not TODO checkboxes: of the last
   five level-axis MODIFYs, the one that was honoured was the one whose condition was written
   into the release entry.

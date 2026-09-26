@@ -11,9 +11,8 @@
     `requirement-quality-review` skill moves with it in the same release.
   ADR-0037 and ADR-0043 are not edited.
 - **Decided:** 2026-09-17, at the maintainer's choice among three options (a new verb, the
-  modes under `clarify`, helper flags folded into values), then audited by nine senators
-  (`2026-09-17_081414-senate-reqmap-cli-surface-gate-flags-to-9`, all seats on Opus, one round,
-  verdict **MODIFY**, GO 3 / MODIFY 6 / STOP 0). Every condition below is theirs.
+  modes under `clarify`, helper flags folded into values), then reviewed on that date. Every
+  condition below is the review's.
 - **Evidence:** `COMMANDS` on `989714a` — `gate` 16 params, all verbs 37. ROADMAP.md `Next`:
   "`gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului".
 

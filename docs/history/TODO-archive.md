@@ -35,8 +35,8 @@
 - [x] Scan cache (opt-in `--cache` flag — ARCH-SCANCACHE-023) | lane: ops
 
 ## v1.16
-<!-- Senate fix plan 2026-06-12 (runs/senate/2026-06-12_091906-requirement-manager-fix-plan.json, verdict MODIFY).
-     Detail spec: docs/PLAN-senate-fix-2026-06-12.md -->
+<!-- Review fix plan 2026-06-12.
+     Detail spec: docs/PLAN-review-fix-2026-06-12.md -->
 - [x] Phantom-member fix: context-aware tag scan (fence/backtick/indent + .py string state) | lane: bus
 - [x] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, SYS-SSOT-001 AC-1 split + severity table | lane: ops
 - [x] check --strict (promotes test-link integrity + confirmed-drift to error) | lane: feature
@@ -72,14 +72,14 @@
      already been updated to the new model (TRIAS -> skeptic_on_chosen edge) while the
      prose contract still described the old one — an internal contradiction. -->
 - [x] Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches "behavior shipped, spec not updated". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement. | lane: feature
-      <!-- Done as ARCH-MEMBERDRIFT-027: stored in a versioned sidecar `_memberlock.json` (not _reqlock.json) so the cross-repo contract stays byte-stable; scoped to mono-requirement files to avoid alarm fatigue. Both Senate blocking conditions addressed. -->
+      <!-- Done as ARCH-MEMBERDRIFT-027: stored in a versioned sidecar `_memberlock.json` (not _reqlock.json) so the cross-repo contract stays byte-stable; scoped to mono-requirement files to avoid alarm fatigue. Both blocking conditions from the review addressed. -->
 
 - [x] ~~Internal-consistency lint: flag a requirement whose structured fields moved to a new model while its prose Contract/AC still assert the superseded model.~~ **DROPPED** | lane: feature
-      <!-- DROPPED (not implemented). Senate 2026-06-19 (runs/senate/2026-06-19_224727-reqmap-item4-internal-consistency-lint.json) + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by ARCH-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
+      <!-- DROPPED (not implemented). Review of 2026-06-19 + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by ARCH-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
 
 ## v1.35
 <!-- Backfilled 2026-06-21 (TODO/roadmap hygiene): shipped capabilities whose milestone
-     sections were never recorded here. Senate 2026-06-21 (runs/senate/*roadmap-coherence)
+     sections were never recorded here. A review of 2026-06-21
      chose manual TODO hygiene over building a TODO<->requirement coherence-check feature
      (demand n=1; the only stale TODO observed was this repo's own). -->
 - [x] Project presentation page (`site`): inject/refresh engine-owned nav + stats regions into docs/architecture.html (scaffold if absent) | lane: feature
@@ -95,10 +95,10 @@
 
 ## v2.6
 - [x] Untagged-code coverage signal: read-only `untagged` count in `health` (code traced to no requirement) | lane: feature
-      <!-- ARCH-COVERAGE-029. Senate 2026-06-21 (enforce-all-code DEEPLY_SPLIT): a hard coverage gate was rejected; only this read-only signal shipped. -->
+      <!-- ARCH-COVERAGE-029. Review of 2026-06-21: a hard coverage gate was rejected; only this read-only signal shipped. -->
 
 ## v2.7
-<!-- Multi-platform Phase 1 — SHIPPED (PR #127). Senate 2026-06-21 (runs/senate/2026-06-21_110220-reqmap-multiplatform-mcp.json, verdict MODIFY).
+<!-- Multi-platform Phase 1 — SHIPPED (PR #127). Review of 2026-06-21.
      Detail spec: docs/superpowers/specs/2026-06-21-reqmap-multiplatform-command-registry-design.md
      Problem: the prior multi-AI artifacts (tool_definition.json + 3 SKILL.universal.md) were hand-maintained
      mirrors of the CLI with no sync mechanism — already drifting. Fix: one declarative command registry as
@@ -133,7 +133,7 @@
 
 ## v2.32 — TO VERIFY
 <!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided.
-     Audited the same day: runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
+     Reviewed the same day. -->
 
 - [x] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
       <!-- done: 9 SYS needs, every one with architecture members — ADR-0025 (2026-09-03), RM032 checks it since v7.1.0 -->
@@ -194,9 +194,9 @@
            Parked until 1-5 are closed. -->
 
 ## v2.8 (deferred — demand-gated)
-<!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
+<!-- Multi-platform Phase 2: the MCP server. A review of 2026-06-21 deferred it: reviewers converged that
      direct-CLI already covers every current shell-capable assistant (Claude Code, Copilot CLI, Gemini CLI,
-     Codex), so an MCP server unlocks zero platforms today, and demand is unproven (Deming n=0). BUILD ONLY
+     Codex), so an MCP server unlocks zero platforms today, and demand is unproven (n=0). BUILD ONLY
      when ALL hold: (1) a named consumer that genuinely cannot use direct-CLI; (2) a conformance test
      (initialize -> tools/list -> tools/call over stdio); (3) read-only-by-default mutation guard
      (--allow-writes to expose sync/confirm/map); (4) init seeds the artifacts + gate warns when absent;
@@ -261,7 +261,7 @@
            the only subcommand that shells out to `claude -p`, never called by gate/sync/lint/
            map/CI — cache is read-only-inlined by map/export. Every translated field renders
            behind a visible "machine-translated, unreviewed" badge; falls back to source text
-           with no cache entry. Scoped from a 9-senator Senate audit (MODIFY, 3 blocking + 3
+           with no cache entry. Scoped from a review (3 blocking + 3
            advisory conditions) plus a follow-up request for majority-language corpus detection
            instead of mandatory per-file `lang:` tagging. -->
 - [x] Scan-evidence run 6 — Management_Dashboard (TS/TSX, SQL, shell, Dockerfile, Caddyfile, Prisma, YAML, JSON, Markdown): four engine defects found and fixed in v2.27.0 | lane: ops
@@ -442,8 +442,7 @@
            files is acceptable, and the cost is invisible below ~1k files. -->
 - [x] Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget | lane: bus
       <!-- Settled 2026-08-21 as ADR-0014: keep one file, NO split and NO line-count gate.
-           Nine-senator Senate audit, two rounds, verdict MODIFY
-           (runs/senate/2026-08-21_004654-reqmap-module-size.json). Not one senator defended
+           A review, two rounds (review of 2026-08-21). Not one reviewer defended
            the split. Three findings decided it: (1) the premise was never established — every
            option argued from line count and none named a failure caused by it, against 511
            tests, 92% coverage and 130 commits in that file with no size-attributable incident;
@@ -600,13 +599,12 @@
            least diacritic-insensitive matching. -->
 
 ## v5.2
-- [x] Senate review: is the C&K metrics pillar the right shape? | lane: ops
+- [x] Review: is the C&K metrics pillar the right shape? | lane: ops
 - [x] C&K pillar: an independent confirmation sample | lane: ops
-      <!-- The Senate audit (runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json,
-           MODIFY) discharged four of six requests in v5.3.0. This one is open: ADR-0022 asks
+      <!-- The review of 2026-09-05 discharged four of six requests in v5.3.0. This one is open: ADR-0022 asks
            for a confirmation sample from a reviewer who did NOT author the check, with each
            verdict citing executed output and the refusal rate recorded. The sample today is
-           1 of 1 and the reviewer was the author. Tacitus's blocking finding is that this
+           1 of 1 and the reviewer was the author. A blocking finding is that this
            repo has retracted an author-graded finding set twice in four days. -->
 - [x] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
 - [x] Engine: the nine long functions still over 80 lines | lane: ops
@@ -623,7 +621,7 @@
            that returned an exit code from a parser factory, and a local left on the wrong
            side of the cut). A batch of six would hide one. cmd_check is the gate's core
            and should go last, or not at all. -->
-      <!-- Musk's request, recorded not actioned: RFC's formula is `len(methods) + len(called)`,
+      <!-- A request, recorded not actioned: RFC's formula is `len(methods) + len(called)`,
            so WMC is literally a term inside it, and LCOM1's raw pair count grows mechanically
            with method count. On this repo all three fire on the same single class and have
            never diverged, so two of the three have carried no independent signal yet. Decide
@@ -637,7 +635,7 @@
            one repo's shape — this one — which is exactly the reasoning a single author
            is worst at checking.
 
-           Run the `senate` skill on the pillar and let the nine lenses argue it:
+           Run a further review on the pillar and let multiple lenses argue it:
              - vague terms: "god class", "low cohesion" are verdicts stated as measurements
              - precedent: adopting a named academic suite and shipping half of it sets the
                expectation that the other half is coming; is that a debt or a decision?
@@ -673,7 +671,7 @@
                 parallel of the existing `owner: auto`. This is the ONLY marker that reaches
                 a consumer (ADRs are not shipped in plugin/), so it is the load-bearing part:
                 without it, LINT_FANOUT_BANDS and LEVEL_TEST_PAIR treat a machine guess as a
-                human decision, which is Dimon's blocking finding from the audit.
+                human decision, which is a blocking finding from the review.
              5. Nothing enforced: every minted node is `status: draft`, which the gate never
                 enforces. ADR-0019's warn-only posture is untouched.
 
@@ -684,11 +682,11 @@
            wrong (`owner: auto`, `level_source: auto`, `status: draft`) and that renaming them
            is the author's first task.
 
-           Deming's STOP is unanswered and stays unanswered: whether the three-level shape
+           One objection is unanswered and stays unanswered: whether the three-level shape
            pays is still calibrated on one corpus, this one. Implementing the record changes
            what `init` produces, not what is known about whether the shape is worth producing.
-           Do not cite the audit as endorsement — it was MODIFY, GO 1 / MODIFY 6 / STOP 2,
-           bundle runs/senate/2026-09-06_003141-senate-reqmap-three-levels-adoption.json. -->
+           Do not cite the review as endorsement — it did not clear without conditions
+           (review of 2026-09-06). -->
 - [ ] Requirement history: how a contract changed, and when | lane: feature
       <!-- Today the corpus records only the CURRENT state plus one hash per requirement in
            `_reqlock.json`. Drift is detectable (the hash moved) but not READABLE: nothing
@@ -745,7 +743,7 @@
            splits a `confirmed` contract that six ADRs already cite. Do not do it as a
            side effect of the next viewer feature — which is exactly how it got to eleven. -->
 - [x] An already-tagged corpus has no path to the three rungs | lane: feature  <!-- shipped v5.13.0: `clarify --levels`, ADR-0031 -->
-      <!-- Filed from the Senate repo (a real consumer, 42 confirmed requirements) on
+      <!-- Filed from a consumer repo (a real consumer, 42 confirmed requirements) on
            2026-09-06, engine 2026-09-06.6. The request as the user put it: "generate the
            three levels at `sync` too, not just at `init`."
 
@@ -761,8 +759,8 @@
 
            This is a retrofit gap, not a `sync` gap, and the difference matters:
 
-             - Writing `level:` on every `sync` is the one thing the audit explicitly
-               blocked. Aurelius's anchor: cmd_init, cmd_draft and cmd_new must contain
+             - Writing `level:` on every `sync` is the one thing the review explicitly
+               blocked. Its anchor: cmd_init, cmd_draft and cmd_new must contain
                ZERO code paths writing a `level:` key unless a human supplied it on that
                invocation. `sync` runs on every commit via the pre-commit hook, so putting
                the write there is the most automatic placement available — the opposite of
@@ -778,7 +776,7 @@
            It also changes how ADR-0019's 2027-03-03 review should read its own evidence.
            That criterion is "the level fields stay unused by any consumer repo after
            6 months", and concludes such a field should be removed rather than documented
-           harder. Senate is a consumer repo whose non-use is STRUCTURAL, not a preference:
+           harder. That repo is a consumer repo whose non-use is STRUCTURAL, not a preference:
            it cannot reach the axis with any shipped command. Counting it as evidence of
            low demand would be measuring the absence of a retrofit path, not the absence of
            a reader. Either build the retrofit before that date, or record in ADR-0019 that
@@ -826,10 +824,9 @@
            item below.
 
 
-           Deming's STOP from the original audit still stands unanswered and is not
-           answered by this item either. Do not cite the audit as endorsement — it was
-           MODIFY, GO 1 / MODIFY 6 / STOP 2, bundle
-           runs/senate/2026-09-06_003141-senate-reqmap-three-levels-adoption.json.
+           One objection from the original review still stands unanswered and is not
+           answered by this item either. Do not cite the review as endorsement — it
+           did not clear without conditions (review of 2026-09-06).
 
            Confirmed in the engine on 2026-09-06, not taken on trust: `by_dir` is
            populated only inside the per-file draft loop (`reqmap.py:3632`), and
@@ -868,8 +865,7 @@
 ## v7.1
 - [x] Reduce the engine's command surface from 18 modes to 5 commands | lane: feature
       <!-- CLOSED AS FILED 2026-09-08 by [ADR-0037](docs/adr/0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md),
-           after a nine-senator audit (bundle 2026-09-08_163116-senate-reqmap-cli-surface-18-to-5,
-           MODIFY, GO 1 / MODIFY 8 / STOP 0). The five commands already exist — `init new gate
+           after a review of 2026-09-08. The five commands already exist — `init new gate
            sync clarify` — so the residue was a FLAG cull, and its measured ceiling is 854 LOC
            = 7.2% of the engine, not the bulk the premise below assumed. Eleven of the eighteen
            modes free ZERO lines, because `sync` runs `_audit_summary` on every clean gate
@@ -896,7 +892,7 @@
 
 - [ ] Give `gate` a flag ceiling, and make `sync` name what it runs | lane: feature
       <!-- The half of the 18-to-5 item that was REAL and that a line count could never reach
-           (ADR-0037, and Aristotel's dissent inside the audit): "five commands each doing one
+           (ADR-0037, and a dissent inside the review): "five commands each doing one
            thing" is not satisfied by five verbs carrying 36 flags. Two numbers, both measurable
            today, both currently failing:
              - flags on one verb. `python -c "import sys;sys.path.insert(0,'.');from
@@ -921,29 +917,28 @@
            requirements and tests removed via `sync --retire`, not hidden behind a flag.
            A retired capability takes hundreds of engine lines and 5–10 requirements with
            it; that is the only lever in this repo that reduces lines (see the
-           2026-09-07 Senate bundle: every lint/shape lever in that audit added code).
+           review of 2026-09-07: every lint/shape lever in that review added code).
            Before any code:
-             - Record the outcome of the three 2026-09-05 Senate runs
-               `senate-reqmap-cli-surface-18-to-4` (all still PEND, verdict MODIFY):
-               their modify_requests are the conditions this item inherits.
+             - Record the outcome of the three reviews of 2026-09-05
+               (all still PEND): their modify requests are the conditions this item inherits.
              - Measure per capability: engine lines, requirements, tests, and actual use
                (which modes the maintainer and consumers run) — the ranking that decides
                which 5 stay. Ship the table in the ADR that records the cut.
              - Every survivor keeps its requirement; every retiree goes through
                `sync --retire` plan-then-apply so no `# implements:`/`# verifies:` tag is
-               orphaned (Dimon, 2026-09-07: the retire path strips tags without
+               orphaned (noted 2026-09-07: the retire path strips tags without
                repointing them — check per capability, not once at the end). -->
 - [x] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
       <!-- shipped v7.2.0 (62f8009) as `relevel.py`, five detectors on the `sync` audit
            tail. The requirement it shipped without — RM024 on a 204-line untagged file —
            was authored afterwards as REQ-RELEVEL-997 under ARCH-AUDIT-065. Its ordering
            clause below ("do this AFTER the 18-to-5 cut") was overtaken by the release. -->
-      <!-- Senate 2026-09-07 `senate-reqmap-relevel-promote-demote` (Sonnet, MODIFY): a
+      <!-- Review of 2026-09-07: a
            code requirement may be promoted to architecture and an architecture to
            system, and the reverse, but the engine gets the PLAN ONLY (R1) — no `--apply`,
            no `--rename`, no `satisfies:` write into a human-authored file. The `--apply`
            half collides with ADR-0031 / REQ-LEVELRETROFIT-987 clause 3 and with ADR-0036
-           (refused 9/9 the same morning) and would need a superseding ADR plus a
+           (refused the same morning) and would need a superseding ADR plus a
            provenance marker; the cost case behind it is n=1 (commit 20071fe), so no ROI
            number goes into a SKILL or an ADR. Maintainer's shape, same evening: not a new
            mode flag — `sync` already runs on every corpus change, so the plan is a report
@@ -959,11 +954,11 @@
              - a `satisfies:` target on the wrong rung — RM032's line, referenced, not
                repeated.
            The id prefix is NOT a residue: the engine does not parse it and the rename was
-           cosmetic (Musk). Drift (RM018) and the baked viewer fixture (RM017) already
+           cosmetic. Drift (RM018) and the baked viewer fixture (RM017) already
            report on their own; the report names them, it does not re-check them.
-           Conditions carried from the run: cite the bundle and its precedent
-           `2026-09-07_163654` in the CHANGELOG entry (Tacitus: 3 of the last 4 level-axis
-           MODIFYs shipped past their conditions — re-read the bundle before merging);
+           Conditions carried from the review: cite the review and its precedent
+           of 2026-09-07 in the CHANGELOG entry (3 of the last 4 level-axis
+           reviews shipped past their conditions — re-read the review before merging);
            tests on a temp corpus for each residue line and for the silence of a corpus
            that declares no `level:` (ADR-0019). Do this AFTER the 18-to-5 cut above, so
            it lands in the `sync` that survives. -->

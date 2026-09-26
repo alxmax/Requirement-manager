@@ -1,7 +1,7 @@
 # ADR-0017 — Consolidate Notes/Example/Current-implementation into one Context section
 
-- **Status:** Accepted (modified from the original proposal per Senate feedback)
-- **Decided:** 2026-09-02, after a nine-senator Senate audit (`runs/senate/2026-09-02_191837-reqmap-schema-simplify-context-merge-and-traceability.json`, two rounds, verdict MODIFY, 8 MODIFY / 1 GO, all eight blocking)
+- **Status:** Accepted (modified from the original proposal per review feedback)
+- **Decided:** 2026-09-02, after a two-round review on that date
 - **Companion record:** [ADR-0018](0018-no-contract-acceptance-traceability-marker-yet.md) — the second half of the audited proposal, rejected
 
 ## Context
@@ -14,12 +14,12 @@ example vs. how the code does it today), not enforcement. An author picking one 
 was making a choice about vocabulary, not about the contract.
 
 The originally-audited proposal also included merging the `>` WHY blockquote into the same
-consolidated section. The Senate's Wittgenstein and Socrate found, independently, that this
+consolidated section. Two independent readings during review found that this
 would have bought nothing: `_first_quote` (the WHY reader) is not heading-based — it reads
 the first blockquote anywhere in the file — so the blockquote was never part of the
 heading-choice problem this ADR addresses. It stays exactly where it is.
 
-The Senate's Socrate and Wittgenstein also found the originally-audited proposal's central
+The review also found the originally-audited proposal's central
 premise false: `_build_map_data` reads `## WHAT — Notes` and `## WHERE — Current
 implementation` **by heading label** to populate `_map.json`'s `notes` and `current_impl`
 fields (48 and 51 of the 51 requirement files in this corpus carry them). A migration that
@@ -46,7 +46,7 @@ Ship the consolidation as **purely additive**, not a migration:
    needs no reshaping (matching the pre-existing "emission schema matches
    `REQUIREMENT_TEMPLATE`" intent).
 
-This directly answers the Senate's two structural objections (Musk, Aurelius, Dimon):
+This directly answers the review's two structural objections:
 attacking the 51-file migration and the consumer-repo `check@v2` breaking-change risk both
 assumed the legacy headings would stop being recognized. Neither this decision nor the code
 that implements it removes that recognition, so neither risk exists. No batching, no

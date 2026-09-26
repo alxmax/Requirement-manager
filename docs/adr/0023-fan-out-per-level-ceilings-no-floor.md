@@ -12,9 +12,8 @@ into `system`. The `architecture` ceiling (thirty) and everything else here stan
 
 **Date.** 2026-09-03.
 
-**Evidence.** This repo's corpus at `b0ce92b` (641 requirements, 72 confirmed);
-`runs/senate/2026-09-03_155528-senate-reqmap-pr208-branch-audit.json` (MODIFY, two rounds),
-which is what forced this record to exist.
+**Evidence.** This repo's corpus at `b0ce92b` (641 requirements, 72 confirmed); a two-round
+review on 2026-09-03, which is what forced this record to exist.
 
 ## Context
 
@@ -59,9 +58,8 @@ the architecture ceiling of 30. It is a real one, and it is left standing.
 
 ADR-0019's Consequence stated that the seven band findings were *real*. That was the
 proposing author's own verdict on his own check, recorded in the commit that shipped it
-(`3a34b3d`) — not an independent sample. The Senate that audited that very proposal
-(`runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json`,
-MODIFY 8–1, all blocking) had already recorded the opposite: *"#6 must satisfy the SECOND
+(`3a34b3d`) — not an independent sample. The review that audited that very proposal
+had already recorded the opposite: *"#6 must satisfy the SECOND
 half of the ADR-0016 bar: sample 10 flags, require >=8 confirmed real. On today's corpus 3
 of the 4 over-20 flags already carry `lint_exempt`, so the sample is **pre-failed**."* The
 check shipped anyway; that run's outcome row is `OVR`.
@@ -81,10 +79,8 @@ confirmation sample, because it cannot create a false positive a reader must tri
 
 Two further citation defects, recorded so a reader does not hunt for them:
 
-- ADR-0019's Evidence line cites `runs/senate/2026-09-02_*-v-model*.json`, which matches no
-  file. The runs are `2026-09-02_201621-senate-reqmap-vmodel-req-size-and-3-classes` and
-  `2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers` (`-vmodel-`, not
-  `-v-model-`). ADR-0019 is not edited to fix this; this line is the correction.
+- ADR-0019's Evidence line originally cited review runs by a pattern that matched no file.
+  ADR-0019 is not edited to fix this; this line is the correction.
 - Run `2026-09-02_201621` carries two blocking conditions this repo has never delivered nor
   declined in writing: a human pilot classification round over ≥10 requirements, and a
   reverse dangling-`# verifies:`-after-split check. **Both are hereby declined**, on a

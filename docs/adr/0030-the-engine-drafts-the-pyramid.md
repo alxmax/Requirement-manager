@@ -7,10 +7,8 @@
 - **Decided:** 2026-09-06 (`ARCH-EXTRACT-008`, `ARCH-INIT-012`, `ARCH-LEVEL-051`)
 - **Where:** `init` only. `draft` was folded into `init` in v5.0.0 and `cmd_extract` has
   exactly one caller, so there is one place for this to happen and one place to undo it.
-- **Evidence:** the nine-senator audit
-  `runs/senate/2026-09-06_003141-senate-reqmap-three-levels-adoption.json` (MODIFY, GO 1 /
-  MODIFY 6 / STOP 2), whose blocking requests this record answers rather than ignores; the
-  directory-inference measurement below, run on this repo.
+- **Evidence:** the review of 2026-09-06, whose blocking requests this record answers
+  rather than ignores; the directory-inference measurement below, run on this repo.
 
 ## Context
 
@@ -59,21 +57,21 @@ The engine drafts all three rungs, and every rung it invents says so.
 
 ## Why this answers the audit rather than overriding it
 
-Three senators blocked automatic assignment. Each objection is met on its own terms:
+Three reviewers blocked automatic assignment. Each objection is met on its own terms:
 
-- **Aurelius — irreversible × critical, it writes a field into every consumer's files.**
+- **Reversibility — irreversible × critical, it writes a field into every consumer's files.**
   It still does. What changes is that every written field is `status: draft` and carries
   `level_source: auto`, so the write is visibly provisional and mechanically reversible:
   deleting every requirement with `level_source: auto` restores the previous corpus
   exactly.
-- **Dimon — an auto level is indistinguishable from a human one to `LINT_FANOUT_BANDS`
+- **Stress test — an auto level is indistinguishable from a human one to `LINT_FANOUT_BANDS`
   and `LEVEL_TEST_PAIR`.** That was true and is the reason `level_source: auto` exists.
-- **Musk and Aristotel — a file is not a rung, and inventing SYS nodes from source is the
+- **Deletion and purpose — a file is not a rung, and inventing SYS nodes from source is the
   "AI invents requirements" failure.** Agreed, which is why the engine asserts only the
   rung it can know, proposes the one it can only guess, and refuses to guess the need at
   all — it mints a placeholder that says so in its own title.
 
-**Deming's STOP is not answered and is recorded unanswered.** The claim that the
+**The statistical objection is not answered and is recorded unanswered.** The claim that the
 three-level model helps is still calibrated on one corpus — this one. This record does not
 pretend otherwise; it changes what `init` produces, not what is known about whether the
 shape pays.
