@@ -1,32 +1,17 @@
 # Changelog
 
-## plugin `v8.7.1` — 2026-09-25
+## plugin `v8.7.0` — 2026-09-26
 
-- Share one authoring and gate workflow across Claude and universal skill entries.
-- Preserve generated command references and move detailed rules behind explicit links.
-- Correct stale gate/configuration, setup and CI instructions; document compact exports.
+**One verdict in text and JSON, input the gate can trust, a smaller skill.**
 
-## plugin `v8.7.0` — 2026-09-25
-
-- Add `init --minimal` without optional planning, release, MCP or site scaffolding.
-- Add a compact map profile and explicit locale selection; preserve full exports.
-- Minify embedded offline data and compare map JSON semantically for freshness.
-- Load retirement and review commands only when requested.
-
-## plugin `v8.6.2` — 2026-09-25
-
-- Reject invalid configuration before dispatch; expose duplicate IDs and unreadable requirements as structured gate errors.
-- Strict gates reject corrupt drift baselines, while an absent initial baseline remains supported.
-- Demand-load the optional audit report; keep its CLI and library access.
-
-
-## plugin `v8.6.1` — 2026-09-24
-
-- Collect rule, readability and map findings into one gate result before choosing text or JSON. JSON no longer skips lint or the map-freshness verdict.
-- Document the approved simplification backlog and its four stacked review increments.
-- Add format-parity, opt-out and read-only regression cases.
-- Load the MCP server only when requested; core falls to 7,466 logical lines, and its budget falls with it. The complete engine has 16,680 physical lines.
-
+- `gate --json` runs the same stages as the text gate. It used to return the rule verdict alone, skipping readability and map freshness, so the two formats could disagree on pass or fail (REQ-CHECK-1036)
+- Duplicate requirement ids, unreadable requirement files and a corrupt drift baseline under `--strict` fail the gate instead of shrinking the corpus in silence; `sync` does not advance the lock over them (ADR-0054, ARCH-PARSE-001, ARCH-CHECK-006)
+- A bad `_config.json` entry is still reported and skipped, and the gate now lists it as an `INPUT:config` warning that `--strict` promotes (ADR-0054, ARCH-CONFIG-060)
+- `init --minimal` sets up requirements, locks and map without the planning, release, MCP and site scaffolding (ARCH-INIT-012)
+- `MAP_PROFILE` (`full`/`compact`) and `MAP_LOCALES` choose how much the committed map carries; full stays the default and this repository keeps it. The offline viewer embeds minified JSON and map freshness compares JSON by content (ADR-0055, ARCH-MAP-007, ARCH-MAPDIAGRAMS-055, ARCH-TRANSLATE-044)
+- The Action takes a `code` input, passed to the gate as `--code`, for a repository whose tagged code lives outside `working-directory`; this repository now gates itself through it (ARCH-SELFGATE-039)
+- The two skill entry points shrink from 72.5 KB to 18 KB by sharing `references/workflow.md`, now the skill's one authoritative contract, and a test checks every relative skill link (ARCH-CMDREGISTRY-033)
+- The MCP server, the audit report, retirement and review load only when asked for: the engine's core falls from 7,603 to 7,056 logical lines, and its budget falls with it
 
 ## plugin `v8.6.0` — 2026-09-23
 

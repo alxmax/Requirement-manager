@@ -22286,9 +22286,9 @@
     },
     {
       "month": "2026-09",
-      "count": 114,
+      "count": 111,
       "first": "2026-09-02",
-      "last": "2026-09-25",
+      "last": "2026-09-26",
       "versions": [
         "v2.29.3",
         "v2.30.0",
@@ -22400,33 +22400,15 @@
         "v8.5.0",
         "v8.5.1",
         "v8.6.0",
-        "v8.6.1",
-        "v8.6.2",
-        "v8.7.0",
-        "v8.7.1"
+        "v8.7.0"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
         {
-          "version": "v8.7.1",
-          "date": "2026-09-25",
-          "headline": ""
-        },
-        {
           "version": "v8.7.0",
-          "date": "2026-09-25",
-          "headline": ""
-        },
-        {
-          "version": "v8.6.2",
-          "date": "2026-09-25",
-          "headline": ""
-        },
-        {
-          "version": "v8.6.1",
-          "date": "2026-09-24",
-          "headline": ""
+          "date": "2026-09-26",
+          "headline": "One verdict in text and JSON, input the gate can trust, a smaller skill"
         },
         {
           "version": "v8.6.0",
