@@ -345,6 +345,10 @@
       "hash": "01428251f82d",
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
+    "REQ-SELFGATE-1071": {
+      "hash": "fd0724ff7b10",
+      "reason": "Action code input"
+    },
     "REQ-SELFGATE-916": {
       "hash": "0ea295ef13c9",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"

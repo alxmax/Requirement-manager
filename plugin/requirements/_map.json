@@ -12565,7 +12565,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:232"
+          "loc": "scripts/test_pipeline_wiring.py:238"
         }
       ],
       "test_exempt": null,
@@ -12622,7 +12622,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:232"
+          "loc": "scripts/test_pipeline_wiring.py:238"
         }
       ],
       "test_exempt": null,
@@ -15269,12 +15269,13 @@
       "contract": [
         "`check/action.yml` is a composite action whose gate step runs the consumer's vendored `reqmap.py` (`scripts/reqmap.py` by default) as `gate`, the command `ci.yml` runs here.",
         "Its `lint` and `freshness` inputs default to `'true'`; any other value passes `--no-lint` or `--no-map-check` to that gate.",
+        "Its `code` input defaults to empty; a non-empty value is passed to that gate as `--code`, so tagged code outside `working-directory` is scanned.",
         "Its header carries the `uses: alxmax/requirement-manager/check@vN` reference the release job derives the alias tag from."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the composite action runs the same verdict\n  Given  `check/action.yml`\n  When   its `runs.steps` are read\n  Then   it is a composite action whose gate step runs the vendored `reqmap.py gate`\n\nCASE-2 — the lint and freshness inputs switch their halves off\n  Given  the `lint` and `freshness` inputs of `check/action.yml`\n  When   the inputs and the gate step are read\n  Then   both default to `'true'`, and a value other than `true` adds `--no-lint` or\n         `--no-map-check` to the gate's flags\n\nCASE-3 — the file names the alias the release job moves\n  Given  `check/action.yml`\n  When   it is searched the way the `release` job's alias step searches it\n  Then   it yields one `requirement-manager/check@vN` reference",
+      "accept": "CASE-1 — the composite action runs the same verdict\n  Given  `check/action.yml`\n  When   its `runs.steps` are read\n  Then   it is a composite action whose gate step runs the vendored `reqmap.py gate`\n\nCASE-2 — the lint and freshness inputs switch their halves off\n  Given  the `lint` and `freshness` inputs of `check/action.yml`\n  When   the inputs and the gate step are read\n  Then   both default to `'true'`, and a value other than `true` adds `--no-lint` or\n         `--no-map-check` to the gate's flags\n\nCASE-3 — the file names the alias the release job moves\n  Given  `check/action.yml`\n  When   it is searched the way the `release` job's alias step searches it\n  Then   it yields one `requirement-manager/check@vN` reference\n\nCASE-4 — the code input widens the scan\n  Given  the `code` input of `check/action.yml`\n  When   the input and the gate step are read\n  Then   it defaults to empty, and a non-empty value is passed to the gate as `--code`",
       "input": "",
       "output": "",
       "desc": "",
@@ -15298,8 +15299,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "REQ-SELFGATE-1072",
@@ -15334,7 +15335,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_pipeline_wiring.py:189"
+          "loc": "scripts/test_pipeline_wiring.py:195"
         }
       ],
       "test_exempt": null,

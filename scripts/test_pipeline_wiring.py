@@ -177,7 +177,13 @@ class PublishedAction(unittest.TestCase):  # tested-by: REQ-SELFGATE-1071 @unit
                       'FLAGS="$FLAGS --no-lint"; fi', step)
         self.assertIn('if [ "${{ inputs.freshness }}" != "true" ]; then '
                       'FLAGS="$FLAGS --no-map-check"; fi', step)
-        self.assertRegex(step, r"\}\}\" gate \$FLAGS\n")
+        self.assertRegex(step, r"\}\}\" gate \$FLAGS \"\$\{CODE_ARGS\[@\]\}\"\n")
+
+    def test_code_input_widens_the_scan(self):  # verifies: REQ-SELFGATE-1071#CASE-4
+        self.assertIn("default: ''", self._input("code"))
+        self.assertIn('if [ -n "${{ inputs.code }}" ]; then '
+                      'CODE_ARGS=(--code "${{ inputs.code }}"); fi',
+                      self._gate_step())
 
     def test_names_alias(self):  # verifies: REQ-SELFGATE-1071#CASE-3
         # The same pattern the release job's alias step greps for.

@@ -746,8 +746,8 @@ graph LR
   ARCH_REPRO_041["Committed build artifacts stay re-derivable<br><small>ARCH-REPRO-041</small>"]
   f__github_workflows_ci_yml_4[".github/workflows/ci.yml:4"]
   ARCH_REPRO_041 -->|implements| f__github_workflows_ci_yml_4
-  f_scripts_test_pipeline_wiring_py_232["scripts/test_pipeline_wiring.py:232"]
-  ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_232
+  f_scripts_test_pipeline_wiring_py_238["scripts/test_pipeline_wiring.py:238"]
+  ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_238
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
   f_plugin_scripts_test_reqmap_author_py_1776_2750["plugin/scripts/test_reqmap_author.py:1776-2750"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1776_2750
