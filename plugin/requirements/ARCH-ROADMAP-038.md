@@ -516,8 +516,8 @@ satisfies: [ARCH-ROADMAP-038]
 
 ## Description
 > Now and Next say the work is coming; a bar says when. An item in either with no bar is a
-> commitment with no date, and nothing said so. The two files stay two (Senate run
-> 2026-09-14_225939); this is a read-only line between them.
+> commitment with no date, and nothing said so. The two files stay two (decided on
+> 2026-09-14); this is a read-only line between them.
 
 Every bullet below is binding.
 - An open item under Now or Next is scheduled when a bar's title equals its name or a bar

@@ -15,7 +15,7 @@ satisfies: [SYS-REPORT-105]
 > reqmap links code to requirements by tags, but nothing reported how much code is
 > linked to nothing — code traceable to no requirement was only visible by running
 > `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at
-> a glance whether code is drifting ahead of the spec. A Senate audit (2026-06-21)
+> a glance whether code is drifting ahead of the spec. A review on 2026-06-21
 > rejected enforcing coverage as a hard gate — it is gameable with hollow tags and
 > conflicts with the model where a requirement is a behavior, not a file — and
 > approved only this non-blocking visibility signal.
@@ -52,7 +52,7 @@ CASE-3
 
 **Notes**
 - This is the read-only half of coverage; the matching list of which files is the "Untagged files" bucket in `next` ([[ARCH-NEXT-013]]). Same denominator, two surfaces.
-- It measures tag PRESENCE, not tag QUALITY: a hollow `# implements:` tag counts as covered. This is accepted — the Senate flagged that a hard gate would make hollow tags the rational way to pass CI, which is why this stays advisory.
+- It measures tag PRESENCE, not tag QUALITY: a hollow `# implements:` tag counts as covered. This is accepted — a hard gate would make hollow tags the rational way to pass CI, which is why this stays advisory.
 - Granularity is per file, not per member; the engine does not parse members.
 
 **Current implementation**
@@ -77,8 +77,8 @@ satisfies: [ARCH-COVERAGE-029]
 ## Description
 > Code can drift ahead of the spec with nobody noticing, because a tag's absence was
 > only visible by running `draft`/`plan`. `health` now counts scannable files with no
-> membership tag and reports it as `untagged` — visible, but never a gate: a Senate
-> audit rejected enforcing it, since a hollow tag would then become the rational way to
+> membership tag and reports it as `untagged` — visible, but never a gate: a review
+> rejected enforcing it, since a hollow tag would then become the rational way to
 > pass CI.
 
 Every bullet below is binding.

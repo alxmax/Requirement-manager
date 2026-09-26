@@ -468,7 +468,7 @@ CASE-4 — the pillar says what it did not measure
 - These numbers are advisory like every other candidate. `Scene` is reported and nothing gates on it; splitting it would change the public builder API, which is a semver decision rather than a lint fix.
 - The thresholds 20/50/20 are the conventional textbook numbers and are UNTUNED: C&K (1994) proposed the metrics and no thresholds, so there is no primary source to cite. They have not been calibrated against any corpus and are `CONFIG_KEYS` entries a consumer is expected to retune.
 - Fire rate on this repo, published rather than asserted: 1 of 9 non-test classes carries a candidate (11.1%); the same run is 3 of 121 design findings (2.5%) and 1 of 31 files (3.2%). ADR-0016's 5-40% band has no defined denominator for a code-level check — every prior application measured the requirement corpus `lint` visits — so the band is cited here as context, not as a passed bar. The confirmation sample is 1 of 1 and was made by this pillar's own author, which ADR-0022 does not accept as independent; that obligation is open and tracked in TODO.md.
-- Audited by the Senate on 2026-09-05 (`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`, verdict MODIFY, GO 4 / MODIFY 4 / STOP 1). Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and Musk's request to delete WMC and LCOM1 as redundant with RFC.
+- Reviewed on 2026-09-05, with changes requested. Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and a request to delete WMC and LCOM1 as redundant with RFC.
 
 ---
 id: REQ-DESIGN-979
@@ -534,7 +534,7 @@ satisfies: [ARCH-DESIGN-061]
 
 ## Description
 > The pillar shipped with three C&K metrics on the strength of one repo and no review.
-> A Senate audit refused that, so all three were measured over seven Python corpora and
+> A review refused that, so all three were measured over seven Python corpora and
 > every flag was judged by a reviewer who had not written them. Two metrics failed:
 > across 65 unique classes neither WMC nor LCOM1 ever fired without RFC, and the
 > independent reviewer confirmed none of their flags. They are gone. This requirement

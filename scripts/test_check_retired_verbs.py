@@ -3,8 +3,8 @@
 Stdlib unittest, run from the repo root:
     python -X utf8 scripts/test_check_retired_verbs.py
 
-Every case here is a defect the guard shipped with and that the 2026-09-08 Senate
-(`senate-reqmap-cli-surface-18-to-5`) found by measurement, not by review: the
+Every case here is a defect the guard shipped with and that a 2026-09-08 audit
+found by measurement, not by review: the
 guard matched verbs but not flags, required a delimiter it did not always get,
 read the flags of whatever command happened to follow on the same line, and knew
 only English for "this verb is gone".

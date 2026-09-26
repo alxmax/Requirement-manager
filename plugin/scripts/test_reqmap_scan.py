@@ -374,22 +374,22 @@ class ProseClassification(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # te
             self.assertEqual(R.classify_prose(rel), "ignore", rel)
 
     def test_readme_and_docs_and_html_are_sync_only(self):  # verifies: REQ-PROSE-900#CASE-3
-        for rel in ("README", "README.md", "docs/senate.md",
+        for rel in ("README", "README.md", "docs/usage.md",
                     "docs/sub/guide.md", "docs/architecture.html", "x.html"):
             self.assertEqual(R.classify_prose(rel), "sync_only", rel)
 
     def test_prompts_and_specs_are_capability(self):  # verifies: REQ-PROSE-900#CASE-4
-        for rel in ("prompts/senators/aurelius.md", "specs/foo.md",
+        for rel in ("prompts/reviewers/editor.md", "specs/foo.md",
                     "modes/bar.md", "notes.md"):
             self.assertEqual(R.classify_prose(rel), "capability", rel)
 
 
 class ProseFacts(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by: REQ-PROSE-901
     def test_markdown_frontmatter_title_and_headings(self):  # verifies: REQ-PROSE-901#CASE-2
-        src = ("---\ntitle: Senator Aurelius\n---\n\n"
+        src = ("---\ntitle: Senior Editor\n---\n\n"
                "## Role\nrisk lens\n## Specialty\nreversibility\n### sub\n")
         title, heads = R._prose_facts(src)
-        self.assertEqual(title, "Senator Aurelius")
+        self.assertEqual(title, "Senior Editor")
         self.assertEqual(heads, ["Role", "Specialty"])  # H2 only, not H3
 
     def test_markdown_h1_title_when_no_frontmatter(self):
@@ -420,11 +420,11 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
 
     def test_capability_prose_is_drafted(self):  # verifies: REQ-PROSE-900#CASE-1
         with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "prompts", "aurelius.md"),
-                   "---\ntitle: Aurelius\n---\n## Role\nx\n")
+            _write(os.path.join(d, "prompts", "editor.md"),
+                   "---\ntitle: Editor\n---\n## Role\nx\n")
             rdir = self._extract(d)
             drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
-            self.assertTrue(any("PROMPTS-AURELIUS" in f for f in drafts), drafts)
+            self.assertTrue(any("PROMPTS-EDITOR" in f for f in drafts), drafts)
 
     def test_sync_only_and_meta_prose_not_drafted(self):
         with tempfile.TemporaryDirectory() as d:
@@ -440,9 +440,9 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
     def test_explicitly_tagged_prose_not_redrafted(self):  # verifies: REQ-PROSE-901#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "README.md"),
-                   "# P\n" + gtag_html("SENATE-SYNTH-001") + "\n")
+                   "# P\n" + gtag_html("PROMPT-SYNTH-001") + "\n")
             members = R.scan_members(d, None)
-            self.assertIn("SENATE-SYNTH-001", members)   # rider #1 guard
+            self.assertIn("PROMPT-SYNTH-001", members)   # rider #1 guard
             rdir = self._extract(d)
             drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
             self.assertFalse(any("README" in f for f in drafts), drafts)
@@ -464,10 +464,10 @@ class RiderGuards(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-b
     def test_tag_inside_html_comment_is_a_member(self):  # rider #1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"),
-                   gtag_html("SENATE-SYNTH-001") + "\n<h1>x</h1>\n")
+                   gtag_html("PROMPT-SYNTH-001") + "\n<h1>x</h1>\n")
             members = R.scan_members(d, None)
-            self.assertIn("SENATE-SYNTH-001", members)
-            roles = [r for (r, _f, _l) in members["SENATE-SYNTH-001"]]
+            self.assertIn("PROMPT-SYNTH-001", members)
+            roles = [r for (r, _f, _l) in members["PROMPT-SYNTH-001"]]
             self.assertIn("generated-from", roles)
 
     def test_draft_status_is_not_enforced(self):  # rider #3  # verifies: REQ-CHECK-828#CASE-5
@@ -653,7 +653,7 @@ class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-b
 
 
 class PhantomMember(unittest.TestCase):
-    """Fixtures F1-F8 from the phantom-member Senate spec."""
+    """Fixtures F1-F8 from the phantom-member spec."""
 
     # Split so this .py source does not register itself as a phantom member
     _CAP = "CORE" + "-SCAN-002"

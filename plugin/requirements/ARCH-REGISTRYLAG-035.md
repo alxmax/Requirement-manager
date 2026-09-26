@@ -21,8 +21,8 @@ satisfies: [SYS-REPORT-105]
 > reviewer sees at a glance that code is racing ahead of the spec. It is the
 > temporal complement to the untagged-code coverage signal ([[ARCH-COVERAGE-029]]):
 > coverage answers "is this code traced?", lag answers "has the registry moved
-> lately at all?". Per the Senate audit that governs the coverage signal
-> (2026-06-21), advisory visibility only — never a hard gate.
+> lately at all?". Per the 2026-06-21 review that governs the coverage signal,
+> advisory visibility only — never a hard gate.
 
 Every bullet below is binding.
 - Registry lag is the number of commits on `HEAD` since the most recent commit that touched `reqs_dir`, computed from git alone, never from requirement contents. [[REQ-REGISTRYLAG-903]] details the behaviour.

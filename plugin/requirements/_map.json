@@ -271,7 +271,7 @@
       "notes": [
         "The label set compared against is `_labeled_acs`, every declared label — NOT `_automatable_acs`, which RM013 uses. The latter drops criteria marked `verifiable by: inspection|manual`, and a tag on one of those names a case that really exists; reporting it would be a false finding.",
         "Warn, never error: a stale label is a documentation slip, and the gate's errors stay reserved for link integrity between requirements and code members.",
-        "This closes a condition first raised as blocking in the Senate run `2026-09-02_201621`, recorded there as an override and never built. It is a precondition for any future tool that writes `verifies:` tags in bulk: without it, a generated wrong label is indistinguishable from a correct one."
+        "This closes a condition first raised as blocking on 2026-09-02, recorded then as an override and never built. It is a precondition for any future tool that writes `verifies:` tags in bulk: without it, a generated wrong label is indistinguishable from a correct one."
       ],
       "current_impl": [
         "`_dangling_verifies_rule` in `reqmap_engine/rules.py`, registered as RM034."
@@ -550,15 +550,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3154"
+          "loc": "plugin/scripts/test_reqmap_report.py:3153"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3327"
+          "loc": "plugin/scripts/test_reqmap_report.py:3326"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4887"
+          "loc": "plugin/scripts/test_reqmap_report.py:4886"
         },
         {
           "role": "implements",
@@ -742,11 +742,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3154"
+          "loc": "plugin/scripts/test_reqmap_report.py:3153"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4887"
+          "loc": "plugin/scripts/test_reqmap_report.py:4886"
         },
         {
           "role": "implements",
@@ -818,7 +818,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3154"
+          "loc": "plugin/scripts/test_reqmap_report.py:3153"
         },
         {
           "role": "implements",
@@ -869,7 +869,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3154"
+          "loc": "plugin/scripts/test_reqmap_report.py:3153"
         },
         {
           "role": "implements",
@@ -926,7 +926,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3154"
+          "loc": "plugin/scripts/test_reqmap_report.py:3153"
         },
         {
           "role": "implements",
@@ -1003,7 +1003,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3327"
+          "loc": "plugin/scripts/test_reqmap_report.py:3326"
         },
         {
           "role": "implements",
@@ -2604,23 +2604,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1827"
+          "loc": "plugin/scripts/test_reqmap_report.py:1826"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3667"
+          "loc": "plugin/scripts/test_reqmap_report.py:3666"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4682"
+          "loc": "plugin/scripts/test_reqmap_report.py:4681"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5110"
+          "loc": "plugin/scripts/test_reqmap_report.py:5109"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5678"
+          "loc": "plugin/scripts/test_reqmap_report.py:5677"
         },
         {
           "role": "implements",
@@ -2688,15 +2688,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1827"
+          "loc": "plugin/scripts/test_reqmap_report.py:1826"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3667"
+          "loc": "plugin/scripts/test_reqmap_report.py:3666"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5787"
+          "loc": "plugin/scripts/test_reqmap_report.py:5786"
         },
         {
           "role": "implements",
@@ -2760,7 +2760,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4682"
+          "loc": "plugin/scripts/test_reqmap_report.py:4681"
         },
         {
           "role": "implements",
@@ -2995,11 +2995,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5110"
+          "loc": "plugin/scripts/test_reqmap_report.py:5109"
         },
         {
           "role": "implements",
@@ -3051,7 +3051,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "implements",
@@ -3083,7 +3083,7 @@
       "verify": [],
       "notes": [
         "The two draft-emitting code paths (`draft`'s prose-capability and code-capability branches) were updated to scaffold the Context form too, so a promoted draft needs no reshaping — matching the existing \"emission schema matches `REQUIREMENT_TEMPLATE`\" intent.",
-        "[ADR-0017](../../docs/adr/0017-consolidated-context-section.md) records the decision and the Senate audit it came out of, including why the `>` WHY blockquote was deliberately left alone (it is not heading-based — `_first_quote` reads the first blockquote in the file regardless of section — so merging it into `## Context` would not have simplified anything a parser cares about)."
+        "[ADR-0017](../../docs/adr/0017-consolidated-context-section.md) records the decision and the review it came out of, including why the `>` WHY blockquote was deliberately left alone (it is not heading-based — `_first_quote` reads the first blockquote in the file regardless of section — so merging it into `## Context` would not have simplified anything a parser cares about)."
       ],
       "current_impl": [
         "`_context_group` in `reqmap.py`, called from `_build_map_data`'s `notes`/`current_impl` emission as a fallback after `_bullets` on the legacy heading.",
@@ -3110,7 +3110,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3653"
+          "loc": "plugin/scripts/test_reqmap_report.py:3652"
         },
         {
           "role": "implements",
@@ -3166,7 +3166,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3653"
+          "loc": "plugin/scripts/test_reqmap_report.py:3652"
         },
         {
           "role": "implements",
@@ -3195,7 +3195,7 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Untagged-code coverage signal",
-      "intent": "reqmap links code to requirements by tags, but nothing reported how much code is linked to nothing — code traceable to no requirement was only visible by running `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at a glance whether code is drifting ahead of the spec. A Senate audit (2026-06-21) rejected enforcing coverage as a hard gate — it is gameable with hollow tags and conflicts with the model where a requirement is a behavior, not a file — and approved only this non-blocking visibility signal.",
+      "intent": "reqmap links code to requirements by tags, but nothing reported how much code is linked to nothing — code traceable to no requirement was only visible by running `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at a glance whether code is drifting ahead of the spec. A review on 2026-06-21 rejected enforcing coverage as a hard gate — it is gameable with hollow tags and conflicts with the model where a requirement is a behavior, not a file — and approved only this non-blocking visibility signal.",
       "contract": [
         "`health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour.",
         "The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files, named in one list. [[REQ-UNTAGGEDSET-1007]]",
@@ -3204,7 +3204,7 @@
       "verify": [],
       "notes": [
         "This is the read-only half of coverage; the matching list of which files is the \"Untagged files\" bucket in `next` ([[ARCH-NEXT-013]]). Same denominator, two surfaces.",
-        "It measures tag PRESENCE, not tag QUALITY: a hollow `# implements:` tag counts as covered. This is accepted — the Senate flagged that a hard gate would make hollow tags the rational way to pass CI, which is why this stays advisory.",
+        "It measures tag PRESENCE, not tag QUALITY: a hollow `# implements:` tag counts as covered. This is accepted — a hard gate would make hollow tags the rational way to pass CI, which is why this stays advisory.",
         "Granularity is per file, not per member; the engine does not parse members."
       ],
       "current_impl": [
@@ -3259,7 +3259,7 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Counting untagged code as a read-only signal",
-      "intent": "Code can drift ahead of the spec with nobody noticing, because a tag's absence was only visible by running `draft`/`plan`. `health` now counts scannable files with no membership tag and reports it as `untagged` — visible, but never a gate: a Senate audit rejected enforcing it, since a hollow tag would then become the rational way to pass CI.",
+      "intent": "Code can drift ahead of the spec with nobody noticing, because a tag's absence was only visible by running `draft`/`plan`. `health` now counts scannable files with no membership tag and reports it as `untagged` — visible, but never a gate: a review rejected enforcing it, since a hollow tag would then become the rational way to pass CI.",
       "contract": [
         "The capability reports the count of scannable code files that carry no membership tag — \"untagged code\", code traced to no requirement.",
         "The denominator is exactly `_scan_untagged`'s (see [[ARCH-NEXT-013]]): the files matched by the scanner extension walk, minus `.reqmapignore`.",
@@ -3296,7 +3296,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4180"
+          "loc": "plugin/scripts/test_reqmap_report.py:4179"
         },
         {
           "role": "implements",
@@ -3346,7 +3346,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4921"
+          "loc": "plugin/scripts/test_reqmap_report.py:4920"
         },
         {
           "role": "implements",
@@ -3445,7 +3445,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "implements",
@@ -3828,15 +3828,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5389"
+          "loc": "plugin/scripts/test_reqmap_report.py:5388"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5508"
+          "loc": "plugin/scripts/test_reqmap_report.py:5507"
         },
         {
           "role": "implements",
@@ -3894,7 +3894,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "implements",
@@ -3968,7 +3968,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "implements",
@@ -4042,7 +4042,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "implements",
@@ -4094,7 +4094,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "implements",
@@ -4147,7 +4147,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5389"
+          "loc": "plugin/scripts/test_reqmap_report.py:5388"
         },
         {
           "role": "implements",
@@ -4208,7 +4208,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5146"
+          "loc": "plugin/scripts/test_reqmap_report.py:5145"
         },
         {
           "role": "implements",
@@ -4274,7 +4274,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5390"
+          "loc": "plugin/scripts/test_reqmap_report.py:5389"
         },
         {
           "role": "implements",
@@ -4317,7 +4317,7 @@
         "These numbers are advisory like every other candidate. `Scene` is reported and nothing gates on it; splitting it would change the public builder API, which is a semver decision rather than a lint fix.",
         "The thresholds 20/50/20 are the conventional textbook numbers and are UNTUNED: C&K (1994) proposed the metrics and no thresholds, so there is no primary source to cite. They have not been calibrated against any corpus and are `CONFIG_KEYS` entries a consumer is expected to retune.",
         "Fire rate on this repo, published rather than asserted: 1 of 9 non-test classes carries a candidate (11.1%); the same run is 3 of 121 design findings (2.5%) and 1 of 31 files (3.2%). ADR-0016's 5-40% band has no defined denominator for a code-level check — every prior application measured the requirement corpus `lint` visits — so the band is cited here as context, not as a passed bar. The confirmation sample is 1 of 1 and was made by this pillar's own author, which ADR-0022 does not accept as independent; that obligation is open and tracked in TODO.md.",
-        "Audited by the Senate on 2026-09-05 (`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`, verdict MODIFY, GO 4 / MODIFY 4 / STOP 1). Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and Musk's request to delete WMC and LCOM1 as redundant with RFC."
+        "Reviewed on 2026-09-05, with changes requested. Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and a request to delete WMC and LCOM1 as redundant with RFC."
       ],
       "current_impl": [],
       "accept": "CASE-1 — a class that reaches too far is named\n  Given  a Python class whose own methods plus the distinct method names they call exceed `DESIGN_RFC_MAX`\n  When   `design` runs\n  Then   a `high-response` candidate is reported under Metrics, naming both counts\n\nCASE-2 — the threshold is per repo\n  Given  a `requirements/_config.json` setting `DESIGN_RFC_MAX` to 2\n  When   `design` runs over a small class\n  Then   that class is reported as `high-response`\n\n\n\n\nCASE-3 — a small class is silent\n  Given  a class with two methods calling almost nothing\n  When   `design` runs\n  Then   it reports no metrics candidate for that class\n\nCASE-4 — the pillar says what it did not measure\n  Given  any repo\n  When   `design` renders the metrics pillar, or reports no candidate at all\n  Then   the output names the metrics it does not compute, and its own over-reporting shapes",
@@ -4378,7 +4378,7 @@
       "status": "deprecated",
       "area": "REQ",
       "title": "The metrics that did not survive calibration",
-      "intent": "The pillar shipped with three C&K metrics on the strength of one repo and no review. A Senate audit refused that, so all three were measured over seven Python corpora and every flag was judged by a reviewer who had not written them. Two metrics failed: across 65 unique classes neither WMC nor LCOM1 ever fired without RFC, and the independent reviewer confirmed none of their flags. They are gone. This requirement records the measurement, because a number nobody can find is a number nobody can challenge.",
+      "intent": "The pillar shipped with three C&K metrics on the strength of one repo and no review. A review refused that, so all three were measured over seven Python corpora and every flag was judged by a reviewer who had not written them. Two metrics failed: across 65 unique classes neither WMC nor LCOM1 ever fired without RFC, and the independent reviewer confirmed none of their flags. They are gone. This requirement records the measurement, because a number nobody can find is a number nobody can challenge.",
       "contract": [
         "`_design_lcom` counts only the methods that touch at least one instance field. A method touching none has no state to share, and counting it as disjoint from every sibling adds one pair per sibling while measuring nothing.",
         "Cohesion is not computed for a class with fewer than two fields, because a single field admits no grouping for methods to be split across.",
@@ -4440,7 +4440,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5508"
+          "loc": "plugin/scripts/test_reqmap_report.py:5507"
         },
         {
           "role": "implements",
@@ -5013,7 +5013,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4106"
+          "loc": "plugin/scripts/test_reqmap_report.py:4105"
         },
         {
           "role": "implements",
@@ -5070,7 +5070,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4106"
+          "loc": "plugin/scripts/test_reqmap_report.py:4105"
         },
         {
           "role": "implements",
@@ -5729,11 +5729,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2241"
+          "loc": "plugin/scripts/test_reqmap_report.py:2240"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3699"
+          "loc": "plugin/scripts/test_reqmap_report.py:3698"
         },
         {
           "role": "implements",
@@ -5807,7 +5807,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3699"
+          "loc": "plugin/scripts/test_reqmap_report.py:3698"
         },
         {
           "role": "implements",
@@ -5976,7 +5976,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2241"
+          "loc": "plugin/scripts/test_reqmap_report.py:2240"
         },
         {
           "role": "implements",
@@ -6174,11 +6174,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3844"
+          "loc": "plugin/scripts/test_reqmap_report.py:3843"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "implements",
@@ -6258,7 +6258,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3844"
+          "loc": "plugin/scripts/test_reqmap_report.py:3843"
         },
         {
           "role": "implements",
@@ -6329,7 +6329,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3844"
+          "loc": "plugin/scripts/test_reqmap_report.py:3843"
         },
         {
           "role": "implements",
@@ -6394,7 +6394,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3844"
+          "loc": "plugin/scripts/test_reqmap_report.py:3843"
         },
         {
           "role": "implements",
@@ -6589,7 +6589,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5634"
+          "loc": "plugin/scripts/test_reqmap_report.py:5633"
         },
         {
           "role": "implements",
@@ -6787,11 +6787,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2007"
+          "loc": "plugin/scripts/test_reqmap_report.py:2006"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "implements",
@@ -8051,31 +8051,31 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1729"
+          "loc": "plugin/scripts/test_reqmap_report.py:1728"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1768"
+          "loc": "plugin/scripts/test_reqmap_report.py:1767"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2007"
+          "loc": "plugin/scripts/test_reqmap_report.py:2006"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2427"
+          "loc": "plugin/scripts/test_reqmap_report.py:2426"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2596"
+          "loc": "plugin/scripts/test_reqmap_report.py:2595"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3633"
+          "loc": "plugin/scripts/test_reqmap_report.py:3632"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "tested-by",
@@ -8227,11 +8227,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1768"
+          "loc": "plugin/scripts/test_reqmap_report.py:1767"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5742"
+          "loc": "plugin/scripts/test_reqmap_report.py:5741"
         },
         {
           "role": "implements",
@@ -8330,7 +8330,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5742"
+          "loc": "plugin/scripts/test_reqmap_report.py:5741"
         },
         {
           "role": "implements",
@@ -8522,7 +8522,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2427"
+          "loc": "plugin/scripts/test_reqmap_report.py:2426"
         },
         {
           "role": "implements",
@@ -8571,7 +8571,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2596"
+          "loc": "plugin/scripts/test_reqmap_report.py:2595"
         },
         {
           "role": "implements",
@@ -8657,11 +8657,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2384"
+          "loc": "plugin/scripts/test_reqmap_report.py:2383"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4130"
+          "loc": "plugin/scripts/test_reqmap_report.py:4129"
         },
         {
           "role": "implements",
@@ -8737,15 +8737,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2384"
+          "loc": "plugin/scripts/test_reqmap_report.py:2383"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4130"
+          "loc": "plugin/scripts/test_reqmap_report.py:4129"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5742"
+          "loc": "plugin/scripts/test_reqmap_report.py:5741"
         },
         {
           "role": "implements",
@@ -8841,7 +8841,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2384"
+          "loc": "plugin/scripts/test_reqmap_report.py:2383"
         },
         {
           "role": "implements",
@@ -8902,11 +8902,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2384"
+          "loc": "plugin/scripts/test_reqmap_report.py:2383"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "implements",
@@ -8965,11 +8965,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2384"
+          "loc": "plugin/scripts/test_reqmap_report.py:2383"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4130"
+          "loc": "plugin/scripts/test_reqmap_report.py:4129"
         },
         {
           "role": "implements",
@@ -9007,7 +9007,7 @@
       ],
       "verify": [],
       "notes": [
-        "The decision, and the Senate deferral it supersedes, are ADR-0043.",
+        "The decision, and the earlier deferral it supersedes, are ADR-0043.",
         "-------------------"
       ],
       "current_impl": [],
@@ -9036,7 +9036,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4551"
+          "loc": "plugin/scripts/test_reqmap_report.py:4550"
         },
         {
           "role": "implements",
@@ -9097,7 +9097,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4338"
+          "loc": "plugin/scripts/test_reqmap_report.py:4337"
         },
         {
           "role": "implements",
@@ -9155,7 +9155,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4338"
+          "loc": "plugin/scripts/test_reqmap_report.py:4337"
         },
         {
           "role": "implements",
@@ -9215,7 +9215,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4506"
+          "loc": "plugin/scripts/test_reqmap_report.py:4505"
         },
         {
           "role": "implements",
@@ -9266,7 +9266,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4450"
+          "loc": "plugin/scripts/test_reqmap_report.py:4449"
         },
         {
           "role": "implements",
@@ -9787,23 +9787,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1970"
+          "loc": "plugin/scripts/test_reqmap_report.py:1969"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2303"
+          "loc": "plugin/scripts/test_reqmap_report.py:2302"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2343"
+          "loc": "plugin/scripts/test_reqmap_report.py:2342"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4999"
+          "loc": "plugin/scripts/test_reqmap_report.py:4998"
         },
         {
           "role": "implements",
@@ -9899,7 +9899,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "implements",
@@ -9972,7 +9972,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "implements",
@@ -10033,7 +10033,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2344"
+          "loc": "plugin/scripts/test_reqmap_report.py:2343"
         },
         {
           "role": "implements",
@@ -10085,7 +10085,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "implements",
@@ -10153,11 +10153,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "implements",
@@ -10225,7 +10225,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3423"
+          "loc": "plugin/scripts/test_reqmap_report.py:3422"
         },
         {
           "role": "implements",
@@ -10291,7 +10291,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4999"
+          "loc": "plugin/scripts/test_reqmap_report.py:4998"
         },
         {
           "role": "implements",
@@ -10409,7 +10409,7 @@
         "The gate does not consider the prose, styling and config extensions (`.md .html .css .sql .yaml .yml`). Prose coverage is [[ARCH-DOCBUNDLE-026]]'s concern.",
         "The check honors `.reqmapignore` and the standard scan walk, so a repo can mark generated or vendored code out of scope rather than tag it.",
         "The walk itself — what it prunes, what it ignores, and how it treats a file it cannot read — is [[ARCH-SCAN-002]]'s contract, not restated here.",
-        "The check is warn-only and never changes the gate's exit code, including under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -->",
+        "The check is warn-only and never changes the gate's exit code, including under `--strict`. <!-- Rationale: the 2026-06-21 review of ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -->",
         "An author silences a file by tagging it or by adding it to `.reqmapignore`.",
         "There is no separate exemption mechanism."
       ],
@@ -10445,15 +10445,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Avertizare pe un fișier considerabil fără nicio legătură de cerință",
-          "intent": "Un fișier sursă nou, mare, fără niciun tag de membership implementează un comportament pe care nicio cerință nu îl descrie, iar nimic nu a spus asta la momentul commit-ului — doar `health` l-a numărat mai târziu. Gate-ul acum avertizează pe fiecare fișier de program peste un prag de număr de linii fără niciun tag de membership sau `verifies:`, astfel încât autorul îl leagă, redactează o cerință, sau îl marchează out of scope; nu eșuează niciodată build-ul, la nicio combinație de flag-uri, deoarece prezența unui tag singură este gameable.",
-          "contract": "> Un fișier sursă nou, mare, fără niciun tag de membership implementează un\n> comportament pe care nicio cerință nu îl descrie, iar nimic nu a spus asta la momentul\n> commit-ului — doar `health` l-a numărat mai târziu. Gate-ul acum avertizează pe fiecare\n> fișier de program peste un prag de număr de linii fără niciun tag de membership sau\n> `verifies:`, astfel încât autorul îl leagă, redactează o cerință, sau îl marchează out\n> of scope; nu eșuează niciodată build-ul, la nicio combinație de flag-uri, deoarece\n> prezența unui tag singură este gameable.\n\nFiecare bullet de mai jos este obligatoriu.\n- Gate-ul avertizează pentru fiecare fișier de program care nu poartă niciun tag de membership și\n  niciun tag `verifies:`, odată ce acel fișier are cel puțin `ORPHAN_CODE_MIN_LOC`\n  linii fizice lungime.\n- Un fișier de program este unul care se termină în `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp\n  .java .go .rs`.\n- Un tag de membership este unul din `implements`, `tested-by`, `generated-from` și\n  `validated-against`.\n- Gate-ul nu ia în considerare extensiile de proză, stilizare și config\n  (`.md .html .css .sql .yaml .yml`). Acoperirea de proză este\n  preocuparea lui [[ARCH-DOCBUNDLE-026]].\n- Verificarea respectă `.reqmapignore` și walk-ul standard de scanare, astfel încât un repo poate\n  marca cod generat sau vendored ca out of scope în loc să-l tageze.\n- Walk-ul în sine — ce elimină, ce ignoră, și cum tratează un fișier pe care nu-l poate\n  citi — este contractul lui [[ARCH-SCAN-002]], nu restatat aici.\n- Verificarea este warn-only și nu schimbă niciodată codul de ieșire al gate-ului, inclusiv\n  sub `--strict`. <!-- Rationale: 2026-06-21 Senate audit on\n  ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the\n  rational way to pass CI); this stays advisory at any flag combination. -->\n- Un autor amuțește un fișier tagându-l sau adăugându-l la `.reqmapignore`.\n- Nu există niciun mecanism separat de exemptare.",
-          "acceptance": "CASE-1 — un fișier netagat la pragul LOC declanșează avertismentul\n  Given  un fișier `.py` netagat de 400 linii fără tag `implements`/`verifies`\n  When   rulează `gate`\n  Then   afișează o linie warn care numește acel fișier drept orphan code, iar codul de ieșire al gate-ului este neschimbat, inclusiv sub `--strict`\n\nCASE-2 — sunt considerate doar fișierele din lista de extensii de program\n  Given  un fișier `.go` netagat de 400 linii și un fișier `.txt` netagat de 400 linii\n  When   rulează `gate`\n  Then   fișierul `.go` este raportat ca orphan code iar fișierul `.txt` nu este\n\nCASE-3 — oricare din cele patru tag-uri de membership amuțește avertismentul\n  Given  patru fișiere mari netagate, fiecare purtând unul din `implements`, `tested-by`,\n         `generated-from`, `validated-against`\n  When   rulează `gate`\n  Then   niciunul din cele patru nu este raportat ca orphan code\n\nCASE-4 — extensiile de proză și config nu sunt niciodată verificate pentru orphan code\n  Given  un fișier `.md` mare netagat și un fișier `.yaml` mare netagat\n  When   rulează `gate`\n  Then   niciunul nu este raportat ca orphan code\n\nCASE-5 — un pattern .reqmapignore exemptează un fișier mare netagat\n  Given  un fișier `.py` mare netagat, potrivit de un pattern `.reqmapignore`\n  When   rulează `gate`\n  Then   nu este raportat ca orphan code, fără niciun mecanism separat de exemptare dincolo de tagging sau `.reqmapignore`"
-        }
-      }
+      "covered": 5
     },
     {
       "id": "ARCH-PARSE-001",
@@ -10523,7 +10515,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "tested-by",
@@ -11016,7 +11008,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2684"
+          "loc": "plugin/scripts/test_reqmap_report.py:2683"
         },
         {
           "role": "implements",
@@ -11066,7 +11058,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2684"
+          "loc": "plugin/scripts/test_reqmap_report.py:2683"
         },
         {
           "role": "implements",
@@ -11172,11 +11164,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1729"
+          "loc": "plugin/scripts/test_reqmap_report.py:1728"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1970"
+          "loc": "plugin/scripts/test_reqmap_report.py:1969"
         },
         {
           "role": "implements",
@@ -11596,7 +11588,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — draft writes a requirement for an untagged capability-bucket prose file\n  Given  `prompts/foo.md` with no `# implements:` tag\n  When   `draft` runs\n  Then   a new `draft`-status requirement is written scaffolded from that file\n\nCASE-2 — classify_prose buckets meta/boilerplate files as ignore\n  Given  the paths `CLAUDE.md`, `LICENSE`, and `_map.html`\n  When   `classify_prose` runs on each\n  Then   each returns `\"ignore\"`\n\nCASE-3 — classify_prose buckets README/docs/html paths as sync_only\n  Given  the paths `README.md`, `docs/sub/guide.md`, and `x.html`\n  When   `classify_prose` runs on each\n  Then   each returns `\"sync_only\"`\n\nCASE-4 — classify_prose buckets prompt/spec prose as capability\n  Given  the paths `prompts/senators/aurelius.md`, `specs/foo.md`, and `notes.md`\n  When   `classify_prose` runs on each\n  Then   each returns `\"capability\"`\n\n\n--------------------",
+      "accept": "CASE-1 — draft writes a requirement for an untagged capability-bucket prose file\n  Given  `prompts/foo.md` with no `# implements:` tag\n  When   `draft` runs\n  Then   a new `draft`-status requirement is written scaffolded from that file\n\nCASE-2 — classify_prose buckets meta/boilerplate files as ignore\n  Given  the paths `CLAUDE.md`, `LICENSE`, and `_map.html`\n  When   `classify_prose` runs on each\n  Then   each returns `\"ignore\"`\n\nCASE-3 — classify_prose buckets README/docs/html paths as sync_only\n  Given  the paths `README.md`, `docs/sub/guide.md`, and `x.html`\n  When   `classify_prose` runs on each\n  Then   each returns `\"sync_only\"`\n\nCASE-4 — classify_prose buckets prompt/spec prose as capability\n  Given  the paths `prompts/reviewers/editor.md`, `specs/foo.md`, and `notes.md`\n  When   `classify_prose` runs on each\n  Then   each returns `\"capability\"`\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -11625,15 +11617,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Sortarea fișierelor de proză în trei bucket-uri de redactare",
-          "intent": "Nu orice fișier de text este o capabilitate — un README și o specificație de prompt au nevoie de tratament diferit. `classify_prose` sortează fiecare fișier de proză netagat în ignore (boilerplate), sync_only (README/docs/HTML, verificat pentru drift doar odată tagat de mână), sau capability (auto-redactat), astfel încât `draft` nici nu ratează specificații reale, nici nu inundă registry-ul cu junk.",
-          "contract": "> Nu orice fișier de text este o capabilitate — un README și o specificație de prompt\n> au nevoie de tratament diferit. `classify_prose` sortează fiecare fișier de proză\n> netagat în ignore (boilerplate), sync_only (README/docs/HTML, verificat pentru drift\n> doar odată tagat de mână), sau capability (auto-redactat), astfel încât `draft` nici nu\n> ratează specificații reale, nici nu inundă registry-ul cu junk.\n\nFiecare bullet de mai jos este obligatoriu.\n- `draft` produce de asemenea cerințe cu status `draft` din fișiere de **proză** netagate\n  (`.md`/`.html`) — proză însemnând text de specificație/prompt lizibil pentru om, spre deosebire\n  de cod sursă.\n- Fiecare fișier de proză este clasificat într-unul din trei bucket-uri înainte de redactare:\n  - **ignore** — meta/boilerplate care nu este niciodată o capabilitate: `CLAUDE.md`, `AGENTS.md`,\n    `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`,\n    `LICENSE`/`LICENSE.*`, și orice fișier generat prefixat cu `_` (`_map.html`, `_findings.md`, …).\n  - **sync_only** — `README`/`README.*` în orice caz de litere, tot ce se află sub `docs/`, și\n    orice `*.html`.\n    Acestea nu sunt niciodată redactate ca propria lor cerință, dar devin un membru (și sunt\n    verificate pentru drift) când un om le tagă `generated-from: <ID>`.\n  - **capability** — orice altceva (de ex. proza din `prompts/`, `specs/`, `modes/`). Acestea\n    sunt auto-redactate.",
-          "acceptance": "CASE-1 — draft scrie o cerință pentru un fișier de proză netagat din bucket-ul capability\n  Given  `prompts/foo.md` fără niciun tag `# implements:`\n  When   rulează `draft`\n  Then   o nouă cerință cu status `draft` este scrisă, ștanțată din acel fișier\n\nCASE-2 — classify_prose bucketuiește fișiere meta/boilerplate ca ignore\n  Given  căile `CLAUDE.md`, `LICENSE`, și `_map.html`\n  When   rulează `classify_prose` pe fiecare\n  Then   fiecare returnează `\"ignore\"`\n\nCASE-3 — classify_prose bucketuiește căi README/docs/html ca sync_only\n  Given  căile `README.md`, `docs/sub/guide.md`, și `x.html`\n  When   rulează `classify_prose` pe fiecare\n  Then   fiecare returnează `\"sync_only\"`\n\nCASE-4 — classify_prose bucketuiește proza de prompt/spec ca capability\n  Given  căile `prompts/senators/aurelius.md`, `specs/foo.md`, și `notes.md`\n  When   rulează `classify_prose` pe fiecare\n  Then   fiecare returnează `\"capability\"`\n\n\n--------------------"
-        }
-      }
+      "covered": 4
     },
     {
       "id": "REQ-PROSE-901",
@@ -11652,7 +11636,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an explicit generated-from tag registers a sync_only file as a member\n  Given  a `README.md` carrying a `<!-- generated-from: REQ-DOCS-001 -->` comment\n  When   `scan_members` runs\n  Then   the file appears as a member of `REQ-DOCS-001`, despite being sync_only\n\nCASE-2 — _prose_facts prefers frontmatter title, then collects the H2 headings\n  Given  a source with frontmatter `title: Senator Aurelius` and two `## ` headings\n  When   `_prose_facts(src)` runs\n  Then   it returns `(\"Senator Aurelius\", [\"Role\", \"Specialty\"])`\n\nCASE-3 — later H1 headings become the section hint when no H2 exists\n  Given  `\"# IDENTITY and PURPOSE\\n\\ntext\\n\\n# STEPS\\n\\n# OUTPUT INSTRUCTIONS\\n\"` (no `##` anywhere)\n  When   `_prose_facts(src)` runs\n  Then   the headings list is `[\"STEPS\", \"OUTPUT INSTRUCTIONS\"]`, drawn from the later H1s\n\nCASE-4 — editing the source prose file does not change the requirement's binding_hash\n  Given  a capability-bucket prose file drafted into a requirement, then edited afterward\n  When   `binding_hash` is computed on the requirement body before and after the edit\n  Then   the two hashes are equal — the prose edit produced no drift",
+      "accept": "CASE-1 — an explicit generated-from tag registers a sync_only file as a member\n  Given  a `README.md` carrying a `<!-- generated-from: REQ-DOCS-001 -->` comment\n  When   `scan_members` runs\n  Then   the file appears as a member of `REQ-DOCS-001`, despite being sync_only\n\nCASE-2 — _prose_facts prefers frontmatter title, then collects the H2 headings\n  Given  a source with frontmatter `title: Senior Editor` and two `## ` headings\n  When   `_prose_facts(src)` runs\n  Then   it returns `(\"Senior Editor\", [\"Role\", \"Specialty\"])`\n\nCASE-3 — later H1 headings become the section hint when no H2 exists\n  Given  `\"# IDENTITY and PURPOSE\\n\\ntext\\n\\n# STEPS\\n\\n# OUTPUT INSTRUCTIONS\\n\"` (no `##` anywhere)\n  When   `_prose_facts(src)` runs\n  Then   the headings list is `[\"STEPS\", \"OUTPUT INSTRUCTIONS\"]`, drawn from the later H1s\n\nCASE-4 — editing the source prose file does not change the requirement's binding_hash\n  Given  a capability-bucket prose file drafted into a requirement, then edited afterward\n  When   `binding_hash` is computed on the requirement body before and after the edit\n  Then   the two hashes are equal — the prose edit produced no drift",
       "input": "",
       "output": "",
       "desc": "",
@@ -11685,15 +11669,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Ștanțarea unui draft din titlurile proprii ale unui fișier de proză",
-          "intent": "Un bucket decide doar dacă se auto-redactează; un tag adăugat de mână câștigă mereu, deci un README tagat de mână tot contează ca membru chiar dacă nu este niciodată auto-redactat. Când un fișier capability este redactat, titlul lui și titlurile de secțiune devin scaffold-ul — și deoarece hash-ul de drift se ancorează pe contractul redactat, nu pe proza sursă, editarea fișierului original ulterior nu raportează niciodată fals drift.",
-          "contract": "> Un bucket decide doar dacă se auto-redactează; un tag adăugat de mână câștigă mereu,\n> deci un README tagat de mână tot contează ca membru chiar dacă nu este niciodată\n> auto-redactat. Când un fișier capability este redactat, titlul lui și titlurile de\n> secțiune devin scaffold-ul — și deoarece hash-ul de drift se ancorează pe contractul\n> redactat, nu pe proza sursă, editarea fișierului original ulterior nu raportează\n> niciodată fals drift.\n\nFiecare bullet de mai jos este obligatoriu.\n- Bucket-urile guvernează auto-redactarea DOAR; un tag explicit pe orice fișier este mereu\n  respectat de scanner indiferent de bucket (astfel un README tagat de mână tot este un membru).\n- Un draft de proză este ștanțat din titlul fișierului (frontmatter `title:`, altfel primul\n  titlu `#`, altfel `<title>`/`<h1>` din HTML) plus titlurile sale de secțiune `##`,\n  înregistrate ca indiciu de redactare.\n- Când un fișier nu are deloc niciun titlu `##`, titlurile sale ulterioare `#` devin secțiunile\n  în loc, astfel încât proza plată, cu un singur nivel (o bibliotecă de prompt-uri) tot produce\n  un indiciu.\n- Proza sursă nu este niciodată contractul: hash-ul de drift se ancorează pe Contract-ul și\n  Acceptance-ul redactate, astfel încât proza poate deriva ulterior liber de la cerința redactată.",
-          "acceptance": "CASE-1 — un tag explicit generated-from înregistrează un fișier sync_only ca membru\n  Given  un `README.md` purtând un comentariu `<!-- generated-from: REQ-DOCS-001 -->`\n  When   rulează `scan_members`\n  Then   fișierul apare ca membru al `REQ-DOCS-001`, deși este sync_only\n\nCASE-2 — _prose_facts preferă titlul frontmatter, apoi colectează titlurile H2\n  Given  o sursă cu frontmatter `title: Senator Aurelius` și două titluri `## `\n  When   rulează `_prose_facts(src)`\n  Then   returnează `(\"Senator Aurelius\", [\"Role\", \"Specialty\"])`\n\nCASE-3 — titlurile H1 ulterioare devin indiciul de secțiune când nu există niciun H2\n  Given  `\"# IDENTITY and PURPOSE\\n\\ntext\\n\\n# STEPS\\n\\n# OUTPUT INSTRUCTIONS\\n\"` (fără niciun `##` nicăieri)\n  When   rulează `_prose_facts(src)`\n  Then   lista de titluri este `[\"STEPS\", \"OUTPUT INSTRUCTIONS\"]`, desprinsă din H1-urile ulterioare\n\nCASE-4 — editarea fișierului de proză sursă nu schimbă binding_hash-ul cerinței\n  Given  un fișier de proză din bucket-ul capability redactat într-o cerință, apoi editat ulterior\n  When   `binding_hash` este calculat pe corpul cerinței înainte și după editare\n  Then   cele două hash-uri sunt egale — editarea de proză nu a produs niciun drift"
-        }
-      }
+      "covered": 4
     },
     {
       "id": "ARCH-PYFLOOR-040",
@@ -11828,7 +11804,7 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Registry-lag signal — commits since the requirements dir was last touched",
-      "intent": "`health` reports whether the requirements that exist are coherent, but not whether the registry as a whole has gone stale while code moved on. A downstream consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted with no requirement update — nothing in `health` surfaced that the spec had stopped tracking reality. This adds a read-only count of how many commits have landed since the requirements dir was last touched, so a reviewer sees at a glance that code is racing ahead of the spec. It is the temporal complement to the untagged-code coverage signal ([[ARCH-COVERAGE-029]]): coverage answers \"is this code traced?\", lag answers \"has the registry moved lately at all?\". Per the Senate audit that governs the coverage signal (2026-06-21), advisory visibility only — never a hard gate.",
+      "intent": "`health` reports whether the requirements that exist are coherent, but not whether the registry as a whole has gone stale while code moved on. A downstream consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted with no requirement update — nothing in `health` surfaced that the spec had stopped tracking reality. This adds a read-only count of how many commits have landed since the requirements dir was last touched, so a reviewer sees at a glance that code is racing ahead of the spec. It is the temporal complement to the untagged-code coverage signal ([[ARCH-COVERAGE-029]]): coverage answers \"is this code traced?\", lag answers \"has the registry moved lately at all?\". Per the 2026-06-21 review that governs the coverage signal, advisory visibility only — never a hard gate.",
       "contract": [
         "Registry lag is the number of commits on `HEAD` since the most recent commit that touched `reqs_dir`, computed from git alone, never from requirement contents. [[REQ-REGISTRYLAG-903]] details the behaviour.",
         "`health --json` reports the count as a `commits_since_req_touch` integer key — present only when measurable, and never affecting the score or exit code. [[REQ-REGISTRYLAG-904]] details the behaviour."
@@ -11875,15 +11851,7 @@
       "test_exempt": null,
       "milestone": "v2.12",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Semnal de întârziere a registrului — commit-uri de la ultima atingere a directorului de cerințe",
-          "intent": "`health` raportează dacă cerințele care există sunt coerente, dar nu dacă registrul în ansamblu a devenit învechit în timp ce codul a avansat. Registrul unui consumator din aval a stat înghețat 18 zile de-a lungul a ~40 de commit-uri de cod, în timp ce o valoare monetară a suferit drift fără nicio actualizare de cerință — nimic în `health` nu a scos la suprafață faptul că specificația încetase să urmărească realitatea. Aceasta adaugă o numărătoare doar-citire a câte commit-uri au ajuns de la ultima atingere a directorului de cerințe, astfel încât un revizor vede dintr-o privire că codul o ia înaintea specificației. Este complementul temporal al semnalului de acoperire pentru codul neetichetat ([[ARCH-COVERAGE-029]]): acoperirea răspunde la \"este acest cod trasat?\", întârzierea răspunde la \"s-a mișcat registrul deloc în ultima vreme?\". Conform auditului Senate care guvernează semnalul de acoperire (2026-06-21), doar vizibilitate consultativă — niciodată un gate ferm.",
-          "contract": "> `health` raportează dacă cerințele care există sunt coerente, dar nu dacă registrul\n> în ansamblu a devenit învechit în timp ce codul a avansat. Registrul unui\n> consumator din aval a stat înghețat 18 zile de-a lungul a ~40 de commit-uri de\n> cod, în timp ce o valoare monetară a suferit drift fără nicio actualizare de\n> cerință — nimic în `health` nu a scos la suprafață faptul că specificația\n> încetase să urmărească realitatea. Aceasta adaugă o numărătoare doar-citire a câte\n> commit-uri au ajuns de la ultima atingere a directorului de cerințe, astfel încât\n> un revizor vede dintr-o privire că codul o ia înaintea specificației. Este\n> complementul temporal al semnalului de acoperire pentru codul neetichetat\n> ([[ARCH-COVERAGE-029]]): acoperirea răspunde la \"este acest cod trasat?\", întârzierea\n> răspunde la \"s-a mișcat registrul deloc în ultima vreme?\". Conform auditului Senate\n> care guvernează semnalul de acoperire (2026-06-21), doar vizibilitate consultativă\n> — niciodată un gate ferm.\n\nFiecare punct de mai jos este obligatoriu.\n- Întârzierea registrului este numărul de commit-uri de pe `HEAD` de la cel mai recent commit care a atins `reqs_dir`, calculat doar din git, niciodată din conținutul cerințelor. [[REQ-REGISTRYLAG-903]] detaliază comportamentul.\n- `health --json` raportează numărătoarea ca o cheie întreagă `commits_since_req_touch` — prezentă doar când este măsurabilă, și nu afectează niciodată scorul sau codul de ieșire. [[REQ-REGISTRYLAG-904]] detaliază comportamentul.",
-          "acceptance": "CASE-1\n  Given  un repo git al cărui director de cerințe a fost commis, apoi două commit-uri ulterioare au atins doar cod\n  When   `health --json` rulează cu acea rădăcină de cod\n  Then   `commits_since_req_touch` este egal cu 2 iar scorul rămâne neschimbat de aceasta\n\nCASE-2\n  Given  un repo git al cărui commit cel mai recent a atins directorul de cerințe\n  When   `health --json` rulează cu acea rădăcină de cod\n  Then   `commits_since_req_touch` este prezent și egal cu 0\n\nCASE-3\n  Given  o rădăcină de cod care nu este un git worktree\n  When   `health --json` rulează cu acea rădăcină de cod\n  Then   ieșirea nu poartă nicio cheie `commits_since_req_touch`"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-REGISTRYLAG-903",
@@ -11918,7 +11886,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4254"
+          "loc": "plugin/scripts/test_reqmap_report.py:4253"
         },
         {
           "role": "implements",
@@ -11977,7 +11945,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4254"
+          "loc": "plugin/scripts/test_reqmap_report.py:4253"
         },
         {
           "role": "implements",
@@ -12739,7 +12707,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4796"
+          "loc": "plugin/scripts/test_reqmap_report.py:4795"
         },
         {
           "role": "implements",
@@ -13252,19 +13220,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2071"
+          "loc": "plugin/scripts/test_reqmap_report.py:2070"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2539"
+          "loc": "plugin/scripts/test_reqmap_report.py:2538"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2809"
+          "loc": "plugin/scripts/test_reqmap_report.py:2808"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4089"
+          "loc": "plugin/scripts/test_reqmap_report.py:4088"
         },
         {
           "role": "implements",
@@ -13360,11 +13328,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2071"
+          "loc": "plugin/scripts/test_reqmap_report.py:2070"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4089"
+          "loc": "plugin/scripts/test_reqmap_report.py:4088"
         },
         {
           "role": "implements",
@@ -13418,7 +13386,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2071"
+          "loc": "plugin/scripts/test_reqmap_report.py:2070"
         },
         {
           "role": "implements",
@@ -13481,7 +13449,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2809"
+          "loc": "plugin/scripts/test_reqmap_report.py:2808"
         },
         {
           "role": "implements",
@@ -13606,7 +13574,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2427"
+          "loc": "plugin/scripts/test_reqmap_report.py:2426"
         },
         {
           "role": "implements",
@@ -13654,7 +13622,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2539"
+          "loc": "plugin/scripts/test_reqmap_report.py:2538"
         },
         {
           "role": "implements",
@@ -13691,7 +13659,7 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "A Now or Next item with no bar is counted",
-      "intent": "Now and Next say the work is coming; a bar says when. An item in either with no bar is a commitment with no date, and nothing said so. The two files stay two (Senate run 2026-09-14_225939); this is a read-only line between them.",
+      "intent": "Now and Next say the work is coming; a bar says when. An item in either with no bar is a commitment with no date, and nothing said so. The two files stay two (decided on 2026-09-14); this is a read-only line between them.",
       "contract": [
         "An open item under Now or Next is scheduled when a bar's title equals its name or a bar carries its `req:`; otherwise it is unplanned.",
         "`sync` prints one line counting unplanned items and naming the first; done items and Later items are never counted, and a repo with no ROADMAP.md sees nothing."
@@ -14485,7 +14453,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "tested-by",
@@ -14584,11 +14552,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3714"
+          "loc": "plugin/scripts/test_reqmap_report.py:3713"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4717"
+          "loc": "plugin/scripts/test_reqmap_report.py:4716"
         },
         {
           "role": "implements",
@@ -14661,7 +14629,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3714"
+          "loc": "plugin/scripts/test_reqmap_report.py:3713"
         },
         {
           "role": "implements",
@@ -14721,7 +14689,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3714"
+          "loc": "plugin/scripts/test_reqmap_report.py:3713"
         },
         {
           "role": "implements",
@@ -14773,7 +14741,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3714"
+          "loc": "plugin/scripts/test_reqmap_report.py:3713"
         },
         {
           "role": "implements",
@@ -14828,7 +14796,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3714"
+          "loc": "plugin/scripts/test_reqmap_report.py:3713"
         },
         {
           "role": "implements",
@@ -14893,7 +14861,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4717"
+          "loc": "plugin/scripts/test_reqmap_report.py:4716"
         },
         {
           "role": "implements",
@@ -15152,7 +15120,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4579"
+          "loc": "plugin/scripts/test_reqmap_report.py:4578"
         },
         {
           "role": "implements",
@@ -15431,11 +15399,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap_report.py:4579"
+          "loc": "plugin/scripts/test_reqmap_report.py:4578"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4579"
+          "loc": "plugin/scripts/test_reqmap_report.py:4578"
         }
       ],
       "test_exempt": null,
@@ -15544,7 +15512,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3572"
+          "loc": "plugin/scripts/test_reqmap_report.py:3571"
         },
         {
           "role": "implements",
@@ -15605,7 +15573,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3572"
+          "loc": "plugin/scripts/test_reqmap_report.py:3571"
         },
         {
           "role": "implements",
@@ -15724,7 +15692,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3572"
+          "loc": "plugin/scripts/test_reqmap_report.py:3571"
         },
         {
           "role": "implements",
@@ -15801,11 +15769,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2359"
+          "loc": "plugin/scripts/test_reqmap_report.py:2358"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3971"
+          "loc": "plugin/scripts/test_reqmap_report.py:3970"
         },
         {
           "role": "implements",
@@ -15889,7 +15857,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3971"
+          "loc": "plugin/scripts/test_reqmap_report.py:3970"
         },
         {
           "role": "implements",
@@ -15953,15 +15921,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2359"
+          "loc": "plugin/scripts/test_reqmap_report.py:2358"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2956"
+          "loc": "plugin/scripts/test_reqmap_report.py:2955"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3971"
+          "loc": "plugin/scripts/test_reqmap_report.py:3970"
         },
         {
           "role": "implements",
@@ -16028,7 +15996,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3971"
+          "loc": "plugin/scripts/test_reqmap_report.py:3970"
         },
         {
           "role": "implements",
@@ -16091,7 +16059,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3971"
+          "loc": "plugin/scripts/test_reqmap_report.py:3970"
         },
         {
           "role": "implements",
@@ -16138,7 +16106,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3065"
+          "loc": "plugin/scripts/test_reqmap_report.py:3064"
         },
         {
           "role": "implements",
@@ -16182,7 +16150,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3092"
+          "loc": "plugin/scripts/test_reqmap_report.py:3091"
         },
         {
           "role": "implements",
@@ -16237,7 +16205,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2879"
+          "loc": "plugin/scripts/test_reqmap_report.py:2878"
         },
         {
           "role": "implements",
@@ -17660,7 +17628,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5771"
+          "loc": "plugin/scripts/test_reqmap_report.py:5770"
         },
         {
           "role": "implements",
@@ -18325,7 +18293,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2150"
+          "loc": "plugin/scripts/test_reqmap_report.py:2149"
         },
         {
           "role": "implements",
@@ -19283,11 +19251,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1786"
+          "loc": "plugin/scripts/test_reqmap_report.py:1785"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3911"
         },
         {
           "role": "implements",
@@ -19344,7 +19312,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3911"
         },
         {
           "role": "implements",
@@ -19398,11 +19366,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1768"
+          "loc": "plugin/scripts/test_reqmap_report.py:1767"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3911"
         },
         {
           "role": "implements",

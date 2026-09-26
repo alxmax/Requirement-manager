@@ -123,7 +123,7 @@ Every bullet below is binding.
 - The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
   read — is [[ARCH-SCAN-002]]'s contract, not restated here.
 - The check is warn-only and never changes the gate's exit code, including
-  under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on
+  under `--strict`. <!-- Rationale: the 2026-06-21 review of
   ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the
   rational way to pass CI); this stays advisory at any flag combination. -->
 - An author silences a file by tagging it or by adding it to `.reqmapignore`.
