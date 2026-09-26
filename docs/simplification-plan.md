@@ -66,6 +66,7 @@ new/updated requirements and links needed to describe the implementation.
 | Baseline | 90,707 | 1,574,184 | 1,869,883 | 72,492 |
 | PR 1 | 90,999 | 1,575,539 | 1,871,240 | 72,492 |
 | PR 2 | 90,998 | 1,565,220 | 1,860,933 | 72,492 |
+| PR 3 | 925 | 1,028,989 | 1,324,680 | 72,568 |
 
 Each PR appends its actual measured row. Growth in the first two correctness changes
 is reported honestly; it is not hidden by removing requirement evidence.
@@ -79,3 +80,44 @@ The viewer source/bundle remains unchanged unless a demonstrated compatibility
 problem requires an update. Performance targets need a named workload and machine.
 
 The remaining backlog is deliberately not claimed complete by these four PRs.
+
+## Using the smaller setup and exports
+
+Start a consumer with `python scripts/reqmap.py init --minimal`. It creates the
+requirements, ignore rules, locks and map without planning/release files, MCP
+configuration or a project site. Existing optional files are preserved. Ordinary
+`init` still provides the full setup; `--no-site` remains available independently.
+
+For smaller exports, put this in `requirements/_config.json` and run `sync`:
+
+```json
+{"MAP_PROFILE": "compact", "MAP_LOCALES": []}
+```
+
+The compact Markdown contains status totals and system needs, with links to the
+complete graph and offline viewer. Compact JSON preserves authored contracts,
+cases, notes, metadata and all links. Only JSON whitespace and explicitly unselected
+translation caches are omitted. HTML embeds minified JSON in either profile.
+Use `MAP_PROFILE: "full"` and `MAP_LOCALES: ["*"]` to restore full diagrams and
+all fresh translations; `["ro"]` selects Romanian only. Missing/stale cached
+translations continue to fall back to source content in the viewer.
+
+Commit requirement sources, configuration, baselines, `_map.md` and `_map.json`.
+The offline `_map.html` is generated locally or during publication; it remains
+untracked. Cached translations are preserved as inputs. The viewer bundle remains
+vendored; its only PR 2 change refreshes the example describing strict baselines.
+
+### PR 3 fixed-corpus comparison
+
+Using PR 2's 306-node JSON as input to both serializers in PR 3:
+full Markdown 91,000 bytes → compact 925; full JSON 1,565,344 →
+compact without selected translations 1,026,169. The source node fields and
+edges are identical after removing only `i18n`. Compact HTML with every cached
+locale is 1,658,117 bytes; without caches it is 1,321,860. The PR 2 viewer
+with pretty data was 1,860,933 bytes. Thus roughly 203 KB of HTML reduction
+comes from minification alone and 336 KB from the explicit locale choice.
+The stage table includes updated requirements and tests, not only format savings.
+
+PR 3 passes 1,239 engine tests, cross-tool integration and the viewer render smoke
+against compact data. CORE falls from 7,338 to 7,057 logical lines by demand-loading
+retirement and review modules; the vendored engine remains below 17,000 lines.

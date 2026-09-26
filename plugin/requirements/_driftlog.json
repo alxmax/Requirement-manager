@@ -69,6 +69,10 @@
       "hash": "4f93ce5f5feb",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
+    "ARCH-MAPDIAGRAMS-055": {
+      "hash": "0e45d4b8d45e",
+      "reason": "Compact export contracts and cases"
+    },
     "ARCH-MCP-073": {
       "hash": "bf318590b46e",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
@@ -222,8 +226,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "REQ-INIT-861": {
-      "hash": "74293b79d18b",
-      "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
+      "hash": "5151412a4deb",
+      "reason": "Compact exports and minimal initialization"
     },
     "REQ-INITTAG-1008": {
       "hash": "8b464f058897",
@@ -242,8 +246,16 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "REQ-MAP-870": {
-      "hash": "750addc172b2",
-      "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
+      "hash": "af329c57d766",
+      "reason": "Compact export contracts and cases"
+    },
+    "REQ-MAP-871": {
+      "hash": "7e73678111e9",
+      "reason": "Compact export contracts and cases"
+    },
+    "REQ-MAPDIAGRAMS-874": {
+      "hash": "68d4a52da578",
+      "reason": "Compact export contracts and cases"
     },
     "REQ-MCPTOOLS-1028": {
       "hash": "938eb7ec8f3e",
@@ -358,8 +370,8 @@
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
     },
     "REQ-TRANSLATE-938": {
-      "hash": "25c9549e479a",
-      "reason": "senate i18n sequence: clause 4 corrected against search.js, CASE-4 authored at the mutation evidence, counting check added"
+      "hash": "bbe7e87b21bf",
+      "reason": "Compact exports and minimal initialization"
     },
     "REQ-TRANSLATE-996": {
       "hash": "cd9ffcc8e0ce",

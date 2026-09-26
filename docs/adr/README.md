@@ -67,6 +67,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 
 | [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
 
+| [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
+
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
 never rewritten to match a later change: it gains a superseding record instead, because the

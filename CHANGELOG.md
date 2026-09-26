@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.7.0` — 2026-09-25
+
+- Add `init --minimal` without optional planning, release, MCP or site scaffolding.
+- Add a compact map profile and explicit locale selection; preserve full exports.
+- Minify embedded offline data and compare map JSON semantically for freshness.
+- Load retirement and review commands only when requested.
+
 ## plugin `v8.6.2` — 2026-09-25
 
 - Reject invalid configuration before dispatch; expose duplicate IDs and unreadable requirements as structured gate errors.

@@ -27,6 +27,10 @@
             "type": "boolean",
             "description": "Hard-reset: delete all non-generated requirements and strip membership tags from source files before re-extracting."
           },
+          "minimal": {
+            "type": "boolean",
+            "description": "Skip planning, release, MCP and site scaffolding."
+          },
           "no_site": {
             "type": "boolean",
             "description": "Skip the final site step (scaffolding docs/architecture.html)."

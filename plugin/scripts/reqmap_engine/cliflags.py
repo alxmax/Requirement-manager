@@ -117,6 +117,8 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--attach", default=None,
                     help="sync: HTML page to refresh the site's engine-owned "
                          "regions in (scaffolds it if absent)")
+    ap.add_argument("--minimal", action="store_true",
+                    help="Initialize without planning, release, MCP or site scaffolding.")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
     ap.add_argument("--allow-writes", dest="allow_writes", action="store_true",

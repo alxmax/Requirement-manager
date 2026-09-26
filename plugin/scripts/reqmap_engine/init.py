@@ -308,7 +308,7 @@ def _init_site(ws, code_root):
         print("note: site step skipped ({}).".format(e))
 
 
-def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
+def cmd_init(reqs_dir, code_root, wipe=False, no_site=False, minimal=False):
     # implements: ARCH-INIT-012  # implements: REQ-INIT-861
     """First-use bootstrap for a fresh repo: create requirements/, seed
     a minimal .reqmapignore (idempotent — never clobbers an existing
@@ -330,7 +330,8 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
         with open(ignore, "w", encoding="utf-8") as f:
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
-    release_notes = _seed_plan_files(code_root, reqs_dir, created)
+    release_notes = ([] if minimal else
+                     _seed_plan_files(code_root, reqs_dir, created))
     if wipe:
         _wipe(reqs_dir, code_root)
     print("Bootstrapping draft requirements from existing code...\n")
@@ -343,7 +344,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
     reqs = ws.reqs
     cmd_check(ws, update_lock=True)
     cmd_map(ws, code_root)
-    if not no_site:
+    if not (no_site or minimal):
         _init_site(ws, code_root)
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
@@ -358,7 +359,8 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
     print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
     if created:
         print("created: " + ", ".join(created))
-    _print_release_setup(reqs_dir, code_root, release_notes)
+    if not minimal:
+        _print_release_setup(reqs_dir, code_root, release_notes)
     print("\nNext: run `reqmap.py gate --risk` — it shows what to do, "
           "most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to "

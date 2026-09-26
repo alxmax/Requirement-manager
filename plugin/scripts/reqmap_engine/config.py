@@ -202,8 +202,10 @@ DESIGN_LINE_MAX = 80            # standards: a physical line wider than this
 # the named ones — read fail-open, applied once at startup, a key of the wrong
 # type or an unknown name is reported and ignored. Set constants without
 # rewiring: the circuit network.
+MAP_PROFILE = "full"
+MAP_LOCALES = ["*"]
 CONFIG_FILE = "_config.json"
-CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
+CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
                "LINT_CONTRACT_MAX",
                "LINT_FILE_SPREAD_MAX", "LINT_FANOUT_MIN", "LINT_FANOUT_MAX",
                "LINT_FANOUT_BANDS",
@@ -225,7 +227,7 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS",
 # declared here and a value outside them is reported rather than applied.
 # Without this, a repo that wrote `"eror"` would get the default back in silence
 # — precisely the failure the whole config mechanism exists to avoid.
-CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error")}
+CONFIG_ENUMS = {"MAP_PROFILE": ("full", "compact"), "DRIFT_SEVERITY": ("warn", "error")}
 
 # Keys a released engine once read and then dropped with what they tuned
 # (ADR-0047, ADR-0051): the design metrics, the docstring and definition-count

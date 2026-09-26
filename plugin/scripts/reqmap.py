@@ -39,8 +39,6 @@ from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
 from reqmap_engine.registry import _cli_choices, cmd_gen_integration
 from reqmap_engine.release import cmd_release
-from reqmap_engine.retire import cmd_retire
-from reqmap_engine.review import cmd_review
 from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
 from reqmap_engine.search import SEARCH_TOP, cmd_search
@@ -53,7 +51,7 @@ from reqmap_engine import (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audittail, init, retire, retireapply, levels, review,
+    gate, audittail, init, levels,
     targets, plandrift, history,
     pyramid, cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
@@ -206,6 +204,7 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     if a.mode_review is not None:
         # No id plans the whole corpus: what cmd_review and the review skill
         # always said.
+        from reqmap_engine.review import cmd_review
         return cmd_review(reqs, a.mode_review or None)
     if a.mode_dupes:
         return cmd_similar(reqs,
@@ -222,6 +221,7 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         if not a.mode_retire:
             print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]")
             return 2
+        from reqmap_engine.retire import cmd_retire
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
     if a.mode_release is not None:
@@ -331,7 +331,8 @@ def main():
         from reqmap_engine.mcp import serve
         return serve(a)
     if a.cmd == "init" and not a.plan:
-        return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
+        return cmd_init(reqs_dir, code_root, wipe=a.wipe,
+                        no_site=a.no_site, minimal=a.minimal)
 
     # One walk for the commands that need coverage too (gate/sync); the rest
     # only ever asked for members. --cache stays on scan_members, the only
@@ -419,15 +420,15 @@ _ENGINE_MODULES = (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audittail, init, retire, retireapply, levels, pyramid,
-    review, targets, plandrift, history,
+    gate, audittail, init, levels, pyramid,
+    targets, plandrift, history,
     cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
 )
 # The design review is imported only when a name is looked up in it, so a
 # command that never asks for it (`gate` above all) never loads it. Searched
 # after every eager module, in this order.
-_LAZY_MODULES = ("mcp", "audit", "design", "design_python", "design_brace",
+_LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design", "design_python", "design_brace",
                  "design_report")
 
 

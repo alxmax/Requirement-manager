@@ -4,6 +4,7 @@ show them.
 """
 import hashlib, json, os
 
+from . import config as cfg
 from .sections import ACCEPTANCE_LABELS, CONTRACT_LABELS, _from_any
 from .text import _first_quote, _section_raw, _title
 
@@ -65,6 +66,8 @@ def _load_translations(reqs, reqs_dir):
         if not fname.endswith(".json"):
             continue
         locale = fname[:-len(".json")]
+        if "*" not in cfg.MAP_LOCALES and locale not in cfg.MAP_LOCALES:
+            continue
         try:
             with open(os.path.join(i18n_dir, fname), encoding="utf-8") as f:
                 cache = json.load(f)

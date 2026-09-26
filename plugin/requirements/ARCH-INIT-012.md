@@ -192,6 +192,8 @@ Every bullet below is binding.
 - A second run never deletes a requirement someone wrote, and never edits an existing
   `.reqmapignore`.
 
+- `init --minimal` skips planning, release, MCP and site scaffolding, preserving existing files. Ordinary init retains full setup.
+
 ## Cases
 CASE-1 — the lock and map cover the requirements init just drafted
   Given  an untagged `app.py` in a repo with no `requirements/`
@@ -218,3 +220,8 @@ CASE-5 — a hand-authored requirement and .reqmapignore survive a re-run
   When   `cmd_init` runs (no `--wipe`)
   Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged
 
+
+CASE-5 — minimal initialization preserves existing optional files
+  Given a repository with an existing roadmap
+  When minimal init runs twice
+  Then maps and locks exist, no optional scaffolding is added, and the roadmap is unchanged

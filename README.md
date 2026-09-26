@@ -17,7 +17,7 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 16,711 lines across
+map of how everything connects. The engine is stdlib only, 16,763 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 
@@ -27,7 +27,7 @@ this repo's own requirement graph, republished on every push to `main`.
 ## Three commands
 
 ```bash
-python scripts/reqmap.py init     # set up requirements/, draft one per capability from the code you have
+python scripts/reqmap.py init --minimal  # set up requirements/, draft one per capability from the code you have
 python scripts/reqmap.py gate     # THE verdict: do the code and the specs still agree? (report-only)
 python scripts/reqmap.py sync     # rebuild everything derived: drift baseline, map, findings
 ```

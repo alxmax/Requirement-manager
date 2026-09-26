@@ -282,6 +282,9 @@ def _build_md_text(data):
     # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-874
     from datetime import datetime
 
+    if cfg.MAP_PROFILE == "compact":
+        return _compact_md(data)
+
     dep_count = {n["id"]: 0 for n in data["nodes"]}
     for _, b in data["edges"]:
         dep_count[b] = dep_count.get(b, 0) + 1
@@ -347,3 +350,27 @@ def render_md(data, reqs_dir):
     with open(out, "w", encoding="utf-8") as f:
         f.write(_utf8_safe(_build_md_text(data)))
     return out
+
+
+def _compact_md(data):
+    # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-874
+    """A bounded overview; complete contracts and links remain in JSON/HTML."""
+    nodes = data["nodes"]
+    lines = ["# Requirement Map", "",
+             "{} requirements · {} dependency links".format(
+                 len(nodes), len(data["edges"])), "",
+             "[Interactive offline map](_map.html) · "
+             "[Complete graph and contracts](_map.json)", "",
+             "| Status | Requirements |", "| --- | ---: |"]
+    for status in sorted({n["status"] for n in nodes}):
+        lines.append("| {} | {} |".format(
+            status, sum(n["status"] == status for n in nodes)))
+    lines += ["", "## System needs", "",
+              "| ID | Title |", "| --- | --- |"]
+    for n in nodes:
+        if n.get("level") == "system":
+            title = n["title"].replace("|", "/").replace("\n", " ")
+            lines.append("| {} | {} |".format(n["id"], title))
+    lines += ["", "Set MAP_PROFILE to full in _config.json and run sync "
+              "to restore all four Markdown diagrams.", ""]
+    return "\n".join(lines)

@@ -2,6 +2,7 @@
 _map.md/_map.json/_map.html, refresh _findings.md, and tell a committed
 artifact from a stale one.
 """
+import json
 import os
 
 from .author import _parse_todos
@@ -133,6 +134,14 @@ def _strip_generated(text):
     failed with zero requirement errors (issue #243).
     The committed rows may lag the code until the next `sync`; that is the
     trade for advice nobody should be blocked by."""
+    try:
+        payload = json.loads(text)
+    except ValueError:
+        payload = None
+    if isinstance(payload, dict) and "nodes" in payload:
+        for key in ("engine_version", "repo", "branch", "design"):
+            payload.pop(key, None)
+        return json.dumps(payload, sort_keys=True, ensure_ascii=False)
     out, in_design = [], False
     for l in text.splitlines():
         if in_design:
