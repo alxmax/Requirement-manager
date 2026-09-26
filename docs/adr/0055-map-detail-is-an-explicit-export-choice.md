@@ -12,7 +12,9 @@ Translation caches also made every offline export carry every available locale.
 Keep the full profile as the compatible default. Add a compact profile with a
 Markdown overview and minified JSON. Always minify the offline viewer payload.
 MAP_LOCALES independently selects cached translations; source contracts, cases,
-nodes and links are retained. This repository opts into compact with no caches.
+nodes and links are retained. This repository keeps the full profile and every
+cached locale: its committed `_map.md` is read on GitHub, where the offline viewer
+is not.
 Compare JSON content semantically so formatting is not a freshness failure.
 The existing single offline viewer policy (ADR-0034) remains in force.
 

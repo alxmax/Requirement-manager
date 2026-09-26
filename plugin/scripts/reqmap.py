@@ -146,34 +146,27 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # something is broken (ADR-0049); `--full` runs the whole registry and
     # prints every readability warning, as `gate` did before v8.4.0.
     quiet = not getattr(a, "full", False)
-    result, report = GateResult(), io.StringIO()
-    result.extend(Finding("INPUT:config", "error" if a.strict else "warn",
-                          None, msg)
-                  for msg in getattr(a, "config_problems", ()))
-    # Run exactly the same stages for both formats. Collect structured
-    # findings directly; the captured human report is never parsed.
-    try:
-        with redirect_stdout(report):
-            cmd_check(ws, False, a.strict,
-                      mode=GateMode(False, getattr(a, "since", None), quiet),
-                      findings=result)
-            if not a.no_lint:
-                cmd_lint(ws, strict=True, quiet=quiet, findings=result)
-            if not a.no_map_check:
-                cmd_map(ws, code_root, True, findings=result)
-    except BaseException:
-        # A stage that raises must not swallow what the earlier ones printed.
-        print(report.getvalue(), end="",
-              file=sys.stderr if a.as_json else sys.stdout)
-        raise
+    result = GateResult(Finding("INPUT:config", "error" if a.strict else
+                                "warn", None, msg)
+                        for msg in getattr(a, "config_problems", ()))
+    if not a.as_json:
+        print("".join("{} {} {}\n".format(
+            "ERROR" if f["severity"] == "error" else "WARN ", f["rule"], f)
+            for f in result), end="")
+    # Run exactly the same stages for both formats and collect structured
+    # findings directly. Text streams as it runs, so a stage that raises
+    # cannot swallow what the earlier ones printed; JSON discards the prose.
+    with redirect_stdout(io.StringIO() if a.as_json else sys.stdout):
+        cmd_check(ws, False, a.strict,
+                  mode=GateMode(False, getattr(a, "since", None), quiet),
+                  findings=result)
+        if not a.no_lint:
+            cmd_lint(ws, strict=True, quiet=quiet, findings=result)
+        if not a.no_map_check:
+            cmd_map(ws, code_root, True, findings=result)
     if a.as_json:
         print(json.dumps(result.payload()))
         return result.exit_code
-    for f in result:
-        if f["rule"] == "INPUT:config":
-            print("ERROR" if f["severity"] == "error" else "WARN ",
-                  f["rule"], str(f))
-    print(report.getvalue(), end="")
     rc = result.exit_code
     # Last, because a reader takes the last line as the verdict. `cmd_check`
     # prints its own counts where it runs, which is FIRST — a hundred lines
@@ -330,8 +323,8 @@ def main():
     # `gate --strict` promotes (ADR-0054).
     a.config_problems = []
     loaded = load_config(reqs_dir, a.config_problems)
-    for msg in a.config_problems:
-        print("config: " + msg, file=sys.stderr)
+    print("".join("config: %s\n" % m for m in a.config_problems), end="",
+          file=sys.stderr)
     apply_config(loaded, problems=a.config_problems)
     # prefer an on-disk templates/requirement.md if present (back-compat), else
     # the built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
