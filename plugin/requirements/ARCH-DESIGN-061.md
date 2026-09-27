@@ -18,14 +18,14 @@ satisfies: [SYS-READ-103]
 > never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's
 > code (Python through `ast`, the brace languages through masked-text heuristics) and
 > names the shapes the four OOP pillars would fix, plus two writing rules — a file of at
-> most 500 lines, a line of at most 80 columns — so the reader who came to understand a
+> most 500 lines, a line of at most 120 columns — so the reader who came to understand a
 > file also sees where its design pulls against it. It advises; it never gates.
 
 Every bullet below is binding.
 - `design` reports encapsulation and abstraction candidates: module state written from functions, long parameter lists, data clumps, long or deeply nested functions, prefix families. [[REQ-DESIGN-950]]
 - `design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]
 - `design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]
-- `design` reports two writing standards per file: more than 500 lines, and lines wider than 80 columns. [[REQ-DESIGN-953]]
+- `design` reports two writing standards per file: more than 500 lines, and lines wider than 120 columns. [[REQ-DESIGN-953]]
 - The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`), `health` and `gate --audit`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 - The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
@@ -224,33 +224,33 @@ satisfies: [ARCH-DESIGN-061]
 
 ## Description
 > Two rules a reviewer checks by eye on every file, made mechanical and tunable: a
-> file stays at most 500 lines, a line at most 80 columns. One finding per file per
+> file stays at most 500 lines, a line at most 120 columns. One finding per file per
 > rule, so a 2,000-line file is one line in the report, not two thousand.
 
 Every bullet below is binding.
 - A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.
-- A file with lines wider than `DESIGN_LINE_MAX` columns (default 80) is one `line-too-long` candidate reporting the count and the first such line.
+- A file with lines wider than `DESIGN_LINE_MAX` columns (default 120) is one `line-too-long` candidate reporting the count and the first such line.
 - Both rules apply to every program-logic file the review reads, whatever its language.
 - Standards candidates carry the pillar `standards` and print as the last block of the report.
 
 ## Cases
 CASE-1 — each standard fires once per file
-  Given  a 501-line Python file whose last line is 86 columns wide
+  Given  a 501-line Python file whose last line is 126 columns wide
   When   `_design_file` reads it
-  Then   one `file-too-long` and one `line-too-long` at line 501 naming 80 columns are reported, both under standards
+  Then   one `file-too-long` and one `line-too-long` at line 501 naming 120 columns are reported, both under standards
 
-CASE-2 — the defaults are 500 lines and 80 columns
-  Given  the shipped configuration and a 499-line file of 78-column lines
+CASE-2 — the defaults are 500 lines and 120 columns
+  Given  the shipped configuration and a 499-line file of 120-column lines
   When   `_design_file` reads it
-  Then   the thresholds read 500 and 80, and nothing is reported
+  Then   the thresholds read 500 and 120, and nothing is reported
 
 CASE-3 — the writing rules are configurable
-  Given  a file with one 96-column line, then `DESIGN_LINE_MAX` set to 120 through `apply_config`
+  Given  a file with one 136-column line, then `DESIGN_LINE_MAX` set to 160 through `apply_config`
   When   `_design_file` reads it before and after
   Then   `line-too-long` is reported before and nothing after
 
 CASE-4 — standards print last
-  Given  a module with a global write on a line wider than 80 columns
+  Given  a module with a global write on a line wider than 120 columns
   When   `cmd_design` prints its report
   Then   the Encapsulation block precedes the Standards block
 
