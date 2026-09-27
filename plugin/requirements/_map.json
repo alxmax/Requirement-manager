@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-26.6",
+  "engine_version": "2026-09-27",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3793,12 +3793,12 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Advisory design review",
-      "intent": "Code written in a long AI session drifts toward procedural sprawl: state in module globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's code (Python through `ast`, the brace languages through masked-text heuristics) and names the shapes the four OOP pillars would fix, plus two writing rules — a file of at most 500 lines, a line of at most 80 columns — so the reader who came to understand a file also sees where its design pulls against it. It advises; it never gates.",
+      "intent": "Code written in a long AI session drifts toward procedural sprawl: state in module globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's code (Python through `ast`, the brace languages through masked-text heuristics) and names the shapes the four OOP pillars would fix, plus two writing rules — a file of at most 500 lines, a line of at most 120 columns — so the reader who came to understand a file also sees where its design pulls against it. It advises; it never gates.",
       "contract": [
         "`design` reports encapsulation and abstraction candidates: module state written from functions, long parameter lists, data clumps, long or deeply nested functions, prefix families. [[REQ-DESIGN-950]]",
         "`design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]",
         "`design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]",
-        "`design` reports two writing standards per file: more than 500 lines, and lines wider than 80 columns. [[REQ-DESIGN-953]]",
+        "`design` reports two writing standards per file: more than 500 lines, and lines wider than 120 columns. [[REQ-DESIGN-953]]",
         "The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`), `health` and `gate --audit`. [[REQ-DESIGN-954]]",
         "JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]",
         "The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]",
@@ -4085,17 +4085,17 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Code-writing standards",
-      "intent": "Two rules a reviewer checks by eye on every file, made mechanical and tunable: a file stays at most 500 lines, a line at most 80 columns. One finding per file per rule, so a 2,000-line file is one line in the report, not two thousand.",
+      "intent": "Two rules a reviewer checks by eye on every file, made mechanical and tunable: a file stays at most 500 lines, a line at most 120 columns. One finding per file per rule, so a 2,000-line file is one line in the report, not two thousand.",
       "contract": [
         "A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.",
-        "A file with lines wider than `DESIGN_LINE_MAX` columns (default 80) is one `line-too-long` candidate reporting the count and the first such line.",
+        "A file with lines wider than `DESIGN_LINE_MAX` columns (default 120) is one `line-too-long` candidate reporting the count and the first such line.",
         "Both rules apply to every program-logic file the review reads, whatever its language.",
         "Standards candidates carry the pillar `standards` and print as the last block of the report."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each standard fires once per file\n  Given  a 501-line Python file whose last line is 86 columns wide\n  When   `_design_file` reads it\n  Then   one `file-too-long` and one `line-too-long` at line 501 naming 80 columns are reported, both under standards\n\nCASE-2 — the defaults are 500 lines and 80 columns\n  Given  the shipped configuration and a 499-line file of 78-column lines\n  When   `_design_file` reads it\n  Then   the thresholds read 500 and 80, and nothing is reported\n\nCASE-3 — the writing rules are configurable\n  Given  a file with one 96-column line, then `DESIGN_LINE_MAX` set to 120 through `apply_config`\n  When   `_design_file` reads it before and after\n  Then   `line-too-long` is reported before and nothing after\n\nCASE-4 — standards print last\n  Given  a module with a global write on a line wider than 80 columns\n  When   `cmd_design` prints its report\n  Then   the Encapsulation block precedes the Standards block\n\n--------------------",
+      "accept": "CASE-1 — each standard fires once per file\n  Given  a 501-line Python file whose last line is 126 columns wide\n  When   `_design_file` reads it\n  Then   one `file-too-long` and one `line-too-long` at line 501 naming 120 columns are reported, both under standards\n\nCASE-2 — the defaults are 500 lines and 120 columns\n  Given  the shipped configuration and a 499-line file of 120-column lines\n  When   `_design_file` reads it\n  Then   the thresholds read 500 and 120, and nothing is reported\n\nCASE-3 — the writing rules are configurable\n  Given  a file with one 136-column line, then `DESIGN_LINE_MAX` set to 160 through `apply_config`\n  When   `_design_file` reads it before and after\n  Then   `line-too-long` is reported before and nothing after\n\nCASE-4 — standards print last\n  Given  a module with a global write on a line wider than 120 columns\n  When   `cmd_design` prints its report\n  Then   the Encapsulation block precedes the Standards block\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -23250,14 +23250,14 @@
   ],
   "design": {
     "files": 118,
-    "clean_files": 116,
-    "score": 98,
+    "clean_files": 117,
+    "score": 99,
     "candidates": {
       "encapsulation": 0,
       "abstraction": 1,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 1
+      "standards": 0
     },
     "findings": [
       {
@@ -23267,18 +23267,9 @@
         "line": 281,
         "name": "main",
         "detail": "`main` is 90 lines (over 80)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 208,
-        "name": "config.py",
-        "detail": "2 line(s) wider than 80 columns, first at line 208"
       }
     ],
     "advice": {
-      "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
       "long-function": "a function this long hides several steps: extract each step under a name that says what it does"
     }
   },

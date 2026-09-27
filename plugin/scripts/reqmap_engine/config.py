@@ -194,7 +194,7 @@ DESIGN_ISINSTANCE_CHAIN = 3
 # polymorphism: `x == literal` branches on one name
 DESIGN_BRANCH_CHAIN = 4
 DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
-DESIGN_LINE_MAX = 80            # standards: a physical line wider than this
+DESIGN_LINE_MAX = 120           # standards: a physical line wider than this
 
 # ---------- per-repo configuration ----------
 # Every threshold above is a module constant, and a consumer could change none

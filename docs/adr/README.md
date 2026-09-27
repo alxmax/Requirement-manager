@@ -66,6 +66,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0053](0053-the-budget-measures-the-core-in-logical-lines.md) | The budget measures the core in logical lines, under a total-lines ceiling | Accepted |
 | [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
 | [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
+| [0056](0056-the-design-review-line-limit-is-120-columns.md) | The design review's line limit is 120 columns | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

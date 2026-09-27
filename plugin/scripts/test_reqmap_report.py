@@ -5286,30 +5286,30 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
 
     def test_file_length_and_line_width(self):  # verifies: REQ-DESIGN-953#CASE-1
         src = ("".join("x{} = 1\n".format(i) for i in range(500))
-               + "y = '" + "z" * 80 + "'\n")
+               + "y = '" + "z" * 120 + "'\n")
         f = {x["kind"]: x for x in R._design_file("m.py", src)}
         self.assertIn("file-too-long", f)
         self.assertEqual(f["line-too-long"]["line"], 501)
-        self.assertIn("1 line(s) wider than 80", f["line-too-long"]["detail"])
+        self.assertIn("1 line(s) wider than 120", f["line-too-long"]["detail"])
         self.assertEqual({x["pillar"] for x in f.values()}, {"standards"})
 
-    def test_the_defaults_are_500_lines_and_80_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
+    def test_the_defaults_are_500_lines_and_120_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
         self.assertEqual((R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_LINE_MAX),
-                         (500, 80))
-        ok = "".join("x = '{}'\n".format("y" * 72) for _ in range(499))
+                         (500, 120))
+        ok = "".join("x = '{}'\n".format("y" * 114) for _ in range(499))
         self.assertEqual(R._design_file("m.py", ok), [])
 
     def test_the_writing_rules_are_configurable(self):  # verifies: REQ-DESIGN-953#CASE-3
-        self._set(DESIGN_FILE_MAX_LINES=500, DESIGN_LINE_MAX=80)
-        src = "x = '" + "y" * 90 + "'\n"
+        self._set(DESIGN_FILE_MAX_LINES=500, DESIGN_LINE_MAX=120)
+        src = "x = '" + "y" * 130 + "'\n"
         self.assertEqual([f["kind"] for f in R._design_file("m.py", src)],
                          ["line-too-long"])
-        R.apply_config({"DESIGN_LINE_MAX": 120}, out=io.StringIO())
+        R.apply_config({"DESIGN_LINE_MAX": 160}, out=io.StringIO())
         self.assertEqual(R._design_file("m.py", src), [])
 
     def test_standards_print_last(self):  # verifies: REQ-DESIGN-953#CASE-4
         src = ("COUNT = 0\ndef bump():\n    global COUNT\n"
-               "    COUNT += 1  # " + "c" * 80 + "\n")
+               "    COUNT += 1  # " + "c" * 120 + "\n")
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "m.py"), src)
             buf = io.StringIO()

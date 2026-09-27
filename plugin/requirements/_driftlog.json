@@ -38,8 +38,8 @@
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
     "ARCH-DESIGN-061": {
-      "hash": "98d3066d75c0",
-      "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
+      "hash": "dda7532467d4",
+      "reason": null
     },
     "ARCH-DOCCLAIMS-071": {
       "hash": "c26232330457",
@@ -196,6 +196,10 @@
     "REQ-DECOMPOSE-994": {
       "hash": "3ae7bb5d2b90",
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
+    },
+    "REQ-DESIGN-953": {
+      "hash": "5999a2f61f1b",
+      "reason": null
     },
     "REQ-DESIGN-954": {
       "hash": "79d473bf523a",
