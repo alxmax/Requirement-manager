@@ -4,218 +4,121 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-All commands run from `plugin/` (the engine resolves paths relative to its working directory):
+Engine commands run from `plugin/` (the engine resolves paths relative to its working directory). The CLI has six verbs — `init`, `gate`, `sync`, `clarify`, `ask`, `mcp` — and everything else is a flag of one of them; `python scripts/reqmap.py <verb> --help` lists each verb's flags. A verb refuses a flag the registry gives another verb (exit 2, naming the owner).
 
 ```bash
-python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft requirements from untagged code + lock + map + next-steps (--plan: JSON dry run, writes nothing; --md-glob adds .md files; --wipe: hard reset)
-
-# --- author ---------------------------------------------------------------
-# a new requirement is written directly as requirements/AREA-NAME-NNN.md (or an assistant is asked to write it);
-# the `new` verb and `new --from-todo` were removed in v8.0.0 (ADR-0045); the built-in
-# template is still the shape to follow, and ARCH-NEW-004 / ARCH-PROMOTE-TODO-001 stay
-# in the corpus as `deprecated`
-python scripts/reqmap.py clarify AREA-NAME-NNN  # the questions this requirement has not answered (--json). --decompose splits it into code-rung children along the bold group labels in its Description, --apply to write; with no id, every grouped requirement. A requirement with no groups gets one draft per over-long clause instead
-python scripts/reqmap.py clarify --levels       # propose a V-model rung for every requirement that declares none (code by default, architecture for a group), plus `ARCH-<FAMILY>-001` per id-prefix family, `SYS-NEEDS-A-NAME-001` at the apex and the `satisfies:` edges — init's shape; read-only, --apply writes all of it marked `level_source: auto` (ADR-0031, ADR-0038)
-# confirming is a HUMAN's answer, not a command: edit `status:` in the frontmatter
-# after someone has read it. The gate enforces the invariant (RM006: confirmed with
-# no implements: member is an error), and `sync` demotes an edited contract back to
-# draft on its own.
-
-# --- build ----------------------------------------------------------------
-python scripts/reqmap.py gate --full --code ..  # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only. Bare `gate` runs only DEFAULT_RULES and prints readability errors only (ADR-0049); this repo's CI and hook pass --full.
-python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, _findings.md, the integration artifacts. --accept-drift when a confirmed contract changed.
-python scripts/reqmap.py mcp [--allow-writes]   # serve the engine to an AI assistant over MCP (stdio): 13 tools named for questions, each one reqmap invocation in a fresh process, plus each requirement and the map as resources; read-only unless --allow-writes (ADR-0043). init writes .mcp.json and .vscode/mcp.json
-python scripts/reqmap.py sync --release [vX.Y.Z]   # cut the next version planned in _planning.json: bump the version files, write the CHANGELOG entry, drop the milestone from the plan. Plan first, --apply to write, --json for CI (ADR-0040). Tagging stays in CI
-python scripts/reqmap.py sync --retire AREA-NAME-NNN [ID ...]  # take one requirement — or a whole class — out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents. A batch retires in a graph-computed order (consumers first) under ONE working-tree check; a dependent that is already deprecated, or that is in the same batch, never blocks
-
-# --- read -----------------------------------------------------------------
-python scripts/reqmap.py gate --risk               # what to do next: health score + counted risk buckets + the plan's own gaps, last (--json/--badge: the health numbers, `plan_gaps` among them; --untagged: files with no implements: tag)
-python scripts/reqmap.py gate --show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
-python scripts/reqmap.py ask --search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
-python scripts/reqmap.py ask --dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
-python scripts/reqmap.py ask --review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors)
-python scripts/reqmap.py ask --design --code ..   # advisory OOP review of the code: 4 pillars + files <= 500 lines, lines <= 120 columns (--json; ADR-0051, ADR-0056)
-# The EN/RO toggle in the viewer still reads requirements/_i18n/<locale>.json; the `translate` verb that WROTE that cache was removed 2026-09-05, so a refresh is now a manual step.
+python scripts/reqmap.py gate --full --code ..   # THE verdict: link sync + drift + test links, readability, committed-map freshness. Report-only. CI and the hook run --full
+python scripts/reqmap.py sync --code ..          # rebuild everything derived: lock, _map.*, _findings.md, integration artifacts
+python scripts/reqmap.py sync --code .. --accept-drift   # required after editing a CONFIRMED contract, or sync demotes it to draft
+python scripts/reqmap.py gate --risk             # what to do next: health + risk buckets + test gaps + the plan's gaps
+python scripts/reqmap.py gate --show ID          # one requirement's dossier
+python scripts/reqmap.py sync --release          # cut the next planned version (plan first, --apply to write, tagging stays in CI)
 ```
 
-The CLI has six verbs — `init`, `gate`, `sync`, `clarify`, `ask` (every read-only question that is not the verdict, ADR-0044), and `mcp`, the server (ADR-0043) (`reqmap.py --help`); everything else is a flag of one of them. `new` was the seventh until v8.0.0 removed it (ADR-0045, REQ-NEWGONE-1034). Since v8.0.0 every verb refuses a flag the registry gives another verb (exit 2, naming the owner), `gate --search` & co. included.
+**`gate` and `sync` must carry `--code ..`** so the scan reaches the repo root (`docs/`, `.github/`, `.githooks/`, root `scripts/`) under the repo-root `.reqmapignore` (kept separate from `plugin/.reqmapignore` — see that file's comment). The committed `_reqlock.json`/`_map.json`/`_map.md` are generated from this widened scan: member paths are `code_root`-relative, so a run without `--code ..` reports every path one level off and fails freshness. `.githooks/pre-commit` runs from the repo root and passes `--code .` — same target. Read-only questions (`gate --show`, `ask`, `clarify`) work either way.
 
-The viewer (`app/`, see `app/CLAUDE.md`), run from `app/`:
+A confirmed requirement whose members all live outside `plugin/` (e.g. `ARCH-SELFGATE-039`: CI workflow, `check/action.yml`, the git hooks, `sync_reqmap.sh`) ERRORs under a bare `gate` with no `--code ..`, because the narrow scan never reaches its tags. Accepted and permanent: CI and the hook always run widened.
+
+**Confirming a requirement is a human's answer, not a command:** edit `status:` in the frontmatter after someone has read it. RM006 errors on a confirmed requirement with no `implements:` member.
+
+### Tests
+
+Stdlib `unittest`, no install. On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252.
 
 ```bash
-npm run smoke          # SSR render checks — the viewer's test suite
-npm run build:viewer   # rebuild the vendored plugin/scripts/_map_viewer.html; required after any app/ change, then `sync`
+python -X utf8 scripts/test_reqmap.py                          # from plugin/: the whole suite (entry point; the parts are test_reqmap_*.py)
+python -X utf8 -m unittest test_reqmap_gate -v                 # one part, from plugin/scripts/
+python -X utf8 -m unittest test_reqmap_gate.PlanInput -v       # one class or test
 ```
 
-**`gate` and `sync` above already carry `--code ..`** so the scan reaches the repo root
-(`docs/`, `.github/`, `.githooks/`, root-level `scripts/`), per a NEW repo-root `.reqmapignore`
-(kept separate from `plugin/.reqmapignore` — see that file's own comment for why). This is not
-optional for these two: the *committed* `_reqlock.json`/`_map.json`/`_map.md`
-are generated from the widened scan (member `loc` paths are `code_root`-relative, so a copy
-generated without `--code ..` reports every existing member's path one level off and fails
-freshness checks against the real committed files). `.githooks/pre-commit` already runs from
-the repo root, so it passes `--code .` instead of `--code ..` — same target, different starting
-cwd. Read-only exploration with no committed-artifact freshness concern (`gate --show`,
-`ask`, `clarify`) is unaffected either way and can be run with or
-without `--code ..` depending on what you want to inspect.
+The viewer's tests and rebuild are in `app/CLAUDE.md`; any `app/` change needs `npm run build:viewer`, then `sync`.
 
-**A `confirmed` requirement whose members all live outside `plugin/`** (e.g. `ARCH-SELFGATE-039`,
-whose 5 members are `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`,
-`.githooks/pre-push`, `sync_reqmap.sh`) can now only pass `gate`'s implements-tag check under the
-widened scan. Running the bare `gate` (no `--code ..`) genuinely ERRORs on such a requirement —
-not a silent miss, a real exit-1 failure — because the narrow scope never reaches any file that
-proves the tag exists. This is an accepted, permanent consequence of the widened-scan design, not
-a bug: CI and the pre-commit hook always run widened, so it never fires there; a human running the
-bare command locally sees a loud, immediately-diagnosable error rather than a silent divergence.
-
-The regression suite is an entry point plus five parts: `test_reqmap.py` is the entry point and re-exports
-`test_reqmap_common` (shared fixtures), `test_reqmap_scan` (parser, scanning, masking, walk,
-git), `test_reqmap_gate` (gate rules, drift, `--since`, test links), `test_reqmap_author`
-(init/lint/clarify/retire) and `test_reqmap_report` (map, viewer, site, health, audit,
-design). The test split predates the engine's own split (ADR-0035) and is independent of it. Every
-documented invocation still goes through `test_reqmap`; a part also runs on its own.
-
-Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
+From the **repo root**, the packaging side:
 
 ```bash
-python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
-python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
-python -X utf8 -m unittest test_reqmap_gate -v                     # one part on its own
-python scripts/reqmap.py gate --code ..                            # includes the freshness check: fails if the committed _map.* is stale
-```
-
-From the **repo root** (not `plugin/`) — the packaging/release side:
-
-```bash
-python scripts/check_versions.py        # plugin.json semver == marketplace.json (x2); validates MAP_ENGINE_VERSION shape. --fix syncs.
+python scripts/check_versions.py [--fix]          # plugin.json semver == marketplace.json (x2), Action major, MAP_ENGINE_VERSION shape
+python scripts/check_engine_bump.py --base main   # reqmap.py or reqmap_engine/ changed => MAP_ENGINE_VERSION changed
+python scripts/check_engine_budget.py             # core logical-line budget + physical ceiling
 python -X utf8 scripts/test_check_versions.py
-python scripts/check_engine_bump.py --base main   # reqmap.py changed => MAP_ENGINE_VERSION must have changed (CI: --base HEAD~1; hook: --staged)
 python -X utf8 scripts/test_check_engine_bump.py
-python -X utf8 scripts/test_changelog_notes.py    # release-notes extraction (CI runs it with cwd=scripts/)
-python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync→gate→map: the AI-agnostic falsification test
+python -X utf8 scripts/test_changelog_notes.py    # CI runs it with cwd=scripts/
+python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync -> gate -> map
+python -X utf8 scripts/test_engine_staleness.py   # the only thing that exercises check/engine_staleness.py before it ships
 ```
 
-**Python floor: 3.9** (`MIN_PYTHON` in `reqmap.py`, `ARCH-PYFLOOR-040`). It is deliberately the oldest version CI runs, not the oldest the code happens to work on (3.7): a floor nothing tests is a claim, not a guarantee. `reqmap.py` refuses an older interpreter with one readable line and exit 2. Raising it means moving the matrix and `MIN_PYTHON` together — a test asserts they stay equal.
+### CI and hooks
 
-CI has **two** test surfaces, don't confuse them: `gate-and-tests` (ubuntu, `3.x`) is the single authoritative verdict on this repo's requirement corpus; `tests` is the portability matrix (3.9/3.12/3.13 x ubuntu/windows) that runs every suite and nothing else. `release` needs both; `deploy-map` needs only the gate.
-
-A third, non-authoritative job — `quality` — measures the engine rather than verifying it: `coverage` over `test_reqmap.py` (92% at the time of writing) and `ruff`, both published to the run's job summary. Only `ruff --select E9,F` (syntax errors, undefined names) can fail it; every other rule is advisory, because several ruff complaints describe deliberate choices here (`except Exception: return None` IS the fail-open contract in a dozen places). It is the only job that installs from PyPI, both tools pinned, and it is deliberately **not** in `release`'s `needs` — the authoritative verdicts stay dependency-free. There is no coverage floor yet, on purpose: publish the number first.
-
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` (which since `v4.0.0` *is* the lint and the map-freshness check as well) → `test_reqmap.py`.
-
-**Hooks — two different files, don't confuse them:**
-- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `check_engine_bump.py --staged` → `gate`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
-- `plugin/hooks/pre-commit` is the hook **shipped to consumer repos** — editing it changes consumer behaviour and needs a semver bump.
-
-`sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into the local plugin cache and any consumer repos passed as args; it only refreshes an *existing* vendored engine, never seeds one.
+- `gate-and-tests` (ubuntu) is the single authoritative verdict: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → CHANGELOG-entry check → `gate --code ..` → `test_reqmap.py`. The gate must pass (0 errors) before committing a change to the engine or any requirement.
+- `tests` is the portability matrix (3.9/3.12/3.13 × ubuntu/windows) and runs every suite, nothing else. `release` needs both; `deploy-map` needs only the gate.
+- `quality` measures, it does not verify: `coverage` and `ruff`, pinned from PyPI. Only `ruff --select E9,F` can fail it; other rules are advisory because several describe deliberate choices (`except Exception: return None` IS the fail-open contract in a dozen places). It is deliberately not in `release`'s needs, and there is no coverage floor yet, on purpose.
+- **Python floor 3.9** (`MIN_PYTHON`, `ARCH-PYFLOOR-040`) is the oldest version CI runs, not the oldest the code works on. Raising it means moving the matrix and `MIN_PYTHON` together — a test asserts they match.
+- **Two hook files, don't confuse them:** `.githooks/pre-commit` is this repo's dev hook (`check_versions.py` → `check_engine_bump.py --staged` → `gate`; enable with `git config core.hooksPath .githooks`; `.githooks/pre-push` blocks direct pushes to `main`). `plugin/hooks/pre-commit` is shipped to consumer repos — editing it changes consumer behaviour and needs a semver bump.
+- `sync_reqmap.sh` refreshes an EXISTING vendored engine (+ viewer template) in the plugin cache and in consumer repos passed as args; it never seeds one.
 
 ## Architecture
 
-This repo is a Claude Code plugin that ships **two skills** under `plugin/skills/`:
-- `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` (Claude) and `SKILL.universal.md` (any other assistant) are short entry points; both load `references/workflow.md`, the authoritative contract.
-- `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: ARCH-REVIEW-022`).
+The repo is a Claude Code plugin shipping two skills under `plugin/skills/`: `requirement-manager` (its `SKILL.md` / `SKILL.universal.md` are entry points that load `references/workflow.md`, the authoritative contract on authoring rules, statuses and the gate) and `requirement-quality-review` (advisory, never part of the gate). It dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Diagrams of this repo** are no longer generated here. The `excalidraw-diagram` skill was
-split out at plugin `v6.1.0` into [its own repository](https://github.com/alxmax/excalidraw-diagram) — it shared this one and
-nothing else, with no imports in either direction. `docs/` stays the published Pages root;
-`.gitignore` still hard-blocks `docs/*.excalidraw`. Its HTML is reviewed and self-contained,
-and beside it live the five reference pages the README's own sections moved into on
-2026-09-20 — `commands.md`, `requirements.md`, `integrations.md`, `planning.md`,
-`internals.md`. The README is the front door only (problem, `init`/`sync`/`gate`, the worked
-example, the Action, 92 lines); a fact that belongs in one of the five is edited THERE, never
-copied back. All six are in the root `.reqmapignore`: prose about the capabilities, never a
-member of one.
+**Design decisions live in `docs/adr/`** (index at `docs/adr/README.md`). Read the relevant record before proposing a change that reverses one; each names its evidence and revisit condition. A decision that changes gets a NEW record superseding the old one — never an edit to the old one.
 
-The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
+**The engine is a package behind a thin CLI** (ADR-0035). `plugin/scripts/reqmap.py` is the command line only — parser, dispatch, the Python floor, and the flat namespace `import reqmap` offers (a module-level `__getattr__` looks any engine name up across the package, so `R.LINT_AC_MAX` works). `plugin/scripts/reqmap_engine/` holds the logic, 69 modules beside `__init__.py`, one per capability, stdlib only. Seeding copies `reqmap.py` AND `reqmap_engine/` together.
 
-**Design decisions live in `docs/adr/`** (57 records, index at `docs/adr/README.md`) — the engine's shape (`0014` kept it one file, `0033` priced the split, `0035` made it a package at the maintainer's direction), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+- **Shape by convention:** no file over 500 lines, no line over 100 columns.
+- **Size is budgeted** (ADR-0053): `check_engine_budget.py` derives CORE — the modules `sync` + `gate --full` load — and fails above `CORE_LOGICAL_BUDGET` (logical lines, so rewrapping costs nothing) or above `TOTAL_LINE_CEILING` physical lines. Budgets move down only with the cut that earns it, in the same commit. A capability only some commands need is imported at call time (`plandrift`, `planschema`, `release`, `testgaps` are in `_LAZY_MODULES`), so it stays out of CORE.
+- **Layering is a bus, imported by name, never upward:** `config → model → parse/sections/acceptance/text → tags/scan/orphans → git → locks → (features) → workspace → rules → gate → reqmap.py`. Two documented call-time imports break the direction on purpose: `health._link_sync_errors` → `rules` (the gate's map rule embeds the health record) and `risk._plan_gaps` → `mapdata` (`mapdata` reads `_risk_signals` from `risk`).
+- **Every `_config.json` tunable lives in `config.py` and is read as `cfg.NAME`** — a name import snapshots the default and misses the override.
+- **A test that patches an engine name patches the module that looks it up** (`R.git._git`, not `R._git`).
+- **An extracted helper keeps a copy of the parent's `# implements:` line** as the first line of its body, or the member sidecar loses coverage of the moved code.
+- **`MAP_ENGINE_VERSION` lives in `reqmap_engine/__init__.py`**, which every probe reads first (falling back to `reqmap.py` for a single-file copy seeded before v7).
 
-**The engine is a package behind a thin CLI** (`docs/adr/0035`, plugin `v7.0.0`): `plugin/scripts/reqmap.py` is the command line only — parser, dispatch, the Python floor, and the flat namespace `import reqmap` has always offered (a module-level `__getattr__` looks any engine name up across the package, so `R.LINT_AC_MAX` and `R._acc_blocks` still work) — and `plugin/scripts/reqmap_engine/` holds the logic, 69 modules beside `__init__.py`, one per capability, stdlib only. The shape it keeps by convention: no file over 500 lines, no line over 100 columns; `ask --design` (ADR-0051, back after ADR-0047 removed it) measures any repo against 500 lines and 120 columns (ADR-0056). Its size is budgeted (ADR-0053): `scripts/check_engine_budget.py` derives CORE, the modules `sync` + `gate --full` load, and fails above `CORE_LOGICAL_BUDGET` counted in logical lines (`tokenize.NEWLINE`, so rewrapping costs nothing); it also fails when the physical total, `wc -l plugin/scripts/reqmap.py plugin/scripts/reqmap_engine/*.py | tail -1`, passes `TOTAL_LINE_CEILING` (20,000, the maintainer's alarm). Budgets move down only with the cut that earns it, in the same commit. `scripts/check_engine_perf.py` reports gate and import timings (median and sd of 10 cold runs) and blocks nothing yet. A helper extracted from a tagged function carries a copy of the parent's `# implements:` line as the first line of its body — keep that when you extract one, or the member sidecar loses coverage of the moved code. The layering is a bus, imported by name and never upward: `config → model → parse/sections/acceptance/text → tags/scan/orphans → git → locks → (features) → workspace → rules → gate → reqmap.py`. Three rules keep it one: every `_config.json` tunable lives in `config.py` and is read as `cfg.NAME` (a name import would snapshot the default and miss the override); nothing imports upward, with two documented call-time imports (`health._link_sync_errors` → `rules` + `workspace.GateContext`, because the gate's map rule embeds the health record; and `risk._plan_gaps` → `mapdata`, because `mapdata` reads `_risk_signals` from `risk`) — besides these, `plandrift`, `planschema`, `release` and `testgaps` are imported at call time only by the command that needs them, so `gate` and `sync` in a repository with no plan never load them (ADR-0057); and `MAP_ENGINE_VERSION` lives in `reqmap_engine/__init__.py`, which every probe reads first, falling back to `reqmap.py` for a single-file copy seeded before v7. A test that patches an engine name patches the module that looks it up (`R.git._git`, not `R._git`). The two travel together: seeding copies `scripts/reqmap.py` AND `scripts/reqmap_engine/`.
+**The command registry is the CLI's SSOT** (`COMMANDS` in `reqmap_engine/commands.py`). `plugin/tool_definition.json` and the command-table region in `SKILL.universal.md` are GENERATED from it — never hand-edit them; `gate` warns when they are stale.
 
-**Command registry is the CLI's SSOT** (`COMMANDS` dict in `reqmap_engine/commands.py`, `ARCH-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
+**Gate rules** are registered with `@gate_rule("RMnnn", severity, strict=...)` into `GATE_RULES` and run over one `GateContext`; registration order is output order, and a test pins it. Codes are permanent (a consumer writes `gate_exempt: [RMnnn]`), so a retired number is never reused. Bare `gate` runs only `DEFAULT_RULES` — what says something is broken (ADR-0049); `--full` and `--audit` run everything. Errors (exit 1): RM001 dangling tag, RM002 bad frontmatter, RM003 missing `depends_on` target, RM006 enforced requirement with no `implements:`. Drift (RM018/RM019), test links (RM012) and plan input (RM037) warn and are promoted by `--strict`. `gate` never touches `_reqlock.json`; `sync` advances it. RM013 checks a requirement's cases only once one `# verifies:` tag exists — a requirement with none is named by `gate --risk` instead. `Requirement` and `Finding` are dict subclasses carrying derived facts — no class hierarchy.
 
-**Requirement layers:**
-- `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
-- `layer: feature` — compose the bus via `depends_on`. One per capability — a verb, or a flag of one (`ask --dupes`, `sync --release`, …); `ls plugin/requirements/` is the live list.
-- `layer: need` — an upstream stakeholder need (`SYS-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `ARCH-TRACE-020`).
-- `layer: aggregate` — the mirror image: no code of its own, covered *downward* by a non-empty `depends_on` (it asserts its dependencies work together). Exempt from the same gates via the one predicate `_impl_exempt`, which `gate`, `health`, the risk map and `confirm` all read — they disagreed before (`docs/adr/0015`).
+**Code tagging:** `# implements: ID`, `# tested-by: ID`, `# verifies: ID#CASE-N`. `TAG_RE` has a left-boundary guard so `reimplements:` is not a tag. Members are discovered by scanning, never hand-kept. The scan prunes `.git`, `node_modules`, `__pycache__` but NOT other dot-directories — which is why `.worktrees/**` and `.claude/worktrees/**` are in `.reqmapignore` here and seeded into consumers': a subagent worktree is a full second copy of the repo and doubles every member, reporting the copies as dangling ERRORS a CI checkout never sees. A tag in an unscanned file type is reported (RM023), not lost.
 
-**Specification levels — `level:` is a SECOND axis, orthogonal to `layer:`.** `layer` is the graph position (fan-in: bus/feature/need/aggregate); `level` is the abstraction rung of the V-model's left arm: `system` → `architecture` → `code`. They are not aliases and must not be merged — `IMPL_EXEMPT_LAYERS` keys on `layer`, so treating `architecture` as `aggregate` would silently exempt every architecture requirement from the confirmed-must-have-code gate. The hierarchy edge is `satisfies:` (level axis); `depends_on:` stays the composition axis. Only `satisfies:` forms the pyramid the 5–20 fan-out rule and the `_mermaid_hierarchy` diagram read.
+**Per-repo configuration:** `requirements/_config.json` overrides the names in `CONFIG_KEYS`, read fail-open; a bad file, unknown key or wrong type is reported on stderr and skipped, and the bare gate carries it as an `INPUT:config` warning that `--strict` makes an error (ADR-0054). This repo ships none.
 
-**Ids carry their level, since 2026-09-03:** `SYS-` → `ARCH-` → `REQ-`. The prefix is a reading convenience for *this* corpus, not something the engine parses — `level:` in the frontmatter is the authority, and a consumer repo may name ids anything. Renaming was one mechanical prefix swap over 681 ids, keeping every tail (`STEM-NNN`) intact.
+## The requirement corpus
 
-**Three levels, since 2026-09-03 (`docs/adr/0025`, superseding `0024`'s one-day promotion) — this corpus's shape, NOT a shape the tool asks anyone else to build:** <!--reqmap:level:system-->10 `SYS-*` stakeholder needs at `level: system` (`layer: need`, satisfied by ARCH nodes, verified by `validated-against:`), <!--reqmap:level:architecture-->67 `ARCH-*` capabilities at `level: architecture` (one command or one shared engine capability, `tested-by: <id> @integration`), <!--reqmap:level:code-->233 `REQ-*` behaviour groups at `level: code` (3-7 labelled cases each, `# verifies: <id>#CASE-N` per case). <!--reqmap:total-->310 requirements in total. `level:` is opt-in and stays opt-in: the template ships it commented out, nothing in the engine infers it (ADR-0019: the axis is one *the author declares*, not one the engine deduces), and a corpus that declares none gates identically to a run from before the field existed (`ARCH-LEVEL-051` CASE-3). ADR-0019 carries a dated review — **2027-03-03** — that says a field no consumer repo sets should be *removed rather than documented harder*. Read the counts below as a description of this repo, not as a target; `gate --audit` reports any corpus's rung distribution and states in its own output that adopting the axis is a decision, not a defect. `fan-out`'s `system` ceiling is ten again (`LINT_FANOUT_BANDS`). The 573 one-sentence atomic leaves of the same morning were folded into the 126 `REQ-*` groups; their ids (`REQ-…-233` … `-815`) are historical, the folded children start at 821.
+**Two orthogonal axes — never merge them.** `layer:` is the graph position: `bus` (foundation, high fan-in), `feature` (one capability, composes the bus via `depends_on`), `need` (a stakeholder need, satisfied via `satisfies:`, no code), `aggregate` (no code, covered downward by `depends_on`). `need` and `aggregate` are exempt from the implements/tested-by gates through the one predicate `_impl_exempt`. `level:` is the V-model rung — `system` → `architecture` → `code` — linked by `satisfies:`. `IMPL_EXEMPT_LAYERS` keys on `layer`, so treating `architecture` as `aggregate` would silently exempt every architecture requirement from the confirmed-must-have-code gate.
 
-**Translating an old id.** `docs/adr/**` and `CHANGELOG.md` were deliberately NOT rewritten: they record what was true on a date, and an ADR citing `REQ-VLEVEL-037` is a correct statement about 2026-08-17. To read one, match the tail: `REQ-VLEVEL-037` → `ARCH-VLEVEL-037`, `CORE-PARSE-001` → `ARCH-PARSE-001`, `NEED-SSOT-001` → `SYS-SSOT-001`. Match the stem and the number together (`VLEVEL-037`): the number alone is NOT unique — eleven repeat, e.g. `REQ-DOCCLAIMS-1012` and `REQ-PLANSTACK-1012`. A decision that changes still gets a NEW ADR — never an edit to an old one, prefixes included.
+Ids carry their level here (`SYS-` → `ARCH-` → `REQ-`) as a reading convenience only; the engine reads `level:`, and a consumer may name ids anything. `level:` is opt-in (ADR-0019, with a dated review on **2027-03-03** that says a field no consumer sets should be removed). This corpus: <!--reqmap:level:system-->10 `SYS-*` needs, <!--reqmap:level:architecture-->67 `ARCH-*` capabilities (`tested-by: <id> @integration`), <!--reqmap:level:code-->233 `REQ-*` behaviour groups (3–7 cases each, a `# verifies: <id>#CASE-N` per case) — <!--reqmap:total-->310 requirements in <!--reqmap:files-->77 files. Each `ARCH-*.md` holds the architecture requirement followed by its `REQ-*` children; a block starts at a `---` line immediately followed by `id:`, and only block 0 may fall back to the filename for its id. A description of this repo, not a shape the tool asks anyone to build.
 
-**Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, level, layer, owner, satisfies, depends_on; optional priority/milestone/lint_exempt/test_exempt — no comments, no empty keys) + prose body in the **lean form**: `## Description` (an intent quote for a developer new to the repo, then `Every bullet below is binding.` and the clauses), `## Cases` (`CASE-N — title`, Given/When/Then), optional `## Context`. No `## Verify intent`, `## Links` or `## Members in code (auto)` on a confirmed requirement. An `ARCH-*` Description is its intent plus one obligation sentence per child ending in `[[REQ-…]]`; the detail lives only in the child. Two body forms coexist and the engine detects which from the body, never from the frontmatter: the **sectioned** form and the **atomic** form (`form: atomic`) — a story blockquote plus a `Scenario:` block, with no normative headings at all. `binding_hash` hashes the normative heading span for the first and the story+scenario span for the second; a form it cannot recognise would hash the empty string, which is why `_atomic_spans` is consulted before the fallback. The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
+**Old ids in `docs/adr/` and `CHANGELOG.md` were deliberately not rewritten** — they record what was true on a date. Read one by matching stem AND number (`REQ-VLEVEL-037` → `ARCH-VLEVEL-037`, `NEED-SSOT-001` → `SYS-SSOT-001`); the number alone is not unique.
 
-**Section names — `## Description` and `## Cases`, since 2026-09-03** (`REQ-DESCRIPTION-057`). `## Description` merged the standalone `> WHY:` blockquote with `## WHAT — Contract (normative)`: the same capability was described twice, as rationale and as obligation, under two headings that both said WHAT. The quote now opens the section and the binding clauses follow it. `## Cases` (labels `CASE-1`, `CASE-2`, …) replaced `## HOW — Acceptance (= tests)` and `AC-N`. `## Verify intent` and `## Notes` simply dropped a `WHAT —` prefix that no longer named a section.
+**Requirement schema:** frontmatter (id, status, level, layer, owner, satisfies, depends_on; optional priority/milestone/lint_exempt/test_exempt/gate_exempt — no comments, no empty keys), parsed by a hand-rolled parser (scalars and inline lists only). Body in the lean form: `## Description` (an intent quote, then `Every bullet below is binding.` and the clauses), `## Cases` (`CASE-N — title`, Given/When/Then), optional `## Context`. An `ARCH-*` Description is its intent plus one obligation per child ending in `[[REQ-…]]`; the detail lives only in the child. A second, atomic form (story blockquote + `Scenario:`) is detected from the body, never the frontmatter.
 
-**Every old spelling still parses, forever.** `CONTRACT_LABELS = ("description", "contract")` and `ACCEPTANCE_LABELS = ("cases", "acceptan")` are the SSOT — current name first — and `_has_any`/`_from_any` are the only way a call site should ask for either section. `AC_VERIFY_RE` and `_AC_LABEL_RE` accept `CASE-N` and `AC-N` alike, because the label is an **identifier a `# verifies:` tag points at**: dropping the old spelling would break every consumer tag already written. Most fixtures across the suite are deliberately left in the legacy form — that is the back-compat suite, and rewriting them would delete the only coverage of the older shape.
+- **Every old spelling still parses, forever:** `CONTRACT_LABELS` / `ACCEPTANCE_LABELS` (current name first) and `_has_any`/`_from_any` are the only way to ask for either section; `CASE-N` and `AC-N` are both accepted because the label is what a consumer's `# verifies:` tag points at. Most test fixtures are deliberately in the legacy form — they are the back-compat suite; don't rewrite them.
+- **The intent quote is outside the drift hash:** `binding_hash` skips `>` lines, so improving an explanation never reports DRIFT, and the linter never sees rationale.
+- **Corpus-shape advice** (`next`'s Granularity and Redundancy buckets) is surfaced by `sync` and `gate --risk`, never by `gate`: it is not a commit-time concern. Redundancy ships below ADR-0016's fire-rate floor on purpose (ADR-0020).
 
-**The intent quote is inside the normative section but outside the drift hash.** `binding_hash` skips `>` lines within a normative span, so improving an explanation never reports DRIFT on a confirmed contract; `_contract_clauses` never treated a blockquote as a clause, so the linter never sees rationale either. The atomic form draws the same line by keeping `rationale:` in the frontmatter. No requirement carried a blockquote inside a normative section when this was added, so no existing hash changed.
+## Generated outputs
 
-**One file may hold many requirements** (`REQ-MODULEFILE-056`). A block starts at a `---` line *immediately followed by* `id:`, so a bare `---` used as a horizontal rule starts nothing; `split_requirement_blocks` returns the whole text unchanged for a single-block file. Each architecture requirement keeps its detailed design in its own file — <!--reqmap:total-->310 requirements live in <!--reqmap:files-->77 files: each `ARCH-*.md` holds the architecture requirement followed by its `REQ-*` children, each `SYS-*.md` one need. Only block 0 may fall back to the filename for its id, or every module would mint a duplicate named after itself.
+Under `plugin/requirements/`: `_map.md`, `_map.json` (the graph the viewer reads; a node's dependency list is `depends_on`, and an older map's `deps` is still read), `_reqlock.json` (the contract-hash baseline — a byte-stable cross-repo contract an older seeded engine must still read, which is why member hashes live in the separate `_memberlock.json`), `_findings.md` — all committed. `_map.html` is regenerated from the vendored template and gitignored.
 
-**Code tagging:** source files declare membership with inline comments:
-```
-# implements: ARCH-PARSE-001
-# tested-by: ARCH-CHECK-006
-```
-`TAG_RE` in the engine enforces a left-boundary guard so `reimplements:` or `x-implements:` are not picked up as real tags. The member list is discovered by scanning — never hand-maintained.
+The viewer is the Vite + React app in `app/`; its single-file build is vendored as `plugin/scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker the stdlib engine fills with `_map.json`, so the engine ships a UI without depending on Node. Without the template it emits only `_map.md` + `_map.json`. The viewer renders a node's `accept` block as authored; never gate that render on the folded `acc` list being empty — that once collapsed every criterion into one run-on line.
 
-**Gate logic** (`gate`): every check is a rule in `GATE_RULES` (`ARCH-RULES-059`, `docs/adr/0026`), registered with `@gate_rule("RMnnn", severity, strict=...)` and run over one `GateContext` by `cmd_check`, which itself only advances the lock and prints. Each printed line carries its code (`WARN  RM018 ARCH-X: DRIFT — ...`), `gate --json` carries `findings` records, and a requirement may write `gate_exempt: [RMnnn]` to silence one rule for itself. Link sync (RM001 dangling tag, RM006 enforced requirement with no `implements:` member) and `depends_on` target existence (RM003) are **error-level** (exit 1); `health` reads RM001/RM006 from the same registry. RM032 (`axis.py`, warn) checks the level axis is complete in both directions — every `system` groups an `architecture`, every `architecture` groups a `code`, every `code`/`architecture` satisfies the rung above — for enforced requirements that declare a `level:`, and nothing otherwise. RM034 (`REQ-DANGLINGVERIFY-1009`, warn) reads per-case coverage the other way round from RM013: a `# verifies: <id>#CASE-N` whose label — or whose requirement id — has no referent is a broken link, and the bogus label is what switches RM013 ON, so a typo used to print `0/N criteria carry a tag` for a file that plainly carries one. It compares against every declared label, not RM013’s automatable subset. RM033 (`ARCH-UNREADABLE-070`, warn) names a scannable file the scan opened and could not decode as text — a UTF-16 source with no BOM: every tag in it is invisible, so it is reported rather than silently counted as untagged (a BOM’d UTF-16 file is decoded and never reported). Drift (RM018, content hash vs `_reqlock.json`) and **test-link integrity** (RM012) are **warn-only**, promoted under `--strict`. `gate` is report-only and never touches `_reqlock.json`; use `sync` (with `--accept-drift` for confirmed/implemented contracts) to advance the baseline. The test-link check: a `tested-by` file must exist and contain a test function (`_test_link_problem`). Per-criterion coverage (RM013, `ARCH-ACVERIFY-019`): a `# verifies: <id>#CASE-N` tag links one test to one labelled criterion; the gate warns once per requirement for the untagged `CASE-N`s, only once a requirement carries at least one `verifies` tag. `Requirement` and `Finding` are dict subclasses (`r["meta"]` still works) that carry the derived facts rules read — encapsulation, no class hierarchy.
+**`docs/` is the published Pages root and `docs/map.html` is never committed** (ADR-0034): the engine never writes into `docs/`; the `deploy-map` job builds the published copy right before upload. `.gitignore` blocks `docs/*.excalidraw`. The README is the front door only; a fact belonging in `docs/commands.md`, `requirements.md`, `integrations.md`, `planning.md` or `internals.md` is edited THERE, never copied back. Those pages are in the root `.reqmapignore`: prose about capabilities, never members.
 
-**Per-repo configuration:** `requirements/_config.json` overrides the constants named in `CONFIG_KEYS` (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, `LINT_FANOUT_BANDS`, ...) plus `extra_code_exts`; read fail-open at startup by `apply_config(load_config(...))`; a malformed file, an unknown key or a mistyped value is reported on stderr and skipped (`ARCH-CONFIG-060`), except a key v8.2.0 retired (`DESIGN_*`, `LANGUAGE`), which is skipped in silence (ADR-0047). The bare `gate` lists each problem as an `INPUT:config` warning that `--strict` promotes to an error (ADR-0054). `MAP_PROFILE` (`full`/`compact`) and `MAP_LOCALES` choose how much the committed map carries (ADR-0055). This repo ships none.
+## Planning and releases
 
-**Corpus shape is advised on in BOTH directions, read-only** (`REQ-REDUNDANCY-058`, `docs/adr/0020`). `next`'s *Granularity* bucket says one requirement does too much (more than `LINT_AC_MAX` criteria — 7 — scoped to `LINT_STATUSES` and honouring `lint_exempt: [ac-count-high]`, via the shared `_oversize` predicate); its *Redundancy* bucket says several say the same thing — requirements whose Description clauses are byte-identical once case and whitespace are normalised. `_redundant_groups` is the exact-match floor under `dupes`, not a rival: no threshold, so a group is a duplicate by construction. Draft placeholders are excluded or every scaffolded `TODO:` would match every other. It is surfaced by `sync` and `next` and deliberately NOT by `gate` — the hook runs `gate` on every commit and corpus shape is not a commit-time concern. It reports; it never merges. **It ships below ADR-0016's 5% fire-rate floor on purpose** (6 groups, 1.7% of the corpus, zero false positives by construction) — `docs/adr/0020` records why, so the number is not quietly widened later.
-
-**Generated outputs** (under `plugin/requirements/`):
-- `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*
-- `_map.json` — `{engine_version, nodes, edges}` registry graph; consumed by the viewer and any external front-end; also written standalone by `export` *(committed)*. **A node's dependency list is `depends_on`**, the name the frontmatter and every document use. Until v8.3.0 it was emitted a second time as `deps`; the viewer still reads `deps` from a map an older engine wrote. `used_by` is its inverse and has no frontmatter spelling; `satisfies`/`satisfied_by` are the level axis.
-- `_map.html` — a self-contained single-file copy of the React viewer (`app/`) with this repo's `_map.json` inlined; opens by double-click, no server. *Regenerable (template + `_map.json`), gitignored — not committed.*
-- `_reqlock.json` — content hash baseline for drift detection (one hash per requirement = the contract; prose-ahead-of-code direction) *(committed)*
-- `_memberlock.json` — versioned sidecar (`{_schema, members}`) of dedicated-member content hashes for reverse-direction (member-ahead-of-spec) drift; kept separate so `_reqlock.json` stays a byte-stable cross-repo contract an older seeded engine reads unchanged (`ARCH-MEMBERDRIFT-027`) *(committed)*
-- `_findings.md` — aggregated verify-intent triage *(committed; `map`/`sync` refresh it once it exists, `map --check` flags it stale)*
-
-**One rendered map, and `docs/map.html` is not committed** ([ADR-0034](docs/adr/0034-one-rendered-map-built-where-it-is-published.md), plugin `v6.0.0`). The engine writes exactly one viewer, `requirements/_map.html`, and never writes into `docs/`. The published copy is BUILT in the `deploy-map` job — `sync`, then `cp _map.html docs/map.html`, then `sync` again so the site page's NAV sees it — immediately before the Pages artifact is uploaded, so it cannot go stale and never enters a commit. It was a byte-identical 2.1 MB duplicate rewritten in 249 commits. `docs/` is still the Pages root (committed: `architecture.html`, `full_architecture.html`, `index.html`, `.nojekyll`); the job publishes via OIDC on pushes to `main` and still refuses to publish a `map.html` under 10 KB.
-
-The viewer is the Vite + React app under `app/`. Its single-file build is vendored beside the engine as `plugin/scripts/_map_viewer.html` (carries a `<!--REQMAP_DATA-->` marker); the stdlib engine injects each repo's `_map.json` into that marker to produce `_map.html`. So the engine ships a rich UI without itself depending on Node/npm — and emits only `_map.md` + `_map.json` if the template is absent.
-
-**Each node carries the acceptance section once, as `accept`** — the labelled Given/When/Then block as authored. The viewer renders it (`adaptNode` in `app/src/lib/loadData.js` → `gwt`) and derives `acc`, the same criteria folded to one line each for search and counting, with `foldAccept`, a port of the engine's `_acc_items` checked identical on 497 nodes. The engine still emits `acc` for an atomic body, which has no Cases text to fold. Until v8.3.0 every node carried both, 305 KB of this repo's map twice over. Gating the block render on `acc` being empty is what silently collapsed every criterion into a run-on line the moment `_acc_blocks` learned to parse the block form (v2.29.0 → fixed in v2.29.2, `ARCH-VIEWER-007` AC-8).
-
-See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
-
-**Planning and releases** ([ADR-0040](docs/adr/0040-a-release-is-cut-from-the-plan.md)). Three files, one flow. `ROADMAP.md` (repo root) is the product plan in horizons — `## Now` / `## Next` / `## Later` / `## Not now`, items `- [ ] text | req: ID` grouped under `### Category` headings, and every Later item needs `unpark:`. `plugin/requirements/_planning.json` is the dated plan the Gantt draws: `lanes`, `bars` (`title`, `lane`, `start`, `end`, `milestone`, optional `req`), `milestones` keyed `vX.Y.Z` with a `due`, and `cadence` (default weekly, Friday). `CHANGELOG.md` is what shipped, and the chart's history band reads it. `sync --release` picks the lowest planned milestone above the declared version, bumps the version files, writes the CHANGELOG entry from that milestone's bars and drops them from the plan; `--apply` writes, tagging stays in CI. `sync` and `gate --audit` report, never fail on: a milestone at or below a shipped version, version files / CHANGELOG / tags disagreeing, a Now/Next item with no bar, and a bar whose work finished on another day. A bar matches a ROADMAP item by exact title, else by a `req:` only one item carries.
-
-**Editing on Windows.** Bash heredocs mangle backslashes and `\n` inside Python string literals: write an edit script to a file and run it, or use the Edit tool. Never name such a script after a stdlib module (`warnings.py` in the working directory broke an unrelated `import subprocess`).
-
-**Scanning scope:** one walk (`scan_all`, cached under `--cache` for members, `verifies:` coverage and test levels alike; `scan_members` is a view of it) over `.py .js .ts .tsx .jsx .mjs .cjs .mts .cts .c .cpp .h .hpp .cc .java .go .rs .cs .php .rb .kt .kts .swift .scala .ex .exs .dart .vue .svelte .html .css .scss .sass .less .sql .yaml .yml .toml .sh .tf .prisma .graphql .proto .md` plus the basenames `Dockerfile Makefile Caddyfile Jenkinsfile Procfile Vagrantfile`, `Dockerfile.*` variants and git hook names (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs); a pattern ending in `/**` or `/*` also prunes the walk. Prunes `.git`, `node_modules`, `__pycache__` automatically — **but not other dot-directories**, which is why `_reqmapignore_seed` (`ARCH-INIT-012`) seeds `.worktrees/**` and `.claude/worktrees/**` into a consumer's file: an isolated subagent worktree is a full second copy of the repo, so an unignored one counts every member twice and reports the copies' tags as dangling ERRORS that a clean CI checkout never sees. Same reason this repo's own root `.reqmapignore` carries them. A tag in any other file type is reported by the gate (`ARCH-UNSCANNEDTAG-045`), not silently lost. Non-code capability *discovery* (`init --plan --md-glob`, internally `cmd_candidates`) is separate and opt-in.
+`ROADMAP.md` is the plan in horizons (`## Now` / `## Next` / `## Later` / `## Not now`, items `- [ ] text | req: ID` under `### Category`; every Later item needs `unpark:`). `plugin/requirements/_planning.json` is the dated plan the Gantt draws. `CHANGELOG.md` is what shipped. `sync --release` cuts the next planned milestone (ADR-0040); plan-input problems are gate warnings (RM037, ADR-0057), while the plan's content — a stale milestone, an unscheduled Now item, an overdue bar — is only reported by `sync`, `gate --audit` and `gate --risk`. See `docs/planning.md`.
 
 ## Plugin packaging
 
-`plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root).
-
 **Two independent version numbers — don't conflate them:**
-- **Plugin semver** lives in *three* places kept in lockstep by `check_versions.py`: `version` in `plugin.json`, plus the top-level `version` and `plugins[].version` in `marketplace.json`. **Any** shipped change — engine *or* a skill edit — must bump this semver, or installed copies won't pick it up via `/plugin update` (a skill edit with no bump is silently invisible to consumers).
-- **`MAP_ENGINE_VERSION`** inside `reqmap.py` (ISO date `YYYY-MM-DD`, optional `.N` same-day suffix, e.g. `2026-06-03.2`) is engine-only — it lets a seeded copy of `reqmap.py` detect it is behind. Bump it on **every** change to `reqmap.py`, comments included (the staleness probe compares files, not behaviour); `scripts/check_engine_bump.py` enforces this in CI (`--base HEAD~1`) and in the dev hook (`--staged`).
+- **Plugin semver** — `version` in `plugin/.claude-plugin/plugin.json` plus the top-level and `plugins[].version` in `.claude-plugin/marketplace.json`, kept in lockstep by `check_versions.py`. ANY shipped change — engine, skill, or the vendored viewer — must bump it, or installed copies never see it via `/plugin update`.
+- **`MAP_ENGINE_VERSION`** (`YYYY-MM-DD`, `.N` for a second bump the same day) — bump it on every change to `reqmap.py` or `reqmap_engine/`, comments included: a seeded copy compares it to learn it is behind. `check_engine_bump.py` enforces it in CI and in the hook.
 
-**A semver bump must ship with a CHANGELOG entry.** CI fails the build when `plugin/.claude-plugin/plugin.json`'s version changed in the commit but `CHANGELOG.md` has no heading containing `` `vX.Y.Z` `` (the backticked form is what the grep matches). On pushes to `main` the `release` job then cuts tag `vX.Y.Z` from `plugin.json` — idempotent, so a non-bumping push creates nothing — with notes extracted from that same CHANGELOG section by `scripts/changelog_notes.py`. Tags therefore follow `plugin.json`, never the other way round.
+**A semver bump ships with a CHANGELOG entry** whose heading contains `` `vX.Y.Z` `` (the backticked form is what CI greps). On pushes to `main` the `release` job tags `vX.Y.Z` from `plugin.json` with notes from that section (`scripts/changelog_notes.py`); a push without a bump tags nothing. Tags follow `plugin.json`, never the other way round.
 
-The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/references/workflow.md`.
-
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v8`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v8` ships with plugin `8.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
+**GitHub Action (`check/action.yml`)** — consumers use it as:
 ```yaml
 - uses: alxmax/requirement-manager/check@v8
 ```
+The `@vN` alias tracks the plugin's major (ADR-0029); the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `SKILL*.md` files agree. Older aliases stay where they point. `check/engine_staleness.py` warns (never fails, by default) when a consumer's vendored engine is behind; a warn-only step does not justify a major bump, because bumping would strand exactly the stale-pin consumers it exists to reach.
 
-The action also ships `check/engine_staleness.py` (`ARCH-STALEENGINE-043`): it compares the
-consumer's vendored `MAP_ENGINE_VERSION` against the engine in the action's own checkout and
-annotates the run when the vendored copy is behind — the CI half of `warn_if_stale`, which is
-silent outside a Claude Code session. It deliberately did **not** take the major to `@v3`: the
-rule above is about a step that can newly FAIL a green build, and this one is warn-only
-(`stale-engine: warn|error|off`, default `warn`) and fails open on anything unexpected. Bumping
-would have stranded exactly the stale-pin consumers it exists to reach. Its test lives at
-`scripts/test_engine_staleness.py` — the probe never runs in this repo's own CI, so that suite
-is the only thing exercising it before it ships.
+## Working on Windows
+
+Bash heredocs mangle backslashes and `\n` inside Python string literals: write an edit script to a file and run it, or use the Edit tool. Never name such a script after a stdlib module (a `warnings.py` in the working directory broke an unrelated `import subprocess`).
