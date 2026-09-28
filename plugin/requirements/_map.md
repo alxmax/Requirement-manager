@@ -1088,17 +1088,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_REQ["REQ"]
-    REQ_PLANINPUT_1086["The gate names plan input it drops or misreads<br><small>REQ-PLANINPUT-1086</small><br>unreviewed"]
-    REQ_VIEWER_1087["Milestones due close together all stay visible<br><small>REQ-VIEWER-1087</small><br>unreviewed"]
-  end
-  style REQ_PLANINPUT_1086 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1087 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-PLANINPUT-1086 | draft | 9 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1087 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

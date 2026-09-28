@@ -506,7 +506,7 @@ CASE-6 — reported, never gated
 
 ---
 id: REQ-PLANINPUT-1086
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

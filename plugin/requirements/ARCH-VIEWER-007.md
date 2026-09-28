@@ -1005,7 +1005,7 @@ CASE-5 — a row that only awaits confirmation stays in Review
 
 ---
 id: REQ-VIEWER-1087
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
