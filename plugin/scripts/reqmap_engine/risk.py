@@ -291,6 +291,8 @@ def cmd_next(ws, show_all=False, top_n=3):
         return 0
     (total, confirmed, tested, unreviewed, pending, untagged,
      oversize, redundant, gaps) = found
+    from .testgaps import gap_lines  # only for `gate --risk`
+    tests = gap_lines(ws, show_all, top_n)  # implements: REQ-TESTGAPS-1088
     # Computed BEFORE the early return: Granularity/Redundancy are
     # their own findings, not a footnote on the four risk buckets
     # above — a corpus clean on every bucket but still carrying an
@@ -299,7 +301,7 @@ def cmd_next(ws, show_all=False, top_n=3):
     # order whose ROADMAP still carries unscheduled work has something
     # to do. implements: REQ-PLANGAPS-1033
     if (not pending and not untagged and not oversize and not redundant
-            and not gaps):
+            and not gaps and not tests):
         print("Nothing pending — every confirmed requirement is "
               "implemented, tested and "
               "intent-checked.")
@@ -307,7 +309,7 @@ def cmd_next(ws, show_all=False, top_n=3):
     if pending:
         total_actions = sum(len(ids) for _, _, ids in pending)
         n_cat = (len(pending) + bool(untagged) + bool(oversize)
-                 + bool(redundant) + bool(gaps))
+                 + bool(redundant) + bool(gaps) + bool(tests))
         print("{} item(s) need attention across {} {}:\n".format(
             total_actions, n_cat, "category" if n_cat == 1 else "categories"))
     disp = (reqs, show_all, top_n)
@@ -319,6 +321,7 @@ def cmd_next(ws, show_all=False, top_n=3):
         _print_oversize_bucket(oversize, disp)
     if redundant:
         _print_redundant_bucket(redundant, disp)
+    print("\n".join(tests), end="\n" if tests else "")
     if gaps:
         _print_plan_bucket(gaps, show_all, top_n)
     return 0

@@ -7,7 +7,6 @@ from .mapdata import _roadmap_signals
 from .gate import cmd_check
 from .mapcmd import cmd_map
 from .mcpconfig import seed_mcp_files
-from .release import seed_release_files
 from .versions import version_files
 from .parse import load_requirements
 from .scan import _walk_code, scan_members
@@ -257,6 +256,7 @@ def _seed_plan_files(code_root, reqs_dir, created):
             f.write(_planning_seed())
         created.append(
             os.path.relpath(planning, code_root).replace(os.sep, "/"))
+    from .release import seed_release_files  # only here (ADR-0057)
     seeded, notes = seed_release_files(code_root, reqs_dir)
     created.extend(seeded)
     # implements: REQ-MCPSEED-1029

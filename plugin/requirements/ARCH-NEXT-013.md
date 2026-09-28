@@ -26,6 +26,7 @@ Every bullet below is binding.
 - By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]
 - With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]
 - `next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]
+- `next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]
 
 ## Cases
 CASE-1
@@ -506,3 +507,63 @@ CASE-6 — a plan gap alone is not "nothing pending"
 - `risk.py` reads `mapdata` at call time, not at import: `mapdata` reads `_risk_signals`
   from `risk`, so a module-level import would close the cycle. It is the engine's second
   such import, after `health._link_sync_errors`.
+
+---
+id: REQ-TESTGAPS-1088
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-NEXT-013]
+distinct_from: [REQ-ACVERIFY-822]
+---
+
+# The worklist names the tests the gate cannot see missing
+
+## Description
+> The gate checks a requirement's cases only once one of them carries a `# verifies:` tag,
+> so a confirmed requirement with none passes in silence: one corpus stood at 3% of its
+> cases tagged with a green gate. A `tested-by` line counts one file as the test of every
+> requirement it names, and an exemption key left empty reads like an exemption and is
+> none. The gate stays as it is; the worklist says what it cannot.
+
+Every bullet below is binding.
+- `next` prints a `Cases without a test` bucket naming each confirmed requirement, not
+  `test_exempt` and not exempt from implementation, whose automatable cases are not all
+  tagged, with how many of how many are missing, most missing first. A requirement with no
+  case tagged at all is included.
+- `next` prints a `Shared test files` bucket naming each file that is the `tested-by` of
+  three requirements or more and carries no `# verifies:` tag for any case.
+- `next` prints an `Empty exemptions` bucket naming each `lint_exempt`, `test_exempt` or
+  `gate_exempt` key present with no value.
+- Each bucket truncates to the same top few as every other bucket, `--all` lists all of
+  it, and any of them keeps `next` off the all-clear line.
+- None of them is a gate finding, and a repository that runs only `gate` and `sync` never
+  loads the code behind them.
+
+## Cases
+CASE-1 — a confirmed requirement with no case tagged is named
+  Given  a confirmed requirement with three cases and none tagged, and one with every case tagged
+  When   `next` runs
+  Then   only the first is named, as 3 of 3 cases missing
+
+CASE-2 — a file that stands for several requirements is named
+  Given  one test file that is the `tested-by` of three requirements and tags no case
+  When   `next` runs
+  Then   the `Shared test files` bucket names it with the count 3
+
+CASE-3 — an empty exemption key is named
+  Given  a requirement whose frontmatter carries `test_exempt:` with no value
+  When   `next` runs
+  Then   the `Empty exemptions` bucket names the requirement and the key
+
+CASE-4 — a test gap alone is not "nothing pending"
+  Given  a corpus clean on every other bucket, with one confirmed case untagged
+  When   `next` runs
+  Then   the all-clear line is not printed and the `Cases without a test` bucket is
+
+## Context
+**Notes**
+- `distinct_from: REQ-ACVERIFY-822` - `REQ-ACVERIFY-822` warns in the gate about a requirement's untagged cases once it has adopted per-case tagging; this names, outside the gate, the requirements that never adopted it.
+- Measured on 2026-09-28 across four corpora: 27, 21 and 97 confirmed requirements had
+  a `tested-by` file and no case tagged, and one corpus carried 17 empty exemption keys.

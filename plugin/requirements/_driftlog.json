@@ -334,12 +334,16 @@
       "reason": "Cite the decision date instead of the review tool"
     },
     "REQ-RELEASECMD-1018": {
-      "hash": "23eeba192147",
-      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+      "hash": "a8e32efb3b37",
+      "reason": null
     },
     "REQ-RELEASEROADMAP-1023": {
       "hash": "a3e41c373fd0",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-RELEASEWORKFLOW-1019": {
+      "hash": "6979b8caf38b",
+      "reason": null
     },
     "REQ-REPRO-905": {
       "hash": "34bdcb2ea67a",

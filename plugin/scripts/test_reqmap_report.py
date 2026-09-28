@@ -5131,6 +5131,63 @@ class PlanBucket(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: R
             for i in range(5):
                 self.assertIn("Item {}".format(i), out_all)
 
+class TestGapBuckets(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1088
+    """`next` names the tests the gate cannot see missing."""
+    CASES = ("CASE-1 — a\n  Given x\n  When y\n  Then z",
+             "CASE-2 — b\n  Given x\n  When y\n  Then z",
+             "CASE-3 — c\n  Given x\n  When y\n  Then z")
+
+    def _req(self, rid, extra=""):
+        text = _spec(rid, ["{} works.".format(rid)], self.CASES, extra=extra)
+        return R.parse_frontmatter(text)[0], text
+
+    def _next(self, reqs, members, cover):
+        with tempfile.TemporaryDirectory() as d:
+            ws = R.Workspace(reqs, members, os.path.join(d, "requirements"), d,
+                             ac_cover=cover)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_next(ws)
+        return buf.getvalue()
+
+    def _corpus(self, ids, extra=""):
+        reqs = {}
+        for rid in ids:
+            meta, body = self._req(rid, extra)
+            reqs[rid] = {"meta": meta, "body": body}
+        members = {rid: [("implements", "src.py", 1), ("tested-by", "t_%s.py" % rid, 1)]
+                   for rid in ids}
+        return reqs, members
+
+    def test_a_requirement_with_no_case_tagged_is_named(self):  # verifies: REQ-TESTGAPS-1088#CASE-1
+        reqs, members = self._corpus(["REQ-BARE-001", "REQ-FULL-002"])
+        cover = {"REQ-FULL-002": {c: [("t.py", 1)] for c in ("CASE-1", "CASE-2", "CASE-3")}}
+        out = self._next(reqs, members, cover)
+        self.assertIn("Cases without a test (1)", out)
+        self.assertIn("REQ-BARE-001   3/3 case(s)", out)
+        self.assertNotIn("REQ-FULL-002   3/3", out)
+
+    def test_a_file_standing_for_several_requirements_is_named(self):  # verifies: REQ-TESTGAPS-1088#CASE-2
+        ids = ["REQ-A-001", "REQ-B-002", "REQ-C-003"]
+        reqs, members = self._corpus(ids)
+        for rid in ids:
+            members[rid][1] = ("tested-by", "tests/test_all.py", 1)
+        self.assertEqual([("tests/test_all.py", 3)], R.testgaps.shared_test_files(members, {}))
+        self.assertIn("tests/test_all.py   tested-by of 3 requirements", self._next(reqs, members, {}))
+
+    def test_an_empty_exemption_key_is_named(self):  # verifies: REQ-TESTGAPS-1088#CASE-3
+        reqs, members = self._corpus(["REQ-X-001"], extra="test_exempt:\n")
+        self.assertEqual([("REQ-X-001", "test_exempt")], R.testgaps.empty_exemptions(reqs))
+        self.assertIn("REQ-X-001   `test_exempt:` has no value", self._next(reqs, members, {}))
+
+    def test_a_test_gap_alone_is_not_nothing_pending(self):  # verifies: REQ-TESTGAPS-1088#CASE-4
+        reqs, members = self._corpus(["REQ-ONE-001"])
+        cover = {"REQ-ONE-001": {"CASE-1": [("t.py", 1)], "CASE-2": [("t.py", 2)]}}
+        out = self._next(reqs, members, cover)
+        self.assertNotIn("Nothing pending", out)
+        self.assertIn("REQ-ONE-001   1/3 case(s)", out)
+
+
 class RemovedInV820(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: ARCH-CONFIG-060
     """ADR-0047: the i18n detector left the engine; its flag stays one release, doing
     nothing but saying so."""

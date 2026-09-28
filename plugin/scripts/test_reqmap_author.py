@@ -3427,6 +3427,26 @@ class ReleaseCommand(unittest.TestCase):  # tested-by: REQ-RELEASECMD-1018 @unit
                 _release(d, reqs, version="v1.5.0", apply_it=True)
             self.assertEqual(1, _text(d, "CHANGELOG.md").count("## [1.5.0]"))
 
+    def test_no_version_file_and_no_tag_is_refused(self):  # verifies: REQ-RELEASECMD-1018#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, None, self.PLAN, self.BARS, changelog="# Changelog\n")
+            before = (_text(d, "CHANGELOG.md"), _text(reqs, "_planning.json"))
+            rc, out = _release(d, reqs, apply_it=True)
+            self.assertEqual(2, rc)
+            self.assertIn("no version file to bump and no tag to follow", out)
+            self.assertEqual(before, (_text(d, "CHANGELOG.md"), _text(reqs, "_planning.json")))
+
+    def test_tags_only_releases_with_a_note_to_tag_by_hand(self):  # verifies: REQ-RELEASECMD-1018#CASE-7
+        tag = ((1, 4, 0), "v1.4.0")
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, None, self.PLAN, self.BARS, changelog="# Changelog\n")
+            with mock.patch.object(R.release, "newest_tag", return_value=tag), \
+                    mock.patch.object(R.versions, "newest_tag", return_value=tag):
+                rc, out = _release(d, reqs, apply_it=True)
+            self.assertEqual(0, rc, out)
+            self.assertIn("note     no version file: nothing is bumped", out)
+            self.assertIn("## [1.5.0] - ", _text(d, "CHANGELOG.md"))
+
     def test_the_plan_drops_the_released_version_and_keeps_the_rest(self):  # verifies: REQ-PLANADVANCE-1020#CASE-1
         with tempfile.TemporaryDirectory() as d:
             reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
@@ -3502,6 +3522,19 @@ class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019
             got = json.loads(out)
             self.assertEqual(("v1.5.0", False, "**Export to CSV.**"),
                              (got["declared"], got["tag_exists"], got["notes"]))
+
+    def test_a_missing_workflow_is_named_and_never_written(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-6
+        plan = {"v1.5.0": {"due": "2026-10-02"}}
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", plan, changelog="# Changelog\n")
+            os.makedirs(os.path.join(d, ".github"))
+            rc, out = _release(d, reqs, apply_it=True)
+            self.assertEqual(0, rc, out)
+            self.assertIn("note     no .github/workflows/reqmap-release.yml", out)
+            self.assertFalse(os.path.exists(os.path.join(d, self.WORKFLOW)))
+            _write(os.path.join(d, self.WORKFLOW), "mine\n")
+            _, again = _release(d, reqs, version="v1.6.0")
+            self.assertNotIn("reqmap-release.yml", again)
 
 
 class ReleaseEndToEnd(unittest.TestCase):  # tested-by: ARCH-RELEASE-072 @integration

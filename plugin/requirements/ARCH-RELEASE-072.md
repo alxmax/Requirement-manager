@@ -246,8 +246,11 @@ Every bullet below is binding.
   milestone's label in bold, then one bullet per bar planned on that version — directly under
   `Unreleased` when the file has one, otherwise above the newest release.
 - A version named after `--release` is released instead of the planned one.
-- `sync --release --apply` refuses with exit 2 and writes nothing in three cases: nothing is
-  planned above the baseline, the version is not above it, or the gate reports errors.
+- `sync --release --apply` refuses with exit 2 and writes nothing in four cases: nothing is
+  planned above the baseline, the version is not above it, the gate reports errors, or the
+  repository has neither a version file nor a tag, so CI would have no declared version to tag.
+- With tags but no version file, the release proceeds and says that nothing is bumped and the
+  release is tagged by hand.
 - An entry for the version that already exists is never written a second time.
 
 ## Cases
@@ -276,6 +279,16 @@ CASE-5 — an entry is never written twice
   When   it is applied again
   Then   the CHANGELOG holds one `1.5.0` heading
 
+CASE-6 — no version file and no tag is refused
+  Given  a plan with `v1.5.0` in a repository with no version file and no tag
+  When   `sync --release --apply` runs
+  Then   it exits 2, asks for a `VERSION` file, and the CHANGELOG and the plan are unchanged
+
+CASE-7 — tags only release with a note to tag by hand
+  Given  the same plan in a repository whose newest tag is `v1.4.0`
+  When   `sync --release --apply` runs
+  Then   it exits 0, writes the 1.5.0 entry, and notes that nothing is bumped
+
 ---
 id: REQ-RELEASEWORKFLOW-1019
 status: confirmed
@@ -299,6 +312,8 @@ Every bullet below is binding.
 - The workflow runs the engine vendored in the checkout and creates the tag and GitHub release
   only when the declared version has no tag; with no engine inside the repository, `init`
   writes no workflow and says why.
+- `sync --release` notes a GitHub repository with no release workflow, because nothing may
+  tag the release, and never writes the workflow itself.
 
 ## Cases
 CASE-1 — init seeds the workflow on a GitHub repository
@@ -325,6 +340,11 @@ CASE-5 — the JSON carries what CI needs
   Given  a declared 1.5.0 with a CHANGELOG entry and no tag
   When   `sync --release --json` runs
   Then   it reports `v1.5.0`, no tag, and the entry's text
+
+CASE-6 — a missing workflow is named and never written
+  Given  a repository with a `.github` directory and no release workflow
+  When   `sync --release --apply` runs, then runs again once the workflow exists
+  Then   the first run notes the missing workflow without writing it, and the second is silent
 
 ---
 id: REQ-PLANADVANCE-1020

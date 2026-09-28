@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v8.9.1` — 2026-09-28
+
+**A release that CI could never tag is refused, and the worklist names the tests the gate cannot see missing.**
+
+- `sync --release --apply` refuses with exit 2 in a repository that has neither a version file nor a tag. It used to write the CHANGELOG entry and drop the milestone from the plan while CI, which tags only a version a file declares, never tagged it. It now asks for a `VERSION` file holding the version already shipped (REQ-RELEASECMD-1018)
+- With tags but no version file the release still goes through, and says that nothing is bumped and the release is tagged by hand (REQ-RELEASECMD-1018)
+- On a GitHub repository with no `.github/workflows/reqmap-release.yml`, `sync --release` says that nothing may tag the release. It never writes the workflow; `init` does (REQ-RELEASEWORKFLOW-1019)
+- The JSON carries these as `notices`, beside the `notes` CI publishes
+- `gate --risk` names the tests the gate cannot see missing, in three buckets. `Cases without a test` lists confirmed requirements whose cases carry no `# verifies:` tag, including those with none at all, which the gate's case check never looks at. `Shared test files` lists a file that is the `tested-by` of three requirements or more and tags none of their cases. `Empty exemptions` lists a `lint_exempt`, `test_exempt` or `gate_exempt` key left with no value. None of them is a gate finding (REQ-TESTGAPS-1088)
+- The release code loads only for `sync --release` and `init`, and the test buckets only for `gate --risk`. The engine's core falls to 6,704 logical lines, and its budget with it
+- The physical line ceiling, the maintainer's alarm, moves from 17,000 to 20,000 by decision
+
 ## plugin `v8.9.0` — 2026-09-28
 
 **The gate names plan input the engine drops or misreads.**
