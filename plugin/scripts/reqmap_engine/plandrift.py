@@ -285,7 +285,39 @@ def plan_drift_lines(result):
 DONE_STATUSES = ("implemented", "confirmed")
 
 
-def bar_date_suggestions(bars, reqs, members, code_root, today):
+def bar_items(bar, items, bars):
+    # implements: REQ-PLANDATES-1022
+    """The ROADMAP items, done or open, that `bar` carries out: those named
+    like its title, or else those carrying its `req:` when no other bar
+    carries that `req:`. A requirement two bars share owns no item for
+    either, so neither can claim the other's work."""
+    title = (bar.get("title") or "").strip().lower()
+    named = [it for it in items or []
+             if it["name"].strip().lower() == title]
+    rid = bar.get("req")
+    if named or not rid or sum(b.get("req") == rid for b in bars) > 1:
+        return named
+    return [it for it in items or [] if it.get("req") == rid]
+
+
+def bar_done(bar, reqs, items=(), bars=()):
+    # implements: REQ-PLANDATES-1022
+    """True when any source says the bar's work is finished: `progress:
+    100`, every ROADMAP item it carries out ticked, or its requirement
+    confirmed or implemented. The one predicate every "is this bar done"
+    reads. Status alone was the first version, and it read shipped work
+    as late wherever requirements stay `draft` after the code lands."""
+    if bar.get("progress") == 100:
+        return True
+    mine = bar_items(bar, items, bars or [bar])
+    if mine and all(it.get("done") for it in mine):
+        return True
+    req = reqs.get(bar.get("req") or "")
+    return req is not None and \
+        req["meta"].get("status") in DONE_STATUSES
+
+
+def bar_date_suggestions(bars, reqs, members, code_root, today, items=None):
     # implements: ARCH-RELEASE-072  # implements: REQ-PLANDATES-1022
     """Bars whose planned end the work behind them no longer matches,
     as suggestions.
@@ -295,7 +327,7 @@ def bar_date_suggestions(bars, reqs, members, code_root, today):
     commit to that code. When that day is not the planned `end`, and
     not before the bar's `start` (a bar extending code that already
     existed), it is suggested as the new `end`. A bar whose `end` has
-    passed while its requirement is not done is suggested to move.
+    passed while `bar_done` says it is not done is suggested to move.
     Nothing is written: the plan's dates are the author's, and a date
     a check invented would erase what was planned."""
     out = []
@@ -315,7 +347,7 @@ def bar_date_suggestions(bars, reqs, members, code_root, today):
                 out.append({"title": bar["title"], "req": bar["req"],
                             "kind": "done",
                             "planned": bar["end"], "actual": finished})
-        elif bar["end"] < today:
+        elif bar["end"] < today and not bar_done(bar, reqs, items, bars):
             out.append({"title": bar["title"], "req": bar["req"],
                         "kind": "overdue",
                         "planned": bar["end"], "actual": None})

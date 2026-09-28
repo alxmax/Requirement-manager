@@ -3582,6 +3582,27 @@ class PlanDates(unittest.TestCase):  # tested-by: REQ-PLANDATES-1022 @unit
         self.assertEqual([("B", "overdue")], [(s["title"], s["kind"]) for s in got])
         self.assertIn("move its `end`", R.bar_date_lines(got)[0])
 
+    def test_a_bar_other_sources_call_done_is_not_overdue(self):  # verifies: REQ-PLANDATES-1022#CASE-5
+        late = {"req": "REQ-OPEN-002", "start": "2026-09-01", "end": "2026-09-10"}
+        ticked = [{"name": "B", "horizon": "now", "req": "REQ-OPEN-002", "done": True}]
+        with mock.patch.object(R.plandrift, "_last_touched", return_value="2026-09-12"):
+            by_progress = R.bar_date_suggestions(
+                [dict(late, title="B", progress=100)], self.REQS, self.MEMBERS, ".", "2026-09-16")
+            by_item = R.bar_date_suggestions(
+                [dict(late, title="B")], self.REQS, self.MEMBERS, ".", "2026-09-16", ticked)
+        self.assertEqual(([], []), (by_progress, by_item))
+
+    def test_a_shared_requirement_lends_its_items_to_no_bar(self):  # verifies: REQ-PLANDATES-1022#CASE-6
+        items = [{"name": "Other work", "horizon": "now", "req": "REQ-OPEN-002", "done": True},
+                 {"name": "Still open", "horizon": "now", "req": "REQ-OPEN-002", "done": False}]
+        bars = [{"title": "B", "req": "REQ-OPEN-002", "start": "2026-09-01", "end": "2026-09-10"},
+                {"title": "C", "req": "REQ-OPEN-002", "start": "2026-09-01", "end": "2026-09-10"}]
+        self.assertEqual([], R.plandrift.bar_items(bars[0], items, bars))
+        self.assertFalse(R.plandrift.bar_done(bars[0], self.REQS, items, bars))
+        solo = [bars[0]]
+        self.assertEqual(2, len(R.plandrift.bar_items(bars[0], items, solo)))
+        self.assertFalse(R.plandrift.bar_done(bars[0], self.REQS, items, solo))
+
 
 class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @unit  # tested-by: REQ-UNPLANNED-1024 @unit
     """ROADMAP items against the bars that schedule them."""

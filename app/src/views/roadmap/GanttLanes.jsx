@@ -4,6 +4,7 @@
  * ruler. */
 import {
   PX, PAD, ROW_H, BAND_H, HEAD_H, LABEL_LINES, LANE_TONE, extent,
+  PILL_W, pillTop,
 } from "./ganttLayout.js";
 import { onActivate } from "./PlanNotes.jsx";
 
@@ -88,9 +89,9 @@ function VersionPill({ f, laneH, sel }) {
         + `${f.at.toLocaleDateString(lay.loc)}`}
       style={{
         cursor: "pointer", outlineOffset: 1, outline: selected(picked, key),
-        position: "absolute", top: laneH / 2 - 11,
-        left: f.idx * PX + PX / 2 - 34,
-        width: 68, height: 22, boxSizing: "border-box", textAlign: "center",
+        position: "absolute", top: pillTop(laneH, f.row, lay.flagRows),
+        left: f.idx * PX + PX / 2 - PILL_W / 2,
+        width: PILL_W, height: 22, boxSizing: "border-box", textAlign: "center",
         fontSize: 11, fontWeight: 800, lineHeight: "20px",
         color: "var(--indigo-500)", background: "var(--indigo-tint)",
         border: "1px solid var(--indigo-400)", borderRadius: 4, zIndex: 3,

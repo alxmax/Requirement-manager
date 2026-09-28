@@ -27,6 +27,7 @@ Every bullet below is binding.
 - A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]
 - A planned milestone in `_planning.json` at or below the highest version the repo has already declared is reported by `gate --audit` and `health`. [[REQ-PLANSTALE-1013]]
 - That report covers milestone keys as well as bar milestones, and is never a gate rule. [[REQ-PLANSTALE-1013]]
+- A value in `_planning.json` the engine drops, repairs or cannot use is a gate warning that `--strict` makes an error; a key it never reads is advice outside the gate. [[REQ-PLANINPUT-1086]]
 - An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]
 - `init` seeds a plan a new repository can plan on, and a plan with no dates still carries a calendar to its horizon. [[REQ-PLANHORIZON-1010]]
 - The export carries the branch git is on, and the plan's shipped band is labelled with it. [[REQ-PLANBRANCH-1011]]
@@ -502,6 +503,77 @@ CASE-6 — reported, never gated
 - `distinct_from: ARCH-RELEASE-072` - `ARCH-RELEASE-072` is the capability that cuts a release from the plan; this is the read-only report on a plan that fell behind.
 - `distinct_from: REQ-PLANADVANCE-1020` - `REQ-PLANADVANCE-1020` removes a released version from the plan when a release is applied; this reports one still there because nothing removed it.
 - `distinct_from: REQ-RELEASECMD-1018` - `REQ-RELEASECMD-1018` is the command that writes a release; this report never writes.
+
+---
+id: REQ-PLANINPUT-1086
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+distinct_from: [REQ-PLANSTALE-1013, REQ-CONFIG-949]
+---
+
+# The gate names plan input it drops or misreads
+
+## Description
+> The planning reader is fail-open: a bar with a mistyped `start` leaves the chart, an `end`
+> it cannot read quietly becomes the `start`, and a file that is not JSON reads as an empty
+> plan. A consumer's plan carried two bars pointing at deprecated requirements, and a
+> milestone list of ninety entries the engine never reads, and nothing said so. The plan's
+> content stays a report; its input is checked like `_config.json`'s (ADR-0054, ADR-0057).
+
+Every bullet below is binding.
+- `gate` reports, under RM037, each value in the planning sidecar that the reader drops,
+  repairs or cannot use: a file that is not valid JSON or not an object, a bar with no title
+  or no `YYYY-MM-DD` `start`, a bar `end` that is not a date, a bar ending before it starts,
+  a bar lane not listed in `lanes` when `lanes` is given, a milestone entry with no valid
+  `due` and no label, a `cadence` it does not understand, and a bar `req:` that names no
+  requirement or a deprecated one.
+- RM037 is a warning in the bare gate and an error under `--strict`, and it never raises: an
+  unreadable plan is one finding.
+- A milestone whose name is not a version is not reported, and neither is anything about
+  the plan's dates against today or the shipped version.
+- A key the reader never reads is one advisory line per key in `sync` and `gate --audit`,
+  naming where it appears, and never a gate finding.
+- The findings come from the reader's own parsing functions, so the gate and the chart
+  cannot disagree about what was lost.
+
+## Cases
+CASE-1 — every dropped or misread value is named
+  Given  a plan with one of each defect, a phase-named milestone and an ignored key
+  When   `gate --json` runs
+  Then   eight RM037 findings name the defects, and neither the phase nor the key appears
+
+CASE-2 — the bare gate warns and strict fails
+  Given  the same plan
+  When   `gate` runs bare, then with `--strict`
+  Then   the first exits 0 with RM037 warnings and the second exits 1 with RM037 errors
+
+CASE-3 — invalid JSON is one warning and never a crash
+  Given  a `_planning.json` with a trailing comma
+  When   `gate --json` runs
+  Then   it exits 0 with one RM037 finding saying the file is not valid JSON
+
+CASE-4 — a clean plan and no plan are silent
+  Given  a well-formed plan, and separately no planning file
+  When   `gate --json` runs
+  Then   no RM037 finding is reported
+
+CASE-5 — an ignored key is advice outside the gate
+  Given  two milestones each carrying an `items` list
+  When   the ignored keys are asked for, and `gate --json` runs
+  Then   one line names `items` in both milestones, and the gate reports nothing for it
+
+## Context
+**Notes**
+- `distinct_from: REQ-PLANSTALE-1013` - `REQ-PLANSTALE-1013` reports a milestone already shipped, a fact about the plan's content that stays out of the gate; this checks that the plan's input was read at all.
+- `distinct_from: REQ-CONFIG-949` - `REQ-CONFIG-949` reports a bad `_config.json` as `INPUT:config`; this is the same severity model for the planning sidecar, under its own rule code.
+- Measured before it shipped, on 2026-09-28: eight repositories with a corpus, four with a
+  plan. One fired, with two findings, both real (bars naming deprecated requirements). A
+  first draft also reported milestone names that are not versions; one repository plans
+  named phases on purpose and would have carried five warnings a commit, so that check was
+  dropped.
 
 ---
 id: REQ-UNPLANNED-1024

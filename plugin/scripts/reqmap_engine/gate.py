@@ -18,6 +18,7 @@ from .rulesrepo import DRIFT_RULES
 from . import axis  # noqa: F401 — registers RM032 after every rule in `rules`
 from . import docclaims  # noqa: F401 — registers RM035, same reason as `axis`
 from . import wikilinks  # noqa: F401 — registers RM036, same reason as `axis`
+from . import planinput  # noqa: F401 — registers RM037, same reason as `axis`
 from .sections import _legacy_schema_ids
 from .workspace import GateContext, Workspace
 
@@ -46,6 +47,7 @@ DEFAULT_RULES = frozenset((
     "RM005", "RM012", "RM023", "RM033", "RM034", "RM036",  # a link is broken
     "RM016", "RM018", "RM019", "RM020",                    # the drift baseline
     "RM022", "RM027",                                      # the committed map
+    "RM037",                                               # the plan's input
 ))
 
 

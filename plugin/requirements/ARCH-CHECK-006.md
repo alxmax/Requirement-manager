@@ -592,8 +592,8 @@ satisfies: [ARCH-CHECK-006]
 Every bullet below is binding.
 - A bare `gate` runs only the rules in `DEFAULT_RULES`: every error-severity rule, the
   warnings that say a link is broken (RM005, RM012, RM023, RM033, RM034, RM036), the
-  warnings about the drift baseline (RM016, RM018, RM019, RM020) and the committed map
-  (RM022, RM027).
+  warnings about the drift baseline (RM016, RM018, RM019, RM020), the committed map
+  (RM022, RM027) and plan input the engine cannot use (RM037).
 - A bare `gate` prints a requirement's readability findings only when one is an error;
   warnings are not printed and not counted.
 - `gate --full` and `gate --audit` run every registered rule and print every readability

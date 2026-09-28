@@ -5,7 +5,6 @@ from . import config as cfg
 from .lintrules import _count_ac, _oversize
 from .model import ENFORCED, RISK_ADVICE, _as_list, _impl_exempt
 from .orphans import _scan_untagged
-from .plandrift import unplanned_items
 from .similar import _redundant_groups
 from .targets import load_targets
 from .text import _req_file, _verify_bullets
@@ -66,6 +65,7 @@ def _plan_gaps(reqs, code_root, reqs_dir):
     items = _read_roadmap(code_root) if code_root else None
     if not items:
         return []
+    from .plandrift import unplanned_items  # only with a plan (ADR-0057)
     bars = load_targets(reqs_dir).get("bars", []) if reqs_dir else []
     missing, parked = _roadmap_plan_gaps(items, reqs)
     gaps = [("no bar", it["name"]) for it in unplanned_items(items, bars)]

@@ -384,8 +384,12 @@ Every bullet below is binding.
 - A bar whose `req:` names a confirmed or implemented requirement with code implementing it
   is done on the date of the last commit to that code; when that date differs from the bar's
   `end` and is not before its `start`, `sync` names it as the `end` to set.
-- A bar whose `end` has passed while the requirement it names is not done is reported as
-  needing its `end` moved.
+- A bar whose `end` has passed is reported as needing its `end` moved unless it is done.
+  A bar is done when it carries `progress: 100`, when every ROADMAP item it carries out is
+  ticked, or when the requirement it names is confirmed or implemented; one predicate
+  decides this for every reader.
+- A bar carries out the ROADMAP items named like its title, or else the items carrying its
+  `req:` when no other bar carries that `req:`.
 - A bar with no `req:`, or whose requirement does not exist, is never reported.
 - Nothing is written to `_planning.json`.
 
@@ -409,6 +413,17 @@ CASE-4 — an open requirement past its end is overdue
   Given  bars naming a draft requirement, one ending before today and one after, and a bar with no `req:`
   When   `sync` runs
   Then   only the bar that ended before today is reported, asking for its `end` to move
+
+CASE-5 — a bar other sources call done is not overdue
+  Given  a bar past its end naming a draft requirement, once with `progress: 100` and once
+         with its only ROADMAP item ticked
+  When   `sync` runs
+  Then   neither is reported
+
+CASE-6 — a shared requirement lends its items to no bar
+  Given  two bars carrying the same `req:`, and ROADMAP items carrying it, one ticked
+  When   the items and the done state of the first bar are asked for
+  Then   it carries no item and is not done; alone, it carries both items and is still not done
 
 ## Context
 **Notes**

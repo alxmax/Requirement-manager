@@ -77,6 +77,45 @@ export function extent(b) {
 
 const dayCentre = (idx) => idx * PX + PX / 2;
 
+/* A version pill is 68px in its lane, three days and more at PX 22, so two
+ * milestones due within that of each other were drawn on top of one another
+ * and one simply vanished. A consumer merged two milestones to get the
+ * hidden one back — the chart had changed the plan. Pills now take rows the
+ * way bars do; the ruler, which has one row, joins them into one pill.
+ * implements: REQ-VIEWER-1087 */
+export const PILL_W = 68;
+export const PILL_ROW = 26;
+const PILL_DAYS = Math.ceil(PILL_W / PX);
+
+export function stackFlags(flags) {
+  const ends = [];
+  return [...flags].sort((a, b) => a.idx - b.idx).map((f) => {
+    let row = ends.findIndex((end) => end <= f.idx);
+    if (row < 0) { row = ends.length; ends.push(0); }
+    ends[row] = f.idx + PILL_DAYS;
+    return { ...f, row };
+  });
+}
+
+/** Ruler pills: flags closer than a pill's width become one, naming each. */
+export function clusterFlags(flags) {
+  const out = [];
+  for (const f of [...flags].sort((a, b) => a.idx - b.idx)) {
+    const last = out[out.length - 1];
+    if (last && f.idx - last.idx < PILL_DAYS) last.members.push(f);
+    else out.push({ idx: f.idx, members: [f] });
+  }
+  return out.map((c) => ({
+    ...c, ms: c.members.map((m) => m.ms).join(" · "),
+  }));
+}
+
+/** The top of a version pill in a lane `laneH` tall, when `rows` rows of
+ *  pills share it: one row sits in the middle, as it always has. */
+export function pillTop(laneH, row, rows) {
+  return laneH / 2 - 11 + (row - (rows - 1) / 2) * PILL_ROW;
+}
+
 /** The chart's first and last day: whole months around every dated thing
  *  and today. Release dates extend the range like any other dated thing: a
  *  cadence running past the last bar — `until: 2026-12-31` with nothing
@@ -118,7 +157,7 @@ function buildGuides(lay) {
   const releaseH = lay.heights[lay.lanes.indexOf(lay.releaseLane)];
   const versionGuides = (lay.releaseLane ? lay.flags : []).map((f) => ({
     key: `version-${f.ms}`, kind: "version", x: dayCentre(f.idx),
-    to: laneTop[lay.releaseLane] + releaseH / 2 - 11,
+    to: laneTop[lay.releaseLane] + pillTop(releaseH, f.row, lay.flagRows),
   }));
   return [...barGuides, ...versionGuides];
 }
@@ -154,10 +193,19 @@ export function layoutPlan(planning, history, locale) {
   const byLane = Object.fromEntries(
     lanes.map((ln) => [ln, bars.filter((b) => b.lane === ln)]),
   );
+  /* A version is a release, so it is drawn in the lane the cadence
+   * names; with no such lane the pill stays on the ruler, where a plan
+   * without a cadence has always shown it. */
+  const releaseLane = lanes.includes(planning?.cadence?.lane)
+    ? planning.cadence.lane : null;
+  const flags = stackFlags(
+    dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) })));
+  const flagRows = flags.reduce((n, f) => Math.max(n, f.row + 1), 1);
   const lay = {
     totalDays, chartW: totalDays * PX, bars, lanes, byLane,
-    heights: lanes.map((ln) =>
-      Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2),
+    heights: lanes.map((ln) => Math.max(
+      Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2,
+      ln === releaseLane ? flagRows * PILL_ROW + PAD * 2 : 0)),
     pastRows: past.map((h) => {
       const startIdx = dayIndex(origin, parseIso(h.first));
       return {
@@ -169,7 +217,7 @@ export function layoutPlan(planning, history, locale) {
     weeks: buildWeekBands(origin, totalDays),
     days: buildDayBands(origin, totalDays),
     todayIdx: todayD ? dayIndex(origin, todayD) : -1,
-    flags: dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) })),
+    flags, flagRows, rulerFlags: clusterFlags(flags),
     /* Release cadence: the ENGINE computed these dates (targets.py) and
      * the chart only places them, so the CLI and the chart cannot
      * disagree about when a release lands.
@@ -177,11 +225,7 @@ export function layoutPlan(planning, history, locale) {
     releaseIdx: releases
       .map((iso) => ({ iso, idx: dayIndex(origin, parseIso(iso)) }))
       .filter((r) => r.idx >= 0 && r.idx < totalDays),
-    /* A version is a release, so it is drawn in the lane the cadence
-     * names; with no such lane the pill stays on the ruler, where a plan
-     * without a cadence has always shown it. */
-    releaseLane: lanes.includes(planning?.cadence?.lane)
-      ? planning.cadence.lane : null,
+    releaseLane,
     loc: locale === "ro" ? "ro-RO" : "en-GB",
   };
   lay.guides = buildGuides(lay);

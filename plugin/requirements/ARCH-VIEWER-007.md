@@ -35,6 +35,7 @@ Every bullet below is binding.
 - The Versions view lists the same bars as the Plan chart, each in its milestone's column. [[REQ-VIEWER-999]]
 - The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]
 - Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
+- Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]
 
 ## Cases
 CASE-1
@@ -1001,3 +1002,47 @@ CASE-5 — a row that only awaits confirmation stays in Review
   When   Problems renders on its Health tab
   Then   only the untested row is listed, the Health count is 1, and the tab says 1
          row only awaits confirmation
+
+---
+id: REQ-VIEWER-1087
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+distinct_from: [REQ-PLANSTACK-1012]
+---
+
+# Milestones due close together all stay visible
+
+## Description
+> A version pill is wider than three days, so two milestones due within that of each other
+> were drawn one on top of the other and one vanished. A consumer merged two milestones to
+> get the hidden one back: a limit of the drawing changed the plan.
+
+Every bullet below is binding.
+- In the release lane, version pills whose boxes would overlap take separate rows, and the
+  lane grows to hold every row; a single row stays centred where the pill always was.
+- On the ruler, which has one row, milestones due within a pill's width of each other share
+  one pill that names every one of them and lists each with its date on hover.
+- Each version's guide runs to its own pill.
+
+## Cases
+CASE-1 — release-lane pills due close together take separate rows
+  Given  four milestones in a release lane, three of them due within four days
+  When   the plan chart renders
+  Then   every pill is drawn, and the three close ones sit on three different rows
+
+CASE-2 — ruler pills due close together become one pill naming each
+  Given  the same milestones and no release lane
+  When   the plan chart renders
+  Then   one ruler pill names the three close versions, and a second names the fourth
+
+CASE-3 — one milestone keeps its pill where it always was
+  Given  a single milestone and a release lane
+  When   the plan chart renders
+  Then   its pill sits centred in the lane, as before
+
+## Context
+**Notes**
+- `distinct_from: REQ-PLANSTACK-1012` - `REQ-PLANSTACK-1012` keeps bars from covering each other; this keeps version pills from covering each other.

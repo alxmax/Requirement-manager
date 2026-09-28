@@ -20,7 +20,20 @@ version file says what the repository is. The engine reads all three as `vX.Y.Z`
 - version files, the newest CHANGELOG entry and the newest tag that disagree;
 - a bar whose requirement is done on a different day than the bar's `end` — the date of the
   last commit to that requirement's code — or a bar past its `end` whose requirement is not;
-- `Now` / `Next` items in `ROADMAP.md` that no bar schedules.
+- `Now` / `Next` items in `ROADMAP.md` that no bar schedules;
+- a key in `_planning.json` that nothing reads.
+
+A bar counts as done when it carries `progress: 100`, when every `ROADMAP.md` item it
+carries out is ticked, or when the requirement it names is confirmed or implemented.
+
+**What the gate checks in the plan.** Only its input
+([ADR-0057](adr/0057-plan-input-the-engine-cannot-read-reaches-the-gate.md)). `gate` warns,
+under `RM037`, about a value in `_planning.json` the engine drops, repairs or cannot use:
+a file that is not valid JSON, a bar with no `YYYY-MM-DD` `start` or with an `end` that is
+not a date, a bar ending before it starts, a lane missing from `lanes`, a milestone with no
+valid `due` and no label, an unknown `cadence`, or a bar `req:` that names no requirement
+or a deprecated one. `gate --strict` makes each of them an error. Everything above this
+paragraph stays a report.
 
 **Cutting a release.** `sync --release` takes the lowest milestone planned above the
 declared version and shows what it would do. `sync --release --apply` does it: bumps every
