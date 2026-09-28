@@ -42,6 +42,11 @@ the milestone's label with one bullet per bar planned on it — under `## [Unrel
 the file has one, so what you collected there becomes the notes — removes the milestone and
 its bars from `_planning.json`, and names the `ROADMAP.md` items to tick by hand.
 
+A repository with neither a version file nor a tag cannot release: `--apply` refuses and
+asks for a `VERSION` file, because CI tags only a version a file declares. With tags and no
+version file, the release goes through and says to tag it by hand. A GitHub repository with
+no release workflow is told so; the workflow is written only by `init`.
+
 **Tagging stays in CI.** On a GitHub repo `init` writes `.github/workflows/reqmap-release.yml`:
 on every push to the default branch it reads `sync --release --json` and, only when the
 declared version has no tag yet, creates the tag and a GitHub release whose notes are that

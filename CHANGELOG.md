@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.9.1` — 2026-09-28
+
+**A release that CI could never tag is refused before anything is written.**
+
+- `sync --release --apply` refuses with exit 2 in a repository that has neither a version file nor a tag. It used to write the CHANGELOG entry and drop the milestone from the plan while CI, which tags only a version a file declares, never tagged it. It now asks for a `VERSION` file holding the version already shipped (REQ-RELEASECMD-1018)
+- With tags but no version file the release still goes through, and says that nothing is bumped and the release is tagged by hand (REQ-RELEASECMD-1018)
+- On a GitHub repository with no `.github/workflows/reqmap-release.yml`, `sync --release` says that nothing may tag the release. It never writes the workflow; `init` does (REQ-RELEASEWORKFLOW-1019)
+- The JSON carries these as `notices`, beside the `notes` CI publishes
+- The release code loads only for `sync --release` and `init`. The engine's core falls to 6,706 logical lines, and its budget with it
+
 ## plugin `v8.9.0` — 2026-09-28
 
 **The gate names plan input the engine drops or misreads.**

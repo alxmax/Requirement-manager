@@ -37,7 +37,6 @@ from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
 from reqmap_engine.registry import _cli_choices, cmd_gen_integration
-from reqmap_engine.release import cmd_release
 from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
 from reqmap_engine.search import SEARCH_TOP, cmd_search
@@ -52,7 +51,7 @@ from reqmap_engine import (
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audittail, init, levels,
     targets, history,
-    pyramid, cliflags, docclaims, versions, release, mcpconfig, search,
+    pyramid, cliflags, docclaims, versions, mcpconfig, search,
     healthrows, site, site_template,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually
@@ -217,6 +216,7 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
     if a.mode_release is not None:
+        from reqmap_engine.release import cmd_release
         return cmd_release(ws, code_root, reqs_dir, version=a.mode_release,
                            apply_it=a.do_apply, as_json=a.as_json)
     # Before the gate, not after: the generated integration artifacts are
@@ -419,17 +419,17 @@ _ENGINE_MODULES = (
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audittail, init, levels, pyramid,
     targets, history,
-    cliflags, docclaims, versions, release, mcpconfig, search,
+    cliflags, docclaims, versions, mcpconfig, search,
     healthrows, site, site_template,
 )
-# The design review, and the planning checks a repository without a plan
-# never needs (ADR-0057), are imported only when a name is looked up in
+# The design review, and the planning and release code a repository without
+# a plan never needs (ADR-0057), are imported only when a name is looked up in
 # them, so a command that never asks for them (`gate` above all) never
 # loads them. Searched
 # after every eager module, in this order.
 _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
-                 "plandrift", "planschema")
+                 "plandrift", "planschema", "release")
 
 
 def __getattr__(name):

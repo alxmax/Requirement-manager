@@ -123,6 +123,25 @@ def _declared(reqs_dir, code_root):
             "notes": entry_body(_read(_changelog_path(code_root)), name)}
 
 
+def _release_notices(code_root, files, problems):
+    # implements: REQ-RELEASECMD-1018  # implements: REQ-RELEASEWORKFLOW-1019
+    """What stands between this release and a tag. With neither a version
+    file nor a tag, CI could never tag it: refused. The rest are notes."""
+    notices = []
+    if not files and newest_tag(code_root) is None:
+        problems.append("no version file to bump and no tag to follow - "
+                        "create a `VERSION` file holding the version already "
+                        "shipped, or name the file in `VERSION_FILES`")
+    elif not files:
+        notices.append("no version file: nothing is bumped - tag this "
+                       "release by hand")
+    workflow = os.path.join(code_root, *WORKFLOW_PATH.split("/"))
+    if _uses_github(code_root) and not os.path.exists(workflow):
+        notices.append("no {}: nothing tags this release unless another "
+                       "workflow does - `init` writes it".format(WORKFLOW_PATH))
+    return notices
+
+
 def release_plan(ws, code_root, reqs_dir, version=True):
     # implements: ARCH-RELEASE-072  # implements: REQ-RELEASECMD-1018
     # implements: REQ-NEXTVERSION-1017
@@ -150,15 +169,18 @@ def release_plan(ws, code_root, reqs_dir, version=True):
         problems.append(
             "gate reports {} error(s) - fix them before a release"
             .format(len(errs)))
+    files = version_files(reqs_dir, code_root)
+    # `notes` is taken: it is the CHANGELOG text CI publishes.
+    notices = _release_notices(code_root, files, problems)
     plan.update({"target": tag_form(key) if key else None,
-                 "problems": problems,
+                 "problems": problems, "notices": notices,
                  "date": datetime.date.today().isoformat()})
     if key is None:
         return plan
     _, name, label, bars = _released_work(reqs_dir, key)
     text = _read(_changelog_path(code_root))
     plan["files"] = [{"path": p, "from": v, "to": tag_form(key).lstrip("v")}
-                     for p, v in version_files(reqs_dir, code_root)]
+                     for p, v in files]
     plan["changelog"] = _changelog_entry(
         changelog_style(text), tag_form(key), plan["date"], label, bars)
     plan["plan"] = {"milestone": name,
@@ -200,6 +222,8 @@ def _print_plan(plan, applied):
         plan["baseline"] or "-"))
     for problem in plan["problems"]:
         print("  BLOCKED  " + problem)
+    for notice in plan.get("notices", []):
+        print("  note     " + notice)
     for change in plan.get("files", []):
         print("  bump     {}: {} -> {}".format(
             change["path"], change["from"], change["to"]))

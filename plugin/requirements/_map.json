@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-28",
+  "engine_version": "2026-09-28.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2605,7 +2605,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:87"
+          "loc": "plugin/scripts/reqmap.py:86"
         },
         {
           "role": "tested-by",
@@ -2819,11 +2819,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:169"
+          "loc": "plugin/scripts/reqmap.py:168"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:179"
+          "loc": "plugin/scripts/reqmap.py:178"
         },
         {
           "role": "tested-by",
@@ -5541,7 +5541,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:98"
+          "loc": "plugin/scripts/reqmap_engine/init.py:97"
         },
         {
           "role": "implements",
@@ -6809,15 +6809,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:147"
+          "loc": "plugin/scripts/reqmap_engine/init.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:178"
+          "loc": "plugin/scripts/reqmap_engine/init.py:177"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:241"
+          "loc": "plugin/scripts/reqmap_engine/init.py:240"
         },
         {
           "role": "implements",
@@ -6873,7 +6873,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:178"
+          "loc": "plugin/scripts/reqmap_engine/init.py:177"
         }
       ],
       "test_exempt": null,
@@ -6931,7 +6931,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3894"
+          "loc": "plugin/scripts/test_reqmap_author.py:3927"
         },
         {
           "role": "implements",
@@ -11729,7 +11729,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:66"
+          "loc": "plugin/scripts/reqmap.py:65"
         },
         {
           "role": "tested-by",
@@ -11780,11 +11780,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:64"
+          "loc": "plugin/scripts/reqmap.py:63"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:66"
+          "loc": "plugin/scripts/reqmap.py:65"
         },
         {
           "role": "implements",
@@ -12036,7 +12036,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3507"
+          "loc": "plugin/scripts/test_reqmap_author.py:3540"
         },
         {
           "role": "implements",
@@ -12052,15 +12052,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:127"
+          "loc": "plugin/scripts/reqmap_engine/release.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:223"
+          "loc": "plugin/scripts/reqmap_engine/release.py:247"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:336"
+          "loc": "plugin/scripts/reqmap_engine/release.py:360"
         },
         {
           "role": "implements",
@@ -12172,7 +12172,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:336"
+          "loc": "plugin/scripts/reqmap_engine/release.py:360"
         }
       ],
       "test_exempt": null,
@@ -12274,7 +12274,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:128"
+          "loc": "plugin/scripts/reqmap_engine/release.py:147"
         },
         {
           "role": "implements",
@@ -12300,13 +12300,14 @@
         "`sync --release` prints the version it would release, the version-file changes, the CHANGELOG entry and the plan change, and writes nothing.",
         "With `--apply` it rewrites every version file, and writes the dated entry — headed by the milestone's label in bold, then one bullet per bar planned on that version — directly under `Unreleased` when the file has one, otherwise above the newest release.",
         "A version named after `--release` is released instead of the planned one.",
-        "`sync --release --apply` refuses with exit 2 and writes nothing in three cases: nothing is planned above the baseline, the version is not above it, or the gate reports errors.",
+        "`sync --release --apply` refuses with exit 2 and writes nothing in four cases: nothing is planned above the baseline, the version is not above it, the gate reports errors, or the repository has neither a version file nor a tag, so CI would have no declared version to tag.",
+        "With tags but no version file, the release proceeds and says that nothing is bumped and the release is tagged by hand.",
         "An entry for the version that already exists is never written a second time."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a dry run writes nothing\n  Given  a plan with `v1.5.0` above a declared 1.4.0\n  When   `sync --release` runs without `--apply`\n  Then   it names `v1.5.0` and every file is unchanged\n\nCASE-2 — apply bumps the files and writes the entry under Unreleased\n  Given  that plan and a CHANGELOG holding an Unreleased item\n  When   `sync --release --apply` runs\n  Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item\n\nCASE-3 — apply with nothing planned is refused\n  Given  a declared 1.4.0 and an empty plan\n  When   `sync --release --apply` runs\n  Then   it exits 2, says nothing is planned above `v1.4.0`, and `package.json` is unchanged\n\nCASE-4 — a named version not above the baseline is refused\n  Given  a declared 1.4.0\n  When   `sync --release v1.4.0 --apply` runs\n  Then   it exits 2 and says `v1.4.0` is not above `v1.4.0`\n\nCASE-5 — an entry is never written twice\n  Given  a release already applied for `v1.5.0`\n  When   it is applied again\n  Then   the CHANGELOG holds one `1.5.0` heading",
+      "accept": "CASE-1 — a dry run writes nothing\n  Given  a plan with `v1.5.0` above a declared 1.4.0\n  When   `sync --release` runs without `--apply`\n  Then   it names `v1.5.0` and every file is unchanged\n\nCASE-2 — apply bumps the files and writes the entry under Unreleased\n  Given  that plan and a CHANGELOG holding an Unreleased item\n  When   `sync --release --apply` runs\n  Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item\n\nCASE-3 — apply with nothing planned is refused\n  Given  a declared 1.4.0 and an empty plan\n  When   `sync --release --apply` runs\n  Then   it exits 2, says nothing is planned above `v1.4.0`, and `package.json` is unchanged\n\nCASE-4 — a named version not above the baseline is refused\n  Given  a declared 1.4.0\n  When   `sync --release v1.4.0 --apply` runs\n  Then   it exits 2 and says `v1.4.0` is not above `v1.4.0`\n\nCASE-5 — an entry is never written twice\n  Given  a release already applied for `v1.5.0`\n  When   it is applied again\n  Then   the CHANGELOG holds one `1.5.0` heading\n\nCASE-6 — no version file and no tag is refused\n  Given  a plan with `v1.5.0` in a repository with no version file and no tag\n  When   `sync --release --apply` runs\n  Then   it exits 2, asks for a `VERSION` file, and the CHANGELOG and the plan are unchanged\n\nCASE-7 — tags only release with a note to tag by hand\n  Given  the same plan in a repository whose newest tag is `v1.4.0`\n  When   `sync --release --apply` runs\n  Then   it exits 0, writes the 1.5.0 entry, and notes that nothing is bumped",
       "input": "",
       "output": "",
       "desc": "",
@@ -12343,11 +12344,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:176"
+          "loc": "plugin/scripts/reqmap_engine/release.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:223"
+          "loc": "plugin/scripts/reqmap_engine/release.py:198"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:247"
         },
         {
           "role": "implements",
@@ -12358,8 +12363,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "REQ-RELEASEWORKFLOW-1019",
@@ -12372,12 +12377,13 @@
       "contract": [
         "`sync --release --json` carries `declared`, `tag_exists` and `notes`: the declared version as `vX.Y.Z`, whether that tag exists, and that version's CHANGELOG entry.",
         "`init` writes `.github/workflows/reqmap-release.yml` when the repository has a `.github` directory or a github.com remote, and never over an existing file.",
-        "The workflow runs the engine vendored in the checkout and creates the tag and GitHub release only when the declared version has no tag; with no engine inside the repository, `init` writes no workflow and says why."
+        "The workflow runs the engine vendored in the checkout and creates the tag and GitHub release only when the declared version has no tag; with no engine inside the repository, `init` writes no workflow and says why.",
+        "`sync --release` notes a GitHub repository with no release workflow, because nothing may tag the release, and never writes the workflow itself."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — init seeds the workflow on a GitHub repository\n  Given  a repository with a `.github` directory and no release workflow\n  When   `init` runs\n  Then   `.github/workflows/reqmap-release.yml` is written\n\nCASE-2 — an existing workflow is never overwritten\n  Given  a repository whose release workflow already exists\n  When   the release files are seeded\n  Then   the workflow is unchanged and not reported as created\n\nCASE-3 — a repository off GitHub gets no workflow\n  Given  a repository with no `.github` directory and no remote\n  When   `init` runs\n  Then   no `.github` directory is created\n\nCASE-4 — the workflow runs the vendored engine and releases once\n  Given  the engine inside the checkout, and a checkout without it\n  When   the workflow text is built for each\n  Then   the first runs that engine with `sync --release --json` and skips an existing tag, and the second has no workflow\n\nCASE-5 — the JSON carries what CI needs\n  Given  a declared 1.5.0 with a CHANGELOG entry and no tag\n  When   `sync --release --json` runs\n  Then   it reports `v1.5.0`, no tag, and the entry's text",
+      "accept": "CASE-1 — init seeds the workflow on a GitHub repository\n  Given  a repository with a `.github` directory and no release workflow\n  When   `init` runs\n  Then   `.github/workflows/reqmap-release.yml` is written\n\nCASE-2 — an existing workflow is never overwritten\n  Given  a repository whose release workflow already exists\n  When   the release files are seeded\n  Then   the workflow is unchanged and not reported as created\n\nCASE-3 — a repository off GitHub gets no workflow\n  Given  a repository with no `.github` directory and no remote\n  When   `init` runs\n  Then   no `.github` directory is created\n\nCASE-4 — the workflow runs the vendored engine and releases once\n  Given  the engine inside the checkout, and a checkout without it\n  When   the workflow text is built for each\n  Then   the first runs that engine with `sync --release --json` and skips an existing tag, and the second has no workflow\n\nCASE-5 — the JSON carries what CI needs\n  Given  a declared 1.5.0 with a CHANGELOG entry and no tag\n  When   `sync --release --json` runs\n  Then   it reports `v1.5.0`, no tag, and the entry's text\n\nCASE-6 — a missing workflow is named and never written\n  Given  a repository with a `.github` directory and no release workflow\n  When   `sync --release --apply` runs, then runs again once the workflow exists\n  Then   the first run notes the missing workflow without writing it, and the second is silent",
       "input": "",
       "output": "",
       "desc": "",
@@ -12390,7 +12396,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3455"
+          "loc": "plugin/scripts/test_reqmap_author.py:3475"
         },
         {
           "role": "implements",
@@ -12402,19 +12408,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:306"
+          "loc": "plugin/scripts/reqmap_engine/release.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:337"
+          "loc": "plugin/scripts/reqmap_engine/release.py:330"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/release.py:361"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "REQ-PLANADVANCE-1020",
@@ -12452,7 +12462,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:176"
+          "loc": "plugin/scripts/reqmap_engine/release.py:198"
         }
       ],
       "test_exempt": null,
@@ -12495,7 +12505,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3548"
+          "loc": "plugin/scripts/test_reqmap_author.py:3581"
         },
         {
           "role": "implements",
@@ -12557,7 +12567,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3607"
+          "loc": "plugin/scripts/test_reqmap_author.py:3640"
         },
         {
           "role": "implements",
@@ -13550,11 +13560,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:147"
+          "loc": "plugin/scripts/reqmap_engine/init.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:241"
+          "loc": "plugin/scripts/reqmap_engine/init.py:240"
         },
         {
           "role": "implements",
@@ -13723,7 +13733,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/planinput.py:19"
+          "loc": "plugin/scripts/reqmap_engine/planinput.py:10"
         },
         {
           "role": "implements",
@@ -13785,7 +13795,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3607"
+          "loc": "plugin/scripts/test_reqmap_author.py:3640"
         },
         {
           "role": "implements",
@@ -16375,7 +16385,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3658"
+          "loc": "plugin/scripts/test_reqmap_author.py:3691"
         },
         {
           "role": "implements",
@@ -16483,7 +16493,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3661"
+          "loc": "plugin/scripts/test_reqmap_author.py:3694"
         },
         {
           "role": "implements",
@@ -22480,7 +22490,7 @@
     },
     {
       "month": "2026-09",
-      "count": 116,
+      "count": 117,
       "first": "2026-09-02",
       "last": "2026-09-28",
       "versions": [
@@ -22599,11 +22609,17 @@
         "v8.8.1",
         "v8.8.2",
         "v8.8.3",
-        "v8.9.0"
+        "v8.9.0",
+        "v8.9.1"
       ],
       "landmark": "v8.0.0",
       "headline": "The CLI surface: `new` and the `gate --…` aliases removed, foreign flags refused",
       "entries": [
+        {
+          "version": "v8.9.1",
+          "date": "2026-09-28",
+          "headline": "A release that CI could never tag is refused before anything is written"
+        },
         {
           "version": "v8.9.0",
           "date": "2026-09-28",
