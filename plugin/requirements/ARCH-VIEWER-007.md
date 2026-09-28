@@ -1029,14 +1029,14 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — release-lane pills due close together take separate rows
-  Given  milestones due 22, 24 and 25 September and 2 October, and a release lane
+  Given  four milestones in a release lane, three of them due within four days
   When   the plan chart renders
-  Then   every pill is drawn and the three September ones sit on three different rows
+  Then   every pill is drawn, and the three close ones sit on three different rows
 
 CASE-2 — ruler pills due close together become one pill naming each
   Given  the same milestones and no release lane
   When   the plan chart renders
-  Then   one ruler pill names the three September versions and another names the October one
+  Then   one ruler pill names the three close versions, and a second names the fourth
 
 CASE-3 — one milestone keeps its pill where it always was
   Given  a single milestone and a release lane

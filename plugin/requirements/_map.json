@@ -19331,7 +19331,7 @@
         "`distinct_from: REQ-PLANSTACK-1012` - `REQ-PLANSTACK-1012` keeps bars from covering each other; this keeps version pills from covering each other."
       ],
       "current_impl": [],
-      "accept": "CASE-1 — release-lane pills due close together take separate rows\n  Given  milestones due 22, 24 and 25 September and 2 October, and a release lane\n  When   the plan chart renders\n  Then   every pill is drawn and the three September ones sit on three different rows\n\nCASE-2 — ruler pills due close together become one pill naming each\n  Given  the same milestones and no release lane\n  When   the plan chart renders\n  Then   one ruler pill names the three September versions and another names the October one\n\nCASE-3 — one milestone keeps its pill where it always was\n  Given  a single milestone and a release lane\n  When   the plan chart renders\n  Then   its pill sits centred in the lane, as before",
+      "accept": "CASE-1 — release-lane pills due close together take separate rows\n  Given  four milestones in a release lane, three of them due within four days\n  When   the plan chart renders\n  Then   every pill is drawn, and the three close ones sit on three different rows\n\nCASE-2 — ruler pills due close together become one pill naming each\n  Given  the same milestones and no release lane\n  When   the plan chart renders\n  Then   one ruler pill names the three close versions, and a second names the fourth\n\nCASE-3 — one milestone keeps its pill where it always was\n  Given  a single milestone and a release lane\n  When   the plan chart renders\n  Then   its pill sits centred in the lane, as before",
       "input": "",
       "output": "",
       "desc": "",
