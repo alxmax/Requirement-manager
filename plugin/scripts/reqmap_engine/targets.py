@@ -233,6 +233,13 @@ def _read_planning_file(path):
         return None
 
 
+def has_plan(reqs_dir):  # implements: REQ-PLANINPUT-1086
+    """True when the requirements directory holds a planning file: the
+    one test that decides whether the planning checks load at all."""
+    return any(os.path.isfile(os.path.join(reqs_dir or ".", name))
+               for name in PLANNING_FILES)
+
+
 def load_targets(reqs_dir):
     """Parsed planning sidecar, or {} when absent or invalid (fail-open)."""
     raw = None

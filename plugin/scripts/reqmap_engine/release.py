@@ -19,7 +19,6 @@ from .history import (
     changelog_style, entry_body, parse_changelog, release_heading
 )
 from .mapdata import _read_roadmap
-from .plandrift import items_for_bars
 from .targets import PLANNING_FILES
 from .versions import (
     newest_tag, next_planned_version, semver3, shipped_baseline, tag_form,
@@ -166,6 +165,7 @@ def release_plan(ws, code_root, reqs_dir, version=True):
                      "bars": [b.get("title") for b in bars]}
     # Suggested, never written: ticking an item is the author's
     # statement that it is done.
+    from .plandrift import items_for_bars  # only on a release (ADR-0057)
     plan["roadmap"] = [
         it["name"]
         for it in items_for_bars(_read_roadmap(code_root), bars)]

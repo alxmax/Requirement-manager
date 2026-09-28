@@ -3124,7 +3124,7 @@ class QuietGate(unittest.TestCase):  # tested-by: REQ-CHECK-1036
             "RM001", "RM002", "RM003", "RM006",
             "RM005", "RM012", "RM023", "RM033", "RM034", "RM036",
             "RM016", "RM018", "RM019", "RM020",
-            "RM022", "RM027")))
+            "RM022", "RM027", "RM037")))
         errors = {r.id for r in R.GATE_RULES if r.severity == "error"}
         self.assertLessEqual(errors, R.gate.DEFAULT_RULES)
 
@@ -3147,13 +3147,113 @@ class QuietGate(unittest.TestCase):  # tested-by: REQ-CHECK-1036
 
 
 
+class PlanInput(unittest.TestCase):  # tested-by: REQ-PLANINPUT-1086
+    """RM037: plan input the engine drops, repairs or cannot use."""
+
+    BROKEN = {
+        "lanes": ["Feature"],
+        "cadence": {"every": "fortnight"},
+        "milestones": {"v1.3.0": {"due": "soon"}, "Phase one": {"due": "2026-10-09"}},
+        "bars": [
+            {"title": "Bad start", "start": "tomorrow"},
+            {"title": "Bad end", "start": "2026-09-20", "end": "10/05"},
+            {"title": "Backwards", "start": "2026-10-05", "end": "2026-09-20"},
+            {"title": "Typo lane", "lane": "Feture", "start": "2026-09-20"},
+            {"title": "Ghost", "start": "2026-09-20", "req": "REQ-NOPE-009"},
+            {"title": "Retired", "start": "2026-09-20", "req": "REQ-OLD-002"},
+            {"title": "Fine", "start": "2026-09-20", "req": "REQ-A-001",
+             "milestone": "Phase one", "items": ["read by nothing"]},
+        ],
+    }
+
+    def _repo(self, d, plan):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "REQ-A-001.md"), _spec("REQ-A-001", ["`gate` writes a lock."]))
+        _write(os.path.join(rd, "REQ-OLD-002.md"),
+               _spec("REQ-OLD-002", ["Retired."], status="deprecated"))
+        _write(os.path.join(d, "a.py"), tag("REQ-A-001") + "\ndef f():\n    return 1\n")
+        if plan is not None:
+            _write(os.path.join(rd, "_planning.json"),
+                   plan if isinstance(plan, str) else json.dumps(plan))
+
+    def _gate(self, root, *flags):
+        return subprocess.run([sys.executable,
+            os.path.join(os.path.dirname(__file__), "reqmap.py"),
+            "gate", *flags], cwd=root, capture_output=True, text=True)
+
+    def _rm037(self, root, *flags):
+        r = self._gate(root, "--json", *flags)
+        return r.returncode, [f for f in json.loads(r.stdout)["findings"]
+                              if f["rule"] == "RM037"]
+
+    def test_every_dropped_or_misread_value_is_named(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, self.BROKEN)
+            _rc, found = self._rm037(d)
+        text = "\n".join(str(f) for f in found)
+        for needle in ("'Bad start': dropped", "'Bad end': `end` '10/05'",
+                       "'Backwards': ends 2026-09-20 before it starts",
+                       "'Typo lane': lane 'Feture'", "milestone 'v1.3.0' has no",
+                       "`cadence` is not understood", "REQ-NOPE-009 - no such",
+                       "REQ-OLD-002 - a deprecated"):
+            self.assertIn(needle, text)
+        self.assertEqual(8, len(found), text)
+        # a phase name is a legitimate milestone, and an ignored key is advice
+        self.assertNotIn("Phase one", text)
+        self.assertNotIn("items", text)
+
+    def test_the_bare_gate_warns_and_strict_fails(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, self.BROKEN)
+            bare_rc, bare = self._rm037(d)
+            strict_rc, strict = self._rm037(d, "--strict")
+            plain = self._gate(d)
+        self.assertEqual((0, 1), (bare_rc, strict_rc))
+        self.assertEqual({"warn"}, {f["severity"] for f in bare})
+        self.assertEqual({"error"}, {f["severity"] for f in strict})
+        self.assertIn("RM037", plain.stdout)
+
+    def test_invalid_json_is_one_warning_and_never_a_crash(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, '{"bars": [],}')
+            rc, found = self._rm037(d)
+        self.assertEqual(0, rc)
+        self.assertEqual(1, len(found))
+        self.assertIn("not valid JSON", str(found[0]))
+
+    def test_a_clean_plan_and_no_plan_are_silent(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-4
+        clean = {"lanes": ["Feature"], "milestones": {"v1.3.0": {"due": "2026-10-09"}},
+                 "bars": [{"title": "Fine", "lane": "Feature", "start": "2026-09-20",
+                           "end": "2026-09-25", "req": "REQ-A-001"}]}
+        for plan in (clean, None):
+            with tempfile.TemporaryDirectory() as d:
+                self._repo(d, plan)
+                self.assertEqual((0, []), self._rm037(d))
+
+    def test_an_ignored_key_is_advice_outside_the_gate(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"milestones": {"v1": {"due": "2026-10-09", "items": []},
+                                          "v2": {"due": "2026-10-16", "items": []}},
+                           "bars": []})
+            lines = R.plan_ignored_key_lines(os.path.join(d, "requirements"))
+            _rc, found = self._rm037(d)
+        self.assertEqual(1, len(lines), lines)
+        self.assertIn("key 'items' is read by nothing (milestone v1, v2)", lines[0])
+        self.assertEqual([], found)
+
+
 class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
     """GATE_RULES order is output order. It must not depend on which module
     a caller happens to import first: a split once let RM032 register
     before RM001, and no other test noticed."""
 
-    ENTRIES = ("axis", "docclaims", "wikilinks", "rulesrepo", "rules",
-               "gate", "audit", "audittail", "relevel", "health")
+    ENTRIES = ("axis", "docclaims", "wikilinks", "planinput", "rulesrepo",
+               "rules", "gate", "audit", "audittail", "relevel", "health")
 
     def _order_after(self, first):
         code = ("import reqmap_engine.{}; import reqmap as R; "
@@ -3167,7 +3267,7 @@ class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
         orders = {m: self._order_after(m) for m in self.ENTRIES}
         first = orders["gate"]
         self.assertEqual(first[:3], ["RM001", "RM002", "RM031"])
-        self.assertEqual(first[-3:], ["RM032", "RM035", "RM036"])
+        self.assertEqual(first[-4:], ["RM032", "RM035", "RM036", "RM037"])
         for m, order in orders.items():
             self.assertEqual(order, first, m)
 

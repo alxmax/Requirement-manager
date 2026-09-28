@@ -204,6 +204,53 @@ test("gantt: a version's guide runs from its due day to its pill",
     return g.includes("top:80px") && g.includes("height:106px");
   })());
 
+// ---- milestones due close together (REQ-VIEWER-1087) ------------------------
+// tested-by: REQ-VIEWER-1087 @unit
+const closeMilestones = {
+  "v1.10.0": { due: "2026-09-22" }, "v1.11.0": { due: "2026-09-24" },
+  "v1.12.0": { due: "2026-09-25" }, "v1.15.0": { due: "2026-10-02" },
+};
+
+// verifies: REQ-VIEWER-1087#CASE-1
+test("gantt: release-lane pills due close together take separate rows",
+  (() => {
+    const html = renderToString(<PlanGantt planning={{
+      lanes: ["Feature", "Release"], bars: [],
+      cadence: { every: "week", on: "friday", lane: "Release" },
+      releases: ["2026-09-25"], milestones: closeMilestones }}
+      history={[]} locale="en" t={(x) => x} zoom={100} />);
+    const tops = Object.keys(closeMilestones).map((ms) => {
+      const m = html.match(new RegExp(
+        `data-version="${ms.replace(/\./g, "\\.")}"[^>]*top:(-?[\\d.]+)px`));
+      return m ? m[1] : null;
+    });
+    // every pill drawn, and the three due within one pill's width sit on
+    // three different rows
+    return tops.every((x) => x !== null)
+      && new Set(tops.slice(0, 3)).size === 3;
+  })());
+
+// verifies: REQ-VIEWER-1087#CASE-2
+test("gantt: ruler pills due close together become one pill naming each",
+  (() => {
+    const html = renderToString(<PlanGantt planning={{
+      lanes: ["Feature"], bars: [], milestones: closeMilestones }}
+      history={[]} locale="en" t={(x) => x} zoom={100} />);
+    return html.includes('data-flag="v1.10.0 · v1.11.0 · v1.12.0"')
+      && html.includes('data-flag="v1.15.0"');
+  })());
+
+// verifies: REQ-VIEWER-1087#CASE-3
+test("gantt: one milestone keeps its pill where it always was", (() => {
+  const html = renderToString(<PlanGantt planning={{
+    lanes: ["Feature", "Release"], bars: [],
+    cadence: { every: "week", on: "friday", lane: "Release" },
+    releases: ["2026-09-25"], milestones: { "v9.8.0": { due: "2026-09-25" } } }}
+    history={[]} locale="en" t={(x) => x} zoom={100} />);
+  // a Release lane of 78px: 39 - 11
+  return /data-version="v9\.8\.0"[^>]*top:28px/.test(html);
+})());
+
 test("gantt: the lane column sticks while the chart scrolls sideways",
   // verifies: REQ-PLANSTACK-1012#CASE-4
   (() => {

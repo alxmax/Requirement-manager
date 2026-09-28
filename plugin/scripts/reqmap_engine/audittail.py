@@ -9,10 +9,9 @@ from .mapdata import (
 )
 from .model import _as_list
 from .orphans import _scan_untagged
-from .plandrift import bar_date_lines, bar_date_suggestions, unplanned_line
 from .relevel import relevel_residue_lines
 from .similar import _corpus_shape, _exemptions_in_force
-from .targets import load_targets
+from .targets import has_plan, load_targets
 from .versions import stale_plan_milestones, version_alignment_lines
 
 
@@ -163,15 +162,26 @@ def _version_lines(code_root, reqs_dir):
         reqs_dir, code_root)
 
 
-def _bar_date_lines(bars, reqs, members, code_root):
+def _plan_lines(reqs, members, reqs_dir, code_root):
     # implements: ARCH-AUDIT-065  # implements: REQ-PLANDATES-1022
-    """The dates `sync` suggests changing on bars whose work finished, or
-    ran over."""
-    if not (bars and code_root):
+    # implements: REQ-PLANINPUT-1086
+    """The dates `sync` suggests changing on bars whose work finished or
+    ran over, the Now/Next items no bar schedules, and the plan keys
+    nothing reads. The modules behind them load only for a repository that
+    keeps a plan (ADR-0057)."""
+    items = _read_roadmap(code_root) if code_root else None
+    planned = bool(reqs_dir) and has_plan(reqs_dir)
+    if not (planned or items):
         return []
-    return bar_date_lines(bar_date_suggestions(
-        bars, reqs, members, code_root,
-        datetime.date.today().isoformat()))
+    from .plandrift import bar_date_lines, bar_date_suggestions, unplanned_line
+    from .planschema import plan_ignored_key_lines
+    bars = load_targets(reqs_dir).get("bars", []) if planned else []
+    lines = bar_date_lines(bar_date_suggestions(
+        bars, reqs, members, code_root, datetime.date.today().isoformat(),
+        items)) if bars and code_root else []
+    unplanned = unplanned_line(items, bars) if code_root else None
+    return lines + ([unplanned] if unplanned else []) + (
+        plan_ignored_key_lines(reqs_dir) if planned else [])
 
 
 def _roadmap_lag_lines(reqs, code_root):
@@ -225,12 +235,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):
         _untagged_files_line(code_root, reqs_dir),
     ) if text]
     lines.extend(_version_lines(code_root, reqs_dir))
-    bars = load_targets(reqs_dir).get("bars", []) if reqs_dir else []
-    lines.extend(_bar_date_lines(bars, reqs, members, code_root))
-    unplanned = (unplanned_line(_read_roadmap(code_root), bars)
-                if code_root else None)
-    if unplanned:
-        lines.append(unplanned)
+    lines.extend(_plan_lines(reqs, members, reqs_dir, code_root))
     lines.extend(_roadmap_lag_lines(reqs, code_root))
     lines.extend(relevel_residue_lines(reqs))
     if not lines:

@@ -89,18 +89,25 @@ function FlagRow({ lay, t }) {
           width: 1, height: 6, background: "var(--fg-faint)", zIndex: 1,
         }} />
       ))}
-      {!lay.releaseLane && lay.flags.map((f) => (
-        <div key={f.ms}
-          title={f.label || `${f.ms} · ${f.at.toLocaleDateString(lay.loc)}`}
-          style={{
-            ...PILL, left: f.idx * PX + PX / 2 - 28, width: 56,
-            color: "var(--indigo-500)",
-            background: "var(--indigo-tint)",
-            border: "1px solid var(--indigo-400)", zIndex: 3,
-          }}>
-          {f.ms}
-        </div>
-      ))}
+      {/* implements: REQ-VIEWER-1087 — milestones due within a pill's
+          width of each other share one pill that names every one */}
+      {!lay.releaseLane && lay.rulerFlags.map((c) => {
+        const w = Math.max(56, c.ms.length * 6 + 12);
+        return (
+          <div key={c.ms} data-flag={c.ms}
+            title={c.members.map((f) => `${f.ms}${f.label
+              ? ` · ${f.label}` : ""} · ${f.at.toLocaleDateString(lay.loc)}`)
+              .join("\n")}
+            style={{
+              ...PILL, left: c.idx * PX + PX / 2 - 28, width: w,
+              color: "var(--indigo-500)",
+              background: "var(--indigo-tint)",
+              border: "1px solid var(--indigo-400)", zIndex: 3,
+            }}>
+            {c.ms}
+          </div>
+        );
+      })}
     </div>
   );
 }

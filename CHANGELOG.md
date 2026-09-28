@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.9.0` — 2026-09-28
+
+**The gate names plan input the engine drops or misreads.**
+
+- New rule RM037: `gate` reports each value in `_planning.json` that the reader drops, repairs or cannot use. That covers invalid JSON, a bar with no date or a bad `end`, a bar ending before it starts, an undeclared lane, a milestone entry with no `due` or label, an unknown `cadence`, and a bar `req:` that is missing or deprecated. It warns in the bare gate and fails `--strict`, like `INPUT:config` (ADR-0057, which supersedes ADR-0040 Decision 5 for plan input only) (REQ-PLANINPUT-1086)
+- Measured before shipping on the eight repositories with a corpus on the maintainer's machine: one fired, with two findings, both bars naming deprecated requirements. A check on milestone names that are not versions was dropped, because it would have warned five times a commit in a repository that plans named phases
+- A key `_planning.json` carries and nothing reads, such as a milestone's `items` list, is one advisory line in `sync` and `gate --audit`, never a gate finding (REQ-PLANINPUT-1086)
+- One predicate decides whether a bar is done: `progress: 100`, every ROADMAP item it carries out ticked, or its requirement confirmed or implemented. A bar is no longer reported overdue when its requirement stays `draft` after its items were ticked (REQ-PLANDATES-1022)
+- The Plan chart keeps every milestone visible when several are due within a few days of each other. In the release lane their pills take separate rows; on the ruler they share one pill that names each. A consumer had merged two milestones to get a hidden one back (REQ-VIEWER-1087)
+- The planning checks load only for a repository that keeps a plan. `plandrift` and the new `planschema` are imported when they are needed, and only the small RM037 rule loads with the gate. The engine's core falls to 6,891 logical lines, and its budget with it
+
 ## plugin `v8.8.3` — 2026-09-26
 
 **`gate --audit` counts the exemptions `gate --risk` counts.**

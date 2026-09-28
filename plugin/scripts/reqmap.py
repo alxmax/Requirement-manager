@@ -51,7 +51,7 @@ from reqmap_engine import (
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audittail, init, levels,
-    targets, plandrift, history,
+    targets, history,
     pyramid, cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
 )
@@ -418,15 +418,18 @@ _ENGINE_MODULES = (
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
     gate, audittail, init, levels, pyramid,
-    targets, plandrift, history,
+    targets, history,
     cliflags, docclaims, versions, release, mcpconfig, search,
     healthrows, site, site_template,
 )
-# The design review is imported only when a name is looked up in it, so a
-# command that never asks for it (`gate` above all) never loads it. Searched
+# The design review, and the planning checks a repository without a plan
+# never needs (ADR-0057), are imported only when a name is looked up in
+# them, so a command that never asks for them (`gate` above all) never
+# loads them. Searched
 # after every eager module, in this order.
 _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
-                 "design_python", "design_brace", "design_report", "usage")
+                 "design_python", "design_brace", "design_report", "usage",
+                 "plandrift", "planschema")
 
 
 def __getattr__(name):

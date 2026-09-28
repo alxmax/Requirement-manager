@@ -50,7 +50,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0037](0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md) | The command surface is already five; the cut is one mode per release | Accepted |
 | [0038](0038-the-retrofit-writes-the-whole-pyramid-in-inits-shape.md) | The retrofit writes the whole pyramid, in `init`'s shape | Accepted |
 | [0039](0039-the-first-recorded-criterion-that-did-not-cover-its-clause.md) | The first recorded criterion that did not cover its clause | Accepted |
-| [0040](0040-a-release-is-cut-from-the-plan.md) | A release is cut from the plan | Accepted |
+| [0040](0040-a-release-is-cut-from-the-plan.md) | A release is cut from the plan | Accepted (Decision 5 superseded in part by 0057) |
 | [0041](0041-two-of-the-engines-four-design-findings-are-fixed.md) | Two of the engine's four design findings are fixed, two are kept | Accepted |
 | [0042](0042-file-spread-counts-directories.md) | `file-spread` counts directories, not files | Accepted |
 | [0043](0043-the-engine-is-served-over-mcp.md) | The engine is served over MCP | Accepted |
@@ -67,6 +67,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
 | [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
 | [0056](0056-the-design-review-line-limit-is-120-columns.md) | The design review's line limit is 120 columns | Accepted |
+| [0057](0057-plan-input-the-engine-cannot-read-reaches-the-gate.md) | Plan input the engine cannot read reaches the gate | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

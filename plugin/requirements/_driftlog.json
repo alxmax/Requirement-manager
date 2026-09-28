@@ -102,8 +102,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-ROADMAP-038": {
-      "hash": "daf5f508b040",
-      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+      "hash": "5fd8185fc946",
+      "reason": null
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -130,8 +130,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "167be02aece5",
-      "reason": "the design ring and tab left the viewer: REQ-VIEWER-969 is the health ring alone, REQ-VIEWER-977 retired"
+      "hash": "7ff2b01618c0",
+      "reason": null
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -154,8 +154,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "REQ-CHECK-1036": {
-      "hash": "8b9ebb1ff39b",
-      "reason": "Clarify reviewed format-parity contract"
+      "hash": "bfd8e3e1acfc",
+      "reason": null
     },
     "REQ-CHECK-829": {
       "hash": "0e8902f7179e",
@@ -295,6 +295,10 @@
     },
     "REQ-PLANCADENCE-1000": {
       "hash": "3f85229041a5",
+      "reason": null
+    },
+    "REQ-PLANDATES-1022": {
+      "hash": "b77fea0694f3",
       "reason": null
     },
     "REQ-PLANDAYS-1021": {
