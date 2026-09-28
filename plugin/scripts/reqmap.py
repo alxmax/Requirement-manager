@@ -429,7 +429,8 @@ _ENGINE_MODULES = (
 # after every eager module, in this order.
 _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
-                 "plandrift", "planschema", "release")
+                 "plandrift", "planschema", "release",
+                 "testgaps")
 
 
 def __getattr__(name):

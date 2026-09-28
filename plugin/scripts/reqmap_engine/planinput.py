@@ -11,9 +11,5 @@ def _plan_input_rule(ctx):  # implements: REQ-PLANINPUT-1086
     if not has_plan(ctx.reqs_dir):
         return
     from .planschema import plan_input_findings
-    try:
-        found = plan_input_findings(ctx.reqs_dir, ctx.reqs)
-    except Exception:  # fail-open: a plan never breaks the verdict
-        return
-    for msg in found:
-        yield None, msg
+    yield from ((None, msg)
+                for msg in plan_input_findings(ctx.reqs_dir, ctx.reqs))

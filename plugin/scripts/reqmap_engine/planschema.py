@@ -29,7 +29,16 @@ _READ_KEYS = {
 def plan_input_findings(reqs_dir, reqs):
     # implements: REQ-PLANINPUT-1086
     """Every RM037 message: the file's own problems, then each bar whose
-    `req:` names no requirement or a deprecated one."""
+    `req:` names no requirement or a deprecated one. Fail-open: a plan
+    never breaks the verdict."""
+    try:
+        return _plan_input_findings(reqs_dir, reqs)
+    except Exception:
+        return []
+
+
+def _plan_input_findings(reqs_dir, reqs):
+    # implements: REQ-PLANINPUT-1086
     out = plan_input_problems(reqs_dir)
     for bar in load_targets(reqs_dir).get("bars", []):
         rid = bar.get("req")

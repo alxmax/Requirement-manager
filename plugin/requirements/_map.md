@@ -1,9 +1,9 @@
 ---
 generated: 2026-09-28
-engine: 2026-09-28.1
-nodes: 309
+engine: 2026-09-28.2
+nodes: 310
 edges: 121
-design pass-rate: 99% (119/120 source files without a design candidate)
+design pass-rate: 99% (120/121 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -202,6 +202,7 @@ graph LR
     REQ_NEXT_886["Each bucket truncates to a top few, --all shows everything<br><small>REQ-NEXT-886</small>"]
     REQ_NEXT_887["An empty registry and a clean one get different messages<br><small>REQ-NEXT-887</small>"]
     REQ_PLANGAPS_1033["The plan's own gaps are a bucket in the worklist<br><small>REQ-PLANGAPS-1033</small>"]
+    REQ_TESTGAPS_1088["The worklist names the tests the gate cannot see missing<br><small>REQ-TESTGAPS-1088</small>"]
     REQ_ORPHANCODE_888["Warning on a sizeable file with no requirement link<br><small>REQ-ORPHANCODE-888</small>"]
     REQ_PARSE_890["load_requirements returns one meta/body/path record per file<br><small>REQ-PARSE-890</small>"]
     REQ_PARSE_891["The hand-rolled frontmatter grammar: scalars and lists only<br><small>REQ-PARSE-891</small>"]
@@ -461,8 +462,8 @@ graph LR
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_86["plugin/scripts/reqmap.py:86"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_86
-  f_plugin_scripts_test_reqmap_report_py_1826_5702["plugin/scripts/test_reqmap_report.py:1826-5702"]
-  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1826_5702
+  f_plugin_scripts_test_reqmap_report_py_1826_5759["plugin/scripts/test_reqmap_report.py:1826-5759"]
+  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1826_5759
   f_plugin_scripts_reqmap_engine_cliflags_py_18_51["plugin/scripts/reqmap_engine/cliflags.py:18-51"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_18_51
   f_plugin_scripts_reqmap_engine_commands_py_15["plugin/scripts/reqmap_engine/commands.py:15"]
@@ -472,8 +473,8 @@ graph LR
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
   f_plugin_scripts_reqmap_py_311["plugin/scripts/reqmap.py:311"]
   ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_311
-  f_plugin_scripts_test_reqmap_report_py_2955_5134["plugin/scripts/test_reqmap_report.py:2955-5134"]
-  ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2955_5134
+  f_plugin_scripts_test_reqmap_report_py_2955_5191["plugin/scripts/test_reqmap_report.py:2955-5191"]
+  ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2955_5191
   f_plugin_scripts_reqmap_engine_config_py_242_260["plugin/scripts/reqmap_engine/config.py:242-260"]
   ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_242_260
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
@@ -502,8 +503,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_lintrules_py_18["plugin/scripts/reqmap_engine/lintrules.py:18"]
   ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_engine_lintrules_py_18
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_scripts_test_reqmap_report_py_5170_5532["plugin/scripts/test_reqmap_report.py:5170-5532"]
-  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5170_5532
+  f_plugin_scripts_test_reqmap_report_py_5227_5589["plugin/scripts/test_reqmap_report.py:5227-5589"]
+  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5227_5589
   f_plugin_scripts_reqmap_engine_design_py_58["plugin/scripts/reqmap_engine/design.py:58"]
   ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_engine_design_py_58
   f_plugin_scripts_reqmap_engine_design_report_py_16_86["plugin/scripts/reqmap_engine/design_report.py:16-86"]
@@ -1074,7 +1075,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>67 caps</small>"]
-  a_REQ["REQ<br><small>232 caps</small>"]
+  a_REQ["REQ<br><small>233 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1088,5 +1089,14 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  ok["No risk signals detected"]
+  subgraph sg_misc["misc"]
+    REQ_TESTGAPS_1088["The worklist names the tests the gate cannot see missing<br><small>REQ-TESTGAPS-1088</small><br>unreviewed"]
+  end
+  style REQ_TESTGAPS_1088 fill:#fff3cd,stroke:#a66,color:#630
 ```
+
+### Risk Table
+
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| REQ-TESTGAPS-1088 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
