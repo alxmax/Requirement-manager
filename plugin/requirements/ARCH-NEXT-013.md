@@ -510,7 +510,7 @@ CASE-6 — a plan gap alone is not "nothing pending"
 
 ---
 id: REQ-TESTGAPS-1088
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -10348,7 +10348,7 @@
       "id": "REQ-TESTGAPS-1088",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The worklist names the tests the gate cannot see missing",
       "intent": "The gate checks a requirement's cases only once one of them carries a `# verifies:` tag, so a confirmed requirement with none passes in silence: one corpus stood at 3% of its cases tagged with a green gate. A `tested-by` line counts one file as the test of every requirement it names, and an exemption key left empty reads like an exemption and is none. The gate stays as it is; the worklist says what it cannot.",
@@ -10404,12 +10404,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -23525,30 +23520,20 @@
     "score": 100,
     "total": 310,
     "scored": 289,
-    "healthy": 288,
+    "healthy": 289,
     "exempt": 0,
     "deprecated": 21,
-    "confirmed": 288,
+    "confirmed": 289,
     "implemented": 280,
     "tested": 280,
-    "drafts": 1,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 288,
-    "unhealthy": [
-      {
-        "id": "REQ-TESTGAPS-1088",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      }
-    ],
+    "unhealthy": [],
     "exempt_ids": []
   },
   "planning": {
