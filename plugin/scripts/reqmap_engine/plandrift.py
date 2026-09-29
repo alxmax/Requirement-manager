@@ -18,9 +18,11 @@ make the list look self-verifying.
 The four false-positive classes below were each paid for in that
 consumer's first run, not theorised here.
 """
+import os
 import re
 
 from .git import _git
+from .parse import parse_frontmatter, split_requirement_blocks
 from .scan import _walk_code
 
 # implements: REQ-PLANDRIFT-1002
@@ -300,11 +302,37 @@ def bar_items(bar, items, bars):
     return [it for it in items or [] if it.get("req") == rid]
 
 
-def bar_done(bar, reqs, items=(), bars=()):
+def done_before(rid, req, start, code_root):
+    # implements: REQ-PLANDATES-1022
+    """True when git shows `rid` already confirmed or implemented in the
+    last commit of its file before the bar's `start`.
+
+    Such a bar produces nothing on that requirement — it waits on
+    something outside it, like a consumer's CI staying green — so the
+    requirement's status and its code's commits say nothing about the
+    bar. Read as evidence, every later edit to that code looked like the
+    bar finishing. False whenever git cannot say, which keeps the older
+    reading."""
+    path = req.get("path")
+    if not (path and code_root and start):
+        return False
+    folder, base = os.path.split(os.path.abspath(path))
+    sha = (_git(["-C", folder, "log", "-1", "--format=%H",
+                 "--before=" + start + " 00:00:00", "--", base]) or "").strip()
+    text = _git(["-C", folder, "show", sha + ":./" + base]) if sha else None
+    for block in split_requirement_blocks(text or ""):
+        meta = parse_frontmatter(block)[0]
+        if meta.get("id") == rid:
+            return meta.get("status") in DONE_STATUSES
+    return False
+
+
+def bar_done(bar, reqs, items=(), bars=(), code_root=None):
     # implements: REQ-PLANDATES-1022
     """True when any source says the bar's work is finished: `progress:
     100`, every ROADMAP item it carries out ticked, or its requirement
-    confirmed or implemented. The one predicate every "is this bar done"
+    confirmed or implemented — unless it already was before the bar
+    started (`done_before`). The one predicate every "is this bar done"
     reads. Status alone was the first version, and it read shipped work
     as late wherever requirements stay `draft` after the code lands."""
     if bar.get("progress") == 100:
@@ -312,9 +340,11 @@ def bar_done(bar, reqs, items=(), bars=()):
     mine = bar_items(bar, items, bars or [bar])
     if mine and all(it.get("done") for it in mine):
         return True
-    req = reqs.get(bar.get("req") or "")
+    rid = bar.get("req") or ""
+    req = reqs.get(rid)
     return req is not None and \
-        req["meta"].get("status") in DONE_STATUSES
+        req["meta"].get("status") in DONE_STATUSES and \
+        not done_before(rid, req, bar.get("start"), code_root)
 
 
 def bar_date_suggestions(bars, reqs, members, code_root, today, items=None):
@@ -337,7 +367,9 @@ def bar_date_suggestions(bars, reqs, members, code_root, today, items=None):
             continue
         files = sorted({path for role, path, _ in members.get(bar["req"], [])
                         if role == "implements"})
-        if req["meta"].get("status") in DONE_STATUSES and files:
+        done_req = req["meta"].get("status") in DONE_STATUSES
+        if done_req and files and not done_before(
+                bar["req"], req, bar["start"], code_root):
             finished = max(
                 (d for d in (_last_touched(code_root, f) for f in files)
                  if d),
@@ -347,7 +379,8 @@ def bar_date_suggestions(bars, reqs, members, code_root, today, items=None):
                 out.append({"title": bar["title"], "req": bar["req"],
                             "kind": "done",
                             "planned": bar["end"], "actual": finished})
-        elif bar["end"] < today and not bar_done(bar, reqs, items, bars):
+        elif bar["end"] < today and not bar_done(
+                bar, reqs, items, bars, code_root):
             out.append({"title": bar["title"], "req": bar["req"],
                         "kind": "overdue",
                         "planned": bar["end"], "actual": None})

@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "543ac90ec84df89ed507fedbf45a9819a65281d25ab5b775d3a563da5123c432",
+      "plugin/scripts/reqmap_engine/__init__.py": "3ef95e55a8f0f32223b472cdb4de367c0ce6aa80ecd6db32ae41131ba832d816",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -332,11 +332,12 @@
     },
     "REQ-PLANDATES-1022": {
       "plugin/scripts/reqmap_engine/plandrift.py#bar_date_lines": "e0a7d1613efb39e9e12a862eda12b8f018ac18fbd6f61e92136be2c11a81bfa5",
-      "plugin/scripts/reqmap_engine/plandrift.py#bar_done": "5c19d1a00b8e877b92e82bdddf7f9fee52c5b8c8fdf69176e147b1d2d0ed8d69",
-      "plugin/scripts/reqmap_engine/plandrift.py#bar_items": "116871cf04e690a0373d85cd536ce1e4a61dc4649a05404adeb1246d1425824e"
+      "plugin/scripts/reqmap_engine/plandrift.py#bar_done": "e623e5b10a8d0fd32a3d7d288895b4db3eb25cc93e2a73f93e282dc29dbea90e",
+      "plugin/scripts/reqmap_engine/plandrift.py#bar_items": "116871cf04e690a0373d85cd536ce1e4a61dc4649a05404adeb1246d1425824e",
+      "plugin/scripts/reqmap_engine/plandrift.py#done_before": "0fc159bc489f7cabb78d2057a15d6fed51011c9231e460904eff7b1910fcbe64"
     },
     "REQ-PLANDRIFT-1002": {
-      "plugin/scripts/reqmap_engine/plandrift.py": "c9d95a6b56ea81c85b9016f19b4d7ab1bb03ab8b2a2c5d3fe9abd1be1d9ee7f7",
+      "plugin/scripts/reqmap_engine/plandrift.py": "364bb8353605c608de2cac4cdcb6048922fbf30e6dffacb73b420668625ee806",
       "plugin/scripts/reqmap_engine/plandrift.py#_index_repo": "30d72c05ad16a124a536b8d72683f838ec33d83bf5975658a52c2f594af64750",
       "plugin/scripts/reqmap_engine/plandrift.py#_is_new_ground": "4e2952fa0766dc35a5be8e20e1d35913184b502698e194518b883e9bcc17c5f8",
       "plugin/scripts/reqmap_engine/plandrift.py#_last_touched": "8ac727e7d7fe75ce49a409007cb60585a6d545a4bbe5c431e943c3414067fcce",

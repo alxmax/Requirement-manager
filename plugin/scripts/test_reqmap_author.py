@@ -3677,6 +3677,39 @@ class PlanDates(unittest.TestCase):  # tested-by: REQ-PLANDATES-1022 @unit
                 [dict(late, title="B")], self.REQS, self.MEMBERS, ".", "2026-09-16", ticked)
         self.assertEqual(([], []), (by_progress, by_item))
 
+    def test_status_before_the_bar_is_read_from_git_history(self):  # verifies: REQ-PLANDATES-1022#CASE-7
+        def commit(d, status, when):
+            _write(os.path.join(d, "requirements", "REQ-MON-003.md"),
+                   _spec("REQ-MON-003", ["It stays green."], status=status))
+            env = dict(os.environ, GIT_AUTHOR_DATE=when + "T12:00:00",
+                       GIT_COMMITTER_DATE=when + "T12:00:00")
+            for args in (["add", "-A"], ["-c", "user.name=t", "-c", "user.email=t@t",
+                                         "commit", "-q", "-m", status]):
+                subprocess.run(["git", "-C", d] + args, check=True, env=env,
+                               capture_output=True)
+        with tempfile.TemporaryDirectory() as d:
+            subprocess.run(["git", "init", "-q", d], check=True, capture_output=True)
+            commit(d, "draft", "2026-09-01")
+            commit(d, "confirmed", "2026-09-10")
+            req = {"meta": {"status": "confirmed"},
+                   "path": os.path.join(d, "requirements", "REQ-MON-003.md")}
+            done = R.plandrift.done_before
+            self.assertFalse(done("REQ-MON-003", req, "2026-09-05", d))
+            self.assertTrue(done("REQ-MON-003", req, "2026-09-15", d))
+            self.assertFalse(done("REQ-MON-003", {"meta": {}}, "2026-09-15", d))
+
+    def test_a_bar_on_a_requirement_done_before_it_started_is_never_read_as_finished(self):  # verifies: REQ-PLANDATES-1022#CASE-7
+        waiting = {"title": "Stays green", "req": "REQ-DONE-001",
+                   "start": "2026-09-07", "end": "2026-09-14"}
+        with mock.patch.object(R.plandrift, "done_before", return_value=True):
+            early = self._suggest([dict(waiting, end="2026-10-02")])
+            late = self._suggest([waiting])
+            ticked = self._suggest([dict(waiting, progress=100)])
+        self.assertEqual([], early)                     # a later commit is not its finish
+        self.assertEqual([("Stays green", "overdue")],
+                         [(s["title"], s["kind"]) for s in late])
+        self.assertEqual([], ticked)                    # progress still says done
+
     def test_a_shared_requirement_lends_its_items_to_no_bar(self):  # verifies: REQ-PLANDATES-1022#CASE-6
         items = [{"name": "Other work", "horizon": "now", "req": "REQ-OPEN-002", "done": True},
                  {"name": "Still open", "horizon": "now", "req": "REQ-OPEN-002", "done": False}]
