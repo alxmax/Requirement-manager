@@ -786,8 +786,9 @@ Every bullet below is binding.
 - The vertical guides mark the work: a dotted rule from the centre of each bar's start day on
   the ruler down to the bar, and a fainter dotted one from its end day, each stopping at the
   bar; a version's dotted rule runs from its due day down to its pill. Every guide is drawn
-  under the bars and pills, and every bar and shipped-month box is opaque, so neither a guide
-  nor a month rule shows through a title. `today` keeps its pill on the ruler, the
+  under the bars and pills.
+- Every bar and shipped-month box is opaque, so neither a guide nor a month rule shows
+  through a title. `today` keeps its pill on the ruler, the
   milestones keep theirs there or in the release lane, and neither rules a line through the lanes.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.

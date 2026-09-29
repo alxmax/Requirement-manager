@@ -306,7 +306,7 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "6b011842975b",
+      "hash": "cc648dfb7e9b",
       "reason": null
     },
     "REQ-PLANSTALE-1013": {
