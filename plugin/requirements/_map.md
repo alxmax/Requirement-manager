@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-29
-engine: 2026-09-28.2
+engine: 2026-09-29
 nodes: 310
 edges: 121
 design pass-rate: 99% (120/121 source files without a design candidate)
@@ -706,8 +706,8 @@ graph LR
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]
   f_plugin_scripts_test_reqmap_report_py_2760["plugin/scripts/test_reqmap_report.py:2760"]
   ARCH_PLANDRIFT_069 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2760
-  f_plugin_scripts_reqmap_engine_plandrift_py_218_264["plugin/scripts/reqmap_engine/plandrift.py:218-264"]
-  ARCH_PLANDRIFT_069 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_218_264
+  f_plugin_scripts_reqmap_engine_plandrift_py_220_266["plugin/scripts/reqmap_engine/plandrift.py:220-266"]
+  ARCH_PLANDRIFT_069 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_220_266
   ARCH_PROMOTE_011["Confirmation is a human's answer, and an edit takes it back<br><small>ARCH-PROMOTE-011</small>"]
   f_plugin_scripts_test_reqmap_author_py_336_2579["plugin/scripts/test_reqmap_author.py:336-2579"]
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_336_2579
@@ -741,8 +741,8 @@ graph LR
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
   f_plugin_scripts_test_reqmap_author_py_3592["plugin/scripts/test_reqmap_author.py:3592"]
   ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3592
-  f_plugin_scripts_reqmap_engine_plandrift_py_321_383["plugin/scripts/reqmap_engine/plandrift.py:321-383"]
-  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_321_383
+  f_plugin_scripts_reqmap_engine_plandrift_py_351_416["plugin/scripts/reqmap_engine/plandrift.py:351-416"]
+  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_351_416
   f_plugin_scripts_reqmap_engine_release_py_1_360["plugin/scripts/reqmap_engine/release.py:1-360"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_release_py_1_360
   f_plugin_scripts_reqmap_engine_versions_py_1_239["plugin/scripts/reqmap_engine/versions.py:1-239"]
@@ -777,8 +777,8 @@ graph LR
   ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_health_py_327
   f_plugin_scripts_reqmap_engine_mapdata_py_153_362["plugin/scripts/reqmap_engine/mapdata.py:153-362"]
   ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_153_362
-  f_plugin_scripts_reqmap_engine_plandrift_py_402["plugin/scripts/reqmap_engine/plandrift.py:402"]
-  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_402
+  f_plugin_scripts_reqmap_engine_plandrift_py_435["plugin/scripts/reqmap_engine/plandrift.py:435"]
+  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_435
   f_plugin_scripts_reqmap_engine_targets_py_169["plugin/scripts/reqmap_engine/targets.py:169"]
   ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_engine_targets_py_169
   f_plugin_scripts_reqmap_engine_versions_py_173_206["plugin/scripts/reqmap_engine/versions.py:173-206"]
@@ -862,8 +862,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_scripts_reqmap_py_247["plugin/scripts/reqmap.py:247"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_247
-  f_plugin_scripts_test_reqmap_author_py_3743["plugin/scripts/test_reqmap_author.py:3743"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3743
+  f_plugin_scripts_test_reqmap_author_py_3776["plugin/scripts/test_reqmap_author.py:3776"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3776
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_296["plugin/scripts/reqmap_engine/init.py:296"]

@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v8.9.2` — 2026-09-29
+
+**A bar that waits on something is no longer read as finished by unrelated commits.**
+
+- A bar tied to a requirement that was already confirmed or implemented before the bar started — say, a bar waiting for a consumer's CI to stay green — produces nothing on that requirement. `sync` used to read every later commit to that requirement's code as the bar finishing, and suggested moving its `end` to the date of an unrelated edit. The status is now read from the requirement file's last commit before the bar's `start`. For such a bar only `progress: 100` or its ticked ROADMAP items count as done, and past its `end` it is reported as overdue. When git cannot say, the older reading holds (REQ-PLANDATES-1022)
+
 ## plugin `v8.9.1` — 2026-09-28
 
 **A release that CI could never tag is refused, and the worklist names the tests the gate cannot see missing.**

@@ -410,6 +410,11 @@ Every bullet below is binding.
   decides this for every reader.
 - A bar carries out the ROADMAP items named like its title, or else the items carrying its
   `req:` when no other bar carries that `req:`.
+- A bar whose requirement was already confirmed or implemented in the last commit of its
+  file before the bar's `start` produces nothing on that requirement: neither the
+  requirement's status nor a later commit to its code counts the bar as done, and only
+  `progress: 100` or its ticked ROADMAP items do. When git cannot say, the requirement
+  counts as not done before the bar.
 - A bar with no `req:`, or whose requirement does not exist, is never reported.
 - Nothing is written to `_planning.json`.
 
@@ -444,6 +449,11 @@ CASE-6 — a shared requirement lends its items to no bar
   Given  two bars carrying the same `req:`, and ROADMAP items carrying it, one ticked
   When   the items and the done state of the first bar are asked for
   Then   it carries no item and is not done; alone, it carries both items and is still not done
+
+CASE-7 — a bar on a requirement done before it started is never read as finished
+  Given  a requirement git shows confirmed before a bar's start, and code changed since
+  When   `sync` runs before, then after, the bar's `end`
+  Then   nothing is suggested before the end, the bar is overdue after it, and `progress: 100` silences it
 
 ## Context
 **Notes**
