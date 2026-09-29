@@ -21,8 +21,8 @@ from .history import (
 from .mapdata import _read_roadmap
 from .targets import PLANNING_FILES
 from .versions import (
-    newest_tag, next_planned_version, semver3, shipped_baseline, tag_form,
-    version_files, write_version_file
+    VERSION_FILE_CANDIDATES, newest_tag, next_planned_version, semver3,
+    shipped_baseline, tag_form, version_files, write_version_file
 )
 from .workspace import GateContext
 
@@ -275,15 +275,18 @@ becomes that release's notes.
 WORKFLOW_PATH = ".github/workflows/reqmap-release.yml"
 
 _WORKFLOW = """# Seeded by `reqmap.py init` (REQ-RELEASEWORKFLOW-1019); edit
-# freely, `init` never overwrites it. On every push to {branch} it releases
-# the version this repository declares, once: when tag vX.Y.Z does not exist
-# yet it is created, with a GitHub release whose notes are that version's
-# CHANGELOG entry. Choosing and bumping the version is `reqmap.py sync
-# --release --apply`, run before the push.
+# freely, `init` never overwrites it. On a push to {branch} that touches the
+# version or the CHANGELOG it releases the version this repository declares,
+# once: when tag vX.Y.Z does not exist yet and the CHANGELOG has its entry, it
+# is created, with a GitHub release whose notes are that entry. Choosing and
+# bumping the version is `reqmap.py sync --release --apply`, run before the
+# push. A failed run is re-run from the Actions tab.
 name: release
 on:
   push:
     branches: [{branch}]
+    paths: {paths}
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -300,12 +303,12 @@ jobs:
         env:
           GH_TOKEN: ${{{{ github.token }}}}
         run: |
-          python {engine} sync --release --json --reqs {reqs} --code . \
+          python {engine} sync --release --json --reqs {reqs} --code . \\
             > release.json
           python - <<'PY' > release.env
           import json
           d = json.load(open("release.json"))
-          open("notes.md", "w").write(d["notes"] or d["declared"] or "")
+          open("notes.md", "w").write(d["notes"] or "")
           print("version=" + (d["declared"] or ""))
           print("exists=" + str(d["tag_exists"]).lower())
           PY
@@ -313,7 +316,10 @@ jobs:
           if [ -z "$version" ] || [ "$exists" = "true" ]; then
             echo "nothing to release"; exit 0
           fi
-          gh release create "$version" --target "$GITHUB_SHA" \
+          if [ ! -s notes.md ]; then
+            echo "no CHANGELOG entry for $version: nothing to release"; exit 0
+          fi
+          gh release create "$version" --target "$GITHUB_SHA" \\
             --title "$version" --notes-file notes.md
 """
 
@@ -344,9 +350,15 @@ def release_workflow(code_root, reqs_dir):
         return None
     if rel_engine.startswith(".."):
         return None
+    # A release only happens when the declared version changes, so a push
+    # touching neither a version file nor the CHANGELOG has nothing to run
+    # for. No version file yet: the names one would be created under.
+    paths = [p for p, _ in version_files(reqs_dir, code_root)] \
+        or list(VERSION_FILE_CANDIDATES)
     return _WORKFLOW.format(branch=_default_branch(code_root),
                             engine=rel_engine.replace(os.sep, "/"),
-                            reqs=rel_reqs.replace(os.sep, "/"))
+                            reqs=rel_reqs.replace(os.sep, "/"),
+                            paths=json.dumps(paths + [CHANGELOG]))
 
 
 def _uses_github(code_root):

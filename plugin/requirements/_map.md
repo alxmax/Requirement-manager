@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-29
-engine: 2026-09-29
+engine: 2026-09-29.1
 nodes: 310
 edges: 121
 design pass-rate: 99% (120/121 source files without a design candidate)
@@ -739,12 +739,12 @@ graph LR
   f_plugin_scripts_reqmap_engine_health_py_125_319["plugin/scripts/reqmap_engine/health.py:125-319"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_engine_health_py_125_319
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_scripts_test_reqmap_author_py_3592["plugin/scripts/test_reqmap_author.py:3592"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3592
+  f_plugin_scripts_test_reqmap_author_py_3607["plugin/scripts/test_reqmap_author.py:3607"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3607
   f_plugin_scripts_reqmap_engine_plandrift_py_351_416["plugin/scripts/reqmap_engine/plandrift.py:351-416"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_351_416
-  f_plugin_scripts_reqmap_engine_release_py_1_360["plugin/scripts/reqmap_engine/release.py:1-360"]
-  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_release_py_1_360
+  f_plugin_scripts_reqmap_engine_release_py_1_372["plugin/scripts/reqmap_engine/release.py:1-372"]
+  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_release_py_1_372
   f_plugin_scripts_reqmap_engine_versions_py_1_239["plugin/scripts/reqmap_engine/versions.py:1-239"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_versions_py_1_239
   ARCH_REPRO_041["Committed build artifacts stay re-derivable<br><small>ARCH-REPRO-041</small>"]
@@ -862,8 +862,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_scripts_reqmap_py_247["plugin/scripts/reqmap.py:247"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_247
-  f_plugin_scripts_test_reqmap_author_py_3776["plugin/scripts/test_reqmap_author.py:3776"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3776
+  f_plugin_scripts_test_reqmap_author_py_3791["plugin/scripts/test_reqmap_author.py:3791"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3791
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_296["plugin/scripts/reqmap_engine/init.py:296"]

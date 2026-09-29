@@ -45,9 +45,11 @@ export function PlanGantt(props) {
         <LaneLabels lay={lay} branch={branch} t={t} />
         <div style={{ position: "relative", minWidth: lay.chartW, flex: 1 }}>
           <Ruler lay={lay} t={t} />
+          {/* Before the lanes and with no z-index, so every bar, pill and
+              title paints over the guides instead of under them. */}
+          <Guides guides={lay.guides} />
           <ShippedBand sel={sel} t={t} />
           {lay.lanes.map((ln, i) => <Lane key={ln} ln={ln} i={i} sel={sel} />)}
-          <Guides guides={lay.guides} />
         </div>
       </div>
       {picked && (

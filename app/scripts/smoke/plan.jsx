@@ -204,6 +204,26 @@ test("gantt: a version's guide runs from its due day to its pill",
     return g.includes("top:80px") && g.includes("height:106px");
   })());
 
+// verifies: REQ-PLANSTACK-1012#CASE-5
+test("gantt: the guides are dotted and drawn under the bars",
+  (() => {
+    // Drawn last with a z-index, a solid guide crossed every title it
+    // passed through. Positioned siblings with no z-index paint in DOM
+    // order, so a guide written before the first bar paints under it.
+    const html = renderToString(<PlanGantt planning={stackPlan}
+      history={[]} locale="en" t={(x) => x} zoom={100} />);
+    const guides = html.match(/data-guide="[a-z]+" style="[^"]*"/g) || [];
+    const firstBar = html.indexOf("primul lucru");
+    // A translucent bar let the guides and month rules under it show
+    // through its title.
+    const bars = html.match(/<div title="[^"]*" style="[^"]*"/g) || [];
+    return guides.length === 4
+      && guides.every((g) => g.includes("dotted") && !g.includes("z-index"))
+      && html.lastIndexOf("data-guide=") < firstBar
+      && bars.length === 2
+      && bars.every((b) => /background:[^;]*var\(--surface\)(;|")/.test(b));
+  })());
+
 // ---- milestones due close together (REQ-VIEWER-1087) ------------------------
 // tested-by: REQ-VIEWER-1087 @unit
 const closeMilestones = {

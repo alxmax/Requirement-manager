@@ -251,6 +251,20 @@ const barNoteChecks = [
     // is the panel's separate question.
     matchItem({ reqId: null }, HZ) === null
     && matchItem({ reqId: "ABSENT-Z-000" }, HZ) === null],
+  // verifies: REQ-VIEWER-999#CASE-6
+  ["roadmap: two bars sharing a req open their own notes, not the first one's",
+    (() => {
+      const items = [
+        { name: "first with the id", req: "AREA-A-001", context: "first" },
+        { name: "Named bar", req: "AREA-A-001", context: "named" },
+      ];
+      const named = { title: "named bar", reqId: "AREA-A-001" };
+      const other = { title: "Another bar", reqId: "AREA-A-001" };
+      const bars = [named, other];
+      return matchItem(named, items, bars)?.context === "named"
+        && matchItem(other, items, bars) === null
+        && matchItem(other, items, [other])?.context === "first";
+    })()],
   // tested-by: REQ-ROADMAP-998
   // verifies: REQ-ROADMAP-998#CASE-7
   ["roadmap: the roadmap payload survives the mode's removal",

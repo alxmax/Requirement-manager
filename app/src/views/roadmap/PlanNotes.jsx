@@ -17,12 +17,23 @@ export function noteText(context) {  // implements: REQ-VIEWER-999
     .trim();
 }
 
-/** The roadmap item a bar belongs to. `req` is the only id both sides
- *  carry, so it is the join; a bar with none, or one no item claims,
- *  simply has no note. */
-export function matchItem(bar, roadmap) {  // implements: REQ-VIEWER-999
-  const req = bar?.reqId || bar?.req;
-  if (!req || !Array.isArray(roadmap)) return null;
+/** The roadmap item a bar belongs to, by the engine's own rule
+ *  (`plandrift.bar_items`) so the panel and `sync` never disagree: the
+ *  item named like the bar's title, or else the one carrying its `req:`
+ *  when no other bar in `bars` carries that `req:`. Joining on `req`
+ *  alone opened the first item for every bar sharing it. A bar no item
+ *  claims simply has no note. */
+export function matchItem(bar, roadmap, bars = [bar]) {  // implements: REQ-VIEWER-999
+  if (!bar || !Array.isArray(roadmap)) return null;
+  const title = (bar.title || "").trim().toLowerCase();
+  const named = roadmap.find((it) => typeof it?.name === "string"
+    && it.name.trim().toLowerCase() === title);
+  if (named) return named;
+  const reqOf = (b) => b?.reqId || b?.req;
+  const req = reqOf(bar);
+  if (!req || (bars || []).filter((b) => reqOf(b) === req).length > 1) {
+    return null;
+  }
   return roadmap.find((it) => it && it.req === req) || null;
 }
 
@@ -147,8 +158,8 @@ export function VersionNote(
 /** A bar, opened: its dates, its requirement and the note under its
  *  ROADMAP.md item.
  *  implements: REQ-VIEWER-999 */
-function BarNote({ bar, roadmap, t, openSpec, onClose }) {
-  const item = matchItem(bar, roadmap);
+function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
+  const item = matchItem(bar, roadmap, bars);
   const note = noteText(item?.context);
   const req = bar?.reqId || bar?.req;
   const meta =
@@ -186,6 +197,7 @@ export function PickedNote({ picked, lay, roadmap, t, openSpec, onPick }) {
                         openSpec={openSpec}
                         onClose={close} onPickBar={onPick} />;
   }
-  return <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
+  return <BarNote bar={picked} bars={lay.bars} roadmap={roadmap} t={t}
+                  openSpec={openSpec}
                   onClose={close} />;
 }
