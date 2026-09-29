@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.9.3` — 2026-09-29
+
+**A plan bar opens its own note, and the seeded release workflow no longer publishes an empty release.**
+
+- The Plan panel matches a bar to its ROADMAP item by the engine's rule: the item named like the bar's title, or else the one carrying its `req:` when no other bar carries it. It used to join on `req:` alone, so every bar sharing a requirement opened the first item that had it (REQ-VIEWER-999)
+- The Plan chart's vertical guides are dotted and drawn under the bars and version pills, and the bars and shipped-month boxes are opaque, so neither a guide nor a month rule shows through a title. The guides used to be drawn on top, and the solid ones crossed every title they passed through (REQ-PLANSTACK-1012)
+- The release workflow `init` seeds creates no release when the declared version has no CHANGELOG entry. It used to publish one whose notes were the bare version name (REQ-RELEASEWORKFLOW-1019)
+- It runs only on a push that touches a version file or the CHANGELOG, instead of on every push, and can be re-run by hand (`workflow_dispatch`). Its line continuations now reach the written file: the template's `\` was swallowed and joined two lines into one (REQ-RELEASEWORKFLOW-1019)
+- An existing `reqmap-release.yml` is never rewritten; a repository that wants these changes edits its copy or deletes it and re-runs `init`
+
 ## plugin `v8.9.2` — 2026-09-29
 
 **A bar that waits on something is no longer read as finished by unrelated commits.**

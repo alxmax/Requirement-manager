@@ -310,8 +310,10 @@ Every bullet below is binding.
 - `init` writes `.github/workflows/reqmap-release.yml` when the repository has a `.github`
   directory or a github.com remote, and never over an existing file.
 - The workflow runs the engine vendored in the checkout and creates the tag and GitHub release
-  only when the declared version has no tag; with no engine inside the repository, `init`
-  writes no workflow and says why.
+  only when the declared version has no tag and the CHANGELOG has an entry for it; with no
+  engine inside the repository, `init` writes no workflow and says why.
+- The workflow runs on a push that touches a version file or the CHANGELOG, and can be started
+  by hand; its shell line continuations reach the written file as written.
 - `sync --release` notes a GitHub repository with no release workflow, because nothing may
   tag the release, and never writes the workflow itself.
 
@@ -340,6 +342,12 @@ CASE-5 — the JSON carries what CI needs
   Given  a declared 1.5.0 with a CHANGELOG entry and no tag
   When   `sync --release --json` runs
   Then   it reports `v1.5.0`, no tag, and the entry's text
+
+CASE-7 — the workflow runs only when a release can happen, and never without notes
+  Given  the engine inside a checkout that declares its version in a version file
+  When   the workflow text is built
+  Then   it triggers on that file and the CHANGELOG, offers a manual run, keeps each `\`
+         line continuation, and exits before `gh release create` when the notes are empty
 
 CASE-6 — a missing workflow is named and never written
   Given  a repository with a `.github` directory and no release workflow

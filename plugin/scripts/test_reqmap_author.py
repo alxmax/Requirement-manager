@@ -3566,6 +3566,21 @@ class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019
                                    side_effect=ValueError("path is on mount 'D:'")):
                 self.assertIsNone(R.release_workflow(d, os.path.join(d, "requirements")))
 
+    def test_the_workflow_runs_only_when_a_release_can_happen(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-7
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "VERSION"), "1.2.0\n")
+            with mock.patch.object(R.release, "__file__",
+                                   os.path.join(d, "scripts", "reqmap_engine", "release.py")):
+                text = R.release_workflow(d, os.path.join(d, "requirements"))
+        self.assertIn('    paths: ["VERSION", "CHANGELOG.md"]\n', text)
+        self.assertIn("  workflow_dispatch:\n", text)
+        # a `\` the template's own string literal swallowed joined two commands on one line
+        self.assertIn("--code . \\\n            > release.json", text)
+        self.assertIn('"$GITHUB_SHA" \\\n            --title', text)
+        # no entry, no release: the notes are never the bare version name
+        self.assertIn('write(d["notes"] or "")', text)
+        self.assertLess(text.index('[ ! -s notes.md ]'), text.index("gh release create"))
+
     def test_json_reports_the_declared_version_its_tag_and_notes(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-5
         with tempfile.TemporaryDirectory() as d:
             reqs = _release_repo(d, "1.5.0",

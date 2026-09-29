@@ -705,7 +705,9 @@ Every bullet below is binding.
   none of its own.
 - Selecting a plan bar opens a detail panel below the chart carrying that bar's title, its
   milestone, its horizon when one is known, and the `context` of the matching roadmap item.
-- A bar matches a roadmap item by `req:`, the one id both sides carry.
+- A bar matches a roadmap item by the engine's rule (`bar_items`, REQ-PLANDATES-1022): the
+  item named like the bar's title, or else the one carrying its `req:` when no other bar
+  carries that `req:`. Two bars sharing a `req:` never both open the first item that has it.
 - A bar no roadmap item claims opens the panel with its own title and dates, and no note.
 - Context written as an HTML comment renders as its text, because the comment markers are
   how a plan file hides a note from a Markdown reader, not part of what the note says.
@@ -742,6 +744,12 @@ CASE-5 — a bar appears in its version's column
   When   the Versions view renders
   Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
 
+CASE-6 — two bars sharing a `req:` open their own notes, not the first one's
+  Given  two bars carrying `req: AREA-A-001`, one titled like a roadmap item, and two roadmap
+         items carrying that `req:`
+  When   the reader selects each bar
+  Then   the titled bar opens the item named like it, and the other opens no note
+
 ## Context
 **Notes**
 - `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` is an engine line counting unscheduled items; this is the viewer panel for one selected bar.
@@ -775,9 +783,11 @@ Every bullet below is binding.
   where their dates do not.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
   the lane grows only where two bars would otherwise overlap.
-- The vertical guides mark the work: a solid rule from the centre of each bar's start day on
-  the ruler down to the bar, and a dotted one from its end day, each stopping at the bar; a
-  version's rule runs from its due day down to its pill. `today` keeps its pill on the ruler, the
+- The vertical guides mark the work: a dotted rule from the centre of each bar's start day on
+  the ruler down to the bar, and a fainter dotted one from its end day, each stopping at the
+  bar; a version's dotted rule runs from its due day down to its pill. Every guide is drawn
+  under the bars and pills, and every bar and shipped-month box is opaque, so neither a guide
+  nor a month rule shows through a title. `today` keeps its pill on the ruler, the
   milestones keep theirs there or in the release lane, and neither rules a line through the lanes.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.
@@ -806,6 +816,12 @@ CASE-3 — the guides mark the work, not the dates
   Given  a plan carrying a bar and a milestone due date
   When   the Plan renders
   Then   the milestone keeps its header pill and no dashed full-height rule is drawn
+
+CASE-5 — the guides are dotted and drawn under the bars
+  Given  a plan carrying a bar
+  When   the Plan renders
+  Then   every guide is dotted and comes before the first bar in paint order, with no z-index,
+         and every bar's background ends on the chart's opaque surface
 
 ---
 id: REQ-PLANDAYS-1021

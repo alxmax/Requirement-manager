@@ -12,6 +12,11 @@ const selected = (picked, key) => (picked && picked.key === key
   ? "2px solid var(--accent-2)" : "none");
 const fade = (pct) =>
   `color-mix(in oklch, var(--fg-faint) ${pct}%, transparent)`;
+/* The tints are translucent, so a guide or a month rule drawn under a box
+   showed through its title. Stacked on the chart's own surface they keep
+   their colour and hide what is beneath. */
+const opaque = (...tints) => tints.map((c) => `linear-gradient(${c}, ${c})`)
+  .concat("var(--surface)").join(", ");
 
 function MonthRules({ months }) {
   return months.map((m) => (
@@ -27,7 +32,8 @@ function shippedStyle(h, picked) {
     position: "absolute", left: h.startIdx * PX + 3, top: PAD,
     width: Math.max((h.endIdx - h.startIdx + 1) * PX - 6, 46),
     height: ROW_H - 4,
-    boxSizing: "border-box", borderRadius: 4, background: fade(16),
+    boxSizing: "border-box", borderRadius: 4,
+    background: opaque(fade(16), fade(5)),
     border: `1px solid ${fade(40)}`, borderLeft: "3px solid var(--fg-muted)",
     color: "var(--fg-muted)", fontSize: 11, fontWeight: 600, padding: "0 8px",
     display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
@@ -106,7 +112,7 @@ function barStyle(bar, tone, picked) {
   return {
     position: "absolute", left, top: PAD + bar.subRow * ROW_H, width,
     height: ROW_H - 6,
-    background: tone.bg, color: tone.fg, borderRadius: 4,
+    background: opaque(tone.bg), color: tone.fg, borderRadius: 4,
     boxSizing: "border-box",
     border: `1px solid color-mix(in oklch, ${tone.edge} 40%, transparent)`,
     borderLeft: `3px solid ${tone.edge}`, fontSize: 11, fontWeight: 600,
@@ -169,13 +175,15 @@ export function Lane({ ln, i, sel }) {
 
 const GUIDE_BORDER = {
   end: "2px dotted var(--fg-muted)",
-  version: "2px solid var(--indigo-400)",
-  start: "2px solid var(--fg-muted)",
+  version: "2px dotted var(--indigo-400)",
+  start: "2px dotted var(--fg-muted)",
 };
 
 /** Guides run from the day on the ruler down to the thing that happens
- *  on it, and stop there: a bar's start (solid, a commitment) and end
- *  (dotted, an estimate), and a version at its due day.
+ *  on it, and stop there: a bar's start (a commitment, the stronger
+ *  line) and end (an estimate, fainter), and a version at its due day.
+ *  All dotted and drawn under the bars: a solid line on top crossed
+ *  every title it passed through.
  *  implements: REQ-PLANSTACK-1012 */
 export function Guides({ guides }) {
   return guides.map((gd) => (
@@ -184,7 +192,7 @@ export function Guides({ guides }) {
       width: 0,
       borderLeft: GUIDE_BORDER[gd.kind],
       opacity: gd.kind === "end" ? 0.38 : 0.5,
-      pointerEvents: "none", zIndex: 1,
+      pointerEvents: "none",
     }} />
   ));
 }
