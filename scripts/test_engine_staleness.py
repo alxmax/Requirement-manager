@@ -46,7 +46,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
         return (_engine(Path(d) / "vendored.py", vendored_ver),
                 _engine(Path(d) / "reference.py", reference_ver))
 
-    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043  # verifies: REQ-STALEENGINE-925#CASE-1  # verifies: REQ-STALEENGINE-925#CASE-5
+    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043  # verifies: REQ-STALEENGINE-925#CASE-1  # verifies: REQ-STALEENGINE-925#CASE-5  # verifies: ARCH-STALEENGINE-043#CASE-1
         """AC-1: the motivating case — an old vendored engine, named, without failing."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -56,7 +56,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
             self.assertIn("2026-08-20.2", out)
             self.assertIn("stale", out.lower())
 
-    def test_stale_error_mode_exits_one(self):  # verifies: REQ-STALEENGINE-925#CASE-6
+    def test_stale_error_mode_exits_one(self):  # verifies: REQ-STALEENGINE-925#CASE-6  # verifies: ARCH-STALEENGINE-043#CASE-2
         """AC-2."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -64,7 +64,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
             self.assertEqual(code, 1)
             self.assertIn("stale", out.lower())
 
-    def test_off_mode_is_silent(self):  # verifies: REQ-STALEENGINE-926#CASE-1
+    def test_off_mode_is_silent(self):  # verifies: REQ-STALEENGINE-926#CASE-1  # verifies: ARCH-STALEENGINE-043#CASE-3
         """AC-3."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -72,7 +72,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
             self.assertEqual(code, 0)
             self.assertEqual(out, "")
 
-    def test_current_or_ahead_never_warns(self):  # verifies: REQ-STALEENGINE-926#CASE-2
+    def test_current_or_ahead_never_warns(self):  # verifies: REQ-STALEENGINE-926#CASE-2  # verifies: ARCH-STALEENGINE-043#CASE-4
         """AC-4: equal, and a vendored engine ahead of the pinned action's."""
         for vendored, reference in [("2026-08-20.2", "2026-08-20.2"),
                                     ("2026-08-20.2", "2026-08-20"),
@@ -119,7 +119,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
             self.assertEqual(code, 0)
             self.assertIn("skipped", out.lower())
 
-    def test_annotation_only_under_github_actions(self):  # verifies: REQ-STALEENGINE-925#CASE-7
+    def test_annotation_only_under_github_actions(self):  # verifies: REQ-STALEENGINE-925#CASE-7  # verifies: ARCH-STALEENGINE-043#CASE-6
         """AC-6: the workflow-annotation syntax is noise in a local terminal."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -149,6 +149,25 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
                 with redirect_stdout(io.StringIO()):
                     ES.main(["--vendored", v, "--reference", r, "--mode", "warning"])
             self.assertEqual(cm.exception.code, 2)
+
+    def test_unreadable_input_or_crash_is_a_skip_in_error_mode(self):  # verifies: ARCH-STALEENGINE-043#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            missing = str(Path(d) / "absent.py")
+            no_version = _engine(Path(d) / "v.py", None)
+            old = _engine(Path(d) / "old.py", "2025-08-02")
+            new = _engine(Path(d) / "new.py", "2026-08-20.2")
+            for vendored, reference in [(no_version, new), (old, missing), (missing, new)]:
+                code, out = self._run(vendored, reference, mode="error")
+                self.assertEqual(code, 0, (vendored, reference))
+                self.assertIn("skipped", out.lower(), (vendored, reference))
+            saved = ES.version_at
+            ES.version_at = lambda path: 1 / 0
+            try:
+                code, out = self._run(old, new, mode="error")
+            finally:
+                ES.version_at = saved
+            self.assertEqual(code, 0)
+            self.assertIn("skipped", out.lower())
 
 
 class StalenessActionWiring(unittest.TestCase):  # tested-by: ARCH-STALEENGINE-043  # tested-by: REQ-STALEENGINE-925

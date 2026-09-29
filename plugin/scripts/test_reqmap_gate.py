@@ -186,7 +186,7 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         self.assertIn("NEED-B-002", out)
         self.assertIn("validated-against", out)
 
-    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-VLEVEL-946#CASE-2
+    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-VLEVEL-946#CASE-2  # verifies: ARCH-VLEVEL-037#CASE-5
         # No validated-against tag anywhere: the rule must not fire at all, so a repo
         # that never adopts the role sees no new warnings.
         files = {
@@ -238,6 +238,33 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         }
         _, out = self._check(files)
         self.assertNotIn("verified only at @system", out)
+
+    def test_only_the_unvalidated_need_is_named(self):  # verifies: ARCH-VLEVEL-037#CASE-4
+        files = {
+            "NEED-A-001.md": REQ.format(id="NEED-A-001", status="confirmed", layer="need",
+                                        extra="", title="Validated need"),
+            "NEED-B-002.md": REQ.format(id="NEED-B-002", status="confirmed", layer="need",
+                                        extra="", title="Unvalidated need"),
+            "t_probe.py": "# validated-against: NEED-A-001\ndef test_x():\n    pass\n",
+        }
+        _, out = self._check(files)
+        named = [ln for ln in out.splitlines() if "validated-against" in ln]
+        self.assertEqual(len(named), 1, out)
+        self.assertIn("NEED-B-002", named[0])
+
+    def test_system_only_bus_warns_until_any_one_thing_changes(self):  # verifies: ARCH-VLEVEL-037#CASE-6
+        def out_for(layer, *test_tags):
+            files = {"CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed",
+                                                 layer=layer, extra="", title="Foundation"),
+                     "impl.py": tag("CORE-X-001") + "\ndef go():\n    return 1\n"}
+            for i, t in enumerate(test_tags):
+                files["t_{}.py".format(i)] = t + "\ndef test_{}():\n    pass\n".format(i)
+            return self._check(files)[1]
+        system, msg = tb_tag("CORE-X-001") + " @system", "verified only at @system"
+        self.assertIn(msg, out_for("bus", system))
+        self.assertNotIn(msg, out_for("bus", system, tb_tag("CORE-X-001") + " @unit"))
+        self.assertNotIn(msg, out_for("bus", tb_tag("CORE-X-001")))
+        self.assertNotIn(msg, out_for("feature", system))
 
 
 class DocBundle(unittest.TestCase):  # tested-by: ARCH-DOCBUNDLE-026  # tested-by: REQ-DOCBUNDLE-840
@@ -666,7 +693,7 @@ class TestLink(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by:
             _write(p, "#[cfg(test)]\nmod t {\n  #[test]\n  fn checks() {}\n}\n")
             self.assertEqual("", R._test_link_problem(p))
 
-    def test_py_runner_entry_recognized(self):  # stdlib suites drive checks from run()/main()  # verifies: REQ-TESTLINK-932#CASE-2
+    def test_py_runner_entry_recognized(self):  # stdlib suites drive checks from run()/main()  # verifies: REQ-TESTLINK-932#CASE-2  # verifies: ARCH-TESTLINK-018#CASE-5
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "test_thing.py")
             _write(p, 'def run():\n    return 0\nif __name__ == "__main__":\n    raise SystemExit(run())\n')
@@ -678,7 +705,7 @@ class TestLink(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by:
             _write(p, "def main():\n    return 0\n")
             self.assertIn("no test function", R._test_link_problem(p))
 
-    def test_check_warns_warn_only_on_broken_link(self):  # verifies: REQ-TESTLINK-933#CASE-1  # verifies: REQ-TESTLINK-933#CASE-2
+    def test_check_warns_warn_only_on_broken_link(self):  # verifies: REQ-TESTLINK-933#CASE-1  # verifies: REQ-TESTLINK-933#CASE-2  # verifies: ARCH-TESTLINK-018#CASE-1  # verifies: ARCH-TESTLINK-018#CASE-4
         with tempfile.TemporaryDirectory() as d:
             reqs = {"REQ-A-001": {"meta": {"status": "confirmed", "layer": "feature"},
                                   "body": "# T\n", "path": os.path.join(d, "REQ-A-001.md")}}
@@ -874,7 +901,7 @@ class ImplExemptLayers(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # teste
 class ShellTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by: REQ-TESTLINK-932
     """Four real bash suites warned forever because no pattern matched shell."""
 
-    def test_bash_function_recognized(self):  # verifies: REQ-TESTLINK-932#CASE-3
+    def test_bash_function_recognized(self):  # verifies: REQ-TESTLINK-932#CASE-3  # verifies: ARCH-TESTLINK-018#CASE-6
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "checks.sh")
             _write(p, "#!/usr/bin/env bash\ntest_backup_runs() {\n  [ -f x ]\n}\n")
@@ -929,7 +956,7 @@ class TestLinkOnDraft(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tes
         self.assertIn("contains no test function", out)
         self.assertEqual(code, 0)                       # warn-only
 
-    def test_draft_link_problem_is_not_strict_promoted(self):  # verifies: REQ-TESTLINK-933#CASE-3
+    def test_draft_link_problem_is_not_strict_promoted(self):  # verifies: REQ-TESTLINK-933#CASE-3  # verifies: ARCH-TESTLINK-018#CASE-7
         # a draft-heavy consumer running `gate --strict` must not start failing
         code, out = self._check("draft", strict=True)
         self.assertEqual(code, 0)
@@ -938,6 +965,11 @@ class TestLinkOnDraft(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tes
     def test_confirmed_link_problem_still_fails_under_strict(self):  # verifies: REQ-TESTLINK-933#CASE-3
         code, _ = self._check("confirmed", strict=True)
         self.assertEqual(code, 1)
+
+    def test_confirmed_link_to_non_test_file_warns(self):  # verifies: ARCH-TESTLINK-018#CASE-3
+        code, out = self._check("confirmed")
+        self.assertIn("A-FOO-001: tested-by widget.py contains no test function", out)
+        self.assertEqual(code, 0)
 
 
 class GateMapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-871
@@ -1830,6 +1862,55 @@ class PythonFloor(unittest.TestCase):  # tested-by: ARCH-PYFLOOR-040  # tested-b
         self.assertEqual(oldest, R.MIN_PYTHON,
                          "MIN_PYTHON %r != oldest CI python %r" % (R.MIN_PYTHON, oldest))
 
+    def test_main_below_floor_prints_both_versions_and_the_fix(self):  # verifies: ARCH-PYFLOOR-040#CASE-1
+        buf = io.StringIO()
+        old_argv, old_ver = sys.argv, R.sys.version_info
+        sys.argv = ["reqmap", "health"]
+        try:
+            R.sys.version_info = (3, 8, 10, "final", 0)
+            with redirect_stdout(buf), redirect_stderr(buf):
+                rc = R.main()
+        finally:
+            R.sys.version_info = old_ver
+            sys.argv = old_argv
+        out = buf.getvalue()
+        self.assertEqual(rc, 2)
+        self.assertIn("needs Python %d.%d" % tuple(R.MIN_PYTHON[:2]), out)   # required
+        self.assertIn("running 3.8", out)                                    # running
+        self.assertIn("a newer interpreter is the entire fix", out)          # the fix
+
+    def test_main_at_or_above_the_floor_runs_the_command(self):  # verifies: ARCH-PYFLOOR-040#CASE-2
+        self.assertIsNone(R._python_floor_error())      # this interpreter is at or above it
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"))
+            buf = io.StringIO()
+            old_argv = sys.argv
+            sys.argv = ["reqmap", "gate", "--risk", "--json", "--root", d]
+            try:
+                with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+                    rc = R.main()
+            finally:
+                sys.argv = old_argv
+        self.assertEqual(rc, 0)
+        self.assertNotIn("needs Python", buf.getvalue())
+        self.assertIn("score", json.loads(buf.getvalue()))   # the command's own output
+
+    def test_tests_job_oldest_python_is_the_floor_on_linux_and_windows(self):  # verifies: ARCH-PYFLOOR-040#CASE-3
+        ci = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(R.__file__)))), ".github", "workflows", "ci.yml")
+        if not os.path.exists(ci):
+            self.skipTest("ci.yml not present (engine seeded outside this repo)")
+        with open(ci, encoding="utf-8") as f:
+            text = f.read()
+        job = re.search(r"^  tests:\n(.*?)(?=^  \S)", text, re.S | re.M).group(1)
+        matrix = re.search(r"matrix:\n(.*?)(?=^    \S)", job, re.S | re.M).group(1)
+        oses = re.search(r"os:\s*\[([^\]]*)\]", matrix).group(1)
+        pys = re.findall(r'"(3\.\d+)"', re.search(r"python:\s*\[([^\]]*)\]", matrix).group(1))
+        self.assertIn("ubuntu-latest", oses)
+        self.assertIn("windows-latest", oses)
+        self.assertNotIn("exclude", matrix)     # a full cross product: every python on each OS
+        self.assertEqual(min(tuple(int(x) for x in v.split(".")) for v in pys), R.MIN_PYTHON)
+
 
 class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     """The renamed CLI surface: gate (report-only) + check (deprecation alias)."""
@@ -2119,7 +2200,7 @@ class EngineVersionFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # t
 
 
 class ClosedPipe(unittest.TestCase):  # tested-by: ARCH-PIPE-046  # tested-by: REQ-PIPE-893
-    def test_broken_pipe_and_windows_einval_exit_zero(self):  # verifies: REQ-PIPE-893#CASE-1
+    def test_broken_pipe_and_windows_einval_exit_zero(self):  # verifies: REQ-PIPE-893#CASE-1  # verifies: ARCH-PIPE-046#CASE-1
         def boom_pipe():
             raise BrokenPipeError()
         def boom_einval():
@@ -2128,13 +2209,13 @@ class ClosedPipe(unittest.TestCase):  # tested-by: ARCH-PIPE-046  # tested-by: R
             self.assertEqual(R._run_cli(boom_pipe), 0)
             self.assertEqual(R._run_cli(boom_einval), 0)
 
-    def test_other_oserror_propagates(self):  # verifies: REQ-PIPE-893#CASE-2
+    def test_other_oserror_propagates(self):  # verifies: REQ-PIPE-893#CASE-2  # verifies: ARCH-PIPE-046#CASE-2
         def boom():
             raise OSError(errno.ENOENT, "missing")
         with self.assertRaises(OSError):
             R._run_cli(boom)
 
-    def test_normal_exit_code_passes_through(self):  # verifies: REQ-PIPE-893#CASE-3
+    def test_normal_exit_code_passes_through(self):  # verifies: REQ-PIPE-893#CASE-3  # verifies: ARCH-PIPE-046#CASE-3
         self.assertEqual(R._run_cli(lambda: 3), 3)
         self.assertEqual(R._run_cli(lambda: None), 0)
 
@@ -2462,7 +2543,7 @@ class CasesTestlink018(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # te
                       'only."""\n')
             self.assertEqual(R._test_link_problem(p), "")
 
-    def test_valid_tested_by_produces_no_warning(self):  # verifies: REQ-TESTLINK-933#CASE-4
+    def test_valid_tested_by_produces_no_warning(self):  # verifies: REQ-TESTLINK-933#CASE-4  # verifies: ARCH-TESTLINK-018#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
                    "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
@@ -2511,7 +2592,7 @@ class CasesCheck(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: 
             self.assertIn("confirmed but no tested-by", buf.getvalue())
             self.assertEqual(code, 0)
 
-    def test_open_verify_intent_finding_keeps_exit_zero(self):  # verifies: REQ-CHECK-832#CASE-2
+    def test_open_verify_intent_finding_keeps_exit_zero(self):  # verifies: REQ-CHECK-832#CASE-2  # verifies: ARCH-FINDINGS-010#CASE-5
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),
                    _req_with_verify("AREA-X-001", ["magic 1.05, bug?"]))
@@ -3489,7 +3570,7 @@ class InputIntegrity(unittest.TestCase):
                 self.assertEqual(1, R.cmd_check(ws, True))
             self.assertFalse(os.path.exists(os.path.join(d, "requirements", "_reqlock.json")))
 
-    def test_bad_config_is_reported_and_fails_only_strict(self):
+    def test_bad_config_is_reported_and_fails_only_strict(self):  # verifies: ARCH-CONFIG-060#CASE-2
         # verifies: REQ-CONFIG-949#CASE-5
         with tempfile.TemporaryDirectory() as d:
             for text in ('{broken', '[]', '{"DRIFT_SEVERITY":"eror"}',
@@ -3532,3 +3613,19 @@ class InputIntegrity(unittest.TestCase):
             r = self._gate(d, "--json")
             self.assertEqual(r.returncode, 1, r.stdout)
             self.assertIn("INPUT:requirements", r.stdout)
+
+    def test_an_unknown_key_is_named_and_a_retired_one_stays_silent(self):  # verifies: ARCH-CONFIG-060#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            cfg = os.path.join(d, "requirements", "_config.json")
+            _write(cfg, '{"NOT_A_KEY": 1}')
+            plain, strict = self._gate(d), self._gate(d, "--strict")
+            self.assertIn("NOT_A_KEY", plain.stderr)
+            self.assertEqual(0, plain.returncode, plain.stdout)
+            self.assertIn("INPUT:config", plain.stdout)
+            self.assertEqual(1, strict.returncode, strict.stdout)
+            _write(cfg, '{"LANGUAGE": "ro", "DESIGN_RFC_MAX": 10}')
+            plain, strict = self._gate(d), self._gate(d, "--strict")
+            self.assertNotIn("LANGUAGE", plain.stderr)
+            self.assertNotIn("DESIGN_RFC_MAX", plain.stderr)
+            self.assertNotIn("INPUT:config", plain.stdout)
+            self.assertEqual((0, 0), (plain.returncode, strict.returncode), strict.stdout)

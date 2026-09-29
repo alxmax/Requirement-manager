@@ -127,7 +127,7 @@ def run_cmd(args, cwd):
     return result.returncode
 
 
-def main():
+def main():  # verifies: ARCH-CMDREGISTRY-033#CASE-4
     if not os.path.exists(ENGINE_SRC):
         print(f"SKIP: reqmap.py not found at {ENGINE_SRC}", file=sys.stderr)
         return 0

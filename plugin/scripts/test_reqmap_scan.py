@@ -321,10 +321,39 @@ class Scanning(unittest.TestCase):  # tested-by: ARCH-SCAN-002  # tested-by: REQ
                              [(role, "REQ-A-001")])
         self.assertEqual(R.TAG_RE.findall("# not-a-role: REQ-A-001"), [])
 
-    def test_levelled_tag_still_resolves_as_a_plain_member(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-VLEVEL-944#CASE-3  # verifies: REQ-VLEVEL-945#CASE-2
+    def test_levelled_tag_still_resolves_as_a_plain_member(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-VLEVEL-944#CASE-3  # verifies: REQ-VLEVEL-945#CASE-2  # verifies: ARCH-VLEVEL-037#CASE-2
         # backwards compatibility: the suffix must not disturb ordinary tag parsing
         self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
                          [("tested-by", "REQ-A-001")])
+
+    def test_scan_test_levels_reads_levels_and_lists_and_drops_the_rest(self):  # verifies: ARCH-VLEVEL-037#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "t_levels.py"),
+                   tb_tag("REQ-A-001") + " @unit\n"
+                   + tb_tag("REQ-A-001") + " @system\n"
+                   + tb_tag("REQ-B-002, REQ-C-003") + " @integration\n"
+                   + tb_tag("REQ-D-004") + "\n"
+                   + tb_tag("REQ-E-005") + " @wrong\n")
+            got = R.scan_test_levels(d)
+        self.assertEqual(dict(got["REQ-A-001"]),
+                         {"unit": [("t_levels.py", 1)], "system": [("t_levels.py", 2)]})
+        self.assertEqual(set(got["REQ-B-002"]), {"integration"})
+        self.assertEqual(set(got["REQ-C-003"]), {"integration"})
+        self.assertNotIn("REQ-D-004", got)
+        self.assertNotIn("REQ-E-005", got)
+
+    def test_scan_test_levels_counts_only_the_real_comment_tag(self):  # verifies: ARCH-VLEVEL-037#CASE-3
+        body = ("# write it as `" + tb_tag("REQ-TICK-001") + " @unit` in your test\n"
+                "def f():\n"
+                '    """Tag it like ' + tb_tag("REQ-DOC-001")[2:] + ' @unit."""\n'
+                '    s = "' + tb_tag("REQ-STR-001")[2:] + ' @unit"\n'
+                "    return s\n"
+                + tb_tag("REQ-REAL-001") + " @unit\n")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), body)
+            got = R.scan_test_levels(d)
+        self.assertEqual(sorted(got), ["REQ-REAL-001"])
+        self.assertEqual(set(got["REQ-REAL-001"]), {"unit"})
 
 
 class RepoRootScan(unittest.TestCase):  # tested-by: ARCH-SCAN-002
@@ -418,7 +447,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
             R.cmd_extract(R.Workspace(reqs, members, os.path.join(d, "requirements"), d))
         return os.path.join(d, "requirements")
 
-    def test_capability_prose_is_drafted(self):  # verifies: REQ-PROSE-900#CASE-1
+    def test_capability_prose_is_drafted(self):  # verifies: REQ-PROSE-900#CASE-1  # verifies: ARCH-PROSE-024#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "prompts", "editor.md"),
                    "---\ntitle: Editor\n---\n## Role\nx\n")
@@ -426,7 +455,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
             drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
             self.assertTrue(any("PROMPTS-EDITOR" in f for f in drafts), drafts)
 
-    def test_sync_only_and_meta_prose_not_drafted(self):
+    def test_sync_only_and_meta_prose_not_drafted(self):  # verifies: ARCH-PROSE-024#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "README.md"), "# Project\n## Overview\n")
             _write(os.path.join(d, "docs", "guide.md"), "# Guide\n## How\n")
@@ -447,7 +476,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
             drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
             self.assertFalse(any("README" in f for f in drafts), drafts)
 
-    def test_tagged_capability_prose_not_redrafted(self):
+    def test_tagged_capability_prose_not_redrafted(self):  # verifies: ARCH-PROSE-024#CASE-3
         with tempfile.TemporaryDirectory() as d:
             # a prompts/ file (bucket 3) that already carries a member tag must be
             # skipped by the `rel in tagged` guard, not re-drafted
@@ -461,7 +490,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: ARCH-PROSE-024  # tested-by
 
 
 class RiderGuards(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: ARCH-PROSE-024
-    def test_tag_inside_html_comment_is_a_member(self):  # rider #1
+    def test_tag_inside_html_comment_is_a_member(self):  # rider #1  # verifies: ARCH-PROSE-024#CASE-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"),
                    gtag_html("PROMPT-SYNTH-001") + "\n<h1>x</h1>\n")
@@ -608,7 +637,7 @@ class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-b
         _write(os.path.join(d, "b.py"), tag("B-Y-002") + "\n")
         return rq
 
-    def test_cache_results_byte_identical(self):  # verifies: ARCH-SCANCACHE-023  # verifies: REQ-SCANCACHE-911#CASE-4
+    def test_cache_results_byte_identical(self):  # verifies: ARCH-SCANCACHE-023  # verifies: REQ-SCANCACHE-911#CASE-4  # verifies: ARCH-SCANCACHE-023#CASE-1
         with tempfile.TemporaryDirectory() as d:
             rq = self._tree(d)
             no = R.scan_members(d, rq, cache=False)
@@ -618,7 +647,7 @@ class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-b
             self.assertEqual(no, c2)
             self.assertTrue(os.path.exists(os.path.join(rq, "_scancache.json")))
 
-    def test_cache_invalidates_on_change(self):  # verifies: REQ-SCANCACHE-911#CASE-2
+    def test_cache_invalidates_on_change(self):  # verifies: REQ-SCANCACHE-911#CASE-2  # verifies: ARCH-SCANCACHE-023#CASE-2
         with tempfile.TemporaryDirectory() as d:
             rq = self._tree(d)
             p = os.path.join(d, "a.py")
@@ -628,7 +657,7 @@ class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-b
             self.assertIn("C-Z-003", m)
             self.assertNotIn("A-X-001", m)
 
-    def test_cache_prunes_deleted_file(self):  # verifies: REQ-SCANCACHE-911#CASE-3
+    def test_cache_prunes_deleted_file(self):  # verifies: REQ-SCANCACHE-911#CASE-3  # verifies: ARCH-SCANCACHE-023#CASE-3
         with tempfile.TemporaryDirectory() as d:
             rq = self._tree(d)
             R.scan_members(d, rq, cache=True)
@@ -638,7 +667,7 @@ class ScanCache(unittest.TestCase):  # tested-by: ARCH-SCANCACHE-023  # tested-b
             cache = json.load(open(os.path.join(rq, "_scancache.json"), encoding="utf-8"))
             self.assertNotIn("b.py", cache)
 
-    def test_cache_off_by_default_writes_nothing(self):  # verifies: REQ-SCANCACHE-911#CASE-1
+    def test_cache_off_by_default_writes_nothing(self):  # verifies: REQ-SCANCACHE-911#CASE-1  # verifies: ARCH-SCANCACHE-023#CASE-4
         with tempfile.TemporaryDirectory() as d:
             rq = self._tree(d)
             R.scan_members(d, rq)                                   # no cache arg
@@ -863,12 +892,40 @@ class UntrackedMembers(unittest.TestCase):  # tested-by: ARCH-TRACKED-042  # tes
             subprocess.run(["git", "-C", d, "commit", "-m", "t"], check=True, capture_output=True)
             self.assertEqual(R.untracked_members(d, self._members("src/pkg/a.py")), [])
 
-    def test_outside_a_work_tree_fails_open(self):  # verifies: REQ-TRACKED-936#CASE-4
+    def test_outside_a_work_tree_fails_open(self):  # verifies: REQ-TRACKED-936#CASE-4  # verifies: ARCH-TRACKED-042#CASE-3
         """None, not [] — the same fail-open signal _since_changed_files uses. A repo
         distributed as a tarball must not be told its every member is untracked."""
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "a.py"), "x=1" + chr(10))
             self.assertIsNone(R.untracked_members(d, self._members("a.py")))
+
+    def _gate_out(self, d, loose):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="baseline", layer="bus", extra="", title="A"))
+        _write(os.path.join(d, "tracked.py"), tag("REQ-A-001") + "\n")
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "commit", "-m", "t"], check=True, capture_output=True)
+        if loose:
+            _write(os.path.join(d, "loose.py"), tag("REQ-A-001") + "\n")   # never added
+        reqs = R.load_requirements(rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = R.cmd_check(R.Workspace(reqs, R.scan_members(d, rd), rd, d), False)
+        return rc, buf.getvalue()
+
+    def test_gate_names_the_untracked_member_and_count_and_exits_zero(self):  # verifies: ARCH-TRACKED-042#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            rc, out = self._gate_out(d, loose=True)
+        self.assertEqual(rc, 0)
+        self.assertIn("1 member(s) are not tracked by git: loose.py", out)
+
+    def test_gate_is_silent_when_every_member_is_tracked(self):  # verifies: ARCH-TRACKED-042#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            _rc, out = self._gate_out(d, loose=False)
+        self.assertNotIn("not tracked by git", out)
 
 
 # ---------------------------------------------------------------------------
@@ -1744,6 +1801,49 @@ class UndecodableSources(unittest.TestCase):  # tested-by: ARCH-UNREADABLE-070 @
             self.assertEqual(rc, 0)
             self.assertIn("RM033", out.getvalue())
             self.assertIn("nobom.py", out.getvalue())
+
+    def test_bom_utf16_file_is_a_member_with_its_real_line_count(self):  # verifies: ARCH-UNREADABLE-070#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._tree(d)
+            hits = R.scan_members(d, None)["ARCH-EXAMPLE-001"]
+            loc = R.candidates._file_facts(os.path.join(d, "bom.py"), "bom.py")["loc"]
+        self.assertIn(("implements", "bom.py", 1), hits)
+        self.assertEqual(41, loc)          # the real count, not 82
+
+    def test_gate_names_the_bomless_file_and_why_and_reads_no_tag(self):  # verifies: ARCH-UNREADABLE-070#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ARCH-EXAMPLE-001.md"),
+                   _spec("ARCH-EXAMPLE-001", ["does a thing"], status="draft"))
+            with open(os.path.join(d, "nobom.py"), "wb") as f:
+                f.write(self.SRC.encode("utf-16-le"))
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            out = io.StringIO()
+            with redirect_stdout(out), redirect_stderr(out):
+                rc = R.cmd_check(R.Workspace(reqs, members, d, d), False)
+        text = out.getvalue()
+        self.assertEqual(rc, 0)
+        line = next(ln for ln in text.splitlines() if "RM033" in ln)
+        self.assertIn("nobom.py", line)
+        self.assertIn("UTF-16 without BOM", line)                     # the reason
+        self.assertNotIn("nobom.py", {fp for hits in members.values() for _r, fp, _l in hits})
+
+    def test_utf8_reading_is_unchanged_with_or_without_bom(self):  # verifies: ARCH-UNREADABLE-070#CASE-3
+        src = "x = 0\r\n" + self.SRC            # the tag sits on line 2
+        for prefix in (b"", codecs.BOM_UTF8):
+            with tempfile.TemporaryDirectory() as d:
+                p = os.path.join(d, "u8.py")
+                with open(p, "wb") as f:
+                    f.write(prefix + src.encode("utf-8"))
+                with open(p, encoding="utf-8", errors="ignore") as f:
+                    before = f.readlines()      # how every source was read before
+                lines, problem = R.scan.read_source_lines(p)
+                hits = R.scan_members(d, None)["ARCH-EXAMPLE-001"]
+                loc = R.candidates._file_facts(p, "u8.py")["loc"]
+            self.assertIsNone(problem)
+            self.assertEqual(before, lines, prefix)
+            self.assertEqual([("implements", "u8.py", 2)], hits, prefix)
+            self.assertEqual(len(before), loc, prefix)
 
 
 class StringMaskEdges(unittest.TestCase):  # tested-by: ARCH-SCAN-002
