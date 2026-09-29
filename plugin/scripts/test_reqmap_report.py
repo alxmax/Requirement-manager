@@ -196,7 +196,7 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertNotIn("Serverul", md)
             self.assertNotIn("Primul contact", md)
 
-    def test_triage_sidecar_orders_confirmed_bugs_first(self):  # verifies: REQ-FINDINGS-855#CASE-1  # verifies: REQ-FINDINGS-855#CASE-2  # verifies: REQ-FINDINGS-855#CASE-3
+    def test_triage_sidecar_orders_confirmed_bugs_first(self):  # verifies: REQ-FINDINGS-855#CASE-1  # verifies: REQ-FINDINGS-855#CASE-2  # verifies: REQ-FINDINGS-855#CASE-3  # verifies: ARCH-FINDINGS-010#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),
                    _req_with_verify("AREA-X-001", ["magic 1.05, bug?", "swallowed except, intended?"]))
@@ -212,7 +212,7 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertIn("`f.py:10`", md)
             self.assertIn("1 confirmed bug(s)", out)
 
-    def test_raw_flag_ignores_sidecar(self):  # verifies: REQ-FINDINGS-854#CASE-4
+    def test_raw_flag_ignores_sidecar(self):  # verifies: REQ-FINDINGS-854#CASE-4  # verifies: ARCH-FINDINGS-010#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),
                    _req_with_verify("AREA-X-001", ["magic 1.05, bug?"]))
@@ -222,7 +222,7 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertNotIn("Confirmed bugs", md)
             self.assertIn("Open findings", md)
 
-    def test_staleness_note_when_counts_differ(self):  # verifies: REQ-FINDINGS-855#CASE-4
+    def test_staleness_note_when_counts_differ(self):  # verifies: REQ-FINDINGS-855#CASE-4  # verifies: ARCH-FINDINGS-010#CASE-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),
                    _req_with_verify("AREA-X-001", ["a?", "b?", "c?"]))  # 3 raw
@@ -241,6 +241,19 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             with redirect_stdout(buf):
                 R.cmd_check(R.Workspace(reqs, {}, os.path.join(d, "requirements")), False)
             self.assertIn("1 open verify-intent finding(s)", buf.getvalue())
+
+    def test_raw_mode_counts_only_requirements_with_open_items(self):  # verifies: ARCH-FINDINGS-010#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["swallowed except, intended?", "magic 1.05, bug?"]))
+            _write(os.path.join(d, "requirements", "AREA-Y-002.md"),
+                   _req_with_verify("AREA-Y-002", ["None — behavior is unambiguous and matches the contract."]))
+            md, out = self._run(d, raw=True)
+            self.assertIn("2 open finding(s) across 1 requirement(s)", out)
+            head = md.index("AREA-X-001")
+            self.assertGreater(md.index("swallowed except, intended?"), head)
+            self.assertGreater(md.index("magic 1.05, bug?"), head)
+            self.assertNotIn("AREA-Y-002", md)
 
 
 # ---- regression tests for the 2026-06-02 audit fixes + previously-untested code ----
@@ -433,7 +446,7 @@ class ViewerInject(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # test
         self.assertIn("window.__REQMAP_DATA__=", out) # data assigned
         self.assertIn('"A-1"', out)                   # node present
 
-    def test_script_close_in_field_is_escaped(self):  # bug: viewer-data-script-breakout-xss  # verifies: REQ-VIEWER-941#CASE-2
+    def test_script_close_in_field_is_escaped(self):  # bug: viewer-data-script-breakout-xss  # verifies: REQ-VIEWER-941#CASE-2  # verifies: ARCH-VIEWERFILE-074#CASE-2
         out = R._inject_viewer("<!--REQMAP_DATA-->",
                                {"nodes": [{"id": "a</script><img src=x>"}], "edges": []})
         self.assertNotIn("</script><img", out)        # NOT a raw breakout
@@ -548,23 +561,23 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
         body = "## WHAT — Contract\n- -1 means error\n"
         self.assertEqual(R._section(body, "contract"), "-1 means error")
 
-    def test_context_group_extracts_bold_subgroup(self):  # verifies: REQ-CONTEXT-835#CASE-2
+    def test_context_group_extracts_bold_subgroup(self):  # verifies: REQ-CONTEXT-835#CASE-2  # verifies: ARCH-CONTEXT-048#CASE-1
         body = ("## Context (non-binding)\n"
                 "**Notes**\n- a footgun\n- a second footgun\n"
                 "**Current implementation**\n- lives in foo.py\n")
         self.assertEqual(R._context_group(body, "notes"), ["a footgun", "a second footgun"])
         self.assertEqual(R._context_group(body, "current implementation"), ["lives in foo.py"])
 
-    def test_context_group_empty_when_no_context_section(self):  # verifies: REQ-CONTEXT-835#CASE-4
+    def test_context_group_empty_when_no_context_section(self):  # verifies: REQ-CONTEXT-835#CASE-4  # verifies: ARCH-CONTEXT-048#CASE-2
         # a legacy-schema file (no Context section at all) must not spuriously match
         body = "## WHAT — Notes & known limitations (informative)\n- old-style note\n"
         self.assertEqual(R._context_group(body, "notes"), [])
 
-    def test_context_group_ignores_unrelated_subgroup(self):  # verifies: REQ-CONTEXT-835#CASE-3
+    def test_context_group_ignores_unrelated_subgroup(self):  # verifies: REQ-CONTEXT-835#CASE-3  # verifies: ARCH-CONTEXT-048#CASE-3
         body = "## Context (non-binding)\n**Example**\n- a story\n"
         self.assertEqual(R._context_group(body, "notes"), [])
 
-    def test_map_data_notes_falls_back_to_context_group(self):  # verifies: REQ-CONTEXT-835#CASE-2
+    def test_map_data_notes_falls_back_to_context_group(self):  # verifies: REQ-CONTEXT-835#CASE-2  # verifies: ARCH-CONTEXT-048#CASE-4
         # a requirement using ONLY the new consolidated Context section must still
         # populate _map.json's notes/current_impl fields — the fallback this ADR-0017
         # migration exists to guarantee, so the fields never go silently empty.
@@ -580,7 +593,7 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
             self.assertEqual(node["notes"], ["a footgun"])
             self.assertEqual(node["current_impl"], ["lives in foo.py"])
 
-    def test_map_data_notes_prefers_legacy_heading_over_context(self):  # verifies: REQ-CONTEXT-835#CASE-4
+    def test_map_data_notes_prefers_legacy_heading_over_context(self):  # verifies: REQ-CONTEXT-835#CASE-4  # verifies: ARCH-CONTEXT-048#CASE-5
         # an old-schema file must keep working completely unchanged — the fallback
         # only fires when the legacy heading is absent.
         with tempfile.TemporaryDirectory() as d:
@@ -1104,14 +1117,14 @@ class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHO
         self.assertEqual(1, code)
         self.assertIn("no requirement with id NOPE-000", json.loads(buf.getvalue())["error"])
 
-    def test_known_id_header_and_zero(self):  # verifies: REQ-SHOW-917#CASE-3  # verifies: REQ-SHOW-919#CASE-3
+    def test_known_id_header_and_zero(self):  # verifies: REQ-SHOW-917#CASE-3  # verifies: REQ-SHOW-919#CASE-3  # verifies: ARCH-SHOW-015#CASE-1
         code, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
         self.assertEqual(code, 0)
         self.assertIn("REQ-X-001", out)
         self.assertIn("confirmed", out)
         self.assertIn("feature", out)
 
-    def test_unknown_id_returns_one(self):  # verifies: REQ-SHOW-919#CASE-3
+    def test_unknown_id_returns_one(self):  # verifies: REQ-SHOW-919#CASE-3  # verifies: ARCH-SHOW-015#CASE-3
         code, out = self._show({}, {}, "NOPE-000")
         self.assertEqual(code, 1)
         self.assertIn("no requirement with id NOPE-000", out)
@@ -1125,20 +1138,20 @@ class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHO
         _, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
         self.assertNotIn("·  ·", out.splitlines()[0])   # no empty priority slot
 
-    def test_reverse_dependency_listed(self):  # verifies: REQ-SHOW-918#CASE-1
+    def test_reverse_dependency_listed(self):  # verifies: REQ-SHOW-918#CASE-1  # verifies: ARCH-SHOW-015#CASE-4
         reqs = {"CORE-A-001": self._req(),
                 "REQ-B-002": self._req(extra="depends_on: [CORE-A-001]")}
         _, out = self._show(reqs, {}, "CORE-A-001")
         self.assertIn("Depended on by", out)
         self.assertIn("REQ-B-002", out)
 
-    def test_member_role_and_location(self):  # verifies: REQ-SHOW-918#CASE-2
+    def test_member_role_and_location(self):  # verifies: REQ-SHOW-918#CASE-2  # verifies: ARCH-SHOW-015#CASE-5
         members = {"REQ-X-001": [("implements", "src/foo.py", 42)]}
         _, out = self._show({"REQ-X-001": self._req()}, members, "REQ-X-001")
         self.assertIn("implements", out)
         self.assertIn("src/foo.py:42", out)
 
-    def test_open_verify_shown_placeholder_skipped(self):  # verifies: REQ-SHOW-919#CASE-1
+    def test_open_verify_shown_placeholder_skipped(self):  # verifies: REQ-SHOW-919#CASE-1  # verifies: ARCH-SHOW-015#CASE-6
         body = ("# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
                 "- None — doc is unambiguous.\n")
         _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
@@ -1174,6 +1187,30 @@ class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHO
         self.assertIn("t.py:2", buf.getvalue())
         self.assertNotIn("@", buf.getvalue().split("Members in code")[-1])
 
+    def test_show_names_a_members_level_and_nothing_without_one(self):  # verifies: ARCH-VLEVEL-037#CASE-7
+        reqs = {"REQ-X-001": self._req()}
+        members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(R.Workspace(reqs, members), "REQ-X-001",
+                       {"REQ-X-001": {"integration": [("t.py", 2)]}})
+        line = [ln for ln in buf.getvalue().splitlines() if "t.py:2" in ln][0]
+        self.assertIn("@integration", line)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(R.Workspace(reqs, members), "REQ-X-001")
+        self.assertIn("t.py:2", buf.getvalue())
+        self.assertNotIn("@", buf.getvalue().split("Members in code")[-1])
+
+    def test_priority_segment_only_when_set(self):  # verifies: ARCH-SHOW-015#CASE-2
+        _, with_p = self._show({"REQ-X-001": self._req(extra="priority: must-have")}, {},
+                               "REQ-X-001")
+        _, without = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
+        self.assertIn("must-have", with_p.splitlines()[0])
+        header = without.splitlines()[0]
+        self.assertNotIn("·  ·", header)
+        self.assertFalse(header.rstrip().endswith("·"), header)
+
 
 class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: REQ-SIMILAR-920  # tested-by: REQ-SIMILAR-921  # tested-by: REQ-SIMILAR-922  # tested-by: REQ-SIMILAR-923
     def _sim(self, reqs, threshold=0.35):
@@ -1186,7 +1223,7 @@ class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: R
         return {"body": "# {t}\n\n> {t} intent.\n\n## WHAT — Contract (normative)\n- {c}\n".format(
             t=title, c=contract)}
 
-    def test_near_identical_pair_reported(self):  # verifies: REQ-SIMILAR-920#CASE-1
+    def test_near_identical_pair_reported(self):  # verifies: REQ-SIMILAR-920#CASE-1  # verifies: ARCH-SIMILAR-016#CASE-5
         # DISTINCT titles so only the Contract text overlaps — this forces the match
         # through the contract path AC-1 names (bug-hunt #8: identical titles let a
         # contract-dropping mutation survive)
@@ -1219,7 +1256,7 @@ class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: R
         terms = line.split("shared terms:")[1].strip().split(", ")
         self.assertEqual(terms, sorted(terms))
 
-    def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7  # verifies: REQ-SIMILAR-923#CASE-6  # verifies: REQ-SIMILAR-921#CASE-6
+    def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7  # verifies: REQ-SIMILAR-923#CASE-6  # verifies: REQ-SIMILAR-921#CASE-6  # verifies: ARCH-SIMILAR-016#CASE-7
         # A requirement and the requirement that IS its test suite share vocabulary by
         # construction; with the member map the pair is a known tested-by link, not a dupe.
         c = "resolve the dispatch model for each reviewer from prompt frontmatter"
@@ -1238,18 +1275,18 @@ class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: R
         self.assertNotIn("<->", out)
         self.assertIn("skipped 1 pair(s) linked by tested-by", out)
 
-    def test_unrelated_not_reported(self):  # verifies: REQ-SIMILAR-920#CASE-3
+    def test_unrelated_not_reported(self):  # verifies: REQ-SIMILAR-920#CASE-3  # verifies: ARCH-SIMILAR-016#CASE-2
         reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
                 "REQ-B-002": self._req("Roadmap", "render mermaid gantt diagrams for milestones")}
         _, out = self._sim(reqs, 0.35)
         self.assertIn("No overlapping", out)
 
-    def test_too_few_docs(self):  # verifies: REQ-SIMILAR-923#CASE-4
+    def test_too_few_docs(self):  # verifies: REQ-SIMILAR-923#CASE-4  # verifies: ARCH-SIMILAR-016#CASE-3
         code, out = self._sim({"REQ-A-001": self._req("Solo", "does one thing well")}, 0.35)
         self.assertEqual(code, 0)
         self.assertIn("at least two", out)
 
-    def test_threshold_above_score_hides_pair(self):  # verifies: REQ-SIMILAR-923#CASE-5
+    def test_threshold_above_score_hides_pair(self):  # verifies: REQ-SIMILAR-923#CASE-5  # verifies: ARCH-SIMILAR-016#CASE-4
         c = "validate user input and reject malformed payloads"
         reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
         _, out = self._sim(reqs, 1.01)   # cosine maxes at 1.0, so nothing qualifies
@@ -1285,7 +1322,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         self.assertIn(rec["matches"][0]["match"], ("text", "lexical"))
         self.assertIsNone(rec["message"])
 
-    def test_query_ranks_matching_requirement_first_with_score(self):  # AC-1  # verifies: REQ-SEARCH-913#CASE-1
+    def test_query_ranks_matching_requirement_first_with_score(self):  # AC-1  # verifies: REQ-SEARCH-913#CASE-1  # verifies: ARCH-SEARCH-036#CASE-1
         reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash baseline"),
                 "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
         code, out = self._search(reqs, "contract changed against the lock hash")
@@ -1296,7 +1333,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         # (a match is shown WITH its score, never as a bare id)
         self.assertRegex(lines[0].strip(), r"^\d\.\d{3}\s+REQ-DRIFT-001\b")
 
-    def test_no_lexical_overlap_reports_no_strong_match(self):  # AC-2  # verifies: REQ-SEARCH-913#CASE-4  # verifies: REQ-SEARCH-913#CASE-5  # verifies: REQ-SEARCH-915#CASE-1
+    def test_no_lexical_overlap_reports_no_strong_match(self):  # AC-2  # verifies: REQ-SEARCH-913#CASE-4  # verifies: REQ-SEARCH-913#CASE-5  # verifies: REQ-SEARCH-915#CASE-1  # verifies: ARCH-SEARCH-036#CASE-2
         reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash"),
                 "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
         code, out = self._search(reqs, "photosynthesis quarterly dividend wombat")
@@ -1306,14 +1343,14 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         self.assertNotIn("REQ-DRIFT-001", out)
         self.assertNotIn("REQ-MAP-002", out)
 
-    def test_query_with_only_stopwords_says_no_terms(self):  # AC-3 — distinct from no-match  # verifies: REQ-SEARCH-914#CASE-2
+    def test_query_with_only_stopwords_says_no_terms(self):  # AC-3 — distinct from no-match  # verifies: REQ-SEARCH-914#CASE-2  # verifies: ARCH-SEARCH-036#CASE-3
         reqs = {"REQ-A-001": self._req("Thing", "does one thing well")}
         code, out = self._search(reqs, "the and for with")
         self.assertEqual(code, 0)
         self.assertIn("No searchable terms", out)
         self.assertNotIn("No match for", out)
 
-    def test_top_caps_result_count(self):  # AC-4
+    def test_top_caps_result_count(self):  # AC-4  # verifies: ARCH-SEARCH-036#CASE-4
         reqs = {"REQ-DUP-00{}".format(i): self._req("Doc" + str(i),
                     "validate user input and reject malformed payloads from the client")
                 for i in range(1, 6)}
@@ -1359,7 +1396,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         return {"meta": {"status": "confirmed"},
                 "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"}
 
-    def test_all_green_is_100(self):  # verifies: REQ-HEALTH-857#CASE-3
+    def test_all_green_is_100(self):  # verifies: REQ-HEALTH-857#CASE-3  # verifies: ARCH-HEALTH-017#CASE-1
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         code, out = self._health({"REQ-A-001": self._green()}, members)
         self.assertEqual(code, 0)
@@ -1411,12 +1448,12 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         _, clean = self._health({"REQ-B-002": self._green()}, members)
         self.assertNotIn("exemption", clean.splitlines()[0])
 
-    def test_all_draft_is_zero(self):
+    def test_all_draft_is_zero(self):  # verifies: ARCH-HEALTH-017#CASE-2
         reqs = {"REQ-A-001": {"meta": {"status": "draft"}, "body": "# T\n"}}
         _, out = self._health(reqs, {})
         self.assertIn("0/100", out)
 
-    def test_json_has_all_component_fields(self):  # bug-hunt #18: assert every emitted key  # verifies: REQ-HEALTH-859#CASE-1
+    def test_json_has_all_component_fields(self):  # bug-hunt #18: assert every emitted key  # verifies: REQ-HEALTH-859#CASE-1  # verifies: ARCH-HEALTH-017#CASE-3
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertEqual(json.loads(out), {
@@ -1495,7 +1532,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertLess(obj["score"], 100)
 
     # tested-by: ARCH-COVERAGE-029
-    def test_untagged_count_with_code_root(self):  # tested-by: REQ-COVERAGE-836  # verifies: REQ-COVERAGE-836#CASE-1  # verifies: REQ-COVERAGE-836#CASE-4
+    def test_untagged_count_with_code_root(self):  # tested-by: REQ-COVERAGE-836  # verifies: REQ-COVERAGE-836#CASE-1  # verifies: REQ-COVERAGE-836#CASE-4  # verifies: ARCH-COVERAGE-029#CASE-1
         # ARCH-COVERAGE-029 AC-1 — the read-only coverage signal: count scannable
         # code files with no membership tag. Informational: it must NOT lower
         # the score.
@@ -1511,7 +1548,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertEqual(obj["untagged"], 1)   # only untagged.py; tagged.py is covered
         self.assertEqual(obj["score"], 100)    # informational — never lowers the score
 
-    def test_untagged_absent_without_code_root(self):  # tested-by: REQ-COVERAGE-836  # verifies: REQ-COVERAGE-836#CASE-6
+    def test_untagged_absent_without_code_root(self):  # tested-by: REQ-COVERAGE-836  # verifies: REQ-COVERAGE-836#CASE-6  # verifies: ARCH-COVERAGE-029#CASE-2
         # no code root (e.g. a unit-test caller) -> the key is absent, not zero,
         # so existing --json consumers keep their exact schema.
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
@@ -1530,7 +1567,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
         subprocess.run(["git", "-C", d, "commit", "-m", msg], check=True, capture_output=True)
 
-    def test_commits_since_req_touch_counted(self):  # tested-by: REQ-REGISTRYLAG-903  # tested-by: REQ-REGISTRYLAG-904  # verifies: REQ-REGISTRYLAG-903#CASE-1  # verifies: REQ-REGISTRYLAG-904#CASE-1  # verifies: REQ-REGISTRYLAG-904#CASE-3
+    def test_commits_since_req_touch_counted(self):  # tested-by: REQ-REGISTRYLAG-903  # tested-by: REQ-REGISTRYLAG-904  # verifies: REQ-REGISTRYLAG-903#CASE-1  # verifies: REQ-REGISTRYLAG-904#CASE-1  # verifies: REQ-REGISTRYLAG-904#CASE-3  # verifies: ARCH-REGISTRYLAG-035#CASE-1
         # ARCH-REGISTRYLAG-035 AC-1 — advisory "registry lag" signal: how many
         # commits landed since the requirements dir was last touched. It flags a
         # registry frozen while code races ahead. Informational: never lowers score.
@@ -1550,7 +1587,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertEqual(obj["commits_since_req_touch"], 2)
         self.assertEqual(obj["score"], 100)   # informational — never lowers the score
 
-    def test_commits_since_req_touch_zero_when_fresh(self):
+    def test_commits_since_req_touch_zero_when_fresh(self):  # verifies: ARCH-REGISTRYLAG-035#CASE-2
         # ARCH-REGISTRYLAG-035 AC-2 — the most recent commit touched requirements/:
         # lag is 0 and the key is present (0, not absent) for --json consumers.
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
@@ -1565,7 +1602,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
             obj = json.loads(buf.getvalue())
         self.assertEqual(obj["commits_since_req_touch"], 0)
 
-    def test_registry_lag_absent_without_git(self):  # verifies: REQ-REGISTRYLAG-904#CASE-4
+    def test_registry_lag_absent_without_git(self):  # verifies: REQ-REGISTRYLAG-904#CASE-4  # verifies: ARCH-REGISTRYLAG-035#CASE-3
         # ARCH-REGISTRYLAG-035 AC-3 — a code root that is not a git worktree ->
         # the key is absent (not zero), mirroring the untagged idiom.
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
@@ -1598,13 +1635,13 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
                 os.chdir(old_cwd)
             self.assertEqual(lag, 2)
 
-    def test_orphan_not_green(self):  # verifies: REQ-HEALTH-858#CASE-1
+    def test_orphan_not_green(self):  # verifies: REQ-HEALTH-858#CASE-1  # verifies: ARCH-HEALTH-017#CASE-4
         # confirmed but no implements member -> orphan, drops out of green
         _, out = self._health({"REQ-A-001": self._green()}, {})
         self.assertIn("orphans", out)
         self.assertIn("0/100", out)
 
-    def test_empty_corpus(self):  # verifies: REQ-HEALTH-859#CASE-3  # verifies: REQ-HEALTH-859#CASE-4
+    def test_empty_corpus(self):  # verifies: REQ-HEALTH-859#CASE-3  # verifies: REQ-HEALTH-859#CASE-4  # verifies: ARCH-HEALTH-017#CASE-5
         code, out = self._health({}, {})
         self.assertEqual(code, 0)
         self.assertIn("0/100", out)
@@ -1613,7 +1650,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         return {"meta": {"status": "confirmed", "layer": "need"},
                 "body": "# N\n\n## WHAT — Verify intent\n- None — clear.\n"}
 
-    def test_satisfied_need_is_green(self):  # verifies: REQ-HEALTH-858#CASE-3
+    def test_satisfied_need_is_green(self):  # verifies: REQ-HEALTH-858#CASE-3  # verifies: ARCH-HEALTH-017#CASE-6
         # a need is covered by being satisfied, not implemented; test axis waived
         reqs = {"NEED-X-001": self._need(),
                 "REQ-A-001": {"meta": {"status": "confirmed", "satisfies": ["NEED-X-001"]},
@@ -1625,7 +1662,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         self.assertEqual(obj["orphans"], 0)
         self.assertEqual(obj["untested"], 0)
 
-    def test_unsatisfied_need_is_orphan_not_green(self):  # verifies: REQ-HEALTH-858#CASE-4
+    def test_unsatisfied_need_is_orphan_not_green(self):  # verifies: REQ-HEALTH-858#CASE-4  # verifies: ARCH-HEALTH-017#CASE-7
         _, out = self._health({"NEED-X-001": self._need()}, {}, as_json=True)
         obj = json.loads(out)
         self.assertEqual(obj["orphans"], 1)
@@ -1782,7 +1819,7 @@ class AdversarialInjection(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tes
                            "status": "confirmed", "layer": "bus", "members": [],
                            "risk": 0, "acc": [], "deps": []}]}
 
-    def test_js_line_terminators_never_reach_the_script_blob_raw(self):  # tested-by: ARCH-VIEWERFILE-074  # verifies: REQ-VIEWER-941#CASE-5
+    def test_js_line_terminators_never_reach_the_script_blob_raw(self):  # tested-by: ARCH-VIEWERFILE-074  # verifies: REQ-VIEWER-941#CASE-5  # verifies: ARCH-VIEWERFILE-074#CASE-5
         """U+2028/U+2029 terminate a line in JavaScript. Raw in the inlined blob they
         are a syntax error on any engine older than ES2019 - the whole viewer dies on
         one character in one requirement title."""
@@ -1824,7 +1861,7 @@ class AdversarialInjection(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tes
 
 
 class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-834
-    def test_registry_matches_argparse_choices(self):  # verifies: REQ-CMDREGISTRY-834#CASE-1
+    def test_registry_matches_argparse_choices(self):  # verifies: REQ-CMDREGISTRY-834#CASE-1  # verifies: ARCH-CMDREGISTRY-033#CASE-1
         # the registry is the single source: argparse choices must equal its keys in insertion order.
         self.assertEqual(R._cli_choices(), list(R.COMMANDS))
 
@@ -1957,13 +1994,53 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
             with open(tj, "wb") as f:
                 f.write(b"[]\n")             # pre-existing LF-only committed convention
             buf = io.StringIO()
-            with redirect_stdout(buf):
+            # The generator writes beside ENGINE_DIR, so point it at the copy: left
+            # alone it rewrote the real repository's files and this assertion read a
+            # file nothing had touched.
+            with mock.patch.object(R.registry, "ENGINE_DIR", os.path.join(dst, "scripts")), \
+                    redirect_stdout(buf):
                 rc = R.cmd_gen_integration(os.path.join(dst, "requirements"), dst)
             self.assertEqual(rc, 0)
             with open(tj, "rb") as f:
                 data = f.read()
+            self.assertNotEqual(b"[]\n", data, "the copy was never regenerated")
             self.assertNotIn(b"\r\n", data,
                               "regenerating flipped the file's existing LF convention to CRLF")
+
+    def test_gate_exits_nonzero_on_a_stale_tool_definition(self):  # verifies: ARCH-CMDREGISTRY-033#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            plugin_root = os.path.join(d, "plugin")
+            _write(os.path.join(plugin_root, ".claude-plugin", "plugin.json"), "{}\n")
+            tj = os.path.join(plugin_root, "tool_definition.json")
+            reqs_dir = os.path.join(d, "requirements")
+            os.makedirs(reqs_dir)
+
+            def gate():
+                out = io.StringIO()
+                with mock.patch.object(R.gate, "ENGINE_DIR", os.path.join(plugin_root, "scripts")), \
+                        redirect_stdout(out), redirect_stderr(out):
+                    code = R.cmd_check(R.Workspace({}, {}, reqs_dir, d), False)
+                return code, out.getvalue()
+
+            _write(tj, R._generate_schema())
+            self.assertEqual(gate()[0], 0)
+            _write(tj, "[]\n")
+            code, out = gate()
+            self.assertEqual(code, 1)
+            self.assertIn("stale integration artifact(s): tool_definition.json", out)
+
+    def test_generation_is_byte_reproducible(self):  # verifies: ARCH-CMDREGISTRY-033#CASE-3
+        self.assertEqual(R._generate_schema(), R._generate_schema())
+        self.assertEqual(R._generate_command_table(), R._generate_command_table())
+        with tempfile.TemporaryDirectory() as d:
+            fp = os.path.join(d, "SKILL.universal.md")
+            _write(fp, "before\n<!--##REQMAP:COMMANDS##-->\nold\n<!--##/REQMAP:COMMANDS##-->\nafter\n")
+            R._write_region(fp, R._generate_command_table())
+            with open(fp, "rb") as f:
+                first = f.read()
+            R._write_region(fp, R._generate_command_table())
+            with open(fp, "rb") as f:
+                self.assertEqual(f.read(), first)
 
 
 class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: ARCH-NEXT-013
@@ -2262,7 +2339,7 @@ class FindingsFreshness(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # t
             self._map(d, rd)
             self.assertFalse(os.path.exists(os.path.join(rd, "_findings.md")))
 
-    def test_map_refreshes_existing_findings(self):  # verifies: REQ-FINDINGS-856#CASE-1
+    def test_map_refreshes_existing_findings(self):  # verifies: REQ-FINDINGS-856#CASE-1  # verifies: ARCH-FINDINGS-010#CASE-6
         with tempfile.TemporaryDirectory() as d:
             rd = self._seed(d, ["a?"])
             self._findings(rd)
@@ -2287,7 +2364,7 @@ class FindingsFreshness(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # t
             code, _ = self._map(d, rd, check=True)
             self.assertEqual(code, 0)
 
-    def test_stale_findings_fails_check(self):  # verifies: REQ-FINDINGS-856#CASE-3
+    def test_stale_findings_fails_check(self):  # verifies: REQ-FINDINGS-856#CASE-3  # verifies: ARCH-FINDINGS-010#CASE-7
         with tempfile.TemporaryDirectory() as d:
             rd = self._seed(d, ["a?"])
             self._findings(rd)
@@ -2360,7 +2437,7 @@ class DupesSkipPlaceholders(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  
         return {"body": "# {t}" + chr(10) + chr(10) + "> {t} intent." + chr(10) + chr(10)
                 + "## WHAT — Contract (normative)" + chr(10) + "- {c}" + chr(10)}
 
-    def test_placeholder_drafts_are_skipped_with_count(self):  # verifies: REQ-SIMILAR-921#CASE-5
+    def test_placeholder_drafts_are_skipped_with_count(self):  # verifies: REQ-SIMILAR-921#CASE-5  # verifies: ARCH-SIMILAR-016#CASE-6
         reqs = {
             "DRAFT-A": {"body": "# A" + chr(10) + chr(10) + "> DRAFT extracted from a.py." + chr(10) + chr(10)
                         + "## WHAT — Contract (normative)" + chr(10) + "- TODO: the observed behavior (characterization)." + chr(10)},
@@ -3149,6 +3226,34 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertIn("ARCH_A_001", out)
         self.assertNotIn("REQ_A_002", out)
 
+    def test_a_config_file_sets_where_lint_and_next_call_oversize(self):  # verifies: ARCH-CONFIG-060#CASE-1
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+
+        def run(d, *args):
+            return subprocess.run([sys.executable, "-X", "utf8", engine, *args,
+                                   "--reqs", "requirements", "--code", "."],
+                                  cwd=d, capture_output=True, text=True, encoding="utf-8")
+
+        def cases(n):
+            return ["CASE-{} — c\n  Given x\n  When y\n  Then z".format(i) for i in range(1, n + 1)]
+
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-TEN-001.md"),
+                   _spec("AREA-TEN-001", ["It holds."], cases=cases(10)))
+            _write(os.path.join(rd, "AREA-BIG-002.md"),
+                   _spec("AREA-BIG-002", ["It holds too."], cases=cases(13)))
+            _write(os.path.join(d, "mod.py"),
+                   tag("AREA-TEN-001") + "\n" + tag("AREA-BIG-002") + "\n")
+            self.assertIn("10 AC (> 7)", run(d, "gate").stdout)   # the default calls 10 oversize
+            _write(os.path.join(rd, "_config.json"), '{"LINT_AC_MAX": 12}')
+            lint, nxt = run(d, "gate"), run(d, "gate", "--risk")
+        self.assertNotIn("10 AC", lint.stdout)            # lint: 10 is within the new bound
+        self.assertIn("13 AC (> 12)", lint.stdout)        # ...and 13 is over it
+        granularity = nxt.stdout.split("Granularity", 1)[1].split("\n\n", 1)[0]
+        self.assertNotIn("AREA-TEN-001", granularity)     # next draws the same line
+        self.assertIn("AREA-BIG-002", granularity)
+
 
 class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-AUDIT-970  # tested-by: REQ-AUDIT-971  # tested-by: REQ-AUDIT-972  # tested-by: REQ-AUDIT-973
     """`audit` runs every discovery pass and reports; only the gate reaches the exit code."""
@@ -3201,7 +3306,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         rc, _ = self._run(reqs, members)
         self.assertEqual(rc, self._gate_rc(reqs, members))
 
-    def test_a_gate_error_fails_the_audit(self):  # verifies: REQ-AUDIT-970#CASE-3
+    def test_a_gate_error_fails_the_audit(self):  # verifies: REQ-AUDIT-970#CASE-3  # verifies: ARCH-AUDIT-065#CASE-2
         # a confirmed requirement with no `implements:` member is the gate's own error
         rc, out = self._run({"REQ-A-001": self._req()}, {})
         self.assertEqual(rc, 1)
@@ -3214,7 +3319,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         self.assertIn("pass exploded", text)
         self.assertEqual(rc, 0)
 
-    def test_json_carries_every_signal(self):  # verifies: REQ-AUDIT-970#CASE-5
+    def test_json_carries_every_signal(self):  # verifies: REQ-AUDIT-970#CASE-5  # verifies: ARCH-AUDIT-065#CASE-3
         _, out = self._run(*self._green(), as_json=True)
         data = json.loads(out)
         for key in ("gate", "health", "exemptions", "shape"):
@@ -3329,6 +3434,15 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             with redirect_stdout(io.StringIO()):
                 R._audit_summary(reqs, {}, d, d)
             self.assertEqual(sorted(os.listdir(d)), before)
+
+    def test_a_clean_gate_exits_zero_and_names_every_section(self):  # verifies: ARCH-AUDIT-065#CASE-1
+        reqs, members = self._green()
+        self.assertEqual(0, self._gate_rc(reqs, members))          # the gate is clean
+        rc, out = self._run(reqs, members)
+        self.assertEqual(0, rc)
+        for section in ("Gate", "Risk", "Duplicates", "Design", "Tag coverage",
+                        "Exemptions in force", "Corpus shape"):
+            self.assertIn(section, out)
 
 
 class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-RELEVEL-997
@@ -3672,7 +3786,7 @@ class CasesContext(unittest.TestCase):  # tested-by: ARCH-CONTEXT-048  # tested-
 
 
 class CasesCmdRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-834
-    def test_generator_functions_import_stdlib_only(self):  # verifies: REQ-CMDREGISTRY-834#CASE-6
+    def test_generator_functions_import_stdlib_only(self):  # verifies: REQ-CMDREGISTRY-834#CASE-6  # verifies: ARCH-CMDREGISTRY-033#CASE-5
         import ast
         import importlib.util
         here = os.path.dirname(os.path.abspath(R.__file__))
@@ -3933,7 +4047,7 @@ class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # te
                 out = R.render_html({"nodes": [], "edges": []}, d)
             self.assertIsNone(out)
 
-    def test_map_writes_md_and_json_when_viewer_template_absent(self):  # verifies: REQ-VIEWER-940#CASE-4
+    def test_map_writes_md_and_json_when_viewer_template_absent(self):  # verifies: REQ-VIEWER-940#CASE-4  # verifies: ARCH-VIEWERFILE-074#CASE-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
                    "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
@@ -3961,7 +4075,7 @@ class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # te
         unescaped = blob.replace("-\\->", "-->").replace("<\\!--", "<!--").replace("<\\/", "</")
         self.assertEqual(json.loads(unescaped)["nodes"][0]["title"], title)
 
-    def test_html_comment_open_is_escaped(self):  # verifies: REQ-VIEWER-941#CASE-3
+    def test_html_comment_open_is_escaped(self):  # verifies: REQ-VIEWER-941#CASE-3  # verifies: ARCH-VIEWERFILE-074#CASE-3
         out = R._inject_viewer("<!--REQMAP_DATA-->",
                                self._node(contract=["discusses HTML injection via <!-- markers"]))
         blob = self._blob(out)
@@ -3973,6 +4087,28 @@ class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # te
         blob = self._blob(out)
         self.assertNotIn("-->", blob)
         self.assertIn("-\\->", blob)
+
+    def test_map_inlines_one_node_per_requirement_into_map_html(self):  # verifies: ARCH-VIEWERFILE-074#CASE-1
+        if not os.path.exists(R._viewer_template_path()):
+            self.skipTest("viewer template not vendored beside the engine")
+        with tempfile.TemporaryDirectory() as d:
+            for rid in ("A-FOO-001", "A-BAR-002"):
+                _write(os.path.join(d, rid + ".md"),
+                       "---\nid: {}\nstatus: confirmed\nlayer: bus\n---\n\n".format(rid) + _ac_body())
+            _write(os.path.join(d, "a.py"), tag("A-FOO-001") + "\n" + tag("A-BAR-002") + "\n")
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            with redirect_stdout(io.StringIO()):
+                code = R.cmd_map(R.Workspace(reqs, members, d), d)
+            self.assertEqual(code, 0)
+            with open(os.path.join(d, "_map.html"), encoding="utf-8") as f:
+                html = f.read()
+            self.assertNotIn("<!--REQMAP_DATA-->", html)
+            head = "<script>window.__REQMAP_DATA__="
+            start = html.index(head) + len(head)
+            blob = html[start:html.index(";</script>", start)]
+            data = json.loads(blob.replace("-\\->", "-->").replace("<\\!--", "<!--")
+                              .replace("<\\/", "</"))
+            self.assertEqual(sorted(n["id"] for n in data["nodes"]), ["A-BAR-002", "A-FOO-001"])
 
 
 class CasesSimilar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: REQ-SIMILAR-920  # tested-by: REQ-SIMILAR-921  # tested-by: REQ-SIMILAR-922  # tested-by: REQ-SIMILAR-923
@@ -4091,6 +4227,22 @@ class CasesSimilar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-
         self.assertNotIn("<->", out_default)
         _, out_low = self._sim(reqs, 0.1)              # --threshold 0.1 -> now shown
         self.assertIn("REQ-A-001  <->  REQ-B-002", out_low)
+
+    def test_near_identical_contracts_score_high(self):  # verifies: ARCH-SIMILAR-016#CASE-1
+        reqs = {
+            "REQ-A-001": self._req("Payload Validator",
+                                   "validate user input and reject malformed payloads from the client"),
+            "REQ-B-002": self._req("Payload Validator",
+                                   "validate user input and reject malformed payloads from the browser"),
+            "REQ-C-003": self._req("Roadmap", "render mermaid gantt diagrams for milestones"),
+        }
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_similar(reqs, 0.35, {}, top=0, as_json=True)
+        self.assertEqual(code, 0)
+        pairs = json.loads(buf.getvalue())["pairs"]
+        self.assertEqual([("REQ-A-001", "REQ-B-002")], [(p["a"], p["b"]) for p in pairs])
+        self.assertGreaterEqual(pairs[0]["score"], 0.8)
 
 
 class CasesRoadmap(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-907
@@ -4229,7 +4381,7 @@ class CasesCoverage029(unittest.TestCase):  # tested-by: REQ-COVERAGE-836
         self.assertIn("untagged code (no requirement):", out)
         self.assertIn("1", out.split("untagged code (no requirement):")[1].splitlines()[0])
 
-    def test_tagging_or_ignoring_drops_untagged_count(self):  # verifies: REQ-COVERAGE-836#CASE-7
+    def test_tagging_or_ignoring_drops_untagged_count(self):  # verifies: REQ-COVERAGE-836#CASE-7  # verifies: ARCH-COVERAGE-029#CASE-3
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         with tempfile.TemporaryDirectory() as d1:
             _write(os.path.join(d1, "probe.py"), "x = 1\n")

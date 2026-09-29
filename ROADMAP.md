@@ -31,9 +31,7 @@ Cadence: one release a week, not one per merge.
 
 ### Planning and releasing
 
-- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose bars it drops, instead of only listing them | req: ARCH-RELEASE-072 | unpark: a Now item describes work that already shipped
-- [ ] `sync --release` refuses a milestone that has Now/Next items with no bar | req: ARCH-RELEASE-072 | unpark: a release is cut from an incomplete plan
-- [ ] `gate --strict` fails on a stale plan (a milestone at or below the declared version); the bare gate keeps it a warning | req: ARCH-ROADMAP-038 | unpark: a stale milestone is found by a person before the signal
+- [ ] `sync --release` refuses a milestone whose own bars are not done (`plandrift.bar_done`), never over Now/Next items elsewhere in the plan | req: ARCH-RELEASE-072 | unpark: the done predicate is checked on five repositories it was not tuned on, with the false-block rate stated
 - [ ] One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag | req: ARCH-RELEASE-072 | unpark: the maintainer picks one
 
 ### CI of this repository

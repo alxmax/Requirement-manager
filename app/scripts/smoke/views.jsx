@@ -439,3 +439,42 @@ const foldChecks = [
     folded.deps[0] === "DEP-001" && legacy.deps[0] === "OLD-001"],
 ];
 for (const [label, ok] of foldChecks) test(label, ok);
+
+// ---- ARCH-VIEWER-007: the architecture-level cases -------------------------
+// verifies: ARCH-VIEWER-007#CASE-1
+test("layout: a depends_on cycle places every node, ranks within the node "
+  + "count, and still draws every cycle edge",
+  cyc.every((r) => cycLayout.pos[r.id])
+    && cycMaxRank <= cyc.length - 1
+    && [["A-1", "B-2"], ["B-2", "C-3"], ["C-3", "A-1"]].every(([a, b]) =>
+      cycLayout.edges.some(([x, y]) => x === a && y === b)));
+
+// verifies: ARCH-VIEWER-007#CASE-2
+{
+  adoptMapExport({ nodes: [adaptNode({
+    id: "LOCALE-TEST-001", title: "Authored title", area: "LOCALE",
+    layer: "feature", status: "confirmed", intent: "Authored reason.",
+    contract: ["- The authored clause."],
+    accept: "CASE-1\n  Given  an authored state\n  Then   an authored result",
+    members: [], deps: [], used_by: [],
+  })] });
+  const ro = renderToString(
+    <I18nProvider initialLocale="ro">{specOf("LOCALE-TEST-001")}</I18nProvider>);
+  test("i18n: a non-English locale translates the section headers and leaves "
+    + "the title, contract, acceptance and status/layer values as authored",
+    ro.includes("Descriere") && ro.includes("Cazuri")
+      && ro.includes("Unde — Membri în cod")
+      && !ro.includes("Description") && !ro.includes("Where — Members in code")
+      && ro.includes("Authored title") && ro.includes("The authored clause.")
+      && ro.includes("<div>  Given  an authored state</div>")
+      && ro.includes("<div>  Then   an authored result</div>")
+      && ro.includes(">confirmed<") && ro.includes(">feature<"));
+  adoptMapExport({ nodes: json.nodes.map(adaptNode) });
+}
+
+// verifies: ARCH-VIEWER-007#CASE-3
+test("acceptance: with both accept and acc, each authored Given/When/Then "
+  + "line renders on its own line and the folded form is not shown",
+  gwtSpec.includes('class="gwt"')
+    && GWT_ACCEPT.split("\n").every((ln) => gwtSpec.includes(`<div>${ln}</div>`))
+    && !gwtSpec.includes("AC-1 — Given"));

@@ -36,7 +36,7 @@ class Extract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: R
         self.assertEqual(R._draft_id("_.py"), "DRAFT-FILE")
         self.assertEqual(R._draft_id("世界.py"), "DRAFT-FILE")
 
-    def test_extract_creates_distinct_drafts_and_makedirs(self):  # bugs #10/#11/#12  # verifies: REQ-EXTRACT-850#CASE-1  # verifies: REQ-EXTRACT-850#CASE-4
+    def test_extract_creates_distinct_drafts_and_makedirs(self):  # bugs #10/#11/#12  # verifies: REQ-EXTRACT-850#CASE-1  # verifies: REQ-EXTRACT-850#CASE-4  # verifies: ARCH-EXTRACT-008#CASE-1
         with tempfile.TemporaryDirectory() as d:
             code = os.path.join(d, "code")
             _write(os.path.join(code, "src", "utils.py"), "x = 1\n")
@@ -61,7 +61,7 @@ class Extract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: R
             self.assertIn("DRAFT-SERVER.md", made)
             self.assertIn("DRAFT-LIB.md", made)
 
-    def test_extract_honors_reqmapignore(self):  # init surfaced: extract ignored .reqmapignore  # verifies: REQ-EXTRACT-849#CASE-3
+    def test_extract_honors_reqmapignore(self):  # init surfaced: extract ignored .reqmapignore  # verifies: REQ-EXTRACT-849#CASE-3  # verifies: ARCH-EXTRACT-008#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "keep.py"), "x = 1\n")
             _write(os.path.join(d, "scripts", "reqmap.py"), "y = 2\n")
@@ -132,7 +132,7 @@ class Candidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested
             R.cmd_candidates(R.Workspace(reqs, members, reqs_dir, d), None)
         return json.loads(buf.getvalue())
 
-    def test_writes_no_md_and_valid_json(self):  # verifies: REQ-CANDIDATES-826#CASE-1  # verifies: REQ-CANDIDATES-826#CASE-2
+    def test_writes_no_md_and_valid_json(self):  # verifies: REQ-CANDIDATES-826#CASE-1  # verifies: REQ-CANDIDATES-826#CASE-2  # verifies: ARCH-CANDIDATES-009#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "a.py"), '"""mod a."""\ndef f(x):\n    return x\n')
             plan = self._plan(d)
@@ -148,7 +148,7 @@ class Candidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested
             self.assertIn("keep.py", allfiles)
             self.assertNotIn("skip.py", allfiles)
 
-    def test_derives_depends_on_from_imports(self):  # verifies: REQ-CANDIDATES-827#CASE-3
+    def test_derives_depends_on_from_imports(self):  # verifies: REQ-CANDIDATES-827#CASE-3  # verifies: ARCH-CANDIDATES-009#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "paths.py"), "ROOT = '.'\n")
             _write(os.path.join(d, "app.py"), "import paths\n")
@@ -157,7 +157,7 @@ class Candidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested
             paths = next(c for c in cands if "paths.py" in c["files"])
             self.assertIn(paths["suggested_id"], app["depends_on"])
 
-    def test_capmap_groups_files(self):  # verifies: REQ-CANDIDATES-827#CASE-6
+    def test_capmap_groups_files(self):  # verifies: REQ-CANDIDATES-827#CASE-6  # verifies: ARCH-CANDIDATES-009#CASE-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "a.py"), "x=1\n")
             _write(os.path.join(d, "b.py"), "y=2\n")
@@ -169,7 +169,7 @@ class Candidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested
             self.assertEqual(sorted(ab[0]["files"]), ["a.py", "b.py"])
             self.assertEqual(ab[0]["suggested_layer"], "bus")
 
-    def test_existing_req_for_tagged_file(self):  # verifies: REQ-CANDIDATES-827#CASE-5
+    def test_existing_req_for_tagged_file(self):  # verifies: REQ-CANDIDATES-827#CASE-5  # verifies: ARCH-CANDIDATES-009#CASE-5
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "m.py"), tag("CORE-FOO-001") + "\n")
             m = next(c for c in self._plan(d)["candidates"] if "m.py" in c["files"])
@@ -215,7 +215,7 @@ class CandidatesGrouping(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  
                                          R.scan_members(d, reqs_dir), reqs_dir, d), None)
         return json.loads(buf.getvalue())
 
-    def test_high_fanin_module_inferred_bus(self):  # bug: candidates-bus-threshold-untested  # verifies: REQ-CANDIDATES-827#CASE-4
+    def test_high_fanin_module_inferred_bus(self):  # bug: candidates-bus-threshold-untested  # verifies: REQ-CANDIDATES-827#CASE-4  # verifies: ARCH-CANDIDATES-009#CASE-6
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "paths.py"), "ROOT = '.'\n")
             for i in range(R.BUS_FANIN_THRESHOLD):
@@ -226,7 +226,7 @@ class CandidatesGrouping(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  
             self.assertEqual(paths["suggested_layer"], "bus")
             self.assertIn(paths["suggested_id"], plan["bus"])
 
-    def test_candidates_honors_reqmapignore_in_requirements_dir(self):  # bug: collect-files-ignores-reqsdir-reqmapignore
+    def test_candidates_honors_reqmapignore_in_requirements_dir(self):  # bug: collect-files-ignores-reqsdir-reqmapignore  # verifies: ARCH-CANDIDATES-009#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "keep.py"), "x = 1\n")
             _write(os.path.join(d, "skip.py"), "y = 2\n")
@@ -435,7 +435,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             self.assertFalse([f for f in drafted if "ROADMAP" in f.upper()],
                              "the plan file is not a capability")
 
-    def test_scaffolds_dir_ignore_lock_and_map(self):  # verifies: REQ-INIT-860#CASE-1  # verifies: REQ-INIT-860#CASE-3
+    def test_scaffolds_dir_ignore_lock_and_map(self):  # verifies: REQ-INIT-860#CASE-1  # verifies: REQ-INIT-860#CASE-3  # verifies: ARCH-INIT-012#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
             code, out, reqs_dir = self._init(d)
@@ -454,7 +454,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             drafts = [n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")]
             self.assertTrue(drafts)
 
-    def test_selfhost_init_omits_engine_ignore(self):  # verifies: REQ-INIT-860#CASE-5
+    def test_selfhost_init_omits_engine_ignore(self):  # verifies: REQ-INIT-860#CASE-5  # verifies: ARCH-INIT-012#CASE-2
         # A self-hosting repo: scripts/reqmap.py carries a tag that resolves to an
         # existing requirement => init must NOT ignore the engine (else it orphans it).
         with tempfile.TemporaryDirectory() as d:
@@ -483,7 +483,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             self.assertIn(".worktrees/**", globs)
             self.assertIn(".claude/worktrees/**", globs)
 
-    def test_seeded_ignore_prunes_a_worktree_copy(self):  # verifies: REQ-INIT-860#CASE-4
+    def test_seeded_ignore_prunes_a_worktree_copy(self):  # verifies: REQ-INIT-860#CASE-4  # verifies: ARCH-INIT-012#CASE-7
         # The copy's tags would otherwise be counted a second time as members.
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "CORE-X-001.md"),
@@ -496,7 +496,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             self.assertEqual([fp for _role, fp, _ln in hits], ["app.py"])
 
 
-    def test_does_not_clobber_existing_reqmapignore(self):  # verifies: REQ-INIT-860#CASE-2  # verifies: REQ-INIT-861#CASE-5
+    def test_does_not_clobber_existing_reqmapignore(self):  # verifies: REQ-INIT-860#CASE-2  # verifies: REQ-INIT-861#CASE-5  # verifies: ARCH-INIT-012#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, ".reqmapignore"), "my-custom-glob/**\n")
             self._init(d)
@@ -516,7 +516,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             _, out, _ = self._init(d)
             self.assertIn("reqmap.py gate --risk", out)
 
-    def test_empty_extraction_is_distinct(self):  # verifies: REQ-INIT-861#CASE-3
+    def test_empty_extraction_is_distinct(self):  # verifies: REQ-INIT-861#CASE-3  # verifies: ARCH-INIT-012#CASE-6
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "README.txt"), "not code\n")   # nothing extractable
             code, out, reqs_dir = self._init(d)
@@ -587,6 +587,26 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             req_path = self._req_file(d)
             self._init(d, wipe=False)
             self.assertTrue(os.path.exists(req_path))       # untouched without --wipe
+
+    @unittest.skipUnless(os.path.exists(R._viewer_template_path()), "viewer template not vendored")
+    def test_completed_init_leaves_html_md_map_and_lock(self):  # verifies: ARCH-INIT-012#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "x = 1\n")
+            code, _, reqs_dir = self._init(d)
+            self.assertEqual(code, 0)
+            for name in ("_map.html", "_map.md"):
+                self.assertTrue(os.path.isfile(os.path.join(reqs_dir, name)), name)
+            self.assertTrue(os.path.isfile(R.lock_path(reqs_dir)))
+
+    def test_drafts_and_summary_names_tracked_count_and_next_step(self):  # verifies: ARCH-INIT-012#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "def f(x):\n    return x\n")
+            code, out, reqs_dir = self._init(d)
+            self.assertEqual(code, 0)
+            self.assertTrue([n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")])
+            n = len(R.load_requirements(reqs_dir))
+            self.assertIn("reqmap initialized — %d requirement(s) tracked" % n, out)
+            self.assertIn("reqmap.py gate --risk", out.split("tracked", 1)[1])
 
 
 class StripLineTag(unittest.TestCase):  # tested-by: ARCH-INIT-012
@@ -1323,7 +1343,7 @@ class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ
             self.assertEqual(rc, 1, "an unknown single id must exit 1, not emit an empty plan")
             self.assertIn("no requirement with id", buf.getvalue())
 
-    def test_plan_structure_and_coverage(self):  # verifies: REQ-REVIEW-906#CASE-2  # verifies: REQ-REVIEW-906#CASE-3
+    def test_plan_structure_and_coverage(self):  # verifies: REQ-REVIEW-906#CASE-2  # verifies: REQ-REVIEW-906#CASE-3  # verifies: ARCH-REVIEW-022#CASE-2
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
             plan = json.loads(self._review(R.load_requirements(d)))
@@ -1335,13 +1355,13 @@ class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ
             self.assertEqual(anchors["contract_clauses"], 2)
             self.assertTrue(anchors["more_contract_than_acceptance"])     # 2 contract > 1 AC
 
-    def test_review_is_byte_deterministic(self):  # verifies: REQ-REVIEW-906#CASE-1  # verifies: REQ-REVIEW-906#CASE-4
+    def test_review_is_byte_deterministic(self):  # verifies: REQ-REVIEW-906#CASE-1  # verifies: REQ-REVIEW-906#CASE-4  # verifies: ARCH-REVIEW-022#CASE-3
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
             reqs = R.load_requirements(d)
             self.assertEqual(self._review(reqs), self._review(reqs))
 
-    def test_gate_ignores_ai_sidecar(self):  # DETERMINISM WALL — verifies: ARCH-REVIEW-022  # verifies: REQ-REVIEW-906#CASE-4  # verifies: REQ-REVIEW-906#CASE-5
+    def test_gate_ignores_ai_sidecar(self):  # DETERMINISM WALL — verifies: ARCH-REVIEW-022  # verifies: REQ-REVIEW-906#CASE-4  # verifies: REQ-REVIEW-906#CASE-5  # verifies: ARCH-REVIEW-022#CASE-4
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
             reqs = R.load_requirements(d)
@@ -1358,6 +1378,21 @@ class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ
                    "# AI — advisory (non-deterministic). NOT a gate.\n- something\n")
             self.assertEqual(before, gate())   # check never reads the AI sidecar
 
+    def test_review_all_or_one_writes_nothing_and_opens_no_connection(self):  # verifies: ARCH-REVIEW-022#CASE-1
+        import socket
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _write(os.path.join(d, "A-R-002.md"), self.BODY.replace("A-R-001", "A-R-002"))
+            reqs = R.load_requirements(d)
+            before = sorted(os.listdir(d))
+            with mock.patch.object(socket, "socket", side_effect=AssertionError("network")), \
+                 mock.patch.object(subprocess, "Popen", side_effect=AssertionError("subprocess")):
+                every = json.loads(self._review(reqs))
+                one = json.loads(self._review(reqs, "A-R-002"))
+            self.assertEqual([r["id"] for r in every["requirements"]], ["A-R-001", "A-R-002"])
+            self.assertEqual([r["id"] for r in one["requirements"]], ["A-R-002"])
+            self.assertEqual(before, sorted(os.listdir(d)))
+
 
 class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-by: REQ-CANDIDATES-826  # tested-by: REQ-CANDIDATES-827
     def _plan(self, d):
@@ -1369,7 +1404,7 @@ class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-
             R.cmd_candidates(R.Workspace(reqs, members, rd, d), None)
         return json.loads(buf.getvalue())
 
-    def test_unparsed_languages_are_candidates_and_tests_are_flagged(self):  # verifies: REQ-CANDIDATES-826#CASE-4  # verifies: REQ-CANDIDATES-826#CASE-5  # verifies: REQ-CANDIDATES-827#CASE-2
+    def test_unparsed_languages_are_candidates_and_tests_are_flagged(self):  # verifies: REQ-CANDIDATES-826#CASE-4  # verifies: REQ-CANDIDATES-826#CASE-5  # verifies: REQ-CANDIDATES-827#CASE-2  # verifies: ARCH-CANDIDATES-009#CASE-7
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "main.go"), "package main" + chr(10) + "func main() {}" + chr(10))
             _write(os.path.join(d, "zlib.h"), "int deflate(int x);" + chr(10))
@@ -1400,7 +1435,7 @@ class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-
 
 
 class DraftObservedSurface(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-851
-    def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5
+    def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: ARCH-EXTRACT-008#CASE-6
         with tempfile.TemporaryDirectory() as d:
             code = os.path.join(d, "code")
             _write(os.path.join(code, "svc.py"),
@@ -1938,7 +1973,7 @@ class CasesDecompose050(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # 
 
 
 class CasesExtract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-849  # tested-by: REQ-EXTRACT-850  # tested-by: REQ-EXTRACT-851
-    def test_draft_skips_already_tagged_file(self):  # verifies: REQ-EXTRACT-849#CASE-2
+    def test_draft_skips_already_tagged_file(self):  # verifies: REQ-EXTRACT-849#CASE-2  # verifies: ARCH-EXTRACT-008#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "auth.py"), tag("AUTH-LOGIN-001") + "\ndef login():\n    pass\n")
             reqs_dir = os.path.join(d, "requirements")
@@ -1977,7 +2012,7 @@ class CasesExtract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-
             messy_risk = int(re.search(r"risk: (\d+)", messy_text).group(1))
             self.assertGreater(messy_risk, clean_risk)
 
-    def test_risk_score_routes_review_flag(self):  # verifies: REQ-EXTRACT-851#CASE-2
+    def test_risk_score_routes_review_flag(self):  # verifies: REQ-EXTRACT-851#CASE-2  # verifies: ARCH-EXTRACT-008#CASE-4
         with tempfile.TemporaryDirectory() as d:
             code_root = os.path.join(d, "src")
             _write(os.path.join(code_root, "messy.py"), "x = 1  # TODO fix\ny = 2  # noqa\n")
@@ -2005,6 +2040,23 @@ class CasesExtract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-
             with redirect_stdout(io.StringIO()):
                 R.cmd_extract(R.Workspace({}, {}, reqs_dir, code_root))
             self.assertEqual(open(dest, encoding="utf-8").read(), custom)
+
+    def test_rerun_keeps_a_draft_and_same_basenames_do_not_collide(self):  # verifies: ARCH-EXTRACT-008#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            code_root = os.path.join(d, "src")
+            _write(os.path.join(code_root, "a", "utils.py"), "x = 1\n")
+            _write(os.path.join(code_root, "b", "utils.py"), "y = 2\n")
+            reqs_dir = os.path.join(d, "requirements")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_extract(R.Workspace({}, {}, reqs_dir, code_root))
+            made = sorted(n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-"))
+            self.assertEqual(made, ["DRAFT-A-UTILS.md", "DRAFT-B-UTILS.md"])
+            dest = os.path.join(reqs_dir, "DRAFT-A-UTILS.md")
+            _write(dest, "hand-edited content\n")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_extract(R.Workspace({}, {}, reqs_dir, code_root))
+            with open(dest, encoding="utf-8") as f:
+                self.assertEqual(f.read(), "hand-edited content\n")
 
 
 class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894
@@ -3781,7 +3833,7 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
         self.assertIn("<b>2</b><span>confirmed", stats)
         self.assertIn(R.MAP_ENGINE_VERSION, stats)
 
-    def test_attach_is_idempotent(self):  # verifies: REQ-SITE-924#CASE-1
+    def test_attach_is_idempotent(self):  # verifies: REQ-SITE-924#CASE-1  # verifies: ARCH-SITE-026#CASE-1
         with tempfile.TemporaryDirectory() as d:
             reqs = self._seed(d)
             page = os.path.join(d, "page.html")
@@ -3793,7 +3845,7 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
             self.assertEqual(first, second)
             self.assertIn("<h1>Mine</h1>", second)
 
-    def test_no_remote_degrades(self):
+    def test_no_remote_degrades(self):  # verifies: ARCH-SITE-026#CASE-2
         with tempfile.TemporaryDirectory() as d:
             reqs = self._seed(d)
             page = os.path.join(d, "page.html")
@@ -3804,7 +3856,7 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
             self.assertEqual(0, rc)
             self.assertNotIn("GitHub", _text(page))
 
-    def test_scaffold_writes_full_page(self):  # verifies: REQ-SITE-924#CASE-2
+    def test_scaffold_writes_full_page(self):  # verifies: REQ-SITE-924#CASE-2  # verifies: ARCH-SITE-026#CASE-3
         with tempfile.TemporaryDirectory() as d:
             reqs = self._seed(d)
             target = os.path.join(d, "docs", "architecture.html")
@@ -3844,7 +3896,7 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
                           _text(os.path.join(fresh, "index.html")))
             self.assertTrue(os.path.isfile(os.path.join(fresh, ".nojekyll")))
 
-    def test_init_scaffolds_site_when_absent(self):
+    def test_init_scaffolds_site_when_absent(self):  # verifies: ARCH-SITE-026#CASE-5
         # verifies: REQ-SITE-924#CASE-5
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "docs"))
@@ -3866,7 +3918,7 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
             self.assertFalse(os.path.exists(
                 os.path.join(d, "docs", "architecture.html")))
 
-    def test_site_stale_fires_only_after_tampering(self):
+    def test_site_stale_fires_only_after_tampering(self):  # verifies: ARCH-SITE-026#CASE-4
         # verifies: REQ-SITE-924#CASE-6
         with tempfile.TemporaryDirectory() as d:
             reqs = self._seed(d)
