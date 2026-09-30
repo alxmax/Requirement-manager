@@ -2,7 +2,7 @@
 requirement: title, intent quote, bullets, verify hints, context
 groups.
 """
-import os, re
+import itertools, os, re
 
 from .sections import (
     CONTRACT_LABELS, _BLOCK_SEP_RE, _atomic_spans, _body_lines,
@@ -184,13 +184,21 @@ def _bullets(body, name):
 # tool's own hint. The scaffold now writes the hint into `## Context`; this cut
 # keeps files that were drafted before that fix honest.
 _VERIFY_HINT_RE = re.compile(r"authoring hint,\s*not the contract", re.I)
+# The indent of a line of a question asked as a decision: an option `a) …`,
+# also written as a sub-bullet `- a) …`, or an italic label such as
+# `*Default:* …`. It is replaced by a marker that `_bullets` folds in with a
+# space, and the line gets its own line back once the bullet is whole. A
+# sub-bullet that is not an option stays a question of its own.
+_DECISION_INDENT_RE = re.compile(
+    r"^\s+(?:-\s+(?=[a-zA-Z]\)\s))?(?=[a-zA-Z]\)\s|\*[^*\s][^*]*:\*)")
 
 
 def _verify_bullets(body):
     # implements: ARCH-FINDINGS-010  # implements: REQ-FINDINGS-853
     """The open questions in `## Verify intent` — the section's
     bullets, minus anything below a line that declares itself a
-    non-binding authoring hint.
+    non-binding authoring hint. A question asked as a decision is one
+    bullet, its options and labels each on their own line.
 
     The single reader every verify-intent consumer goes through (`findings`, the
     map export, `next`, `health`), so the count in the viewer, the CLI and the
@@ -198,14 +206,13 @@ def _verify_bullets(body):
     section = _section_raw(body, "verify intent")
     if not section:
         return []
-    kept = []
-    for line in section.splitlines():
-        if _VERIFY_HINT_RE.search(line):
-            break
-        kept.append(line)
+    lines = itertools.takewhile(
+        lambda line: not _VERIFY_HINT_RE.search(line), section.splitlines())
+    kept = [_DECISION_INDENT_RE.sub("  \x00", line) for line in lines]
     # re-parse through _bullets so bullet shape, fences, label lines and
     # hanging-indent continuations are handled in exactly one place
-    return _bullets("## Verify intent\n" + "\n".join(kept), "verify intent")
+    return [b.replace(" \x00", "\n") for b in _bullets(
+        "## Verify intent\n" + "\n".join(kept), "verify intent")]
 
 
 def _context_group(body, label):

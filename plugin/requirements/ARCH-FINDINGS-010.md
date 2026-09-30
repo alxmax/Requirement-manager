@@ -112,6 +112,10 @@ Every bullet below is binding.
   authoring hint — the scaffold's own list of a source file's headings is context, not a
   question. Every verify-intent reader goes through the one collection step, so the viewer,
   the CLI and the gate summary cannot report different counts.
+- A question asked as a decision is one item: its indented options (`a) …`, or sub-bullets
+  `- a) …`) and indented italic labels (`*Default:* …`) belong to it, each on its own line,
+  and `_findings.md` writes them on their own lines under the question. A sub-bullet that is
+  not an option is still a question of its own.
 
 ## Cases
 CASE-1 — findings collects verify-intent bullets from every requirement
@@ -135,6 +139,13 @@ CASE-4 — findings drops the scaffold's own authoring hint
          line reading "authoring hint, not the contract" and a list of source headings
   When   `sync` runs
   Then   only the open question is reported, and none of the headings below that line are
+
+CASE-5 — a decision is one question with its options on their own lines
+  Given  a bold question with options `a)` and `b)`, written indented and separately as
+         sub-bullets, followed by an indented `*Default:*` line
+  When   `sync` runs
+  Then   each form counts one open finding, and `_findings.md` lists the options and the
+         default on their own lines under the question
 
 
 --------------------
