@@ -298,12 +298,16 @@
       "reason": null
     },
     "REQ-PLANDATES-1022": {
-      "hash": "693a7ee5406b",
+      "hash": "a1ef90f57a63",
       "reason": null
     },
     "REQ-PLANDAYS-1021": {
       "hash": "bb4560f824aa",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-PLANINPUT-1086": {
+      "hash": "88e711a5aa8e",
+      "reason": null
     },
     "REQ-PLANSTACK-1012": {
       "hash": "cc648dfb7e9b",
@@ -334,12 +338,12 @@
       "reason": "Cite the decision date instead of the review tool"
     },
     "REQ-RELEASECMD-1018": {
-      "hash": "a8e32efb3b37",
+      "hash": "c88cd9ecc03f",
       "reason": null
     },
     "REQ-RELEASEROADMAP-1023": {
-      "hash": "a3e41c373fd0",
-      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+      "hash": "abd6e6adbc01",
+      "reason": null
     },
     "REQ-RELEASEWORKFLOW-1019": {
       "hash": "782ed4aff614",
@@ -348,6 +352,10 @@
     "REQ-REPRO-905": {
       "hash": "34bdcb2ea67a",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
+    },
+    "REQ-ROADMAP-907": {
+      "hash": "2abd1e787c44",
+      "reason": null
     },
     "REQ-ROADMAP-983": {
       "hash": "7a94ddf4659e",
@@ -414,8 +422,8 @@
       "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
     },
     "REQ-UNPLANNED-1024": {
-      "hash": "f4c83e90aff2",
-      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+      "hash": "fc2ddc3d38bd",
+      "reason": null
     },
     "REQ-UNTAGGEDSET-1007": {
       "hash": "17fc26a52451",
@@ -450,7 +458,7 @@
       "reason": "v7.3.1: REQ-VIEWER-995 gains a clause and CASE-4 \u2014 a milestone whose TODO items are all complete still renders a column"
     },
     "REQ-VIEWER-999": {
-      "hash": "592f488f6653",
+      "hash": "65c909d3b753",
       "reason": null
     },
     "SYS-GATE-102": {

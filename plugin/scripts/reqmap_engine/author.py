@@ -190,18 +190,25 @@ def _write_frontmatter_status(r, new_status):  # implements: ARCH-PROMOTE-011
     return True
 
 
-def _parse_todos_from_text(text):
+# A `## ` heading that says it is not a milestone ends the one above it,
+# so its items are filed under no version and it is not warned about.
+NOT_MILESTONE_RE = re.compile(r"<!--\s*reqmap:\s*not-milestone\s*-->")
+
+
+def _parse_todos_from_text(text):  # implements: REQ-ROADMAP-907
     """Parse TODO.md content → list of {name, lane, milestone, done} dicts.
-    Pure. Items before the first ## vX.Y heading are silently ignored
-    (milestone is required)."""
+    Pure. Items before the first ## vX.Y heading, or under a heading marked
+    `<!-- reqmap: not-milestone -->`, are silently ignored (milestone is
+    required)."""
     todos, current_ms = [], None
     for line in text.splitlines():
         # match the version token at the heading start; a trailing annotation
         # like `## v2.8 (deferred — demand-gated)` is harmless (the capture
         # group isolates the version) and must not drop the milestone's items.
         ms_m = re.match(r"^##\s+(v\d[\d.]*)\b", line.strip())
-        if ms_m:
-            current_ms = ms_m.group(1)
+        if ms_m or (line.strip().startswith("## ")
+                    and NOT_MILESTONE_RE.search(line)):
+            current_ms = ms_m.group(1) if ms_m else None
             continue
         item_m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", line.strip())
         if item_m and current_ms:

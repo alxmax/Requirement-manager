@@ -3327,6 +3327,20 @@ class PlanInput(unittest.TestCase):  # tested-by: REQ-PLANINPUT-1086
         self.assertIn("key 'items' is read by nothing (milestone v1, v2)", lines[0])
         self.assertEqual([], found)
 
+    def test_a_roadmap_link_to_no_item_is_named(self):
+        # verifies: REQ-PLANINPUT-1086#CASE-6
+        plan = {"bars": [{"title": "Linked", "start": "2026-09-20", "roadmap": "CSV writer"},
+                         {"title": "Lost", "start": "2026-09-20", "roadmap": "Gone item"}]}
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, plan)
+            _write(os.path.join(d, "ROADMAP.md"), "## Now\n- [ ] CSV writer\n")
+            _rc, found = self._rm037(d)
+            lines = R.plan_ignored_key_lines(os.path.join(d, "requirements"))
+        self.assertEqual(1, len(found), found)
+        self.assertIn("bar 'Lost' links ROADMAP item 'Gone item' - no such item",
+                      str(found[0]))
+        self.assertEqual([], lines)
+
 
 class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
     """GATE_RULES order is output order. It must not depend on which module

@@ -42,12 +42,10 @@ def _parse_bar(raw):
     if not isinstance(end, str) or not _DATE_RE.match(end.strip()):
         end = start
     out = {"title": title.strip(), "start": start.strip(), "end": end.strip()}
-    lane = raw.get("lane")
-    if isinstance(lane, str) and lane.strip():
-        out["lane"] = lane.strip()
-    ms = raw.get("milestone")
-    if isinstance(ms, str) and ms.strip():
-        out["milestone"] = ms.strip()
+    for key in ("lane", "milestone", "roadmap"):
+        value = raw.get(key)
+        if isinstance(value, str) and value.strip():
+            out[key] = value.strip()
     rid = raw.get("req") or raw.get("reqId") or raw.get("id")
     if isinstance(rid, str) and rid.strip() and rid.strip() != out["title"]:
         out["req"] = rid.strip()

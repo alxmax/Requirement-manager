@@ -706,8 +706,8 @@ Every bullet below is binding.
 - Selecting a plan bar opens a detail panel below the chart carrying that bar's title, its
   milestone, its horizon when one is known, and the `context` of the matching roadmap item.
 - A bar matches a roadmap item by the engine's rule (`bar_items`, REQ-PLANDATES-1022): the
-  item named like the bar's title, or else the one carrying its `req:` when no other bar
-  carries that `req:`. Two bars sharing a `req:` never both open the first item that has it.
+  item named like the bar's `roadmap:`, or its title when it has none, or else the one
+  carrying its `req:` when no other bar carries that `req:`. Two bars sharing a `req:` never both open the first item that has it.
 - A bar no roadmap item claims opens the panel with its own title and dates, and no note.
 - Context written as an HTML comment renders as its text, because the comment markers are
   how a plan file hides a note from a Markdown reader, not part of what the note says.
@@ -749,6 +749,11 @@ CASE-6 — two bars sharing a `req:` open their own notes, not the first one's
          items carrying that `req:`
   When   the reader selects each bar
   Then   the titled bar opens the item named like it, and the other opens no note
+
+CASE-7 — a bar's `roadmap:` opens its item whatever its title says
+  Given  items `v1.2 bugs` and `v1.2 bugs (70)`, and a bar titled `v1.2 bugs (70)`
+  When   the bar is matched with `roadmap: v1.2 bugs`, then without it
+  Then   the first opens `v1.2 bugs` and the second `v1.2 bugs (70)`
 
 ## Context
 **Notes**

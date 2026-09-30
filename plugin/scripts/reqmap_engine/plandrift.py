@@ -287,13 +287,21 @@ def plan_drift_lines(result):
 DONE_STATUSES = ("implemented", "confirmed")
 
 
+def bar_item_name(bar):
+    # implements: REQ-PLANDATES-1022
+    """The ROADMAP item name `bar` answers to, lowercased: its `roadmap:`
+    when it has one, else its title. The title is drawn at the bar's
+    width, so a count or a short form in it must not break the link."""
+    return (bar.get("roadmap") or bar.get("title") or "").strip().lower()
+
+
 def bar_items(bar, items, bars):
     # implements: REQ-PLANDATES-1022
     """The ROADMAP items, done or open, that `bar` carries out: those named
-    like its title, or else those carrying its `req:` when no other bar
-    carries that `req:`. A requirement two bars share owns no item for
-    either, so neither can claim the other's work."""
-    title = (bar.get("title") or "").strip().lower()
+    like its `roadmap:` or title, or else those carrying its `req:` when no
+    other bar carries that `req:`. A requirement two bars share owns no
+    item for either, so neither can claim the other's work."""
+    title = bar_item_name(bar)
     named = [it for it in items or []
              if it["name"].strip().lower() == title]
     rid = bar.get("req")
@@ -332,14 +340,16 @@ def bar_done(bar, reqs, items=(), bars=(), code_root=None):
     """True when any source says the bar's work is finished: `progress:
     100`, every ROADMAP item it carries out ticked, or its requirement
     confirmed or implemented — unless it already was before the bar
-    started (`done_before`). The one predicate every "is this bar done"
-    reads. Status alone was the first version, and it read shipped work
-    as late wherever requirements stay `draft` after the code lands."""
+    started (`done_before`), or an item it carries out is still open.
+    The one predicate every "is this bar done" reads. Status alone was
+    the first version, and it read shipped work as late wherever
+    requirements stay `draft` after the code lands; a bar on an umbrella
+    requirement confirmed early then read done with its list still open."""
     if bar.get("progress") == 100:
         return True
     mine = bar_items(bar, items, bars or [bar])
-    if mine and all(it.get("done") for it in mine):
-        return True
+    if mine:
+        return all(it.get("done") for it in mine)
     rid = bar.get("req") or ""
     req = reqs.get(rid)
     return req is not None and \
@@ -367,7 +377,8 @@ def bar_date_suggestions(bars, reqs, members, code_root, today, items=None):
             continue
         files = sorted({path for role, path, _ in members.get(bar["req"], [])
                         if role == "implements"})
-        done_req = req["meta"].get("status") in DONE_STATUSES
+        done_req = req["meta"].get("status") in DONE_STATUSES and not any(
+            not it.get("done") for it in bar_items(bar, items, bars))
         if done_req and files and not done_before(
                 bar["req"], req, bar["start"], code_root):
             finished = max(
@@ -415,12 +426,13 @@ def _open_items(items, horizons=("now", "next")):
 def items_for_bars(items, bars):
     # implements: ARCH-RELEASE-072  # implements: REQ-RELEASEROADMAP-1023
     """The open ROADMAP items the given bars carry out: the item named
-    exactly like a bar, or else the one open item that carries the
-    bar's `req:`. A requirement several items share names none of
-    them, because suggesting a tick on all of them would be a guess."""
+    exactly like a bar's `roadmap:` or title, or else the one open item
+    that carries the bar's `req:`. A requirement several items share
+    names none of them, because suggesting a tick on all of them would
+    be a guess."""
     found = []
     for bar in bars:
-        title = (bar.get("title") or "").strip().lower()
+        title = bar_item_name(bar)
         named = [it for it in _open_items(items, ("now", "next", "later"))
                  if it["name"].strip().lower() == title]
         by_req = [it for it in _open_items(items, ("now", "next", "later"))
@@ -435,7 +447,7 @@ def unplanned_items(items, bars):
     # implements: ARCH-ROADMAP-038  # implements: REQ-UNPLANNED-1024
     """Open Now and Next items no bar schedules — by the item's name,
     or by its `req:`."""
-    titles = {(b.get("title") or "").strip().lower() for b in bars}
+    titles = {bar_item_name(b) for b in bars}
     reqs = {b.get("req") for b in bars if b.get("req")}
     return [it for it in _open_items(items)
             if it["name"].strip().lower() not in titles

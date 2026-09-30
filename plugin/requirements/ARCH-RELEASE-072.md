@@ -245,6 +245,8 @@ Every bullet below is binding.
 - With `--apply` it rewrites every version file, and writes the dated entry — headed by the
   milestone's label in bold, then one bullet per bar planned on that version — directly under
   `Unreleased` when the file has one, otherwise above the newest release.
+- A bar's bullet is worded as the ROADMAP item its `roadmap:` links, and as its title when it
+  links none.
 - A version named after `--release` is released instead of the planned one.
 - `sync --release --apply` refuses with exit 2 and writes nothing in four cases: nothing is
   planned above the baseline, the version is not above it, the gate reports errors, or the
@@ -260,9 +262,11 @@ CASE-1 — a dry run writes nothing
   Then   it names `v1.5.0` and every file is unchanged
 
 CASE-2 — apply bumps the files and writes the entry under Unreleased
-  Given  that plan and a CHANGELOG holding an Unreleased item
+  Given  that plan and a CHANGELOG holding an Unreleased item, and separately a bar titled `CSV`
+         whose `roadmap:` links the item `CSV writer for every export`
   When   `sync --release --apply` runs
-  Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item
+  Then   `package.json` declares 1.5.0 and the 1.5.0 entry, below Unreleased, lists the planned bar and the collected item;
+         the linked bar is listed as `CSV writer for every export`
 
 CASE-3 — apply with nothing planned is refused
   Given  a declared 1.4.0 and an empty plan
@@ -416,8 +420,10 @@ Every bullet below is binding.
   A bar is done when it carries `progress: 100`, when every ROADMAP item it carries out is
   ticked, or when the requirement it names is confirmed or implemented; one predicate
   decides this for every reader.
-- A bar carries out the ROADMAP items named like its title, or else the items carrying its
-  `req:` when no other bar carries that `req:`.
+- A bar that carries out ROADMAP items is done only when all of them are ticked: an open one
+  keeps it open whatever its requirement's status, and no date is suggested for it.
+- A bar carries out the ROADMAP items named like its `roadmap:`, or like its title when it
+  has none, or else the items carrying its `req:` when no other bar carries that `req:`.
 - A bar whose requirement was already confirmed or implemented in the last commit of its
   file before the bar's `start` produces nothing on that requirement: neither the
   requirement's status nor a later commit to its code counts the bar as done, and only
@@ -447,16 +453,21 @@ CASE-4 — an open requirement past its end is overdue
   When   `sync` runs
   Then   only the bar that ended before today is reported, asking for its `end` to move
 
-CASE-5 — a bar other sources call done is not overdue
+CASE-5 — a bar's own items and progress decide before its requirement
   Given  a bar past its end naming a draft requirement, once with `progress: 100` and once
-         with its only ROADMAP item ticked
+         with its only ROADMAP item ticked; and a bar past its end naming a confirmed
+         requirement with one open ROADMAP item it carries out
   When   `sync` runs
-  Then   neither is reported
+  Then   neither of the first two is reported; the third is reported overdue, not done, and
+         with its item ticked it is done
 
-CASE-6 — a shared requirement lends its items to no bar
-  Given  two bars carrying the same `req:`, and ROADMAP items carrying it, one ticked
-  When   the items and the done state of the first bar are asked for
-  Then   it carries no item and is not done; alone, it carries both items and is still not done
+CASE-6 — the items a bar carries: by `roadmap:`, by title, never by a shared requirement
+  Given  two bars carrying the same `req:`, and ROADMAP items carrying it, one ticked; and
+         separately items `v1.2 bugs` and `v1.2 bugs (70)` with a bar titled `v1.2 bugs (70)`
+  When   the items and the done state of the first bar are asked for, and the titled bar's
+         items with `roadmap: v1.2 bugs` and without it
+  Then   it carries no item and is not done; alone, it carries both items and is still not done;
+         the titled bar finds `v1.2 bugs` with the key and `v1.2 bugs (70)` without it
 
 CASE-7 — a bar on a requirement done before it started is never read as finished
   Given  a requirement git shows confirmed before a bar's start, and code changed since
@@ -484,8 +495,9 @@ distinct_from: [REQ-VIEWER-999, REQ-UNPLANNED-1024, REQ-ROADMAP-998]
 > open beside a version that had shipped. Ticking it is the author's call; finding it is not.
 
 Every bullet below is binding.
-- An open ROADMAP item belongs to a released bar when its name equals the bar's title, or,
-  failing that, when it is the only open item carrying the bar's `req:`.
+- An open ROADMAP item belongs to a released bar when its name equals the bar's `roadmap:`,
+  or its title when it has none, or, failing that, when it is the only open item carrying the
+  bar's `req:`.
 - `sync --release` lists those items as ones to tick by hand, and never edits `ROADMAP.md`.
 
 ## Cases
@@ -503,6 +515,11 @@ CASE-3 — a done item is never suggested
   Given  a bar titled like an item already ticked
   When   the items for the bars are asked for
   Then   none is named
+
+CASE-4 — a bar's `roadmap:` names its item
+  Given  a bar titled `CSV (3)` with `roadmap: CSV writer`
+  When   the items for the bars are asked for
+  Then   `CSV writer` is named
 
 ## Context
 **Notes**

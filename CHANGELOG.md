@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.10.0` — 2026-09-30
+
+**A plan bar can name its ROADMAP item, and a TODO.md section can say it is not a milestone.**
+
+- A bar in `_planning.json` takes an optional `"roadmap": "<item name>"`. The bar then answers to that item instead of its title, for the note the Plan opens, the done state, the unscheduled-item count, the items a release suggests ticking, and the CHANGELOG line. A bar's title is drawn at its width, so a count or a short form in it used to break the link silently (REQ-PLANDATES-1022, REQ-VIEWER-999, REQ-RELEASEROADMAP-1023, REQ-UNPLANNED-1024)
+- `sync --release` words a linked bar's CHANGELOG bullet as its ROADMAP item and falls back to the title (REQ-RELEASECMD-1018)
+- A `roadmap:` that names no ROADMAP item is an RM037 plan-input warning, never a silent fallback to the title (REQ-PLANINPUT-1086)
+- A bar that carries out ROADMAP items is done only when all of them are ticked. An open item used to be outweighed by the bar's requirement being confirmed, so a bar on an umbrella requirement read done with its list still open, and `sync` suggested moving its `end` to the last commit (REQ-PLANDATES-1022)
+- A `TODO.md` heading ending in `<!-- reqmap: not-milestone -->` ends the milestone above it: its items belong to no version, and `sync` no longer warns about it. An unmarked non-version heading still files its items under the milestone above and is still reported, and the warning now names the marker (REQ-ROADMAP-907)
+- The engine's core falls to 6,703 logical lines, and its budget with it
+
 ## plugin `v8.9.3` — 2026-09-29
 
 **A plan bar opens its own note, and the seeded release workflow no longer publishes an empty release.**

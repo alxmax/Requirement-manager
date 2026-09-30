@@ -4,7 +4,7 @@ roadmap signals, TODO parsing, cmd_map.
 import os, re
 
 from .acceptance import _acc_blocks, _acc_items
-from .author import _parse_todos_from_text
+from .author import NOT_MILESTONE_RE, _parse_todos_from_text
 from .model import RISK_ADVICE, _area_of, _as_list
 from .risk import _risk_signals
 from .sections import ACCEPTANCE_LABELS, CONTRACT_LABELS, _from_any, _has_any
@@ -181,7 +181,7 @@ def _roadmap_signals(root):
             m = re.match(r"^##\s+(v\d[\d.]*)\b", s)
             if m:
                 versions.append(m.group(1))
-            else:
+            elif not NOT_MILESTONE_RE.search(s):
                 bad.append(s[3:].strip())
         newest = max(versions, key=_version_key) if versions else None
         # The newest milestone the roadmap marks SHIPPED (at least one

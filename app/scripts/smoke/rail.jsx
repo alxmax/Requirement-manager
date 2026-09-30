@@ -265,6 +265,17 @@ const barNoteChecks = [
         && matchItem(other, items, bars) === null
         && matchItem(other, items, [other])?.context === "first";
     })()],
+  // verifies: REQ-VIEWER-999#CASE-7
+  ["roadmap: a bar's roadmap key opens its item whatever its title says",
+    (() => {
+      const items = [
+        { name: "v1.2 bugs", context: "linked" },
+        { name: "v1.2 bugs (70)", context: "titled" },
+      ];
+      const title = "v1.2 bugs (70)";
+      return matchItem({ title, roadmap: "v1.2 bugs" }, items)?.context === "linked"
+        && matchItem({ title }, items)?.context === "titled";
+    })()],
   // tested-by: REQ-ROADMAP-998
   // verifies: REQ-ROADMAP-998#CASE-7
   ["roadmap: the roadmap payload survives the mode's removal",

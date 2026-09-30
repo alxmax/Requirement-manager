@@ -134,6 +134,8 @@ Every bullet below is binding.
   version.
 - Such a heading leaves the previous milestone in force, so items below it are filed
   under the section above instead of their own.
+- A `## ` heading ending in `<!-- reqmap: not-milestone -->` ends the milestone above it:
+  its items are filed under no milestone, and it is not listed as unversioned.
 - Both signals are read-only. Neither changes an exit code, and neither lowers the
   health score.
 
@@ -170,10 +172,12 @@ CASE-6 — a non-version heading is listed under roadmap_unversioned_headings
   When   `health --json` runs
   Then   `roadmap_unversioned_headings` equals `["Deferred work"]`
 
-CASE-7 — an item under a non-version heading is filed under the prior milestone
-  Given  `## v2.16` followed by `## Deferred work` followed by one checklist item
-  When   `_parse_todos_from_text` parses the text
-  Then   that item's `milestone` reads `"v2.16"`, not `"Deferred work"`
+CASE-7 — an item under a non-version heading is filed under the prior milestone, unless marked
+  Given  `## v2.16` followed by `## Deferred work` followed by one checklist item, and
+         separately `## Backlog <!-- reqmap: not-milestone -->` with one item under it
+  When   `_parse_todos_from_text` and `_roadmap_signals` read the text
+  Then   the first item's `milestone` reads `"v2.16"`, not `"Deferred work"`; the marked
+         heading's item is not returned and the marked heading is not listed as unversioned
 
 
 --------------------
@@ -528,8 +532,8 @@ Every bullet below is binding.
   repairs or cannot use: a file that is not valid JSON or not an object, a bar with no title
   or no `YYYY-MM-DD` `start`, a bar `end` that is not a date, a bar ending before it starts,
   a bar lane not listed in `lanes` when `lanes` is given, a milestone entry with no valid
-  `due` and no label, a `cadence` it does not understand, and a bar `req:` that names no
-  requirement or a deprecated one.
+  `due` and no label, a `cadence` it does not understand, a bar `req:` that names no
+  requirement or a deprecated one, and a bar `roadmap:` that names no ROADMAP item.
 - RM037 is a warning in the bare gate and an error under `--strict`, and it never raises: an
   unreadable plan is one finding.
 - A milestone whose name is not a version is not reported, and neither is anything about
@@ -565,6 +569,11 @@ CASE-5 — an ignored key is advice outside the gate
   When   the ignored keys are asked for, and `gate --json` runs
   Then   one line names `items` in both milestones, and the gate reports nothing for it
 
+CASE-6 — a `roadmap:` link to no item is named
+  Given  two bars, one whose `roadmap:` names a ROADMAP item and one whose `roadmap:` names none
+  When   `gate --json` runs
+  Then   one RM037 finding names the second bar and its link, and `roadmap` is not an ignored key
+
 ## Context
 **Notes**
 - `distinct_from: REQ-PLANSTALE-1013` - `REQ-PLANSTALE-1013` reports a milestone already shipped, a fact about the plan's content that stays out of the gate; this checks that the plan's input was read at all.
@@ -592,8 +601,8 @@ satisfies: [ARCH-ROADMAP-038]
 > 2026-09-14); this is a read-only line between them.
 
 Every bullet below is binding.
-- An open item under Now or Next is scheduled when a bar's title equals its name or a bar
-  carries its `req:`; otherwise it is unplanned.
+- An open item under Now or Next is scheduled when a bar's `roadmap:`, or its title when it
+  has none, equals the item's name, or a bar carries its `req:`; otherwise it is unplanned.
 - `sync` prints one line counting unplanned items and naming the first; done items and
   Later items are never counted, and a repo with no ROADMAP.md sees nothing.
 
@@ -612,4 +621,9 @@ CASE-3 — done and Later items are never counted
   Given  a ROADMAP with open Now/Next items, a done item and a Later item, and no bars
   When   the unplanned items are asked for
   Then   only the open Now and Next items are counted
+
+CASE-4 — a bar's `roadmap:` schedules its item
+  Given  a bar titled `CSV (3)` with `roadmap: CSV writer`
+  When   the unplanned items are asked for
+  Then   `CSV writer` is not among them
 

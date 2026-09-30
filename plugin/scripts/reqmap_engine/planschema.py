@@ -21,26 +21,36 @@ from .targets import (PLANNING_FILES, _parse_bar, _parse_cadence,
 _READ_KEYS = {
     "top": ("_comment", "lanes", "cadence", "bars", "milestones"),
     "bar": ("title", "name", "start", "end", "due", "lane", "milestone",
-            "req", "reqId", "id", "progress"),
+            "req", "reqId", "id", "progress", "roadmap"),
     "milestone": ("due", "label", "note"),
 }
 
 
-def plan_input_findings(reqs_dir, reqs):
+def plan_input_findings(reqs_dir, reqs, code_root=None):
     # implements: REQ-PLANINPUT-1086
     """Every RM037 message: the file's own problems, then each bar whose
-    `req:` names no requirement or a deprecated one. Fail-open: a plan
-    never breaks the verdict."""
+    `req:` names no requirement or a deprecated one, or whose `roadmap:`
+    names no ROADMAP item. Fail-open: a plan never breaks the verdict."""
     try:
-        return _plan_input_findings(reqs_dir, reqs)
+        return _plan_input_findings(reqs_dir, reqs, code_root)
     except Exception:
         return []
 
 
-def _plan_input_findings(reqs_dir, reqs):
+def _plan_input_findings(reqs_dir, reqs, code_root):
     # implements: REQ-PLANINPUT-1086
     out = plan_input_problems(reqs_dir)
-    for bar in load_targets(reqs_dir).get("bars", []):
+    bars = load_targets(reqs_dir).get("bars", [])
+    if any(b.get("roadmap") for b in bars):
+        from .mapdata import _read_roadmap
+        names = {it["name"].strip().lower()
+                 for it in _read_roadmap(code_root or reqs_dir) or []}
+        out.extend(
+            "_planning.json: bar {!r} links ROADMAP item {!r} - no such "
+            "item".format(b["title"][:60], b["roadmap"][:60])
+            for b in bars
+            if b.get("roadmap") and b["roadmap"].lower() not in names)
+    for bar in bars:
         rid = bar.get("req")
         r = reqs.get(rid) if rid else None
         if rid and (r is None or r["meta"].get("status") == "deprecated"):

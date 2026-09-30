@@ -211,8 +211,9 @@ def _roadmap_lag_lines(reqs, code_root):
     if roadmap["unversioned_headings"]:
         lines.append(
             "{} TODO.md heading(s) are not milestones, so their items "
-            "never reach the roadmap - start each with its version, "
-            "`## vX.Y` (first: {})"
+            "are filed under the milestone above - start each with its "
+            "version, `## vX.Y`, or end the heading with "
+            "`<!-- reqmap: not-milestone -->` (first: {})"
             .format(len(roadmap["unversioned_headings"]),
                     roadmap["unversioned_headings"][0]))
     return lines

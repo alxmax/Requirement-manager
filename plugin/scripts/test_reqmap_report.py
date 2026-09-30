@@ -4261,6 +4261,18 @@ class CasesRoadmap(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-
         later = next(t for t in todos if t["name"] == "later thing")
         self.assertEqual(later["milestone"], "v2.16")
 
+    def test_heading_marked_not_milestone_files_nothing(self):  # verifies: REQ-ROADMAP-907#CASE-7
+        text = ("## v2.16\n- [ ] shipped thing | lane: feature\n\n"
+                "## Backlog <!-- reqmap: not-milestone -->\n- [ ] parked thing\n")
+        todos = R._parse_todos_from_text(text)
+        self.assertEqual([t["name"] for t in todos], ["shipped thing"])
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "TODO.md"), text)
+            self.assertEqual(R._roadmap_signals(d)["unversioned_headings"], [])
+            # an unmarked non-version heading is still reported
+            _write(os.path.join(d, "TODO.md"), text + "## Deferred\n")
+            self.assertEqual(R._roadmap_signals(d)["unversioned_headings"], ["Deferred"])
+
 
 class CasesDriftImpact(unittest.TestCase):  # tested-by: ARCH-DRIFTIMPACT-035  # tested-by: REQ-DRIFTIMPACT-843
     def test_dependent_of_dependent_not_named(self):  # verifies: REQ-DRIFTIMPACT-843#CASE-3
