@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.10.1` — 2026-09-30
+
+**A question asked as a decision counts once, with its options on their own lines.**
+
+- A `## Verify intent` question followed by indented options `a) …` / `b) …` and an indented `*Default:* …` line is one open question. Options written as sub-bullets, `- a) …`, used to count as questions of their own, with the default glued onto the last option; indented options were run together on one line (REQ-FINDINGS-853)
+- `_findings.md` writes the options and labels on their own lines under the question. A sub-bullet that is not an option is still a question of its own
+- Measured before shipping on eleven corpora on the maintainer's machine, 2,208 requirement blocks and 528 open questions: no count changed, and 61 decision-shaped questions gained their line breaks
+- The engine's core falls to 6,701 logical lines, and its budget with it
+
 ## plugin `v8.10.0` — 2026-09-30
 
 **A plan bar can name its ROADMAP item, and a TODO.md section can say it is not a milestone.**

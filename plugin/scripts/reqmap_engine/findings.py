@@ -49,7 +49,8 @@ def _render_findings_raw(groups, total):  # implements: REQ-FINDINGS-854
         L.append("## {} - {}  ({})".format(rid, title, len(items)))
         L.append("")
         for it in items:
-            L.append("- {}".format(it))
+            # a decision's options keep their lines, under the bullet
+            L.append("- {}".format(it.replace("\n", "\n  ")))
         L.append("")
     return "\n".join(L) + "\n", 0, 0
 

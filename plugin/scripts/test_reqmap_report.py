@@ -196,6 +196,25 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertNotIn("Serverul", md)
             self.assertNotIn("Primul contact", md)
 
+    def test_a_decision_is_one_question_with_its_options_on_their_lines(self):  # verifies: REQ-FINDINGS-853#CASE-5
+        head = "## Verify intent\n- **Two mechanics, one phone dies. What then?**\n"
+        tail = "  *Default:* b), as today.\n- plain question, wrapped\n  over two lines\n"
+        want = ["**Two mechanics, one phone dies. What then?**\n"
+                "a) Stop his timer.\nb) Keep both running.\n*Default:* b), as today.",
+                "plain question, wrapped over two lines"]
+        for options in ("  a) Stop his timer.\n  b) Keep both running.\n",
+                        "  - a) Stop his timer.\n  - b) Keep both running.\n"):
+            self.assertEqual(want, R._verify_bullets(head + options + tail))
+        # a sub-bullet that is not an option stays a question of its own
+        self.assertEqual(["q one", "*Ask:* q two"],
+                         R._verify_bullets("## Verify intent\n- q one\n  - *Ask:* q two\n"))
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-D-001.md"),
+                   _req_with_verify("AREA-D-001", ["**Q?**\n  - a) one\n  - b) two"]))
+            md, out = self._run(d)
+        self.assertIn("1 open finding(s) across 1 requirement(s)", out)
+        self.assertIn("- **Q?**\n  a) one\n  b) two\n", md)
+
     def test_triage_sidecar_orders_confirmed_bugs_first(self):  # verifies: REQ-FINDINGS-855#CASE-1  # verifies: REQ-FINDINGS-855#CASE-2  # verifies: REQ-FINDINGS-855#CASE-3  # verifies: ARCH-FINDINGS-010#CASE-2
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),

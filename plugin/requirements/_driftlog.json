@@ -213,6 +213,10 @@
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
     },
+    "REQ-FINDINGS-853": {
+      "hash": "4e07f8cec94f",
+      "reason": null
+    },
     "REQ-GITRUN-993": {
       "hash": "70bef219f0bd",
       "reason": "GITRUN-993 case scope"
