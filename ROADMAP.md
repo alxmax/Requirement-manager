@@ -18,6 +18,11 @@ Cadence: one release a week, not one per merge.
 
 ## Next
 
+### Planning and releasing
+
+- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose `| req: ID` matches bars on the cut milestone | req: ARCH-RELEASE-072
+- [ ] `gate --strict` fails a stale plan (`REQ-PLANSTALE-1013`); bare `gate` stays warn-only | req: ARCH-RELEASE-072
+
 ## Later
 
 ### Engine surface
