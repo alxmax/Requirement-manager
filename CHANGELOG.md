@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.12.1` — 2026-09-30
+
+**Six edges the gate's own corpus did not show.**
+
+- An `*Answer (YYYY-MM-DD):*` line closes a verify-intent question when it is indented or written as the nested bullet `_findings.md` uses, and only when the date is a real day. `2026-02-31` leaves the question open (ADR-0058, REQ-FINDINGS-853)
+- A `---` / `id:` pair inside a ``` or ~~~ fence is an example, not a second requirement, so it can no longer shadow the real id (REQ-MODULEFILE-056)
+- The drift hash treats a ~~~ fence the way it already treats a ``` fence: the example is not part of the contract (REQ-SECTIONS-994)
+- A plan bar's `progress: true` is not 1%. A boolean is not a percentage, and the chart drops it
+- `gate --audit --json` includes the plan-drift lines the text audit already prints (REQ-AUDIT-970)
+- No new core lines: the engine's core stays at 6,533 logical lines
+
 ## plugin `v8.12.0` — 2026-09-30
 
 **An answered question is closed where it stands.**

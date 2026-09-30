@@ -1243,6 +1243,24 @@ class ModuleFile(unittest.TestCase):  # tested-by: REQ-MODULEFILE-056
             self.assertEqual(after["AREA-D-001"]["meta"]["status"], "draft")
             self.assertIn("body of AREA-D-001", after["AREA-D-001"]["body"])
 
+    def test_a_fenced_example_is_not_a_requirement(self):  # verifies: REQ-MODULEFILE-056#CASE-6
+        # An example of frontmatter used to become a second requirement and, when its
+        # id matched the file, shadowed the real one.
+        example = ("\n```markdown\n---\nid: AREA-B-001\nstatus: draft\n---\n\n"
+                   "# Ghost\n```\n\nstill the real body\n")
+        tilde = example.replace("```", "~~~")
+        for fenced in (example, tilde):
+            text = (REQ.format(id="AREA-B-001", status="draft", layer="bus",
+                               extra="", title="B") + fenced)
+            self.assertEqual(len(R.split_requirement_blocks(text)), 1)
+            with tempfile.TemporaryDirectory() as d:
+                _write(os.path.join(d, "AREA-B-001.md"), text)
+                reqs = R.load_requirements(d)
+            self.assertEqual(list(reqs), ["AREA-B-001"])
+            self.assertEqual(reqs["AREA-B-001"]["meta"].get("status"), "draft")
+            self.assertIn("still the real body", reqs["AREA-B-001"]["body"])
+            self.assertIn("Ghost", reqs["AREA-B-001"]["body"])
+
     def test_preamble_before_the_first_block_is_kept(self):
         text = "# Module heading\n\n" + REQ.format(
             id="AREA-E-001", status="draft", layer="bus", extra="", title="E")
@@ -1655,6 +1673,16 @@ class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # te
     def test_a_fenced_example_is_not_part_of_the_contract(self):  # verifies: REQ-SECTIONS-994#CASE-5  # verifies: ARCH-SECTIONS-068#CASE-2
         with_fence = ("## Description\n- real clause\n\n"
                       "```markdown\n## Cases\nCASE-9 fake\n```\n\n"
+                      "## Cases\nCASE-1 real\n")
+        without = "## Description\n- real clause\n\n## Cases\nCASE-1 real\n"
+        self.assertEqual(R.binding_hash(with_fence), R.binding_hash(without))
+
+    def test_a_tilde_fence_is_a_fence(self):  # verifies: REQ-SECTIONS-994#CASE-1  # verifies: REQ-SECTIONS-994#CASE-5
+        tilde = self.FENCED.replace("```", "~~~")
+        seen = [line.strip() for is_h, line in R._body_lines(tilde) if is_h]
+        self.assertEqual(seen, ["## Notes", "## Cases"])
+        with_fence = ("## Description\n- real clause\n\n"
+                      "~~~markdown\n## Cases\nCASE-9 fake\n~~~\n\n"
                       "## Cases\nCASE-1 real\n")
         without = "## Description\n- real clause\n\n## Cases\nCASE-1 real\n"
         self.assertEqual(R.binding_hash(with_fence), R.binding_hash(without))

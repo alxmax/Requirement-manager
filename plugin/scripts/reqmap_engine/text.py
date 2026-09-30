@@ -2,7 +2,7 @@
 requirement: title, intent quote, bullets, verify hints, context
 groups.
 """
-import itertools, os, re
+import calendar, itertools, os, re
 
 from .sections import (
     CONTRACT_LABELS, _BLOCK_SEP_RE, _atomic_spans, _body_lines,
@@ -190,7 +190,18 @@ _VERIFY_HINT_RE = re.compile(r"authoring hint,\s*not the contract", re.I)
 # space, and the line gets its own line back once the bullet is whole. A
 # sub-bullet that is not an option stays a question of its own.
 _DECISION_INDENT_RE = re.compile(
-    r"^\s+(?:-\s+(?=[a-zA-Z]\)\s))?(?=[a-zA-Z]\)\s|\*[^*\s][^*]*:\*)")
+    r"^\s+(?:-\s+(?=(?:[a-zA-Z]\)\s|\*Answer \(\d{4}-\d{2}-\d{2}\):\*)))?"
+    r"(?=[a-zA-Z]\)\s|\*[^*\s][^*]*:\*)")
+
+
+def _answer_is_real(q):
+    # implements: REQ-FINDINGS-853
+    """True when `q` carries an `*Answer (YYYY-MM-DD):*` line whose date
+    is a real calendar day. `2026-02-31` matches the shape and is not a
+    day, so it leaves the question open (ADR-0058)."""
+    m = re.search(r"\n\*Answer \((\d{4})-(\d{2})-(\d{2})\):\*", q)
+    y, mo, d = map(int, m.groups()) if m else (0, 0, 0)
+    return bool(m) and 1 <= mo <= 12 and 1 <= d <= calendar.monthrange(y, mo)[1]
 
 
 def _verify_bullets(body):
@@ -213,10 +224,13 @@ def _verify_bullets(body):
     # re-parse through _bullets so bullet shape, fences, label lines and
     # hanging-indent continuations are handled in exactly one place. A
     # question with an indented `*Answer (YYYY-MM-DD):*` line is closed
-    # where it stands and leaves every count (ADR-0058).
+    # where it stands and leaves every count (ADR-0058). A nested
+    # `- *Answer (YYYY-MM-DD):*` is the same line: `_findings.md` writes
+    # a decision's own lines as nested bullets, and copying that shape
+    # back must close the question too.
     return [q for q in (b.replace(" \x00", "\n") for b in _bullets(
         "## Verify intent\n" + "\n".join(kept), "verify intent"))
-        if not re.search(r"\n\*Answer \(\d{4}-\d{2}-\d{2}\):\*", q)]
+        if not _answer_is_real(q)]
 
 
 def _context_group(body, label):
@@ -232,15 +246,10 @@ def _context_group(body, label):
     heading via `_bullets()` first — this is the fallback for files
     that never had one, so an old-schema requirement is completely
     unaffected."""
-    out, in_context, in_label, fenced = [], False, False, False
-    for line in body.splitlines():
+    out, in_context, in_label = [], False, False
+    for is_heading, line in _body_lines(body):
         s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
+        if is_heading:
             in_context = _heading_label_is(s, "context")
             in_label = False
             continue

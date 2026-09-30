@@ -142,8 +142,8 @@
       "reason": "dupes: move Versions clause to viewer, fold atomic parity into LINTCHECKS"
     },
     "REQ-AUDIT-970": {
-      "hash": "b525a8d3167f",
-      "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
+      "hash": "3eecb6beca78",
+      "reason": "audit JSON carries the plan-drift lines the text report already prints"
     },
     "REQ-AUDIT-971": {
       "hash": "002116926d7b",
@@ -214,8 +214,8 @@
       "reason": "plain present tense"
     },
     "REQ-FINDINGS-853": {
-      "hash": "0be36a588f92",
-      "reason": null
+      "hash": "b687863b90c7",
+      "reason": "a nested answer bullet closes the question, and only a real calendar day counts"
     },
     "REQ-FINDINGS-855": {
       "hash": "426f987d59c4",
@@ -280,6 +280,10 @@
     "REQ-MCPTOOLS-1028": {
       "hash": "938eb7ec8f3e",
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
+    },
+    "REQ-MODULEFILE-056": {
+      "hash": "a52e180643a9",
+      "reason": "a fenced ---/id: example is not a second requirement"
     },
     "REQ-NEW-881": {
       "hash": "e2419be12c70",

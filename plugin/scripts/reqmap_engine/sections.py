@@ -3,6 +3,8 @@ form, and the binding hash the drift baseline compares.
 """
 import hashlib, re
 
+from .tags import _fence_transition
+
 
 
 # ---------- hashing / drift ----------
@@ -50,22 +52,18 @@ _NORMATIVE_HEADING_RE = re.compile(
 def _body_lines(body):
     # implements: ARCH-SECTIONS-068  # implements: REQ-SECTIONS-994
     """Yield `(is_heading, line)` for every line of a requirement body
-    outside a ``` fence.
+    outside a fenced code block.
 
-    The fence is checked BEFORE the heading test, so a `## ` written
-    inside a fenced example is code, not a section boundary. Eight
-    readers of these files carried a copy of this two-line state machine
-    and `_has_section` carried none — which is why a heading inside a
-    fence satisfied the presence check while every reader of that
-    section came back empty.
+    Both CommonMark fences count, `` ``` `` and `~~~`, length-matched
+    the same way the tag scanner decides. The fence is checked BEFORE
+    the heading test, so a `## ` written inside a fenced example is
+    code, not a section boundary.
     """
-    fenced = False
+    fence = None
     for line in body.splitlines():
         s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
+        fence, marker = _fence_transition(s, fence)
+        if fence or marker:
             continue
         yield s.startswith("## "), line
 
@@ -145,9 +143,9 @@ def _atomic_spans(body):  # implements: REQ-ATOMICFORM-053
     _acc_blocks, _bullets) is handed a body and no meta. The frontmatter
     key is validated separately, as documentation."""
     story, scen, in_scen = [], [], False
-    for line in body.splitlines():
+    for is_heading, line in _body_lines(body):
         st = line.strip()
-        if st.startswith("## "):
+        if is_heading:
             # auto sections end the normative span
             break
         if st.startswith("# "):

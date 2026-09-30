@@ -170,8 +170,10 @@ attempt and rejected it).
    A question a reviewer can answer at a glance is asked as a decision: the question in
    bold, one indented `a) …` line per option, and an indented `*Default:* …` line saying
    what happens if nobody decides. An answer that changes nothing (the default stands) is
-   kept under the question as an indented `*Answer (YYYY-MM-DD):* …` line: the question
-   then counts as answered everywhere and the record stays where it was asked (ADR-0058).
+   kept under the question as an indented `*Answer (YYYY-MM-DD):* …` line, or as the nested
+   bullet `- *Answer (YYYY-MM-DD):* …` that `_findings.md` writes. The date must be a real
+   calendar day. The question then counts as answered everywhere and the record stays where
+   it was asked (ADR-0058).
 
 **Prose files** (`.md`, `.html`) fall into three buckets — ignored, sync-only, or capability source: [references/prose-buckets.md](prose-buckets.md).
 

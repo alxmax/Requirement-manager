@@ -119,9 +119,11 @@ Every bullet below is binding.
   own.
 - The viewer shows such a question with each option and label on its own indented line, the
   question in bold and a line-start label in italics. A one-line question shows as before.
-- A question with an indented `*Answer (YYYY-MM-DD):* …` line is answered: it is left out of
-  every open count and every list, and stays in the file where the author wrote it. A line
-  with any other shape, such as an answer with no date, leaves the question open (ADR-0058).
+- A question carrying an indented `*Answer (YYYY-MM-DD):* …` line, or that same line as a
+  nested bullet, is answered when the date is a real calendar day. It leaves every open
+  count and every list, and stays in the file where the author wrote it. Any other shape
+  leaves the question open: no date, or a date that is not a day, such as `2026-02-31`
+  (ADR-0058).
 
 ## Cases
 CASE-1 — findings collects verify-intent bullets from every requirement
@@ -161,10 +163,11 @@ CASE-6 — the viewer shows a decision's options on their own lines
          HTML stays escaped, the cross-reference is a link, and the plain question is unchanged
 
 CASE-7 — an answered question is closed where it stands
-  Given  a question with an indented `*Answer (2026-10-01):*` line, one whose answer line has
-         no date, and a plain open question
+  Given  one question with an indented `*Answer (2026-10-01):*` line, one with that line as a
+         nested bullet, one dated `2026-02-31`, one whose answer line has no date, and a plain
+         open question
   When   `sync` runs
-  Then   two open findings are reported, the answered question is not among them, and the
+  Then   three open findings are reported, neither answered question is among them, and the
          requirement file is unchanged
 
 

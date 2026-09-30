@@ -28,6 +28,10 @@ Since v8.10.1 a question asked as a decision is one item whose indented option a
 ## Decision
 
 **An indented `*Answer (YYYY-MM-DD):* …` line under a question closes it, where it stands.**
+The same line written as a nested bullet, `- *Answer (YYYY-MM-DD):* …`, closes it too: that is
+the shape `_findings.md` writes for a decision's own lines, and copying it back must not leave
+the question open. The date has to be a real calendar day. `2026-02-31` matches the shape and
+does not close the question.
 
 - `_verify_bullets` leaves out a question that carries such a line. It is the single reader every
   count goes through (`_findings.md`, the map, the Problems tab, `unverified-intent`), so a closed
