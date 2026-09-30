@@ -32,7 +32,6 @@ from reqmap_engine.gate import GateMode, cmd_check
 from reqmap_engine.model import Finding, GateResult
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
-from reqmap_engine.init import cmd_init
 from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
@@ -49,7 +48,7 @@ from reqmap_engine import (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audittail, init, levels,
+    gate, audittail, levels,
     targets, history,
     pyramid, cliflags, docclaims, versions, mcpconfig, search,
     healthrows, site, site_template,
@@ -328,6 +327,7 @@ def main():
         from reqmap_engine.mcp import serve
         return serve(a)
     if a.cmd == "init" and not a.plan:
+        from reqmap_engine.init import cmd_init  # only on init (ADR-0053)
         return cmd_init(reqs_dir, code_root, wipe=a.wipe,
                         no_site=a.no_site, minimal=a.minimal)
 
@@ -417,20 +417,21 @@ _ENGINE_MODULES = (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     lintprose, risk, show, mapmd,
     mapjson, viewer, mapdata, health, mapcmd, workspace, rules, rulesrepo,
-    gate, audittail, init, levels, pyramid,
+    gate, audittail, levels, pyramid,
     targets, history,
     cliflags, docclaims, versions, mcpconfig, search,
     healthrows, site, site_template,
 )
-# The design review, and the planning and release code a repository without
-# a plan never needs (ADR-0057), are imported only when a name is looked up in
+# The design review, the planning and release code a repository without a
+# plan never needs (ADR-0057), and `init`, which runs once per repository, are
+# imported only when a name is looked up in
 # them, so a command that never asks for them (`gate` above all) never
 # loads them. Searched
 # after every eager module, in this order.
 _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
                  "plandrift", "planschema", "release",
-                 "testgaps")
+                 "testgaps", "init")
 
 
 def __getattr__(name):

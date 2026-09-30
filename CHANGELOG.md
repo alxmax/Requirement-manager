@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.11.0` — 2026-09-30
+
+**A decision's options read one per line, and the rendered map stays out of git.**
+
+- `_findings.md` writes a decision question's options and labels as nested bullets under the question, so any Markdown renderer shows each on its own line. v8.10.1 wrote them as indented lines, which a renderer joins back into one paragraph (REQ-FINDINGS-853)
+- The viewer shows the same question with each option and label on its own indented line, the question in bold and a line-start label such as `*Default:*` in italics, on the Spec page and in the Problems list. A cross-reference in an option is a link; a one-line question shows exactly as before (REQ-FINDINGS-853)
+- `init` adds `requirements/_map.html` to `.gitignore`, once, appending to an existing file. The rendered viewer is rebuilt from `_map.json` on every sync (ADR-0034), and a committed copy conflicted on every parallel branch (REQ-INIT-860)
+- When git already tracks `_map.html`, `sync` says so once and names `git rm --cached` (REQ-VIEWER-940)
+- The setup guide says what to commit, how to keep local-only tagged files out of the scan with `.reqmapignore`, and how to resolve a conflict on generated files: take either side, run `sync`, commit
+- `init` is imported only when it runs, like the release code. The engine's core falls to 6,533 logical lines, and its budget with it
+
 ## plugin `v8.10.1` — 2026-09-30
 
 **A question asked as a decision counts once, with its options on their own lines.**

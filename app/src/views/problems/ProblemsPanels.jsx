@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Icon } from "../../lib/icons.jsx";
 import { REQ_BY_ID } from "../../lib/data.js";
-import { Pill, statusKind } from "../../lib/ui.jsx";
+import { Pill, statusKind, mdQuestion, reqLinkProps } from "../../lib/ui.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 
 const COUNT = {
@@ -216,8 +216,12 @@ export function ProblemRow({ p, openSpec, t }) {
         </div>
         {p.questions
           ? (
-            <ul className="finding-qs">
-              {p.questions.map((q, j) => <li key={j}>{q}</li>)}
+            <ul className="finding-qs" {...reqLinkProps(openSpec)}>
+              {/* a decision's options on their own lines; a plain
+                  question stays the text it always was */}
+              {p.questions.map((q, j) => (q.includes("\n")
+                ? <li key={j} dangerouslySetInnerHTML={{ __html: mdQuestion(q) }} />
+                : <li key={j}>{q}</li>))}
             </ul>
           )
           : <div className="prob-msg">{p.msg}</div>}

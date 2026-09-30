@@ -61,6 +61,19 @@ export function mdInline(s) {
     ));
 }
 
+/* A verify-intent question asked as a decision is one string: the question,
+ * then one line per option (`a) …`) or label (`*Default:* …`). Each line after
+ * the first renders as its own indented block, so the options read at a
+ * glance. A line-start `*Label*` becomes <em>, here only: in mdInline it would
+ * catch stray asterisks in every other caller's prose. It runs after
+ * mdInline's escaping and admits no `<` or `>`, so it cannot open a tag. */
+export function mdQuestion(q) {  // implements: REQ-FINDINGS-853
+  const [head, ...rest] = String(q).split("\n");
+  return mdInline(head) + rest.map((line) => '<span class="q-opt">'
+    + mdInline(line).replace(/^\*([^*<>]+)\*/, "<em>$1</em>") + "</span>")
+    .join("");
+}
+
 /* Click/Enter delegate for a container rendering mdInline() output: one handler
  * per list rather than a React node per link, which is what keeps the renderer
  * a plain string transform. */

@@ -214,7 +214,7 @@
       "reason": "plain present tense"
     },
     "REQ-FINDINGS-853": {
-      "hash": "4e07f8cec94f",
+      "hash": "7b03a47611e7",
       "reason": null
     },
     "REQ-GITRUN-993": {
@@ -236,6 +236,10 @@
     "REQ-HISTORY-1003": {
       "hash": "5796b765d6d6",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "REQ-INIT-860": {
+      "hash": "bf4e002a3da1",
+      "reason": null
     },
     "REQ-INIT-861": {
       "hash": "5151412a4deb",
@@ -439,6 +443,10 @@
     },
     "REQ-VIEWER-1087": {
       "hash": "13513264942c",
+      "reason": null
+    },
+    "REQ-VIEWER-940": {
+      "hash": "77e9d38ebfb9",
       "reason": null
     },
     "REQ-VIEWER-942": {

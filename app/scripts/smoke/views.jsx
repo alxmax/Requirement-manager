@@ -16,6 +16,7 @@
 // tested-by: REQ-VIEWER-999
 // tested-by: REQ-PLANCADENCE-1000
 // tested-by: REQ-HISTORY-1003
+// tested-by: REQ-FINDINGS-853
 /* Render smoke test, part: every view renders; spec document; acceptance;
    layout. */
 import { renderToString } from "react-dom/server";
@@ -36,6 +37,7 @@ import {
 } from "../../src/views/roadmap/PlanGantt.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
+import { ProblemRow } from "../../src/views/problems/ProblemsPanels.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
 import { CommandsView } from "../../src/views/CommandsView.jsx";
@@ -239,6 +241,39 @@ const linkChecks = [
     !linkSpec.includes("owner")],
 ];
 for (const [label, ok] of linkChecks) test(label, ok);
+
+// ---- a question asked as a decision (REQ-FINDINGS-853) ---------------------
+// One verify string: the question, then a line per option and label. Each
+// line after the first is its own block; a plain question stays as it was.
+const DECISION = "**Retry on a timeout?**\na) Three times.\n<b>x</b>\n"
+  + "*Default:* b)\nsee [[LINK-DST-002]]";
+adoptMapExport({ nodes: [
+  adaptNode({ id: "Q-DEC-001", title: "decision", area: "Q", layer: "feature",
+    status: "draft", intent: "i", contract: [], acc: [], members: [],
+    deps: [], used_by: [], verify: [DECISION, "plain **q** `c`"] }),
+  adaptNode({ id: "LINK-DST-002", title: "target", area: "LINK",
+    layer: "feature", status: "confirmed", intent: "i", contract: [],
+    acc: [], members: [], deps: [], used_by: [] }),
+] });
+const decSpec = renderToString(specOf("Q-DEC-001"));
+const decRow = renderToString(<ProblemRow t={(s) => s} openSpec={noop} p={{
+  id: "Q-DEC-001", title: "decision", sev: "QUESTION", status: "draft",
+  questions: [DECISION, "plain **q** `c`"], fix: "f", loc: "" }} />);
+const optCount = (h) => (h.match(/class="q-opt"/g) || []).length;
+const decChecks = [
+  // verifies: REQ-FINDINGS-853#CASE-6
+  ["decision: the question is bold and each later line is its own block",
+    decSpec.includes("<strong>Retry on a timeout?</strong>")
+      && optCount(decSpec) === 4 && optCount(decRow) === 4],
+  ["decision: a line-start label is italic and markup stays escaped",
+    decRow.includes("<em>Default:</em> b)") && decRow.includes("&lt;b&gt;x")
+      && !decRow.includes("<b>x</b>")],
+  ["decision: a plain question in the Problems list is the text it was",
+    decRow.includes("<li>plain **q** `c`</li>")],
+  ["decision: a cross-reference in an option is a link with its own id",
+    decRow.includes('data-req="LINK-DST-002"')],
+];
+for (const [label, ok] of decChecks) test(label, ok);
 
 // i18n: the toggle must translate UI CHROME and leave requirement content
 // alone. Rendered inside the provider with the locale forced, since the

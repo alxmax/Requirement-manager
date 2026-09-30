@@ -197,13 +197,13 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertNotIn("Primul contact", md)
 
     def test_a_decision_is_one_question_with_its_options_on_their_lines(self):  # verifies: REQ-FINDINGS-853#CASE-5
-        head = "## Verify intent\n- **Two mechanics, one phone dies. What then?**\n"
+        head = "## Verify intent\n- **Should the export retry on a timeout?**\n"
         tail = "  *Default:* b), as today.\n- plain question, wrapped\n  over two lines\n"
-        want = ["**Two mechanics, one phone dies. What then?**\n"
-                "a) Stop his timer.\nb) Keep both running.\n*Default:* b), as today.",
+        want = ["**Should the export retry on a timeout?**\n"
+                "a) Retry three times.\nb) Fail at once.\n*Default:* b), as today.",
                 "plain question, wrapped over two lines"]
-        for options in ("  a) Stop his timer.\n  b) Keep both running.\n",
-                        "  - a) Stop his timer.\n  - b) Keep both running.\n"):
+        for options in ("  a) Retry three times.\n  b) Fail at once.\n",
+                        "  - a) Retry three times.\n  - b) Fail at once.\n"):
             self.assertEqual(want, R._verify_bullets(head + options + tail))
         # a sub-bullet that is not an option stays a question of its own
         self.assertEqual(["q one", "*Ask:* q two"],
@@ -213,7 +213,7 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
                    _req_with_verify("AREA-D-001", ["**Q?**\n  - a) one\n  - b) two"]))
             md, out = self._run(d)
         self.assertIn("1 open finding(s) across 1 requirement(s)", out)
-        self.assertIn("- **Q?**\n  a) one\n  b) two\n", md)
+        self.assertIn("- **Q?**\n  - a) one\n  - b) two\n", md)
 
     def test_triage_sidecar_orders_confirmed_bugs_first(self):  # verifies: REQ-FINDINGS-855#CASE-1  # verifies: REQ-FINDINGS-855#CASE-2  # verifies: REQ-FINDINGS-855#CASE-3  # verifies: ARCH-FINDINGS-010#CASE-2
         with tempfile.TemporaryDirectory() as d:
@@ -482,6 +482,26 @@ class ViewerInject(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # test
             html = open(out, encoding="utf-8").read()
             self.assertIn("window.__REQMAP_DATA__=", html)
             self.assertNotIn("<!--REQMAP_DATA-->", html)
+
+    def test_a_tracked_viewer_is_named_once_with_how_to_untrack(self):  # verifies: REQ-VIEWER-940#CASE-7
+        if not os.path.exists(R._viewer_template_path()):
+            self.skipTest("viewer template not vendored beside the engine")
+
+        def sync(d):
+            rd = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_map(R.Workspace(R.load_requirements(rd), R.scan_members(d, rd), rd, d),
+                          d)
+            return buf.getvalue()
+        with tempfile.TemporaryDirectory() as d:
+            subprocess.run(["git", "init", "-q", d], check=True, capture_output=True)
+            os.makedirs(os.path.join(d, "requirements"))
+            self.assertNotIn("git rm --cached", sync(d))      # untracked: silent
+            subprocess.run(["git", "-C", d, "add", "-f", "requirements/_map.html"],
+                           check=True, capture_output=True)
+            out = sync(d)
+        self.assertEqual(1, out.count("git rm --cached requirements/_map.html"))
 
 
 class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-048  # tested-by: REQ-CONTEXT-835  # tested-by: REQ-MAP-873

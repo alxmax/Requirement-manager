@@ -6,7 +6,9 @@
    duplicate. The document stayed; the tab went. */
 // implements: REQ-TRANSLATE-1080
 // implements: REQ-VIEWER-944
-import { Pill, statusKind, mdInline, reqLinkProps } from "../lib/ui.jsx";
+import {
+  Pill, statusKind, mdInline, mdQuestion, reqLinkProps,
+} from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
 import { TranslatedProse, CovStrip, SpecMeta } from "./spec/SpecParts.jsx";
@@ -50,11 +52,11 @@ export const ENFORCED = {
 };
 
 /** A list of Markdown-inline bullets whose requirement ids are links. */
-function MdList({ items, onNav }) {
+function MdList({ items, onNav, fmt = mdInline }) {
   return (
     <ul {...reqLinkProps(onNav)}>
       {items.map((c, i) => (
-        <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />
+        <li key={i} dangerouslySetInnerHTML={{ __html: fmt(c) }} />
       ))}
     </ul>
   );
@@ -177,7 +179,7 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
             <div className="eyebrow warn">
               {t("Open questions — verify intent")}
             </div>
-            <MdList items={questions} onNav={onNav} />
+            <MdList items={questions} onNav={onNav} fmt={mdQuestion} />
           </div>
         )}
         <RisksSection r={r} t={t} />

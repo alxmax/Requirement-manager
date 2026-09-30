@@ -236,6 +236,29 @@ def _reqmapignore_seed(code_root, reqs_dir):
             "scripts/reqmap_engine/**\n")
 
 
+def _ignore_rendered_map(code_root, reqs_dir):
+    # implements: ARCH-INIT-012  # implements: REQ-INIT-860
+    """Add the rendered viewer `_map.html` to `.gitignore`, once. It is
+    regenerated from `_map.json` on every `sync` (ADR-0034), so a
+    committed copy only rewrites itself and conflicts on every parallel
+    branch. Appends; never rewrites a line already there. Returns True
+    when it added the entry."""
+    entry = os.path.relpath(os.path.join(reqs_dir, "_map.html"),
+                            code_root).replace(os.sep, "/")
+    path = os.path.join(code_root, ".gitignore")
+    text = ""
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+    if {entry, "/" + entry} & {ln.strip() for ln in text.splitlines()}:
+        return False
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(("\n" if text and not text.endswith("\n") else "")
+                + "# Rebuilt by reqmap sync from _map.json; never "
+                "committed.\n" + entry + "\n")
+    return True
+
+
 def _seed_plan_files(code_root, reqs_dir, created):
     # implements: ARCH-INIT-012  # implements: REQ-PLANHORIZON-1010
     """Seed the plan and what a release needs, appending each file made
@@ -330,6 +353,8 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False, minimal=False):
         with open(ignore, "w", encoding="utf-8") as f:
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
+    if _ignore_rendered_map(code_root, reqs_dir):
+        created.append(".gitignore entry for _map.html")
     release_notes = ([] if minimal else
                      _seed_plan_files(code_root, reqs_dir, created))
     if wipe:

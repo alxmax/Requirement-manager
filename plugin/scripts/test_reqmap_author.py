@@ -435,6 +435,16 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             self.assertFalse([f for f in drafted if "ROADMAP" in f.upper()],
                              "the plan file is not a capability")
 
+    def test_the_rendered_map_is_gitignored_once(self):  # verifies: REQ-INIT-860#CASE-7
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
+            _write(os.path.join(d, ".gitignore"), "node_modules/")
+            self._init(d)
+            self._init(d)
+            lines = io.open(os.path.join(d, ".gitignore"), encoding="utf-8").read().splitlines()
+            self.assertEqual("node_modules/", lines[0])
+            self.assertEqual(1, lines.count("requirements/_map.html"))
+
     def test_scaffolds_dir_ignore_lock_and_map(self):  # verifies: REQ-INIT-860#CASE-1  # verifies: REQ-INIT-860#CASE-3  # verifies: ARCH-INIT-012#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
