@@ -3499,6 +3499,18 @@ class ReleaseCommand(unittest.TestCase):  # tested-by: REQ-RELEASECMD-1018 @unit
             self.assertIn("note     no version file: nothing is bumped", out)
             self.assertIn("## [1.5.0] - ", _text(d, "CHANGELOG.md"))
 
+    def test_a_linked_bar_is_worded_as_its_roadmap_item(self):  # verifies: REQ-RELEASECMD-1018#CASE-2
+        bars = [dict(self.BARS[0], title="CSV", roadmap="CSV writer for every export"),
+                {"title": "Docs", "start": "2026-09-28", "milestone": "v1.5.0"}]
+        with tempfile.TemporaryDirectory() as d:
+            reqs = _release_repo(d, "1.4.0", self.PLAN, bars, changelog="# Changelog\n")
+            _write(os.path.join(d, "ROADMAP.md"),
+                   "# Roadmap\n\n## Now\n\n- [ ] CSV writer for every export | req: REQ-CSV-001\n")
+            self.assertEqual(0, _release(d, reqs, apply_it=True)[0])
+            self.assertEqual("**Export to CSV.**\n\n"
+                             "- CSV writer for every export (REQ-CSV-001)\n- Docs",
+                             R.history.entry_body(_text(d, "CHANGELOG.md"), "v1.5.0"))
+
     def test_the_plan_drops_the_released_version_and_keeps_the_rest(self):  # verifies: REQ-PLANADVANCE-1020#CASE-1
         with tempfile.TemporaryDirectory() as d:
             reqs = _release_repo(d, "1.4.0", self.PLAN, self.BARS, changelog="# Changelog\n")
@@ -3736,6 +3748,29 @@ class PlanDates(unittest.TestCase):  # tested-by: REQ-PLANDATES-1022 @unit
         self.assertEqual(2, len(R.plandrift.bar_items(bars[0], items, solo)))
         self.assertFalse(R.plandrift.bar_done(bars[0], self.REQS, items, solo))
 
+    def test_an_open_item_keeps_a_confirmed_bar_open(self):  # verifies: REQ-PLANDATES-1022#CASE-5
+        bar = {"title": "v1.2 bugs", "req": "REQ-DONE-001",
+               "start": "2026-09-07", "end": "2026-09-14"}
+        open_item = [{"name": "v1.2 bugs", "horizon": "now", "done": False}]
+        done = R.plandrift.bar_done
+        self.assertTrue(done(bar, self.REQS, [], [bar]))            # no list: status decides
+        self.assertFalse(done(bar, self.REQS, open_item, [bar]))
+        self.assertTrue(done(bar, self.REQS, [dict(open_item[0], done=True)], [bar]))
+        with mock.patch.object(R.plandrift, "_last_touched", return_value="2026-09-12"):
+            got = R.bar_date_suggestions([bar], self.REQS, self.MEMBERS, ".",
+                                         "2026-09-16", open_item)
+        self.assertEqual([("v1.2 bugs", "overdue")], [(s["title"], s["kind"]) for s in got])
+
+    def test_a_roadmap_key_links_the_bar_whatever_its_title(self):  # verifies: REQ-PLANDATES-1022#CASE-6
+        items = [{"name": "v1.2 bugs", "horizon": "now", "done": False},
+                 {"name": "v1.2 bugs (70)", "horizon": "now", "done": False}]
+        linked = {"title": "v1.2 bugs (70)", "roadmap": "v1.2 bugs"}
+        self.assertEqual(["v1.2 bugs"], [it["name"] for it in
+                                        R.plandrift.bar_items(linked, items, [linked])])
+        plain = {"title": "v1.2 bugs (70)"}
+        self.assertEqual(["v1.2 bugs (70)"], [it["name"] for it in
+                                             R.plandrift.bar_items(plain, items, [plain])])
+
 
 class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @unit  # tested-by: REQ-UNPLANNED-1024 @unit
     """ROADMAP items against the bars that schedule them."""
@@ -3758,6 +3793,11 @@ class RoadmapAndBars(unittest.TestCase):  # tested-by: REQ-RELEASEROADMAP-1023 @
 
     def test_a_done_item_is_never_suggested(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-3
         self.assertEqual([], R.items_for_bars(self.ITEMS, [{"title": "Shipped", "req": "REQ-OLD-004"}]))
+
+    def test_a_bar_s_roadmap_key_names_its_item(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-4  # verifies: REQ-UNPLANNED-1024#CASE-4
+        bars = [{"title": "CSV (3)", "roadmap": "CSV writer"}]
+        self.assertEqual(["CSV writer"], [it["name"] for it in R.items_for_bars(self.ITEMS, bars)])
+        self.assertNotIn("CSV writer", [it["name"] for it in R.unplanned_items(self.ITEMS, bars)])
 
     def test_the_release_plan_names_the_items_and_writes_none(self):  # verifies: REQ-RELEASEROADMAP-1023#CASE-2
         with tempfile.TemporaryDirectory() as d:

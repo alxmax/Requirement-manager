@@ -12,4 +12,5 @@ def _plan_input_rule(ctx):  # implements: REQ-PLANINPUT-1086
         return
     from .planschema import plan_input_findings
     yield from ((None, msg)
-                for msg in plan_input_findings(ctx.reqs_dir, ctx.reqs))
+                for msg in plan_input_findings(ctx.reqs_dir, ctx.reqs,
+                                               ctx.code_root))

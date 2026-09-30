@@ -75,7 +75,19 @@ def _released_work(reqs_dir, key):
     return raw, name, label, bars
 
 
-def _changelog_entry(style, version, date, label, bars):
+def _bar_line(bar, items):
+    # implements: REQ-RELEASECMD-1018
+    """A bar's CHANGELOG text: the ROADMAP item its `roadmap:` links,
+    whose wording is not cut to the bar's width, else its title."""
+    from .plandrift import bar_item_name  # only on a release (ADR-0057)
+    if bar.get("roadmap"):
+        for it in items or ():
+            if it["name"].strip().lower() == bar_item_name(bar):
+                return it["name"].strip()
+    return bar.get("title", "")
+
+
+def _changelog_entry(style, version, date, label, bars, items=()):
     # implements: REQ-RELEASECMD-1018
     """The dated entry for one release: a bold headline, then one bullet
     per planned bar."""
@@ -86,7 +98,7 @@ def _changelog_entry(style, version, date, label, bars):
         for bar in bars:
             req = bar.get("req")
             lines.append("- {}{}".format(
-                bar.get("title", ""), " ({})".format(req) if req else ""))
+                _bar_line(bar, items), " ({})".format(req) if req else ""))
     return "\n".join(lines) + "\n"
 
 
@@ -179,10 +191,12 @@ def release_plan(ws, code_root, reqs_dir, version=True):
         return plan
     _, name, label, bars = _released_work(reqs_dir, key)
     text = _read(_changelog_path(code_root))
+    items = _read_roadmap(code_root)
     plan["files"] = [{"path": p, "from": v, "to": tag_form(key).lstrip("v")}
                      for p, v in files]
     plan["changelog"] = _changelog_entry(
-        changelog_style(text), tag_form(key), plan["date"], label, bars)
+        changelog_style(text), tag_form(key), plan["date"], label, bars,
+        items)
     plan["plan"] = {"milestone": name,
                      "bars": [b.get("title") for b in bars]}
     # Suggested, never written: ticking an item is the author's
@@ -190,7 +204,7 @@ def release_plan(ws, code_root, reqs_dir, version=True):
     from .plandrift import items_for_bars  # only on a release (ADR-0057)
     plan["roadmap"] = [
         it["name"]
-        for it in items_for_bars(_read_roadmap(code_root), bars)]
+        for it in items_for_bars(items, bars)]
     return plan
 
 

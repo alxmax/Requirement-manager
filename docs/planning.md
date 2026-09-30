@@ -24,21 +24,29 @@ version file says what the repository is. The engine reads all three as `vX.Y.Z`
 - a key in `_planning.json` that nothing reads.
 
 A bar counts as done when it carries `progress: 100`, when every `ROADMAP.md` item it
-carries out is ticked, or when the requirement it names is confirmed or implemented.
+carries out is ticked, or when the requirement it names is confirmed or implemented. An open
+item it carries out keeps it open whatever its requirement's status.
+
+A bar carries out the `ROADMAP.md` item named like its title. When the title is drawn short
+or carries a count, link the item explicitly with `"roadmap": "<item name>"` on the bar; the
+title is then free for the chart, and the link decides the note, the done state, the tick
+suggestions and the CHANGELOG wording.
 
 **What the gate checks in the plan.** Only its input
 ([ADR-0057](adr/0057-plan-input-the-engine-cannot-read-reaches-the-gate.md)). `gate` warns,
 under `RM037`, about a value in `_planning.json` the engine drops, repairs or cannot use:
 a file that is not valid JSON, a bar with no `YYYY-MM-DD` `start` or with an `end` that is
 not a date, a bar ending before it starts, a lane missing from `lanes`, a milestone with no
-valid `due` and no label, an unknown `cadence`, or a bar `req:` that names no requirement
-or a deprecated one. `gate --strict` makes each of them an error. Everything above this
+valid `due` and no label, an unknown `cadence`, a bar `req:` that names no requirement
+or a deprecated one, or a bar `roadmap:` that names no `ROADMAP.md` item. `gate --strict`
+makes each of them an error. Everything above this
 paragraph stays a report.
 
 **Cutting a release.** `sync --release` takes the lowest milestone planned above the
 declared version and shows what it would do. `sync --release --apply` does it: bumps every
 version file (only the version text changes), writes the dated CHANGELOG entry headed by
-the milestone's label with one bullet per bar planned on it — under `## [Unreleased]` when
+the milestone's label with one bullet per bar planned on it, worded as the `ROADMAP.md`
+item the bar's `roadmap:` links or else as its title — under `## [Unreleased]` when
 the file has one, so what you collected there becomes the notes — removes the milestone and
 its bars from `_planning.json`, and names the `ROADMAP.md` items to tick by hand.
 
@@ -65,6 +73,14 @@ splits the chart. Completed items (`[x]`) are hidden in the chart.
 ## v1.14
 - [ ] Promote-todo command    | lane: feature
 - [ ] Milestone id rejected on Windows paths | lane: bug
+```
+
+A `## ` heading that does not start with a version leaves the milestone above it in force,
+and `sync` warns about it. A section that is deliberately not a milestone ends the one above
+it with a marker, and its items belong to no version:
+
+```markdown
+## How the work is split <!-- reqmap: not-milestone -->
 ```
 
 Open items appear in their version's column on the Roadmap tab's Versions view.
