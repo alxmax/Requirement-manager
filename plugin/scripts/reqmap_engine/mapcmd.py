@@ -42,10 +42,17 @@ def cmd_map(ws, root=".", check=False, findings=None):
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
     html_out = render_html(data, reqs_dir)
-    print("wrote {}".format(md_out))
-    print("wrote {}".format(json_out))
-    if html_out:
-        print("wrote {}".format(html_out))
+    for out in (md_out, json_out, html_out):
+        if out:
+            print("wrote {}".format(out))
+    # implements: REQ-VIEWER-940
+    # A tracked viewer rewrites itself on every sync and conflicts on
+    # every parallel branch (ADR-0034); say how to stop tracking it.
+    if html_out and _git(["ls-files", "--error-unmatch", "--",
+                          os.path.relpath(html_out, root)], cwd=root):
+        print("note: {0} is rebuilt on every sync - stop tracking it: "
+              "`git rm --cached {0}`, then add it to .gitignore".format(
+                  os.path.relpath(html_out, root).replace(os.sep, "/")))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     # implements: ARCH-FINDINGS-010
     if os.path.exists(os.path.join(reqs_dir, "_findings.md")):
@@ -225,7 +232,7 @@ def _stale_artifacts(data, ws, root="."):
     # `requirements/_map.html` is the only
     # rendered viewer the engine writes, it is regenerable from two
     # committed inputs (`_map.json` and the vendored template) and is
-    # therefore gitignored — so nothing
+    # therefore gitignored (`init` adds the line) — so nothing
     # here can go stale in a commit. A published copy is built where
     # it is published:
     # see the `deploy-map` job.
@@ -259,9 +266,7 @@ def _map_check(data, ws, root=".", findings=None):
             findings.append(Finding("MAP:" + kind, "error", None, message))
         print("FAIL  " + message)
         return 1
-    if not any(os.path.exists(os.path.join(reqs_dir, n))
-               for n in _MAP_ARTIFACTS):
-        print("OK  no committed map to check.")
-        return 0
-    print("OK  map is fresh.")
+    print("OK  map is fresh." if any(
+        os.path.exists(os.path.join(reqs_dir, n)) for n in _MAP_ARTIFACTS)
+        else "OK  no committed map to check.")
     return 0

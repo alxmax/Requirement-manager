@@ -126,6 +126,8 @@ Every bullet below is binding.
   reading it.
 - "Describes itself" means `scripts/reqmap.py` carries tags whose ids match requirements
   already in the repo.
+- `init` adds the rendered viewer, `<requirements>/_map.html`, to `.gitignore` once, creating
+  the file if needed. It appends and never rewrites a line already there.
 
 ## Cases
 CASE-1 — init creates a missing requirements directory
@@ -157,6 +159,11 @@ CASE-6 — a tag pointing at no local requirement is not self-hosting
   Given  `requirements/CORE-Y-002.md` exists and `scripts/reqmap.py` carries `# implements: CORE-GHOST-999` (an id with no matching file)
   When   `cmd_init` runs
   Then   the self-hosting exception does not fire: the written `.reqmapignore` still ignores `scripts/reqmap.py`
+
+CASE-7 — the rendered viewer is gitignored once
+  Given  a repo whose `.gitignore` holds `node_modules/`
+  When   `cmd_init` runs twice
+  Then   `.gitignore` still starts with `node_modules/` and lists `requirements/_map.html` once
 
 
 --------------------

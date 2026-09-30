@@ -339,6 +339,7 @@ h1 .i18n-badge { font-size: 12px; }
 .prob-row.finding-row { grid-template-columns: minmax(0, 1fr); }
 .finding-qs { margin: 8px 0 0; padding-left: 20px; }
 .finding-qs li { font: var(--text-small); color: var(--fg-secondary); margin-bottom: 5px; }
+.q-opt { display: block; padding-left: 16px; }
 .prob-row { display: grid; grid-template-columns: 76px 1fr auto; gap: 16px; align-items: start; padding: 14px 16px; border: 1px solid var(--border-soft); border-radius: var(--radius-2); background: var(--surface); cursor: pointer; transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease); }
 .prob-row:hover { border-color: var(--border); box-shadow: var(--shadow-2); }
 .prob-sev { font: var(--text-caption); font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; padding: 3px 0; border-radius: var(--radius-1); text-align: center; align-self: start; margin-top: 1px; }

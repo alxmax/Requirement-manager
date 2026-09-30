@@ -24,6 +24,27 @@ Claude Code creates today; `.worktrees/` is the older parallel-session location.
 Add any other vendored or generated paths that should not be scanned (one fnmatch
 glob per line, `#` comments ok). The engine itself is always the first entry.
 
+**Local files you never commit.** A tagged file git does not track (a local notes
+folder, a scratch script) is still scanned, so the local map records a member a CI
+checkout never has and the hook reports `map is stale`. The gate names it in the same
+run (`RM022 … not tracked by git`). Exclude the folder once in `.reqmapignore`
+(e.g. `notes/local/**`) rather than stashing it before each commit. An untagged
+untracked file changes nothing.
+
+**What to commit.** Commit `_map.json`, `_map.md`, `_findings.md` and the lock files:
+the gate compares them with a fresh build. Never commit `_map.html`: it is rebuilt from
+`_map.json` on every sync, so `init` adds it to `.gitignore`, and `sync` tells you how
+to stop tracking a copy that is already committed.
+
+**A merge conflict on generated files.** Two branches that both ran `sync` conflict on
+`_map.json`, `_map.md`, `_findings.md` or the locks. Do not merge the hunks by hand:
+take either side, run `sync`, commit the result, and `gate` confirms the map is fresh.
+
+```bash
+git checkout --theirs requirements/_map.json requirements/_map.md   # either side
+python scripts/reqmap.py sync && git add requirements/
+```
+
 From then on every command below runs against the repo's own `scripts/reqmap.py`.
 Commit the script, the package and `.reqmapignore` so the gate works in CI without
 the plugin present. When the plugin ships a newer engine, re-seed with:

@@ -104,6 +104,8 @@ Every bullet below is binding.
 - `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
   `<script>window.__REQMAP_DATA__=…</script>` assignment.
 - That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds.
+- When git tracks `_map.html`, `map` says so once and names `git rm --cached` and
+  `.gitignore`: the file is rebuilt on every sync and is never committed (ADR-0034).
 
 ## Cases
 CASE-1 — render_html writes _map.html when the vendored template exists
@@ -136,6 +138,12 @@ CASE-6 — the inlined blob's node id matches the graph handed to _inject_viewer
   Given  a graph `{"nodes": [{"id": "A-1"}], "edges": []}`
   When   `_inject_viewer(template_text, data)` runs
   Then   the injected `<script>` text contains `"A-1"`
+
+CASE-7 — a tracked viewer is named with how to stop tracking it
+  Given  a git repository, first with `_map.html` untracked, then with it added
+  When   `map` runs each time
+  Then   the first run says nothing about it, and the second names
+         `git rm --cached requirements/_map.html` once
 
 
 ---

@@ -114,8 +114,11 @@ Every bullet below is binding.
   the CLI and the gate summary cannot report different counts.
 - A question asked as a decision is one item: its indented options (`a) …`, or sub-bullets
   `- a) …`) and indented italic labels (`*Default:* …`) belong to it, each on its own line,
-  and `_findings.md` writes them on their own lines under the question. A sub-bullet that is
-  not an option is still a question of its own.
+  and `_findings.md` writes them as nested bullets under the question, so a Markdown renderer
+  shows each on its own line. A sub-bullet that is not an option is still a question of its
+  own.
+- The viewer shows such a question with each option and label on its own indented line, the
+  question in bold and a line-start label in italics. A one-line question shows as before.
 
 ## Cases
 CASE-1 — findings collects verify-intent bullets from every requirement
@@ -145,7 +148,14 @@ CASE-5 — a decision is one question with its options on their own lines
          sub-bullets, followed by an indented `*Default:*` line
   When   `sync` runs
   Then   each form counts one open finding, and `_findings.md` lists the options and the
-         default on their own lines under the question
+         default as nested bullets under the question
+
+CASE-6 — the viewer shows a decision's options on their own lines
+  Given  a question string with a bold question, an option, a line of HTML, a `*Default:*`
+         line and a cross-reference, and a plain one-line question
+  When   the Spec page and the Problems list render them
+  Then   each line after the question is its own indented block, the label is italic, the
+         HTML stays escaped, the cross-reference is a link, and the plain question is unchanged
 
 
 --------------------
