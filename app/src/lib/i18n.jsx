@@ -165,8 +165,10 @@ const RO = {  // implements: REQ-VIEWER-943
       + "numără drept constatare.",
   "{n} open question(s) across {m} requirement(s)":
     "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
-  "Answer it, fold the answer into the Description, then delete the bullet.":
-    "Răspunde, integrează răspunsul în Descriere, apoi șterge punctul.",
+  ["Answer it: fold the answer into the Description and delete the bullet, "
+    + "or keep it under the question as `*Answer (YYYY-MM-DD):* …`."]:
+    "Răspunde: integrează răspunsul în Descriere și șterge punctul, "
+    + "sau păstrează-l sub întrebare ca `*Answer (YYYY-MM-DD):* …`.",
   // map tabs
   "System Map": "Harta sistemului",
   "Req→Code": "Cerință→Cod",

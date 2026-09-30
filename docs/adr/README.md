@@ -68,6 +68,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
 | [0056](0056-the-design-review-line-limit-is-120-columns.md) | The design review's line limit is 120 columns | Accepted |
 | [0057](0057-plan-input-the-engine-cannot-read-reaches-the-gate.md) | Plan input the engine cannot read reaches the gate | Accepted |
+| [0058](0058-an-answered-question-is-closed-where-it-stands.md) | An answered question is closed where it stands | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

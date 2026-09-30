@@ -119,6 +119,9 @@ Every bullet below is binding.
   own.
 - The viewer shows such a question with each option and label on its own indented line, the
   question in bold and a line-start label in italics. A one-line question shows as before.
+- A question with an indented `*Answer (YYYY-MM-DD):* …` line is answered: it is left out of
+  every open count and every list, and stays in the file where the author wrote it. A line
+  with any other shape, such as an answer with no date, leaves the question open (ADR-0058).
 
 ## Cases
 CASE-1 — findings collects verify-intent bullets from every requirement
@@ -156,6 +159,13 @@ CASE-6 — the viewer shows a decision's options on their own lines
   When   the Spec page and the Problems list render them
   Then   each line after the question is its own indented block, the label is italic, the
          HTML stays escaped, the cross-reference is a link, and the plain question is unchanged
+
+CASE-7 — an answered question is closed where it stands
+  Given  a question with an indented `*Answer (2026-10-01):*` line, one whose answer line has
+         no date, and a plain open question
+  When   `sync` runs
+  Then   two open findings are reported, the answered question is not among them, and the
+         requirement file is unchanged
 
 
 --------------------
@@ -234,6 +244,8 @@ Every bullet below is binding.
 - A bug entry shows its location and its recommended fix when those are present.
 - `sync` emits an advisory staleness note when the count of raw verify-intent items
   differs from the count of triaged items in the sidecar.
+- A sidecar item carrying `"status": "resolved"` is left out of the classified view and of
+  every count in it, the staleness comparison included (ADR-0058).
 
 ## Cases
 CASE-1 — findings renders a classified view when a sidecar exists
@@ -258,6 +270,12 @@ CASE-4 — findings warns when raw and triaged counts diverge
   Given  three raw Verify-intent items but only one item recorded in the sidecar
   When   `sync` runs
   Then   `_findings.md` carries an advisory staleness note
+
+CASE-5 — a resolved sidecar item leaves the classified view
+  Given  one open raw item, and a sidecar with one open bug and one bug marked resolved
+  When   `sync` runs
+  Then   the resolved bug is not listed, one confirmed bug is counted, and there is no
+         staleness note
 
 
 --------------------

@@ -73,8 +73,9 @@ export function computeProblems() {
     out.push({ id: r.id, title: r.title, signal: "question", sev: "QUESTION",
       status: r.status, questions: qs,
       msg: `${qs.length} open verify-intent question(s).`,
-      fix: "Answer it, fold the answer into the Description, then delete "
-        + "the bullet.", loc: "" });
+      fix: "Answer it: fold the answer into the Description and delete the "
+        + "bullet, or keep it under the question as `*Answer (YYYY-MM-DD):* …`.",
+      loc: "" });
   });
   const design = (DESIGN && Array.isArray(DESIGN.findings))
     ? DESIGN.findings : [];
