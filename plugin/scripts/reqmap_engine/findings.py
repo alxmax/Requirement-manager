@@ -57,7 +57,10 @@ def _render_findings_raw(groups, total):  # implements: REQ-FINDINGS-854
 
 
 def _render_findings_triaged(triage, raw_total):  # implements: REQ-FINDINGS-855
-    items = [it for it in triage.get("items", []) if isinstance(it, dict)]
+    # an item its author marked resolved is closed, like an answered
+    # question (ADR-0058): it leaves the view and every count
+    items = [it for it in triage.get("items", []) if isinstance(it, dict)
+             and it.get("status") != "resolved"]
     buckets = {"REAL_BUG": [], "USER_DECISION": [], "INTENTIONAL": [],
               "FALSE_POSITIVE": []}
     for it in items:

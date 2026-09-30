@@ -231,6 +231,35 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertIn("`f.py:10`", md)
             self.assertIn("1 confirmed bug(s)", out)
 
+    def test_an_answered_question_is_closed_where_it_stands(self):  # verifies: REQ-FINDINGS-853#CASE-7
+        answered = "**Retry?**\n  a) Yes.\n  b) No.\n  *Answer (2026-10-01):* b), as it is."
+        undated = "**Log it?**\n  a) Yes.\n  *Answer:* no date"
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "requirements", "AREA-A-001.md")
+            _write(path, _req_with_verify("AREA-A-001", [answered, undated, "still open?"]))
+            before = open(path, encoding="utf-8").read()
+            md, out = self._run(d)
+            self.assertEqual(before, open(path, encoding="utf-8").read())
+        self.assertIn("2 open finding(s)", out)
+        self.assertNotIn("Retry?", md)
+        self.assertIn("Log it?", md)       # a malformed answer keeps it open
+
+    def test_a_resolved_triage_item_leaves_the_view(self):  # verifies: REQ-FINDINGS-855#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["magic 1.05, bug?"]))
+            _write(os.path.join(d, "requirements", R.FINDINGS_SIDECAR), json.dumps({
+                "items": [
+                    {"req_id": "AREA-X-001", "finding": "magic 1.05",
+                     "classification": "REAL_BUG", "severity": "high"},
+                    {"req_id": "AREA-X-001", "finding": "old timeout",
+                     "classification": "REAL_BUG", "severity": "high", "status": "resolved"},
+                ]}))
+            md, out = self._run(d)
+        self.assertNotIn("old timeout", md)
+        self.assertIn("1 confirmed bug(s)", out)
+        self.assertNotIn("WARN", md)       # one open raw item, one open triaged item
+
     def test_raw_flag_ignores_sidecar(self):  # verifies: REQ-FINDINGS-854#CASE-4  # verifies: ARCH-FINDINGS-010#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),

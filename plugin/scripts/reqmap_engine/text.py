@@ -198,7 +198,8 @@ def _verify_bullets(body):
     """The open questions in `## Verify intent` — the section's
     bullets, minus anything below a line that declares itself a
     non-binding authoring hint. A question asked as a decision is one
-    bullet, its options and labels each on their own line.
+    bullet, its options and labels each on their own line. An answered
+    question is not open, so it is not returned.
 
     The single reader every verify-intent consumer goes through (`findings`, the
     map export, `next`, `health`), so the count in the viewer, the CLI and the
@@ -210,9 +211,12 @@ def _verify_bullets(body):
         lambda line: not _VERIFY_HINT_RE.search(line), section.splitlines())
     kept = [_DECISION_INDENT_RE.sub("  \x00", line) for line in lines]
     # re-parse through _bullets so bullet shape, fences, label lines and
-    # hanging-indent continuations are handled in exactly one place
-    return [b.replace(" \x00", "\n") for b in _bullets(
-        "## Verify intent\n" + "\n".join(kept), "verify intent")]
+    # hanging-indent continuations are handled in exactly one place. A
+    # question with an indented `*Answer (YYYY-MM-DD):*` line is closed
+    # where it stands and leaves every count (ADR-0058).
+    return [q for q in (b.replace(" \x00", "\n") for b in _bullets(
+        "## Verify intent\n" + "\n".join(kept), "verify intent"))
+        if not re.search(r"\n\*Answer \(\d{4}-\d{2}-\d{2}\):\*", q)]
 
 
 def _context_group(body, label):

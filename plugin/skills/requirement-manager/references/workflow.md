@@ -167,6 +167,11 @@ attempt and rejected it).
    as a placeholder and `findings` skips it. Once the human answers, fold the answer
    into the Contract (or Notes) and delete the bullet — the section should shrink toward
    empty as the requirement matures.
+   A question a reviewer can answer at a glance is asked as a decision: the question in
+   bold, one indented `a) …` line per option, and an indented `*Default:* …` line saying
+   what happens if nobody decides. An answer that changes nothing (the default stands) is
+   kept under the question as an indented `*Answer (YYYY-MM-DD):* …` line: the question
+   then counts as answered everywhere and the record stays where it was asked (ADR-0058).
 
 **Prose files** (`.md`, `.html`) fall into three buckets — ignored, sync-only, or capability source: [references/prose-buckets.md](prose-buckets.md).
 

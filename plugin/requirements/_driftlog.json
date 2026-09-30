@@ -214,7 +214,11 @@
       "reason": "plain present tense"
     },
     "REQ-FINDINGS-853": {
-      "hash": "7b03a47611e7",
+      "hash": "0be36a588f92",
+      "reason": null
+    },
+    "REQ-FINDINGS-855": {
+      "hash": "426f987d59c4",
       "reason": null
     },
     "REQ-GITRUN-993": {

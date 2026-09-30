@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.12.0` — 2026-09-30
+
+**An answered question is closed where it stands.**
+
+- An indented `*Answer (YYYY-MM-DD):* …` line under a `## Verify intent` question closes it: it leaves `_findings.md`, the map, the Problems tab and `gate --risk`'s `unverified-intent` signal, and stays in the file where it was asked. An answer line with no date, or any other shape, leaves the question open (ADR-0058, REQ-FINDINGS-853)
+- A `_findings_triage.json` item carrying `"status": "resolved"` leaves the triaged view and its counts, so a resolved bug no longer sits under "Confirmed bugs" and no longer trips the raw-vs-triaged staleness note (REQ-FINDINGS-855)
+- The authoring rules describe a question asked as a decision, and the Problems tab names both ways to close a question: fold the answer in and delete the bullet, or keep it as an answer line
+- No new core lines: the engine's core stays at 6,533 logical lines
+
 ## plugin `v8.11.0` — 2026-09-30
 
 **A decision's options read one per line, and the rendered map stays out of git.**
