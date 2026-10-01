@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.13.0` — 2026-10-01
+
+**A decision question is checked for whoever has to answer it.**
+
+- Six warnings on a `## Verify intent` question asked as a decision (a bold question, then `a) …` option lines): `question-too-long`, `default-has-code`, `context-repeats-question`, `recommendation-without-source`, `option-defers-decision` and `question-no-audience`. They never fire on a plain or an answered question, are warnings under `--strict` too, and skip a draft (ADR-0059, REQ-LINTCHECKS-1089)
+- Nine `_config.json` keys set the limits and the label spellings: `LINT_QUESTION_WORDS`, `LINT_QUESTION_SENTENCES`, `LINT_QUESTION_OVERLAP`, `LINT_QUESTION_DEFAULT_LABELS`, `LINT_QUESTION_CONTEXT_LABELS`, `LINT_QUESTION_RECOMMENDED_MARKS`, `LINT_QUESTION_SOURCE_LABELS`, `LINT_QUESTION_DEFER_WORDS` and `LINT_QUESTION_AUDIENCE_MARKERS`. A repo that writes its labels in another language lists them there; an empty list switches a check off
+- The authoring rules gain a short-question template with its word targets, an audience marker, a `*Recommendation source:*` line and a `*For the developer:*` line, and the clarify answer steps say to write for whoever answers
+- Fire rate: one consumer corpus held 79 decision questions in 51 requirements before it was rewritten, and this repo holds none (ADR-0059)
+- The engine's core rises from 6,533 to 6,612 logical lines, and its budget with it (ADR-0060)
+
 ## plugin `v8.12.0` — 2026-09-30
 
 **An answered question is closed where it stands.**

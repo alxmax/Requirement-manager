@@ -26,9 +26,16 @@ relay the engine's wording. It reads the requirement, then answers in two parts:
    a candidate resolution the user can pick and you can then write — "add CASE-6
    asserting X", "fold clause 4 into CASE-2", "move clause 4 to [[OTHER-ID]], which
    already proves it" — never a restatement of the question and never "clarify this".
-   Say what each option costs and what it gives up, and put your recommendation
-   first. If you genuinely cannot see two defensible resolutions, ask the plain
+   Say what each option changes and what it gives up, in the reader's words, and put
+   your recommendation first. If you genuinely cannot see two defensible resolutions, ask the plain
    question instead of padding the list to two.
+3. **Written for whoever answers it.** When the question goes into `## Verify intent`,
+   use the form of workflow rule 7. The `<!-- audience: … -->` marker picks the
+   vocabulary: none means a non-developer, and `client` or `legal` means no technical
+   terms. An option says what happens for a person, not what changes in code; code goes
+   on the `*For the developer:*` line. `*(recommended)*` appears only with a
+   `*Recommendation source:*` line. After shortening, every number, threshold, role and
+   default from the old text is still there.
 
 Then write the picked option into the requirement and re-run the command, so the
 question disappears because it was answered rather than silenced. This never writes a

@@ -48,8 +48,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ENGINE_DIR = REPO_ROOT / "plugin" / "scripts"
 PACKAGE = "reqmap_engine"
 # The stage reached, lowered only by the change that earns it (ADR-0046).
-# Set by ADR-0053 to the measured core, in logical lines, with no headroom.
-CORE_LOGICAL_BUDGET = 6533
+# Set by ADR-0053 to the measured core, in logical lines, with no headroom;
+# raised once by ADR-0060 to the size measured with the question checks.
+CORE_LOGICAL_BUDGET = 6612
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

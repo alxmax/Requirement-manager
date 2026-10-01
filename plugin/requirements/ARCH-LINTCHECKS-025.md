@@ -25,6 +25,7 @@ Every bullet below is binding.
 - `atomic-bullet-then-mismatch` and `atomic-story-overlong` warn on an atomic-form story quote whose fact count disagrees with its Scenario; `layer-mismatch` warns on a fan-out `bus` requirement nothing depends on. [[REQ-LINTCHECKS-867]] details the behaviour.
 - `vague-term` warns on a Contract bullet using an untestable quality word from the closed `LINT_VAGUE_TERMS` set. [[REQ-LINTCHECKS-868]] details the behaviour.
 - `redundant-modal` warns on a Contract bullet using `shall` or `must` — the closed `LINT_MODAL_WORDS` set. [[REQ-LINTCHECKS-869]] details the behaviour.
+- `question-too-long`, `default-has-code`, `context-repeats-question`, `recommendation-without-source`, `option-defers-decision` and `question-no-audience` warn on a `## Verify intent` question asked as a decision that the person answering it would struggle to read. [[REQ-LINTCHECKS-1089]] details the behaviour.
 
 ## Cases
 CASE-1
@@ -54,6 +55,13 @@ CASE-5
   When   `gate` runs
   Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked
          `shall_retry` identifier and a plain present-tense bullet report none
+
+CASE-6
+  Given  a confirmed requirement whose Verify intent holds a decision question with a two-sentence
+         bold question beside a plain one-line question
+  When   `gate --strict` runs
+  Then   it reports one `question-too-long` warning for the decision question, none for the plain
+         one, and exits 0
 
 ## Context
 **Terms**
@@ -386,3 +394,72 @@ CASE-3 — redundant-modal reports each distinct term once
   When   `gate` runs
   Then   it reports two `redundant-modal` findings, one for "shall" and one for "must"
 
+--------------------
+
+
+---
+id: REQ-LINTCHECKS-1089
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-LINTCHECKS-025]
+---
+
+# Decision questions the person answering can read
+
+## Description
+> A question in `## Verify intent` is answered by a person who may never have opened the
+> code. Six warnings catch a decision question that person would struggle to read.
+
+Every bullet below is binding.
+- The checks run on an open question asked as a decision: a bold question, then one or more `a) …` option lines.
+- A plain question and an answered question get no finding.
+- `question-too-long` warns when the bold question runs over `LINT_QUESTION_WORDS` words (default 15) or `LINT_QUESTION_SENTENCES` sentences (default 1).
+- `default-has-code` warns when the default line names a `file:line` reference; the label spellings are `LINT_QUESTION_DEFAULT_LABELS` (default `Default`).
+- `context-repeats-question` warns when the context line holds bold text or repeats over `LINT_QUESTION_OVERLAP` of the question's words (default 0.5); the labels are `LINT_QUESTION_CONTEXT_LABELS`.
+- `recommendation-without-source` warns when a question carries more `LINT_QUESTION_RECOMMENDED_MARKS` marks than `LINT_QUESTION_SOURCE_LABELS` lines.
+- `option-defers-decision` warns once per option that holds a word from `LINT_QUESTION_DEFER_WORDS`.
+- `question-no-audience` warns once per requirement when no `LINT_QUESTION_AUDIENCE_MARKERS` comment such as `<!-- audience: client -->` appears in the section.
+- Every check is a warning, `--strict` included, and an empty list switches its check off.
+
+## Cases
+CASE-1
+  Given  a decision question whose bold question holds two sentences, and another of 16 words
+  When   `gate` runs
+  Then   each reports `question-too-long`; the base question reports none
+
+CASE-2
+  Given  a default line reading `stays a); see export.py:120`
+  When   `gate` runs
+  Then   it reports `default-has-code`; a default without a file and line reports none
+
+CASE-3
+  Given  a context line holding bold text, and another repeating most of the question's words
+  When   `gate` runs
+  Then   each reports `context-repeats-question`
+
+CASE-4
+  Given  an option reading "The legal team decides", and a recommended option with no source line
+  When   `gate` runs
+  Then   they report `option-defers-decision` and `recommendation-without-source`
+
+CASE-5
+  Given  two decision questions and no audience marker
+  When   `gate` runs
+  Then   it reports exactly one `question-no-audience`; with a marker, none; a plain question alone, none
+
+CASE-6
+  Given  `_config.json` naming `Par défaut` as the default label and `lecteur` as the audience marker
+  When   `gate` runs
+  Then   a `Par défaut` line with a file and line reports `default-has-code`, and the marker silences the audience check
+
+CASE-7
+  Given  a two-sentence decision question carrying an `*Answer (2026-10-01):*` line
+  When   `gate` runs
+  Then   it reports no finding, and every finding the other cases name has warn severity
+
+## Context
+- Fire rate: one consumer corpus held 79 decision questions in 51 requirements before it was rewritten; this repo holds none.
+- The option, default, context and total word budgets are targets in the workflow, never checks.
+- A draft requirement is not linted (REQ-LINT-863), so its questions get no finding.
