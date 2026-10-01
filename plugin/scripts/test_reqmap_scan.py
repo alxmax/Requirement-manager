@@ -1261,6 +1261,14 @@ class ModuleFile(unittest.TestCase):  # tested-by: REQ-MODULEFILE-056
             self.assertIn("still the real body", reqs["AREA-B-001"]["body"])
             self.assertIn("Ghost", reqs["AREA-B-001"]["body"])
 
+    def test_a_fence_that_never_closes_hides_no_block(self):  # verifies: REQ-MODULEFILE-056#CASE-7
+        first = REQ.format(id="AREA-B-001", status="draft", layer="bus", extra="", title="B")
+        second = "---\nid: AREA-B-002\nstatus: draft\n---\n\n# B2\n"
+        for stray in ("```\nnever closed\n", "~~~~ rule\n"):
+            blocks = R.split_requirement_blocks(first + "\n" + stray + "\n" + second)
+            self.assertEqual(len(blocks), 2)
+            self.assertIn("id: AREA-B-002", blocks[1])
+
     def test_preamble_before_the_first_block_is_kept(self):
         text = "# Module heading\n\n" + REQ.format(
             id="AREA-E-001", status="draft", layer="bus", extra="", title="E")
@@ -1686,6 +1694,22 @@ class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # te
                       "## Cases\nCASE-1 real\n")
         without = "## Description\n- real clause\n\n## Cases\nCASE-1 real\n"
         self.assertEqual(R.binding_hash(with_fence), R.binding_hash(without))
+
+    def test_a_fence_closes_only_on_a_bare_run_of_its_own_kind(self):  # verifies: REQ-SECTIONS-994#CASE-6
+        longer = "````\n```\n## Cases\n````\n## After\n"
+        info = "```md\n```text\n## Cases\n```\n## After\n"
+        for body in (longer, info):
+            seen = [line.strip() for is_h, line in R._body_lines(body) if is_h]
+            self.assertEqual(seen, ["## After"])
+
+    def test_a_fenced_line_is_no_part_of_an_atomic_body(self):  # verifies: REQ-SECTIONS-994#CASE-7
+        plain = AtomicForm.ATOMIC
+        fenced = plain.replace(
+            "Scenario:", "```\n> a fenced quote\nScenario: a fake\n  Then   nothing\n```\n\n"
+            "Scenario:", 1)
+        self.assertNotEqual(plain, fenced)
+        self.assertEqual(R._atomic_spans(fenced), R._atomic_spans(plain))
+        self.assertEqual(R.binding_hash(fenced), R.binding_hash(plain))
 
     def test_a_section_stops_at_the_next_heading(self):  # verifies: REQ-SECTIONS-994#CASE-2
         body = "## Description\n- one\n\n## Notes\n- two\n"

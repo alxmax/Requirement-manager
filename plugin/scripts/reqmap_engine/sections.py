@@ -3,8 +3,6 @@ form, and the binding hash the drift baseline compares.
 """
 import hashlib, re
 
-from .tags import _fence_transition
-
 
 
 # ---------- hashing / drift ----------
@@ -47,6 +45,30 @@ _NORMATIVE_HEADING_RE = re.compile(
     r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
     r"(?:" + "|".join(re.escape(n) for n in CONTRACT_LABELS + ACCEPTANCE_LABELS
                        + ("input", "output")) + ")", re.I)
+
+
+# CommonMark fence opener/closer, shared by the tag scanner, the requirement-block
+# split and the section reader
+_FENCE_RE = re.compile(r'^(`{3,}|~{3,})')
+
+
+def _fence_transition(stripped, fence):
+    # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
+    # implements: REQ-SCAN-992
+    """(new_fence, is_marker) for one prose line: `is_marker` is True when
+    `stripped` is a fence opener/closer line itself (so the caller skips
+    yielding it), and `new_fence` is the fence state to carry into the next
+    line."""
+    fm = _FENCE_RE.match(stripped)
+    if not fm:
+        return fence, False
+    marker = fm.group(1)
+    rest = stripped[len(marker):].strip()
+    if fence is None:
+        return marker, True
+    if marker[0] == fence[0] and len(marker) >= len(fence) and not rest:
+        return None, True   # closer must be bare (no info string)
+    return fence, False
 
 
 def _body_lines(body):

@@ -6,6 +6,7 @@ classifiers.
 import os, re
 
 from . import config as cfg
+from .sections import _fence_transition
 
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
@@ -41,7 +42,6 @@ def _findall_tags(text):  # implements: REQ-VLEVEL-944
 
 
 # Phantom-member exclusion helpers used in _scan_file_tags
-_FENCE_RE = re.compile(r'^(`{3,}|~{3,})')   # CommonMark fence opener/closer
 # NOTE: only handles single-backtick spans; double/triple-backtick spans
 # (CommonMark-valid) are not filtered. No instances exist in this corpus, but
 # this is a known gap.
@@ -182,25 +182,6 @@ def _strip_py_strings(s):
                 out.append(' ')
                 i += 1
     return ''.join(out), None
-
-
-def _fence_transition(stripped, fence):
-    # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
-    # implements: REQ-SCAN-992
-    """(new_fence, is_marker) for one prose line: `is_marker` is True when
-    `stripped` is a fence opener/closer line itself (so the caller skips
-    yielding it), and `new_fence` is the fence state to carry into the next
-    line."""
-    fm = _FENCE_RE.match(stripped)
-    if not fm:
-        return fence, False
-    marker = fm.group(1)
-    rest = stripped[len(marker):].strip()
-    if fence is None:
-        return marker, True
-    if marker[0] == fence[0] and len(marker) >= len(fence) and not rest:
-        return None, True   # closer must be bare (no info string)
-    return fence, False
 
 
 def _close_triple_quote(s, in_triple):

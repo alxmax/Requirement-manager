@@ -3,7 +3,7 @@ load_requirements."""
 import os, re, sys
 
 from .model import Requirement
-from .tags import _fence_transition
+from .sections import _fence_transition
 
 
 def _scalar_value(v):  # implements: ARCH-PARSE-001
@@ -94,14 +94,16 @@ def split_requirement_blocks(text):  # implements: REQ-MODULEFILE-056
     block, byte-identical to the whole text, so nothing about the
     existing corpus changes. A `---`/`id:` pair inside a fenced example
     (``` or ~~~) is not a block: the example is blanked before the split,
-    and the slices come back out of the original text."""
+    and the slices come back out of the original text. A fence that never
+    closes hides nothing: the whole text is split as it stands, so a stray
+    fence cannot swallow the blocks after it."""
     text = text.lstrip("\ufeff")
     masked, fence = [], None
     for line in text.splitlines(True):
         end = len(line.rstrip("\r\n"))
         fence, marker = _fence_transition(line[:end].lstrip(), fence)
         masked.append(" " * end + line[end:] if fence or marker else line)
-    starts = [m.start() for m in _REQ_BLOCK_RE.finditer("".join(masked))]
+    starts = [m.start() for m in _REQ_BLOCK_RE.finditer(text if fence else "".join(masked))]
     if not starts:
         return [text]
     return ([text[:starts[0]]] if text[:starts[0]].strip() else []) + [

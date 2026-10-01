@@ -299,6 +299,8 @@ Every bullet below is binding.
 - A bare `---` used as a horizontal rule, not followed by `id:`, starts no new block.
 - A `---` line followed by `id:` inside a fenced code block, backtick or tilde, starts no
   block. The fence holds an example of a requirement, not a requirement.
+- A fence that never closes hides nothing: the file is split as written, so a stray fence
+  cannot swallow the blocks after it.
 - Confirming one requirement in a multi-block file changes that block's status alone.
 - Only the first block in a file may fall back to the filename for its id; a later block with no `id:` does not.
 
@@ -336,3 +338,9 @@ CASE-6 — a fenced example of a requirement is not one
   Given  a requirement whose body contains a fenced example opening with `---` and `id:`
   When   the engine loads the file
   Then   the file still yields that one requirement, and the example stays inside its body
+
+CASE-7 — a fence that never closes hides no block
+  Given  a file whose first block holds a fence that is never closed, followed by a second
+         `---`/`id:` block
+  When   `split_requirement_blocks` runs on its text
+  Then   it returns two blocks, exactly as it would without the stray fence

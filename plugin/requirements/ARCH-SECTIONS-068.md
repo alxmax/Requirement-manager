@@ -76,6 +76,11 @@ Every bullet below is binding.
   the boundary is shared.
 - `binding_hash` reads the body through `_body_lines`, so a fenced heading neither opens a
   normative span nor closes one.
+- A fence opens on a run of three or more backticks or tildes.
+- A fence closes on a bare line of the same character at least as long as the opener; a
+  closing line that carries an info string, or a shorter run, stays inside the fence.
+- `_atomic_spans` reads through `_body_lines`, so a fenced line is neither the statement
+  nor the scenario of an atomic body.
 
 ## Cases
 CASE-1 — the fence is checked before the heading
@@ -102,6 +107,19 @@ CASE-5 — a fenced heading changes no hash
   Given  a normative section whose text contains a fenced example of another heading
   When   `binding_hash` runs
   Then   the fenced lines are absent from the hashed span
+
+CASE-6 — a fence closes only on a bare run of its own character
+  Given  a four-backtick fence holding a three-backtick line, and a fence whose closing
+         line carries an info string
+  When   `_body_lines` runs
+  Then   neither line closes its fence, so a `## ` after it is still code until the real
+         closer
+
+CASE-7 — a fenced line is no part of an atomic body
+  Given  an atomic body with a fenced example holding a `>` line and a `Scenario:` line
+  When   `_atomic_spans` and `binding_hash` run
+  Then   the fenced lines are in neither the statement nor the scenario, and the hash
+         equals the hash of the same body without the example
 
 --------------------
 

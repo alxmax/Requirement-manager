@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-01.1",
+  "engine_version": "2026-10-01.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1197,11 +1197,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:352"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:333"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:362"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:343"
         }
       ],
       "test_exempt": null,
@@ -1375,7 +1375,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:352"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:333"
         }
       ],
       "test_exempt": null,
@@ -1421,7 +1421,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:362"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:343"
         }
       ],
       "test_exempt": null,
@@ -1752,11 +1752,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:109"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:131"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:262"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:284"
         }
       ],
       "test_exempt": null,
@@ -4777,7 +4777,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1494"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1502"
         },
         {
           "role": "implements",
@@ -4801,7 +4801,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:200"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:222"
         }
       ],
       "test_exempt": null,
@@ -4853,11 +4853,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1494"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1502"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:201"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:223"
         }
       ],
       "test_exempt": null,
@@ -5231,11 +5231,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:406"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:387"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:421"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:402"
         }
       ],
       "test_exempt": null,
@@ -5559,11 +5559,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:406"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:387"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:421"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:402"
         }
       ],
       "test_exempt": null,
@@ -6063,7 +6063,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1575"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1583"
         },
         {
           "role": "implements",
@@ -6120,7 +6120,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1575"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1583"
         },
         {
           "role": "implements",
@@ -10743,7 +10743,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:123"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:125"
         }
       ],
       "test_exempt": null,
@@ -10791,15 +10791,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1485"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1493"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:111"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:124"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:126"
         }
       ],
       "test_exempt": null,
@@ -10902,7 +10902,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:124"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:126"
         }
       ],
       "test_exempt": null,
@@ -10960,27 +10960,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:125"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:129"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:151"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:171"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:193"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:188"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:210"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:200"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:222"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:297"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:319"
         },
         {
           "role": "implements",
@@ -11007,13 +11007,14 @@
         "A file holding a single block is read exactly as before — unchanged for every pre-existing one-requirement file.",
         "A bare `---` used as a horizontal rule, not followed by `id:`, starts no new block.",
         "A `---` line followed by `id:` inside a fenced code block, backtick or tilde, starts no block. The fence holds an example of a requirement, not a requirement.",
+        "A fence that never closes hides nothing: the file is split as written, so a stray fence cannot swallow the blocks after it.",
         "Confirming one requirement in a multi-block file changes that block's status alone.",
         "Only the first block in a file may fall back to the filename for its id; a later block with no `id:` does not."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each id: block becomes its own requirement\n  Given  a file whose text holds three `---`/`id:` blocks\n  When   the engine loads the corpus\n  Then   each block is loaded as its own requirement, keeping its own body and block index\n\nCASE-2 — a single-block file is read exactly as before\n  Given  a file holding one requirement, no second `---`/`id:` block\n  When   `split_requirement_blocks` runs on its text\n  Then   it returns the whole text unchanged, byte for byte\n\nCASE-3 — a horizontal rule starts no new block\n  Given  a file whose body contains a bare `---` not followed by `id:`\n  When   the engine loads the corpus\n  Then   the file still yields exactly one requirement, and the text after the rule stays\n         part of that requirement's body\n\nCASE-4 — confirming one block changes only that block's status\n  Given  a two-block file, the second block carrying an `implements:` member\n  When   `confirm` runs on the second block's id\n  Then   only the second block's status becomes `confirmed`; the first block's status and\n         body are unchanged\n\nCASE-5 — only the first block may fall back to the filename for its id\n  Given  a file whose first block carries no `id:` (so it falls back to the filename) and\n         whose second block carries its own explicit `id:`\n  When   the engine loads the corpus\n  Then   the first block resolves to the filename's id and the second block keeps its own\n         distinct id — the fallback claims the filename once, not per block\n\nCASE-6 — a fenced example of a requirement is not one\n  Given  a requirement whose body contains a fenced example opening with `---` and `id:`\n  When   the engine loads the file\n  Then   the file still yields that one requirement, and the example stays inside its body",
+      "accept": "CASE-1 — each id: block becomes its own requirement\n  Given  a file whose text holds three `---`/`id:` blocks\n  When   the engine loads the corpus\n  Then   each block is loaded as its own requirement, keeping its own body and block index\n\nCASE-2 — a single-block file is read exactly as before\n  Given  a file holding one requirement, no second `---`/`id:` block\n  When   `split_requirement_blocks` runs on its text\n  Then   it returns the whole text unchanged, byte for byte\n\nCASE-3 — a horizontal rule starts no new block\n  Given  a file whose body contains a bare `---` not followed by `id:`\n  When   the engine loads the corpus\n  Then   the file still yields exactly one requirement, and the text after the rule stays\n         part of that requirement's body\n\nCASE-4 — confirming one block changes only that block's status\n  Given  a two-block file, the second block carrying an `implements:` member\n  When   `confirm` runs on the second block's id\n  Then   only the second block's status becomes `confirmed`; the first block's status and\n         body are unchanged\n\nCASE-5 — only the first block may fall back to the filename for its id\n  Given  a file whose first block carries no `id:` (so it falls back to the filename) and\n         whose second block carries its own explicit `id:`\n  When   the engine loads the corpus\n  Then   the first block resolves to the filename's id and the second block keeps its own\n         distinct id — the fallback claims the filename once, not per block\n\nCASE-6 — a fenced example of a requirement is not one\n  Given  a requirement whose body contains a fenced example opening with `---` and `id:`\n  When   the engine loads the file\n  Then   the file still yields that one requirement, and the example stays inside its body\n\nCASE-7 — a fence that never closes hides no block\n  Given  a file whose first block holds a fence that is never closed, followed by a second\n         `---`/`id:` block\n  When   `split_requirement_blocks` runs on its text\n  Then   it returns two blocks, exactly as it would without the stray fence",
       "input": "",
       "output": "",
       "desc": "",
@@ -11044,7 +11045,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/parse.py:123"
+          "loc": "plugin/scripts/reqmap_engine/parse.py:125"
         },
         {
           "role": "implements",
@@ -11055,8 +11056,8 @@
       "milestone": "v2.32",
       "priority": "should-have",
       "risks": [],
-      "clauses": 6,
-      "covered": 6
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "ARCH-PIPE-046",
@@ -11721,7 +11722,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1356"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1364"
         },
         {
           "role": "implements",
@@ -11741,7 +11742,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:317"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:298"
         }
       ],
       "test_exempt": null,
@@ -11798,7 +11799,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:317"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:298"
         }
       ],
       "test_exempt": null,
@@ -11846,7 +11847,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1356"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1364"
         },
         {
           "role": "implements",
@@ -14397,11 +14398,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1513"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1521"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1877"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1901"
         },
         {
           "role": "implements",
@@ -14441,6 +14442,10 @@
         },
         {
           "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/sections.py:56"
+        },
+        {
+          "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/tags.py:93"
         },
         {
@@ -14449,15 +14454,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:207"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:200"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:219"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:282"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:263"
         }
       ],
       "test_exempt": null,
@@ -14516,19 +14517,19 @@
         },
         {
           "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/sections.py:56"
+        },
+        {
+          "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/tags.py:188"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:207"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:200"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:219"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:282"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:263"
         }
       ],
       "test_exempt": null,
@@ -14645,7 +14646,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1513"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1521"
         },
         {
           "role": "implements",
@@ -14653,15 +14654,15 @@
         },
         {
           "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/sections.py:57"
+        },
+        {
+          "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/tags.py:189"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:208"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:220"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:201"
         }
       ],
       "test_exempt": null,
@@ -15245,19 +15246,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1646"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1654"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:53"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:75"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:72"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:94"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:79"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:101"
         }
       ],
       "test_exempt": null,
@@ -15280,12 +15281,15 @@
         "`_section_lines` yields the lines of the FIRST section whose heading label matches, up to the next heading, and takes one label or a tuple of them so a renamed section still reads under its old spelling.",
         "`raw=True` preserves the physical line, indentation and blank lines included, for the Given/When/Then blocks rendered as authored.",
         "What the lines mean — bullets, clauses, prose, criteria — stays with each caller. Only the boundary is shared.",
-        "`binding_hash` reads the body through `_body_lines`, so a fenced heading neither opens a normative span nor closes one."
+        "`binding_hash` reads the body through `_body_lines`, so a fenced heading neither opens a normative span nor closes one.",
+        "A fence opens on a run of three or more backticks or tildes.",
+        "A fence closes on a bare line of the same character at least as long as the opener; a closing line that carries an info string, or a shorter run, stays inside the fence.",
+        "`_atomic_spans` reads through `_body_lines`, so a fenced line is neither the statement nor the scenario of an atomic body."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the fence is checked before the heading\n  Given  a body with `## Cases` inside a fenced block\n  When   `_body_lines` runs\n  Then   that line is not yielded at all, as a heading or otherwise\n\nCASE-2 — a section stops at the next heading\n  Given  a Description followed by a Notes section\n  When   `_section_lines` reads the Description\n  Then   nothing from Notes is included\n\nCASE-3 — a legacy spelling still reads\n  Given  a body using `## WHAT — Contract` rather than `## Description`\n  When   `_section_lines` is asked for `CONTRACT_LABELS`\n  Then   it returns that section's lines\n\nCASE-4 — raw keeps indentation, stripped does not\n  Given  a section with an indented continuation line\n  When   the same section is read with and without `raw`\n  Then   the raw form keeps the leading spaces and the stripped form does not\n\nCASE-5 — a fenced heading changes no hash\n  Given  a normative section whose text contains a fenced example of another heading\n  When   `binding_hash` runs\n  Then   the fenced lines are absent from the hashed span\n\n--------------------",
+      "accept": "CASE-1 — the fence is checked before the heading\n  Given  a body with `## Cases` inside a fenced block\n  When   `_body_lines` runs\n  Then   that line is not yielded at all, as a heading or otherwise\n\nCASE-2 — a section stops at the next heading\n  Given  a Description followed by a Notes section\n  When   `_section_lines` reads the Description\n  Then   nothing from Notes is included\n\nCASE-3 — a legacy spelling still reads\n  Given  a body using `## WHAT — Contract` rather than `## Description`\n  When   `_section_lines` is asked for `CONTRACT_LABELS`\n  Then   it returns that section's lines\n\nCASE-4 — raw keeps indentation, stripped does not\n  Given  a section with an indented continuation line\n  When   the same section is read with and without `raw`\n  Then   the raw form keeps the leading spaces and the stripped form does not\n\nCASE-5 — a fenced heading changes no hash\n  Given  a normative section whose text contains a fenced example of another heading\n  When   `binding_hash` runs\n  Then   the fenced lines are absent from the hashed span\n\nCASE-6 — a fence closes only on a bare run of its own character\n  Given  a four-backtick fence holding a three-backtick line, and a fence whose closing\n         line carries an info string\n  When   `_body_lines` runs\n  Then   neither line closes its fence, so a `## ` after it is still code until the real\n         closer\n\nCASE-7 — a fenced line is no part of an atomic body\n  Given  an atomic body with a fenced example holding a `>` line and a `Scenario:` line\n  When   `_atomic_spans` and `binding_hash` run\n  Then   the fenced lines are in neither the statement nor the scenario, and the hash\n         equals the hash of the same body without the example\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -15298,27 +15302,27 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1646"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1654"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:53"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:75"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:72"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:94"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:79"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:101"
         }
       ],
       "test_exempt": null,
       "milestone": "v6.3",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "REQ-DESCRIPTION-057",
@@ -15353,23 +15357,23 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1292"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1300"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:17"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:15"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:27"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:25"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:278"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:300"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/sections.py:286"
+          "loc": "plugin/scripts/reqmap_engine/sections.py:308"
         }
       ],
       "test_exempt": null,
@@ -17765,7 +17769,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1441"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1449"
         },
         {
           "role": "implements",
@@ -18155,11 +18159,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1739"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1763"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1818"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1842"
         },
         {
           "role": "implements",
@@ -18222,7 +18226,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1739"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1763"
         },
         {
           "role": "implements",
@@ -18349,7 +18353,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1379"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1387"
         },
         {
           "role": "implements",
@@ -19943,7 +19947,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:32"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:33"
         }
       ],
       "test_exempt": null,
@@ -23486,13 +23490,13 @@
       "last": "2026-10-01",
       "versions": [
         "v8.13.0",
-        "v8.13.1"
+        "v8.14.0"
       ],
-      "landmark": "v8.13.0",
-      "headline": "A decision question is checked for whoever has to answer it",
+      "landmark": "v8.14.0",
+      "headline": "Six edges the gate's own corpus did not show",
       "entries": [
         {
-          "version": "v8.13.1",
+          "version": "v8.14.0",
           "date": "2026-10-01",
           "headline": "Six edges the gate's own corpus did not show"
         },

@@ -290,8 +290,8 @@
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
     },
     "REQ-MODULEFILE-056": {
-      "hash": "a52e180643a9",
-      "reason": "a fenced ---/id: example is not a second requirement"
+      "hash": "f5c9407f0cfe",
+      "reason": "fence semantics and unclosed-fence fallback amend REQ-SECTIONS-994 and REQ-MODULEFILE-056 (v8.14.0)"
     },
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
@@ -400,6 +400,10 @@
     "REQ-SEARCH-913": {
       "hash": "c5b8550fa8c5",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+    },
+    "REQ-SECTIONS-994": {
+      "hash": "fc7ad079f394",
+      "reason": "reword the fence bullets of REQ-SECTIONS-994 (v8.14.0)"
     },
     "REQ-SELFGATE-1011": {
       "hash": "01428251f82d",
