@@ -233,15 +233,25 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
 
     def test_an_answered_question_is_closed_where_it_stands(self):  # verifies: REQ-FINDINGS-853#CASE-7
         answered = "**Retry?**\n  a) Yes.\n  b) No.\n  *Answer (2026-10-01):* b), as it is."
+        nested = "**Export?**\n  - a) Yes.\n  - *Answer (2026-10-01):* a), keep it."
+        impossible = "**Leap?**\n  *Answer (2026-02-31):* no such day"
         undated = "**Log it?**\n  a) Yes.\n  *Answer:* no date"
+        self.assertEqual([], R._verify_bullets(
+            "## Verify intent\n- **Leap day?**\n  *Answer (2024-02-29):* yes, it was."))
+        self.assertEqual(["**Not a leap day?**\n*Answer (2025-02-29):* no."],
+                         R._verify_bullets(
+                             "## Verify intent\n- **Not a leap day?**\n  *Answer (2025-02-29):* no."))
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "requirements", "AREA-A-001.md")
-            _write(path, _req_with_verify("AREA-A-001", [answered, undated, "still open?"]))
+            _write(path, _req_with_verify(
+                "AREA-A-001", [answered, nested, impossible, undated, "still open?"]))
             before = open(path, encoding="utf-8").read()
             md, out = self._run(d)
             self.assertEqual(before, open(path, encoding="utf-8").read())
-        self.assertIn("2 open finding(s)", out)
+        self.assertIn("3 open finding(s)", out)
         self.assertNotIn("Retry?", md)
+        self.assertNotIn("Export?", md)
+        self.assertIn("Leap?", md)         # 2026-02-31 is not a day
         self.assertIn("Log it?", md)       # a malformed answer keeps it open
 
     def test_a_resolved_triage_item_leaves_the_view(self):  # verifies: REQ-FINDINGS-855#CASE-5
@@ -3394,6 +3404,25 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             self.assertIn(key, data)
 
     # ---- exemptions ------------------------------------------------------
+    def test_json_roadmap_includes_the_plan_drift_lines(self):  # verifies: REQ-AUDIT-970#CASE-5
+        reqs, members = self._green()
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "pkg"))
+            with open(os.path.join(d, "pkg", "mod.py"), "w", encoding="utf-8") as f:
+                f.write("def f():\n    return 1\n")
+            with open(os.path.join(d, "ROADMAP.md"), "w", encoding="utf-8") as f:
+                f.write("# Roadmap\n\n## Now\n\n- [ ] fix pkg/gone.py\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_audit(R.Workspace(reqs, members, d, d), as_json=True)
+            data = json.loads(buf.getvalue())
+            text = io.StringIO()
+            with redirect_stdout(text):
+                R._print_audit_roadmap(reqs, d, d)
+        roadmap = data.get("roadmap") or []
+        self.assertTrue(any("pkg/gone.py" in line for line in roadmap), roadmap)
+        self.assertTrue(any("pkg/gone.py" in line for line in text.getvalue().splitlines()))
+
     def test_exemption_with_a_recorded_reason_is_clean(self):  # verifies: REQ-AUDIT-971#CASE-1
         r = self._req(exempt=["file-spread"],
                       body_extra="\n## Context\n- `file-spread` is the capability here.\n")

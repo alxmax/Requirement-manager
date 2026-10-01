@@ -3,6 +3,7 @@ load_requirements."""
 import os, re, sys
 
 from .model import Requirement
+from .sections import _fence_transition
 
 
 def _scalar_value(v):  # implements: ARCH-PARSE-001
@@ -91,18 +92,22 @@ def split_requirement_blocks(text):  # implements: REQ-MODULEFILE-056
     """Split one file's text into its requirement blocks, each ready for
     `parse_frontmatter`. A single-requirement file yields exactly one
     block, byte-identical to the whole text, so nothing about the
-    existing corpus changes."""
+    existing corpus changes. A `---`/`id:` pair inside a fenced example
+    (``` or ~~~) is not a block: the example is blanked before the split,
+    and the slices come back out of the original text. A fence that never
+    closes hides nothing: the whole text is split as it stands, so a stray
+    fence cannot swallow the blocks after it."""
     text = text.lstrip("\ufeff")
-    parts = _REQ_BLOCK_RE.split(text)
-    if len(parts) <= 1:
+    masked, fence = [], None
+    for line in text.splitlines(True):
+        end = len(line.rstrip("\r\n"))
+        fence, marker = _fence_transition(line[:end].lstrip(), fence)
+        masked.append(" " * end + line[end:] if fence or marker else line)
+    starts = [m.start() for m in _REQ_BLOCK_RE.finditer(text if fence else "".join(masked))]
+    if not starts:
         return [text]
-    out = []
-    if parts[0].strip():
-        # anything before the first block is a file preamble
-        out.append(parts[0])
-    for chunk in parts[1:]:
-        out.append("---\n" + chunk)
-    return out or [text]
+    return ([text[:starts[0]]] if text[:starts[0]].strip() else []) + [
+        text[a:b] for a, b in zip(starts, starts[1:] + [None])]
 
 
 class RequirementIndex(dict):  # implements: REQ-PARSE-890

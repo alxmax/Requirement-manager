@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v8.14.0` — 2026-10-01
+
+**Six edges the gate's own corpus did not show.**
+
+- An `*Answer (YYYY-MM-DD):*` line closes a verify-intent question when it is indented or written as the nested bullet `_findings.md` uses, and only when the date is a real day. `2026-02-31` leaves the question open (ADR-0058, REQ-FINDINGS-853)
+- A `---` / `id:` pair inside a ``` or ~~~ fence is an example, not a second requirement, so it can no longer shadow the real id (REQ-MODULEFILE-056)
+- The drift hash treats a ~~~ fence the way it already treats a ``` fence: the example is not part of the contract (REQ-SECTIONS-994)
+- A plan bar's `progress: true` is not 1%. A boolean is not a percentage, and the chart drops it
+- `gate --audit --json` includes the plan-drift lines the text audit already prints (REQ-AUDIT-970)
+- The fence reader is one function, now in `sections.py` where `tags`, `parse` and the section reader all import it downward: a fence opens on three or more backticks or tildes and closes on a bare line of the same character at least as long, so a closing line with an info string, or a shorter run, stays inside it. A fence that never closes hides nothing: the file is split as written, so a stray fence cannot swallow the requirement blocks after it (REQ-SECTIONS-994, REQ-MODULEFILE-056)
+- A fenced line is no longer read as the statement or the scenario of an atomic requirement
+- **One-time drift.** The drift hash reads fences more strictly than before, so a confirmed requirement whose normative text holds a `~~~` fence, a fenced `>` or `Scenario:` line, or a closing line with an info string can report DRIFT once. Re-read it, then run `sync --code .. --accept-drift`
+- No new core lines: the engine's core stays at 6,612 logical lines
+
 ## plugin `v8.13.0` — 2026-10-01
 
 **A decision question is checked for whoever has to answer it.**

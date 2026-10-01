@@ -89,7 +89,7 @@ Every bullet below is binding.
 - A gate section that raises fails the audit. Advice that crashes is missing advice; a gate
   that crashes reached no verdict, and reporting one is worse than reporting nothing.
 - `--json` emits the gate findings, the health record, the untagged count, the
-  exemptions and the corpus shape as one object.
+  exemptions, the corpus shape, and the roadmap lines the text report prints, as one object.
 
 ## Cases
 CASE-1 — one command runs them all
@@ -115,7 +115,8 @@ CASE-4 — a raising section does not take the report down
 CASE-5 — the structured form carries the same signals
   Given  any corpus
   When   `audit --json` runs
-  Then   the parsed object carries `gate`, `health`, `exemptions` and `shape`
+  Then   the parsed object carries `gate`, `health`, `exemptions` and `shape`. When the text
+         report has roadmap lines, the object carries those same lines under `roadmap`
 
 CASE-6 — a crashing gate section is not a clean gate
   Given  a gate section whose function raises

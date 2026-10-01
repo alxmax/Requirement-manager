@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "4933ef6946c74676a6550a11cef617e5cc752415e8f70f18b41dee6b96ade425",
+      "plugin/scripts/reqmap_engine/__init__.py": "85e294088f1ab2d7bea6ea502204cb92df97a5c8c7523f6bb1a17fb25b4e1f1a",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -47,7 +47,7 @@
       "plugin/scripts/reqmap_engine/acceptance.py#_acc_items": "f70f6f917516f68c9d65ffdbab342cb4766572a011429c67fae983dcaadcb14b",
       "plugin/scripts/reqmap_engine/mapmd.py#_node_area": "71c1497a43c949e2388931ad913ac1e371bce095196f41c0cad388e6de907ee0",
       "plugin/scripts/reqmap_engine/model.py#_area_of": "b78c929011eff1f7f955a917e759e6b56673998b0feef2c18590f3bc15c3cc94",
-      "plugin/scripts/reqmap_engine/targets.py": "f7d10d4b3fb0632831c237b359c3cfc650cf318307adc25d7d45b33522491f7a",
+      "plugin/scripts/reqmap_engine/targets.py": "abe0bbf0047da305f93a24018ca3b0b7872ad333324bd42ccbc1b6f77768e171",
       "plugin/scripts/reqmap_engine/text.py#_section": "160594884ea1bb820cad46c65c8eda0e6b107a5d13d93c27ef27d9f789293f45",
       "plugin/scripts/reqmap_engine/text.py#_section_raw": "a5c65a9e6e3dd0a0350f4c146d22c65451a0e7de64dfa9ca31ebab6ab273a69c",
       "plugin/scripts/reqmap_engine/text.py#_title": "51c31658b44ec1f4f9842114eea2b428852d59f73bcf9d5aa8d091a8af297d1a"
@@ -155,7 +155,7 @@
     },
     "REQ-ATOMICFORM-053": {
       "plugin/scripts/reqmap_engine/sections.py#_atomic_scenario_then_count": "57b4e9b26b960d16c5685223b05c451856a1aeae6c230b9edd5b61aa04d8d8aa",
-      "plugin/scripts/reqmap_engine/sections.py#_atomic_spans": "79d473c053a295afaaed4e9a468d3f99ad78dba29711ed5788c2f0503d0f6acc",
+      "plugin/scripts/reqmap_engine/sections.py#_atomic_spans": "a45eb2c18802e83789bff7a0e77e9cb1e85e8ceab3359ad306bb13fcd1a992a3",
       "plugin/scripts/reqmap_engine/sections.py#_atomic_story_bullets": "fdb42e8e67005a7a0303180e1facf588183b3cd934e49ddc0e458b748c7d0b81",
       "plugin/scripts/reqmap_engine/sections.py#_legacy_schema_ids": "64597282aa3cb7d587f5b3b7edd016a09ebf698ec3f7e4d59a3c9938a466ff5d"
     },
@@ -253,6 +253,9 @@
     "REQ-EXTRACT-981": {
       "plugin/scripts/reqmap_engine/candidates.py#_assign_arch_ids": "484c355bd14d39b456b7afbfd63078dfca02f4c1c95133137771f1e0774f29c0"
     },
+    "REQ-FINDINGS-853": {
+      "plugin/scripts/reqmap_engine/text.py#_answer_is_real": "5e39a59f37978fa230e9e122985eea4dae3bbb9b2f06b17b5b2c8e3791f890b0"
+    },
     "REQ-FINDINGS-854": {
       "plugin/scripts/reqmap_engine/findings.py#_render_findings_raw": "60fdf7357a7d438c70f0a7a6cc7db18ba07ae6fe69f9bdcf699b83f5c88ce52f"
     },
@@ -311,8 +314,8 @@
       "plugin/scripts/reqmap_engine/locks.py#_span_sha": "2201c9b41fbdeaa1c45487e171c048fb336e6bce56883b21b5aed5ee9416570b"
     },
     "REQ-MODULEFILE-056": {
-      "plugin/scripts/reqmap_engine/parse.py": "78a7be8ca3bef0ffbb19cbd06f56e1a26aaee29ff49f8d2aa57d81a7f2991e57",
-      "plugin/scripts/reqmap_engine/parse.py#split_requirement_blocks": "f14cf67189b2557e4bb6f302b39dd8134b7fe09c3a03de5f26ab2c22e8e99eb0",
+      "plugin/scripts/reqmap_engine/parse.py": "7a80b1ea0cab2659ad3944750ce9630440d3759f3743331d99bc86178dcc4998",
+      "plugin/scripts/reqmap_engine/parse.py#split_requirement_blocks": "2a04d6f568df2af1bce0d00f6d875a5e99fc596d391a1fbe43cdef3e2223ecdd",
       "plugin/scripts/reqmap_engine/text.py#_req_file": "387106965087e7723d9fa52e944af2190578d7131e12b5a4a74b916eac051b0a"
     },
     "REQ-NEWGONE-1034": {

@@ -47,25 +47,45 @@ _NORMATIVE_HEADING_RE = re.compile(
                        + ("input", "output")) + ")", re.I)
 
 
+# CommonMark fence opener/closer, shared by the tag scanner, the requirement-block
+# split and the section reader
+_FENCE_RE = re.compile(r'^(`{3,}|~{3,})')
+
+
+def _fence_transition(stripped, fence):
+    # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
+    # implements: REQ-SCAN-992
+    """(new_fence, is_marker) for one prose line: `is_marker` is True when
+    `stripped` is a fence opener/closer line itself (so the caller skips
+    yielding it), and `new_fence` is the fence state to carry into the next
+    line."""
+    fm = _FENCE_RE.match(stripped)
+    if not fm:
+        return fence, False
+    marker = fm.group(1)
+    rest = stripped[len(marker):].strip()
+    if fence is None:
+        return marker, True
+    if marker[0] == fence[0] and len(marker) >= len(fence) and not rest:
+        return None, True   # closer must be bare (no info string)
+    return fence, False
+
+
 def _body_lines(body):
     # implements: ARCH-SECTIONS-068  # implements: REQ-SECTIONS-994
     """Yield `(is_heading, line)` for every line of a requirement body
-    outside a ``` fence.
+    outside a fenced code block.
 
-    The fence is checked BEFORE the heading test, so a `## ` written
-    inside a fenced example is code, not a section boundary. Eight
-    readers of these files carried a copy of this two-line state machine
-    and `_has_section` carried none — which is why a heading inside a
-    fence satisfied the presence check while every reader of that
-    section came back empty.
+    Both CommonMark fences count, `` ``` `` and `~~~`, length-matched
+    the same way the tag scanner decides. The fence is checked BEFORE
+    the heading test, so a `## ` written inside a fenced example is
+    code, not a section boundary.
     """
-    fenced = False
+    fence = None
     for line in body.splitlines():
         s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
+        fence, marker = _fence_transition(s, fence)
+        if fence or marker:
             continue
         yield s.startswith("## "), line
 
@@ -145,9 +165,9 @@ def _atomic_spans(body):  # implements: REQ-ATOMICFORM-053
     _acc_blocks, _bullets) is handed a body and no meta. The frontmatter
     key is validated separately, as documentation."""
     story, scen, in_scen = [], [], False
-    for line in body.splitlines():
+    for is_heading, line in _body_lines(body):
         st = line.strip()
-        if st.startswith("## "):
+        if is_heading:
             # auto sections end the normative span
             break
         if st.startswith("# "):
