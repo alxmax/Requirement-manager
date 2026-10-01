@@ -50,7 +50,9 @@ def _parse_bar(raw):
     if isinstance(rid, str) and rid.strip() and rid.strip() != out["title"]:
         out["req"] = rid.strip()
     prog = raw.get("progress")
-    if isinstance(prog, (int, float)) and 0 <= prog <= 100:
+    # `true` is a bool, and bool is an int, so it would otherwise render
+    # as 1%. A percentage is a number, not a flag.
+    if not isinstance(prog, bool) and isinstance(prog, (int, float)) and 0 <= prog <= 100:
         out["progress"] = int(round(prog))
     return out
 

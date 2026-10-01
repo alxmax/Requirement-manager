@@ -102,6 +102,12 @@ def _json_audit_report(ws, signals, strict):
     # reporter was in.
     roadmap = _version_lines(ws.code_root, ws.reqs_dir)
     roadmap += _roadmap_lag_lines(reqs, ws.code_root)
+    # The text report appends plan-drift lines under the same "Roadmap"
+    # heading. Leaving them out of `--json` made a clean JSON audit hide
+    # a plan that cites code which is no longer there.
+    if ws.code_root:
+        roadmap += plan_drift_lines(plan_drift(
+            _read_roadmap(ws.code_root) or [], ws.code_root, ws.reqs_dir))
     if roadmap:
         out["roadmap"] = roadmap
     errs, warns = run_gate_rules(

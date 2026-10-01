@@ -297,6 +297,8 @@ Every bullet below is binding.
 - A block starts at a `---` line immediately followed by `id:`; each block loads as its own requirement.
 - A file holding a single block is read exactly as before — unchanged for every pre-existing one-requirement file.
 - A bare `---` used as a horizontal rule, not followed by `id:`, starts no new block.
+- A `---` line followed by `id:` inside a fenced code block, backtick or tilde, starts no
+  block. The fence holds an example of a requirement, not a requirement.
 - Confirming one requirement in a multi-block file changes that block's status alone.
 - Only the first block in a file may fall back to the filename for its id; a later block with no `id:` does not.
 
@@ -329,3 +331,8 @@ CASE-5 — only the first block may fall back to the filename for its id
   When   the engine loads the corpus
   Then   the first block resolves to the filename's id and the second block keeps its own
          distinct id — the fallback claims the filename once, not per block
+
+CASE-6 — a fenced example of a requirement is not one
+  Given  a requirement whose body contains a fenced example opening with `---` and `id:`
+  When   the engine loads the file
+  Then   the file still yields that one requirement, and the example stays inside its body

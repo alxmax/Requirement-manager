@@ -3284,6 +3284,13 @@ class PlanInput(unittest.TestCase):  # tested-by: REQ-PLANINPUT-1086
         self.assertNotIn("Phase one", text)
         self.assertNotIn("items", text)
 
+    def test_a_boolean_progress_is_not_one_percent(self):
+        # `bool` is an `int`, so `progress: true` used to render as 1%.
+        dropped = R._parse_bar({"title": "T", "start": "2026-09-20", "progress": True})
+        kept = R._parse_bar({"title": "T", "start": "2026-09-20", "progress": 40})
+        self.assertNotIn("progress", dropped)
+        self.assertEqual(40, kept["progress"])
+
     def test_the_bare_gate_warns_and_strict_fails(self):
         # verifies: REQ-PLANINPUT-1086#CASE-2
         with tempfile.TemporaryDirectory() as d:

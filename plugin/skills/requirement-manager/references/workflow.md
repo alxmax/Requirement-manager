@@ -192,8 +192,9 @@ attempt and rejected it).
    `<!-- audience: client|legal|data|measurement|developer -->` marker in the section;
    with none, the reader is a non-developer, and the "developer new to the project" of
    the Audience section does not apply to these questions. A question the code already
-   answers gets an indented `*Answer (YYYY-MM-DD):* …` line, with that exact label, never
-   translated: the question then counts as answered everywhere and the record stays where
+   answers gets an indented `*Answer (YYYY-MM-DD):* …` line, or the nested bullet
+   `- *Answer (YYYY-MM-DD):* …` that `_findings.md` writes, with that exact label, never
+   translated and with a real calendar day: the question then counts as answered everywhere and the record stays where
    it was asked (ADR-0058). Another language's labels go in `_config.json` under the
    `LINT_QUESTION_*` keys. `lint` warns, never fails, on a decision question that breaks
    the targets it can measure.
