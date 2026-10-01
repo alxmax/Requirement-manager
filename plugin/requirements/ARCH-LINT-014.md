@@ -20,7 +20,7 @@ satisfies: [SYS-QUALITY-104]
 
 Every bullet below is binding.
 - `gate` reports readability problems and structure problems in requirement files, scoped to non-draft requirements, and writes no file. [[REQ-LINT-863]]
-- The prose checks read the Contract and the Acceptance sections and no other section, skipping non-prose lines; `--strict` fails only on an error-severity finding. [[REQ-LINT-864]]
+- The prose checks read the Contract and the Acceptance sections and no other section, skipping non-prose lines; the question checks read only `## Verify intent`; `--strict` fails only on an error-severity finding. [[REQ-LINT-864]]
 
 ## Cases
 CASE-1
@@ -66,7 +66,8 @@ CASE-6
 
 **Notes**
 - The individual warn checks (stacked-conditions, statement-too-long,
-  ac-count, over-scoped, file-spread, vague-term, redundant-modal) are a separate
+  ac-count, over-scoped, file-spread, vague-term, redundant-modal, and the six
+  decision-question checks) are a separate
   capability — [[ARCH-LINTCHECKS-025]] — running under the same `gate` command.
 - Jargon-before-definition detection is intentionally out of scope for this version.
   Without a dictionary of project terms, any heuristic for "undefined jargon" produces
@@ -173,7 +174,7 @@ satisfies: [ARCH-LINT-014]
 > inside them, keeps every finding pointed at text an author actually needs to fix.
 
 Every bullet below is binding.
-- The prose checks read the Contract and the Acceptance sections, and no other section.
+- The prose checks read the Contract and the Acceptance sections, and no other section; the question checks read only `## Verify intent`.
 - The "Notes & limitations" section is exempt: only deep readers reach it, and it may stay dense.
 - The prose checks skip lines that are not prose — headings, table rows, blockquotes, and any
   line inside a fenced code block.

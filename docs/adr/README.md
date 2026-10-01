@@ -63,12 +63,14 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0050](0050-the-viewer-artifact-and-what-it-renders-are-two-capabilities.md) | The viewer artifact and what it renders are two capabilities | Accepted |
 | [0051](0051-the-oop-design-review-returns-to-the-engine.md) | The OOP design review returns to the engine, with two writing rules | Accepted |
 | [0052](0052-the-line-budget-moves-to-the-measured-size.md) | The line budget moves once, to the measured size | Superseded by 0053 |
-| [0053](0053-the-budget-measures-the-core-in-logical-lines.md) | The budget measures the core in logical lines, under a total-lines ceiling | Accepted |
+| [0053](0053-the-budget-measures-the-core-in-logical-lines.md) | The budget measures the core in logical lines, under a total-lines ceiling | Accepted (budget amended by 0060) |
 | [0054](0054-invalid-input-cannot-produce-a-passing-verdict.md) | Invalid input cannot produce a passing verdict | Accepted |
 | [0055](0055-map-detail-is-an-explicit-export-choice.md) | Map detail is an explicit export choice | Accepted |
 | [0056](0056-the-design-review-line-limit-is-120-columns.md) | The design review's line limit is 120 columns | Accepted |
 | [0057](0057-plan-input-the-engine-cannot-read-reaches-the-gate.md) | Plan input the engine cannot read reaches the gate | Accepted |
 | [0058](0058-an-answered-question-is-closed-where-it-stands.md) | An answered question is closed where it stands | Accepted |
+| [0059](0059-a-decision-question-is-linted-for-whoever-answers-it.md) | A decision question is linted for whoever answers it | Accepted |
+| [0060](0060-the-core-budget-rises-once-for-the-question-checks.md) | The core budget rises once, for the question checks | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

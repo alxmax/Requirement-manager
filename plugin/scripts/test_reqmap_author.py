@@ -1328,6 +1328,110 @@ class LayerMismatchLint(unittest.TestCase):  # tested-by: ARCH-LINTCHECKS-025  #
         self.assertIn("aggregate", R.VALID_LAYER)
 
 
+_QUESTION_CHECKS = {"question-too-long", "default-has-code", "context-repeats-question",
+                    "recommendation-without-source", "option-defers-decision",
+                    "question-no-audience"}
+_QUESTION = ("- **Does the nightly export run before the archive job?**\n"
+             "  a) Yes: nothing changes. *(recommended)*\n"
+             "  b) No: the archive job moves after the export.\n"
+             "  *Default:* stays a). A restore may miss signed files.\n"
+             "  *Context:* Restores need both copies taken in the same order.\n"
+             "  *Recommendation source:* the 2026-09-01 decision in the team notes.\n")
+_AUDIENCE = "<!-- audience: client -->\n"
+
+
+def _question_body(questions, marker=_AUDIENCE):
+    return ("# T\n\n## Description\n> x\n\nEvery bullet below is binding.\n- A clause.\n\n"
+            "## Cases\nCASE-1\n  Given a\n  When b\n  Then c\n\n"
+            "## Verify intent\n" + marker + questions)
+
+
+def _question_findings(questions, **kw):
+    r = {"meta": {"status": "confirmed"}, "body": _question_body(questions, **kw)}
+    return [f for f in R.lint_requirement("REQ-X-001", r) if f["check"] in _QUESTION_CHECKS]
+
+
+class QuestionLint(unittest.TestCase):  # tested-by: ARCH-LINTCHECKS-025  # tested-by: REQ-LINTCHECKS-1089
+    """A decision question in `## Verify intent` that the person answering would struggle to
+    read: six warnings, on the decision form only."""
+
+    def _checks(self, questions, **kw):
+        return [f["check"] for f in _question_findings(questions, **kw)]
+
+    def _swap(self, old, new, **kw):
+        self.assertIn(old, _QUESTION)
+        return self._checks(_QUESTION.replace(old, new), **kw)
+
+    def test_the_clean_question_has_no_finding(self):
+        self.assertEqual([], self._checks(_QUESTION))
+
+    def test_a_long_question_warns(self):  # verifies: REQ-LINTCHECKS-1089#CASE-1
+        short = "Does the nightly export run before the archive job?"
+        two = "Does it run first? Say so."
+        long16 = ("Does the nightly export of the signed files run before the archive job "
+                  "starts each day?")
+        self.assertEqual(["question-too-long"], self._swap(short, two))
+        self.assertEqual(16, len(long16.split()))
+        self.assertEqual(["question-too-long"], self._swap(short, long16))
+
+    def test_a_default_naming_a_file_and_line_warns(self):  # verifies: REQ-LINTCHECKS-1089#CASE-2
+        self.assertEqual(["default-has-code"], self._swap(
+            "A restore may miss signed files.", "A restore may miss files; see `export.py:120`."))
+        self.assertEqual([], self._swap("A restore may miss signed files.", "Runs at 03:15."))
+
+    def test_a_context_that_restates_the_question_warns(self):  # verifies: REQ-LINTCHECKS-1089#CASE-3
+        same = "The nightly export must run before the archive job each day."
+        old = "Restores need both copies taken in the same order."
+        self.assertEqual(["context-repeats-question"], self._swap(old, same))
+        self.assertEqual(["context-repeats-question"], self._swap(old, "**Restores** need both."))
+
+    def test_a_deferring_option_and_an_unsourced_recommendation_warn(self):  # verifies: REQ-LINTCHECKS-1089#CASE-4
+        self.assertEqual(["option-defers-decision"], self._swap(
+            "  *Default:*", "  c) The legal team decides.\n  *Default:*"))
+        self.assertEqual(["recommendation-without-source"], self._swap(
+            "  *Recommendation source:* the 2026-09-01 decision in the team notes.\n", ""))
+
+    def test_one_missing_audience_marker_warns_once(self):  # verifies: REQ-LINTCHECKS-1089#CASE-5
+        self.assertEqual(["question-no-audience"], self._checks(_QUESTION + _QUESTION, marker=""))
+        self.assertEqual([], self._checks(_QUESTION + _QUESTION))
+        # a plain old-style question is not a decision question: no marker, no finding
+        self.assertEqual([], self._checks("- Is the retry count of 3 intended?\n", marker=""))
+
+    def test_the_labels_and_markers_come_from_the_config(self):  # verifies: REQ-LINTCHECKS-1089#CASE-6
+        names = ("LINT_QUESTION_DEFAULT_LABELS", "LINT_QUESTION_AUDIENCE_MARKERS")
+        saved = {n: getattr(R.config, n) for n in names}
+        self.addCleanup(lambda: [setattr(R.config, n, v) for n, v in saved.items()])
+        R.config.apply_config({"LINT_QUESTION_DEFAULT_LABELS": ["Par d\u00e9faut"],
+                               "LINT_QUESTION_AUDIENCE_MARKERS": ["lecteur"]}, out=io.StringIO())
+        french = _QUESTION.replace("*Default:* stays a). A restore may miss signed files.",
+                                   "*Par d\u00e9faut:* stays a). See export.py:120.")
+        marker = "<!-- lecteur: client -->\n"
+        self.assertEqual(["default-has-code"], self._checks(french, marker=marker))
+        self.assertEqual(["question-no-audience"], self._checks(french.replace(
+            "Par d\u00e9faut", "Par defaut"), marker=_AUDIENCE))
+
+    def test_an_answered_question_is_silent_and_every_finding_is_a_warning(self):  # verifies: REQ-LINTCHECKS-1089#CASE-7
+        two = _QUESTION.replace("Does the nightly export run before the archive job?",
+                                "Does it run first? Say so.")
+        self.assertEqual([], self._checks(two + "  *Answer (2026-10-01):* a)\n"))
+        every = (two.replace("A restore may miss signed files.", "See `export.py:120`.")
+                 + "  c) The legal team decides.\n")
+        found = _question_findings(every, marker="")
+        self.assertEqual(4, len(found))
+        self.assertEqual({"warn"}, {f["severity"] for f in found})
+
+    def test_strict_exits_zero_and_names_the_warning(self):  # verifies: ARCH-LINTCHECKS-025#CASE-6
+        two = _QUESTION.replace("Does the nightly export run before the archive job?",
+                                "Does it run first? Say so.")
+        reqs = {"REQ-X-001": {"meta": {"status": "confirmed"},
+                              "body": _question_body(two + "- Is the retry count of 3 intended?\n")}}
+        out = io.StringIO()
+        with redirect_stdout(out):
+            code = R.cmd_lint(R.Workspace(reqs), strict=True)
+        self.assertEqual(0, code)
+        self.assertEqual(1, out.getvalue().count("question-too-long"))
+
+
 class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ-REVIEW-906
     BODY = ("---\nid: A-R-001\nstatus: confirmed\nlayer: feature\n---\n\n"
             "# Thing\n\n> WHY: it does the thing for a reason that matters to readers here.\n\n"

@@ -61,9 +61,13 @@
       "hash": "f37afd7a0755",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "ARCH-LINT-014": {
+      "hash": "231ccfc2d76e",
+      "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
+    },
     "ARCH-LINTCHECKS-025": {
-      "hash": "0b6f9b4355cf",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "325019483c55",
+      "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
     },
     "ARCH-MAP-007": {
       "hash": "4f93ce5f5feb",
@@ -260,6 +264,10 @@
     "REQ-LEVELRETROFIT-987": {
       "hash": "f275a981c830",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+    },
+    "REQ-LINT-864": {
+      "hash": "afcc4e90d981",
+      "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
     },
     "REQ-LINTCHECKS-866": {
       "hash": "0ecf01b2dc9e",

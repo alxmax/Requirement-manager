@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-30.3",
+  "engine_version": "2026-10-01",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -349,11 +349,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1469"
+          "loc": "plugin/scripts/test_reqmap_author.py:1573"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1933"
+          "loc": "plugin/scripts/test_reqmap_author.py:2037"
         },
         {
           "role": "implements",
@@ -412,11 +412,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1469"
+          "loc": "plugin/scripts/test_reqmap_author.py:1573"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1933"
+          "loc": "plugin/scripts/test_reqmap_author.py:2037"
         },
         {
           "role": "implements",
@@ -474,11 +474,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1469"
+          "loc": "plugin/scripts/test_reqmap_author.py:1573"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1933"
+          "loc": "plugin/scripts/test_reqmap_author.py:2037"
         },
         {
           "role": "implements",
@@ -1125,11 +1125,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1407"
+          "loc": "plugin/scripts/test_reqmap_author.py:1511"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2099"
+          "loc": "plugin/scripts/test_reqmap_author.py:2203"
         },
         {
           "role": "tested-by",
@@ -1248,7 +1248,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1407"
+          "loc": "plugin/scripts/test_reqmap_author.py:1511"
         },
         {
           "role": "tested-by",
@@ -1347,11 +1347,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1407"
+          "loc": "plugin/scripts/test_reqmap_author.py:1511"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2099"
+          "loc": "plugin/scripts/test_reqmap_author.py:2203"
         },
         {
           "role": "implements",
@@ -1417,7 +1417,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3060"
+          "loc": "plugin/scripts/test_reqmap_author.py:3164"
         },
         {
           "role": "implements",
@@ -1465,7 +1465,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3060"
+          "loc": "plugin/scripts/test_reqmap_author.py:3164"
         },
         {
           "role": "implements",
@@ -1512,7 +1512,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3060"
+          "loc": "plugin/scripts/test_reqmap_author.py:3164"
         },
         {
           "role": "implements",
@@ -2290,7 +2290,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:117"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:119"
         },
         {
           "role": "implements",
@@ -2341,15 +2341,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2189"
+          "loc": "plugin/scripts/test_reqmap_author.py:2293"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2711"
+          "loc": "plugin/scripts/test_reqmap_author.py:2815"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2776"
+          "loc": "plugin/scripts/test_reqmap_author.py:2880"
         },
         {
           "role": "implements",
@@ -2417,11 +2417,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2189"
+          "loc": "plugin/scripts/test_reqmap_author.py:2293"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2776"
+          "loc": "plugin/scripts/test_reqmap_author.py:2880"
         },
         {
           "role": "implements",
@@ -2481,7 +2481,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2189"
+          "loc": "plugin/scripts/test_reqmap_author.py:2293"
         },
         {
           "role": "implements",
@@ -2527,7 +2527,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2711"
+          "loc": "plugin/scripts/test_reqmap_author.py:2815"
         },
         {
           "role": "implements",
@@ -3016,11 +3016,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:242"
+          "loc": "plugin/scripts/reqmap_engine/config.py:256"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:260"
+          "loc": "plugin/scripts/reqmap_engine/config.py:274"
         }
       ],
       "test_exempt": null,
@@ -3072,11 +3072,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:242"
+          "loc": "plugin/scripts/reqmap_engine/config.py:256"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:260"
+          "loc": "plugin/scripts/reqmap_engine/config.py:274"
         }
       ],
       "test_exempt": null,
@@ -3443,31 +3443,31 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1547"
+          "loc": "plugin/scripts/test_reqmap_author.py:1651"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1633"
+          "loc": "plugin/scripts/test_reqmap_author.py:1737"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1727"
+          "loc": "plugin/scripts/test_reqmap_author.py:1831"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1821"
+          "loc": "plugin/scripts/test_reqmap_author.py:1925"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1973"
+          "loc": "plugin/scripts/test_reqmap_author.py:2077"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2529"
+          "loc": "plugin/scripts/test_reqmap_author.py:2633"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2869"
+          "loc": "plugin/scripts/test_reqmap_author.py:2973"
         },
         {
           "role": "tested-by",
@@ -3507,15 +3507,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:79"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:81"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:108"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:110"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:146"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -3558,11 +3558,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1547"
+          "loc": "plugin/scripts/test_reqmap_author.py:1651"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1973"
+          "loc": "plugin/scripts/test_reqmap_author.py:2077"
         },
         {
           "role": "implements",
@@ -3613,7 +3613,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1547"
+          "loc": "plugin/scripts/test_reqmap_author.py:1651"
         },
         {
           "role": "implements",
@@ -3672,15 +3672,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1547"
+          "loc": "plugin/scripts/test_reqmap_author.py:1651"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1633"
+          "loc": "plugin/scripts/test_reqmap_author.py:1737"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2529"
+          "loc": "plugin/scripts/test_reqmap_author.py:2633"
         },
         {
           "role": "implements",
@@ -3728,7 +3728,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2869"
+          "loc": "plugin/scripts/test_reqmap_author.py:2973"
         },
         {
           "role": "implements",
@@ -5171,11 +5171,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1447"
+          "loc": "plugin/scripts/test_reqmap_author.py:1551"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1985"
+          "loc": "plugin/scripts/test_reqmap_author.py:2089"
         },
         {
           "role": "tested-by",
@@ -5279,7 +5279,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1985"
+          "loc": "plugin/scripts/test_reqmap_author.py:2089"
         },
         {
           "role": "implements",
@@ -5344,7 +5344,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1985"
+          "loc": "plugin/scripts/test_reqmap_author.py:2089"
         },
         {
           "role": "implements",
@@ -5409,11 +5409,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1447"
+          "loc": "plugin/scripts/test_reqmap_author.py:1551"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1985"
+          "loc": "plugin/scripts/test_reqmap_author.py:2089"
         },
         {
           "role": "implements",
@@ -5471,7 +5471,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1859"
+          "loc": "plugin/scripts/test_reqmap_author.py:1963"
         },
         {
           "role": "implements",
@@ -5547,7 +5547,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3190"
+          "loc": "plugin/scripts/test_reqmap_author.py:3294"
         },
         {
           "role": "implements",
@@ -5614,19 +5614,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1747"
+          "loc": "plugin/scripts/test_reqmap_author.py:1851"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1946"
+          "loc": "plugin/scripts/test_reqmap_author.py:2050"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:18"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:19"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:61"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:63"
         }
       ],
       "test_exempt": null,
@@ -5679,11 +5679,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1747"
+          "loc": "plugin/scripts/test_reqmap_author.py:1851"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1946"
+          "loc": "plugin/scripts/test_reqmap_author.py:2050"
         },
         {
           "role": "implements",
@@ -6890,7 +6890,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2155"
+          "loc": "plugin/scripts/test_reqmap_author.py:2259"
         },
         {
           "role": "implements",
@@ -6944,11 +6944,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2155"
+          "loc": "plugin/scripts/test_reqmap_author.py:2259"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4077"
+          "loc": "plugin/scripts/test_reqmap_author.py:4181"
         },
         {
           "role": "implements",
@@ -7374,11 +7374,11 @@
       "intent": "Requirement documents are only useful if people can actually read them. This is the automatic proofreader's frame: it decides which files get checked, which sections count, how severe a finding is, and whether the build fails. Without it, the clear-writing rules rely on someone re-reading every file by hand, and prose slowly degrades until the documents stop being worth opening.",
       "contract": [
         "`gate` reports readability problems and structure problems in requirement files, scoped to non-draft requirements, and writes no file. [[REQ-LINT-863]]",
-        "The prose checks read the Contract and the Acceptance sections and no other section, skipping non-prose lines; `--strict` fails only on an error-severity finding. [[REQ-LINT-864]]"
+        "The prose checks read the Contract and the Acceptance sections and no other section, skipping non-prose lines; the question checks read only `## Verify intent`; `--strict` fails only on an error-severity finding. [[REQ-LINT-864]]"
       ],
       "verify": [],
       "notes": [
-        "The individual warn checks (stacked-conditions, statement-too-long, ac-count, over-scoped, file-spread, vague-term, redundant-modal) are a separate capability — [[ARCH-LINTCHECKS-025]] — running under the same `gate` command.",
+        "The individual warn checks (stacked-conditions, statement-too-long, ac-count, over-scoped, file-spread, vague-term, redundant-modal, and the six decision-question checks) are a separate capability — [[ARCH-LINTCHECKS-025]] — running under the same `gate` command.",
         "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check."
       ],
       "current_impl": [
@@ -7416,23 +7416,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:17"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:18"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:60"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:62"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:79"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:81"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:108"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:110"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:146"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
         },
         {
           "role": "implements",
@@ -7448,15 +7448,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Linter de lizibilitate a cerințelor",
-          "intent": "Documentele de cerințe sunt utile doar dacă oamenii chiar le pot citi. Acesta este cadrul corectorului automat: decide ce fișiere sunt verificate, ce secțiuni contează, cât de severă este o constatare, și dacă build-ul eșuează. Fără aceasta, regulile de scriere clară depind de cineva care recitește fiecare fișier manual, iar proza se degradează încet până când documentele nu mai merită deschise.",
-          "contract": "> Documentele de cerințe sunt utile doar dacă oamenii chiar le pot citi. Acesta este\n> cadrul corectorului automat: decide ce fișiere sunt verificate, ce secțiuni contează,\n> cât de severă este o constatare, și dacă build-ul eșuează. Fără aceasta, regulile de\n> scriere clară depind de cineva care recitește fiecare fișier manual, iar proza se\n> degradează încet până când documentele nu mai merită deschise.\n\nFiecare punct de mai jos este obligatoriu.\n- `gate` raportează probleme de lizibilitate și probleme de structură în fișierele de cerințe, limitat la cerințele care nu sunt drafturi, și nu scrie niciun fișier. [[REQ-LINT-863]]\n- Verificările de proză citesc secțiunile Contract și Acceptance și nicio altă secțiune, sărind peste liniile care nu sunt proză; `--strict` eșuează doar la o constatare de severitate error. [[REQ-LINT-864]]",
-          "acceptance": "CASE-1\n  Given  o cerință confirmată al cărei corp nu are niciun titlu `## Cases`\n  When   `gate` rulează\n  Then   raportează o eroare `missing-section` pentru acea cerință\n\nCASE-2\n  Given  o cerință draft cu o propoziție lungă\n  When   `gate` rulează\n  Then   nu raportează nimic pentru acea cerință, deoarece drafturile sunt în afara domeniului\n\nCASE-3\n  Given  o cerință al cărei titlu `## Cases` este prezent dar nu are niciun criteriu sub el\n  When   `gate` rulează\n  Then   raportează un avertisment `empty-section`\n\nCASE-4\n  Given  o linie normativă cu patru conjuncții în interiorul unui bloc de cod delimitat, în\n         secțiunea Acceptance\n  When   `gate` rulează\n  Then   nu raportează nicio constatare `stacked-conditions` pentru acea linie\n\nCASE-5\n  Given  un corpus ale cărui cerințe non-draft au toate ambele secțiuni\n  When   `lint --strict` rulează\n  Then   returnează zero chiar dacă au fost afișate avertismente\n\nCASE-6\n  Given  o cerință non-draft căreia îi lipsește o secțiune\n  When   `lint --strict` rulează\n  Then   returnează un cod de ieșire diferit de zero"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "REQ-LINT-863",
@@ -7494,7 +7486,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2117"
+          "loc": "plugin/scripts/test_reqmap_author.py:2221"
         },
         {
           "role": "tested-by",
@@ -7502,19 +7494,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:18"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:19"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:80"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:109"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:111"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:147"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:149"
         },
         {
           "role": "implements",
@@ -7565,7 +7557,7 @@
       "title": "Where the prose checks read from, and what fails a strict run",
       "intent": "A prose check that also read Notes or a code fence would flag text nobody meant as a readable sentence — a footgun explanation, a literal example, a `--strict` flag name. Scoping the checks to exactly the Contract and Acceptance sections, and skipping non-prose lines inside them, keeps every finding pointed at text an author actually needs to fix.",
       "contract": [
-        "The prose checks read the Contract and the Acceptance sections, and no other section.",
+        "The prose checks read the Contract and the Acceptance sections, and no other section; the question checks read only `## Verify intent`.",
         "The \"Notes & limitations\" section is exempt: only deep readers reach it, and it may stay dense.",
         "The prose checks skip lines that are not prose — headings, table rows, blockquotes, and any line inside a fenced code block.",
         "`gate` strips a bullet's leading marker before the checks read its text.",
@@ -7593,7 +7585,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2117"
+          "loc": "plugin/scripts/test_reqmap_author.py:2221"
         },
         {
           "role": "implements",
@@ -7609,15 +7601,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "De unde citesc verificările de proză, și ce eșuează o rulare strict",
-          "intent": "O verificare de proză care ar citi și Notes sau un bloc de cod ar semnala text pe care nimeni nu l-a intenționat drept propoziție lizibilă — o explicație de footgun, un exemplu literal, un nume de flag `--strict`. Limitarea verificărilor exact la secțiunile Contract și Acceptance, și omiterea liniilor non-proză din interiorul lor, păstrează fiecare finding îndreptat spre text pe care un autor chiar trebuie să-l repare.",
-          "contract": "> O verificare de proză care ar citi și Notes sau un bloc de cod ar semnala text pe care\n> nimeni nu l-a intenționat drept propoziție lizibilă — o explicație de footgun, un exemplu\n> literal, un nume de flag `--strict`. Limitarea verificărilor exact la secțiunile Contract\n> și Acceptance, și omiterea liniilor non-proză din interiorul lor, păstrează fiecare finding\n> îndreptat spre text pe care un autor chiar trebuie să-l repare.\n\nFiecare bullet de mai jos este obligatoriu.\n- Verificările de proză citesc secțiunile Contract și Acceptance, și nicio altă secțiune.\n- Secțiunea \"Notes & limitations\" este exemptată: doar cititorii aprofundați ajung la ea, și poate\n  rămâne densă.\n- Verificările de proză omit liniile care nu sunt proză — titluri, rânduri de tabel, blockquote-uri,\n  și orice linie dintr-un bloc de cod fenced.\n- `gate` elimină marcatorul de început al unui bullet înainte ca verificările să-i citească textul.\n- `gate` returnează zero implicit, indiferent ce a găsit.\n- Cu `--strict`, `gate` returnează non-zero când cel puțin un finding are severitate `error`.\n- Un avertisment nu schimbă niciodată codul de ieșire.",
-          "acceptance": "CASE-1 — este lintat doar textul primului titlu Contract care se potrivește\n  Given  o clauză scurtă de Contract urmată de un titlu `## Notes — contract addendum` care conține o linie run-on de 50 de cuvinte\n  When   rulează `_lint_prose` pe \"contract\"\n  Then   returnează doar linia scurtă de Contract, niciodată textul din Notes\n\nCASE-2 — o linie stacked-conditions din Notes nu se declanșează niciodată\n  Given  o cerință `confirmed` a cărei secțiune `## Notes & known limitations` conține o linie unită prin patru \"and\"-uri\n  When   rulează `lint_requirement` pe ea\n  Then   niciun finding `stacked-conditions` nu este raportat pentru acea linie\n\nCASE-3 — o linie blockquote cu patru joncțiuni nu este niciodată lintată ca proză\n  Given  o secțiune Contract al cărei singur conținut este o linie blockquote în forma stacked-conditions\n         (`>` urmat de patru conjuncții)\n  When   rulează `_lint_prose` pe \"contract\"\n  Then   returnează o listă goală — linia `>` este omisă, nu citită ca proză\n\nCASE-4 — o clauză \"It\" cu bullet declanșează totuși anonymous-subject\n  Given  un bullet de Contract scris ca `- It creates the folder.`\n  When   rulează `lint_requirement` pe ea\n  Then   raportează un avertisment `anonymous-subject`, dovedind că verificarea `^It` a văzut textul de\n         după eliminarea marcatorului `- `\n\nCASE-5 — o eroare missing-section nu eșuează o rulare non-strict\n  Given  o cerință confirmed fără secțiune `## Cases`\n  When   rulează `cmd_lint` fără `--strict`\n  Then   returnează codul de ieșire 0 în ciuda finding-ului de severitate error\n\nCASE-6 — o secțiune lipsă eșuează o rulare strict\n  Given  o cerință confirmed cu secțiune Contract dar fără titlu `## Cases`\n  When   rulează `cmd_lint` cu `--strict`\n  Then   returnează codul de ieșire 1 din cauza finding-ului de eroare; un avertisment singur ar lăsa\n         codul de ieșire la 0"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "ARCH-LINTCHECKS-025",
@@ -7632,7 +7616,8 @@
         "`ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many directories. [[REQ-LINTCHECKS-866]] details the behaviour.",
         "`atomic-bullet-then-mismatch` and `atomic-story-overlong` warn on an atomic-form story quote whose fact count disagrees with its Scenario; `layer-mismatch` warns on a fan-out `bus` requirement nothing depends on. [[REQ-LINTCHECKS-867]] details the behaviour.",
         "`vague-term` warns on a Contract bullet using an untestable quality word from the closed `LINT_VAGUE_TERMS` set. [[REQ-LINTCHECKS-868]] details the behaviour.",
-        "`redundant-modal` warns on a Contract bullet using `shall` or `must` — the closed `LINT_MODAL_WORDS` set. [[REQ-LINTCHECKS-869]] details the behaviour."
+        "`redundant-modal` warns on a Contract bullet using `shall` or `must` — the closed `LINT_MODAL_WORDS` set. [[REQ-LINTCHECKS-869]] details the behaviour.",
+        "`question-too-long`, `default-has-code`, `context-repeats-question`, `recommendation-without-source`, `option-defers-decision` and `question-no-audience` warn on a `## Verify intent` question asked as a decision that the person answering it would struggle to read. [[REQ-LINTCHECKS-1089]] details the behaviour."
       ],
       "verify": [],
       "notes": [
@@ -7649,7 +7634,7 @@
         "The check bodies live in `lint_requirement` (per-requirement checks) and `_lint_prose` (per-section prose walk) in `reqmap.py`; `_sentences` splits lines for the word and sentence counts.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  a Contract bullet spanning four sentences\n  When   `gate` runs\n  Then   it reports `statement-too-long`; the same bullet cut to three sentences reports\n         none, and a single 40-word sentence reports nothing, however long it runs\n\nCASE-2\n  Given  an Acceptance section with one criterion\n  When   `gate` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nCASE-3\n  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line\n  When   `gate` runs\n  Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under\n         `--strict`; the same story with 3 matching `Then` lines reports none\n\nCASE-4\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `gate` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none\n\nCASE-5\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` warnings (\"shall\" + \"must\"); a backticked\n         `shall_retry` identifier and a plain present-tense bullet report none",
+      "accept": "CASE-1\n  Given  a Contract bullet spanning four sentences\n  When   `gate` runs\n  Then   it reports `statement-too-long`; the same bullet cut to three sentences reports\n         none, and a single 40-word sentence reports nothing, however long it runs\n\nCASE-2\n  Given  an Acceptance section with one criterion\n  When   `gate` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nCASE-3\n  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line\n  When   `gate` runs\n  Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under\n         `--strict`; the same story with 3 matching `Then` lines reports none\n\nCASE-4\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `gate` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none\n\nCASE-5\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` warnings (\"shall\" + \"must\"); a backticked\n         `shall_retry` identifier and a plain present-tense bullet report none\n\nCASE-6\n  Given  a confirmed requirement whose Verify intent holds a decision question with a two-sentence\n         bold question beside a plain one-line question\n  When   `gate --strict` runs\n  Then   it reports one `question-too-long` warning for the decision question, none for the plain\n         one, and exits 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -7666,7 +7651,8 @@
         "REQ-LINTCHECKS-866",
         "REQ-LINTCHECKS-867",
         "REQ-LINTCHECKS-868",
-        "REQ-LINTCHECKS-869"
+        "REQ-LINTCHECKS-869",
+        "REQ-LINTCHECKS-1089"
       ],
       "members": [
         {
@@ -7679,15 +7665,19 @@
         },
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:1354"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_scan.py:569"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:17"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:18"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:60"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:62"
         },
         {
           "role": "implements",
@@ -7700,6 +7690,30 @@
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lintprose.py:202"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:17"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:33"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:40"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:49"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:55"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:80"
         },
         {
           "role": "implements",
@@ -7722,8 +7736,8 @@
       "milestone": "v1.14",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "REQ-LINTCHECKS-865",
@@ -7760,7 +7774,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:19"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:20"
         },
         {
           "role": "implements",
@@ -7818,7 +7832,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:19"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:20"
         }
       ],
       "test_exempt": null,
@@ -7863,7 +7877,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:20"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:21"
         }
       ],
       "test_exempt": null,
@@ -7914,7 +7928,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:20"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:21"
         }
       ],
       "test_exempt": null,
@@ -7948,7 +7962,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — redundant-modal fires on shall or must\n  Given  a Contract bullet reading \"The system shall retry once.\"\n  When   `gate` runs\n  Then   it reports a `redundant-modal` warning naming \"shall\"\n\nCASE-2 — redundant-modal ignores a backticked span\n  Given  a Contract bullet containing only the backticked identifier `` `shall_retry` ``\n  When   `gate` runs\n  Then   it reports no `redundant-modal` warning\n\nCASE-3 — redundant-modal reports each distinct term once\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` findings, one for \"shall\" and one for \"must\"",
+      "accept": "CASE-1 — redundant-modal fires on shall or must\n  Given  a Contract bullet reading \"The system shall retry once.\"\n  When   `gate` runs\n  Then   it reports a `redundant-modal` warning naming \"shall\"\n\nCASE-2 — redundant-modal ignores a backticked span\n  Given  a Contract bullet containing only the backticked identifier `` `shall_retry` ``\n  When   `gate` runs\n  Then   it reports no `redundant-modal` warning\n\nCASE-3 — redundant-modal reports each distinct term once\n  Given  a Contract bullet reading \"The system shall log the event and must retry once.\"\n  When   `gate` runs\n  Then   it reports two `redundant-modal` findings, one for \"shall\" and one for \"must\"\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -7965,7 +7979,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:21"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:22"
         }
       ],
       "test_exempt": null,
@@ -7973,15 +7987,89 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3,
-      "i18n": {
-        "ro": {
-          "title": "Verificarea redundant-modal",
-          "intent": "O secțiune Contract este obligatorie prin construcție — titlul deja o spune — deci \"shall\" și \"must\" în interiorul ei nu adaugă nimic altceva decât jargon juridic. `redundant-modal` semnalează oricare din cele două cuvinte astfel încât un bullet se citește ca o afirmație simplă, la timpul prezent, în loc de o clauză de contract care se preface a fi un document legal.",
-          "contract": "> O secțiune Contract este obligatorie prin construcție — titlul deja o spune — deci\n> \"shall\" și \"must\" în interiorul ei nu adaugă nimic altceva decât jargon juridic.\n> `redundant-modal` semnalează oricare din cele două cuvinte astfel încât un bullet se\n> citește ca o afirmație simplă, la timpul prezent, în loc de o clauză de contract care\n> se preface a fi un document legal.\n\nFiecare bullet de mai jos este obligatoriu.\n- Verificarea `redundant-modal` avertizează pe un bullet de Contract care folosește `shall` sau\n  `must` — setul închis `LINT_MODAL_WORDS`.\n- Blocurile de cod cu backtick sunt eliminate înainte să ruleze scanarea `redundant-modal`, la fel\n  ca la `vague-term`.\n- `redundant-modal` emite un finding per termen distinct.",
-          "acceptance": "CASE-1 — redundant-modal se declanșează pe shall sau must\n  Given  un bullet de Contract care se citește \"The system shall retry once.\"\n  When   rulează `gate`\n  Then   raportează un avertisment `redundant-modal` care numește \"shall\"\n\nCASE-2 — redundant-modal ignoră un span cu backtick\n  Given  un bullet de Contract conținând doar identificatorul cu backtick `` `shall_retry` ``\n  When   rulează `gate`\n  Then   nu raportează niciun avertisment `redundant-modal`\n\nCASE-3 — redundant-modal raportează fiecare termen distinct o singură dată\n  Given  un bullet de Contract care se citește \"The system shall log the event and must retry once.\"\n  When   rulează `gate`\n  Then   raportează două findings `redundant-modal`, unul pentru \"shall\" și unul pentru \"must\""
+      "covered": 3
+    },
+    {
+      "id": "REQ-LINTCHECKS-1089",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "Decision questions the person answering can read",
+      "intent": "A question in `## Verify intent` is answered by a person who may never have opened the code. Six warnings catch a decision question that person would struggle to read.",
+      "contract": [
+        "The checks run on an open question asked as a decision: a bold question, then one or more `a) …` option lines.",
+        "A plain question and an answered question get no finding.",
+        "`question-too-long` warns when the bold question runs over `LINT_QUESTION_WORDS` words (default 15) or `LINT_QUESTION_SENTENCES` sentences (default 1).",
+        "`default-has-code` warns when the default line names a `file:line` reference; the label spellings are `LINT_QUESTION_DEFAULT_LABELS` (default `Default`).",
+        "`context-repeats-question` warns when the context line holds bold text or repeats over `LINT_QUESTION_OVERLAP` of the question's words (default 0.5); the labels are `LINT_QUESTION_CONTEXT_LABELS`.",
+        "`recommendation-without-source` warns when a question carries more `LINT_QUESTION_RECOMMENDED_MARKS` marks than `LINT_QUESTION_SOURCE_LABELS` lines.",
+        "`option-defers-decision` warns once per option that holds a word from `LINT_QUESTION_DEFER_WORDS`.",
+        "`question-no-audience` warns once per requirement when no `LINT_QUESTION_AUDIENCE_MARKERS` comment such as `<!-- audience: client -->` appears in the section.",
+        "Every check is a warning, `--strict` included, and an empty list switches its check off."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1\n  Given  a decision question whose bold question holds two sentences, and another of 16 words\n  When   `gate` runs\n  Then   each reports `question-too-long`; the base question reports none\n\nCASE-2\n  Given  a default line reading `stays a); see export.py:120`\n  When   `gate` runs\n  Then   it reports `default-has-code`; a default without a file and line reports none\n\nCASE-3\n  Given  a context line holding bold text, and another repeating most of the question's words\n  When   `gate` runs\n  Then   each reports `context-repeats-question`\n\nCASE-4\n  Given  an option reading \"The legal team decides\", and a recommended option with no source line\n  When   `gate` runs\n  Then   they report `option-defers-decision` and `recommendation-without-source`\n\nCASE-5\n  Given  two decision questions and no audience marker\n  When   `gate` runs\n  Then   it reports exactly one `question-no-audience`; with a marker, none; a plain question alone, none\n\nCASE-6\n  Given  `_config.json` naming `Par défaut` as the default label and `lecteur` as the audience marker\n  When   `gate` runs\n  Then   a `Par défaut` line with a file and line reports `default-has-code`, and the marker silences the audience check\n\nCASE-7\n  Given  a two-sentence decision question carrying an `*Answer (2026-10-01):*` line\n  When   `gate` runs\n  Then   it reports no finding, and every finding the other cases name has warn severity",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-LINTCHECKS-025"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:1354"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:152"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lint.py:22"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:17"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:33"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:40"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:49"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:55"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lintquestions.py:80"
         }
-      }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "ARCH-MAP-007",
@@ -9800,7 +9888,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1633"
+          "loc": "plugin/scripts/test_reqmap_author.py:1737"
         },
         {
           "role": "tested-by",
@@ -11254,11 +11342,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2072"
+          "loc": "plugin/scripts/test_reqmap_author.py:2176"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2589"
+          "loc": "plugin/scripts/test_reqmap_author.py:2693"
         },
         {
           "role": "tested-by",
@@ -11323,7 +11411,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2072"
+          "loc": "plugin/scripts/test_reqmap_author.py:2176"
         },
         {
           "role": "implements",
@@ -11374,7 +11462,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2589"
+          "loc": "plugin/scripts/test_reqmap_author.py:2693"
         },
         {
           "role": "implements",
@@ -12127,7 +12215,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3629"
+          "loc": "plugin/scripts/test_reqmap_author.py:3733"
         },
         {
           "role": "implements",
@@ -12207,7 +12295,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3298"
+          "loc": "plugin/scripts/test_reqmap_author.py:3402"
         },
         {
           "role": "implements",
@@ -12259,7 +12347,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3351"
+          "loc": "plugin/scripts/test_reqmap_author.py:3455"
         },
         {
           "role": "implements",
@@ -12303,7 +12391,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3385"
+          "loc": "plugin/scripts/test_reqmap_author.py:3489"
         },
         {
           "role": "implements",
@@ -12361,7 +12449,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3415"
+          "loc": "plugin/scripts/test_reqmap_author.py:3519"
         },
         {
           "role": "implements",
@@ -12412,7 +12500,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3437"
+          "loc": "plugin/scripts/test_reqmap_author.py:3541"
         },
         {
           "role": "implements",
@@ -12493,7 +12581,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3549"
+          "loc": "plugin/scripts/test_reqmap_author.py:3653"
         },
         {
           "role": "implements",
@@ -12551,7 +12639,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3437"
+          "loc": "plugin/scripts/test_reqmap_author.py:3541"
         },
         {
           "role": "implements",
@@ -12604,7 +12692,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3670"
+          "loc": "plugin/scripts/test_reqmap_author.py:3774"
         },
         {
           "role": "implements",
@@ -12674,7 +12762,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3785"
+          "loc": "plugin/scripts/test_reqmap_author.py:3889"
         },
         {
           "role": "implements",
@@ -12838,15 +12926,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1821"
+          "loc": "plugin/scripts/test_reqmap_author.py:1925"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2321"
+          "loc": "plugin/scripts/test_reqmap_author.py:2425"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2814"
+          "loc": "plugin/scripts/test_reqmap_author.py:2918"
         },
         {
           "role": "tested-by",
@@ -12924,7 +13012,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2321"
+          "loc": "plugin/scripts/test_reqmap_author.py:2425"
         },
         {
           "role": "implements",
@@ -12982,7 +13070,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2321"
+          "loc": "plugin/scripts/test_reqmap_author.py:2425"
         },
         {
           "role": "implements",
@@ -13063,11 +13151,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2321"
+          "loc": "plugin/scripts/test_reqmap_author.py:2425"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2814"
+          "loc": "plugin/scripts/test_reqmap_author.py:2918"
         },
         {
           "role": "implements",
@@ -13134,7 +13222,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2321"
+          "loc": "plugin/scripts/test_reqmap_author.py:2425"
         },
         {
           "role": "implements",
@@ -13215,7 +13303,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1331"
+          "loc": "plugin/scripts/test_reqmap_author.py:1435"
         },
         {
           "role": "implements",
@@ -13280,7 +13368,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1331"
+          "loc": "plugin/scripts/test_reqmap_author.py:1435"
         },
         {
           "role": "implements",
@@ -13913,7 +14001,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3785"
+          "loc": "plugin/scripts/test_reqmap_author.py:3889"
         },
         {
           "role": "implements",
@@ -16511,7 +16599,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3841"
+          "loc": "plugin/scripts/test_reqmap_author.py:3945"
         },
         {
           "role": "implements",
@@ -16621,7 +16709,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3844"
+          "loc": "plugin/scripts/test_reqmap_author.py:3948"
         },
         {
           "role": "implements",
@@ -21456,6 +21544,10 @@
       "ARCH-LINTCHECKS-025"
     ],
     [
+      "REQ-LINTCHECKS-1089",
+      "ARCH-LINTCHECKS-025"
+    ],
+    [
       "ARCH-MAP-007",
       "SYS-VISUAL-106"
     ],
@@ -23369,6 +23461,24 @@
           "headline": "A full-repo code review turned up ten latent bugs and inefficiencies, none yet reported by a consumer"
         }
       ]
+    },
+    {
+      "month": "2026-10",
+      "count": 1,
+      "first": "2026-10-01",
+      "last": "2026-10-01",
+      "versions": [
+        "v8.13.0"
+      ],
+      "landmark": "v8.13.0",
+      "headline": "A decision question is checked for whoever has to answer it",
+      "entries": [
+        {
+          "version": "v8.13.0",
+          "date": "2026-10-01",
+          "headline": "A decision question is checked for whoever has to answer it"
+        }
+      ]
     }
   ],
   "commands": [
@@ -23586,8 +23696,8 @@
     }
   ],
   "design": {
-    "files": 121,
-    "clean_files": 119,
+    "files": 122,
+    "clean_files": 120,
     "score": 98,
     "candidates": {
       "encapsulation": 0,
@@ -23621,22 +23731,32 @@
   },
   "health": {
     "score": 100,
-    "total": 310,
-    "scored": 289,
+    "total": 311,
+    "scored": 290,
     "healthy": 289,
     "exempt": 0,
     "deprecated": 21,
     "confirmed": 289,
-    "implemented": 280,
-    "tested": 280,
-    "drafts": 0,
+    "implemented": 281,
+    "tested": 281,
+    "drafts": 1,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "unhealthy": [],
+    "reviewed_score": 100,
+    "reviewed_total": 289,
+    "unhealthy": [
+      {
+        "id": "REQ-LINTCHECKS-1089",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      }
+    ],
     "exempt_ids": []
   },
   "planning": {

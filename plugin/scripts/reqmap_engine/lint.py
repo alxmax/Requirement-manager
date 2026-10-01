@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from .decompose import _decompose_clause
 from .lintprose import _readability_lint, _terms_lint
+from .lintquestions import _question_lint
 from .lintrules import (
     LINT_STATUSES, LINT_STRICT_PROMOTE, _acceptance_lint, _graph_lint,
     _sections_lint, _shape_lint
@@ -18,10 +19,10 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):
     # implements: ARCH-FANOUT-052  # implements: REQ-LINT-863
     # implements: REQ-LINTCHECKS-865  # implements: REQ-LINTCHECKS-866
     # implements: REQ-LINTCHECKS-867  # implements: REQ-LINTCHECKS-868
-    # implements: REQ-LINTCHECKS-869
+    # implements: REQ-LINTCHECKS-869  # implements: REQ-LINTCHECKS-1089
     """Return a list of {severity, check, detail} findings for one
     requirement; an empty list means clean. Checks the Contract +
-    Acceptance sections only.
+    Acceptance sections, and the decision questions in Verify intent.
     `member_list` (optional [(role, file, line), ...]) enables the
     member-based file-spread check; when omitted, that check is skipped.
     `fanin` (optional int — how many requirements depend on this one)
@@ -40,6 +41,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):
     findings += _acceptance_lint(body, r, rid)
     findings += _shape_lint(rid, r, body, children)
     findings += _terms_lint(body)
+    findings += _question_lint(body)
     findings += _graph_lint(r, member_list, fanin)
     return [f for f in findings if f["check"] not in exempt]
 
@@ -150,7 +152,10 @@ def cmd_lint(ws, strict=False, decompose=False, only=None, quiet=False,
     level' rules made mechanical. Checks: missing-section (error),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low
     (warn), ac-count-high (warn), vague-term (warn), redundant-modal
-    (warn). Read-only.
+    (warn), and on a decision question in Verify intent question-too-long,
+    default-has-code, context-repeats-question,
+    recommendation-without-source, option-defers-decision,
+    question-no-audience (all warn). Read-only.
     Exit-neutral by default; with --strict it exits non-zero on any
     error-severity finding AND promotes structural checks (ac-count-high)
     to error severity.

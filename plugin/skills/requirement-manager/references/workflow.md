@@ -167,11 +167,36 @@ attempt and rejected it).
    as a placeholder and `findings` skips it. Once the human answers, fold the answer
    into the Contract (or Notes) and delete the bullet — the section should shrink toward
    empty as the requirement matures.
-   A question a reviewer can answer at a glance is asked as a decision: the question in
-   bold, one indented `a) …` line per option, and an indented `*Default:* …` line saying
-   what happens if nobody decides. An answer that changes nothing (the default stands) is
-   kept under the question as an indented `*Answer (YYYY-MM-DD):* …` line: the question
-   then counts as answered everywhere and the record stays where it was asked (ADR-0058).
+   A question a reviewer can answer at a glance is asked as a decision, in this form
+   (names and numbers invented):
+
+   ```
+   - **Does the nightly export run before the archive job?**
+     a) Yes: nothing changes. *(recommended)*
+     b) No: the archive job moves after the export.
+     *Default:* stays a). A restore may miss signed files.
+     *Context:* Restores need both copies taken in the same order.
+     *Recommendation source:* the 2026-09-01 decision in the team notes.
+     *For the developer:* `export.py:120`, [[ID]], the check command.
+   ```
+
+   Targets, never gates: the question is one sentence of at most 15 words, with no
+   "because" and no file name; an option is at most 12 words and says what happens for a
+   person; the default names the option ("stays a)") or "none of the options: <today's
+   state>", adds one consequence, runs at most 20 words and holds no `file:line`; the
+   context is one sentence of at most 30 words, has no bold text and never restates the
+   question; `*For the developer:*` carries every `file:line`, `[[ID]]` and check command;
+   the whole question stays at 80 words without the developer line. `*(recommended)*`
+   needs a `*Recommendation source:*` line. A deferral ("someone else decides") names an
+   audience, it is not an option. The audience is a
+   `<!-- audience: client|legal|data|measurement|developer -->` marker in the section;
+   with none, the reader is a non-developer, and the "developer new to the project" of
+   the Audience section does not apply to these questions. A question the code already
+   answers gets an indented `*Answer (YYYY-MM-DD):* …` line, with that exact label, never
+   translated: the question then counts as answered everywhere and the record stays where
+   it was asked (ADR-0058). Another language's labels go in `_config.json` under the
+   `LINT_QUESTION_*` keys. `lint` warns, never fails, on a decision question that breaks
+   the targets it can measure.
 
 **Prose files** (`.md`, `.html`) fall into three buckets — ignored, sync-only, or capability source: [references/prose-buckets.md](prose-buckets.md).
 
@@ -226,7 +251,7 @@ expected and acceptable.
 `{rule, severity, rid, msg}` records, and a requirement can switch one rule off for itself
 with `gate_exempt: [RM013]` in its frontmatter — the same shape as `lint_exempt:`. Codes are
 permanent. Thresholds (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, the fan-out
-bands, extra scanned extensions) can be set per repo in `requirements/_config.json`; an
+bands, the `LINT_QUESTION_*` limits and labels, extra scanned extensions) can be set per repo in `requirements/_config.json`; an
 unknown key or mistyped value is reported on stderr and skipped, and the gate lists it as
 `INPUT:config`.
 
