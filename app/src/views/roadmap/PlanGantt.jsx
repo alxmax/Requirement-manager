@@ -3,7 +3,7 @@
  * Selecting a bar, a version or a shipped month opens its note below
  * (REQ-VIEWER-999). The positions come from `ganttLayout.js`; this file
  * only holds the selection and puts the parts together. */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { layoutPlan } from "./ganttLayout.js";
 import { LaneLabels, Ruler } from "./GanttRuler.jsx";
 import { Guides, Lane, ShippedBand } from "./GanttLanes.jsx";
@@ -16,6 +16,13 @@ export function PlanGantt(props) {
     planning, history, roadmap, branch, locale, t, zoom, openSpec,
   } = props;
   const [picked, setPicked] = useState(null);
+  const noteRef = useRef(null);
+  // A note opens below the chart, often past the bottom of the canvas;
+  // bring it into view so nothing it lists is hidden under the fold.
+  useEffect(() => {
+    const el = noteRef.current;
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+  }, [picked]);
   // One selection for bars, shipped months and versions alike; selecting
   // the open one again closes its note.
   const toggle = (item) =>
@@ -53,7 +60,8 @@ export function PlanGantt(props) {
         </div>
       </div>
       {picked && (
-        <div style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
+        <div ref={noteRef}
+             style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
           <PickedNote picked={picked} lay={lay} roadmap={roadmap} t={t}
                       openSpec={openSpec}
                       onPick={setPicked} />

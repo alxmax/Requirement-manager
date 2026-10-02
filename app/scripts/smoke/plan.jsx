@@ -15,6 +15,7 @@ import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
   PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
 } from "../../src/views/roadmap/PlanGantt.jsx";
+import { EntryBody } from "../../src/views/roadmap/EntryBody.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
 import { dayStyle } from "../../src/views/roadmap/GanttRuler.jsx";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
@@ -411,6 +412,47 @@ test("gantt: an opened month lists every release with what it did",
     return html.includes("Ten findings fixed")
       && html.includes("The viewer splits")
       && html.indexOf("v2.29.0") < html.indexOf("v2.28.0");
+  })());
+
+// A month lists its releases in a short contents list, then every release
+// unfolded under it; an entry renders as
+// subtitles, nested lists and paragraphs, with no Markdown syntax left and
+// no second copy of the headline the row already shows.
+const SECTIONED = "**Sections land.**\n\nIntro with `a flag`.\n\n### Parser\n\n"
+  + "- **Lead.** first\n  - nested\n- second\n\n### Docs\n\n- one more";
+const FLAT = "**Flat entry.** Its own words.\n\n- a bullet\n  wrapped on";
+// verifies: REQ-HISTORY-1081#CASE-4
+test("gantt: a month shows contents, then every release's whole entry",
+  (() => {
+    const note = renderToString(
+      <ShippedNote t={(x) => x} onClose={noop} month={{
+        month: "2026-05", count: 2, first: "2026-05-02", last: "2026-05-14",
+        entries: [
+          { version: "v3.2.0", date: "2026-05-14", headline: "Sections land",
+            body: SECTIONED },
+          { version: "v3.1.0", date: "2026-05-02", headline: "No body" },
+        ] }} />);
+    const one = renderToString(
+      <EntryBody body={SECTIONED} headline="Sections land" />);
+    const two = renderToString(
+      <EntryBody body={FLAT} headline="Flat entry" />);
+    const clipped = renderToString(
+      <EntryBody body={"**" + "alpha ".repeat(12) + "end.**\n\nAfter."}
+                 headline={"alpha ".repeat(8).trim() + "…"} />);
+    const clean = (h) => !h.includes("**") && !h.includes("`");
+    return (note.match(/data-entry-body/g) || []).length === 1
+      && (note.match(/data-release=/g) || []).length === 2
+      && note.indexOf("data-contents") > -1
+      && note.indexOf("data-contents") < note.indexOf("data-entry-body")
+      && !note.includes("aria-expanded") && clean(one) && clean(two)
+      && /max-height:\s*65vh/.test(note) && /overflow-y:\s*auto/.test(note)
+      && /<h4[^>]*>Parser<\/h4>/.test(one) && one.includes("<h4")
+      && /<strong>Lead\.<\/strong> first<ul[^>]*><li>nested<\/li>/.test(one)
+      && /<code[^>]*>a flag<\/code>/.test(one)
+      && !one.includes("Sections land") && one.includes("Intro with")
+      && !two.includes("<h4") && !two.includes("Flat entry")
+      && two.includes("Its own words.") && two.includes("a bullet wrapped on")
+      && !clipped.includes("end.") && clipped.includes("After.");
   })());
 
 // verifies: REQ-PLANCADENCE-1000#CASE-1

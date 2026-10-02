@@ -453,10 +453,12 @@ Every bullet below is binding.
 - A heading carrying no date is skipped rather than dated by guesswork, because a version
   that never shipped has no place on a timeline of what shipped.
 - The headline is the entry's opening bold sentence; a bold run that ends in a colon is a
-  lead-in to the list under it, so the next standalone line is used instead.
+  lead-in to the list under it, so the next standalone line is used instead. Past 1000
+  characters the headline is cut on a word and ends with an ellipsis.
 - `_map.json` carries `history`: one row per calendar month with its release count, its first
   and last date, every version in it, the headline of its landmark release, and `entries`:
-  each release's version, date and headline, newest first.
+  each release's version, date, headline and the CHANGELOG entry as written (`body`),
+  newest first.
 - The landmark is the month's biggest step — a major over a minor over a patch, newest among
   equals — never simply its first or last release.
 
@@ -485,4 +487,15 @@ CASE-5 — a repo with no CHANGELOG yields nothing
   Given  a code root holding no `CHANGELOG.md`
   When   the history is read
   Then   it is empty and the chart draws no shipped band
+
+CASE-6 — an entry keeps the text under its heading
+  Given  a dated entry whose text holds a section heading and a nested bullet
+  When   the history is parsed and grouped by month
+  Then   that entry's `body` is the text under its heading, and the month carries it
+
+CASE-7 — a headline past 1000 characters is cut on a word
+  Given  an opening bold sentence longer than 1000 characters
+  When   its headline is taken
+  Then   the headline ends at a word boundary with an ellipsis, and a shorter
+         sentence is kept whole
 
