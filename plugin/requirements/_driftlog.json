@@ -134,8 +134,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "7ff2b01618c0",
-      "reason": null
+      "hash": "abf8e714933e",
+      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -242,8 +242,12 @@
       "reason": "REQ-HEALTH-968: the score names its exemptions (CASE-4)"
     },
     "REQ-HISTORY-1003": {
-      "hash": "5796b765d6d6",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "b6a46a69e149",
+      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
+    },
+    "REQ-HISTORY-1081": {
+      "hash": "c62dea5ebd08",
+      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
     },
     "REQ-INIT-860": {
       "hash": "bf4e002a3da1",

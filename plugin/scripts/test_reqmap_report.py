@@ -2809,6 +2809,62 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         self.assertEqual("The breaking rename of every verb",
                          next(e for e in row["entries"] if e["version"] == "v2.0.0")["headline"])
 
+    def test_each_entry_carries_its_whole_body(self):  # verifies: REQ-HISTORY-1003#CASE-6
+        # The headline names a release; the body says what shipped in it. The month
+        # note unfolds the body, so it must arrive whole: sections, nested bullets and
+        # an entry with no `###` at all, each cut at the next heading of any kind.
+        log = "\n".join([
+            "## [3.2.0] - 2026-05-14",
+            "",
+            "**Sections and nesting.**",
+            "",
+            "Intro paragraph.",
+            "",
+            "### Parser",
+            "",
+            "- **Lead.** a first bullet",
+            "  - a nested bullet",
+            "- a second bullet with `code`",
+            "",
+            "### Docs",
+            "",
+            "- one more",
+            "",
+            "## [3.1.0] - 2026-05-02",
+            "",
+            "**Flat.** No sections here.",
+            "",
+            "- only a bullet",
+            "",
+            "## Unreleased",
+            "",
+            "- not part of 3.1.0",
+        ])
+        got = R.history.parse_changelog(log)
+        sectioned, flat = got[0]["body"], got[1]["body"]
+        self.assertTrue(sectioned.startswith("**Sections and nesting.**"))
+        self.assertTrue(sectioned.endswith("- one more"))
+        for part in ("### Parser", "  - a nested bullet", "### Docs"):
+            self.assertIn(part, sectioned)
+        self.assertEqual("**Flat.** No sections here.\n\n- only a bullet", flat)
+        rows = R.history.by_month(got)
+        self.assertEqual([sectioned, flat], [e["body"] for e in rows[0]["entries"]])
+
+    def test_a_long_headline_is_cut_on_a_word(self):  # verifies: REQ-HISTORY-1003#CASE-7
+        sentence = ("alpha " * 200).strip()
+        self.assertGreater(len(sentence), R.history.HEADLINE_MAX)
+        got = R.history._headline("**" + sentence + ".**\n")
+        self.assertTrue(got.endswith("…"))
+        self.assertLessEqual(len(got), R.history.HEADLINE_MAX + 1)
+        self.assertTrue(sentence.startswith(got[:-1]))
+        self.assertTrue(got[:-1].endswith("alpha"))
+        whole = ("word " * 30).strip()
+        self.assertLess(len(whole), R.history.HEADLINE_MAX)
+        self.assertEqual(whole, R.history._headline("**" + whole + ".**\n"))
+        solid = "A" * (R.history.HEADLINE_MAX + 40)
+        hard = R.history._headline("**" + solid + ".**\n")
+        self.assertEqual("A" * R.history.HEADLINE_MAX + "…", hard)
+
     def test_a_repo_with_no_changelog_yields_nothing(self):  # verifies: REQ-HISTORY-1003#CASE-5
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual([], R.history.read_history(d))
@@ -2833,6 +2889,8 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
             payload = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
         self.assertEqual(1, len(payload["history"]))
         self.assertEqual("v2.0.0", payload["history"][0]["landmark"])
+        newest = payload["history"][0]["entries"][0]
+        self.assertIn("A patch", newest["body"])
 
 
 class PlanDrift(unittest.TestCase):  # tested-by: ARCH-PLANDRIFT-069  # tested-by: REQ-PLANDRIFT-1002

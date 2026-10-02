@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.15.0` — 2026-10-02
+
+**A shipped month opens onto the CHANGELOG entry, not only its headline.**
+
+- Each parsed release carries `body`, the text under its heading, and the month's `entries` carry it too (REQ-HISTORY-1003)
+- A headline past 1000 characters is cut on a word and ends with an ellipsis. A shorter sentence is kept whole, so a title is no longer sliced mid-word at 120 characters
+- The month note opens with one contents line per release, then every release unfolded: sections, nested bullets and paragraphs, without a second copy of the headline. The note scrolls inside itself and is brought into view when it opens (REQ-HISTORY-1081)
+- No new core lines: the engine's core stays at 6,612 logical lines
+
 ## plugin `v8.14.0` — 2026-10-01
 
 **Six edges the gate's own corpus did not show.**

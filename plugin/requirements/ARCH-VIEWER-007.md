@@ -23,7 +23,7 @@ Every bullet below is binding.
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
-- The viewer draws the shipped months the engine emitted on the plan's own timeline, and a month opens to every release in it. [[REQ-HISTORY-1081]]
+- The viewer draws the shipped months the engine emitted on the plan's own timeline, and a month opens to every release in it: a short contents list, then each release's CHANGELOG entry. [[REQ-HISTORY-1081]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
@@ -893,8 +893,10 @@ Every bullet below is binding.
   timeline.
 - The row shows the month's headline, not its list of versions.
 - With no `history` in the export, no Shipped band is drawn.
-- Selecting a shipped month opens a note listing every release in it, newest first,
-  each with its date and headline.
+- Selecting a shipped month opens a note. A short contents line per release sits
+  first, newest first, and under it every release stays unfolded, with its date,
+  its headline and its CHANGELOG entry as written.
+- The note scrolls inside itself, so a long month does not push the chart away.
 
 ## Cases
 CASE-1 — one band row per shipped month, labelled by its landmark
@@ -913,9 +915,10 @@ CASE-3 — no history means no band
   Then   no Shipped band is drawn
 
 CASE-4 — a shipped month opens to what was done in it
-  Given  a month holding two releases, each with a headline
+  Given  a month holding two releases, each with a headline and a CHANGELOG entry
   When   the reader selects that month on the chart
-  Then   a note lists both releases, newest first, each with its date and headline
+  Then   a note lists both in a contents list, newest first, then unfolds each
+         with its date, its headline and its entry, and the note scrolls in itself
 
 ## Context
 **Notes**

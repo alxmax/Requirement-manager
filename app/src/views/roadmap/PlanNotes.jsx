@@ -1,6 +1,8 @@
 // implements: ARCH-VIEWER-007
 /* The note that opens below the Plan when a bar, a version or a shipped
  * month is selected. */
+import { useRef } from "react";
+import { EntryBody } from "./EntryBody.jsx";
 
 /** ROADMAP.md keeps a note under an item as an HTML comment, which is how
  *  a plan file hides it from a Markdown reader — the markers are
@@ -44,10 +46,14 @@ export function onActivate(fn) {
   };
 }
 
+/* A note never grows past two thirds of the screen: it scrolls inside itself, so a
+   long one (a bar with a hundred items, a month with its releases
+   unfolded) does not push the chart out of view. */
 const NOTE_BOX = {
   marginTop: 12, padding: "14px 16px", borderRadius: 6,
   background: "var(--surface)", border: "1px solid var(--border-soft)",
   borderLeft: "3px solid var(--accent-2)", maxWidth: 760,
+  maxHeight: "65vh", overflowY: "auto", boxSizing: "border-box",
 };
 const NOTE_LIST = {
   margin: "10px 0 0", padding: 0, listStyle: "none", display: "grid", gap: 6,
@@ -81,10 +87,49 @@ function NoteHead({ title, meta, t, onClose }) {
 
 const say = (t, text) => (t ? t(text) : text);
 
-/** A shipped month, opened: every release in it with its CHANGELOG
- *  headline, newest first.
+const TOC_ROW = {
+  ...NOTE_ROW, ...LINK, color: "var(--fg)", textAlign: "left", width: "100%",
+  alignItems: "baseline", minWidth: 0, overflow: "hidden",
+};
+const TOC_HEAD = {
+  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+  minWidth: 0, flex: 1,
+};
+const ENTRY = {
+  marginTop: 14, paddingTop: 10, borderTop: "1px solid var(--border-soft)",
+};
+
+/** One release in a shipped month, always unfolded: its row, then its whole
+ *  CHANGELOG entry under it. */
+function ShippedEntry({ e, entryRef }) {
+  return (
+    <section ref={entryRef} style={ENTRY} data-release={e.version}>
+      <div style={NOTE_ROW}>
+        <strong style={VERSION}>{e.version}</strong>
+        {e.date && (
+          <span style={{ color: "var(--fg-faint)", minWidth: 78 }}>
+            {e.date}
+          </span>
+        )}
+        <span style={{ minWidth: 0, flex: 1, overflowWrap: "anywhere" }}>
+          {e.headline || ""}
+        </span>
+      </div>
+      {e.body && <EntryBody body={e.body} headline={e.headline} />}
+    </section>
+  );
+}
+
+/** A shipped month, opened: a short contents list of its releases (one
+ *  line each, newest first; a click jumps to the release), then every
+ *  release with its whole CHANGELOG entry, unfolded.
  *  implements: REQ-HISTORY-1081 */
 export function ShippedNote({ month, t, onClose }) {
+  const rows = useRef({});
+  const jump = (version) => {
+    const el = rows.current[version];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: "start" });
+  };
   const entries = Array.isArray(month.entries) && month.entries.length
     ? month.entries : (month.versions || []).map((v) => ({ version: v }));
   const meta =
@@ -92,19 +137,25 @@ export function ShippedNote({ month, t, onClose }) {
   return (
     <div style={NOTE_BOX} data-note="month">
       <NoteHead title={month.month} t={t} onClose={onClose} meta={meta} />
-      <ul style={NOTE_LIST}>
+      <ul style={NOTE_LIST} data-contents="">
         {entries.map((e) => (
-          <li key={e.version} style={NOTE_ROW}>
-            <strong style={VERSION}>{e.version}</strong>
-            {e.date && (
-              <span style={{ color: "var(--fg-faint)", minWidth: 78 }}>
-                {e.date}
-              </span>
-            )}
-            <span>{e.headline || ""}</span>
+          <li key={e.version} style={{ minWidth: 0 }}>
+            <button type="button" style={TOC_ROW} onClick={() => jump(e.version)}>
+              <strong style={VERSION}>{e.version}</strong>
+              {e.date && (
+                <span style={{ color: "var(--fg-faint)", minWidth: 78 }}>
+                  {e.date}
+                </span>
+              )}
+              <span style={TOC_HEAD}>{e.headline || ""}</span>
+            </button>
           </li>
         ))}
       </ul>
+      {entries.map((e) => (
+        <ShippedEntry key={e.version} e={e}
+                      entryRef={(el) => { rows.current[e.version] = el; }} />
+      ))}
     </div>
   );
 }
@@ -190,7 +241,8 @@ function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
 export function PickedNote({ picked, lay, roadmap, t, openSpec, onPick }) {
   const close = () => onPick(null);
   if (picked.kind === "month") {
-    return <ShippedNote month={picked} t={t} onClose={close} />;
+    return <ShippedNote key={picked.key} month={picked} t={t}
+                        onClose={close} />;
   }
   if (picked.kind === "version") {
     return <VersionNote version={picked} bars={lay.bars} t={t}

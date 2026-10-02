@@ -35,8 +35,9 @@ _HEADING_RE = re.compile(r"^##\s", re.M)
 _BOLD_RE = re.compile(r"^\*\*(.+?)\*\*", re.S)
 HISTORY_FILES = ("CHANGELOG.md",)
 # A headline is a label on a timeline, not the entry itself. Past this the
-# chart shows a paragraph where it wanted a caption.
-HEADLINE_MAX = 120
+# chart shows a paragraph where it wanted a caption, so the cut is on a
+# word and the entry's own text still travels whole in `body`.
+HEADLINE_MAX = 1000
 
 
 def _headline(body):  # implements: REQ-HISTORY-1003
@@ -64,8 +65,10 @@ def _headline(body):  # implements: REQ-HISTORY-1003
         # sentence, so keep reading for one that stands alone.
         if not text or text.endswith(":"):
             continue
-        return text[:HEADLINE_MAX].rstrip() + (
-            "…" if len(text) > HEADLINE_MAX else "")
+        return text if len(text) <= HEADLINE_MAX else (
+            text[:HEADLINE_MAX].rsplit(" ", 1)[0]
+            if " " in text[:HEADLINE_MAX] else text[:HEADLINE_MAX]
+        ).rstrip() + "…"
     return ""
 
 
@@ -85,7 +88,12 @@ def _weight(version):  # implements: REQ-HISTORY-1003
 
 
 def parse_changelog(text):  # implements: REQ-HISTORY-1003
-    """[{version, date, headline}] newest first. Pure.
+    """[{version, date, headline, body}] newest first. Pure.
+
+    `body` is the entry exactly as written under its heading, so a reader
+    who opens a release sees everything that shipped in it, not only the
+    headline. It stays Markdown: splitting it into sections is the
+    viewer's job, and the engine keeps no second parser for it.
 
     An entry with no date is SKIPPED, not dated by guesswork: this repo
     carries `## plugin `v3.5.0` — superseded, never released`, and a
@@ -100,7 +108,8 @@ def parse_changelog(text):  # implements: REQ-HISTORY-1003
         version = next(g for g in m.groups()[:3] if g)
         out.append({
             "version": version if version.startswith("v") else "v" + version,
-            "date": m.group(4), "headline": _headline(text[m.end():end])})
+            "date": m.group(4), "headline": _headline(text[m.end():end]),
+            "body": text[m.end():end].strip()})
     return out
 
 
@@ -160,7 +169,7 @@ def by_month(entries):  # implements: REQ-HISTORY-1003
     since we started", not "when exactly did v5.12.1 land". `landmark`
     and `headline` come from the month's biggest step, not its first or
     last release — see `_weight`. `versions` keeps every version in it,
-    and `entries` each one's date and headline, newest first, so
+    and `entries` each one's date, headline and body, newest first, so
     selecting the month shows what was done in it and nothing is lost by
     grouping."""
     months = {}
@@ -173,7 +182,7 @@ def by_month(entries):  # implements: REQ-HISTORY-1003
         row["count"] += 1
         row["entries"].insert(0, {
             "version": e["version"], "date": e["date"],
-            "headline": e["headline"]})
+            "headline": e["headline"], "body": e["body"]})
         row["last"] = e["date"]
         row["versions"].append(e["version"])
         if (not row["landmark"]
