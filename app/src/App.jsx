@@ -48,7 +48,7 @@ export const openScope = (setFocus, setView) => (key) => {
 
 /** A rail reading's click: open Problems on the tab listing the rows
  * behind that number.
- * implements: REQ-VIEWER-1084 */
+ * implements: REQ-VIEWER-1090 */
 export const openTab = (setTab, setView) => (tab) => {
   setTab(tab);
   setView("problems");
