@@ -10,6 +10,8 @@ import {
   defaultExpanded, allExpanded, keepSetFor, flattenTree, hasOpenQuestions,
 } from "../lib/tree.js";
 import { ExplorerFilters } from "./explorer/ExplorerFilters.jsx";
+import { Neighborhood } from "./explorer/Neighborhood.jsx";
+import { shownStatus } from "../lib/ui.jsx";
 
 function isOrphan(r) {
   return !!ENFORCED[r.status] && r.layer !== "need" && r.layer !== "aggregate"
@@ -17,9 +19,9 @@ function isOrphan(r) {
 }
 
 function statusDot(s) {
-  return s === "confirmed" ? "var(--status-confirmed)"
-    : s === "in-progress" ? "var(--status-drift)"
-    : s === "deprecated" ? "var(--fg-faint)"
+  const k = shownStatus(s);
+  return k === "confirmed" ? "var(--status-confirmed)"
+    : k === "deprecated" ? "var(--fg-faint)"
     : "var(--status-draft)";
 }
 
@@ -58,7 +60,7 @@ function Row({ row, selected, onSelect, onToggle }) {
         {row.hasChildren && !row.expanded && (
           <span className="ex-count">{chip}</span>
         )}
-        <span className="ex-dot" title={r.status}
+        <span className="ex-dot" title={shownStatus(r.status)}
               style={{ background: statusDot(r.status) }} />
       </span>
     </div>
@@ -118,7 +120,8 @@ const flip = (setter) => (key) => setter((prev) => {
  *  orphans. */
 function useExplorerFilters(focus, clearFocus) {
   const [level, setLevel] = useState({});
-  const focused = () => (focus && focus !== "orphan" ? { [focus]: true } : {});
+  const slice = focus === "in-progress" ? "draft" : focus;
+  const focused = () => (slice && slice !== "orphan" ? { [slice]: true } : {});
   const [status, setStatus] = useState(focused);
   const [onlyQuestions, setOnlyQuestions] = useState(false);
   const [onlyOrphans, setOnlyOrphans] = useState(focus === "orphan");
@@ -144,7 +147,7 @@ function useMatched(f) {
     }
     return REQUIREMENTS.filter((r) =>
       (!anyLevel || f.level[levelOf(r)]) &&
-      (!anyStatus || f.status[r.status]) &&
+      (!anyStatus || f.status[shownStatus(r.status)]) &&
       (!f.onlyQuestions || hasOpenQuestions(r)) &&
       (!f.onlyOrphans || isOrphan(r))
     ).map((r) => r.id);
@@ -243,7 +246,10 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
         {sel
           ? <SpecDoc r={sel} onNav={setSelId} head={head}
               after={
-                <ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />
+                <>
+                  <Neighborhood sel={sel} onNav={setSelId} />
+                  <ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />
+                </>
               } />
           : <div className="ex-none">{t("No requirement selected.")}</div>}
       </div>

@@ -1,6 +1,6 @@
 // implements: ARCH-VIEWER-007
 import {
-  Pill, Btn, statusKind, mdInline, reqLinkProps,
+  Pill, Btn, statusKind, shownStatus, mdInline, reqLinkProps,
 } from "../../lib/ui.jsx";
 import { Icon, LocateGlyph } from "../../lib/icons.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
@@ -156,7 +156,7 @@ export function MapDetailPanel({ r, onClose, onLocate, onOpenSpec }) {
     <aside className="panel">
       <div className="panel-head">
         <span className="pid">{r.id}</span>
-        <Pill kind={statusKind(r.status)}>{r.status}</Pill>
+        <Pill kind={statusKind(r.status)}>{shownStatus(r.status)}</Pill>
         <Pill kind={r.layer}>{r.layer}</Pill>
         <button className="locate-btn"
                 title={t("center & highlight in the map")}

@@ -134,8 +134,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "6b62163d5b82",
-      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
+      "hash": "3a4525a65f13",
+      "reason": "the neighborhood and the four trace links close the spec"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -465,6 +465,14 @@
       "hash": "ebb1422db3b0",
       "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
     },
+    "REQ-VIEWER-1082": {
+      "hash": "9cb99938c164",
+      "reason": "an in-progress requirement is shown and counted as a draft"
+    },
+    "REQ-VIEWER-1084": {
+      "hash": "9815086fadec",
+      "reason": "gate errors and warnings are listed on the Health tab"
+    },
     "REQ-VIEWER-1087": {
       "hash": "13513264942c",
       "reason": null
@@ -474,12 +482,12 @@
       "reason": null
     },
     "REQ-VIEWER-942": {
-      "hash": "10d7eaf815db",
-      "reason": "_map.json carries accept once and depends_on once; the viewer folds acc (REQ-MAP-870 CASE-4/7, REQ-VIEWER-942 CASE-4)"
+      "hash": "4a922f2f7888",
+      "reason": "the neighborhood and the four trace links close the spec"
     },
     "REQ-VIEWER-945": {
-      "hash": "65092c5acbe0",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "38af4eba4fbe",
+      "reason": "an in-progress requirement is shown and counted as a draft"
     },
     "REQ-VIEWER-969": {
       "hash": "ad8abe212939",

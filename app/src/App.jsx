@@ -2,7 +2,6 @@
 // implements: REQ-VIEWER-1082
 import { useState, useEffect, useMemo, Component } from "react";
 import { REQUIREMENTS } from "./lib/data.js";
-import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 import { ExplorerView } from "./views/ExplorerView.jsx";
@@ -58,7 +57,6 @@ export const openTab = (setTab, setView) => (tab) => {
 export default function App() {
   const [view, setView] = useState("explorer");
   const [selId, setSelId] = useState(() => readHashId() || "ARCH-CHECK-006");
-  const [highlightId, setHighlightId] = useState(null);
   const [query, setQuery] = useState("");
   const [theme, setTheme] = useState("light");
   const [focus, setFocus] = useState(null);
@@ -112,11 +110,6 @@ export default function App() {
           {view === "explorer" && (
             <ExplorerView selId={selId} setSelId={setSelId} focus={focus}
                           clearFocus={() => setFocus(null)} />
-          )}
-          {view === "map" && (
-            <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
-                     highlightId={highlightId}
-                     setHighlightId={setHighlightId} />
           )}
           {view === "problems" && (
             <ProblemsView openSpec={openSpec} problems={problems}

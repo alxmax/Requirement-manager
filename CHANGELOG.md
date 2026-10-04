@@ -8,6 +8,9 @@
 - The block shows the version, and for a patch group how many releases it holds. Releases that start on the same day share one block, labelled from the lowest version to the highest (`v5.10.x-v6.3.0`). Opening it shows the CHANGELOG entry, not only the headline. With no git history, or no tag, both dates are the changelog date, so the block is a single day
 - The engine's core rises from 6,612 to 6,677 logical lines, and its budget with it (ADR-0061, ADR-0062)
 - The Roadmap tab no longer offers Versions. The Plan is the only picture; the chip columns and their requirement (`REQ-VIEWER-995`) are retired
+- Gate errors and warnings are listed on the Health tab. The Errors and Warnings tabs are gone (REQ-VIEWER-1084)
+- A requirement is `confirmed` or `draft`. `in-progress` is counted and filtered with `draft`, and the chip and the registry row that named it are gone (REQ-VIEWER-945, REQ-VIEWER-1082)
+- The Map page is gone. A requirement's spec opens on its title. At the end the viewer draws what uses it and what it depends on, and the four trace links follow that picture (REQ-VIEWER-942)
 
 ## plugin `v8.15.0` — 2026-10-02
 

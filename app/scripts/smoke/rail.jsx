@@ -260,7 +260,8 @@ const railScoped = renderToString(
         problems={[]} />);
 const pressedRows = (html) => (html.match(/aria-pressed="true"/g) || [])
   .length;
-const draftN = REQUIREMENTS.filter((r) => r.status === "draft").length;
+const draftN = REQUIREMENTS.filter((r) =>
+  r.status === "draft" || r.status === "in-progress").length;
 const routed = [];
 openScope((k) => routed.push(["focus", k]),
           (v) => routed.push(["view", v]))("orphan");
@@ -280,6 +281,17 @@ const tallyChecks = [
       === JSON.stringify([["focus", "orphan"], ["view", "explorer"]])],
 ];
 for (const [label, ok] of tallyChecks) test(label, ok);
+adoptMapExport({ nodes: [
+  { id: "DR-1", status: "draft", title: "idea" },
+  { id: "IP-1", status: "in-progress", title: "working" },
+].map(adaptNode) });
+const tallyMerged = renderToString(
+  <Rail view="map" setView={noop} focus="draft" setFocus={noop} problems={[]} />);
+// verifies: REQ-VIEWER-1082#CASE-4
+test("tally: an in-progress requirement is counted as a draft",
+  /draft(?:<!-- -->)?<span class="n">2</.test(tallyMerged)
+    && !tallyMerged.includes("in-progress"));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 
 // ---- a rail reading opens the rows behind it (REQ-VIEWER-1084) -----------
 // tested-by: REQ-VIEWER-1084
@@ -338,11 +350,23 @@ adoptMapExport({ health: { ...HROWS, unhealthy: [
   { id: "AREA-H-001", status: "confirmed", why: ["not tested"] },
 ] }, design: null });
 const reviewOnly = renderToString(
-  <ProblemsView openSpec={noop} initialFilter="HEALTH" />);
+  <ProblemsView openSpec={noop} problems={[]} initialFilter="HEALTH" />);
 // verifies: REQ-VIEWER-1084#CASE-5
 test("filters: a row that only awaits confirmation stays in Review",
   reviewOnly.includes("AREA-H-001") && !reviewOnly.includes("AREA-H-003")
     && /Health<span[^>]*>1</.test(reviewOnly)
     && reviewOnly.includes("1 only await confirmation"));
+const merged = renderToString(
+  <ProblemsView openSpec={noop} initialFilter="HEALTH" problems={[
+    { id: "ERR-1", title: "orphan", sev: "ERROR", signal: "unimplemented",
+      msg: "No implementing member", fix: "tag it", loc: "" },
+    { id: "WARN-1", title: "gap", sev: "WARN", signal: "untested",
+      msg: "Confirmed, but no tested-by", fix: "test it", loc: "" },
+  ]} />);
+// verifies: REQ-VIEWER-1084#CASE-6
+test("filters: errors and warnings are listed on Health",
+  merged.includes("ERR-1") && merged.includes("WARN-1")
+    && !merged.includes("Errors<span") && !merged.includes("Warnings<span")
+    && /Health<span[^>]*>3</.test(merged));
 adoptMapExport({ nodes: json.nodes.map(adaptNode),
                  health: json.health || null, design: json.design || null });

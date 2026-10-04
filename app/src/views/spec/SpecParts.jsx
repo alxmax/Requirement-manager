@@ -1,7 +1,7 @@
 // implements: ARCH-VIEWER-007
 import { Fragment } from "react";
 import { coverageDetail, exemptReason } from "../../lib/data.js";
-import { mdInline, reqLinkProps } from "../../lib/ui.jsx";
+import { mdInline, reqLinkProps, shownStatus } from "../../lib/ui.jsx";
 
 export function parseTranslatedBlocks(text) {
   const lines = String(text || "").split("\n");
@@ -75,14 +75,13 @@ export function CovStrip({ r }) {
 
 export function SpecNavItem({ x, cur, setSelId }) {
   const on = cur === x.id;
-  const sc = x.status === "in-progress" ? "var(--status-drift)"
-    : x.status === "draft" ? "var(--status-draft)"
-    : x.status === "deprecated" ? "var(--fg-faint)"
-    : x.status === "confirmed" ? "transparent" : "var(--status-draft)";
-  const tint = x.status === "in-progress" ? "var(--status-drift-bg)"
-    : x.status === "draft" ? "var(--status-draft-bg)" : "transparent";
+  const st = shownStatus(x.status);
+  const sc = st === "draft" ? "var(--status-draft)"
+    : st === "deprecated" ? "var(--fg-faint)"
+    : st === "confirmed" ? "transparent" : "var(--status-draft)";
+  const tint = st === "draft" ? "var(--status-draft-bg)" : "transparent";
   return (
-    <button onClick={() => setSelId(x.id)} title={x.status} style={{
+    <button onClick={() => setSelId(x.id)} title={st} style={{
       display: "flex", gap: 9, alignItems: "flex-start", textAlign: "left",
       padding: "7px 10px 7px 9px", border: "none",
       borderLeft: `3px solid ${on ? "var(--accent)" : (sc === "transparent" ? "transparent" : sc)}`,

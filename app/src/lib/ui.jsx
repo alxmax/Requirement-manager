@@ -23,12 +23,16 @@ export function Btn({ variant = "secondary", icon, children, ...rest }) {
   );
 }
 
+/** The status the reader sees. `in-progress` is the same bucket as `draft`. */
+export function shownStatus(s) {
+  return s === "in-progress" ? "draft" : s;
+}
+
 /* status → pill kind */
 export function statusKind(s) {
-  return s === "confirmed" ? "confirmed"
-    : s === "in-progress" ? "in-progress"
-    : s === "deprecated" ? "deprecated"
-    : s === "draft" ? "draft" : "draft";
+  const k = shownStatus(s);
+  return k === "confirmed" ? "confirmed"
+    : k === "deprecated" ? "deprecated" : "draft";
 }
 
 /* Requirement prose carries two markups the authors actually write: `code`

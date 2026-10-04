@@ -2,7 +2,7 @@
 import { useI18n } from "../../lib/i18n.jsx";
 import { LEVELS, LEVEL_LABEL } from "../../lib/tree.js";
 
-const STATUSES = ["confirmed", "in-progress", "draft", "deprecated"];
+const STATUSES = ["confirmed", "draft", "deprecated"];
 
 function Chip({ on, onClick, children, title }) {
   return (

@@ -145,6 +145,8 @@ const RO = {  // implements: REQ-VIEWER-943
     "Nicio cerință nu corespunde acestor filtre.",
   "No requirement selected.": "Nicio cerință selectată.",
   "Links — traceability": "Legături — trasabilitate",
+  "Needed by": "Folosit de",
+  "Needs": "Are nevoie de",
   "satisfies (up)": "satisface (în sus)",
   "satisfied by (down)": "satisfăcut de (în jos)",
   "depends on (out)": "depinde de (ieșire)",

@@ -3,7 +3,7 @@ generated: 2026-10-04
 engine: 2026-10-04
 nodes: 310
 edges: 121
-design pass-rate: 98% (119/121 source files without a design candidate)
+design pass-rate: 98% (120/122 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -1002,6 +1002,8 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_commands_CommandGroup_jsx_1
   f_app_src_views_explorer_ExplorerFilters_jsx_1["app/src/views/explorer/ExplorerFilters.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_explorer_ExplorerFilters_jsx_1
+  f_app_src_views_explorer_Neighborhood_jsx_1["app/src/views/explorer/Neighborhood.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_explorer_Neighborhood_jsx_1
   f_app_src_views_map_MapParts_jsx_1["app/src/views/map/MapParts.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_map_MapParts_jsx_1
   f_app_src_views_problems_ProblemsPanels_jsx_1["app/src/views/problems/ProblemsPanels.jsx:1"]

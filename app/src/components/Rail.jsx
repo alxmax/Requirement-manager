@@ -4,13 +4,13 @@ import {
   REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
+import { shownStatus } from "../lib/ui.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { ENFORCED } from "../views/SpecDoc.jsx";
 
 const NAV = [
   { key: "explorer", label: "Explorer", icon: "list-checks" },
   { key: "problems", label: "Problems", icon: "triangle-alert" },
-  { key: "map", label: "Map", icon: "network" },
   { key: "roadmap", label: "Roadmap", icon: "list-checks" },
   { key: "commands", label: "Commands", icon: "terminal" },
 ];
@@ -57,7 +57,6 @@ function RailNav({ view, setView, problems }) {
     : errCount > 0 ? ERROR_BADGE : questionCount > 0 ? ASKED_BADGE : undefined);
   const counts = {
     explorer: REQUIREMENTS.length,
-    map: REQUIREMENTS.filter((r) => r.level !== "code").length,
     problems: problems.length,
     spec: REQUIREMENTS.length,
     roadmap: todoCount,
@@ -154,9 +153,7 @@ function RailStats({ focus, setFocus }) {
   const stats = [
     { key: "confirmed", n: by((r) => r.status === "confirmed"),
       color: "var(--status-confirmed)" },
-    { key: "in-progress", n: by((r) => r.status === "in-progress"),
-      color: "var(--status-drift)" },
-    { key: "draft", n: by((r) => r.status === "draft"),
+    { key: "draft", n: by((r) => shownStatus(r.status) === "draft"),
       color: "var(--status-draft)" },
     { key: "orphan", n: by(isOrphan), color: "var(--status-error)" },
     { key: "deprecated", n: by((r) => r.status === "deprecated"),

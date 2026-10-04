@@ -11,7 +11,7 @@ import { useI18n } from "../lib/i18n.jsx";
 import { openQuestions } from "../lib/tree.js";
 import {
   ProblemTabBar, DesignProblemsPanel, HealthPanel, ProblemRow,
-  ProblemsEmpty, onlyUnconfirmed,
+  ProblemsEmpty, onlyUnconfirmed, gateRowsForHealth,
 } from "./problems/ProblemsPanels.jsx";
 
 const SEV = {
@@ -121,6 +121,9 @@ export function ProblemsView({
   }, {});
   const health = (HEALTH && Array.isArray(HEALTH.unhealthy))
     ? HEALTH : null;
+  const healthRows = health
+    ? health.unhealthy.filter((u) => !onlyUnconfirmed(u)) : [];
+  const gateRows = gateRowsForHealth(healthRows, all);
   const shown = filter === "ALL" ? all : all.filter((p) => p.sev === filter);
   const gateMsg = (counts.ERROR || 0) > 0
     ? <>
@@ -138,15 +141,18 @@ export function ProblemsView({
     <div className="main">
       <ProblemTabBar filter={filter} setFilter={setFilter} counts={counts}
                      designCount={design.length}
-                     healthCount={health ? health.unhealthy
-                       .filter((u) => !onlyUnconfirmed(u)).length
-                       + (health.exempt_ids || []).length : null}
+                     healthCount={health
+                       ? healthRows.length
+                         + (health.exempt_ids || []).length
+                         + gateRows.length
+                       : null}
                      gateMsg={gateMsg} />
       <div className="problems">
         {filter === "DESIGN"
           && <DesignProblemsPanel byPillar={byPillar} advice={advice} />}
         {filter === "HEALTH" && health
-          && <HealthPanel health={health} openSpec={openSpec} />}
+          && <HealthPanel health={health} openSpec={openSpec}
+                          gateRows={gateRows} />}
         {!PANELS.has(filter) && shown.map((p, i) => (
           <ProblemRow key={i} p={p} openSpec={openSpec} t={t} />
         ))}
