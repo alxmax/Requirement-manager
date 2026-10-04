@@ -26,9 +26,7 @@ export function Btn({ variant = "secondary", icon, children, ...rest }) {
 /* status → pill kind */
 export function statusKind(s) {
   return s === "confirmed" ? "confirmed"
-    : s === "in-progress" ? "in-progress"
-    : s === "deprecated" ? "deprecated"
-    : s === "draft" ? "draft" : "draft";
+    : s === "deprecated" ? "deprecated" : "draft";
 }
 
 /* Requirement prose carries two markups the authors actually write: `code`

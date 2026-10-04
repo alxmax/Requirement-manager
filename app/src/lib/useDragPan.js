@@ -3,7 +3,7 @@
  * anywhere to scroll; a real click (no drag) still falls through to whatever
  * the container renders (node/edge/bar selection). A drag past a small
  * threshold is swallowed in the capture phase so it never triggers a click.
- * Extracted from MapView's Canvas and RoadmapView, which had drifted into
+ * Extracted from two canvases that had drifted into
  * two copies of the same mouse-handler logic. */
 import { useRef } from "react";
 

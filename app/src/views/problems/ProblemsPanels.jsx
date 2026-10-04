@@ -22,8 +22,6 @@ export function ProblemTabBar({
   return (
     <div className="tabbar">
       <Tab k="ALL" label={t("All")} n={counts.all} />
-      <Tab k="ERROR" label={t("Errors")} n={counts.ERROR || 0} />
-      <Tab k="WARN" label={t("Warnings")} n={counts.WARN || 0} />
       <Tab k="QUESTION" label={t("Questions")} n={counts.QUESTION || 0} />
       <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW || 0} />
       {healthCount != null && (
@@ -153,10 +151,21 @@ function healthProblem(u) {
   };
 }
 
+/** Gate errors and warnings belong on Health. A requirement already listed
+ *  for a failing axis is not repeated. implements: REQ-VIEWER-1084 */
+export function gateRowsForHealth(rows, problems) {
+  const ids = new Set(rows.map((u) => u.id));
+  return (problems || []).filter(
+    (p) => (p.sev === "ERROR" || p.sev === "WARN") && !ids.has(p.id));
+}
+
 /** The rows behind the Health reading: every scored requirement that is
- * not green, filterable by the axis it fails, then every waiver.
- * implements: REQ-VIEWER-1084 */
-export function HealthPanel({ health, openSpec, initialAxis = null }) {
+ * not green, filterable by the axis it fails, then every waiver. Gate
+ * errors and warnings that are not already one of those rows sit with
+ * them. implements: REQ-VIEWER-1084 */
+export function HealthPanel({
+  health, openSpec, initialAxis = null, gateRows = [],
+}) {
   const { t } = useI18n();
   const [axis, setAxis] = useState(initialAxis);
   const all = health.unhealthy || [];
@@ -168,6 +177,8 @@ export function HealthPanel({ health, openSpec, initialAxis = null }) {
     counts[w] = (counts[w] || 0) + 1;
   }));
   const shown = axis ? rows.filter((u) => u.why.includes(axis)) : rows;
+  const shownIds = new Set(shown.map((u) => u.id));
+  const extra = axis ? [] : gateRows.filter((p) => !shownIds.has(p.id));
   const note = "Requirements not green on every axis — confirmed, "
     + "implemented, tested, no open question, no drift.";
   return (
@@ -179,6 +190,10 @@ export function HealthPanel({ health, openSpec, initialAxis = null }) {
       </div>
       <ChipRow counts={counts} total={rows.length} value={axis}
         setValue={setAxis} label={(k) => t(k)} />
+      {extra.map((p, i) => (
+        <ProblemRow key={`${p.id}-${p.signal}-${i}`} p={p} openSpec={openSpec}
+          t={t} />
+      ))}
       {shown.map((u) => (
         <ProblemRow key={u.id} p={healthProblem(u)} openSpec={openSpec}
           t={t} />
@@ -195,7 +210,7 @@ export function HealthPanel({ health, openSpec, initialAxis = null }) {
           fix: "A waiver: remove it once the finding it silences is "
             + "fixed." }} />
       ))}
-      {shown.length === 0 && exempt.length === 0
+      {shown.length === 0 && exempt.length === 0 && extra.length === 0
         && <ProblemsEmpty filter="HEALTH" t={t} />}
     </>
   );

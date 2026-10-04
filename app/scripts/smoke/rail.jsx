@@ -10,7 +10,6 @@ import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
-import { MapView } from "../../src/views/MapView.jsx";
 import {
   ProblemsView, computeProblems, computeQuestions,
 } from "../../src/views/ProblemsView.jsx";
@@ -146,6 +145,12 @@ adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const roadZoomed  = renderToString(
   <RoadmapView openSpec={noop} initialZoom={40} />);
 const roadDefault = renderToString(<RoadmapView openSpec={noop} />);
+// A storage whose read throws (private mode, blocked cookies) must not break
+// the render: the reader just gets the default scale.
+globalThis.window = { localStorage: { getItem() { throw new Error("blocked"); } } };
+let roadBlocked = "";
+try { roadBlocked = renderToString(<RoadmapView openSpec={noop} />); }
+finally { delete globalThis.window; }
 const roadmapChecks = [
   // verifies: REQ-VIEWER-984#CASE-1
   ["roadmap: scaling uses CSS zoom, not a transform",
@@ -156,6 +161,9 @@ const roadmapChecks = [
   // verifies: REQ-VIEWER-984#CASE-2
   ["roadmap: the default scale is 100%",
     roadDefault.includes("zoom:1") && roadDefault.includes(">100%<")],
+  // verifies: REQ-VIEWER-984#CASE-3
+  ["roadmap: a storage that throws leaves the scale at 100%",
+    roadBlocked.includes("zoom:1") && roadBlocked.includes(">100%<")],
 ];
 for (const [label, ok] of roadmapChecks) test(label, ok);
 
@@ -338,11 +346,23 @@ adoptMapExport({ health: { ...HROWS, unhealthy: [
   { id: "AREA-H-001", status: "confirmed", why: ["not tested"] },
 ] }, design: null });
 const reviewOnly = renderToString(
-  <ProblemsView openSpec={noop} initialFilter="HEALTH" />);
+  <ProblemsView openSpec={noop} problems={[]} initialFilter="HEALTH" />);
 // verifies: REQ-VIEWER-1084#CASE-5
 test("filters: a row that only awaits confirmation stays in Review",
   reviewOnly.includes("AREA-H-001") && !reviewOnly.includes("AREA-H-003")
     && /Health<span[^>]*>1</.test(reviewOnly)
     && reviewOnly.includes("1 only await confirmation"));
+const merged = renderToString(
+  <ProblemsView openSpec={noop} initialFilter="HEALTH" problems={[
+    { id: "ERR-1", title: "orphan", sev: "ERROR", signal: "unimplemented",
+      msg: "No implementing member", fix: "tag it", loc: "" },
+    { id: "WARN-1", title: "gap", sev: "WARN", signal: "untested",
+      msg: "Confirmed, but no tested-by", fix: "test it", loc: "" },
+  ]} />);
+// verifies: REQ-VIEWER-1084#CASE-6
+test("filters: errors and warnings are listed on Health",
+  merged.includes("ERR-1") && merged.includes("WARN-1")
+    && !merged.includes("Errors<span") && !merged.includes("Warnings<span")
+    && /Health<span[^>]*>3</.test(merged));
 adoptMapExport({ nodes: json.nodes.map(adaptNode),
                  health: json.health || null, design: json.design || null });

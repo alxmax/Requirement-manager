@@ -48,7 +48,7 @@ function PriorityBadge({ priority }) {
 }
 
 export const ENFORCED = {
-  confirmed: true, "in-progress": true, implemented: true,
+  confirmed: true, implemented: true,
 };
 
 /** A list of Markdown-inline bullets whose requirement ids are links. */
@@ -123,7 +123,7 @@ function Eyebrow({ label, extra, translated }) {
   );
 }
 
-export function SpecDoc({ r, onNav, head = null, after = null }) {
+export function SpecDoc({ r, onNav, head = null, lead = null, after = null }) {
   const { t, locale } = useI18n();
   if (!r) return null;
   const questions = openQuestions(r);
@@ -142,6 +142,7 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
           {r.priority && <PriorityBadge priority={r.priority} />}
         </div>
         <h1>{title.text}{title.isTranslated && <TranslatedBadge />}</h1>
+        {lead}
         <SpecMeta r={r} t={t} onNav={onNav} />
         <CovStrip r={r} />
         <div className="sec">

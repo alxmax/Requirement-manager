@@ -8,7 +8,6 @@ import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
-import { MapView } from "../../src/views/MapView.jsx";
 import {
   ProblemsView, computeProblems, computeQuestions,
 } from "../../src/views/ProblemsView.jsx";
@@ -114,6 +113,25 @@ const explorerChecks = [
     explorerHtml.includes("clauses")],
 ];
 for (const [label, ok] of explorerChecks) test(label, ok);
+adoptMapExport({ nodes: [
+  { id: "HUB-1", title: "The hub", status: "confirmed", layer: "feature",
+    level: "architecture", depends_on: ["NEED-1"], used_by: ["USE-1"] },
+  { id: "NEED-1", title: "The foundation", status: "confirmed", layer: "bus",
+    level: "architecture", depends_on: [], used_by: ["HUB-1"] },
+  { id: "USE-1", title: "The user", status: "confirmed", layer: "feature",
+    level: "architecture", depends_on: ["HUB-1"], used_by: [] },
+].map(adaptNode) });
+const around = renderToString(
+  <ExplorerView selId="HUB-1" setSelId={noop} />);
+const shell = renderToString(<App />);
+const pictureAt = around.indexOf("neigh");
+const linksAt = around.indexOf("Links — traceability");
+const descAt = around.indexOf("Description");
+// verifies: REQ-VIEWER-942#CASE-6
+test("spec: the neighborhood closes the spec, and there is no Map page",
+  around.includes("NEED-1") && around.includes("USE-1")
+    && descAt >= 0 && descAt < pictureAt && pictureAt < linksAt
+    && !/Map<span class="count"/.test(shell));
 
 // The empty state is a property of the VIEW, so it is asserted against an
 // empty registry. It used to run against this repo's own map and passed only

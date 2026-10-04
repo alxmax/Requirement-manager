@@ -25,7 +25,7 @@ milestone: v1.00
 ## Cases (= tests)
 CASE-1
   Given  a repo where a tag points to a non-existent requirement (dangling ref)
-         or an enforced requirement (in-progress, implemented, or confirmed) has
+         or an enforced requirement (implemented or confirmed) has
          no implements: member (structural gap)
   When   the gate runs
   Then   the build fails (exit 1 — link-sync is an ERROR)

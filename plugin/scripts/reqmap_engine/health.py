@@ -208,7 +208,7 @@ def _reviewed_score(confirmed, drafts, healthy):
     # consumer's schema quietly grows a key that means nothing.
     # The denominator is `confirmed`, NOT "every non-draft". `healthy`'s
     # first axis is `status == confirmed`, so a
-    # `baseline`/`in-progress`/`implemented`/`deprecated` requirement
+    # `baseline`/`implemented`/`deprecated` requirement
     # could enter a "non-draft" denominator but never the numerator — it
     # would depress the score with nothing rotting. A `deprecated`
     # requirement is the clearest case: retired, permanently un-green,

@@ -13,12 +13,12 @@ satisfies: [SYS-VISUAL-106]
 
 ## Description
 > What the viewer shows once it is open: the outline, a requirement's spec, the
-> map, the roadmap and its plan, the inbox of open signals, the commands. The file it
+> roadmap and its plan, the inbox of open signals, the commands. The file it
 > ships in, and the escaping that makes that file safe, is
 > [[ARCH-VIEWERFILE-074]].
 
 Every bullet below is binding.
-- The viewer ranks nodes by longest dependency path so `depends_on` edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. [[REQ-VIEWER-942]]
+- The viewer ranks a `depends_on` layout by longest path so those edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. A requirement's spec opens on its title, with no Map page. [[REQ-VIEWER-942]]
 - The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
@@ -98,7 +98,9 @@ CASE-3
   so the SSR smoke (`npm run smoke`) is what holds them — it asserts both directions: that a
   header translates, and that requirement content and engine vocabulary do not.
 - The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):
-  - `MapView.jsx` — force-graph rendering of the requirement graph
+  - `ExplorerView.jsx` — the outline. A requirement's spec opens on its title.
+    At the end, the neighbourhood of what uses it and what it depends on, then
+    the four trace links. There is no Map page.
   - `ProblemsView.jsx` — gate errors, drift items, and open risk inbox
   - `RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields
   - `SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)
@@ -137,6 +139,9 @@ satisfies: [ARCH-VIEWER-007]
 
 Every bullet below is binding.
 - The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
+- The viewer offers no Map page. A requirement's spec opens on its title. At the
+  end it draws that requirement between what uses it and what it depends on, and
+  lists the four trace links after that picture.
 - The viewer excludes a cycle-closing edge from that ranking, and still draws it.
 - No node ranks higher than the number of nodes, whatever the registry's shape.
 - A node carries the acceptance section once, as `accept`, the labelled Given/When/Then
@@ -177,6 +182,12 @@ CASE-5 — the reader sees the authored Given/When/Then lines, not the folded on
   When   its spec is rendered
   Then   the multi-line block appears as authored, and the folded one-line text is not
          what the reader sees
+
+CASE-6 — the neighborhood closes the spec, and there is no Map page
+  Given  a requirement that depends on one other and is used by one other
+  When   its spec is rendered, and the shell is rendered
+  Then   the description precedes both neighbours, the four trace links follow
+         that picture, and the shell offers no Map page
 
 
 --------------------
@@ -316,6 +327,7 @@ Every bullet below is binding.
 - The outline accepts a requested slice: a status value, or `orphan`.
 - The `orphan` row scopes to the gate's own error condition — an enforced requirement with no
   `implements:` member — which is a computed state, not a status value.
+- The status chips are `confirmed`, `draft`, `deprecated` and `orphan`.
 - An applied scope is rendered as an active filter chip, and clearing that chip, or clicking the
   same tally row again, restores the full outline.
 - The scope applies to the first render, not only after one — the outline is never painted
@@ -336,6 +348,7 @@ CASE-3 — the applied scope is visible and clearable
   Given  the outline rendered with a slice requested
   When   its filter row is drawn
   Then   the chip naming that slice is drawn active
+
 
 ---
 id: REQ-VIEWER-964
@@ -584,6 +597,11 @@ CASE-2 — the default scale is 100%
   When   the markup is inspected
   Then   the zoom control reads `100%` and the wrapper carries `zoom:1`
 
+CASE-3 — a storage that throws leaves the scale at 100%
+  Given  `RoadmapView` rendered with no `initialZoom` and a browser storage whose read throws
+  When   the markup is inspected
+  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`, with no error
+
 ## Context
 **Notes**
 - The wheel handler is deliberately NOT covered here, and the omission is the honest one:
@@ -596,7 +614,7 @@ CASE-2 — the default scale is 100%
 
 **Current implementation**
 - `app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`.
-- `app/scripts/ssr-smoke.jsx` — the two cases above.
+- `app/scripts/ssr-smoke.jsx` — the three cases above.
 
 
 --------------------
@@ -808,8 +826,8 @@ distinct_from: [REQ-HISTORY-1003]
 Every bullet below is binding.
 - The Plan draws shipped work on the Shipped band. Patch releases of the same minor
   version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from
-  the earliest `first_commit` to the latest `last_commit`. A release with no sibling
-  keeps its own version. The changelog date stands in when a commit date is absent.
+  the earliest `first_commit` to the latest `last_commit`; a release with no
+  sibling keeps its own version. The changelog date stands in when a commit date is absent.
 - The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the
   count of releases it holds, so a release shorter than its label is still readable.
 - Blocks share a row. A block takes the next row only when its drawn box would cover
@@ -913,6 +931,7 @@ CASE-3 — choosing a row scopes the outline and opens it
   Then   the slice becomes `orphan` and the outline is the surface shown
 
 
+
 --------------------
 
 
@@ -943,6 +962,9 @@ Every bullet below is binding.
   out.
 - The Health tab offers one chip per failing axis, each with its count; a chip narrows
   the list to the rows failing that axis, and `All` restores it.
+- Gate errors and warnings have no tabs of their own. They are listed on the Health tab,
+  and a requirement already listed there for a failing axis is not repeated. The tab's
+  count includes them.
 - The Design tab offers one chip per pillar, each with its count; a chip narrows the
   candidates to that pillar, and `All` restores them.
 
@@ -973,6 +995,11 @@ CASE-5 — a row that only awaits confirmation stays in Review
   When   Problems renders on its Health tab
   Then   only the untested row is listed, the Health count is 1, and the tab says 1
          row only awaits confirmation
+
+CASE-6 — errors and warnings are listed on the Health tab
+  Given  an error, a warning, and a health row for another requirement
+  When   Problems renders on its Health tab
+  Then   both are listed, and no Errors or Warnings tab is offered
 
 ---
 id: REQ-VIEWER-1087

@@ -10,6 +10,7 @@ import {
   defaultExpanded, allExpanded, keepSetFor, flattenTree, hasOpenQuestions,
 } from "../lib/tree.js";
 import { ExplorerFilters } from "./explorer/ExplorerFilters.jsx";
+import { Neighborhood } from "./explorer/Neighborhood.jsx";
 
 function isOrphan(r) {
   return !!ENFORCED[r.status] && r.layer !== "need" && r.layer !== "aggregate"
@@ -18,7 +19,6 @@ function isOrphan(r) {
 
 function statusDot(s) {
   return s === "confirmed" ? "var(--status-confirmed)"
-    : s === "in-progress" ? "var(--status-drift)"
     : s === "deprecated" ? "var(--fg-faint)"
     : "var(--status-draft)";
 }
@@ -243,7 +243,10 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
         {sel
           ? <SpecDoc r={sel} onNav={setSelId} head={head}
               after={
-                <ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />
+                <>
+                  <Neighborhood sel={sel} onNav={setSelId} />
+                  <ExplorerLinks sel={sel} h={h} setSelId={setSelId} t={t} />
+                </>
               } />
           : <div className="ex-none">{t("No requirement selected.")}</div>}
       </div>

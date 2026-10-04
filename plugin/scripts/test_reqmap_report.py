@@ -1585,7 +1585,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ
         sharpest case: retired, permanently un-green, capping the score forever.
         Invisible in this repo (all non-drafts are `confirmed`), hence this test."""
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
-        for status in ("baseline", "in-progress", "implemented", "deprecated"):
+        for status in ("baseline", "implemented", "deprecated"):
             reqs = {"REQ-A-001": self._green(),
                     "REQ-A-002": {"meta": {"status": status}, "body": "# T\n"},
                     "REQ-A-003": self._draft()}

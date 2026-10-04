@@ -512,7 +512,7 @@
     "area": "REQ",
     "title": "Background sync",
     "layer": "feature",
-    "status": "in-progress",
+    "status": "draft",
     "intent": "Keep the local registry in step with a remote mirror on a timer.",
     "contract": [
       "It shall reconcile local and remote requirement files on an interval without blocking the gate."
@@ -531,7 +531,7 @@
     "risks": [
       {
         "signal": "unimplemented",
-        "advice": "Confirmed/in-progress but no resolving member — the gate reports this as an ERROR (orphan). Add the `implements:` tag or the requirement file."
+        "advice": "Confirmed but no resolving member — the gate reports this as an ERROR (orphan). Add the `implements:` tag or the requirement file."
       }
     ]
   },

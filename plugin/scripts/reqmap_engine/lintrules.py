@@ -48,7 +48,7 @@ def _oversize(rid, r, threshold=None):
 # by design). Jargon-before-definition is deliberately NOT checked in v1
 # — without a term dictionary it is too false-positive-prone on prose
 # that carries code references.
-LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
+LINT_STATUSES = {"baseline", "implemented", "confirmed"}
 # Checks promoted from warn→error under `--strict` (structural, not
 # style). One constant, because `gate` runs the lint strict and `sync`'s
 # summary counted errors without the promotion — a corpus failing `gate`

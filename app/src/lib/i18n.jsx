@@ -23,7 +23,7 @@
  * author's own text, exactly as before.
  *
  * The engine's own vocabulary is out of scope too, deliberately: `confirmed`,
- * `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`,
+ * `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`,
  * and the ERROR/WARN/REVIEW severities are literal values in the
  * requirement files and in the gate's output. A reader who sees
  * "confirmat" here and `status: confirmed`
@@ -145,6 +145,8 @@ const RO = {  // implements: REQ-VIEWER-943
     "Nicio cerință nu corespunde acestor filtre.",
   "No requirement selected.": "Nicio cerință selectată.",
   "Links — traceability": "Legături — trasabilitate",
+  "Needed by": "Folosit de",
+  "Needs": "Are nevoie de",
   "satisfies (up)": "satisface (în sus)",
   "satisfied by (down)": "satisfăcut de (în jos)",
   "depends on (out)": "depinde de (ieșire)",

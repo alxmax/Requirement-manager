@@ -5,8 +5,7 @@ import re
 
 
 
-VALID_STATUS = {"draft", "baseline", "in-progress", "implemented",
-                "confirmed", "deprecated"}
+VALID_STATUS = {"draft", "baseline", "implemented", "confirmed", "deprecated"}
 # 'need'      = an upstream stakeholder need, satisfied-by (not implemented-by)
 # 'aggregate' = a requirement whose implementation IS its dependencies' —
 #               it adds no behavior of its own, it asserts that N
@@ -35,7 +34,7 @@ LEVEL_TEST_PAIR = {"system": "system", "architecture": "integration",
                    "code": "unit"}
 # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")
-ENFORCED = {"in-progress", "implemented", "confirmed"}
+ENFORCED = {"implemented", "confirmed"}
 
 # Scripted, deterministic guidance per risk signal — surfaced in the Risk tab,
 # the detail panel, and the _map.md risk table so a flagged requirement comes
@@ -43,7 +42,7 @@ ENFORCED = {"in-progress", "implemented", "confirmed"}
 RISK_ADVICE = {
     "unimplemented": "Confirmed but no code linked: tag the implementing "
                      "code `# implements: <ID>`, or drop status back to "
-                     "in-progress/draft until it is built. A confirmed "
+                     "draft until it is built. A confirmed "
                      "requirement must point to code.",
     "unreviewed": "Draft/baseline, not yet validated: review the "
                   "contract, wire its `tested-by` tests, then promote to "
