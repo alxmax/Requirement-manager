@@ -7,7 +7,7 @@
 // implements: REQ-TRANSLATE-1080
 // implements: REQ-VIEWER-944
 import {
-  Pill, statusKind, shownStatus, mdInline, mdQuestion, reqLinkProps,
+  Pill, statusKind, mdInline, mdQuestion, reqLinkProps,
 } from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
@@ -48,7 +48,7 @@ function PriorityBadge({ priority }) {
 }
 
 export const ENFORCED = {
-  confirmed: true, "in-progress": true, implemented: true,
+  confirmed: true, implemented: true,
 };
 
 /** A list of Markdown-inline bullets whose requirement ids are links. */
@@ -137,7 +137,7 @@ export function SpecDoc({ r, onNav, head = null, lead = null, after = null }) {
       <div className="spec-sheet">
         {head}
         <div className="head-row">
-          <Pill kind={statusKind(r.status)}>{shownStatus(r.status)}</Pill>
+          <Pill kind={statusKind(r.status)}>{r.status}</Pill>
           <Pill kind={r.layer}>{r.layer}</Pill>
           {r.priority && <PriorityBadge priority={r.priority} />}
         </div>

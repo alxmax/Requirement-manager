@@ -1,9 +1,9 @@
 ---
 generated: 2026-10-04
-engine: 2026-10-04
+engine: 2026-10-04.1
 nodes: 310
 edges: 121
-design pass-rate: 98% (120/122 source files without a design candidate)
+design pass-rate: 98% (118/120 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -448,8 +448,8 @@ graph LR
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_locks_py_192_388
   f_plugin_scripts_reqmap_engine_mapjson_py_9["plugin/scripts/reqmap_engine/mapjson.py:9"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_mapjson_py_9
-  f_plugin_scripts_reqmap_engine_model_py_228["plugin/scripts/reqmap_engine/model.py:228"]
-  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_model_py_228
+  f_plugin_scripts_reqmap_engine_model_py_227["plugin/scripts/reqmap_engine/model.py:227"]
+  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_model_py_227
   f_plugin_scripts_reqmap_engine_rulesrepo_py_209["plugin/scripts/reqmap_engine/rulesrepo.py:209"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_rulesrepo_py_209
   f_plugin_scripts_reqmap_engine_sections_py_131_284["plugin/scripts/reqmap_engine/sections.py:131-284"]
@@ -590,8 +590,8 @@ graph LR
   ARCH_LEVEL_051 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2223_2559
   f_plugin_scripts_reqmap_engine_mapdata_py_52["plugin/scripts/reqmap_engine/mapdata.py:52"]
   ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_52
-  f_plugin_scripts_reqmap_engine_model_py_27["plugin/scripts/reqmap_engine/model.py:27"]
-  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_engine_model_py_27
+  f_plugin_scripts_reqmap_engine_model_py_26["plugin/scripts/reqmap_engine/model.py:26"]
+  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_engine_model_py_26
   f_plugin_scripts_reqmap_engine_rules_py_28["plugin/scripts/reqmap_engine/rules.py:28"]
   ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_engine_rules_py_28
   ARCH_LEVELRETROFIT_066["Giving an existing corpus the three rungs<br><small>ARCH-LEVELRETROFIT-066</small>"]
@@ -642,8 +642,8 @@ graph LR
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapjson_py_60_121
   f_plugin_scripts_reqmap_engine_mapmd_py_42["plugin/scripts/reqmap_engine/mapmd.py:42"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapmd_py_42
-  f_plugin_scripts_reqmap_engine_model_py_275["plugin/scripts/reqmap_engine/model.py:275"]
-  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_model_py_275
+  f_plugin_scripts_reqmap_engine_model_py_274["plugin/scripts/reqmap_engine/model.py:274"]
+  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_model_py_274
   f_plugin_scripts_reqmap_engine_rulesrepo_py_230["plugin/scripts/reqmap_engine/rulesrepo.py:230"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_rulesrepo_py_230
   f_plugin_scripts_reqmap_engine_targets_py_1["plugin/scripts/reqmap_engine/targets.py:1"]
@@ -696,8 +696,8 @@ graph LR
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5188
   f_plugin_scripts_test_reqmap_scan_py_32_934["plugin/scripts/test_reqmap_scan.py:32-934"]
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_32_934
-  f_plugin_scripts_reqmap_engine_model_py_71_197["plugin/scripts/reqmap_engine/model.py:71-197"]
-  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_model_py_71_197
+  f_plugin_scripts_reqmap_engine_model_py_70_196["plugin/scripts/reqmap_engine/model.py:70-196"]
+  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_model_py_70_196
   f_plugin_scripts_reqmap_engine_parse_py_9_125["plugin/scripts/reqmap_engine/parse.py:9-125"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_9_125
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
@@ -790,8 +790,8 @@ graph LR
   ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2314_3352
   f_plugin_scripts_reqmap_engine_gate_py_55_329["plugin/scripts/reqmap_engine/gate.py:55-329"]
   ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_gate_py_55_329
-  f_plugin_scripts_reqmap_engine_model_py_125_173["plugin/scripts/reqmap_engine/model.py:125-173"]
-  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_model_py_125_173
+  f_plugin_scripts_reqmap_engine_model_py_124_172["plugin/scripts/reqmap_engine/model.py:124-172"]
+  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_model_py_124_172
   f_plugin_scripts_reqmap_engine_workspace_py_95_161["plugin/scripts/reqmap_engine/workspace.py:95-161"]
   ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_engine_workspace_py_95_161
   ARCH_SCAN_002["Member discovery<br><small>ARCH-SCAN-002</small>"]
@@ -901,8 +901,8 @@ graph LR
   ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_engine_axis_py_15_62
   f_plugin_scripts_reqmap_engine_mapdata_py_131_145["plugin/scripts/reqmap_engine/mapdata.py:131-145"]
   ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_131_145
-  f_plugin_scripts_reqmap_engine_model_py_215["plugin/scripts/reqmap_engine/model.py:215"]
-  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_engine_model_py_215
+  f_plugin_scripts_reqmap_engine_model_py_214["plugin/scripts/reqmap_engine/model.py:214"]
+  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_engine_model_py_214
   f_plugin_scripts_reqmap_engine_rules_py_54_285["plugin/scripts/reqmap_engine/rules.py:54-285"]
   ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_engine_rules_py_54_285
   f_plugin_scripts_reqmap_engine_show_py_47["plugin/scripts/reqmap_engine/show.py:47"]
@@ -990,8 +990,6 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_CommandsView_jsx_1
   f_app_src_views_ExplorerView_jsx_1["app/src/views/ExplorerView.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_ExplorerView_jsx_1
-  f_app_src_views_MapView_jsx_1["app/src/views/MapView.jsx:1"]
-  ARCH_VIEWER_007 -->|implements| f_app_src_views_MapView_jsx_1
   f_app_src_views_ProblemsView_jsx_1["app/src/views/ProblemsView.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_ProblemsView_jsx_1
   f_app_src_views_RoadmapView_jsx_1["app/src/views/RoadmapView.jsx:1"]
@@ -1004,8 +1002,6 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_explorer_ExplorerFilters_jsx_1
   f_app_src_views_explorer_Neighborhood_jsx_1["app/src/views/explorer/Neighborhood.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_explorer_Neighborhood_jsx_1
-  f_app_src_views_map_MapParts_jsx_1["app/src/views/map/MapParts.jsx:1"]
-  ARCH_VIEWER_007 -->|implements| f_app_src_views_map_MapParts_jsx_1
   f_app_src_views_problems_ProblemsPanels_jsx_1["app/src/views/problems/ProblemsPanels.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_problems_ProblemsPanels_jsx_1
   f_app_src_views_roadmap_EntryBody_jsx_1["app/src/views/roadmap/EntryBody.jsx:1"]

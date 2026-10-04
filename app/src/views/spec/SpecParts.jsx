@@ -1,7 +1,7 @@
 // implements: ARCH-VIEWER-007
 import { Fragment } from "react";
 import { coverageDetail, exemptReason } from "../../lib/data.js";
-import { mdInline, reqLinkProps, shownStatus } from "../../lib/ui.jsx";
+import { mdInline, reqLinkProps } from "../../lib/ui.jsx";
 
 export function parseTranslatedBlocks(text) {
   const lines = String(text || "").split("\n");
@@ -75,7 +75,7 @@ export function CovStrip({ r }) {
 
 export function SpecNavItem({ x, cur, setSelId }) {
   const on = cur === x.id;
-  const st = shownStatus(x.status);
+  const st = x.status;
   const sc = st === "draft" ? "var(--status-draft)"
     : st === "deprecated" ? "var(--fg-faint)"
     : st === "confirmed" ? "transparent" : "var(--status-draft)";

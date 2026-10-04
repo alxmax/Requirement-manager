@@ -10,7 +10,6 @@ import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
-import { MapView } from "../../src/views/MapView.jsx";
 import {
   ProblemsView, computeProblems, computeQuestions,
 } from "../../src/views/ProblemsView.jsx";
@@ -146,6 +145,12 @@ adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const roadZoomed  = renderToString(
   <RoadmapView openSpec={noop} initialZoom={40} />);
 const roadDefault = renderToString(<RoadmapView openSpec={noop} />);
+// A storage whose read throws (private mode, blocked cookies) must not break
+// the render: the reader just gets the default scale.
+globalThis.window = { localStorage: { getItem() { throw new Error("blocked"); } } };
+let roadBlocked = "";
+try { roadBlocked = renderToString(<RoadmapView openSpec={noop} />); }
+finally { delete globalThis.window; }
 const roadmapChecks = [
   // verifies: REQ-VIEWER-984#CASE-1
   ["roadmap: scaling uses CSS zoom, not a transform",
@@ -156,6 +161,9 @@ const roadmapChecks = [
   // verifies: REQ-VIEWER-984#CASE-2
   ["roadmap: the default scale is 100%",
     roadDefault.includes("zoom:1") && roadDefault.includes(">100%<")],
+  // verifies: REQ-VIEWER-984#CASE-3
+  ["roadmap: a storage that throws leaves the scale at 100%",
+    roadBlocked.includes("zoom:1") && roadBlocked.includes(">100%<")],
 ];
 for (const [label, ok] of roadmapChecks) test(label, ok);
 
@@ -260,8 +268,7 @@ const railScoped = renderToString(
         problems={[]} />);
 const pressedRows = (html) => (html.match(/aria-pressed="true"/g) || [])
   .length;
-const draftN = REQUIREMENTS.filter((r) =>
-  r.status === "draft" || r.status === "in-progress").length;
+const draftN = REQUIREMENTS.filter((r) => r.status === "draft").length;
 const routed = [];
 openScope((k) => routed.push(["focus", k]),
           (v) => routed.push(["view", v]))("orphan");
@@ -281,17 +288,6 @@ const tallyChecks = [
       === JSON.stringify([["focus", "orphan"], ["view", "explorer"]])],
 ];
 for (const [label, ok] of tallyChecks) test(label, ok);
-adoptMapExport({ nodes: [
-  { id: "DR-1", status: "draft", title: "idea" },
-  { id: "IP-1", status: "in-progress", title: "working" },
-].map(adaptNode) });
-const tallyMerged = renderToString(
-  <Rail view="map" setView={noop} focus="draft" setFocus={noop} problems={[]} />);
-// verifies: REQ-VIEWER-1082#CASE-4
-test("tally: an in-progress requirement is counted as a draft",
-  /draft(?:<!-- -->)?<span class="n">2</.test(tallyMerged)
-    && !tallyMerged.includes("in-progress"));
-adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 
 // ---- a rail reading opens the rows behind it (REQ-VIEWER-1084) -----------
 // tested-by: REQ-VIEWER-1084

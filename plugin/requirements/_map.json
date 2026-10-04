@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-04",
+  "engine_version": "2026-10-04.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1744,7 +1744,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:228"
+          "loc": "plugin/scripts/reqmap_engine/model.py:227"
         },
         {
           "role": "implements",
@@ -1780,13 +1780,13 @@
         "An invalid `status` or an invalid `layer` is such a condition.",
         "A `depends_on` pointing at a missing id is such a condition.",
         "An enforced requirement with no `implements:` member is such a condition.",
-        "A requirement is enforced when its status is `in-progress`, `implemented` or `confirmed`.",
+        "A requirement is enforced when its status is `implemented` or `confirmed`.",
         "A `layer: need` requirement is exempt from that `implements:` rule — see [[ARCH-TRACE-020]]."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a dangling tag is a gate ERROR\n  Given  `mod.py` carrying `# implements: GHOST-CAP-001` and no such requirement\n  When   `gate` runs\n  Then   its output contains \"dangling tag\" and it exits 1\n\nCASE-2 — an invalid status or layer is a gate ERROR\n  Given  a requirement with `status: bogus`, and separately one with `layer: bogus`\n  When   `gate` runs on each\n  Then   each output contains \"invalid status\" or \"invalid layer\" respectively, and each\n         exits 1\n\nCASE-3 — a depends_on target that does not exist is a gate ERROR\n  Given  a requirement with `depends_on: [GHOST-X-999]` and no such requirement\n  When   `gate` runs\n  Then   its output contains \"depends_on missing GHOST-X-999\" and it exits 1\n\nCASE-4 — a confirmed requirement with no implements tag is a gate ERROR\n  Given  a `status: confirmed` requirement with no `# implements:` tag anywhere\n  When   `gate` runs\n  Then   its output contains \"no implements\" and it exits 1\n\nCASE-5 — ENFORCED names exactly the three enforced statuses\n  Given  the module-level `R.ENFORCED` set\n  When   it is inspected\n  Then   it equals `{\"in-progress\", \"implemented\", \"confirmed\"}`, and `\"draft\"` is absent\n\nCASE-6 — a confirmed need with no implements tag raises no gate error\n  Given  a confirmed `layer: need` requirement with no `implements:` tag, satisfied by\n         another requirement\n  When   `gate` runs\n  Then   `_link_sync_errors` reports no missing-implements error for that need\n\n\n--------------------",
+      "accept": "CASE-1 — a dangling tag is a gate ERROR\n  Given  `mod.py` carrying `# implements: GHOST-CAP-001` and no such requirement\n  When   `gate` runs\n  Then   its output contains \"dangling tag\" and it exits 1\n\nCASE-2 — an invalid status or layer is a gate ERROR\n  Given  a requirement with `status: bogus`, and separately one with `layer: bogus`\n  When   `gate` runs on each\n  Then   each output contains \"invalid status\" or \"invalid layer\" respectively, and each\n         exits 1\n\nCASE-3 — a depends_on target that does not exist is a gate ERROR\n  Given  a requirement with `depends_on: [GHOST-X-999]` and no such requirement\n  When   `gate` runs\n  Then   its output contains \"depends_on missing GHOST-X-999\" and it exits 1\n\nCASE-4 — a confirmed requirement with no implements tag is a gate ERROR\n  Given  a `status: confirmed` requirement with no `# implements:` tag anywhere\n  When   `gate` runs\n  Then   its output contains \"no implements\" and it exits 1\n\nCASE-5 — ENFORCED names exactly the two enforced statuses\n  Given  the module-level `R.ENFORCED` set\n  When   it is inspected\n  Then   it equals `{\"implemented\", \"confirmed\"}`, and `\"draft\"` is absent\n\nCASE-6 — a confirmed need with no implements tag raises no gate error\n  Given  a confirmed `layer: need` requirement with no `implements:` tag, satisfied by\n         another requirement\n  When   `gate` runs\n  Then   `_link_sync_errors` reports no missing-implements error for that need\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -1823,15 +1823,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Erori de gate care blochează un commit",
-          "intent": "Un `ERROR` este semnalul de oprire dură al gate-ului: iese din proces cu cod diferit de zero și blochează CI. Este rezervat pentru probleme pe care un om trebuie să le repare înainte ca ansamblul de cerințe să poată fi considerat de încredere — o etichetă stricată, o valoare enum invalidă, sau o cerință care pretinde că există cod când nicio etichetă nu o dovedește.",
-          "contract": "> Un `ERROR` este semnalul de oprire dură al gate-ului: iese din proces cu cod diferit de zero\n> și blochează CI. Este rezervat pentru probleme pe care un om trebuie să le repare înainte ca\n> ansamblul de cerințe să poată fi considerat de încredere — o etichetă stricată, o valoare enum\n> invalidă, sau o cerință care pretinde că există cod când nicio etichetă nu o dovedește.\n\nFiecare punct de mai jos este obligatoriu.\n- `gate` raportează un `ERROR` și iese cu cod diferit de zero pentru fiecare condiție din acest grup.\n- O etichetă atârnândă — o etichetă de cod care referențiază o capacitate pe care nicio cerință\n  nu o definește — este o astfel de condiție.\n- Un `status` invalid sau un `layer` invalid este o astfel de condiție.\n- Un `depends_on` care indică spre un id inexistent este o astfel de condiție.\n- O cerință impusă fără niciun membru `implements:` este o astfel de condiție.\n- O cerință este impusă când starea ei este `in-progress`, `implemented` sau\n  `confirmed`.\n- O cerință `layer: need` este scutită de acea regulă `implements:` — vezi\n  [[ARCH-TRACE-020]].",
-          "acceptance": "CASE-1 — o etichetă atârnândă este un ERROR de gate\n  Given  `mod.py` care poartă `# implements: GHOST-CAP-001` și nicio astfel de cerință\n  When   `gate` rulează\n  Then   ieșirea lui conține \"dangling tag\" și iese cu 1\n\nCASE-2 — un status sau layer invalid este un ERROR de gate\n  Given  o cerință cu `status: bogus`, și separat una cu `layer: bogus`\n  When   `gate` rulează pentru fiecare\n  Then   fiecare ieșire conține \"invalid status\" sau \"invalid layer\" respectiv, și fiecare\n         iese cu 1\n\nCASE-3 — o țintă depends_on care nu există este un ERROR de gate\n  Given  o cerință cu `depends_on: [GHOST-X-999]` și nicio astfel de cerință\n  When   `gate` rulează\n  Then   ieșirea lui conține \"depends_on missing GHOST-X-999\" și iese cu 1\n\nCASE-4 — o cerință confirmată fără etichetă implements este un ERROR de gate\n  Given  o cerință `status: confirmed` fără nicio etichetă `# implements:` nicăieri\n  When   `gate` rulează\n  Then   ieșirea lui conține \"no implements\" și iese cu 1\n\nCASE-5 — ENFORCED numește exact cele trei stări impuse\n  Given  mulțimea `R.ENFORCED` de la nivel de modul\n  When   este inspectată\n  Then   este egală cu `{\"in-progress\", \"implemented\", \"confirmed\"}`, iar `\"draft\"` lipsește\n\nCASE-6 — o nevoie confirmată fără etichetă implements nu ridică nicio eroare de gate\n  Given  o cerință confirmată `layer: need` fără etichetă `implements:`, satisfăcută de\n         altă cerință\n  When   `gate` rulează\n  Then   `_link_sync_errors` nu raportează nicio eroare de implements lipsă pentru acea nevoie\n\n\n--------------------"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "REQ-CHECK-829",
@@ -2294,7 +2286,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:140"
+          "loc": "plugin/scripts/reqmap_engine/model.py:139"
         }
       ],
       "test_exempt": null,
@@ -5840,7 +5832,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/ui.jsx:74"
+          "loc": "app/src/lib/ui.jsx:68"
         },
         {
           "role": "tested-by",
@@ -6553,7 +6545,7 @@
         "The `reviewed_total` / `reviewed_score` block in `cmd_health` (`reqmap.py`), emitted into `data` and printed as the `reviewed only:` line under the conditions above.",
         "-------------------"
       ],
-      "accept": "CASE-1\n  Given  a corpus of one green confirmed requirement and three drafts\n  When   `health` runs\n  Then   the headline score is 25 and the reviewed-only score is 100\n\nCASE-2\n  Given  an all-draft corpus\n  When   `health --json` runs\n  Then   the output carries no reviewed-only key, and the headline score is still zero\n\nCASE-3\n  Given  a corpus holding no draft at all\n  When   `health --json` runs\n  Then   the output carries no reviewed-only key\n\nCASE-4\n  Given  a corpus holding both drafts and reviewed requirements\n  When   `health` runs\n  Then   the printed line names the confirmed count and how many are not confirmed yet\n\nCASE-5\n  Given  a corpus of one green confirmed requirement, one draft, and one requirement at\n         `baseline`, `in-progress`, `implemented` or `deprecated`\n  When   `health --json` runs\n  Then   the reviewed-only score is 100 and its denominator is 1, because the fourth\n         status is neither green nor counted against green",
+      "accept": "CASE-1\n  Given  a corpus of one green confirmed requirement and three drafts\n  When   `health` runs\n  Then   the headline score is 25 and the reviewed-only score is 100\n\nCASE-2\n  Given  an all-draft corpus\n  When   `health --json` runs\n  Then   the output carries no reviewed-only key, and the headline score is still zero\n\nCASE-3\n  Given  a corpus holding no draft at all\n  When   `health --json` runs\n  Then   the output carries no reviewed-only key\n\nCASE-4\n  Given  a corpus holding both drafts and reviewed requirements\n  When   `health` runs\n  Then   the printed line names the confirmed count and how many are not confirmed yet\n\nCASE-5\n  Given  a corpus of one green confirmed requirement, one draft, and one requirement at\n         `baseline`, `implemented` or `deprecated`\n  When   `health --json` runs\n  Then   the reviewed-only score is 100 and its denominator is 1, because the fourth\n         status is neither green nor counted against green",
       "input": "",
       "output": "",
       "desc": "",
@@ -6582,15 +6574,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Scor de sănătate doar pentru cele revizuite",
-          "intent": "Scorul principal de sănătate nu poate distinge \"nimeni nu a revizuit asta încă\" de \"asta putrezește\". Ambele se citesc ca un număr scăzut, deoarece prima axă a verdelui este statusul `confirmed`, astfel încât un draft nu poate fi niciodată verde cât timp încă este numărat în total. Un repo care schițează cerințe din cod moștenit citește astfel o sănătate aproape zero pentru totdeauna, iar singurul număr menit să arate degradarea arată doar că revizuirea nu s-a terminat. Aceasta adaugă un al doilea număr calculat doar peste partea revizuită, astfel încât cele două citiri se separă.",
-          "contract": "> Scorul principal de sănătate nu poate distinge \"nimeni nu a revizuit asta încă\" de\n> \"asta putrezește\". Ambele se citesc ca un număr scăzut, deoarece prima axă a\n> verdelui este statusul `confirmed`, astfel încât un draft nu poate fi niciodată verde\n> cât timp încă este numărat în total. Un repo care schițează cerințe din cod moștenit\n> citește astfel o sănătate aproape zero pentru totdeauna, iar singurul număr menit să\n> arate degradarea arată doar că revizuirea nu s-a terminat. Aceasta adaugă un al\n> doilea număr calculat doar peste partea revizuită, astfel încât cele două citiri se\n> separă.\n\nFiecare punct de mai jos este obligatoriu.\n\n**Ce calculează**\n- Scorul doar-revizuite este procentul de cerințe verzi dintre cele revizuite.\n- Numărul de cerințe verzi este același folosit de scorul principal. Doar numitorul\n  diferă.\n- Numitorul numără doar cerințele `confirmed`. O cerință aflată în orice alt\n  status este lăsată în afara ambelor părți, astfel încât nu poate niciodată coborî scorul fără\n  a putea să îl și ridice.\n\n**Când este absent**\n- Scorul doar-revizuite este absent, în loc de zero, atunci când nicio cerință nu este confirmată.\n  Zero din zero nu este zero la sută.\n- Scorul doar-revizuite este absent atunci când nicio cerință nu este draft, deoarece ar\n  reformula atunci scorul principal sub un al doilea nume.\n- `health` afișează scorul ca o linie proprie, iar `--json` îl poartă ca o cheie, exact în\n  aceleași condiții.\n\n**Ce nu schimbă**\n- Scorul principal își păstrează definiția existentă, astfel încât o insignă pe care un consumator o\n  publică deja citește numărul pe care l-a citit întotdeauna.\n- Un cititor care vrea doar comportamentul vechi ignoră noua cheie; absența ei în cele două\n  cazuri de mai sus lasă o schemă `--json` existentă neatinsă.",
-          "acceptance": "CASE-1\n  Given  un corpus cu o cerință confirmată verde și trei drafturi\n  When   `health` rulează\n  Then   scorul principal este 25 iar scorul doar-revizuite este 100\n\nCASE-2\n  Given  un corpus numai-draft\n  When   `health --json` rulează\n  Then   ieșirea nu poartă nicio cheie doar-revizuite, iar scorul principal este tot zero\n\nCASE-3\n  Given  un corpus care nu conține niciun draft\n  When   `health --json` rulează\n  Then   ieșirea nu poartă nicio cheie doar-revizuite\n\nCASE-4\n  Given  un corpus care conține atât drafturi cât și cerințe revizuite\n  When   `health` rulează\n  Then   linia afișată numește numărul de confirmate și câte nu sunt încă confirmate\n\nCASE-5\n  Given  un corpus cu o cerință confirmată verde, un draft, și o cerință aflată la\n         `baseline`, `in-progress`, `implemented` sau `deprecated`\n  When   `health --json` rulează\n  Then   scorul doar-revizuite este 100 iar numitorul său este 1, deoarece al patrulea\n         status nu este nici verde, nici numărat împotriva verdelui"
-        }
-      }
+      "covered": 5
     },
     {
       "id": "REQ-HEALTHROWS-1083",
@@ -7021,7 +7005,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:27"
+          "loc": "plugin/scripts/reqmap_engine/model.py:26"
         },
         {
           "role": "implements",
@@ -7465,7 +7449,7 @@
       "contract": [
         "`gate` reports readability problems and structure problems in requirement files.",
         "`gate` writes no file. It only reads and prints.",
-        "`gate` checks non-draft requirements only — status `baseline`, `in-progress`, `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.",
+        "`gate` checks non-draft requirements only — status `baseline`, `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.",
         "`gate` gives each finding one of two severities. A structural check reports an `error`; a prose check or a scope check reports a `warn`.",
         "The `missing-section` check reports an `error` when a non-draft requirement has no `## Description` section, or no `## Cases` section.",
         "The `empty-section` check reports a `warn` when one of those two headings is present but carries nothing under it: no clauses, no criteria. Such a section passes `missing-section` while documenting nothing."
@@ -7542,15 +7526,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Ce verifică și ce omite lint",
-          "intent": "`gate` este read-only: nu editează niciodată o cerință, doar raportează despre ea, deci rularea sa nu prezintă niciun risc de pierdere a muncii. Draft-urile sunt excluse deoarece sunt stub-uri TODO pe care nimeni nu le-a revizuit încă — a le linta ar produce zgomot despre proză care este de așteptat să fie brută.",
-          "contract": "> `gate` este read-only: nu editează niciodată o cerință, doar raportează despre ea, deci\n> rularea sa nu prezintă niciun risc de pierdere a muncii. Draft-urile sunt excluse deoarece\n> sunt stub-uri TODO pe care nimeni nu le-a revizuit încă — a le linta ar produce doar zgomot\n> despre proză care este de așteptat să fie brută.\n\nFiecare bullet de mai jos este obligatoriu.\n- `gate` raportează probleme de lizibilitate și probleme de structură în fișierele de cerințe.\n- `gate` nu scrie niciun fișier. Doar citește și afișează.\n- `gate` verifică doar cerințele non-draft — status `baseline`, `in-progress`,\n  `implemented` sau `confirmed`. Draft-urile sunt stub-uri TODO, deci a le linta ar adăuga doar zgomot.\n- `gate` acordă fiecărui finding una din două severități. O verificare structurală raportează un\n  `error`; o verificare de proză sau o verificare de scope raportează un `warn`.\n- Verificarea `missing-section` raportează un `error` când o cerință non-draft nu are\n  secțiune `## Description`, sau nicio secțiune `## Cases`.\n- Verificarea `empty-section` raportează un `warn` când una din acele două titluri este\n  prezentă dar nu conține nimic dedesubt: nicio clauză, niciun criteriu. O astfel de secțiune trece\n  `missing-section` fără să documenteze nimic.",
-          "acceptance": "CASE-1 — o singură rulare scoate la iveală atât un finding structural cât și unul de lizibilitate\n  Given  o cerință confirmed fără secțiune `## Cases` și un bullet de Contract unit prin patru \"and\"-uri\n  When   rulează `lint_requirement` pe ea\n  Then   findings-urile includ atât o eroare `missing-section` cât și un avertisment `stacked-conditions`\n\nCASE-2 — o rulare lint implicită lasă directorul de cerințe neatins\n  Given  un director de cerințe cu findings de raportat și fără flag-ul `--decompose`\n  When   rulează `cmd_lint`\n  Then   listarea de fișiere a directorului este identică înainte și după apel\n\nCASE-3 — un draft cu o clauză proastă este omis silențios\n  Given  o cerință `draft` a cărei clauză de Contract este o propoziție run-on de 50 de cuvinte\n  When   rulează `cmd_lint`\n  Then   iese cu 0 iar ieșirea sa nu numește niciun finding pentru acea cerință\n\nCASE-4 — findings-urile structurale sunt error, cele de proză sunt warn\n  Given  o cerință confirmed fără secțiune `## Cases` și o linie de Contract care începe cu un \"It\" simplu\n  When   rulează `lint_requirement` pe ea\n  Then   finding-ul `missing-section` poartă severitatea `error` iar finding-ul `anonymous-subject` poartă `warn`\n\nCASE-5 — o cerință confirmed fără titlu Acceptance primește o eroare missing-section\n  Given  un corp de cerință `confirmed` care poartă o secțiune Description dar niciun titlu `## Cases`\n  When   rulează `lint_requirement` pe ea\n  Then   findings-urile sale includ `(\"error\", \"missing-section\")`\n\nCASE-6 — un titlu fără conținut dedesubt primește un avertisment empty-section\n  Given  o cerință `confirmed` ale cărei titluri Contract și Acceptance sunt ambele prezente dar nu conțin bullets\n  When   rulează `lint_requirement` pe ea\n  Then   findings-urile sale includ un avertisment `empty-section` și nicio eroare `missing-section`\n\n\n--------------------"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "REQ-LINT-864",
@@ -8262,7 +8238,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:275"
+          "loc": "plugin/scripts/reqmap_engine/model.py:274"
         },
         {
           "role": "implements",
@@ -10741,11 +10717,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:71"
+          "loc": "plugin/scripts/reqmap_engine/model.py:70"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:197"
+          "loc": "plugin/scripts/reqmap_engine/model.py:196"
         },
         {
           "role": "implements",
@@ -13701,7 +13677,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:239"
+          "loc": "app/scripts/smoke/rail.jsx:247"
         },
         {
           "role": "tested-by",
@@ -14115,15 +14091,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:125"
+          "loc": "plugin/scripts/reqmap_engine/model.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:154"
+          "loc": "plugin/scripts/reqmap_engine/model.py:153"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:173"
+          "loc": "plugin/scripts/reqmap_engine/model.py:172"
         },
         {
           "role": "implements",
@@ -14185,7 +14161,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:173"
+          "loc": "plugin/scripts/reqmap_engine/model.py:172"
         },
         {
           "role": "implements",
@@ -14270,7 +14246,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:125"
+          "loc": "plugin/scripts/reqmap_engine/model.py:124"
         }
       ],
       "test_exempt": null,
@@ -14958,7 +14934,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:133"
+          "loc": "app/scripts/smoke/views.jsx:130"
         },
         {
           "role": "implements",
@@ -17516,7 +17492,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:215"
+          "loc": "plugin/scripts/reqmap_engine/model.py:214"
         },
         {
           "role": "implements",
@@ -17667,7 +17643,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/model.py:215"
+          "loc": "plugin/scripts/reqmap_engine/model.py:214"
         },
         {
           "role": "implements",
@@ -18068,7 +18044,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:73"
+          "loc": "app/scripts/smoke/views.jsx:70"
         },
         {
           "role": "implements",
@@ -18116,7 +18092,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:298"
+          "loc": "app/scripts/smoke/explorer.jsx:286"
         },
         {
           "role": "implements",
@@ -18402,7 +18378,7 @@
       "title": "Self-contained HTML map viewer",
       "intent": "What the viewer shows once it is open: the outline, a requirement's spec, the roadmap and its plan, the inbox of open signals, the commands. The file it ships in, and the escaping that makes that file safe, is [[ARCH-VIEWERFILE-074]].",
       "contract": [
-        "The viewer ranks a `depends_on` layout by longest path so those edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. It offers no Map page: a requirement's spec opens on its title, and at the end it draws that requirement between what uses it and what it depends on, with the four trace links after that picture. [[REQ-VIEWER-942]]",
+        "The viewer ranks a `depends_on` layout by longest path so those edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. A requirement's spec opens on its title, with no Map page. [[REQ-VIEWER-942]]",
         "The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]",
         "The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]",
         "The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]",
@@ -18582,10 +18558,6 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/MapView.jsx:1"
-        },
-        {
-          "role": "implements",
           "loc": "app/src/views/ProblemsView.jsx:1"
         },
         {
@@ -18607,10 +18579,6 @@
         {
           "role": "implements",
           "loc": "app/src/views/explorer/Neighborhood.jsx:1"
-        },
-        {
-          "role": "implements",
-          "loc": "app/src/views/map/MapParts.jsx:1"
         },
         {
           "role": "implements",
@@ -18874,14 +18842,14 @@
       "contract": [
         "The outline accepts a requested slice: a status value, or `orphan`.",
         "The `orphan` row scopes to the gate's own error condition — an enforced requirement with no `implements:` member — which is a computed state, not a status value.",
-        "The status chips are `confirmed`, `draft`, `deprecated` and `orphan`. A requirement whose status is `in-progress` is labelled and filtered as `draft`, and no chip names `in-progress`.",
+        "The status chips are `confirmed`, `draft`, `deprecated` and `orphan`.",
         "An applied scope is rendered as an active filter chip, and clearing that chip, or clicking the same tally row again, restores the full outline.",
         "The scope applies to the first render, not only after one — the outline is never painted unfiltered when a scope was requested."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a tally row narrows the outline\n  Given  the outline rendered with the `draft` slice requested\n  When   its rows are counted\n  Then   fewer rows are shown than with no slice requested\n\nCASE-2 — the orphan row scopes to the gate's condition, not a status\n  Given  a registry in which every enforced requirement has an `implements:` member\n  When   the outline is rendered with the `orphan` slice requested\n  Then   no row matches, and the empty state says so\n\nCASE-3 — the applied scope is visible and clearable\n  Given  the outline rendered with a slice requested\n  When   its filter row is drawn\n  Then   the chip naming that slice is drawn active\n\nCASE-4 — an in-progress requirement matches the draft chip\n  Given  one requirement whose status is `in-progress` and one that is `confirmed`\n  When   the outline is rendered with the `draft` slice requested\n  Then   the in-progress requirement is listed and labelled `draft`, and no `in-progress`\n         chip is offered",
+      "accept": "CASE-1 — a tally row narrows the outline\n  Given  the outline rendered with the `draft` slice requested\n  When   its rows are counted\n  Then   fewer rows are shown than with no slice requested\n\nCASE-2 — the orphan row scopes to the gate's condition, not a status\n  Given  a registry in which every enforced requirement has an `implements:` member\n  When   the outline is rendered with the `orphan` slice requested\n  Then   no row matches, and the empty state says so\n\nCASE-3 — the applied scope is visible and clearable\n  Given  the outline rendered with a slice requested\n  When   its filter row is drawn\n  Then   the chip naming that slice is drawn active",
       "input": "",
       "output": "",
       "desc": "",
@@ -18905,8 +18873,8 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-VIEWER-964",
@@ -19142,10 +19110,10 @@
       ],
       "current_impl": [
         "`app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`.",
-        "`app/scripts/ssr-smoke.jsx` — the two cases above.",
+        "`app/scripts/ssr-smoke.jsx` — the three cases above.",
         "-------------------"
       ],
-      "accept": "CASE-1 — the chart scales with CSS `zoom`, not with a transform\n  Given  `RoadmapView` rendered with `initialZoom` 40\n  When   the markup is inspected\n  Then   the chart's wrapper carries `zoom:0.4` and no `transform`, so the scroll extent\n         scales with the content rather than staying at full width\n\nCASE-2 — the default scale is 100%\n  Given  `RoadmapView` rendered with no `initialZoom` and no stored preference\n  When   the markup is inspected\n  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`",
+      "accept": "CASE-1 — the chart scales with CSS `zoom`, not with a transform\n  Given  `RoadmapView` rendered with `initialZoom` 40\n  When   the markup is inspected\n  Then   the chart's wrapper carries `zoom:0.4` and no `transform`, so the scroll extent\n         scales with the content rather than staying at full width\n\nCASE-2 — the default scale is 100%\n  Given  `RoadmapView` rendered with no `initialZoom` and no stored preference\n  When   the markup is inspected\n  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`\n\nCASE-3 — a storage that throws leaves the scale at 100%\n  Given  `RoadmapView` rendered with no `initialZoom` and a browser storage whose read throws\n  When   the markup is inspected\n  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`, with no error",
       "input": "",
       "output": "",
       "desc": "",
@@ -19169,8 +19137,8 @@
       "milestone": "v6.3",
       "priority": "",
       "risks": [],
-      "clauses": 2,
-      "covered": 2
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-VIEWER-999",
@@ -19270,7 +19238,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:98"
+          "loc": "app/scripts/smoke/plan.jsx:97"
         },
         {
           "role": "implements",
@@ -19324,7 +19292,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:343"
+          "loc": "app/scripts/smoke/plan.jsx:342"
         },
         {
           "role": "implements",
@@ -19351,7 +19319,7 @@
       "title": "Each shipped release, drawn on the plan",
       "intent": "The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader looks at a chart. Patch releases of one minor version share a block, as wide as the commits of that whole line and at least as wide as the version on it. A second row appears only where two of those boxes would cover each other.",
       "contract": [
-        "The Plan draws shipped work on the Shipped band. Patch releases of the same minor version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from the earliest `first_commit` to the latest `last_commit`. A release with no sibling keeps its own version. The changelog date stands in when a commit date is absent.",
+        "The Plan draws shipped work on the Shipped band. Patch releases of the same minor version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from the earliest `first_commit` to the latest `last_commit`; a release with no sibling keeps its own version. The changelog date stands in when a commit date is absent.",
         "The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the count of releases it holds, so a release shorter than its label is still readable.",
         "Blocks share a row. A block takes the next row only when its drawn box would cover another's.",
         "Releases that start on the same day share one block, labelled from the lowest version to the highest with a hyphen, as in `v5.10.x-v6.3.0`. A `vX.Y.x` patch group counts as one end of that range. The block shows that label, not a headline.",
@@ -19378,11 +19346,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/history.jsx:44"
+          "loc": "app/scripts/smoke/history.jsx:43"
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:381"
+          "loc": "app/scripts/smoke/plan.jsx:380"
         },
         {
           "role": "implements",
@@ -19435,13 +19403,12 @@
       "contract": [
         "Each row of the rail's registry tally shows the count of the slice it would scope to.",
         "Choosing a row requests that slice and brings the outline forward, whatever surface was showing; choosing the same row again requests no slice.",
-        "The row whose slice is in force is drawn pressed, and only that row.",
-        "The tally offers no `in-progress` row. A requirement with that status is counted on the `draft` row."
+        "The row whose slice is in force is drawn pressed, and only that row."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the requested slice's row is drawn pressed\n  Given  the rail rendered with the `draft` slice in force\n  When   its tally is drawn\n  Then   exactly one row is pressed, and it is the `draft` row\n\nCASE-2 — each row shows its slice's count\n  Given  a registry holding some drafts\n  When   the rail's tally is drawn\n  Then   the `draft` row shows the number of draft requirements\n\nCASE-3 — choosing a row scopes the outline and opens it\n  Given  the shell's handler for a tally row\n  When   it is called with `orphan`\n  Then   the slice becomes `orphan` and the outline is the surface shown\n\nCASE-4 — an in-progress requirement is counted as a draft\n  Given  a registry holding one `draft` and one `in-progress` requirement\n  When   the rail's tally is drawn\n  Then   the `draft` row shows 2, and no `in-progress` row is offered\n\n\n--------------------",
+      "accept": "CASE-1 — the requested slice's row is drawn pressed\n  Given  the rail rendered with the `draft` slice in force\n  When   its tally is drawn\n  Then   exactly one row is pressed, and it is the `draft` row\n\nCASE-2 — each row shows its slice's count\n  Given  a registry holding some drafts\n  When   the rail's tally is drawn\n  Then   the `draft` row shows the number of draft requirements\n\nCASE-3 — choosing a row scopes the outline and opens it\n  Given  the shell's handler for a tally row\n  When   it is called with `orphan`\n  Then   the slice becomes `orphan` and the outline is the surface shown\n\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -19454,7 +19421,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:254"
+          "loc": "app/scripts/smoke/rail.jsx:262"
         },
         {
           "role": "implements",
@@ -19473,8 +19440,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-VIEWER-1084",
@@ -19495,7 +19462,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each ring opens its own tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-3 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-4 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed\n\nCASE-5 — a row that only awaits confirmation stays in Review\n  Given  a health record with one row failing only `not confirmed` and one failing\n         `not tested`\n  When   Problems renders on its Health tab\n  Then   only the untested row is listed, the Health count is 1, and the tab says 1\n         row only awaits confirmation\n\nCASE-6 — errors and warnings are listed on the Health tab\n  Given  an error, a warning, and a health row for another requirement\n  When   Problems renders on its Health tab\n  Then   the error and the warning are listed, and no Errors or Warnings tab is offered",
+      "accept": "CASE-1 — each ring opens its own tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-3 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-4 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed\n\nCASE-5 — a row that only awaits confirmation stays in Review\n  Given  a health record with one row failing only `not confirmed` and one failing\n         `not tested`\n  When   Problems renders on its Health tab\n  Then   only the untested row is listed, the Health count is 1, and the tab says 1\n         row only awaits confirmation\n\nCASE-6 — errors and warnings are listed on the Health tab\n  Given  an error, a warning, and a health row for another requirement\n  When   Problems renders on its Health tab\n  Then   both are listed, and no Errors or Warnings tab is offered",
       "input": "",
       "output": "",
       "desc": "",
@@ -19508,7 +19475,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:297"
+          "loc": "app/scripts/smoke/rail.jsx:293"
         },
         {
           "role": "implements",
@@ -19573,7 +19540,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:229"
+          "loc": "app/scripts/smoke/plan.jsx:228"
         },
         {
           "role": "implements",
@@ -20460,7 +20427,7 @@
       "current_impl": [
         "Not implemented by code — a stakeholder need is fulfilled by the requirements that declare `satisfies: SYS-SSOT-001` (the gate, the map, the dossier, and the traceability feature itself)."
       ],
-      "accept": "CASE-1\n  Given  a repo where a tag points to a non-existent requirement (dangling ref)\n         or an enforced requirement (in-progress, implemented, or confirmed) has\n         no implements: member (structural gap)\n  When   the gate runs\n  Then   the build fails (exit 1 — link-sync is an ERROR)\n\nCASE-2\n  Given  a repo where a confirmed requirement's contract was edited after the lock\n  When   the gate runs\n  Then   the drift is surfaced (WARN: \"DRIFT — contract changed since lock\") and\n         the gate exits 0 — drift is reported, not blocking, by design\n\nCASE-3\n  Given  a confirmed capability\n  When   the gate runs\n  Then   it has linked, existing code and tests\n\nCASE-4\n  Given  any capability\n  When   a reader runs `show`\n  Then   they see its code locations and what depends on it",
+      "accept": "CASE-1\n  Given  a repo where a tag points to a non-existent requirement (dangling ref)\n         or an enforced requirement (implemented or confirmed) has\n         no implements: member (structural gap)\n  When   the gate runs\n  Then   the build fails (exit 1 — link-sync is an ERROR)\n\nCASE-2\n  Given  a repo where a confirmed requirement's contract was edited after the lock\n  When   the gate runs\n  Then   the drift is surfaced (WARN: \"DRIFT — contract changed since lock\") and\n         the gate exits 0 — drift is reported, not blocking, by design\n\nCASE-3\n  Given  a confirmed capability\n  When   the gate runs\n  Then   it has linked, existing code and tests\n\nCASE-4\n  Given  any capability\n  When   a reader runs `show`\n  Then   they see its code locations and what depends on it",
       "input": "",
       "output": "",
       "desc": "",
@@ -23965,7 +23932,7 @@
           "version": "v8.15.1",
           "date": "2026-10-04",
           "headline": "Each shipped release is its own block, as wide as the work",
-          "body": "**Each shipped release is its own block, as wide as the work.**\n\n- The Plan draws one block per release, from the first commit after the previous tag to that release's own tag. A changelog date inside that span cuts it: the block starts the day after the latest such date, so a release with no tag is not drawn in the middle of a later one (REQ-HISTORY-1003, REQ-HISTORY-1081)\n- The block shows the version, and for a patch group how many releases it holds. Releases that start on the same day share one block, labelled from the lowest version to the highest (`v5.10.x-v6.3.0`). Opening it shows the CHANGELOG entry, not only the headline. With no git history, or no tag, both dates are the changelog date, so the block is a single day\n- The engine's core rises from 6,612 to 6,677 logical lines, and its budget with it (ADR-0061, ADR-0062)\n- The Roadmap tab no longer offers Versions. The Plan is the only picture; the chip columns and their requirement (`REQ-VIEWER-995`) are retired\n- Gate errors and warnings are listed on the Health tab. The Errors and Warnings tabs are gone (REQ-VIEWER-1084)\n- A requirement is `confirmed` or `draft`. `in-progress` is counted and filtered with `draft`, and the chip and the registry row that named it are gone (REQ-VIEWER-945, REQ-VIEWER-1082)\n- The Map page is gone. A requirement's spec opens on its title. At the end the viewer draws what uses it and what it depends on, and the four trace links follow that picture (REQ-VIEWER-942)",
+          "body": "**Each shipped release is its own block, as wide as the work.**\n\n- The Plan draws one block per release, from the first commit after the previous tag to that release's own tag. A changelog date inside that span cuts it: the block starts the day after the latest such date, so a release with no tag is not drawn in the middle of a later one (REQ-HISTORY-1003, REQ-HISTORY-1081)\n- The block shows the version, and for a patch group how many releases it holds. Releases that start on the same day share one block, labelled from the lowest version to the highest (`v5.10.x-v6.3.0`). Opening it shows the CHANGELOG entry, not only the headline. With no git history, or no tag, both dates are the changelog date, so the block is a single day\n- The engine's core rises from 6,612 to 6,677 logical lines, and its budget with it (ADR-0061, ADR-0062)\n- The Roadmap tab no longer offers Versions. The Plan is the only picture; the chip columns and their requirement (`REQ-VIEWER-995`) are retired\n- Gate errors and warnings are listed on the Health tab. The Errors and Warnings tabs are gone (REQ-VIEWER-1084)\n- The Map page is gone. A requirement's spec opens on its title. At the end the viewer draws what uses it and what it depends on, and the four trace links follow that picture (REQ-VIEWER-942)\n- `in-progress` is no longer a status. A requirement is `draft`, `baseline`, `implemented`, `confirmed` or `deprecated`; `ENFORCED` is `implemented` and `confirmed`, and a file that still says `status: in-progress` fails RM002 until it says `draft`",
           "first_commit": "2026-10-04",
           "last_commit": "2026-10-04"
         },
@@ -24211,8 +24178,8 @@
     }
   ],
   "design": {
-    "files": 122,
-    "clean_files": 120,
+    "files": 120,
+    "clean_files": 118,
     "score": 98,
     "candidates": {
       "encapsulation": 0,

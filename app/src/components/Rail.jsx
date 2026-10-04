@@ -4,7 +4,6 @@ import {
   REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
-import { shownStatus } from "../lib/ui.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { ENFORCED } from "../views/SpecDoc.jsx";
 
@@ -153,7 +152,7 @@ function RailStats({ focus, setFocus }) {
   const stats = [
     { key: "confirmed", n: by((r) => r.status === "confirmed"),
       color: "var(--status-confirmed)" },
-    { key: "draft", n: by((r) => shownStatus(r.status) === "draft"),
+    { key: "draft", n: by((r) => r.status === "draft"),
       color: "var(--status-draft)" },
     { key: "orphan", n: by(isOrphan), color: "var(--status-error)" },
     { key: "deprecated", n: by((r) => r.status === "deprecated"),

@@ -56,7 +56,7 @@ CASE-6
 
 ## Context
 **Terms**
-- non-draft    a requirement whose status is baseline, in-progress, implemented
+- non-draft    a requirement whose status is baseline, implemented
 - or confirmed — every status except `draft`.
 - draft        a stub the engine wrote from a TODO item; nobody has reviewed it yet.
 - Contract     the `## Description` section of a requirement file.
@@ -110,7 +110,7 @@ satisfies: [ARCH-LINT-014]
 Every bullet below is binding.
 - `gate` reports readability problems and structure problems in requirement files.
 - `gate` writes no file. It only reads and prints.
-- `gate` checks non-draft requirements only — status `baseline`, `in-progress`,
+- `gate` checks non-draft requirements only — status `baseline`,
   `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.
 - `gate` gives each finding one of two severities. A structural check reports an `error`;
   a prose check or a scope check reports a `warn`.

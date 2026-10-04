@@ -13,7 +13,7 @@ from .parse import split_requirement_blocks
 REQUIREMENT_TEMPLATE = ("""\
 ---
 id: AREA-NAME-NNN
-""" "status: draft        # draft | baseline | in-progress | implemented "
+""" "status: draft        # draft | baseline | implemented "
 "| confirmed | deprecated\n"
 """\
 layer: feature       # bus | feature | need | aggregate

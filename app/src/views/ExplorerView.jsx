@@ -11,7 +11,6 @@ import {
 } from "../lib/tree.js";
 import { ExplorerFilters } from "./explorer/ExplorerFilters.jsx";
 import { Neighborhood } from "./explorer/Neighborhood.jsx";
-import { shownStatus } from "../lib/ui.jsx";
 
 function isOrphan(r) {
   return !!ENFORCED[r.status] && r.layer !== "need" && r.layer !== "aggregate"
@@ -19,9 +18,8 @@ function isOrphan(r) {
 }
 
 function statusDot(s) {
-  const k = shownStatus(s);
-  return k === "confirmed" ? "var(--status-confirmed)"
-    : k === "deprecated" ? "var(--fg-faint)"
+  return s === "confirmed" ? "var(--status-confirmed)"
+    : s === "deprecated" ? "var(--fg-faint)"
     : "var(--status-draft)";
 }
 
@@ -60,7 +58,7 @@ function Row({ row, selected, onSelect, onToggle }) {
         {row.hasChildren && !row.expanded && (
           <span className="ex-count">{chip}</span>
         )}
-        <span className="ex-dot" title={shownStatus(r.status)}
+        <span className="ex-dot" title={r.status}
               style={{ background: statusDot(r.status) }} />
       </span>
     </div>
@@ -120,8 +118,7 @@ const flip = (setter) => (key) => setter((prev) => {
  *  orphans. */
 function useExplorerFilters(focus, clearFocus) {
   const [level, setLevel] = useState({});
-  const slice = focus === "in-progress" ? "draft" : focus;
-  const focused = () => (slice && slice !== "orphan" ? { [slice]: true } : {});
+  const focused = () => (focus && focus !== "orphan" ? { [focus]: true } : {});
   const [status, setStatus] = useState(focused);
   const [onlyQuestions, setOnlyQuestions] = useState(false);
   const [onlyOrphans, setOnlyOrphans] = useState(focus === "orphan");
@@ -147,7 +144,7 @@ function useMatched(f) {
     }
     return REQUIREMENTS.filter((r) =>
       (!anyLevel || f.level[levelOf(r)]) &&
-      (!anyStatus || f.status[shownStatus(r.status)]) &&
+      (!anyStatus || f.status[r.status]) &&
       (!f.onlyQuestions || hasOpenQuestions(r)) &&
       (!f.onlyOrphans || isOrphan(r))
     ).map((r) => r.id);

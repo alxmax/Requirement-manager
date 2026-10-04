@@ -127,8 +127,7 @@ Every bullet below is binding.
 - An invalid `status` or an invalid `layer` is such a condition.
 - A `depends_on` pointing at a missing id is such a condition.
 - An enforced requirement with no `implements:` member is such a condition.
-- A requirement is enforced when its status is `in-progress`, `implemented` or
-  `confirmed`.
+- A requirement is enforced when its status is `implemented` or `confirmed`.
 - A `layer: need` requirement is exempt from that `implements:` rule — see
   [[ARCH-TRACE-020]].
 
@@ -154,10 +153,10 @@ CASE-4 — a confirmed requirement with no implements tag is a gate ERROR
   When   `gate` runs
   Then   its output contains "no implements" and it exits 1
 
-CASE-5 — ENFORCED names exactly the three enforced statuses
+CASE-5 — ENFORCED names exactly the two enforced statuses
   Given  the module-level `R.ENFORCED` set
   When   it is inspected
-  Then   it equals `{"in-progress", "implemented", "confirmed"}`, and `"draft"` is absent
+  Then   it equals `{"implemented", "confirmed"}`, and `"draft"` is absent
 
 CASE-6 — a confirmed need with no implements tag raises no gate error
   Given  a confirmed `layer: need` requirement with no `implements:` tag, satisfied by

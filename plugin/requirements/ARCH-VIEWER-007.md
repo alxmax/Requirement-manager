@@ -18,7 +18,7 @@ satisfies: [SYS-VISUAL-106]
 > [[ARCH-VIEWERFILE-074]].
 
 Every bullet below is binding.
-- The viewer ranks a `depends_on` layout by longest path so those edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. It offers no Map page: a requirement's spec opens on its title, and at the end it draws that requirement between what uses it and what it depends on, with the four trace links after that picture. [[REQ-VIEWER-942]]
+- The viewer ranks a `depends_on` layout by longest path so those edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. A requirement's spec opens on its title, with no Map page. [[REQ-VIEWER-942]]
 - The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
@@ -327,8 +327,7 @@ Every bullet below is binding.
 - The outline accepts a requested slice: a status value, or `orphan`.
 - The `orphan` row scopes to the gate's own error condition — an enforced requirement with no
   `implements:` member — which is a computed state, not a status value.
-- The status chips are `confirmed`, `draft`, `deprecated` and `orphan`. A requirement whose
-  status is `in-progress` is labelled and filtered as `draft`, and no chip names `in-progress`.
+- The status chips are `confirmed`, `draft`, `deprecated` and `orphan`.
 - An applied scope is rendered as an active filter chip, and clearing that chip, or clicking the
   same tally row again, restores the full outline.
 - The scope applies to the first render, not only after one — the outline is never painted
@@ -350,11 +349,6 @@ CASE-3 — the applied scope is visible and clearable
   When   its filter row is drawn
   Then   the chip naming that slice is drawn active
 
-CASE-4 — an in-progress requirement matches the draft chip
-  Given  one requirement whose status is `in-progress` and one that is `confirmed`
-  When   the outline is rendered with the `draft` slice requested
-  Then   the in-progress requirement is listed and labelled `draft`, and no `in-progress`
-         chip is offered
 
 ---
 id: REQ-VIEWER-964
@@ -603,6 +597,11 @@ CASE-2 — the default scale is 100%
   When   the markup is inspected
   Then   the zoom control reads `100%` and the wrapper carries `zoom:1`
 
+CASE-3 — a storage that throws leaves the scale at 100%
+  Given  `RoadmapView` rendered with no `initialZoom` and a browser storage whose read throws
+  When   the markup is inspected
+  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`, with no error
+
 ## Context
 **Notes**
 - The wheel handler is deliberately NOT covered here, and the omission is the honest one:
@@ -615,7 +614,7 @@ CASE-2 — the default scale is 100%
 
 **Current implementation**
 - `app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`.
-- `app/scripts/ssr-smoke.jsx` — the two cases above.
+- `app/scripts/ssr-smoke.jsx` — the three cases above.
 
 
 --------------------
@@ -827,8 +826,8 @@ distinct_from: [REQ-HISTORY-1003]
 Every bullet below is binding.
 - The Plan draws shipped work on the Shipped band. Patch releases of the same minor
   version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from
-  the earliest `first_commit` to the latest `last_commit`. A release with no sibling
-  keeps its own version. The changelog date stands in when a commit date is absent.
+  the earliest `first_commit` to the latest `last_commit`; a release with no
+  sibling keeps its own version. The changelog date stands in when a commit date is absent.
 - The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the
   count of releases it holds, so a release shorter than its label is still readable.
 - Blocks share a row. A block takes the next row only when its drawn box would cover
@@ -914,8 +913,6 @@ Every bullet below is binding.
 - Choosing a row requests that slice and brings the outline forward, whatever surface
   was showing; choosing the same row again requests no slice.
 - The row whose slice is in force is drawn pressed, and only that row.
-- The tally offers no `in-progress` row. A requirement with that status is counted on the
-  `draft` row.
 
 ## Cases
 CASE-1 — the requested slice's row is drawn pressed
@@ -933,10 +930,6 @@ CASE-3 — choosing a row scopes the outline and opens it
   When   it is called with `orphan`
   Then   the slice becomes `orphan` and the outline is the surface shown
 
-CASE-4 — an in-progress requirement is counted as a draft
-  Given  a registry holding one `draft` and one `in-progress` requirement
-  When   the rail's tally is drawn
-  Then   the `draft` row shows 2, and no `in-progress` row is offered
 
 
 --------------------
@@ -1006,7 +999,7 @@ CASE-5 — a row that only awaits confirmation stays in Review
 CASE-6 — errors and warnings are listed on the Health tab
   Given  an error, a warning, and a health row for another requirement
   When   Problems renders on its Health tab
-  Then   the error and the warning are listed, and no Errors or Warnings tab is offered
+  Then   both are listed, and no Errors or Warnings tab is offered
 
 ---
 id: REQ-VIEWER-1087

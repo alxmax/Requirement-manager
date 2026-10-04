@@ -5,7 +5,6 @@ surfaces, built from the high-fidelity design system in *Reqmap Design System*:
 
 | Surface | View | What it is |
 |---|---|---|
-| **Map** | `src/views/MapView.jsx` | Flagship graph explorer — 4 tabs (System Map / Req→Code / Dependencies / Risk), positioned nodes, dependency edges, click-to-open detail panel with a gold "locate" action. |
 | **Problems** | `src/views/ProblemsView.jsx` | Linter-style inbox of every open signal (errors / warnings / review / cautions), filterable; each row jumps to its spec. |
 | **Spec** | `src/views/SpecView.jsx` | One requirement rendered for reading: frontmatter → WHY → coverage strip → WHAT → HOW → WHERE → Risk. |
 

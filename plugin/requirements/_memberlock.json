@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "60fc86dc99c4046cc4bf05ba9cb9d76bdaf0cd967665d096232b47cca6547826",
+      "plugin/scripts/reqmap_engine/__init__.py": "c97c188324c755587d28e76abf3bd61f80f841947d14b9b26b74717b5f47342e",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -38,7 +38,7 @@
       "plugin/scripts/reqmap_engine/findings.py#_render_findings": "6c4e370c6df9c4d30270de75130ca4111c116a679948be182ffed45c9215ca92"
     },
     "ARCH-LEVEL-051": {
-      "plugin/scripts/reqmap_engine/model.py": "44cf84002cd6838bc6c73a23bebde5dd016b43566c775a58b1d2c1c0a9187061"
+      "plugin/scripts/reqmap_engine/model.py": "09996a1621ca23e65fd60fe8cf4efaf30507a896c7b2fc844625514156c7d901"
     },
     "ARCH-LEVELRETROFIT-066": {
       "plugin/scripts/reqmap_engine/levels.py": "bba38e87a87e54a1bd35bfd972e5aa58088e0a5f4622183430928d51014bd286"
@@ -132,21 +132,19 @@
       "app/scripts/ssr-smoke.jsx": "11053302ff9003614514e236df0d2e681ad054252217357e8d4c4e434ca7433e",
       "app/scripts/sync-data.mjs": "fb9eb5f0396b3a61fae78a7e9557243faee2df09c303d5dd04fc66a5be294b9a",
       "app/src/components/TopBar.jsx": "6a0459427011e8304fefc4d83d5ce703a51588fe6acf352cd1ffe1d3af140a9f",
-      "app/src/lib/canvasZoom.jsx": "3a83dcbd8f7e62f8d7bc570d6f40dd15064e57dba0ba94c006158f74fa13ff1a",
+      "app/src/lib/canvasZoom.jsx": "55f88d3c50545d0c74482fd1879021ddd8f3b286db18215928eca334c98c8a2d",
       "app/src/lib/icons.jsx": "f973e7c60297008d5ed96870da0be7dd92091f3dee697338ce8b698694bb6ca5",
       "app/src/lib/planBars.js": "0dfac6e6ea08cc74e31bcced7ab05324863649558ee5c5ea8ba9823ac58c37ad",
       "app/src/lib/tree.js": "9131891bbf3783bd52ccff5b80f8b105856bcc59a62dd92edb25755d591ef051",
-      "app/src/lib/useDragPan.js": "8db451486493aac9f3f37fde8a646c969c389cfffa8282c2827ef183710ba95e",
+      "app/src/lib/useDragPan.js": "c1da172c305dd56ff9a39d52e567dfcd76b8626691490478e333c11e50ba96ab",
       "app/src/main.jsx": "8885b344ea6e788cbe6b42620ce7162acd016f5cd412ca01f5d7ef48ee7e4062",
-      "app/src/styles/app.css": "6fadd9312aa2d18357743ba8018818e5e70d461811709ef56eafa6dd30b2d199",
+      "app/src/styles/app.css": "47978a1d062f653eedec1be31680c5882029e503f9206683ad051b1f2f3a87a0",
       "app/src/styles/colors_and_type.css": "d9ddcb927eb46a8d742efb8439535ad2b49b01e555d058c0b9f25710942b8c9e",
-      "app/src/views/MapView.jsx": "bc8b04751815b281a5e44cab3be4e505ee3f3ace9cbb87cfcf816e2a0e609e00",
       "app/src/views/commands/CommandGroup.jsx": "b9425b46532df218e5f3c4f86a89a61b18dda082226a9894b783a4eb89e390a3",
       "app/src/views/explorer/ExplorerFilters.jsx": "56828b07ed43f0930eadee08493ffefbf65d147c4522377f24f498bce9eaa912",
-      "app/src/views/map/MapParts.jsx": "493ce8c433d7e9a7ed594e8dea723ac5231998bdefc2777a9fd85dc3c540859d",
       "app/src/views/roadmap/EntryBody.jsx": "d609917ec39cd5b11b47555f7227a272845c1c76b6a324c85df6955f1e3b2c18",
       "app/src/views/roadmap/PlanGantt.jsx": "49c2be3ed98c090091de7302bf803c263fef154c1d443e6ac976121d6df5744c",
-      "app/src/views/spec/SpecParts.jsx": "473ccd02cedb38d20bc4d3d2b5912cd0725f1c84992c593b8a91edeb2800689e",
+      "app/src/views/spec/SpecParts.jsx": "3a8a265816ccde809700121a0a232f19b8e63c2cf3407ffa9b5b70bbf1ee235b",
       "plugin/scripts/reqmap_engine/rulesrepo.py#_viewer_fixture_rule": "91609532307b9057d8388973a8c0906a4d55f2a7f03966e15fcbe69ba394aca9",
       "plugin/scripts/reqmap_engine/viewer.py#check_viewer_data_sync": "95fc4f90ea97deff6944c9f260b2fde34c6398019fb567cddb1fd4c7d06fdb65"
     },
@@ -167,7 +165,7 @@
       "plugin/scripts/reqmap_engine/model.py#GateResult": "2d850dff21efc43da79def73d37503a83364d720f45d08ce01ef2c7502213f3d"
     },
     "REQ-CHECK-1040": {
-      "plugin/scripts/reqmap_engine/rules.py#_confirmed_sections_rule": "47914bf2d434479befaf1e484b3446ca2818cc34d5641cc502745b69bc833b65"
+      "plugin/scripts/reqmap_engine/rules.py#_confirmed_sections_rule": "2af27e9488c9fe2ff3ed8bedc788a230cee7cf8aaa80c8ea58448cf854b892ce"
     },
     "REQ-CHECK-828": {
       "plugin/scripts/reqmap_engine/rules.py#_depends_on_missing_rule": "faa8723895adc128705f63965f989ffbee0a40a0d67f71d66814367c88c352d8"
@@ -323,7 +321,7 @@
       "plugin/scripts/reqmap_engine/text.py#_req_file": "387106965087e7723d9fa52e944af2190578d7131e12b5a4a74b916eac051b0a"
     },
     "REQ-NEWGONE-1034": {
-      "plugin/scripts/reqmap_engine/author.py": "92387c868501f07ea6300c17c1bb798d426ea6b8e2832237784ee541fd9bc3d1"
+      "plugin/scripts/reqmap_engine/author.py": "102644b34b4178cb6b75824ab5f15660817cb06c4933b8b115dbeb648f01f147"
     },
     "REQ-PARSE-890": {
       "plugin/scripts/reqmap_engine/parse.py#RequirementIndex": "b26f28bc212fcdaa6f77b8118957f3b6e351c54c4412446328e8272c6066e734"

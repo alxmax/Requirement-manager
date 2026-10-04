@@ -1,7 +1,6 @@
 // implements: ARCH-VIEWER-007
-/* Shared canvas zoom — Map and Roadmap both pan wide surfaces and need the same
- * ctrl+wheel zoom, persisted level, and fit-to-view. Extracted from RoadmapView
- * so MapView does not fork a second copy. */
+/* Shared canvas zoom — the Roadmap pans a wide surface and needs ctrl+wheel
+ * zoom, a persisted level, and fit-to-view. */
 import { useEffect, useRef, useState, useCallback } from "react";
 
 export const ZOOM_MIN = 40;

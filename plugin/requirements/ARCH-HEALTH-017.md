@@ -370,7 +370,7 @@ CASE-4
 
 CASE-5
   Given  a corpus of one green confirmed requirement, one draft, and one requirement at
-         `baseline`, `in-progress`, `implemented` or `deprecated`
+         `baseline`, `implemented` or `deprecated`
   When   `health --json` runs
   Then   the reviewed-only score is 100 and its denominator is 1, because the fourth
          status is neither green nor counted against green

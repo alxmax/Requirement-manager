@@ -105,6 +105,7 @@ docs/commands.md
 docs/integrations.md
 docs/internals.md
 docs/planning.md
+docs/planning-contract.md
 docs/requirements.md
 # ROADMAP.md is INPUT the engine reads (`_roadmap_signals`, ARCH-ROADMAP-038), not a
 # capability and not an artifact derived from one. A `generated-from:` tag would be

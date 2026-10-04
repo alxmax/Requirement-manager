@@ -501,7 +501,7 @@ class RiderGuards(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-b
 
     def test_draft_status_is_not_enforced(self):  # rider #3  # verifies: REQ-CHECK-828#CASE-5
         self.assertNotIn("draft", R.ENFORCED)
-        self.assertEqual(R.ENFORCED, {"in-progress", "implemented", "confirmed"})
+        self.assertEqual(R.ENFORCED, {"implemented", "confirmed"})
 
 
 class JsFacts(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009

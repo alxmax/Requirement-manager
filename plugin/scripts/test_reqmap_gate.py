@@ -1294,7 +1294,7 @@ class LockUpdate(unittest.TestCase):
             rdir = os.path.join(d, "requirements")
             # Write a requirement
             _write(os.path.join(rdir, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="in-progress",
+                   REQ.format(id="REQ-A-001", status="draft",
                               layer="bus", extra="", title="T") +
                    "\n## WHAT — Contract\n- original contract\n")
             # Build initial lock
@@ -1305,7 +1305,7 @@ class LockUpdate(unittest.TestCase):
                 R.cmd_check(R.Workspace(reqs, members, rdir), True)
             # Now change the body so the hash differs
             _write(os.path.join(rdir, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="in-progress",
+                   REQ.format(id="REQ-A-001", status="draft",
                               layer="bus", extra="", title="T") +
                    "\n## WHAT — Contract\n- changed contract\n")
             reqs2 = R.load_requirements(rdir)
@@ -1323,7 +1323,7 @@ class LockUpdate(unittest.TestCase):
             rdir = os.path.join(d, "requirements")
             # Write a requirement and build initial lock
             _write(os.path.join(rdir, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="in-progress",
+                   REQ.format(id="REQ-A-001", status="draft",
                               layer="bus", extra="", title="T"))
             reqs = R.load_requirements(rdir)
             buf = io.StringIO()

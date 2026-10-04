@@ -8,7 +8,6 @@ import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
-import { MapView } from "../../src/views/MapView.jsx";
 import {
   ProblemsView, computeProblems, computeQuestions,
 } from "../../src/views/ProblemsView.jsx";
@@ -170,17 +169,6 @@ const focusChecks = [
       && scopedOrphan.includes("No requirement matches these filters.")],
 ];
 for (const [label, ok] of focusChecks) test(label, ok);
-adoptMapExport({ nodes: [
-  { id: "IP-1", status: "in-progress", title: "working" },
-  { id: "CF-1", status: "confirmed", title: "done" },
-].map(adaptNode) });
-const mergedDraft = renderToString(
-  <ExplorerView selId="IP-1" setSelId={noop} focus="draft" clearFocus={noop} />);
-// verifies: REQ-VIEWER-945#CASE-4
-test("focus: an in-progress requirement matches the draft chip",
-  mergedDraft.includes("IP-1") && !mergedDraft.includes("CF-1")
-    && !mergedDraft.includes("in-progress"));
-adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 
 // ---- the command reference (REQ-VIEWER-964) --------------------------------
 const CLI_FIXTURE = [

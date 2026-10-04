@@ -266,8 +266,8 @@ h1 .i18n-badge { font-size: 12px; }
 .pill .pdot { width: 6px; height: 6px; border-radius: 999px; }
 .pill.confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed); }
 .pill.confirmed .pdot { background: var(--status-confirmed); }
-.pill.in-progress, .pill.drift { background: var(--status-drift-bg); color: var(--status-drift); }
-.pill.in-progress .pdot, .pill.drift .pdot { background: var(--status-drift); }
+.pill.drift { background: var(--status-drift-bg); color: var(--status-drift); }
+.pill.drift .pdot { background: var(--status-drift); }
 .pill.draft { background: var(--status-draft-bg); color: var(--status-draft); }
 .pill.draft .pdot { background: var(--status-draft); }
 .pill.bus { background: var(--status-bus-bg); color: var(--status-bus); }

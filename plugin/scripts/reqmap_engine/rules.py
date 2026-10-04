@@ -273,11 +273,11 @@ def _confirmed_sections_rule(ctx):  # implements: REQ-CHECK-1040
             yield rid, (
                 f"{rid}: confirmed but missing '## Description' section "
                 "— add the normative contract or drop status back to "
-                "in-progress")
+                "draft")
         if not _has_any(r["body"], ACCEPTANCE_LABELS):
             yield rid, (
                 f"{rid}: confirmed but missing '## Cases' section — add "
-                "acceptance criteria or drop status back to in-progress")
+                "acceptance criteria or drop status back to draft")
 
 
 @gate_rule("RM015", "warn")

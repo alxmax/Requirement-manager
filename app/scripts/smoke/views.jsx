@@ -26,7 +26,6 @@ import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
-import { MapView } from "../../src/views/MapView.jsx";
 import {
   ProblemsView, computeProblems, computeQuestions,
 } from "../../src/views/ProblemsView.jsx";
@@ -51,8 +50,6 @@ import { json, noop, specOf, test, fail } from "./harness.jsx";
 
 const cases = {
   App: <App />,
-  MapView: <MapView selId="ARCH-PARSE-001" setSelId={noop} openSpec={noop}
-                    highlightId={null} setHighlightId={noop} />,
   ProblemsView: <ProblemsView openSpec={noop} />,
   RoadmapView: <RoadmapView openSpec={noop} />,
   SpecDoc: specOf("ARCH-MAP-007"),
@@ -141,21 +138,18 @@ const searchChecks = [  // tested-by: REQ-SEARCH-912
 ];
 for (const [label, ok] of searchChecks) test(label, ok);
 
-// XSS regression: untrusted requirement HTML must render ESCAPED in both
-// dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecDoc), never live.
+// XSS regression: untrusted requirement HTML must render ESCAPED in the
+// dangerouslySetInnerHTML sink (SpecDoc), never live.
 adoptMapExport({ nodes: [adaptNode({
   id: "XSS-TEST-001", title: "xss", area: "XSS", layer: "feature",
   status: "confirmed",
   intent: "i", contract: ['danger <img src=x onerror="boom( })">'],
   acc: ['<script>boom()</script>'], members: [], deps: [], used_by: [],
 })] });
-const xssMap = renderToString(
-  <MapView selId="XSS-TEST-001" setSelId={noop} openSpec={noop}
-           highlightId={null} setHighlightId={noop} />);
 const xssSpec = renderToString(specOf("XSS-TEST-001"));
 const xssChecks = [
-  ["MapView escapes injected contract HTML",
-    xssMap.includes("&lt;img") && !xssMap.includes("<img src=x onerror")],
+  ["SpecDoc escapes injected contract HTML",
+    xssSpec.includes("&lt;img") && !xssSpec.includes("<img src=x onerror")],
   ["SpecDoc escapes injected acceptance HTML",
     xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
 ];

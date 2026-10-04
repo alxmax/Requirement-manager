@@ -23,7 +23,7 @@
  * author's own text, exactly as before.
  *
  * The engine's own vocabulary is out of scope too, deliberately: `confirmed`,
- * `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`,
+ * `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`,
  * and the ERROR/WARN/REVIEW severities are literal values in the
  * requirement files and in the gate's output. A reader who sees
  * "confirmat" here and `status: confirmed`

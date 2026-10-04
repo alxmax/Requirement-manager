@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Icon } from "../../lib/icons.jsx";
 import { REQ_BY_ID } from "../../lib/data.js";
-import { Pill, statusKind, shownStatus, mdQuestion, reqLinkProps } from "../../lib/ui.jsx";
+import { Pill, statusKind, mdQuestion, reqLinkProps } from "../../lib/ui.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 
 const COUNT = {
@@ -227,7 +227,7 @@ export function ProblemRow({ p, openSpec, t }) {
         <div className="prob-head">
           <span className="prob-id">{p.id}</span>
           <span className="prob-title">{p.title}</span>
-          {p.status && <Pill kind={statusKind(p.status)}>{shownStatus(p.status)}</Pill>}
+          {p.status && <Pill kind={statusKind(p.status)}>{p.status}</Pill>}
         </div>
         {p.questions
           ? (
