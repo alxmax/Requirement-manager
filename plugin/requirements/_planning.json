@@ -12,7 +12,6 @@
   ],
   "lanes": [
     "Feature",
-    "Fix",
     "Release"
   ],
   "cadence": {

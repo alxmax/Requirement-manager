@@ -302,7 +302,7 @@
       "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]",
       "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]",
       "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]",
-      "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]"
+      "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, each release carrying the first and last commit of the work, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]"
     ],
     "acc": [
       "The generated files contain one node per requirement and one edge per `depends_on`.",

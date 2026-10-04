@@ -14,9 +14,12 @@ import {
 } from "../../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
-  PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
+  PlanGantt, noteText, matchItem, ShippedNote, ReleaseNote, VersionNote,
 } from "../../src/views/roadmap/PlanGantt.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
+import {
+  layoutPlan, shipExtent, PX, LABEL_CHAR,
+} from "../../src/views/roadmap/ganttLayout.js";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
@@ -41,13 +44,25 @@ test("nav: no Spec tab — the Explorer renders the same document",
 // tested-by: REQ-HISTORY-1081
 // The band is engine-computed rows placed on the plan's own timeline, left
 // of today.
+const rel = (version, day, headline) => ({
+  version, date: day, headline, first_commit: day, last_commit: day,
+});
 const HIST = [
-  { month: "2026-06", count: 10, first: "2026-06-04", last: "2026-06-26",
+  { month: "2026-06", count: 3, first: "2026-06-04", last: "2026-06-26",
     versions: ["v1.11.0", "v2.0.0", "v2.8.1"], landmark: "v2.0.0",
-    headline: "Breaking - intent-verb CLI" },
-  { month: "2026-07", count: 4, first: "2026-07-03", last: "2026-07-05",
+    headline: "Breaking - intent-verb CLI",
+    entries: [
+      rel("v1.11.0", "2026-06-04", "old"),
+      rel("v2.0.0", "2026-06-15", "Breaking - intent-verb CLI"),
+      rel("v2.8.1", "2026-06-26", "later"),
+    ] },
+  { month: "2026-07", count: 2, first: "2026-07-03", last: "2026-07-05",
     versions: ["v2.11.0", "v2.13.0"], landmark: "v2.13.0",
-    headline: "Ranked requirement search" },
+    headline: "Ranked requirement search",
+    entries: [
+      rel("v2.11.0", "2026-07-03", "search"),
+      rel("v2.13.0", "2026-07-05", "Ranked requirement search"),
+    ] },
 ];
 const withHist = renderToString(
   <PlanGantt planning={cadencePlan} history={HIST} locale="en"
@@ -57,12 +72,16 @@ const noHist = renderToString(
              t={(s) => s} zoom={100} openSpec={noop} />);
 const historyChecks = [
   // verifies: REQ-HISTORY-1081#CASE-1
-  ["history: one band row per shipped month, labelled by its landmark",
-    withHist.includes(">Shipped<") && withHist.includes(">v2.0.0<")
-      && withHist.includes(">v2.13.0<")],
+  ["history: one block per shipped release, labelled by its version",
+    withHist.includes(">Shipped<")
+      && withHist.includes('data-release="v2.0.0"')
+      && withHist.includes('data-release="v2.13.0"')
+      && !withHist.includes("data-month=")],
   // verifies: REQ-HISTORY-1081#CASE-2
-  ["history: the month's headline is shown, not its version list",
-    withHist.includes("Breaking - intent-verb CLI")],
+  ["history: the block shows the version and not the headline",
+    withHist.includes('data-release="v2.0.0"')
+      && !withHist.includes("Breaking - intent-verb CLI")
+      && !withHist.includes("Ranked requirement search")],
   ["history: no history means no band",  // verifies: REQ-HISTORY-1081#CASE-3
     !noHist.includes(">Shipped<")],
   ["history: the chart reaches back to the first shipped month",
@@ -71,6 +90,111 @@ const historyChecks = [
     withHist.includes("Jun") && !noHist.includes("Jun")],
 ];
 for (const [label, ok] of historyChecks) test(label, ok);
+
+// verifies: REQ-HISTORY-1081#CASE-5
+test("history: a second row only where the dates overlap", () => {
+  const month = (entries) => [{
+    month: "2026-06", count: entries.length, first: "2026-06-01",
+    last: "2026-06-30", versions: entries.map((e) => e.version),
+    landmark: entries[0].version, headline: "h", entries,
+  }];
+  const row = (lay, version) =>
+    lay.pastBars.find((b) => b.version === version).subRow;
+  const apart = layoutPlan({ lanes: ["Feature"] }, month([
+    { version: "v1", date: "2026-06-10", headline: "a",
+      first_commit: "2026-06-01", last_commit: "2026-06-10" },
+    { version: "v2", date: "2026-06-25", headline: "b",
+      first_commit: "2026-06-20", last_commit: "2026-06-25" },
+  ]), "en");
+  const over = layoutPlan({ lanes: ["Feature"] }, month([
+    { version: "v1", date: "2026-06-15", headline: "a",
+      first_commit: "2026-06-01", last_commit: "2026-06-15" },
+    { version: "v2", date: "2026-06-20", headline: "b",
+      first_commit: "2026-06-10", last_commit: "2026-06-20" },
+  ]), "en");
+  return row(apart, "v1") === row(apart, "v2")
+    && row(over, "v1") !== row(over, "v2");
+});
+
+// verifies: REQ-HISTORY-1081#CASE-2
+test("history: the note shows the headline the block omits", () => {
+  const words = "Breaking - intent-verb CLI";
+  const note = renderToString(
+    <ReleaseNote release={{
+      version: "v2.0.0", start: "2026-06-02", end: "2026-06-02", headline: words,
+    }} t={(s) => s} onClose={noop} />);
+  return note.includes(words) && note.includes('data-note="release"');
+});
+
+// verifies: REQ-HISTORY-1081#CASE-6
+test("history: a one-day release widens to its version", () => {
+  const words = "Re-seed consumer repos with the scaffold page inline";
+  const lay = layoutPlan({ lanes: ["Feature"] }, [{
+    month: "2026-06", count: 2, first: "2026-06-14", last: "2026-06-15",
+    versions: ["v1.35.0", "v2.0.0"], landmark: "v1.35.0", headline: words,
+    entries: [
+      { version: "v1.35.0", date: "2026-06-14", headline: words,
+        first_commit: "2026-06-14", last_commit: "2026-06-14" },
+      { version: "v2.0.0", date: "2026-06-15", headline: "Breaking change",
+        first_commit: "2026-06-15", last_commit: "2026-06-15" },
+    ],
+  }], "en");
+  const wide = lay.pastBars.find((b) => b.version === "v1.35.0");
+  const next = lay.pastBars.find((b) => b.version === "v2.0.0");
+  return shipExtent(wide).width > PX
+    && shipExtent(wide).width < words.length * LABEL_CHAR
+    && wide.subRow !== next.subRow;
+});
+
+// verifies: REQ-HISTORY-1081#CASE-7
+test("history: patch releases of one minor share a vX.Y.x block", () => {
+  const lay = layoutPlan({ lanes: ["Feature"] }, [{
+    month: "2026-09", count: 4, first: "2026-09-01", last: "2026-09-28",
+    versions: ["v7.21.0", "v7.21.1", "v7.21.10", "v7.22.0"],
+    landmark: "v7.21.0", headline: "x",
+    entries: [
+      { version: "v7.21.10", date: "2026-09-20", headline: "ten",
+        first_commit: "2026-09-18", last_commit: "2026-09-20" },
+      { version: "v7.21.1", date: "2026-09-10", headline: "one",
+        first_commit: "2026-09-08", last_commit: "2026-09-10" },
+      { version: "v7.21.0", date: "2026-09-02", headline: "zero",
+        first_commit: "2026-09-01", last_commit: "2026-09-02" },
+      { version: "v7.22.0", date: "2026-09-28", headline: "next",
+        first_commit: "2026-09-25", last_commit: "2026-09-28" },
+    ],
+  }], "en");
+  const group = lay.pastBars.find((b) => b.version === "v7.21.x");
+  const alone = lay.pastBars.find((b) => b.version === "v7.22.0");
+  return lay.pastBars.length === 2 && group && alone
+    && group.start === "2026-09-01" && group.end === "2026-09-20"
+    && group.members.map((m) => m.version).join()
+      === "v7.21.0,v7.21.1,v7.21.10";
+});
+
+// verifies: REQ-HISTORY-1081#CASE-6
+test("history: releases that start on one day share a range block", () => {
+  const day = "2026-09-06";
+  const entry = (version, start, end) => ({
+    version, date: end || start, headline: "h",
+    first_commit: start, last_commit: end || start,
+  });
+  const lay = layoutPlan({ lanes: ["Feature"] }, [{
+    month: "2026-09", count: 4, first: "2026-09-06", last: "2026-09-08",
+    versions: ["v5.10.0", "v5.10.1", "v6.3.0", "v6.4.0"],
+    landmark: "v6.3.0", headline: "x",
+    entries: [
+      entry("v5.10.1", day),
+      entry("v6.3.0", day),
+      entry("v5.10.0", day),
+      entry("v6.4.0", "2026-09-08"),
+    ],
+  }], "en");
+  const range = lay.pastBars.find((b) => b.version === "v5.10.x-v6.3.0");
+  const alone = lay.pastBars.find((b) => b.version === "v6.4.0");
+  return lay.pastBars.length === 2 && range && alone
+    && range.start === day
+    && range.members.map((m) => m.version).join() === "v5.10.0,v5.10.1,v6.3.0";
+});
 
 // ---- loadData forwards the WHOLE export (REQ-VIEWER-969) --------------------
 // The bug this exists for: `loadData` copied the export key by key, and two

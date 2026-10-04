@@ -69,6 +69,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Shipped": "Livrat",
   "releases": "release-uri",
   "release": "release",
+  "first commit": "primul commit",
+  "last commit": "ultimul commit",
   "Nothing planned on this version yet.":
     "Nimic planificat încă pe versiunea asta.",
   "Now": "Acum",

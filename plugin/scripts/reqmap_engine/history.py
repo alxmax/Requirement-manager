@@ -14,6 +14,9 @@ asks for.
 """
 import os
 import re
+from datetime import date, timedelta
+
+from .git import _git
 
 # Three spellings of one dated release heading, because a CHANGELOG is
 # written in the convention its ecosystem uses and a parser that knows one
@@ -160,6 +163,97 @@ def read_history(root):  # implements: REQ-HISTORY-1003
     return []
 
 
+def _norm_ver(version):
+    return version[1:] if version.startswith("v") else version
+
+
+def _tag_names(deco):
+    names = []
+    for part in deco.split(","):
+        part = part.strip()
+        if part.startswith("tag: "):
+            names.append(part[5:].strip())
+    return names
+
+
+def _spans_from_git(root, versions):  # implements: REQ-HISTORY-1003
+    """{version: (first_commit, last_commit)} from the first-parent log.
+
+    A release runs from the commit after the previous tagged release
+    through its own tag. Both dates are committer dates, `YYYY-MM-DD`.
+    Empty when git cannot answer — the caller keeps the changelog date."""
+    raw = _git(["-C", root, "log", "--first-parent",
+                "--format=%cs%x09%D", "--decorate-refs=refs/tags"],
+               timeout=60)
+    if not raw or not versions:
+        return {}
+    want = {_norm_ver(v): v for v in versions}
+    rows = []
+    for line in raw.splitlines():
+        date, sep, deco = line.partition("\t")
+        if not sep or len(date) < 10:
+            continue
+        tags = [_norm_ver(n) for n in _tag_names(deco)
+                if _norm_ver(n) in want]
+        rows.append((date[:10], tags))
+    at = {}
+    for i, (_date, tags) in enumerate(rows):
+        for tag in tags:
+            at.setdefault(tag, i)
+    if not at:
+        return {}
+    order = sorted(at, key=at.get)
+    spans = {}
+    for n, tag in enumerate(order):
+        i = at[tag]
+        older = at[order[n + 1]] if n + 1 < len(order) else len(rows)
+        chunk = [d for d, _tags in rows[i:older]] or [rows[i][0]]
+        spans[want[tag]] = (chunk[-1], chunk[0])
+    return spans
+
+
+def _day_after(iso):  # implements: REQ-HISTORY-1003
+    year, month, day = (int(part) for part in iso.split("-"))
+    return (date(year, month, day) + timedelta(days=1)).isoformat()
+
+
+def _clip_spans(entries):  # implements: REQ-HISTORY-1003
+    """A span must not cover another release's changelog date.
+
+    The start moves to the day after the latest date strictly inside
+    the span, and never past the span's own end. A release with no tag
+    stays a point on its changelog date, so it is not swallowed."""
+    for entry in entries:
+        first, last = entry["first_commit"], entry["last_commit"]
+        if not first or not last or first >= last:
+            continue
+        inside = [
+            other["date"] for other in entries
+            if other is not entry and first < other.get("date", "") < last
+        ]
+        if not inside:
+            continue
+        nxt = _day_after(max(inside))
+        entry["first_commit"] = last if nxt > last else nxt
+    return entries
+
+
+def release_spans(entries, root):  # implements: REQ-HISTORY-1003
+    """Each entry plus `first_commit` and `last_commit`.
+
+    The span is how long the release was worked on: the oldest commit
+    after the previous tag, and the tag's own commit. No git, or no tag
+    for that version, and both dates are the changelog date — a point,
+    not a guessed range. A changelog date inside the span cuts it: the
+    start becomes the day after the latest such date."""
+    spans = _spans_from_git(root, [e["version"] for e in entries])
+    out = []
+    for e in entries:
+        first, last = spans.get(e["version"], (e["date"], e["date"]))
+        out.append(dict(e, first_commit=first, last_commit=last))
+    return _clip_spans(out)
+
+
 def by_month(entries):  # implements: REQ-HISTORY-1003
     """[{month, count, first, last, versions, headline}] oldest first —
     the broad-strokes view.
@@ -169,9 +263,9 @@ def by_month(entries):  # implements: REQ-HISTORY-1003
     since we started", not "when exactly did v5.12.1 land". `landmark`
     and `headline` come from the month's biggest step, not its first or
     last release — see `_weight`. `versions` keeps every version in it,
-    and `entries` each one's date, headline and body, newest first, so
-    selecting the month shows what was done in it and nothing is lost by
-    grouping."""
+    and `entries` each one's date, headline, body and, when
+    `release_spans` ran, `first_commit` and `last_commit`, newest
+    first."""
     months = {}
     for e in sorted(entries, key=lambda x: (x["date"], x["version"])):
         key = e["date"][:7]
@@ -180,9 +274,13 @@ def by_month(entries):  # implements: REQ-HISTORY-1003
             "last": e["date"], "versions": [],
             "landmark": "", "headline": "", "entries": []})
         row["count"] += 1
-        row["entries"].insert(0, {
+        entry = {
             "version": e["version"], "date": e["date"],
-            "headline": e["headline"], "body": e["body"]})
+            "headline": e["headline"], "body": e.get("body", "")}
+        if e.get("first_commit"):
+            entry["first_commit"] = e["first_commit"]
+            entry["last_commit"] = e.get("last_commit") or e["first_commit"]
+        row["entries"].insert(0, entry)
         row["last"] = e["date"]
         row["versions"].append(e["version"])
         if (not row["landmark"]

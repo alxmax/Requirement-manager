@@ -31,6 +31,9 @@ export const WEEK_H = 16;
 export const DAY_H = 16;
 export const HEAD_H = FLAG_H + MONTH_H + WEEK_H + DAY_H;
 export const BAND_H = ROW_H + PAD * 2;
+/* A shipped release is one line: its version. Shorter than a plan bar,
+ * which wraps three lines of a title. The headline opens in the note. */
+export const SHIP_H = 32;
 
 const tint = (color, pct) =>
   `color-mix(in oklch, ${color} ${pct}%, transparent)`;
@@ -72,6 +75,26 @@ export function extent(b) {
   return {
     left: b.startIdx * PX + 3,
     width: Math.max((b.endIdx - b.startIdx + 1) * PX - 6, BAR_MIN_W),
+  };
+}
+
+/* 11px on the viewer's UI font: a character is about 5.2px, and the
+ * bar's padding, gap and border add 22. A wider guess left a gap after
+ * the words, and with a release on every line that gap pushed the next
+ * block down. implements: REQ-HISTORY-1081 */
+export const LABEL_CHAR = 5.2;
+const LABEL_PAD = 22;
+
+export function releaseLabelWidth(version, headline) {
+  const text = headline ? `${version} ${headline}` : String(version || "");
+  return Math.ceil(text.length * LABEL_CHAR) + LABEL_PAD;
+}
+
+export function shipExtent(b) {
+  const days = Math.max((b.endIdx - b.startIdx + 1) * PX, PX);
+  return {
+    left: b.startIdx * PX,
+    width: Math.max(days, b.labelW || 0),
   };
 }
 
@@ -121,11 +144,11 @@ export function pillTop(laneH, row, rows) {
  *  cadence running past the last bar — `until: 2026-12-31` with nothing
  *  scheduled in December — otherwise emits dates the chart drops, and the
  *  engine says a release lands where the chart shows none. */
-function chartRange(raw, dueList, past, releases, todayD) {
+function chartRange(raw, dueList, shipped, releases, todayD) {
   const dates = [
     ...raw.flatMap((b) => [parseIso(b.start), parseIso(b.end)]),
     ...dueList.map((d) => d.at),
-    ...past.flatMap((h) => [parseIso(h.first), parseIso(h.last)]),
+    ...shipped.flatMap((h) => [parseIso(h.start), parseIso(h.end)]),
     ...releases.map(parseIso),
     todayD,
   ].filter(Boolean);
@@ -145,7 +168,7 @@ function buildGuides(lay) {
   const laneTop = {};
   lay.lanes.reduce((top, ln, i) => {
     laneTop[ln] = top; return top + lay.heights[i];
-  }, lay.pastRows.length > 0 ? BAND_H : 0);
+  }, lay.pastH || 0);
   const barGuides = lay.bars.filter((b) => laneTop[b.lane] != null)
     .flatMap((b) => {
       const to = laneTop[b.lane] + PAD + (b.subRow || 0) * ROW_H;
@@ -162,6 +185,113 @@ function buildGuides(lay) {
   return [...barGuides, ...versionGuides];
 }
 
+function verParts(version) {
+  return String(version).replace(/^v/i, "").split(".")
+    .map((p) => parseInt(p, 10) || 0);
+}
+
+/** `v7.21.10` and `v7.21.0` are one line of work. A version that is not
+ *  `major.minor` stays on its own. implements: REQ-HISTORY-1081 */
+export function minorKey(version) {
+  const body = String(version || "").replace(/^v/i, "");
+  if (!/^\d+\.\d+/.test(body)) return null;
+  const [major, minor] = verParts(version);
+  return `v${major}.${minor}`;
+}
+
+function cmpVer(a, b) {
+  const pa = verParts(a), pb = verParts(b);
+  const n = Math.max(pa.length, pb.length);
+  for (let i = 0; i < n; i++) {
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if (d) return d;
+  }
+  return 0;
+}
+
+/** Patch releases of one minor version become one block, `vX.Y.x`,
+ *  spanning every commit of that line. A release with no sibling keeps
+ *  its own version. implements: REQ-HISTORY-1081 */
+export function groupPatchReleases(releases) {
+  const buckets = new Map();
+  for (const r of releases) {
+    const key = minorKey(r.version) || `one:${r.version}`;
+    const list = buckets.get(key);
+    if (list) list.push(r);
+    else buckets.set(key, [r]);
+  }
+  const out = [];
+  for (const [key, list] of buckets) {
+    if (list.length === 1) { out.push(list[0]); continue; }
+    const members = list.slice().sort((a, b) => cmpVer(a.version, b.version));
+    const start = members.reduce((s, r) => (r.start < s ? r.start : s),
+      members[0].start);
+    const end = members.reduce((s, r) => (r.end > s ? r.end : s),
+      members[0].end);
+    const version = `${key}.x`;
+    out.push({
+      version, headline: "", date: members[members.length - 1].date,
+      month: members[0].month, start, end, members,
+    });
+  }
+  return out.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
+}
+
+/** Releases that start on the same day are one block, labelled from the
+ *  lowest version to the highest: `v5.10.x-v6.3.0`. A patch group already
+ *  folded to `vX.Y.x` counts as one end of that range.
+ *  implements: REQ-HISTORY-1081 */
+export function groupSameStart(releases) {
+  const buckets = new Map();
+  for (const r of releases) {
+    const list = buckets.get(r.start);
+    if (list) list.push(r);
+    else buckets.set(r.start, [r]);
+  }
+  const out = [];
+  for (const list of buckets.values()) {
+    if (list.length === 1) { out.push(list[0]); continue; }
+    const sorted = list.slice().sort((a, b) => cmpVer(a.version, b.version));
+    const end = sorted.reduce((s, r) => (r.end > s ? r.end : s), sorted[0].end);
+    const members = sorted
+      .flatMap((r) => r.members || [r])
+      .sort((a, b) => cmpVer(a.version, b.version));
+    const version = `${sorted[0].version}-${sorted[sorted.length - 1].version}`;
+    out.push({
+      version, headline: "", date: members[members.length - 1].date,
+      month: sorted[0].month, start: sorted[0].start, end, members,
+    });
+  }
+  return out.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
+}
+
+/* One block per release, then folded by minor version. `first_commit` /
+ * `last_commit` are the work; without them the changelog date is a single
+ * day. implements: REQ-HISTORY-1081 */
+export function shippedReleases(history) {
+  const out = [];
+  for (const h of history || []) {
+    const entries = Array.isArray(h.entries) && h.entries.length
+      ? h.entries
+      : (h.versions || []).map((version) => ({
+          version,
+          date: h.last || h.first,
+          headline: version === h.landmark ? (h.headline || "") : "",
+        }));
+    for (const e of entries) {
+      const start = e.first_commit || e.date || h.first;
+      const end = e.last_commit || e.date || start;
+      if (!e.version || !parseIso(start) || !parseIso(end)) continue;
+      out.push({
+        version: e.version, headline: e.headline || "",
+        body: e.body || "",
+        date: e.date || end, month: h.month, start, end,
+      });
+    }
+  }
+  return groupSameStart(groupPatchReleases(out));
+}
+
 /** Everything the chart draws, positioned; `null` when the plan holds
  *  nothing dated. A cadence with no bars is still a calendar, and a repo
  *  that has planned nothing is the one that needs one — `init` seeds it
@@ -175,17 +305,14 @@ export function layoutPlan(planning, history, locale) {
     .map(([ms, m]) => (
       { ms, due: m.due, label: m.label, at: parseIso(m.due) }
     ));
-  /* What already shipped, one row per calendar month, straight off
-   * CHANGELOG.md via the engine, on the same timeline as the plan.
-   * implements: REQ-HISTORY-1081 */
-  const past = (history || [])
-    .filter((h) => parseIso(h.first) && parseIso(h.last));
-  if (!raw.length && !dueList.length && !past.length && !releases.length) {
+  const shipped = shippedReleases(history);
+  if (!raw.length && !dueList.length && !shipped.length
+      && !releases.length) {
     return null;
   }
 
   const { origin, totalDays } =
-    chartRange(raw, dueList, past, releases, todayD);
+    chartRange(raw, dueList, shipped, releases, todayD);
   const bars = indexBars(raw, origin);
   let lanes = Array.isArray(planning?.lanes) && planning.lanes.length
     ? [...planning.lanes] : [...new Set(bars.map((b) => b.lane))];
@@ -201,18 +328,36 @@ export function layoutPlan(planning, history, locale) {
   const flags = stackFlags(
     dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) })));
   const flagRows = flags.reduce((n, f) => Math.max(n, f.row + 1), 1);
+  /* A row is shared until the drawn boxes meet. The box is the work's
+   * dates, widened to the label when the words are longer than the work,
+   * so a one-day release stays readable and does not cover its neighbour. */
+  const pastBars = shipped.map((h) => {
+    const startIdx = dayIndex(origin, parseIso(h.start));
+    const endIdx = Math.max(dayIndex(origin, parseIso(h.end)), startIdx);
+    return {
+      ...h, startIdx, endIdx, key: `rel-${h.version}`,
+      labelW: releaseLabelWidth(h.version,
+        h.members && !String(h.version).includes("-v")
+          ? `${h.members.length} releases` : ""),
+    };
+  });
+  /* Same start and end keep this order: `stackBars` sorts by those two
+   * and is stable, so one day stacks lowest version first. */
+  pastBars.sort((a, b) =>
+    a.startIdx - b.startIdx || a.endIdx - b.endIdx
+    || cmpVer(a.version, b.version));
+  const pastRowCount = pastBars.length ? stackBars(pastBars, shipExtent) : 0;
+  const pastH = pastBars.length ? pastRowCount * SHIP_H + PAD * 2 : 0;
+  const chartW = pastBars.reduce((max, b) => {
+    const box = shipExtent(b);
+    return Math.max(max, box.left + box.width);
+  }, totalDays * PX);
   const lay = {
-    totalDays, chartW: totalDays * PX, bars, lanes, byLane,
+    totalDays, chartW, bars, lanes, byLane,
     heights: lanes.map((ln) => Math.max(
       Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2,
       ln === releaseLane ? flagRows * PILL_ROW + PAD * 2 : 0)),
-    pastRows: past.map((h) => {
-      const startIdx = dayIndex(origin, parseIso(h.first));
-      return {
-        ...h, startIdx,
-        endIdx: Math.max(dayIndex(origin, parseIso(h.last)), startIdx),
-      };
-    }),
+    pastBars, pastH,
     months: buildMonthBands(origin, totalDays, locale),
     weeks: buildWeekBands(origin, totalDays),
     days: buildDayBands(origin, totalDays),

@@ -24,7 +24,11 @@ jobs:
   published-action:
     runs-on: ubuntu-latest
     steps:
+      # Full history: the map's release spans come from tags, and a
+      # shallow clone rebuilds them as points, so gate reports the map stale.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
       - uses: ./check
         with:
           reqmap-path: scripts/reqmap.py

@@ -10,7 +10,7 @@ from .findings import _render_findings, cmd_findings
 from .git import _git, _git_branch, _repo_name
 from .health import _health_record
 from .i18n import _attach_translations
-from .history import by_month, read_history
+from .history import by_month, read_history, release_spans
 from .mapdata import _read_roadmap, _build_map_data
 from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
@@ -98,7 +98,7 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
     # rather than in the viewer, so the CLI and the chart cannot
     # disagree about what a month held.
     # implements: REQ-HISTORY-1003
-    data["history"] = by_month(read_history(root))
+    data["history"] = by_month(release_spans(read_history(root), root))
     if with_design:
         # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
         from .design_report import _design_summary

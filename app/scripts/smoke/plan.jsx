@@ -13,7 +13,7 @@ import {
 } from "../../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
-  PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
+  PlanGantt, noteText, matchItem, ReleaseNote, ShippedNote, VersionNote,
 } from "../../src/views/roadmap/PlanGantt.jsx";
 import { EntryBody } from "../../src/views/roadmap/EntryBody.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
@@ -385,33 +385,41 @@ test("gantt: a shipped month and a version are selectable",
     const hist = [{ month: "2026-08", count: 2, first: "2026-08-03",
                     last: "2026-08-20",
                     versions: ["v2.28.0", "v2.29.0"], landmark: "v2.29.0",
-                    headline: "x" }];
+                    headline: "x",
+                    entries: [
+                      { version: "v2.29.0", date: "2026-08-20",
+                        headline: "Ten findings fixed",
+                        first_commit: "2026-08-15",
+                        last_commit: "2026-08-20" },
+                      { version: "v2.28.0", date: "2026-08-03",
+                        headline: "The viewer splits",
+                        first_commit: "2026-08-01",
+                        last_commit: "2026-08-03" },
+                    ] }];
     const html = renderToString(<PlanGantt planning={{
       lanes: ["Feature", "Release"],
       cadence: { every: "week", on: "friday", lane: "Release" },
       releases: ["2026-09-25"],
       milestones: { "v9.8.0": { due: "2026-09-25" } }, bars: [] }}
       history={hist} locale="en" t={(x) => x} zoom={100} />);
-    return /data-month="2026-08" role="button" tabindex="0"/.test(html)
+    return /data-release="v2.29.0" role="button" tabindex="0"/.test(html)
+      && /data-release="v2.28.0"/.test(html)
       && /data-version="v9.8.0" role="button" tabindex="0"/.test(html);
   })());
 
 // verifies: REQ-HISTORY-1081#CASE-4
-test("gantt: an opened month lists every release with what it did",
+test("gantt: an opened release shows what it did and both commit dates",
   (() => {
     const html = renderToString(
-      <ShippedNote t={(x) => x} onClose={noop} month={{
-        month: "2026-08", count: 2, first: "2026-08-03", last: "2026-08-20",
-        versions: ["v2.28.0", "v2.29.0"],
-        entries: [
-          { version: "v2.29.0", date: "2026-08-20",
-            headline: "Ten findings fixed" },
-          { version: "v2.28.0", date: "2026-08-03",
-            headline: "The viewer splits" },
-        ] }} />);
+      <ReleaseNote t={(x) => x} onClose={noop} release={{
+        version: "v2.29.0", headline: "Ten findings fixed",
+        start: "2026-08-15", end: "2026-08-20",
+        body: "**Ten findings fixed.**\n\nThe gate names the six." }} />);
     return html.includes("Ten findings fixed")
-      && html.includes("The viewer splits")
-      && html.indexOf("v2.29.0") < html.indexOf("v2.28.0");
+      && html.includes("first commit 2026-08-15")
+      && html.includes("last commit 2026-08-20")
+      && html.includes("data-entry-body")
+      && html.includes("The gate names the six");
   })());
 
 // A month lists its releases in a short contents list, then every release

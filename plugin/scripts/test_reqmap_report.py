@@ -2850,7 +2850,7 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         rows = R.history.by_month(got)
         self.assertEqual([sectioned, flat], [e["body"] for e in rows[0]["entries"]])
 
-    def test_a_long_headline_is_cut_on_a_word(self):  # verifies: REQ-HISTORY-1003#CASE-7
+    def test_a_long_headline_is_cut_on_a_word(self):  # verifies: REQ-HISTORY-1003#CASE-6
         sentence = ("alpha " * 200).strip()
         self.assertGreater(len(sentence), R.history.HEADLINE_MAX)
         got = R.history._headline("**" + sentence + ".**\n")
@@ -2864,6 +2864,72 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         solid = "A" * (R.history.HEADLINE_MAX + 40)
         hard = R.history._headline("**" + solid + ".**\n")
         self.assertEqual("A" * R.history.HEADLINE_MAX + "…", hard)
+
+    def test_a_release_spans_the_commits_since_the_previous_tag(self):  # verifies: REQ-HISTORY-1003#CASE-7
+        # Newest first, the way `git log` prints. v2.1.1 owns the commits
+        # after v2.1.0's tag; v2.0.0, having no older tag, owns everything
+        # back to the first commit in the log.
+        log = "\n".join([
+            "2026-06-20\ttag: v2.1.1",
+            "2026-06-18\t",
+            "2026-06-12\ttag: v2.1.0",
+            "2026-06-05\t",
+            "2026-06-02\ttag: v2.0.0",
+            "2026-05-28\t",
+        ])
+        entries = R.history.parse_changelog(self.LOG)
+        with mock.patch.object(R.history, "_git", return_value=log):
+            spanned = R.history.release_spans(entries, ".")
+        got = {e["version"]: e for e in spanned}
+        self.assertEqual(("2026-06-18", "2026-06-20"),
+                         (got["v2.1.1"]["first_commit"], got["v2.1.1"]["last_commit"]))
+        self.assertEqual(("2026-06-05", "2026-06-12"),
+                         (got["v2.1.0"]["first_commit"], got["v2.1.0"]["last_commit"]))
+        self.assertEqual(("2026-05-28", "2026-06-02"),
+                         (got["v2.0.0"]["first_commit"], got["v2.0.0"]["last_commit"]))
+        with mock.patch.object(R.history, "_git", return_value=None):
+            plain = R.history.release_spans(entries, ".")
+        self.assertEqual(plain[0]["date"], plain[0]["first_commit"])
+        self.assertEqual(plain[0]["date"], plain[0]["last_commit"])
+        rows = R.history.by_month(spanned)
+        kept = next(e for e in rows[0]["entries"] if e["version"] == "v2.1.1")
+        self.assertEqual("2026-06-18", kept["first_commit"])
+        self.assertEqual("2026-06-20", kept["last_commit"])
+
+    def test_a_span_stops_at_a_changelog_release_inside_it(self):  # verifies: REQ-HISTORY-1003#CASE-7
+        # v1.35.0 has no tag. Its changelog date sits inside v2.1.0's
+        # commits, so v2.1.0 starts the next day — its own tag. v1.11.0
+        # is before that span and stays on its changelog date.
+        log = "\n".join([
+            "2026-06-15\ttag: v2.1.0",
+            "2026-06-10\t",
+            "2026-06-05\t",
+        ])
+        entries = [
+            {"version": "v2.1.0", "date": "2026-06-15", "headline": "two"},
+            {"version": "v1.35.0", "date": "2026-06-14", "headline": "one"},
+            {"version": "v1.11.0", "date": "2026-06-04", "headline": "old"},
+        ]
+        with mock.patch.object(R.history, "_git", return_value=log):
+            got = {e["version"]: e for e in R.history.release_spans(entries, ".")}
+        self.assertEqual(("2026-06-15", "2026-06-15"),
+                         (got["v2.1.0"]["first_commit"], got["v2.1.0"]["last_commit"]))
+        self.assertEqual("2026-06-14", got["v1.35.0"]["first_commit"])
+        self.assertEqual("2026-06-04", got["v1.11.0"]["first_commit"])
+        # A date in the middle of the span leaves the days after it.
+        wider = "\n".join([
+            "2026-06-20\ttag: v3.0.0",
+            "2026-06-12\t",
+            "2026-06-05\t",
+        ])
+        mid = [
+            {"version": "v3.0.0", "date": "2026-06-20", "headline": "three"},
+            {"version": "v2.5.0", "date": "2026-06-10", "headline": "mid"},
+        ]
+        with mock.patch.object(R.history, "_git", return_value=wider):
+            got = {e["version"]: e for e in R.history.release_spans(mid, ".")}
+        self.assertEqual(("2026-06-11", "2026-06-20"),
+                         (got["v3.0.0"]["first_commit"], got["v3.0.0"]["last_commit"]))
 
     def test_a_repo_with_no_changelog_yields_nothing(self):  # verifies: REQ-HISTORY-1003#CASE-5
         with tempfile.TemporaryDirectory() as d:

@@ -120,10 +120,49 @@ function ShippedEntry({ e, entryRef }) {
   );
 }
 
-/** A shipped month, opened: a short contents list of its releases (one
- *  line each, newest first; a click jumps to the release), then every
- *  release with its whole CHANGELOG entry, unfolded.
+/** A shipped release, opened: its headline, its CHANGELOG entry, and the
+ *  first and last commit of the work.
  *  implements: REQ-HISTORY-1081 */
+export function ReleaseNote({ release, t, onClose }) {
+  const meta = `${say(t, "first commit")} ${release.start}`
+    + ` · ${say(t, "last commit")} ${release.end}`;
+  const members = Array.isArray(release.members) ? release.members : null;
+  const list = members && (
+    <ul style={NOTE_LIST}>
+      {[...members].reverse().map((e) => (
+        <li key={e.version} style={{ ...NOTE_ROW, flexWrap: "wrap" }}>
+          <strong style={VERSION}>{e.version}</strong>
+          <span style={{ color: "var(--fg-faint)", minWidth: 150 }}>
+            {e.start} → {e.end}
+          </span>
+          <span>{e.headline || ""}</span>
+          {e.body ? (
+            <div style={{ flexBasis: "100%" }}>
+              <EntryBody body={e.body} headline={e.headline} />
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <div style={NOTE_BOX} data-note="release">
+      <NoteHead title={release.version} t={t} onClose={onClose} meta={meta} />
+      {list}
+      {!members && release.headline
+        ? <div style={{ marginTop: 10, fontSize: 12.5, lineHeight: 1.55 }}>
+            {release.headline}
+          </div>
+        : null}
+      {!members && release.body
+        ? <EntryBody body={release.body} headline={release.headline} />
+        : null}
+    </div>
+  );
+}
+
+/** A shipped month, opened: a short contents list, then every release
+ *  with its CHANGELOG entry, newest first. */
 export function ShippedNote({ month, t, onClose }) {
   const rows = useRef({});
   const jump = (version) => {
@@ -240,6 +279,9 @@ function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
 /** Whichever note the selection is: a shipped month, a version, or a bar. */
 export function PickedNote({ picked, lay, roadmap, t, openSpec, onPick }) {
   const close = () => onPick(null);
+  if (picked.kind === "release") {
+    return <ReleaseNote release={picked} t={t} onClose={close} />;
+  }
   if (picked.kind === "month") {
     return <ShippedNote key={picked.key} month={picked} t={t}
                         onClose={close} />;

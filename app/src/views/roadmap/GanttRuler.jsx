@@ -2,7 +2,7 @@
 /* The Plan's fixed parts: the lane names on the left and the ruler along
  * the top. */
 import {
-  PX, LABEL_W, BAND_H, FLAG_H, MONTH_H, WEEK_H, DAY_H, HEAD_H,
+  PX, LABEL_W, FLAG_H, MONTH_H, WEEK_H, DAY_H, HEAD_H,
 } from "./ganttLayout.js";
 
 const LANE_NAME = {
@@ -36,9 +36,9 @@ export function LaneLabels({ lay, branch, t }) {
       <div style={{
         height: HEAD_H, borderBottom: "1px solid var(--border)",
       }} />
-      {lay.pastRows.length > 0 && (
+      {lay.pastH > 0 && (
         <div style={{
-          ...LANE_NAME, height: BAND_H,
+          ...LANE_NAME, height: lay.pastH,
           borderBottom: "1px solid var(--border)",
         }}>
           {branch || t("Shipped")}

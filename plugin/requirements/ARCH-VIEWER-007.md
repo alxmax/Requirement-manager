@@ -23,16 +23,14 @@ Every bullet below is binding.
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
-- The viewer draws the shipped months the engine emitted on the plan's own timeline, and a month opens to every release in it: a short contents list, then each release's CHANGELOG entry. [[REQ-HISTORY-1081]]
+- The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
-- The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
-- The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
+- The roadmap chart is readable at a corpus's real width: the reader scales it, and that choice survives a reload. [[REQ-VIEWER-984]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
-- The Versions view lists the same bars as the Plan chart, each in its milestone's column. [[REQ-VIEWER-999]]
 - The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]
 - Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
 - Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]
@@ -561,25 +559,18 @@ satisfies: [ARCH-VIEWER-007]
 # Reading a roadmap wider than the screen
 
 ## Description
-> One column per milestone and a chip carrying the full requirement title made the chart
-> as wide as its longest title times its column count. At 42 milestones that is over
-> 15,000px, so three versions were visible and the rest was panning. Scaling and packing
-> are two different answers and a reader needs both: zoom shrinks the type along with
-> everything else, while a tighter chip keeps the type crisp and gives up the tail of the
-> title instead.
+> The plan runs wider than a screen once a corpus has a real history. Zoom shrinks the
+> chart together with its scroll extent, so the reader sees more of it without panning
+> across empty space.
 
 Every bullet below is binding.
 - The chart scales through the CSS `zoom` property, so its scroll extent shrinks with its
   contents. A `transform` would leave the container at full size and make the reader pan
   across empty space to reach the last column.
-- The compact density truncates a chip's title and keeps the full text in the chip's
-  `title` attribute, rather than scaling the chip down. Nothing a reader can only see by
-  hovering is lost, because the tooltip was already there.
-- With nothing stored and nothing passed, the chart renders at 100% and `comfy` — the
-  view a reader had before either control existed.
-- `initialZoom` and `initialDensity` let a host or a render test preset the two controls;
-  absent both, the reader's last choice is read from browser storage, and a storage that
-  is missing or throws yields the defaults rather than an error.
+- With nothing stored and nothing passed, the chart renders at 100%.
+- `initialZoom` lets a host or a render test preset the scale; absent that, the reader's
+  last choice is read from browser storage, and a storage that is missing or throws yields
+  100% rather than an error.
 
 ## Cases
 CASE-1 — the chart scales with CSS `zoom`, not with a transform
@@ -588,17 +579,10 @@ CASE-1 — the chart scales with CSS `zoom`, not with a transform
   Then   the chart's wrapper carries `zoom:0.4` and no `transform`, so the scroll extent
          scales with the content rather than staying at full width
 
-CASE-2 — compact truncates the title and keeps it in the tooltip
-  Given  `RoadmapView` rendered with `initialDensity` `compact`
+CASE-2 — the default scale is 100%
+  Given  `RoadmapView` rendered with no `initialZoom` and no stored preference
   When   the markup is inspected
-  Then   a chip's label carries `text-overflow:ellipsis` under a max width, and the chip
-         still carries the untruncated title as its `title` attribute
-
-CASE-3 — the defaults are the view that existed before the controls
-  Given  `RoadmapView` rendered with neither prop and no stored preference
-  When   the markup is inspected
-  Then   the zoom control reads `100%`, the wrapper carries `zoom:1`, and no label
-         is truncated
+  Then   the zoom control reads `100%` and the wrapper carries `zoom:1`
 
 ## Context
 **Notes**
@@ -608,73 +592,12 @@ CASE-3 — the defaults are the view that existed before the controls
   each found by driving the built viewer by hand: a same-frame flick collapsing into one
   zoom step, and the browser's own page zoom firing because a React `onWheel` cannot
   `preventDefault`. Read the absence of a case as untested, not as passing.
-- The zoom range is 40-150%. The floor is where a 42-column chart fits a laptop screen at
-  compact density; the ceiling is a legibility aid, not a use case anyone asked for.
+- The zoom range is 40-150%. The ceiling is a legibility aid, not a use case anyone asked for.
 
 **Current implementation**
-- `app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`, the `DENSITY` table.
-- `app/scripts/ssr-smoke.jsx` — the three cases above.
+- `app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`.
+- `app/scripts/ssr-smoke.jsx` — the two cases above.
 
-
---------------------
-
-
----
-id: REQ-VIEWER-995
-status: confirmed
-level: code
-layer: feature
-owner: Alex
-milestone: v6.3
-satisfies: [ARCH-VIEWER-007]
----
-
-# The roadmap has one lane, and it is named for what the chips are
-
-## Description
-> The Y axis carried four swim lanes — bus, feature, need, ops — which is the engine's own
-> taxonomy, a requirement's position in the graph. That answered a question no reader was
-> asking, so it became two: Bugs and Features. Bugs then rendered empty, and stayed empty,
-> because nothing on this roadmap is a defect — the items are work that was not specified
-> up front, which is a different thing. An axis with one populated value sorts nothing and
-> still costs a row, so the lane stops classifying and names what the chips are.
-
-Every bullet below is binding.
-- The roadmap renders exactly one lane, labelled `Implementations`, and no other lane
-  label appears.
-- Every open `TODO.md` item renders in it, whatever its `lane` field says — `bug`,
-  `feature` and the older `bus`/`ops` values all still parse and are never rejected. A
-  completed item (`[x]`) still renders nowhere.
-- Every requirement with a `milestone:` that is not deprecated renders in it.
-- `lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted
-  in `_map.json`, so a repo that files its items by lane loses the split and nothing else,
-  and no engine data changes for this.
-- A milestone that `TODO.md` groups anything under renders as a column, complete items
-  included. A version whose work has all shipped is a finished column, not a missing
-  one; the chips inside it stay filtered to the open items.
-
-## Cases
-CASE-1 — one lane, named Implementations
-  Given  a registry with at least one milestone
-  When   the roadmap renders
-  Then   exactly one lane label is rendered and it reads `Implementations`
-
-CASE-2 — every lane value lands in that one lane
-  Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one
-         milestone, and a completed item beside them
-  When   the roadmap renders
-  Then   all three open titles appear and the completed one does not
-
-CASE-3 — a milestoned requirement lands in it too
-  Given  a confirmed requirement carrying that same milestone
-  When   the roadmap renders
-  Then   its title appears in the lane
-
-CASE-4 — a milestone whose every item is complete still gets a column
-  Given  a `TODO.md` milestone whose items are all completed (`[x]`), and no requirement
-         carrying it
-  When   the roadmap renders
-  Then   that milestone's column is rendered, and it holds no chips
 
 --------------------
 
@@ -713,9 +636,8 @@ Every bullet below is binding.
   how a plan file hides a note from a Markdown reader, not part of what the note says.
 - The panel names the requirement when the bar carries a `req` the registry has, and opens
   it on request; an id the registry does not have is shown as plain text.
-- Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan.
-- The Versions view lists each bar in the column of its `milestone`, the same list the Plan
-  chart draws, and reads no `milestones[].items[]`.
+- Nothing renders a Now / Next / Later column, and the Roadmap tab does not offer a
+  Versions mode: it shows the Plan.
 
 ## Cases
 CASE-1 — selecting a bar shows the note written under its roadmap item
@@ -734,23 +656,19 @@ CASE-3 — an HTML-comment context renders as text
   When   its bar is selected
   Then   the panel shows `the reason` and neither comment marker
 
-CASE-4 — the Horizons mode is gone
+CASE-4 — Horizons and Versions are both gone
   Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item
   When   the Roadmap tab renders
-  Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists
+  Then   the Plan is shown, and neither a Versions control nor a Now/Next/Later column
+         exists
 
-CASE-5 — a bar appears in its version's column
-  Given  a plan with a bar on milestone `v99.7` and an `items` list on milestone `v99.8`
-  When   the Versions view renders
-  Then   the `v99.7` column lists the bar, and the `items` text appears nowhere
-
-CASE-6 — two bars sharing a `req:` open their own notes, not the first one's
+CASE-5 — two bars sharing a `req:` open their own notes, not the first one's
   Given  two bars carrying `req: AREA-A-001`, one titled like a roadmap item, and two roadmap
          items carrying that `req:`
   When   the reader selects each bar
   Then   the titled bar opens the item named like it, and the other opens no note
 
-CASE-7 — a bar's `roadmap:` opens its item whatever its title says
+CASE-6 — a bar's `roadmap:` opens its item whatever its title says
   Given  items `v1.2 bugs` and `v1.2 bugs (70)`, and a bar titled `v1.2 bugs (70)`
   When   the bar is matched with `roadmap: v1.2 bugs`, then without it
   Then   the first opens `v1.2 bugs` and the second `v1.2 bugs (70)`
@@ -879,46 +797,74 @@ satisfies: [ARCH-VIEWER-007]
 distinct_from: [REQ-HISTORY-1003]
 ---
 
-# The shipped months, drawn beside the plan
+# Each shipped release, drawn on the plan
 
 ## Description
 > The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader
-> looks at a chart. Drawing the past on the plan's own timeline, from exactly the rows
-> the engine emitted, is what lets "what happened" sit next to "what is next" without a
-> second, drifting copy of either.
+> looks at a chart. Patch releases of one minor version share a block, as wide as the
+> commits of that whole line and at least as wide as the version on it. A second row
+> appears only where two of those boxes would cover each other.
 
 Every bullet below is binding.
-- The Plan draws one "Shipped" band row per month the engine emitted in `history`,
-  labelled with that month's landmark version, left of today on the plan's own
-  timeline.
-- The row shows the month's headline, not its list of versions.
+- The Plan draws shipped work on the Shipped band. Patch releases of the same minor
+  version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from
+  the earliest `first_commit` to the latest `last_commit`. A release with no sibling
+  keeps its own version. The changelog date stands in when a commit date is absent.
+- The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the
+  count of releases it holds, so a release shorter than its label is still readable.
+- Blocks share a row. A block takes the next row only when its drawn box would cover
+  another's.
+- Releases that start on the same day share one block, labelled from the lowest version
+  to the highest with a hyphen, as in `v5.10.x-v6.3.0`. A `vX.Y.x` patch group counts as
+  one end of that range. The block shows that label, not a headline.
+- The block shows its version, and for a `vX.Y.x` group that stands alone how many
+  releases it holds. The headline is not drawn on the block.
 - With no `history` in the export, no Shipped band is drawn.
-- Selecting a shipped month opens a note. A short contents line per release sits
-  first, newest first, and under it every release stays unfolded, with its date,
-  its headline and its CHANGELOG entry as written.
-- The note scrolls inside itself, so a long month does not push the chart away.
+- Selecting a single release opens a note with its headline, both commit dates
+  and its CHANGELOG entry as written. Selecting a grouped block, a `vX.Y.x`
+  line or a same-day range, lists every release in it, newest first, each with
+  its headline, commit dates and entry. The note scrolls inside itself.
 
 ## Cases
-CASE-1 — one band row per shipped month, labelled by its landmark
-  Given  an export whose `history` holds two months
+CASE-1 — one block per release
+  Given  an export whose `history` holds two releases
   When   the Plan renders
-  Then   a Shipped band is drawn with one row per month, each labelled by its landmark
+  Then   the Shipped band draws one block per release, each labelled by its version
 
-CASE-2 — the month's headline is shown
-  Given  a month whose landmark release has a headline
-  When   the Plan renders
-  Then   that headline is shown on the row
+CASE-2 — the headline stays in the note
+  Given  a release with a headline
+  When   the Plan renders, and that release is opened
+  Then   the block shows the version and not the headline, and the note shows the headline
 
 CASE-3 — no history means no band
   Given  an export with no `history`
   When   the Plan renders
   Then   no Shipped band is drawn
 
-CASE-4 — a shipped month opens to what was done in it
-  Given  a month holding two releases, each with a headline and a CHANGELOG entry
-  When   the reader selects that month on the chart
-  Then   a note lists both in a contents list, newest first, then unfolds each
-         with its date, its headline and its entry, and the note scrolls in itself
+CASE-4 — a release opens to what it did and when
+  Given  a release with a headline, a CHANGELOG entry and commit dates
+  When   the reader selects that release
+  Then   a note shows the headline, both commit dates and the entry, and the
+         note scrolls inside itself
+
+CASE-5 — a second row only where the drawn boxes would cover each other
+  Given  two releases whose dates do not overlap, and two whose dates do
+  When   the Plan lays them out
+  Then   the first pair shares a row and the second pair does not
+
+CASE-6 — a release shorter than its version widens to it
+  Given  a one-day release whose version is longer than a day, with a neighbour the next
+         day, and several releases that start on one day, a patch line among them
+  When   the Plan lays them out
+  Then   the one-day block is wider than one day and the neighbour takes another row,
+         and the releases that share a start share one block labelled from the lowest
+         version to the highest, as in `v5.10.x-v6.3.0`
+
+CASE-7 — patch releases of one minor version share a block
+  Given  `v7.21.0`, `v7.21.1` and `v7.21.10`, and a `v7.22.0` beside them
+  When   the Plan lays them out
+  Then   the three share one block labelled `v7.21.x` spanning the earliest commit to the
+         latest, and `v7.22.0` stays its own block
 
 ## Context
 **Notes**

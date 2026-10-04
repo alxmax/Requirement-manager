@@ -498,8 +498,8 @@ CASE-6 — reported, never gated
 **Terms**
 - the baseline      the highest version already declared by manifest, tag or CHANGELOG.
 - a version         written `vX.Y.Z` everywhere a plan names one, like `v7.18.0`.
-- the planned set   `bars`, grouped by `milestone`. The Plan chart and the Versions columns
-                    both read it; `milestones` carries only a due date and a label.
+- the planned set   `bars`, grouped by `milestone`. The Plan chart reads it;
+                    `milestones` carries only a due date and a label.
 - a numbered milestone  valid only for the NEXT release. At about five releases a day
                     (20 in 2026-09-13..16), a number further out is overtaken within hours.
 - `distinct_from: REQ-NEXTVERSION-1017` - `REQ-NEXTVERSION-1017` picks the lowest planned version above the baseline; this reports the planned ones at or below it. Same baseline, opposite sides.
