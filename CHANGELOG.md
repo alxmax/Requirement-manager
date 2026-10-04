@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.16.0` — 2026-10-04
+
+**`status: in-progress` is rejected, and a rail reading's routing is its own requirement.**
+
+- A requirement file that still says `status: in-progress` fails RM002. Change it to `draft` before upgrading from `v8.15.0` or earlier; `v8.15.1` already dropped the status, and this release is where that is called out as incompatible
+- `REQ-VIEWER-1084` is split: `REQ-VIEWER-1090` takes which tab a rail ring opens, `REQ-VIEWER-1084` keeps what the tabs list. It starts as `draft`. `ARCH-VIEWER-007` stays whole, and its `file-spread` warning stands (ADR-0063)
+
 ## plugin `v8.15.1` — 2026-10-04
 
 **Each shipped release is its own block, as wide as the work.**

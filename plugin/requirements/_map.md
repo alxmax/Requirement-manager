@@ -1,7 +1,7 @@
 ---
 generated: 2026-10-04
 engine: 2026-10-04.1
-nodes: 310
+nodes: 311
 edges: 121
 design pass-rate: 98% (118/120 source files without a design candidate)
 ---
@@ -309,7 +309,8 @@ graph LR
     REQ_PLANDAYS_1021["Each day on the Plan is labelled<br><small>REQ-PLANDAYS-1021</small>"]
     REQ_HISTORY_1081["Each shipped release, drawn on the plan<br><small>REQ-HISTORY-1081</small>"]
     REQ_VIEWER_1082["A registry tally row asks for its slice<br><small>REQ-VIEWER-1082</small>"]
-    REQ_VIEWER_1084["A rail reading opens the rows behind its number<br><small>REQ-VIEWER-1084</small>"]
+    REQ_VIEWER_1084["A rail reading's rows<br><small>REQ-VIEWER-1084</small>"]
+    REQ_VIEWER_1090["A rail reading opens Problems on its own tab<br><small>REQ-VIEWER-1090</small>"]
     REQ_VIEWER_1087["Milestones due close together all stay visible<br><small>REQ-VIEWER-1087</small>"]
     REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
     REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
@@ -1075,7 +1076,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>67 caps</small>"]
-  a_REQ["REQ<br><small>233 caps</small>"]
+  a_REQ["REQ<br><small>234 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1089,10 +1090,12 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_misc["misc"]
+  subgraph sg_REQ["REQ"]
     REQ_LINTCHECKS_1089["Decision questions the person answering can read<br><small>REQ-LINTCHECKS-1089</small><br>unreviewed"]
+    REQ_VIEWER_1090["A rail reading opens Problems on its own tab<br><small>REQ-VIEWER-1090</small><br>unreviewed"]
   end
   style REQ_LINTCHECKS_1089 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_VIEWER_1090 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
@@ -1100,3 +1103,4 @@ graph LR
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
 | REQ-LINTCHECKS-1089 | draft | 9 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-VIEWER-1090 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

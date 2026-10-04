@@ -18388,6 +18388,7 @@
         "The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]",
+        "Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]",
         "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]",
         "The roadmap chart is readable at a corpus's real width: the reader scales it, and that choice survives a reload. [[REQ-VIEWER-984]]",
         "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]",
@@ -18398,7 +18399,7 @@
       "verify": [],
       "notes": [
         "Split on 2026-09-22 (ADR-0050) along the seam this note used to defer: the ARTIFACT (`_map.html`, its template and the escaping) is [[ARCH-VIEWERFILE-074]]; what the file RENDERS stays here. The `over-scoped` and `ac-count-high` exemptions left with it.",
-        "`lint_exempt: file-spread`: the members are one engine function plus the viewer's source tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files by construction; they are built into ONE artifact, so the spread is not diffuseness.",
+        "`file-spread` stands as a warning ([ADR-0063](docs/adr/0063-the-viewer-architecture-stays-whole.md)): the members are the viewer's source tree, built into ONE artifact. Splitting by folder would name capabilities after directories, so only a piece that changes for its own reasons leaves.",
         "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
         "`_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with `map`. `_map.json` (owned by [[ARCH-MAP-007]]) is the committed source of its data.",
         "Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate capability — see [[ARCH-PAGES-021]]."
@@ -18445,6 +18446,7 @@
         "REQ-HISTORY-1081",
         "REQ-VIEWER-1082",
         "REQ-VIEWER-1084",
+        "REQ-VIEWER-1090",
         "REQ-VIEWER-1087"
       ],
       "members": [
@@ -19449,10 +19451,9 @@
       "level": "code",
       "status": "confirmed",
       "area": "REQ",
-      "title": "A rail reading opens the rows behind its number",
+      "title": "A rail reading's rows",
       "intent": "A score says how the repo is doing and nothing about what to do. The rows behind it are the answer, and they should be one click from the number, already narrowed to what the reader is looking at, never recomputed in the browser.",
       "contract": [
-        "Choosing the health ring opens Problems on its Health tab; choosing the design ring opens it on its Design tab.",
         "The Health tab lists the `unhealthy` rows the map's health record carries, each with the axes it fails, followed by the `exempt_ids` it carries; its count is the sum of both.",
         "A row whose only failing axis is `not confirmed` is left out of the Health tab and its count, because the Review tab already lists it; the tab says how many it left out.",
         "The Health tab offers one chip per failing axis, each with its count; a chip narrows the list to the rows failing that axis, and `All` restores it.",
@@ -19462,7 +19463,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each ring opens its own tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-3 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-4 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed\n\nCASE-5 — a row that only awaits confirmation stays in Review\n  Given  a health record with one row failing only `not confirmed` and one failing\n         `not tested`\n  When   Problems renders on its Health tab\n  Then   only the untested row is listed, the Health count is 1, and the tab says 1\n         row only awaits confirmation\n\nCASE-6 — errors and warnings are listed on the Health tab\n  Given  an error, a warning, and a health row for another requirement\n  When   Problems renders on its Health tab\n  Then   both are listed, and no Errors or Warnings tab is offered",
+      "accept": "CASE-1 — the Health tab lists the rows the engine emitted\n  Given  a health record whose `unhealthy` holds one draft requirement\n  When   Problems renders on its Health tab\n  Then   that requirement is listed with the axis it fails\n\nCASE-2 — an axis chip narrows the Health list\n  Given  a health record with one row failing `not tested` and one failing `drift`\n  When   the Health tab renders with the `drift` chip chosen\n  Then   only the drifted row is listed and the `drift` chip is drawn pressed\n\nCASE-3 — a pillar chip narrows the Design tab\n  Given  candidates under two pillars\n  When   the Design tab renders with one pillar's chip chosen\n  Then   only that pillar's group is listed\n\nCASE-4 — a row that only awaits confirmation stays in Review\n  Given  a health record with one row failing only `not confirmed` and one failing\n         `not tested`\n  When   Problems renders on its Health tab\n  Then   only the untested row is listed, the Health count is 1, and the tab says 1\n         row only awaits confirmation\n\nCASE-5 — errors and warnings are listed on the Health tab\n  Given  an error, a warning, and a health row for another requirement\n  When   Problems renders on its Health tab\n  Then   both are listed, and no Errors or Warnings tab is offered",
       "input": "",
       "output": "",
       "desc": "",
@@ -19475,11 +19476,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:293"
-        },
-        {
-          "role": "implements",
-          "loc": "app/src/App.jsx:51"
+          "loc": "app/scripts/smoke/rail.jsx:313"
         },
         {
           "role": "implements",
@@ -19506,8 +19503,55 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6
+      "clauses": 5,
+      "covered": 5
+    },
+    {
+      "id": "REQ-VIEWER-1090",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A rail reading opens Problems on its own tab",
+      "intent": "The rail's two rings say how the repo is doing. One click on a ring should land on the rows behind it, not on a generic list the reader has to narrow again.",
+      "contract": [
+        "Choosing the health ring opens Problems on its Health tab; choosing the design ring opens it on its Design tab.",
+        "The tab is chosen before Problems is shown, so the surface opens on that reading's rows."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the design ring opens the Design tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `DESIGN`\n  Then   the tab becomes `DESIGN` and Problems is the surface shown\n\nCASE-2 — the health ring opens the Health tab\n  Given  the shell's handler for a rail reading\n  When   it is called with `HEALTH`\n  Then   the tab becomes `HEALTH` and Problems is the surface shown\n\nCASE-3 — the tab is chosen before the surface is shown\n  Given  the shell's handler for a rail reading\n  When   it is called with any tab\n  Then   the tab is set first and Problems is shown second, never the reverse",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/rail.jsx:293"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/App.jsx:51"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "REQ-VIEWER-1087",
@@ -22199,6 +22243,10 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-VIEWER-1090",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "REQ-VIEWER-1087",
       "ARCH-VIEWER-007"
     ],
@@ -23916,18 +23964,27 @@
     },
     {
       "month": "2026-10",
-      "count": 4,
+      "count": 5,
       "first": "2026-10-01",
       "last": "2026-10-04",
       "versions": [
         "v8.13.0",
         "v8.14.0",
         "v8.15.0",
-        "v8.15.1"
+        "v8.15.1",
+        "v8.16.0"
       ],
-      "landmark": "v8.15.0",
-      "headline": "A shipped month opens onto the CHANGELOG entry, not only its headline",
+      "landmark": "v8.16.0",
+      "headline": "`status: in-progress` is rejected, and a rail reading's routing is its own requirement",
       "entries": [
+        {
+          "version": "v8.16.0",
+          "date": "2026-10-04",
+          "headline": "`status: in-progress` is rejected, and a rail reading's routing is its own requirement",
+          "body": "**`status: in-progress` is rejected, and a rail reading's routing is its own requirement.**\n\n- A requirement file that still says `status: in-progress` fails RM002. Change it to `draft` before upgrading from `v8.15.0` or earlier; `v8.15.1` already dropped the status, and this release is where that is called out as incompatible\n- `REQ-VIEWER-1084` is split: `REQ-VIEWER-1090` takes which tab a rail ring opens, `REQ-VIEWER-1084` keeps what the tabs list. It starts as `draft`. `ARCH-VIEWER-007` stays whole, and its `file-spread` warning stands (ADR-0063)",
+          "first_commit": "2026-10-04",
+          "last_commit": "2026-10-04"
+        },
         {
           "version": "v8.15.1",
           "date": "2026-10-04",
@@ -24212,16 +24269,16 @@
     }
   },
   "health": {
-    "score": 100,
-    "total": 310,
-    "scored": 289,
+    "score": 99,
+    "total": 311,
+    "scored": 290,
     "healthy": 288,
     "exempt": 0,
     "deprecated": 21,
     "confirmed": 288,
-    "implemented": 280,
-    "tested": 280,
-    "drafts": 1,
+    "implemented": 281,
+    "tested": 281,
+    "drafts": 2,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -24233,6 +24290,13 @@
     "unhealthy": [
       {
         "id": "REQ-LINTCHECKS-1089",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-VIEWER-1090",
         "status": "draft",
         "why": [
           "not confirmed"

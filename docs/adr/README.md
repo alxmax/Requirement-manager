@@ -73,6 +73,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0060](0060-the-core-budget-rises-once-for-the-question-checks.md) | The core budget rises once, for the question checks | Accepted |
 | [0061](0061-the-core-budget-rises-for-release-spans.md) | The core budget rises for release commit spans | Accepted |
 | [0062](0062-the-core-budget-rises-for-clipping-a-span.md) | The core budget rises for clipping a span | Accepted |
+| [0063](0063-the-viewer-architecture-stays-whole.md) | ARCH-VIEWER-007 stays one capability, and its file-spread warning stands | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

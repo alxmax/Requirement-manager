@@ -289,11 +289,28 @@ const tallyChecks = [
 ];
 for (const [label, ok] of tallyChecks) test(label, ok);
 
-// ---- a rail reading opens the rows behind it (REQ-VIEWER-1084) -----------
+// ---- a rail reading opens Problems on its own tab (REQ-VIEWER-1090) ------
+// tested-by: REQ-VIEWER-1090
+const route = (tab) => {
+  const seen = [];
+  openTab((k) => seen.push(["tab", k]), (v) => seen.push(["view", v]))(tab);
+  return JSON.stringify(seen);
+};
+const routeChecks = [
+  // verifies: REQ-VIEWER-1090#CASE-1
+  ["rail: the design ring opens the Design tab",
+    route("DESIGN") === JSON.stringify([["tab", "DESIGN"], ["view", "problems"]])],
+  // verifies: REQ-VIEWER-1090#CASE-2
+  ["rail: the health ring opens the Health tab",
+    route("HEALTH") === JSON.stringify([["tab", "HEALTH"], ["view", "problems"]])],
+  // verifies: REQ-VIEWER-1090#CASE-3
+  ["rail: the tab is chosen before the surface is shown",
+    route("HEALTH").indexOf("tab") < route("HEALTH").indexOf("view")],
+];
+for (const [label, ok] of routeChecks) test(label, ok);
+
+// ---- a rail reading's rows (REQ-VIEWER-1084) -----------------------------
 // tested-by: REQ-VIEWER-1084
-const tabbed = [];
-openTab((k) => tabbed.push(["tab", k]),
-        (v) => tabbed.push(["view", v]))("DESIGN");
 const HROWS = {
   score: 50, healthy: 1, total: 3, scored: 3,
   unhealthy: [
@@ -325,17 +342,13 @@ const designOnly = renderToString(
   }} advice={{}} initialPillar="standards" />);
 const rowFilterChecks = [
   // verifies: REQ-VIEWER-1084#CASE-1
-  ["filters: a rail reading opens Problems on its own tab",
-    JSON.stringify(tabbed)
-      === JSON.stringify([["tab", "DESIGN"], ["view", "problems"]])],
-  // verifies: REQ-VIEWER-1084#CASE-2
   ["filters: the Health tab lists the rows the engine emitted",
     healthTab.includes("AREA-H-001") && healthTab.includes("not tested")],
-  // verifies: REQ-VIEWER-1084#CASE-3
+  // verifies: REQ-VIEWER-1084#CASE-2
   ["filters: an axis chip narrows the Health list",
     driftOnly.includes("AREA-H-002") && !driftOnly.includes("AREA-H-001")
       && /ex-chip on[^>]*>drift/.test(driftOnly)],
-  // verifies: REQ-VIEWER-1084#CASE-4
+  // verifies: REQ-VIEWER-1084#CASE-3
   ["filters: a pillar chip narrows the Design tab",
     designOnly.includes("line-too-long")
       && !designOnly.includes("global-state")],
@@ -347,7 +360,7 @@ adoptMapExport({ health: { ...HROWS, unhealthy: [
 ] }, design: null });
 const reviewOnly = renderToString(
   <ProblemsView openSpec={noop} problems={[]} initialFilter="HEALTH" />);
-// verifies: REQ-VIEWER-1084#CASE-5
+// verifies: REQ-VIEWER-1084#CASE-4
 test("filters: a row that only awaits confirmation stays in Review",
   reviewOnly.includes("AREA-H-001") && !reviewOnly.includes("AREA-H-003")
     && /Health<span[^>]*>1</.test(reviewOnly)
@@ -359,7 +372,7 @@ const merged = renderToString(
     { id: "WARN-1", title: "gap", sev: "WARN", signal: "untested",
       msg: "Confirmed, but no tested-by", fix: "test it", loc: "" },
   ]} />);
-// verifies: REQ-VIEWER-1084#CASE-6
+// verifies: REQ-VIEWER-1084#CASE-5
 test("filters: errors and warnings are listed on Health",
   merged.includes("ERR-1") && merged.includes("WARN-1")
     && !merged.includes("Errors<span") && !merged.includes("Warnings<span")

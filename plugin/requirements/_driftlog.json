@@ -134,7 +134,7 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "5ef361ba6b61",
+      "hash": "2bc38d74f005",
       "reason": null
     },
     "ARCH-VLEVEL-037": {
@@ -482,7 +482,7 @@
       "reason": null
     },
     "REQ-VIEWER-1084": {
-      "hash": "83a32971d922",
+      "hash": "72681f9aa6f6",
       "reason": null
     },
     "REQ-VIEWER-1087": {

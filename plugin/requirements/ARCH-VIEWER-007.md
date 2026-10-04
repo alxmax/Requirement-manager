@@ -28,6 +28,7 @@ Every bullet below is binding.
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
+- Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
 - The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it, and that choice survives a reload. [[REQ-VIEWER-984]]
 - Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
@@ -67,9 +68,9 @@ CASE-3
 - Split on 2026-09-22 (ADR-0050) along the seam this note used to defer: the ARTIFACT
   (`_map.html`, its template and the escaping) is [[ARCH-VIEWERFILE-074]]; what the file
   RENDERS stays here. The `over-scoped` and `ac-count-high` exemptions left with it.
-- `lint_exempt: file-spread`: the members are one engine function plus the viewer's source
-  tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files
-  by construction; they are built into ONE artifact, so the spread is not diffuseness.
+- `file-spread` stands as a warning ([ADR-0063](docs/adr/0063-the-viewer-architecture-stays-whole.md)):
+  the members are the viewer's source tree, built into ONE artifact. Splitting by folder would
+  name capabilities after directories, so only a piece that changes for its own reasons leaves.
 - The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as
   `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the
   marker for the inline data, so it ships a rich UI without itself depending on Node/npm.
@@ -944,7 +945,7 @@ owner: Alex
 satisfies: [ARCH-VIEWER-007]
 ---
 
-# A rail reading opens the rows behind its number
+# A rail reading's rows
 
 ## Description
 > A score says how the repo is doing and nothing about what to do. The rows behind it
@@ -952,8 +953,6 @@ satisfies: [ARCH-VIEWER-007]
 > what the reader is looking at, never recomputed in the browser.
 
 Every bullet below is binding.
-- Choosing the health ring opens Problems on its Health tab; choosing the design ring
-  opens it on its Design tab.
 - The Health tab lists the `unhealthy` rows the map's health record carries, each with
   the axes it fails, followed by the `exempt_ids` it carries; its count is the sum of
   both.
@@ -969,37 +968,68 @@ Every bullet below is binding.
   candidates to that pillar, and `All` restores them.
 
 ## Cases
-CASE-1 — each ring opens its own tab
-  Given  the shell's handler for a rail reading
-  When   it is called with `DESIGN`
-  Then   the tab becomes `DESIGN` and Problems is the surface shown
-
-CASE-2 — the Health tab lists the rows the engine emitted
+CASE-1 — the Health tab lists the rows the engine emitted
   Given  a health record whose `unhealthy` holds one draft requirement
   When   Problems renders on its Health tab
   Then   that requirement is listed with the axis it fails
 
-CASE-3 — an axis chip narrows the Health list
+CASE-2 — an axis chip narrows the Health list
   Given  a health record with one row failing `not tested` and one failing `drift`
   When   the Health tab renders with the `drift` chip chosen
   Then   only the drifted row is listed and the `drift` chip is drawn pressed
 
-CASE-4 — a pillar chip narrows the Design tab
+CASE-3 — a pillar chip narrows the Design tab
   Given  candidates under two pillars
   When   the Design tab renders with one pillar's chip chosen
   Then   only that pillar's group is listed
 
-CASE-5 — a row that only awaits confirmation stays in Review
+CASE-4 — a row that only awaits confirmation stays in Review
   Given  a health record with one row failing only `not confirmed` and one failing
          `not tested`
   When   Problems renders on its Health tab
   Then   only the untested row is listed, the Health count is 1, and the tab says 1
          row only awaits confirmation
 
-CASE-6 — errors and warnings are listed on the Health tab
+CASE-5 — errors and warnings are listed on the Health tab
   Given  an error, a warning, and a health row for another requirement
   When   Problems renders on its Health tab
   Then   both are listed, and no Errors or Warnings tab is offered
+
+---
+id: REQ-VIEWER-1090
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# A rail reading opens Problems on its own tab
+
+## Description
+> The rail's two rings say how the repo is doing. One click on a ring should land on the
+> rows behind it, not on a generic list the reader has to narrow again.
+
+Every bullet below is binding.
+- Choosing the health ring opens Problems on its Health tab; choosing the design ring
+  opens it on its Design tab.
+- The tab is chosen before Problems is shown, so the surface opens on that reading's rows.
+
+## Cases
+CASE-1 — the design ring opens the Design tab
+  Given  the shell's handler for a rail reading
+  When   it is called with `DESIGN`
+  Then   the tab becomes `DESIGN` and Problems is the surface shown
+
+CASE-2 — the health ring opens the Health tab
+  Given  the shell's handler for a rail reading
+  When   it is called with `HEALTH`
+  Then   the tab becomes `HEALTH` and Problems is the surface shown
+
+CASE-3 — the tab is chosen before the surface is shown
+  Given  the shell's handler for a rail reading
+  When   it is called with any tab
+  Then   the tab is set first and Problems is shown second, never the reverse
 
 ---
 id: REQ-VIEWER-1087
