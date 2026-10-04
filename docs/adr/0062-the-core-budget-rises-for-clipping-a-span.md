@@ -9,7 +9,7 @@
   the map.
 - **Evidence:** `python scripts/check_engine_budget.py --budget 7000` on
   2026-10-04: the core is 6,677 logical lines in 61 modules, up from 6,661.
-  The total is 17,468 physical lines, under the 20,000 ceiling.
+  The total is 17,479 physical lines, under the 20,000 ceiling.
 
 ## Context
 
