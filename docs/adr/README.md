@@ -71,6 +71,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0058](0058-an-answered-question-is-closed-where-it-stands.md) | An answered question is closed where it stands | Accepted |
 | [0059](0059-a-decision-question-is-linted-for-whoever-answers-it.md) | A decision question is linted for whoever answers it | Accepted |
 | [0060](0060-the-core-budget-rises-once-for-the-question-checks.md) | The core budget rises once, for the question checks | Accepted |
+| [0061](0061-the-core-budget-rises-for-release-spans.md) | The core budget rises for release commit spans | Accepted |
+| [0062](0062-the-core-budget-rises-for-clipping-a-span.md) | The core budget rises for clipping a span | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

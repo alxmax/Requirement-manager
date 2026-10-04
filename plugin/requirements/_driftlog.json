@@ -70,8 +70,8 @@
       "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
     },
     "ARCH-MAP-007": {
-      "hash": "4f93ce5f5feb",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "6c6e17fd7e12",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "ARCH-MAPDIAGRAMS-055": {
       "hash": "0e45d4b8d45e",
@@ -134,8 +134,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "abf8e714933e",
-      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
+      "hash": "6b62163d5b82",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -242,12 +242,12 @@
       "reason": "REQ-HEALTH-968: the score names its exemptions (CASE-4)"
     },
     "REQ-HISTORY-1003": {
-      "hash": "b6a46a69e149",
-      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
+      "hash": "2e86ab266804",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "REQ-HISTORY-1081": {
-      "hash": "c62dea5ebd08",
-      "reason": "a shipped month carries each release CHANGELOG entry (v8.15.0)"
+      "hash": "bea95f5002d1",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "REQ-INIT-860": {
       "hash": "bf4e002a3da1",
@@ -489,13 +489,13 @@
       "hash": "8c401c2200b5",
       "reason": null
     },
-    "REQ-VIEWER-995": {
-      "hash": "61b20c804d6b",
-      "reason": "v7.3.1: REQ-VIEWER-995 gains a clause and CASE-4 \u2014 a milestone whose TODO items are all complete still renders a column"
+    "REQ-VIEWER-984": {
+      "hash": "89e0c4f01ed7",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "REQ-VIEWER-999": {
-      "hash": "65c909d3b753",
-      "reason": null
+      "hash": "6488ed81b2f7",
+      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "SYS-GATE-102": {
       "hash": "09266141a146",

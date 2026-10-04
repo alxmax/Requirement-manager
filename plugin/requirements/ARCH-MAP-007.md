@@ -23,7 +23,7 @@ Every bullet below is binding.
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
-- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
+- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, each release carrying the first and last commit of the work, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
 
 ## Cases
 CASE-1
@@ -457,8 +457,13 @@ Every bullet below is binding.
   characters the headline is cut on a word and ends with an ellipsis.
 - `_map.json` carries `history`: one row per calendar month with its release count, its first
   and last date, every version in it, the headline of its landmark release, and `entries`:
-  each release's version, date, headline and the CHANGELOG entry as written (`body`),
-  newest first.
+  each release's version, date, headline, the CHANGELOG entry as written (`body`),
+  `first_commit` and `last_commit`, newest first.
+- `first_commit` and `last_commit` are the oldest and newest committer dates after the previous
+  release tag, up to this release's tag. With no git history or no tag, both are the changelog date.
+- A changelog date that falls strictly inside that span ends it: `first_commit` becomes the day
+  after the latest such date, and never later than `last_commit`. A release with no tag stays on
+  its changelog date, so a neighbour's commits cannot cover it.
 - The landmark is the month's biggest step — a major over a minor over a patch, newest among
   equals — never simply its first or last release.
 
@@ -489,13 +494,19 @@ CASE-5 — a repo with no CHANGELOG yields nothing
   Then   it is empty and the chart draws no shipped band
 
 CASE-6 — an entry keeps the text under its heading
-  Given  a dated entry whose text holds a section heading and a nested bullet
+  Given  a dated entry whose text holds a section heading and a nested bullet,
+         and an opening bold sentence longer than 1000 characters
   When   the history is parsed and grouped by month
-  Then   that entry's `body` is the text under its heading, and the month carries it
+  Then   that entry's `body` is the text under its heading and the month carries
+         it, and a headline past 1000 characters ends at a word boundary with an
+         ellipsis while a shorter sentence stays whole
 
-CASE-7 — a headline past 1000 characters is cut on a word
-  Given  an opening bold sentence longer than 1000 characters
-  When   its headline is taken
-  Then   the headline ends at a word boundary with an ellipsis, and a shorter
-         sentence is kept whole
+CASE-7 — a release spans the commits since the previous tag
+  Given  tagged releases and the commits between them, and a changelog date
+         strictly inside one span whose other release has no tag
+  When   the history is read
+  Then   each release runs from the commit after the previous tag to its own
+         tag, that span starts the day after the date inside it, and a release
+         with no tag stays on its changelog date. With no git history both
+         dates are the changelog date
 

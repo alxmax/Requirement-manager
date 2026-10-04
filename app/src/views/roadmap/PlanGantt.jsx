@@ -9,7 +9,9 @@ import { LaneLabels, Ruler } from "./GanttRuler.jsx";
 import { Guides, Lane, ShippedBand } from "./GanttLanes.jsx";
 import { PickedNote } from "./PlanNotes.jsx";
 
-export { noteText, matchItem, ShippedNote, VersionNote } from "./PlanNotes.jsx";
+export {
+  noteText, matchItem, ShippedNote, ReleaseNote, VersionNote,
+} from "./PlanNotes.jsx";
 
 export function PlanGantt(props) {
   const {

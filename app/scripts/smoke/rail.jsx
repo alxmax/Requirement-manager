@@ -145,8 +145,6 @@ adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 // which is where both of this feature's real bugs lived.
 const roadZoomed  = renderToString(
   <RoadmapView openSpec={noop} initialZoom={40} />);
-const roadCompact = renderToString(
-  <RoadmapView openSpec={noop} initialDensity="compact" />);
 const roadDefault = renderToString(<RoadmapView openSpec={noop} />);
 const roadmapChecks = [
   // verifies: REQ-VIEWER-984#CASE-1
@@ -156,53 +154,14 @@ const roadmapChecks = [
     roadZoomed.includes("zoom:0.4")
       && !roadZoomed.includes("transform:scale")],
   // verifies: REQ-VIEWER-984#CASE-2
-  ["roadmap: compact truncates the title and keeps it in the tooltip",
-    roadCompact.includes("text-overflow:ellipsis")
-    && roadCompact.includes("max-width:108px")
-    && /title="[^"]{40,}"/.test(roadCompact)],
-  // verifies: REQ-VIEWER-984#CASE-3
-  ["roadmap: the defaults are the pre-control view",
-    roadDefault.includes("zoom:1") && roadDefault.includes(">100%<")
-    && !roadDefault.includes("text-overflow:ellipsis")],
+  ["roadmap: the default scale is 100%",
+    roadDefault.includes("zoom:1") && roadDefault.includes(">100%<")],
 ];
 for (const [label, ok] of roadmapChecks) test(label, ok);
 
-// A milestone whose TODO items have all shipped. The chips are still
-// filtered to the open ones, so the column is empty — what is asserted is
-// that it EXISTS, because the version it names is finished, not skipped.
-adoptMapExport({
-  todos: [
-    { title: "a shipped item", done: true, milestone: "v99.9",
-      lane: "feature" },
-  ],
-});
-const roadAllDone = renderToString(<RoadmapView openSpec={noop} />);
-adoptMapExport({ todos: [] });
-// verifies: REQ-VIEWER-995#CASE-4
-test("roadmap: a milestone whose every item is complete still gets a column",
-  roadAllDone.includes(">v99.9<") && !roadAllDone.includes("a shipped item"));
-
-// Plan and Versions read one planned list, `bars` (REQ-PLANSTALE-1013). A
-// bar used to create its version's column and never appear in it, because
-// the column read `milestones[].items[]` — a second list nobody wrote.
-adoptMapExport({ todos: [], planning: {
-  lanes: ["Feature"], milestones: { "v99.8": { items: ["ghost"] } },
-  bars: [{ title: "the planned bar", lane: "Feature", start: "2026-09-21",
-           end: "2026-09-27",
-           milestone: "v99.7" }],
-} });
-const roadBars = renderToString(
-  <RoadmapView openSpec={noop} initialMode="versions" />);
-adoptMapExport({ todos: [], planning: json.planning || null });
-// verifies: REQ-VIEWER-999#CASE-5
-test("roadmap: a bar appears in its version's column, and items[] is not read",
-  roadBars.includes(">v99.7<") && roadBars.includes("the planned bar")
-    && !roadBars.includes("ghost"));
-
 // ---- roadmap horizons (REQ-VIEWER-999) -----------------------------------
-// `initialRoadmap` is the seam the other two controls already open with
-// `initialZoom` / `initialDensity`: a fixture without mutating the loaded
-// export.
+// `initialRoadmap` is the seam `initialZoom` already opens: a fixture
+// without mutating the loaded export.
 const HZ = [
   { name: "the open one", horizon: "now", req: json.nodes[0].id,
     unpark: null, done: false },
@@ -225,6 +184,7 @@ const barNoteChecks = [
       const withItems = renderToString(
         <RoadmapView openSpec={noop} initialRoadmap={HZ} />);
       return !withItems.includes(">Horizons<")
+        && !withItems.includes(">Versions<")
         && !(withItems.includes(">Now<") && withItems.includes(">Later<"));
     })()],
   // verifies: REQ-VIEWER-999#CASE-4
@@ -251,7 +211,7 @@ const barNoteChecks = [
     // is the panel's separate question.
     matchItem({ reqId: null }, HZ) === null
     && matchItem({ reqId: "ABSENT-Z-000" }, HZ) === null],
-  // verifies: REQ-VIEWER-999#CASE-6
+  // verifies: REQ-VIEWER-999#CASE-5
   ["roadmap: two bars sharing a req open their own notes, not the first one's",
     (() => {
       const items = [
@@ -265,7 +225,7 @@ const barNoteChecks = [
         && matchItem(other, items, bars) === null
         && matchItem(other, items, [other])?.context === "first";
     })()],
-  // verifies: REQ-VIEWER-999#CASE-7
+  // verifies: REQ-VIEWER-999#CASE-6
   ["roadmap: a bar's roadmap key opens its item whatever its title says",
     (() => {
       const items = [

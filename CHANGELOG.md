@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.15.1` — 2026-10-04
+
+**Each shipped release is its own block, as wide as the work.**
+
+- The Plan draws one block per release, from the first commit after the previous tag to that release's own tag. A changelog date inside that span cuts it: the block starts the day after the latest such date, so a release with no tag is not drawn in the middle of a later one (REQ-HISTORY-1003, REQ-HISTORY-1081)
+- The block shows the version, and for a patch group how many releases it holds. Releases that start on the same day share one block, labelled from the lowest version to the highest (`v5.10.x-v6.3.0`). Opening it shows the CHANGELOG entry, not only the headline. With no git history, or no tag, both dates are the changelog date, so the block is a single day
+- The engine's core rises from 6,612 to 6,677 logical lines, and its budget with it (ADR-0061, ADR-0062)
+- The Roadmap tab no longer offers Versions. The Plan is the only picture; the chip columns and their requirement (`REQ-VIEWER-995`) are retired
+
 ## plugin `v8.15.0` — 2026-10-02
 
 **A shipped month opens onto the CHANGELOG entry, not only its headline.**

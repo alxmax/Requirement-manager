@@ -11,7 +11,6 @@
 // tested-by: REQ-VIEWER-977
 // tested-by: REQ-VIEWER-964
 // tested-by: REQ-VIEWER-984
-// tested-by: REQ-VIEWER-995
 // tested-by: REQ-TRANSLATE-996
 // tested-by: REQ-VIEWER-999
 // tested-by: REQ-PLANCADENCE-1000
@@ -68,50 +67,6 @@ for (const [name, el] of Object.entries(cases)) {
   } catch (e) {
     fail(`FAIL ${name}: ${e.message}`);
   }
-}
-
-// The roadmap's one lane, and that every item lands in it.
-// tested-by: REQ-VIEWER-995
-// Rendered against a tiny synthetic registry so the assertion is about the
-// RULE, not about whatever TODO.md happens to hold today. Every legacy
-// lane value is present in the fixture on purpose: `lane:` must still
-// PARSE and still be ignored by the chart.
-{
-  const ms = "v9.9";
-  adoptMapExport({ nodes: [
-    adaptNode({ id: "LANE-REQ-001", title: "A shipped capability",
-                status: "confirmed",
-                layer: "bus", milestone: ms, deps: [], used_by: [],
-                depends_on: [] }),
-  ] });
-  const todoNames = [
-    "Crash on empty stdin", "Old style item", "Plain feature item",
-  ];
-  adoptMapExport({ todos: [
-    { name: todoNames[0], lane: "bug",     milestone: ms, done: false },
-    { name: todoNames[1], lane: "ops",     milestone: ms, done: false },
-    { name: todoNames[2], lane: "feature", milestone: ms, done: false },
-    { name: "Already shipped", lane: "feature", milestone: ms, done: true },
-  ] });
-  const html = renderToString(<RoadmapView openSpec={noop} />);
-  const laneLabels = (
-    html.match(/>(Implementations|Bugs|Features|Bus|Need|Ops)</g) || []);
-  const laneChecks = [
-    // verifies: REQ-VIEWER-995#CASE-1
-    ["roadmap shows exactly one lane, labelled Implementations",
-      laneLabels.length === 1 && laneLabels[0] === ">Implementations<"],
-    // verifies: REQ-VIEWER-995#CASE-2
-    ["every open TODO item lands in it, whatever its lane says",
-      todoNames.every(n => html.includes(n))
-        && !html.includes("Already shipped")],
-    // verifies: REQ-VIEWER-995#CASE-3
-    ["a milestoned requirement lands in it",
-      html.includes("A shipped capability")],
-  ];
-  for (const [label, ok] of laneChecks) test(label, ok);
-  // back to the live registry
-  adoptMapExport({ nodes: json.nodes.map(adaptNode) });
-  adoptMapExport({ todos: json.todos || [] });
 }
 
 // LANGUAGE sets the viewer's default locale.

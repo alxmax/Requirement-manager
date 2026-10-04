@@ -3,8 +3,8 @@
  * and versions, and the guides that tie each of them to its day on the
  * ruler. */
 import {
-  PX, PAD, ROW_H, BAND_H, HEAD_H, LABEL_LINES, LANE_TONE, extent,
-  PILL_W, pillTop,
+  PX, PAD, ROW_H, SHIP_H, HEAD_H, LABEL_LINES, LANE_TONE, extent,
+  shipExtent, PILL_W, pillTop,
 } from "./ganttLayout.js";
 import { onActivate } from "./PlanNotes.jsx";
 
@@ -28,52 +28,58 @@ function MonthRules({ months }) {
 }
 
 function shippedStyle(h, picked) {
+  const { left, width } = shipExtent(h);
   return {
-    position: "absolute", left: h.startIdx * PX + 3, top: PAD,
-    width: Math.max((h.endIdx - h.startIdx + 1) * PX - 6, 46),
-    height: ROW_H - 4,
+    position: "absolute", left, top: PAD + (h.subRow || 0) * SHIP_H,
+    width, height: SHIP_H - 6,
     boxSizing: "border-box", borderRadius: 4,
     background: opaque(fade(16), fade(5)),
     border: `1px solid ${fade(40)}`, borderLeft: "3px solid var(--fg-muted)",
     color: "var(--fg-muted)", fontSize: 11, fontWeight: 600, padding: "0 8px",
     display: "flex", alignItems: "center", gap: 6, overflow: "hidden",
     whiteSpace: "nowrap",
-    cursor: "pointer", outline: selected(picked, `month-${h.month}`),
+    cursor: "pointer", outline: selected(picked, h.key),
     outlineOffset: 1,
   };
 }
 
-/** What already shipped, one bar per month; selecting one opens every
- *  release in it.
+/** What already shipped, one block per release. The block covers the days
+ *  between its first and last commit, and widens to its version when those
+ *  days are shorter than the label. A second row is taken when that box
+ *  would cover another block. The headline opens in the note.
  *  implements: REQ-HISTORY-1081 */
 export function ShippedBand({ sel, t }) {
   const { lay, picked, toggle } = sel;
-  if (!lay.pastRows.length) return null;
+  if (!lay.pastBars.length) return null;
   return (
     <div style={{
-      position: "relative", height: BAND_H,
+      position: "relative", height: lay.pastH,
       borderBottom: "1px solid var(--border)",
       background: fade(5),
     }}>
       <MonthRules months={lay.months} />
-      {lay.pastRows.map((h) => {
-        const pick = () => toggle({
-          kind: "month", key: `month-${h.month}`, ...h,
-        });
-        const span = `${h.versions[0]} → ${h.versions[h.versions.length - 1]}`;
+      {lay.pastBars.map((h) => {
+        const pick = () => toggle({ kind: "release", ...h });
+        const caption = h.members && !String(h.version).includes("-v")
+          ? `${h.members.length} ${t("releases")}` : "";
+        const tip = h.members
+          ? `${h.version}\n${t("first commit")} ${h.start}\n`
+            + `${t("last commit")} ${h.end}\n`
+            + h.members.map((m) => m.version).join("\n")
+          : `${h.version}\n${t("first commit")} ${h.start}\n`
+            + `${t("last commit")} ${h.end}`;
         return (
-          <div key={h.month} data-month={h.month} role="button" tabIndex={0}
-            onClick={pick} onKeyDown={onActivate(pick)}
-            style={shippedStyle(h, picked)}
-            title={`${h.month} · ${h.count} ${t("releases")} · ${span}\n`
-              + `${h.headline}`}>
-            <span style={{ fontWeight: 700 }}>{h.landmark}</span>
-            <span style={{ opacity: 0.7 }}>{h.count} {t("releases")}</span>
-            <span style={{
-              overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500,
-            }}>
-              {h.headline}
-            </span>
+          <div key={h.key} data-release={h.version} role="button"
+            tabIndex={0} onClick={pick} onKeyDown={onActivate(pick)}
+            style={shippedStyle(h, picked)} title={tip}>
+            <span style={{ fontWeight: 700, flexShrink: 0 }}>{h.version}</span>
+            {caption ? (
+              <span style={{
+                overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500,
+              }}>
+                {caption}
+              </span>
+            ) : null}
           </div>
         );
       })}

@@ -66,8 +66,8 @@ version's CHANGELOG entry. Commit the release, push, and the tag follows.
 to [`docs/history/TODO-archive.md`](history/TODO-archive.md) on 2026-09-14 and plans in
 `ROADMAP.md` instead. Group items under `## vX.Y` milestone headings; each item is
 a checkbox with an optional `| lane: <label>` suffix. The lane is parsed and carried into
-`_map.json`, but the Roadmap tab renders one lane, `Implementations`, so it no longer
-splits the chart. Completed items (`[x]`) are hidden in the chart.
+`_map.json`. The Roadmap tab draws the dated plan, not a column of chips per
+version. Completed items (`[x]`) stay out of that chart.
 
 ```markdown
 ## v1.14
@@ -82,8 +82,6 @@ it with a marker, and its items belong to no version:
 ```markdown
 ## How the work is split <!-- reqmap: not-milestone -->
 ```
-
-Open items appear in their version's column on the Roadmap tab's Versions view.
 
 **The plan, and the note under it.** `init` seeds a `ROADMAP.md` and a
 `requirements/_planning.json` on a fresh repo, because a plan file a repo does not have
