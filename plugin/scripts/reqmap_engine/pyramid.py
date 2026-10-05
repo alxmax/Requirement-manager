@@ -279,6 +279,9 @@ def report_edges(plan):
           "is a named")
     print("  hole (`NAME THIS …`) for the author to fill, merge or "
           "delete.")
+    from .levelshape import note_over_band   # only the commands that write rungs
+    note_over_band({a: len(e["members"]) for a, e in arch.items()}, "architecture")
+    note_over_band({sys_["id"]: len(arch) + len(sys_["members"])}, "system")
 
 
 def apply_edges(reqs, reqs_dir, plan):

@@ -2747,6 +2747,41 @@ class PlanStale(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by:
             self.assertNotIn("@gate_rule", f.read())
 
 
+class PlanVersionBar(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-PLANVERSIONBAR-1091 @unit
+    """A bar that is a version rather than work is counted, read-only."""
+
+    def _bar(self, title, milestone=None, req=None):
+        bar = {"title": title, "start": "2026-10-05"}
+        bar.update({k: v for k, v in (("milestone", milestone), ("req", req)) if v})
+        return bar
+
+    def test_a_bar_titled_with_its_own_milestone_and_no_req_is_counted(self):  # verifies: REQ-PLANVERSIONBAR-1091#CASE-1
+        lines = R.version_bar_lines([self._bar("v1.0.1 · Export", "v1.0.1"),
+                                     self._bar("v2.3 · Timeouts", "2.3.0")])
+        self.assertEqual(1, len(lines))
+        self.assertIn("2 bar(s)", lines[0])
+        self.assertIn("v1.0.1 · Export", lines[0])
+
+    def test_work_bars_are_silent(self):  # verifies: REQ-PLANVERSIONBAR-1091#CASE-2
+        self.assertEqual([], R.version_bar_lines([
+            self._bar("v1.0.1 · Export", "v1.0.1", req="AREA-A-001"),
+            self._bar("v1.0.1 · Export"),
+            self._bar("v1.0.0 · Export", "v1.0.1")]))
+
+    def test_the_line_reaches_the_audit_report(self):  # verifies: REQ-PLANVERSIONBAR-1091#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"), _spec("AREA-A-001", ["`gate` writes the lock."]))
+            _write(os.path.join(rd, "_planning.json"),
+                   json.dumps({"bars": [self._bar("v1.0.1 · Export", "v1.0.1")]}))
+            reqs = R.load_requirements(rd)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_audit(R.Workspace(reqs, R.scan_members(d, rd), rd, d), as_json=True)
+            roadmap = json.loads(buf.getvalue())["roadmap"]
+        self.assertTrue(any("are a version, not work" in ln for ln in roadmap))
+
+
 class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-HISTORY-1003
     """What already shipped, read from CHANGELOG.md and grouped by calendar month."""
 

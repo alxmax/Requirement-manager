@@ -11,20 +11,9 @@ the emptiness falls out of each detector's own condition.
 from collections import Counter
 
 from .axis import _parent_gap
-from .model import _as_list
+from .model import _as_list, _satisfied_by
 from .sections import CONTRACT_LABELS, _section_lines
 from .tags import _ID_RE
-
-
-def _satisfied_by_map(reqs):
-    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
-    """parent id -> the ids of every requirement that declares `satisfies:
-    [parent]`."""
-    out = {}
-    for rid, r in reqs.items():
-        for up in _as_list(r["meta"].get("satisfies")):
-            out.setdefault(up, []).append(rid)
-    return out
 
 
 def _file_convention_residue(reqs):
@@ -35,7 +24,7 @@ def _file_convention_residue(reqs):
     into one file per requirement, so the odd-file-out child(ren) look like a
     move that only finished for part of the group. A group cleanly split
     one-file-per-requirement, or one that never split at all, is not residue."""
-    children = _satisfied_by_map(reqs)
+    children = _satisfied_by(reqs)
     out = []
     for parent_id, kids in children.items():
         parent = reqs.get(parent_id)
@@ -77,7 +66,7 @@ def _missing_obligation_residue(reqs):
     parent is exactly the case where the obligation sentence SHOULD be gone, and
     reporting it would ask the author to re-add the clause they just deleted on
     purpose."""
-    children = _satisfied_by_map(reqs)
+    children = _satisfied_by(reqs)
     out = []
     for parent_id, kids in children.items():
         parent = reqs.get(parent_id)

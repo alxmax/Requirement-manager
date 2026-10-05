@@ -106,8 +106,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-ROADMAP-038": {
-      "hash": "5fd8185fc946",
-      "reason": null
+      "hash": "5f685af4d233",
+      "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
     },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
@@ -128,6 +128,10 @@
     "ARCH-SIMILAR-016": {
       "hash": "906bc44a1966",
       "reason": "distinct_from; CHECK-831 fold"
+    },
+    "ARCH-TRACE-020": {
+      "hash": "fb4530000681",
+      "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
     },
     "ARCH-TRANSLATE-044": {
       "hash": "fe37ed20245f",
@@ -221,6 +225,10 @@
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
     },
+    "REQ-EXTRACT-981": {
+      "hash": "ca22b80b0a14",
+      "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
+    },
     "REQ-FINDINGS-853": {
       "hash": "b687863b90c7",
       "reason": "a nested answer bullet closes the question, and only a real calendar day counts"
@@ -270,8 +278,8 @@
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
     },
     "REQ-LEVELRETROFIT-987": {
-      "hash": "f275a981c830",
-      "reason": "readability: split stacked clauses, third cases, file-spread by directory"
+      "hash": "f8344744692d",
+      "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
     },
     "REQ-LINT-863": {
       "hash": "4cfac3d2d364",
@@ -346,8 +354,8 @@
       "reason": null
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "cc648dfb7e9b",
-      "reason": null
+      "hash": "93c7507ec09a",
+      "reason": "ADR-0064: neutral examples in the new cases"
     },
     "REQ-PLANSTALE-1013": {
       "hash": "428616bf0fd7",
@@ -454,8 +462,8 @@
       "reason": "Bare sync leaves a page with no engine region alone"
     },
     "REQ-TRACE-934": {
-      "hash": "2ccdcdb3fec3",
-      "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
+      "hash": "e1ca981110a3",
+      "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
     },
     "REQ-TRANSLATE-938": {
       "hash": "bbe7e87b21bf",

@@ -14,6 +14,33 @@ version file says what the repository is. The engine reads all three as `vX.Y.Z`
   `## v1.2.0 - 2026-09-16`, `## 1.2.0 (2026-09-16)` — and a new entry is written in the form
   the file already uses.
 
+**A version is a milestone; a bar is the work.** The Plan reads in three bands: what
+shipped (drawn from the CHANGELOG, patch releases folded into one `vX.Y.x` block), the
+work (one bar per piece of work, each naming the requirement it delivers with `req:`), and
+the releases (one pill per milestone, on its `due` day). A bar titled `v1.4.0 · Export` with
+no `req:` is the version drawn a second time, and the work it ships has no bar at all —
+`gate --audit` counts such bars. Ship a version a day if you like; plan it the same way:
+
+```json
+{
+  "lanes": ["Feature", "Release"],
+  "milestones": {
+    "v1.0.1": {"due": "2026-10-07"},
+    "v1.0.2": {"due": "2026-10-08"}
+  },
+  "bars": [
+    {"title": "Session timeout", "lane": "Feature", "start": "2026-10-06",
+     "end": "2026-10-07", "req": "AUTH-SESSION-012", "milestone": "v1.0.1"},
+    {"title": "Export to CSV", "lane": "Feature", "start": "2026-10-07",
+     "end": "2026-10-08", "req": "REPORT-CSV-031", "milestone": "v1.0.2"}
+  ]
+}
+```
+
+A bar too short for its title draws the title whole beside it, on one line. Once a
+version ships, `sync --release --apply` takes its milestone and bars out of the plan; one
+left behind is named by `sync` and `gate --audit` (below), and stays drawn until removed.
+
 `sync` then says, without writing anything:
 
 - a milestone planned at or below the version already declared — the plan describes the past;

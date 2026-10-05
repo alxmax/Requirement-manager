@@ -20,7 +20,7 @@ satisfies: [SYS-VMODEL-107]
 > float free of the needs that justify them, and a need can quietly go unaddressed.
 
 Every bullet below is binding.
-- A requirement may declare a `satisfies:` frontmatter list naming the upstream ids it fulfils, and the gate warns (never errors) on a dangling link or an unaddressed confirmed need. [[REQ-TRACE-934]]
+- A requirement may declare a `satisfies:` frontmatter list naming the upstream ids it fulfils, and the gate warns (never errors) on a dangling link, an unaddressed confirmed need, or a level axis that is not a tree. [[REQ-TRACE-934]]
 - The `need` and `aggregate` layers are exempt from the implements/tested-by checks; each is covered by edges — `satisfies:` or `depends_on` — instead of code. [[REQ-TRACE-935]]
 
 ## Cases
@@ -103,6 +103,10 @@ Every bullet below is binding.
   another rung. The pyramid is built upward — code into architecture groups, groups into
   needs — and a group with no member is an organisation error, never a code error. A corpus
   that declares no `level:` sees nothing.
+- RM032 also warns when the axis stops being a tree, on drafts that declare a `level:` too:
+  a requirement satisfying two requirements on the rung above it (a `system` one counts
+  `system` parents), a `system` need under a sub-need, or an `architecture` requirement on an
+  apex that has sub-needs. An apex whose satisfiers are sub-needs is a complete group.
 
 ## Cases
 CASE-1 — satisfies: parses into a frontmatter list like any other id field
@@ -129,6 +133,16 @@ CASE-5 — a requirement with no group one rung up warns, and an unlevelled corp
   Given  a confirmed `level: code` requirement declaring no `satisfies:`, and separately a corpus whose requirements declare no `level:`
   When   `gate` runs on each
   Then   the first is warned "satisfies nothing" and the second prints no RM032 line
+
+CASE-6 — two parents on the rung above warn, on a draft too
+  Given  a draft `level: architecture` requirement with `satisfies: [SYS-A-001, SYS-B-002]`, both `level: system`
+  When   `gate` runs
+  Then   it warns once that the requirement satisfies 2 `level: system` requirements, and exits 0
+
+CASE-7 — an apex with sub-needs holds needs, not architecture
+  Given  an apex need, a sub-need satisfying it, and an architecture requirement under the sub-need
+  When   `gate` runs, then runs again with the architecture requirement moved onto the apex and a need added under the sub-need
+  Then   the first run prints no RM032 line; the second warns the architecture requirement to point at a sub-need and the new need that needs nest one deep
 
 
 --------------------

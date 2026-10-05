@@ -5,7 +5,7 @@ import os, re
 
 from .acceptance import _acc_blocks, _acc_items
 from .author import NOT_MILESTONE_RE, _parse_todos_from_text
-from .model import RISK_ADVICE, _area_of, _as_list
+from .model import RISK_ADVICE, _area_of, _as_list, _satisfied_by
 from .risk import _risk_signals
 from .sections import ACCEPTANCE_LABELS, CONTRACT_LABELS, _from_any, _has_any
 from .text import (
@@ -129,11 +129,7 @@ def _build_map_data(reqs, members, ac_cover=None):
             if dep in used_by:
                 used_by[dep].append(rid)
     # reverse upstream edges  # implements: ARCH-TRACE-020
-    satisfied_by = {rid: [] for rid in reqs}
-    for rid, r in reqs.items():
-        for up in _as_list(r["meta"].get("satisfies")):
-            if up in satisfied_by:
-                satisfied_by[up].append(rid)
+    satisfied_by = _satisfied_by(reqs)
     data = {"nodes": [], "edges": [], "upstream_edges": []}
     for rid, r in reqs.items():
         data["nodes"].append(_build_map_node(

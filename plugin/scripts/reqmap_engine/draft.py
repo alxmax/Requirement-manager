@@ -76,7 +76,11 @@ def _write_sys_placeholder(reqs_dir, arch_ids):
                 "the clause "
                 "below with the outcome a user actually wants, then rename the "
                 "file and "
-                "the id. Every architecture draft points here until you do.\n\n"
+                "the id. Every architecture draft points here until you do.\n"
+                "> One need is rarely enough: this can become the apex. Write "
+                "one sub-need per\n> user group or business outcome, each "
+                "`level: system` with `satisfies:` this id,\n> and move every "
+                "architecture draft under the one sub-need it serves.\n\n"
                 "## Description\n"
                 "Every bullet below is binding.\n"
                 "- TODO: the outcome a user wants, in their words, not the "
@@ -332,6 +336,9 @@ def cmd_extract(ws):
               f"Rename, merge or delete "
               f"them; the code level below is the only rung it can "
               f"assert.")
+    from .levelshape import note_over_band   # only the commands that write rungs
+    note_over_band({id_of[d]: len(k) for d, k in by_dir.items()}, "architecture")
+    note_over_band({SYS_PLACEHOLDER_ID: len(arch_ids)}, "system")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW "
           f"ones before promoting.")
     if proposed:

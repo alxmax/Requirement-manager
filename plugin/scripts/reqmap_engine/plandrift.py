@@ -24,6 +24,7 @@ import re
 from .git import _git
 from .parse import parse_frontmatter, split_requirement_blocks
 from .scan import _walk_code
+from .versions import semver3
 
 # implements: REQ-PLANDRIFT-1002
 # Trap 1, measured: with `ts` before `tsx` in the alternation,
@@ -466,4 +467,21 @@ def unplanned_line(items, bars):
             "(first: {}{}) - give them dates, or move them to Later"
             .format(len(left), first[:60],
                    "..." if len(first) > 60 else ""))
+
+
+def version_bar_lines(bars):
+    # implements: REQ-PLANVERSIONBAR-1091
+    """One line counting bars that are a version rather than work: no
+    `req`, and a title opening with the bar's own `milestone`. Two
+    consumers planned one bar per release that way and lost the plan's
+    shape — the version belongs in `milestones`, the bar to the work."""
+    hits = [b["title"] for b in bars
+            if not b.get("req") and semver3(b.get("milestone"))
+            and semver3(b["title"].split()[0].rstrip(":,"))
+            == semver3(b["milestone"])]
+    if not hits:
+        return []
+    return ["{} bar(s) in _planning.json are a version, not work (first: {})"
+            " - keep the version in `milestones` and give the bar the work it"
+            " ships, with a `req:`".format(len(hits), hits[0][:60])]
 

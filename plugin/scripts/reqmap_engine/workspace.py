@@ -5,7 +5,7 @@ import os, re
 
 from .locks import load_lock
 from .mapcmd import _assemble_map_data
-from .model import Requirement, _as_list
+from .model import Requirement, _as_list, _satisfied_by
 from .parse import load_requirements
 from .scan import scan_ac_verifies, scan_all, scan_test_levels
 from .sections import binding_hash
@@ -196,12 +196,9 @@ class GateContext(object):
         self.any_validation = any(
             x[0] == "validated-against"
             for hits in self.full_members.values() for x in hits)
-        self.satisfied_by = {rid: [] for rid in reqs}
+        self.satisfied_by = _satisfied_by(reqs)
         self.dependents = {}
         for rid, r in reqs.items():
-            for up in _as_list(r["meta"].get("satisfies")):
-                if up in self.satisfied_by:
-                    self.satisfied_by[up].append(rid)
             for dep in _as_list(r["meta"].get("depends_on")):
                 self.dependents.setdefault(dep, set()).add(rid)
         self.lock = load_lock(reqs_dir)

@@ -16,6 +16,9 @@ import {
 } from "../../src/views/roadmap/PlanGantt.jsx";
 import { EntryBody } from "../../src/views/roadmap/EntryBody.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
+import {
+  PX, PLAN_CHAR, besideLabelWidth, extent, footprint,
+} from "../../src/views/roadmap/ganttLayout.js";
 import { dayStyle } from "../../src/views/roadmap/GanttRuler.jsx";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
@@ -157,6 +160,31 @@ test("gantt: the chart itself stacks them, not just the helper",
       console.log("   (bars share a row — stacking not wired)");
     }
     return secondRow >= 1;
+  })());
+
+// verifies: REQ-PLANSTACK-1012#CASE-6
+test("gantt: a title too long for its bar runs beside it, and is packed",
+  (() => {
+    // four releases on four consecutive days, one bar each: every bar
+    // keeps its date width, every title is whole, and no two footprints
+    // on one row meet
+    const days = [0, 1, 2, 3].map((i) => {
+      const bar = { startIdx: i, endIdx: i, title: `v1.0.${i} · Export` };
+      return { ...bar, labelW: besideLabelWidth(bar) };
+    });
+    stackBars(days, footprint);
+    const whole = days.every((b) => extent(b).width === Math.max(PX - 6, 30)
+      && b.labelW >= Math.ceil(b.title.length * PLAN_CHAR));
+    const clear = days.every((a) => days.every((b) => a === b
+      || a.subRow !== b.subRow
+      || footprint(a).left + footprint(a).width <= footprint(b).left
+      || footprint(b).left + footprint(b).width <= footprint(a).left));
+    // a two-week bar wraps its long title inside itself, as it always has
+    const long = { startIdx: 0, endIdx: 13, title: "x ".repeat(60).trim() };
+    const html = renderToString(<PlanGantt planning={stackPlan} history={[]}
+      locale="en" t={(x) => x} zoom={100} />);
+    return whole && clear && besideLabelWidth(long) === 0
+      && html.includes("data-beside");
   })());
 
 // verifies: REQ-PLANSTACK-1012#CASE-3
