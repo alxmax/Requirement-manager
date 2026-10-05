@@ -22443,6 +22443,16 @@
       "section_date": null
     },
     {
+      "name": "Read and confirm the version-bar count: a plan bar with no `req:` whose title opens with its own milestone",
+      "horizon": "next",
+      "req": "REQ-PLANVERSIONBAR-1091",
+      "unpark": null,
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
       "name": "The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048)",
       "horizon": "later",
       "req": "ARCH-SELFGATE-039",
@@ -22523,12 +22533,42 @@
       "section_date": null
     },
     {
+      "name": "`cadence` accepts `every: day` (working days) and `every: none` (milestones only)",
+      "horizon": "later",
+      "req": "REQ-PLANCADENCE-1000",
+      "unpark": "with the milestone-not-bar guidance in `docs/planning.md`, a consumer plan still ships more than one version a week",
+      "done": false,
+      "category": "Planning and releasing",
+      "context": "",
+      "section_date": null
+    },
+    {
       "name": "The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell",
       "horizon": "later",
       "req": "ARCH-PYFLOOR-040",
       "unpark": "CI minutes become a constraint",
       "done": false,
       "category": "CI of this repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "RM032's tree checks become an error under `--strict`",
+      "horizon": "later",
+      "req": "REQ-TRACE-934",
+      "unpark": "`gate --full --strict` with them is run on this corpus and two consumer corpora, and the count per check is recorded in a record superseding ADR-0064's warn-only clause",
+      "done": false,
+      "category": "Requirement levels",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The fan-out band is read on the drafts `init` writes, not only through its write-time note",
+      "horizon": "later",
+      "req": "REQ-FANOUT-852",
+      "unpark": "lint with drafts included is run on a fresh `init` of two consumer repos and on this corpus, counting the over-band parents and the findings it adds",
+      "done": false,
+      "category": "Requirement levels",
       "context": "",
       "section_date": null
     },
@@ -22557,6 +22597,26 @@
       "horizon": "later",
       "req": null,
       "unpark": "a reader from outside the repo who uses the viewer in RO",
+      "done": false,
+      "category": "Viewer",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A day-wide view for a short plan: the default day width follows the shortest bar, so one-day versions sit on one row",
+      "horizon": "later",
+      "req": "REQ-PLANSTACK-1012",
+      "unpark": "a one-version-a-day plan rendered at the current day width and at a day-view width shows fewer rows and no overlapping labels in the day view",
+      "done": false,
+      "category": "Viewer",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A fingerprint of the vendored `_map_viewer.html` (line endings normalised, data block removed), reported by `gate --audit` when it differs",
+      "horizon": "later",
+      "req": "ARCH-VIEWER-007",
+      "unpark": "a second consumer is found with a hand-edited vendored viewer",
       "done": false,
       "category": "Viewer",
       "context": "",

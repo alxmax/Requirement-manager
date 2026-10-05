@@ -22,6 +22,7 @@ Cadence: one release a week, not one per merge.
 
 - [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose `| req: ID` matches bars on the cut milestone | req: ARCH-RELEASE-072
 - [ ] `gate --strict` fails a stale plan (`REQ-PLANSTALE-1013`); bare `gate` stays warn-only | req: ARCH-RELEASE-072
+- [ ] Read and confirm the version-bar count: a plan bar with no `req:` whose title opens with its own milestone | req: REQ-PLANVERSIONBAR-1091
 
 ## Later
 
@@ -38,10 +39,16 @@ Cadence: one release a week, not one per merge.
 
 - [ ] `sync --release` refuses a milestone whose own bars are not done (`plandrift.bar_done`), never over Now/Next items elsewhere in the plan | req: ARCH-RELEASE-072 | unpark: the done predicate is checked on five repositories it was not tuned on, with the false-block rate stated
 - [ ] One release path in this repository: CI tags from `sync --release --json` (ADR-0040), or the docs stop saying the plan cuts the tag | req: ARCH-RELEASE-072 | unpark: the maintainer picks one
+- [ ] `cadence` accepts `every: day` (working days) and `every: none` (milestones only) | req: REQ-PLANCADENCE-1000 | unpark: with the milestone-not-bar guidance in `docs/planning.md`, a consumer plan still ships more than one version a week
 
 ### CI of this repository
 
 - [ ] The portability matrix shrinks to 3.9 and 3.12 on one OS once `release` no longer needs every cell | req: ARCH-PYFLOOR-040 | unpark: CI minutes become a constraint
+
+### Requirement levels
+
+- [ ] RM032's tree checks become an error under `--strict` | req: REQ-TRACE-934 | unpark: `gate --full --strict` with them is run on this corpus and two consumer corpora, and the count per check is recorded in a record superseding ADR-0064's warn-only clause
+- [ ] The fan-out band is read on the drafts `init` writes, not only through its write-time note | req: REQ-FANOUT-852 | unpark: lint with drafts included is run on a fresh `init` of two consumer repos and on this corpus, counting the over-band parents and the findings it adds
 
 ### Adoption
 
@@ -51,6 +58,8 @@ Cadence: one release a week, not one per merge.
 ### Viewer
 
 - [ ] RO search: rank on inflections, not on literal matches | unpark: a reader from outside the repo who uses the viewer in RO
+- [ ] A day-wide view for a short plan: the default day width follows the shortest bar, so one-day versions sit on one row | req: REQ-PLANSTACK-1012 | unpark: a one-version-a-day plan rendered at the current day width and at a day-view width shows fewer rows and no overlapping labels in the day view
+- [ ] A fingerprint of the vendored `_map_viewer.html` (line endings normalised, data block removed), reported by `gate --audit` when it differs | req: ARCH-VIEWER-007 | unpark: a second consumer is found with a hand-edited vendored viewer
 
 ## Not now
 
