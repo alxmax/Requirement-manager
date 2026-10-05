@@ -195,6 +195,9 @@ Every bullet below is binding.
   placeholder or unlinked architecture requirement to the apex. `depends_on` is never read.
 - When a requirement carries contract groups, the run names it and the command that
   builds its code rung (`clarify --decompose --apply`), so the last gap is one command away.
+- A placeholder the plan would give more children than its level's `LINT_FANOUT_BANDS`
+  ceiling is named in one `note:` line that says to split it by area; the lint never reads a
+  draft, so this line is the only place the over-full rung is seen before it is written.
 
 ## Cases
 CASE-1 — the default run changes nothing on disk
@@ -215,3 +218,8 @@ CASE-3 — a requirement with contract groups is told which command builds its c
   Given  a requirement whose Description carries two bold contract groups
   When   `clarify --levels` runs
   Then   it is proposed `architecture` and the output names `clarify --decompose --apply`
+
+CASE-4 — a placeholder past its fan-out band is named
+  Given  31 `JS-*` requirements that declare no `level:`, and separately 30
+  When   `clarify --levels` runs on each
+  Then   the first names `ARCH-JS-001` with 31 children over the architecture ceiling of 30; the second prints no note

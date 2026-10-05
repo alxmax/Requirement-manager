@@ -40,11 +40,43 @@ A requirement may also declare where it sits on the V-model's left arm, with
 every invented field is `status: draft` and `level_source: auto` so you can
 rename, merge or delete the guesses. Neither field is required on a corpus you
 authored by hand — a tree that sets neither behaves exactly as it did before
-these fields existed. Adopt them and two extra
-checks switch on: `lint` reports a level whose fan-out leaves the 5–20 band, and
-the gate reports a level whose tests sit at the wrong depth (a `code`
-requirement is verified `@unit`, an `architecture` one `@integration`, a
-`system` one `@system`).
+these fields existed. Adopt them and three checks switch on: the gate warns
+(`RM032`) wherever the levels stop forming the tree below; `lint` reports a
+parent with more children than its level allows — at most 10 under a `system`
+requirement, at most 30 under an `architecture` one, and 5–20 under a parent
+that declares no level (`LINT_FANOUT_BANDS`); and the gate reports a level whose
+tests sit at the wrong depth (a `code` requirement is verified `@unit`, an
+`architecture` one `@integration`, a `system` one `@system`).
+
+**The levels form a tree, one parent each.** This repository's own corpus is
+built this way:
+
+```
+SYS-SSOT-001                 the apex: why the product exists
+├─ SYS-GATE-102              a sub-need: one per user group or business outcome
+│  ├─ ARCH-CHECK-006         a capability: satisfies exactly one sub-need
+│  │  ├─ REQ-CHECK-828       a behaviour group: satisfies exactly one capability
+│  │  └─ REQ-CHECK-829
+│  └─ ARCH-RULES-059
+└─ SYS-READ-103
+   └─ ARCH-PARSE-001
+```
+
+- A `code` requirement satisfies exactly one `architecture` requirement, and an
+  `architecture` requirement exactly one `system` requirement. A second link is
+  a `depends_on`, never a second parent.
+- `system` requirements nest one deep: an apex, then sub-needs that satisfy it.
+  Once the apex has sub-needs, every `architecture` requirement sits under the
+  sub-need it serves, not under the apex.
+- Choose the sub-needs the way you would explain the product to a stakeholder:
+  one per group of users, or per business outcome. `init` writes a single
+  placeholder need, `SYS-NEEDS-A-NAME-001`; with more than one area of work it
+  becomes the apex, and the sub-needs go under it.
+
+`RM032` warns on each break — two parents, a sub-need under a sub-need, a
+capability on an apex that has sub-needs — on drafts as well, because a draft
+is where a second parent is first written. It is a warning: the decision record
+is [ADR-0064](adr/0064-the-level-axis-is-a-tree.md).
 
 Both fields are prose about *this* corpus, so nothing forces an id to advertise
 its level. This repo chooses to, because a reader meets an id long before its

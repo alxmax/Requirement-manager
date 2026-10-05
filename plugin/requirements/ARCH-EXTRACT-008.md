@@ -277,6 +277,7 @@ Every bullet below is binding.
 - One `level: system`, `layer: need` placeholder is written when at least one architecture draft exists, titled so a reader sees it is a hole the engine refused to fill.
 - Everything extraction writes about the level axis carries `level_source: auto`, the parallel of `owner: auto`, so a rung the engine invented stays distinguishable from one a human decided.
 - Every node extraction mints is `status: draft`, which the gate never enforces, and an existing file of the same id is never overwritten.
+- An architecture or system draft given more children than its level's `LINT_FANOUT_BANDS` ceiling is named in one `note:` line that says to split it by area, because the lint never reads a draft.
 
 ## Cases
 CASE-1 — the asserted rung
@@ -298,6 +299,11 @@ CASE-4 — nothing is overwritten
   Given  a corpus already carrying an architecture draft for a directory
   When   `init` runs again
   Then   that file is left byte-identical and no duplicate is written
+
+CASE-5 — a flat repo is told its one directory is past the band
+  Given  31 source files in the repository root, and separately one file in `src/`
+  When   `init` extracts drafts from each
+  Then   the first names `ARCH-ROOT-001` with 31 children over the architecture ceiling of 30; the second prints no note
 
 ## Context
 **Notes**

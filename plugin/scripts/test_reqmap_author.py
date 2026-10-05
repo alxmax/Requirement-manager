@@ -1282,6 +1282,17 @@ class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # 
         self.assertIn("1 requirement(s) carry contract groups", out)
         self.assertIn("--decompose --apply", out)
 
+    def test_a_placeholder_past_its_fan_out_band_is_named(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-4
+        _d, ws = self._repo({"JS-A-{:03d}.md".format(i): self._req("JS-A-{:03d}".format(i))
+                             for i in range(31)})
+        _rc, out = self._run(ws)
+        self.assertIn("note: 1 `level: architecture` parent(s) hold more than 30 children "
+                      "(largest: ARCH-JS-001, 31)", out)
+        _d, ws = self._repo({"JS-A-{:03d}.md".format(i): self._req("JS-A-{:03d}".format(i))
+                             for i in range(30)})
+        _rc, out = self._run(ws)
+        self.assertNotIn("note:", out)
+
     def test_apply_writes_the_rung_and_the_marker(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-2
         _d, ws = self._repo({
             "SYS-A-001.md": self._req("SYS-A-001", layer="need"),
@@ -2032,6 +2043,18 @@ class ExtractRungs(unittest.TestCase):  # tested-by: REQ-EXTRACT-981
             after = {f: open(os.path.join(rq, f), encoding="utf-8").read()
                      for f in os.listdir(rq)}
         self.assertEqual(before, after)
+
+    def test_a_flat_repo_is_told_its_one_directory_is_past_the_band(self):  # verifies: REQ-EXTRACT-981#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            for i in range(31):
+                _write(os.path.join(d, "m{}.py".format(i)), "def f{}():\n    return 1\n".format(i))
+            _rq, out = self._extract(d)
+        self.assertIn("note: 1 `level: architecture` parent(s) hold more than 30 children "
+                      "(largest: ARCH-ROOT-001, 31)", out)
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "a.py"), "def a():\n    return 1\n")
+            _rq, out = self._extract(d)
+        self.assertNotIn("note:", out)
 
 
 class CasesAtomicity049(unittest.TestCase):  # tested-by: ARCH-ATOMICITY-049  # tested-by: REQ-ATOMICITY-824  # tested-by: REQ-ATOMICITY-825

@@ -1198,6 +1198,35 @@ class Traceability(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # tested-by
         _, out = self._check(flat)
         self.assertNotIn("RM032", out)   # no `level:` declared: the axis is never touched
 
+    def _need(self, rid, extra=""):
+        body = REQ.format(id=rid, status="confirmed", layer="need",
+                          extra="level: system\n" + extra, title="N")
+        return body + "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+
+    def test_two_parents_on_the_rung_above_warn_on_a_draft_too(self):  # verifies: REQ-TRACE-934#CASE-6
+        draft = REQ.format(id="ARCH-X-003", status="draft", layer="feature",
+                           extra="level: architecture\nsatisfies: [SYS-A-001, SYS-B-002]\n", title="T")
+        files = {"SYS-A-001.md": self._need("SYS-A-001"), "SYS-B-002.md": self._need("SYS-B-002"),
+                 "ARCH-X-003.md": draft}
+        code, out = self._check(files)
+        self.assertEqual(out.count("satisfies 2 `level: system` requirements"), 1)
+        self.assertIn("ARCH-X-003", out)
+        self.assertEqual(code, 0)                                   # warn, not error
+
+    def test_an_apex_with_sub_needs_holds_needs_not_architecture(self):  # verifies: REQ-TRACE-934#CASE-7
+        tree = {"SYS-X-001.md": self._need("SYS-X-001"),
+                "SYS-X-002.md": self._need("SYS-X-002", "satisfies: [SYS-X-001]\n"),
+                "ARCH-X-003.md": self._levelled("ARCH-X-003", "architecture", "satisfies: [SYS-X-002]\n"),
+                "REQ-X-004.md": self._levelled("REQ-X-004", "code", "satisfies: [ARCH-X-003]\n"),
+                "mod.py": self._tagged("ARCH-X-003", "REQ-X-004")}
+        _, out = self._check(tree)
+        self.assertNotIn("RM032", out)   # the apex groups its sub-need; no architecture needed
+        tree["ARCH-X-003.md"] = self._levelled("ARCH-X-003", "architecture", "satisfies: [SYS-X-001]\n")
+        tree["SYS-X-005.md"] = self._need("SYS-X-005", "satisfies: [SYS-X-002]\n")
+        _, out = self._check(tree)
+        self.assertIn("ARCH-X-003: satisfies SYS-X-001, an apex with sub-needs", out)
+        self.assertIn("SYS-X-005: level: system under the sub-need SYS-X-002", out)
+
     def test_satisfied_need_not_orphan(self):  # verifies: ARCH-TRACE-020#CASE-2  # verifies: REQ-TRACE-934#CASE-3
         need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
         need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"

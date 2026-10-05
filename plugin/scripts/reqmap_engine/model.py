@@ -203,6 +203,18 @@ def _as_list(v):  # implements: ARCH-PARSE-001
     return [v] if v else []
 
 
+def _satisfied_by(reqs):  # implements: ARCH-TRACE-020
+    """id -> the ids that declare `satisfies: [id]`, for every id in `reqs`,
+    in corpus order. A link to an id outside `reqs` is dropped: it is RM005's
+    finding, and no reader of this map walks it."""
+    out = {rid: [] for rid in reqs}
+    for rid, r in reqs.items():
+        for up in _as_list(r["meta"].get("satisfies")):
+            if up in out:
+                out[up].append(rid)
+    return out
+
+
 # A requirement whose implementation is not its own code. Both layers
 # are covered by an EDGE instead of an `implements:` tag: a `need` by
 # the `satisfies:` edges pointing up at it, an `aggregate` by its own

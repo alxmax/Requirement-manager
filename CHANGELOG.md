@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v8.17.0` — 2026-10-05
+
+**The level axis is a tree, and a bar too short for its title draws it beside the bar.**
+
+- RM032 warns when the levels stop forming a tree: a requirement satisfying two requirements on the rung above, a `system` need under a sub-need, or an `architecture` requirement on an apex that has sub-needs. An apex whose satisfiers are sub-needs is a complete group. The shape is checked on drafts that declare a `level:` too. Still a warning (ADR-0064, REQ-TRACE-934)
+- `ARCH-SECTIONS-068` now satisfies `SYS-READ-103` instead of the apex
+- `init` and `clarify --levels` print a `note:` when a placeholder holds more children than its level's `LINT_FANOUT_BANDS` ceiling, which the lint never saw on a draft (REQ-EXTRACT-981, REQ-LEVELRETROFIT-987). The `SYS-NEEDS-A-NAME-001` placeholder says it can become the apex of sub-needs
+- `gate --audit` counts the plan bars that are a version, not work: no `req:`, and a title opening with the bar's own milestone (REQ-PLANVERSIONBAR-1091)
+- In the Plan, a bar too narrow to wrap its title draws the title whole on one line beside it, and rows are packed with that title included, so one-day bars no longer zig-zag or show `v1.` over three lines. The bar keeps the width of its dates (REQ-PLANSTACK-1012)
+- `docs/planning.md` says a version is a milestone and a bar is the work, with a one-version-a-day example. `docs/requirements.md` shows the tree and states the fan-out bands as configured. `update-engine` warns that local edits to the vendored files are overwritten
+- The engine's core drops from 6,677 to 6,675 logical lines (17,562 physical lines in all): the tree checks load only for a corpus that declares `level:`, the reverse `satisfies:` index is one helper instead of three copies, and an uncalled helper is gone
+
 ## plugin `v8.16.0` — 2026-10-04
 
 **`status: in-progress` is rejected, and a rail reading's routing is its own requirement.**

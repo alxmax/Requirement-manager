@@ -5,7 +5,7 @@ level: architecture
 layer: bus
 owner: Alex
 milestone: v6.3
-satisfies: [SYS-SSOT-001]
+satisfies: [SYS-READ-103]
 ---
 
 # Reading a requirement's sections

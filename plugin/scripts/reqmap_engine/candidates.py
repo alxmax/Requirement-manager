@@ -429,21 +429,14 @@ def _arch_slug(rel_dir):
     return re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
 
 
-def _arch_id_for(rel_dir):
-    # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
-    """The architecture id proposed for a source directory (first occupant
-    of the slug).
+def _assign_arch_ids(rel_dirs):  # implements: REQ-EXTRACT-981
+    """One unique ARCH id per source directory in this run.
 
     The directory is the only structural signal a per-file draft has, and
     it is a weak one: on this repo it would name capabilities `scripts`
     and `app/src/lib`, which are not capabilities. That is why the node it
     produces is a `draft` carrying `level_source: auto` — a proposal to
-    rename, not a claim."""
-    return "ARCH-{}-001".format(_arch_slug(rel_dir))
-
-
-def _assign_arch_ids(rel_dirs):  # implements: REQ-EXTRACT-981
-    """One unique ARCH id per source directory in this run.
+    rename, not a claim.
 
     The slug is still the last two path segments (REQ-EXTRACT-981). Two
     directories that share that slug (`src/lib` and `app/src/lib`) must

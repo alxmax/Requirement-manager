@@ -29,6 +29,7 @@ Every bullet below is binding.
 - That report covers milestone keys as well as bar milestones, and is never a gate rule. [[REQ-PLANSTALE-1013]]
 - A value in `_planning.json` the engine drops, repairs or cannot use is a gate warning that `--strict` makes an error; a key it never reads is advice outside the gate. [[REQ-PLANINPUT-1086]]
 - An open Now or Next item that no bar in `_planning.json` schedules is counted by `sync`. [[REQ-UNPLANNED-1024]]
+- A bar that is a version rather than the work toward it is counted by `gate --audit`. [[REQ-PLANVERSIONBAR-1091]]
 - `init` seeds a plan a new repository can plan on, and a plan with no dates still carries a calendar to its horizon. [[REQ-PLANHORIZON-1010]]
 - The export carries the branch git is on, and the plan's shipped band is labelled with it. [[REQ-PLANBRANCH-1011]]
 
@@ -627,3 +628,48 @@ CASE-4 — a bar's `roadmap:` schedules its item
   When   the unplanned items are asked for
   Then   `CSV writer` is not among them
 
+---
+id: REQ-PLANVERSIONBAR-1091
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+distinct_from: [REQ-PLANSTALE-1013, REQ-UNPLANNED-1024]
+---
+
+# A bar that is a version, not work, is counted
+
+## Description
+> Two consumers planned one bar per release, titled `vX.Y.Z · theme`, with no `req:`. The
+> version then appeared twice, as a milestone and as a bar, the work had no bar at all, and the
+> plan no longer read as shipped / work / release. The view was fine; the plan was shaped wrong,
+> and nothing said so.
+
+Every bullet below is binding.
+- A bar is a version when it has no `req:` and the first word of its title is the same version
+  as its own `milestone`, compared in one form: `v2.3` equals `2.3.0`.
+- `gate --audit` prints one line under Roadmap counting those bars and naming the first, in the
+  text and the `--json` report alike; a bar with a `req:` or no `milestone` is never counted.
+- The line is read-only: it is not a gate rule and never changes an exit code.
+
+## Cases
+CASE-1 — a bar titled with its own milestone and no req is counted
+  Given  bars `v1.0.1 · Export` on milestone `v1.0.1` and `v2.3 · Timeouts` on milestone `2.3.0`
+  When   the version-bar lines are asked for
+  Then   one line counts 2 bars and names `v1.0.1 · Export`
+
+CASE-2 — work bars are silent
+  Given  a bar with a `req:`, a bar with no `milestone`, and a bar titled with another version
+  When   the version-bar lines are asked for
+  Then   there is none
+
+CASE-3 — the line reaches the audit report
+  Given  a repository whose `_planning.json` holds one version bar
+  When   `gate --audit --json` runs
+  Then   its `roadmap` list carries the line
+
+## Context
+**Notes**
+- `distinct_from: REQ-PLANSTALE-1013` - `REQ-PLANSTALE-1013` names a milestone already released; this names a bar that stands for a milestone, whether or not it has shipped.
+- `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` counts ROADMAP items no bar schedules; this counts bars that schedule a version instead of an item.

@@ -722,7 +722,7 @@ Every bullet below is binding.
 - One function answers where a bar is drawn and how wide.
 - The renderer reads that function, as does the row chooser; neither computes its own.
 - `stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even
-  where their dates do not.
+  where their dates do not. A title drawn beside its bar is part of that box.
 - Two bars far enough apart that the floor cannot make them touch still share a row, so
   the lane grows only where two bars would otherwise overlap.
 - The vertical guides mark the work: a dotted rule from the centre of each bar's start day on
@@ -735,6 +735,9 @@ Every bullet below is binding.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.
 - A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.
+- A title that does not fit inside its bar in that many lines, or holds a word wider than
+  the bar, runs whole on one line beside the bar, on the chart's opaque surface; the bar
+  keeps the width of its dates.
 - The lane column stays in place while the chart scrolls sideways, which means no
   ancestor of it may declare an overflow: an ancestor that does becomes its scrollport,
   and a scrollport that never scrolls never lets its sticky child stick.
@@ -765,6 +768,12 @@ CASE-5 — the guides are dotted and drawn under the bars
   When   the Plan renders
   Then   every guide is dotted and comes before the first bar in paint order, with no z-index,
          and every bar's background ends on the chart's opaque surface
+
+CASE-6 — a title too long for its bar runs beside it, and is packed
+  Given  four one-day bars on consecutive days titled `v1.0.N · Export`, and a two-week bar with a long title
+  When   the Plan lays them out
+  Then   each one-day bar keeps its date width and carries its whole title beside it, no two
+         on one row meet, and the two-week bar still wraps its title inside itself
 
 ---
 id: REQ-PLANDAYS-1021

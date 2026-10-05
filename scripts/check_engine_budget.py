@@ -50,8 +50,9 @@ PACKAGE = "reqmap_engine"
 # The stage reached, lowered only by the change that earns it (ADR-0046).
 # Set by ADR-0053 to the measured core, in logical lines, with no headroom;
 # raised by ADR-0062 to 6,677, the size measured when a span stops at a
-# changelog date that falls inside it.
-CORE_LOGICAL_BUDGET = 6677
+# changelog date that falls inside it; lowered to 6,675 by ADR-0064, whose
+# tree checks load outside the core and whose cut paid for the rest.
+CORE_LOGICAL_BUDGET = 6675
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

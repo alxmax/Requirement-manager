@@ -63,8 +63,35 @@ function indexBars(raw, origin) {
     const startIdx = dayIndex(origin, a);
     const endIdx = dayIndex(origin, z);
     if (endIdx < startIdx) return null;
-    return { ...b, startIdx, endIdx };
+    const bar = { ...b, startIdx, endIdx };
+    return { ...bar, labelW: besideLabelWidth(bar) };
   }).filter(Boolean);
+}
+
+/* 11px at weight 600 measured ~4.6px a character in the browser (canvas
+ * measureText on real titles); 4.8 leaves a few pixels of air. */
+export const PLAN_CHAR = 4.8;
+const BAR_INSET = 19;    // the bar's 8px padding each side and its 3px edge
+const textW = (s) => Math.ceil(String(s).length * PLAN_CHAR);
+
+/** The width a plan bar's title takes BESIDE the bar, or 0 when it fits
+ *  inside: in LABEL_LINES lines, with no word wider than the bar. A one-day
+ *  bar is 30px and showed "v1." over three lines; its title now runs on
+ *  one line past its end, and the bar itself keeps its dates.
+ *  implements: REQ-PLANSTACK-1012 */
+export function besideLabelWidth(b) {
+  const room = extent(b).width - BAR_INSET;
+  const title = String(b.title || "");
+  const fits = room * LABEL_LINES >= textW(title)
+    && title.split(/\s+/).every((w) => textW(w) <= room);
+  return fits ? 0 : textW(title) + 12;
+}
+
+/** What the row chooser reserves: the drawn bar and, beside it, a title too
+ *  long for it — so the next bar steps down instead of covering the words. */
+export function footprint(b) {
+  const box = extent(b);
+  return { left: box.left, width: box.width + (b.labelW || 0) };
 }
 
 /* The drawn box of a bar, in one place. The renderer used to compute this
@@ -355,7 +382,7 @@ export function layoutPlan(planning, history, locale) {
   const lay = {
     totalDays, chartW, bars, lanes, byLane,
     heights: lanes.map((ln) => Math.max(
-      Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2,
+      Math.max(stackBars(byLane[ln] || [], footprint), 1) * ROW_H + PAD * 2,
       ln === releaseLane ? flagRows * PILL_ROW + PAD * 2 : 0)),
     pastBars, pastH,
     months: buildMonthBands(origin, totalDays, locale),

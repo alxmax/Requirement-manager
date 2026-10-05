@@ -6,12 +6,13 @@ from .audittail import _roadmap_lag_lines, _version_lines
 from .gate import cmd_check, run_gate_rules
 from .health import _exempt_note, _health_record, cmd_coverage
 from .mapdata import _read_roadmap
-from .plandrift import plan_drift, plan_drift_lines
+from .plandrift import plan_drift, plan_drift_lines, version_bar_lines
 from .orphans import _scan_untagged
 from .risk import cmd_next
 from .similar import (
     _corpus_shape, _exemptions_in_force, _redundant_groups, cmd_similar
 )
+from .targets import load_targets
 from .workspace import GateContext
 
 
@@ -33,6 +34,14 @@ def _audit_section(title, remedy, fn, fail_rc=0):
     except Exception as e:            # a section is advice, never a crash
         return (title, remedy, "  (section failed: {})".format(e), fail_rc)
     return (title, remedy, buf.getvalue().rstrip(), rc or 0)
+
+
+def _version_bars(reqs_dir):
+    # implements: ARCH-AUDIT-065  # implements: REQ-PLANVERSIONBAR-1091
+    """The plan's bars that are a version, not work; [] with no plan."""
+    if not reqs_dir:
+        return []
+    return version_bar_lines(load_targets(reqs_dir).get("bars", []))
 
 
 def _print_audit_roadmap(reqs, code_root, reqs_dir=None):
@@ -59,6 +68,7 @@ def _print_audit_roadmap(reqs, code_root, reqs_dir=None):
     drift = (plan_drift(_read_roadmap(code_root) or [], code_root, reqs_dir)
              if code_root else None)
     lines = lines + (plan_drift_lines(drift) if drift else [])
+    lines += _version_bars(reqs_dir)
     if not lines:
         return
     print("-" * 72)
@@ -108,6 +118,7 @@ def _json_audit_report(ws, signals, strict):
     if ws.code_root:
         roadmap += plan_drift_lines(plan_drift(
             _read_roadmap(ws.code_root) or [], ws.code_root, ws.reqs_dir))
+    roadmap += _version_bars(ws.reqs_dir)
     if roadmap:
         out["roadmap"] = roadmap
     errs, warns = run_gate_rules(

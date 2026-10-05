@@ -142,15 +142,34 @@ const PROGRESS = {
   pointerEvents: "none",
 };
 
+/* A title too long for its bar, on one line beside it. Opaque, like the
+   bars, so no guide or month rule runs through the words. */
+function besideStyle(bar, tone) {
+  const { left, width } = extent(bar);
+  return {
+    position: "absolute", left: left + width + 4, top: PAD + bar.subRow * ROW_H,
+    background: "var(--surface)", color: tone.fg, fontSize: 11,
+    fontWeight: 600, lineHeight: 1.3, padding: "4px 4px", whiteSpace: "nowrap",
+    cursor: "pointer",
+  };
+}
+
 function Bar({ bar, tone, picked, toggle }) {
   const milestone = bar.milestone ? `\n${bar.milestone}` : "";
+  const tip = `${bar.title}\n${bar.start} → ${bar.end}${milestone}`;
   return (
-    <div title={`${bar.title}\n${bar.start} → ${bar.end}${milestone}`}
-      onClick={() => toggle(bar)} style={barStyle(bar, tone, picked)}>
-      {bar.progress != null
-        && <span style={{ ...PROGRESS, width: `${bar.progress}%` }} />}
-      <span style={TITLE}>{bar.title}</span>
-    </div>
+    <>
+      <div title={tip} onClick={() => toggle(bar)}
+        style={barStyle(bar, tone, picked)}>
+        {bar.progress != null
+          && <span style={{ ...PROGRESS, width: `${bar.progress}%` }} />}
+        {!bar.labelW && <span style={TITLE}>{bar.title}</span>}
+      </div>
+      {bar.labelW > 0 && (
+        <div data-beside="" title={tip} onClick={() => toggle(bar)}
+          style={besideStyle(bar, tone)}>{bar.title}</div>
+      )}
+    </>
   );
 }
 
