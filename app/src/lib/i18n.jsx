@@ -50,6 +50,10 @@ const RO = {  // implements: REQ-VIEWER-943
   "no strong match": "nicio potrivire clară",
   "toggle theme": "schimbă tema",
   "switch language": "schimbă limba",
+  // no map loaded
+  "No requirement map to show": "Nu există o hartă de cerințe de afișat",
+  "This viewer opened without a map. Run this in your repository, then open requirements/_map.html:":
+    "Viewer-ul s-a deschis fără hartă. Rulează comanda în depozitul tău, apoi deschide requirements/_map.html:",
   // rail
   "Workspace": "Spațiu de lucru",
   "Registry": "Registru",

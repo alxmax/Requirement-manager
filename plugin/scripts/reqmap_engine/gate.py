@@ -75,8 +75,6 @@ def run_gate_rules(ctx, strict=False):
     # implements: REQ-CHECK-1036
     errors, warns = [], []
     for rule in GATE_RULES:
-        if rule.only_source_repo and not ctx.source_repo:
-            continue
         if ctx.quiet and rule.id not in DEFAULT_RULES:
             continue
         for rid, msg in rule.fn(ctx):

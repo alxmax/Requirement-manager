@@ -1,30 +1,13 @@
 // implements: ARCH-VIEWER-007
 /* Requirement Manager dataset.
  *
- * The baked fallback lives in `baked.json` — the 13 authored requirements
- * lifted from the real registry plus two in-flight states (a draft + a fresh
- * orphan) and one deprecated capability, so Risk / Problems / Console have
- * signals to show with no engine present. It is JSON rather than code so the
- * gate's RM017 can read it as data (`json.load`) and compare it with the live
- * registry. At startup `loadData()` (see loadData.js) tries the engine's
- * `_map.json` export and, when found, adopts it in place of this. Importers use
- * named imports — these are ES live bindings, so a reassignment is seen
- * everywhere. */
-import BAKED from "./baked.json";
-
-/* The demo fixture's one partially-covered case. Real corpora get
-   these three fields from the engine (`_map.json`) or not at all —
-   never from a heuristic. */
-function applyBakedCoverage(list) {
-  const m = list.find(r => r.id === "ARCH-MAP-007");
-  if (m) {
-    m.clauses = 4; m.covered = 3; m.gap = "no `verifies:` tag for AC-4";
-  }
-  return list;
-}
+ * Empty until `loadData()` (see loadData.js) adopts the engine's `_map.json`
+ * export. There is no built-in demo: with no map the app says so instead of
+ * showing invented requirements (ADR-0065). Importers use named imports —
+ * these are ES live bindings, so a reassignment is seen everywhere. */
 
 // ---- live bindings: reassigned by setRegistry() / setRepo() ----------------
-export let REQUIREMENTS = applyBakedCoverage(BAKED);
+export let REQUIREMENTS = [];
 export let REQ_EDGES = [];
 export let REQ_BY_ID = {};
 // owner/repo the loaded map describes (engine-emitted); null = no engine data,
@@ -38,8 +21,7 @@ export let TODOS = [];
 // implements: REQ-TRANSLATE-996
 export let LANGUAGE = "en";
 // The CLI as data, straight off _map.json (generated from the engine's command
-// registry). Empty in the baked fallback: a map produced before v4.0.0
-// carries none.
+// registry). Empty when a map produced before v4.0.0 carries none.
 export let COMMANDS = [];
 /* The engine's own `health` and `design` records, verbatim. Deliberately NOT
  * recomputed here: `next` already prints these two numbers, and a second

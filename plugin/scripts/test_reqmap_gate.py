@@ -2390,34 +2390,6 @@ class GateRules(unittest.TestCase):  # tested-by: ARCH-RULES-059  # tested-by: R
         self.assertTrue(any("dangling tag" in e for e in errs))
         self.assertTrue(any("no implements: tag" in e for e in errs))
 
-    def test_source_repo_only_rule_is_skipped_in_a_consumer(self):  # verifies: REQ-RULES-947#CASE-5
-        files = {
-            "AREA-A-001.md": REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
-                                        extra="", title="T") + "## Description\n- the real clause\n## Cases\n- y\n",
-            "impl.py": tag("AREA-A-001") + "\n",
-            os.path.join("app", "src", "lib", "baked.json"):
-                '[{"id": "AREA-A-001", "contract": ["a different clause"]}]\n',
-        }
-        _code, out = self._run(files)
-        self.assertNotIn("RM017", out)
-        self.assertNotIn("baked.json out of sync", out)
-
-    def test_source_repo_reads_the_viewer_fixture_as_json(self):
-        # The same disagreeing fixture, in this repository's own layout: the rule runs,
-        # and it reads the fixture from baked.json.
-        files = {
-            "AREA-A-001.md": REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
-                                        extra="", title="T") + "## Description\n- the real clause\n## Cases\n- y\n",
-            "impl.py": tag("AREA-A-001") + "\n",
-            os.path.join("plugin", ".claude-plugin", "plugin.json"): '{"version": "1.0.0"}\n',
-            os.path.join("app", "src", "lib", "data.js"): 'import BAKED from "./baked.json";\n',
-            os.path.join("app", "src", "lib", "baked.json"):
-                '[{"id": "AREA-A-001", "contract": ["a different clause"]}]\n',
-        }
-        _code, out = self._run(files)
-        self.assertIn("RM017", out)
-        self.assertIn("baked.json out of sync with 1 requirement(s): AREA-A-001", out)
-
     def test_code_is_printed_with_severity(self):  # verifies: REQ-RULES-948#CASE-1
         files = {"AREA-A-001.md": REQ.format(id="AREA-A-001", status="baseline", layer="feature",
                                              extra="milestone: nope\n", title="T")}

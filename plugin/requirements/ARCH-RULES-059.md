@@ -84,10 +84,9 @@ satisfies: [ARCH-RULES-059]
 > every other consumer of the same fact goes stale.
 
 Every bullet below is binding.
-- `gate_rule(code, severity, strict=False, only_source_repo=False)` registers a rule in `GATE_RULES`; registering a code twice raises `ValueError`.
+- `gate_rule(code, severity, strict=False)` registers a rule in `GATE_RULES`; registering a code twice raises `ValueError`.
 - `run_gate_rules(ctx, strict)` runs every rule in registry order. It returns two `Finding` lists, errors then warnings; each finding carries `rule`, `severity`, `rid`, `msg`.
 - A rule with `strict=True` has its findings promoted to errors under `--strict`, except RM012 (test-link integrity) on a requirement that is not `confirmed`, which stays a warning.
-- A rule with `only_source_repo=True` runs only when `_is_source_repo(code_root)` is true, that is inside the requirement-manager repository itself.
 - `_link_sync_errors`, which `health` reads, returns the messages of RM001 and RM006 taken from the registry, so `health` and `gate` cannot count link-sync errors differently.
 - `GateContext` computes once what rules read: the id set, both reverse indexes (`satisfies`, `depends_on`), the lock with the fresh binding hashes, the coverage maps.
 
@@ -111,11 +110,6 @@ CASE-4 — health and gate agree on link-sync errors
   Given  a corpus with one dangling tag and one confirmed requirement without an implements member
   When   `_link_sync_errors` runs
   Then   it returns exactly the two messages RM001 and RM006 produce
-
-CASE-5 — a source-repo-only rule never runs in a consumer repo
-  Given  a temporary consumer repo with an `app/src/lib/baked.json` fixture that disagrees with its corpus
-  When   `gate` runs there
-  Then   no RM017 finding is printed
 
 --------------------
 

@@ -153,22 +153,19 @@ class GateResult(list):  # implements: REQ-CHECK-1036
 class Rule(object):  # implements: ARCH-RULES-059
     """A gate rule: a stable code, a default severity, whether `--strict`
     promotes it to an error, and the function that yields `(rid, msg)`
-    pairs over a GateContext. `only_source_repo` marks a rule about this
-    repository's own dogfooding (the viewer's baked fixture) — it never
-    runs inside a consumer repo."""
-    __slots__ = ("id", "severity", "strict", "fn", "only_source_repo")
+    pairs over a GateContext."""
+    __slots__ = ("id", "severity", "strict", "fn")
 
-    def __init__(self, id, severity, strict, fn, only_source_repo=False):
+    def __init__(self, id, severity, strict, fn):
         self.id, self.severity, self.strict, self.fn = (
             id, severity, strict, fn)
-        self.only_source_repo = only_source_repo
 
 
 GATE_RULES = []   # the bus: every consumer of "what is wrong with this
                   # corpus" reads it
 
 
-def gate_rule(rule_id, severity, strict=False, only_source_repo=False):
+def gate_rule(rule_id, severity, strict=False):
     # implements: ARCH-RULES-059  # implements: REQ-RULES-947
     """Register a gate rule. Codes are permanent identifiers (a consumer
     writes `gate_exempt: [RM016]`), so a retired rule's number is never
@@ -176,8 +173,7 @@ def gate_rule(rule_id, severity, strict=False, only_source_repo=False):
     def wrap(fn):
         if any(r.id == rule_id for r in GATE_RULES):
             raise ValueError("duplicate gate rule id " + rule_id)
-        GATE_RULES.append(
-            Rule(rule_id, severity, strict, fn, only_source_repo))
+        GATE_RULES.append(Rule(rule_id, severity, strict, fn))
         return fn
     return wrap
 
