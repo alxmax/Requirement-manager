@@ -31,16 +31,16 @@ file carries a `<!--REQMAP_DATA-->` marker. The stdlib engine (`reqmap.py map`) 
 the marker for `<script>window.__REQMAP_DATA__ = {…this repo's graph…}</script>` and
 writes `requirements/_map.html` — the **same app** as `npm run dev`, but a single file
 you open by double-click, no server, no npm. `loadData()` reads the inlined data first,
-then a fetched `_map.json`, then the baked fallback.
+then a fetched `_map.json`; with neither, the app says there is no map and names the
+command that writes one.
 
 Re-run `npm run build:viewer` only when the **app UI** changes (it re-bakes the
 template). Day-to-day, `reqmap.py map` refreshes the **data** in `_map.html`.
 
 ## Data: fed by the engine
 
-The app reads its registry from `public/data.json` when present, and otherwise
-renders a **baked fallback** dataset (the 13 dogfooded requirements + in-flight
-signals) so it always works standalone.
+The app reads its registry from `public/data.json` when present. Without it there is
+nothing to show, and the app says so rather than inventing requirements.
 
 To drive it with live registry data:
 

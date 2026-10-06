@@ -51,8 +51,9 @@ PACKAGE = "reqmap_engine"
 # Set by ADR-0053 to the measured core, in logical lines, with no headroom;
 # raised by ADR-0062 to 6,677, the size measured when a span stops at a
 # changelog date that falls inside it; lowered to 6,675 by ADR-0064, whose
-# tree checks load outside the core and whose cut paid for the rest.
-CORE_LOGICAL_BUDGET = 6675
+# tree checks load outside the core and whose cut paid for the rest; lowered
+# to 6,640 by ADR-0065, which retires RM017 with the viewer's demo fixture.
+CORE_LOGICAL_BUDGET = 6640
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

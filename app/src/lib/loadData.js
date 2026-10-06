@@ -4,8 +4,8 @@
  * The engine's `export` command writes `requirements/_map.json` in a
  * {engine_version, nodes, edges, todos} shape. `npm run sync` copies it to
  * `public/data.json`. At startup loadData() fetches it and adapts each node to
- * the app's requirement shape; on any miss it leaves the baked fallback in
- * place, so the app always renders. */
+ * the app's requirement shape; on any miss it reports `source: "none"` and the
+ * app renders its no-map screen. */
 
 import { adoptMapExport } from "./data.js";
 
@@ -57,11 +57,11 @@ export function adaptNode(n) {
     layer: n.layer || "feature",
     // Specification LEVEL — the V-model rung this requirement sits on
     // ("system" | "architecture" | "code"). It is what the module explorer
-    // builds its outline from. The baked fallback dataset (data.js) predates
-    // the field entirely, so it defaults to "architecture": the middle rung,
-    // where a flat pre-level corpus honestly belongs — defaulting to "code"
-    // would hide every fallback row behind a collapsed parent, and to "system"
-    // would promote 15 feature requirements to top-level systems.
+    // builds its outline from. A map written before the field existed has
+    // none, so it defaults to "architecture": the middle rung, where a flat
+    // pre-level corpus honestly belongs — defaulting to "code" would hide every
+    // row behind a collapsed parent, and to "system" would promote every
+    // feature requirement to a top-level system.
     level: n.level || "architecture",
     // Upstream/downstream trace edges. `satisfies` is the parent list (in the
     // current corpus always 0 or 1 entry — a strict tree), `satisfiedBy` the
@@ -119,7 +119,7 @@ export function adaptNode(n) {
  *     self-contained _map.html viewer (double-click, no server).
  *  2. ./data.json (or _map.json) — fetched when served over http
  *     (dev / preview).
- *  3. the baked fallback dataset already in data.js.
+ *  Neither → `source: "none"`, and main.jsx shows the no-map screen.
  */
 /* The export is forwarded WHOLE, with only `nodes` adapted. It used to be
  * copied key by key, and that hand-kept whitelist is exactly how
@@ -145,10 +145,10 @@ export async function loadData() {
   try {
     const res = await fetch(
       `${import.meta.env.BASE_URL}data.json`, { cache: "no-store" });
-    if (!res.ok) return { source: "baked" };
+    if (!res.ok) return { source: "none" };
     const json = await res.json();
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) {
-      return { source: "baked" };
+      return { source: "none" };
     }
     adoptMapExport({ ...json, nodes: json.nodes.map(adaptNode) });
     return {
@@ -156,6 +156,6 @@ export async function loadData() {
       count: json.nodes.length,
     };
   } catch {
-    return { source: "baked" };
+    return { source: "none" };
   }
 }

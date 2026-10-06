@@ -32,8 +32,8 @@ import { json, noop, specOf, test, fail } from "./harness.jsx";
 // ---- hierarchy / module explorer -------------------------------------------
 // The corpus this view exists for is a strict tree (one parent, one root,
 // depth == level). These assert the SHAPE the outline depends on, plus the two
-// degradations that must not throw: a registry with no `satisfies` at all (the
-// baked fallback) and a `satisfies` cycle.
+// degradations that must not throw: a registry with no `satisfies` at all (a
+// map written before the field) and a `satisfies` cycle.
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const H = buildHierarchy(REQUIREMENTS);
 const exp0 = defaultExpanded(H);
@@ -96,8 +96,8 @@ const treeChecks = [
 ];
 for (const [label, ok] of treeChecks) test(label, ok);
 
-// The baked fallback has no `level` at all — adaptNode must default it so the
-// outline still renders, and the Explorer must not throw on that registry.
+// A map written before `level` existed has none — adaptNode must default it so
+// the outline still renders, and the Explorer must not throw on that registry.
 const fallbackLevel = adaptNode({ id: "NOLEVEL-001", title: "t" }).level;
 const explorerHtml = renderToString(
   <ExplorerView selId="ARCH-MAP-007" setSelId={noop} />);

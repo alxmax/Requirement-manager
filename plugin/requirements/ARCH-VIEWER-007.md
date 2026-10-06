@@ -87,13 +87,10 @@ CASE-3
 **Current implementation**
 - `render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is
   called by `cmd_map` after `_map.json`/`_map.md` are written.
-- `check_viewer_data_sync` in `reqmap_engine/viewer.py`, run by RM017 (`gate`): a warn-only
-  comparison of the viewer's hand-authored fallback fixture, `app/src/lib/baked.json` (read as
-  JSON; `data.js` imports it), against the live registry, so a stale demo entry is flagged
-  rather than silently shown forever. A fixture entry marked `demoOnly: true` is skipped: the demo dataset deliberately invents an
-  orphan and a deprecated capability so the Risk and Problems tabs have signals with no engine
-  present, and those ids cannot exist in any registry. An id left unmarked and absent from the
-  registry is still reported — that is a requirement renamed out from under the fixture.
+- With no map to read — the bare template, or `npm run dev` before `npm run sync` — the
+  viewer says so and names the command that produces one. It carries no demo dataset: the
+  invented requirements it once showed in that case read as real (ADR-0065), and RM017, which
+  kept them in step with the corpus, is retired with them.
 - The locale dictionary and provider live in `app/src/lib/i18n.jsx`; the toggle is part of the
   top bar in `app/src/App.jsx`. Both are outside the plugin scan root, like the rest of the app,
   so the SSR smoke (`npm run smoke`) is what holds them — it asserts both directions: that a

@@ -5,6 +5,7 @@ import { renderToString } from "react-dom/server";
 
 import App, { openScope, openTab } from "../../src/App.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
+import { NoMap } from "../../src/components/NoMap.jsx";
 import { rankRequirements, searchRequirements } from "../../src/lib/search.js";
 import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
@@ -379,3 +380,12 @@ test("filters: errors and warnings are listed on Health",
     && /Health<span[^>]*>3</.test(merged));
 adoptMapExport({ nodes: json.nodes.map(adaptNode),
                  health: json.health || null, design: json.design || null });
+
+// ---- no map: say so, never invent requirements (ADR-0065) -----------------
+const noMapEn = renderToString(<I18nProvider initialLocale="en"><NoMap /></I18nProvider>);
+const noMapRo = renderToString(<I18nProvider initialLocale="ro"><NoMap /></I18nProvider>);
+test("no map: the screen names the command that writes one",
+  noMapEn.includes("No requirement map to show")
+    && noMapEn.includes("python scripts/reqmap.py sync"));
+test("no map: the screen is translated, the command is not",
+  noMapRo.includes("Nu există o hartă") && noMapRo.includes("python scripts/reqmap.py sync"));

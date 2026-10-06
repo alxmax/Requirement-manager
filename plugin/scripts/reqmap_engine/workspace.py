@@ -204,7 +204,6 @@ class GateContext(object):
         self.lock = load_lock(reqs_dir)
         self.new_lock = {rid: binding_hash(r["body"])
                          for rid, r in reqs.items()}
-        self.source_repo = _is_source_repo(code_root)
 
     def req(self, rid):
         r = self.reqs[rid]
@@ -229,7 +228,7 @@ def _is_source_repo(code_root):
     """True inside the requirement-manager repository itself (the
     one that dogfoods the engine), never in a consumer: the plugin
     manifest and the viewer's source both sit under `code_root`.
-    Rules about this repo's own artifacts key on it."""
+    `sync` regenerates this repo's own integration artifacts only here."""
     return (os.path.exists(os.path.join(
                 code_root, "plugin", ".claude-plugin", "plugin.json"))
             and os.path.exists(os.path.join(

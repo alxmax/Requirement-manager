@@ -1,6 +1,6 @@
 """The repository-wide gate rules: the lock, drift, the scan's leftovers
 and the map. Registered after every rule in `rules` (RM016 onward); RM030
-sits here only because its place in GATE_RULES is between RM017 and RM018."""
+sits here only because its place in GATE_RULES is between RM016 and RM018."""
 import json, os
 
 from . import config as cfg
@@ -12,10 +12,8 @@ from .orphans import (
     orphan_code_files, tagged_unscanned_files, undecodable_source_files,
     untagged_doc_bundles, untracked_members
 )
-from .sections import CONTRACT_LABELS, _from_any, _legacy_schema_ids
+from .sections import _legacy_schema_ids
 from .similar import EXEMPTION_FIELDS, _exemption_reason_recorded
-from .text import _bullets
-from .viewer import check_viewer_data_sync
 
 
 @gate_rule("RM016", "warn", strict=True)
@@ -36,23 +34,8 @@ def _corrupt_lock_rule(ctx):
                 "this run; restore it or run `reqmap.py sync`")
 
 
-@gate_rule("RM017", "warn", only_source_repo=True)
-def _viewer_fixture_rule(ctx):  # implements: ARCH-VIEWER-007
-    # the viewer's fallback fixture vs the live registry — this repository
-    # only.
-    candidate = os.path.join(ctx.code_root, "app", "src", "lib", "baked.json")
-    if not os.path.exists(candidate):
-        return
-    nodes = [
-        {"id": rid, "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS)}
-        for rid, r in ctx.reqs.items()]
-    drifted = check_viewer_data_sync(candidate, nodes)
-    if drifted:
-        yield None, (
-            "app/src/lib/baked.json out of sync with {} requirement(s): "
-            "{} — update the viewer's fallback fixture or accept the "
-            "drift is intentional for this demo data."
-            .format(len(drifted), ", ".join(drifted)))
+# RM017 compared the viewer's demo fixture with the corpus. The fixture is gone and
+# so is the rule; the code stays retired, never reused (see GATE_RULES).
 
 
 @gate_rule("RM030", "warn")

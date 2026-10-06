@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.19.0` — 2026-10-06
+
+**The viewer no longer invents requirements when it has no map.**
+
+- With no map to read (the template opened directly, or `npm run dev` before `npm run sync`), the viewer used to render a built-in demo: 15 requirements, three of them made up, under a "local repo" label, indistinguishable from a real map. It now shows one screen saying there is no map and naming `python scripts/reqmap.py sync`, in English and Romanian. A `_map.html` written by `sync` always carries its map and is unaffected
+- The vendored `_map_viewer.html` is about 20 KB smaller (286,219 → 266,034 bytes)
+- RM017, which compared the demo with this repository's corpus, is retired with it, along with `check_viewer_data_sync` and the `only_source_repo` switch on gate rules that only RM017 used. It never ran in a consumer repository. The code is never reused, and an `RM017` left in a `gate_exempt:` list is ignored (ADR-0065)
+
 ## plugin `v8.18.0` — 2026-10-06
 
 **One source for every colour, and the four text pairs that missed WCAG AA are fixed.**

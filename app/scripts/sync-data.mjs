@@ -8,14 +8,13 @@
  *
  * Resolves the engine export relative to the repo root, trying the dogfooded
  * plugin/requirements first, then a top-level requirements/. Prints a clear
- * message and exits 0 (non-fatal) when no export is found — the app falls back
- * to its baked dataset.
+ * message and exits 0 (non-fatal) when no export is found — the app then
+ * shows its no-map screen.
  *
- * `--require` makes that fallback fatal. The SSR smoke exists to check
- * the viewer against this repo's REAL registry; with the export
- * missing it would silently run against the baked stand-in and report
- * green, so CI passes the flag and a missing export fails loudly
- * there while a local `npm run sync` still falls back. */
+ * `--require` makes a missing export fatal. The SSR smoke exists to check
+ * the viewer against this repo's REAL registry, so CI passes the flag and a
+ * missing export fails loudly there, while a local `npm run sync` only
+ * warns. */
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,11 +36,11 @@ if (!src) {
   console.log("[sync] looked in:\n  " + candidates.join("\n  "));
   if (required) {
     console.error(
-      "[sync] --require: refusing to fall back to the baked dataset.",
+      "[sync] --require: the smoke needs this repository's real map.",
     );
     process.exit(1);
   }
-  console.log("[sync] the app will use its baked fallback dataset.");
+  console.log("[sync] the app will show its no-map screen.");
   process.exit(0);
 }
 
