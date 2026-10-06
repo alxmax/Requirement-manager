@@ -1,6 +1,8 @@
-# The git hook is executed by /bin/sh — it must keep LF endings even on Windows
-# checkouts, or sh chokes on the CR.
+# The git hooks are executed by /bin/sh — they must keep LF endings even on Windows
+# checkouts, or sh chokes on the CR: the shipped one, and this repo's own dev hooks
+# (`.githooks/pre-push` failed with "line 15: syntax error" from a CRLF checkout).
 plugin/hooks/pre-commit text eol=lf
+.githooks/* text eol=lf
 
 # Committed BUILD ARTIFACTS and the template one of them inlines verbatim. Without a
 # pinned eol these files differ by the platform that produced them: on Windows the
