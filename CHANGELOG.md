@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.18.0` — 2026-10-06
+
+**One source for every colour, and the four text pairs that missed WCAG AA are fixed.**
+
+- `design/tokens.json` is now THE source for every colour in the product. `app/src/styles/colors_and_type.css` and the `<style>` block in `plugin/scripts/reqmap_engine/site_template.py` are generated from it by `scripts/gen_tokens.py`, between `/*##TOKENS:KEY##*/` markers — the same idea as the engine's `<!--##REQMAP:KEY##-->` regions, so authored prose outside a marker is untouched. CI runs `gen_tokens.py --check` and fails on divergence
+- The generated project site now shares the viewer's palette. It had its own eight hardcoded custom properties with a terracotta accent and no name in common with the viewer's sixty, so the two had drifted apart with nothing able to notice — the map rendered in one brand inside a page rendered in another
+- `--ink-2` `#827a68` → `#6d6554` and `--ink-3` `#a29a87` → `#89816f`. Four pairs were under AA on paper: muted text (4.02:1), faint text (2.64:1), the draft pill (3.33:1) and the exempt badge (2.19:1). The aliases carry the fix, so two values repair all four. Every correction moves only `L` in OKLCH — hue and chroma are untouched, so the mark does not shift
+- New `--border-control`, for a control identified by its edge (`btn-secondary`, `btn-icon`, inputs): 3:1 on surface, where `--border` sits at 1.4:1. `--border` stays decorative — darkening it would have thickened every hairline in the product
+- New `hc` theme (`<html data-theme="hc">`, and automatic under `prefers-contrast: more`): a delta over the light theme, sixteen values, text and marks at 7:1 on the sheet. Weakest pair in the theme is 4.52:1
+
 ## plugin `v8.17.0` — 2026-10-05
 
 **The level axis is a tree, and a bar too short for its title draws it beside the bar.**

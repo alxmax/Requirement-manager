@@ -37,6 +37,7 @@ From the **repo root**, the packaging side:
 
 ```bash
 python scripts/check_versions.py [--fix]          # plugin.json semver == marketplace.json (x2), Action major, MAP_ENGINE_VERSION shape
+python scripts/gen_tokens.py [--check]           # design/tokens.json -> colors_and_type.css + site_template.py
 python scripts/check_engine_bump.py --base main   # reqmap.py or reqmap_engine/ changed => MAP_ENGINE_VERSION changed
 python scripts/check_engine_budget.py             # core logical-line budget + physical ceiling
 python -X utf8 scripts/test_check_versions.py
@@ -108,6 +109,17 @@ The viewer is the Vite + React app in `app/`; its single-file build is vendored 
 ## Plugin packaging
 
 **Two independent version numbers — don't conflate them:**
+- **Colour tokens** — `design/tokens.json` is the single source for every colour in the
+  product. `app/src/styles/colors_and_type.css` (three themes: paper, dark, hc) and the
+  `<style>` block in `plugin/scripts/reqmap_engine/site_template.py` are both GENERATED from
+  it, between `/*##TOKENS:KEY##*/` markers, by `scripts/gen_tokens.py` — the same idea as the
+  engine's `<!--##REQMAP:KEY##-->` regions: everything outside a marker is authored and
+  preserved. Edit the JSON, run the script, commit both. CI runs `--check` and fails on
+  divergence. The two surfaces had drifted to different accents with no shared name between
+  them, which nothing could detect; this is the fix. Non-colour custom properties (type,
+  spacing, radii, shadows, motion) stay hand-written in the CSS — they never diverged, and
+  the site does not use them.
+
 - **Plugin semver** — `version` in `plugin/.claude-plugin/plugin.json` plus the top-level and `plugins[].version` in `.claude-plugin/marketplace.json`, kept in lockstep by `check_versions.py`. ANY shipped change — engine, skill, or the vendored viewer — must bump it, or installed copies never see it via `/plugin update`.
 - **`MAP_ENGINE_VERSION`** (`YYYY-MM-DD`, `.N` for a second bump the same day) — bump it on every change to `reqmap.py` or `reqmap_engine/`, comments included: a seeded copy compares it to learn it is behind. `check_engine_bump.py` enforces it in CI and in the hook.
 

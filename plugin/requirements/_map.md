@@ -1,9 +1,9 @@
 ---
-generated: 2026-10-05
-engine: 2026-10-05
+generated: 2026-10-06
+engine: 2026-10-06
 nodes: 312
 edges: 121
-design pass-rate: 98% (118/121 source files without a design candidate)
+design pass-rate: 98% (119/122 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -845,6 +845,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2_224
   f_scripts_check_versions_py_2["scripts/check_versions.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
+  f_scripts_gen_tokens_py_2["scripts/gen_tokens.py:2"]
+  ARCH_SELFGATE_039 -->|implements| f_scripts_gen_tokens_py_2
   f_scripts_test_changelog_notes_py_2["scripts/test_changelog_notes.py:2"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_changelog_notes_py_2
   f_scripts_test_check_engine_budget_py_38["scripts/test_check_engine_budget.py:38"]

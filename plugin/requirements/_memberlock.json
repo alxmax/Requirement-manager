@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "23327848e35092c5bf072dcee6f20a7327a9c3f08bcd8e752f829f6187afcb29",
+      "plugin/scripts/reqmap_engine/__init__.py": "b4276189b6675b46947da61a4ada80dde34865252206ec7f21253b8892c8cf4f",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -95,7 +95,8 @@
       "scripts/check_engine_budget.py": "c50ce466f961ef7271eb77d016d4db060fb02b601cd3eceb3747ee0b55f3c76f",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
-      "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130"
+      "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130",
+      "scripts/gen_tokens.py": "95407693cd650664869768284de9e1e7e66895275cd9803a30e3c00a0f0be809"
     },
     "ARCH-SIMILAR-016": {
       "plugin/scripts/reqmap_engine/similar.py#_placeholder_contract": "8da20d58cf3045618e116dcfb06a7c62b6fbfb5803df3bca8e253708db2df17e",
@@ -111,7 +112,7 @@
       "plugin/scripts/reqmap_engine/site.py#_site_context_from_data": "3f6d27d117f4bde88efcd19879489e4c26646bf51a70c0004b069ee0aa8137a9",
       "plugin/scripts/reqmap_engine/site.py#_site_default_target": "5ab48651d66b1604b4003e89fe9072e62cd1cc5e01236fb5e7a782d5ae0cd8b3",
       "plugin/scripts/reqmap_engine/site.py#_strip_engine_stat": "29f13d773f858c714e61620cca0a79fd50ef7702312ef652cb687711e0d6bfe5",
-      "plugin/scripts/reqmap_engine/site_template.py": "6cb276c0b491b81baffa9d8bb2ef0e79d4f851c5841a2f7456c43da5823beb69"
+      "plugin/scripts/reqmap_engine/site_template.py": "be5cb4ce1b92d405c25e1cdfdb861875b7c7ec3e55ea084de30fc4a1f2c19166"
     },
     "ARCH-STALEENGINE-043": {
       "check/engine_staleness.py": "2f149f42807a0d74349004d1f5a410f2f599958bd826ca03afaa83cf10854d51"
@@ -141,8 +142,8 @@
       "app/src/lib/tree.js": "9131891bbf3783bd52ccff5b80f8b105856bcc59a62dd92edb25755d591ef051",
       "app/src/lib/useDragPan.js": "c1da172c305dd56ff9a39d52e567dfcd76b8626691490478e333c11e50ba96ab",
       "app/src/main.jsx": "8885b344ea6e788cbe6b42620ce7162acd016f5cd412ca01f5d7ef48ee7e4062",
-      "app/src/styles/app.css": "47978a1d062f653eedec1be31680c5882029e503f9206683ad051b1f2f3a87a0",
-      "app/src/styles/colors_and_type.css": "d9ddcb927eb46a8d742efb8439535ad2b49b01e555d058c0b9f25710942b8c9e",
+      "app/src/styles/app.css": "eb42896f9597c5964baa9d2813629f64ec9a4c6286120cca3254af09e4d9c49a",
+      "app/src/styles/colors_and_type.css": "2c7196581730f0851a2b5257e9b1a5b1789d77e01193f16dcf4c428fb646131b",
       "app/src/views/commands/CommandGroup.jsx": "b9425b46532df218e5f3c4f86a89a61b18dda082226a9894b783a4eb89e390a3",
       "app/src/views/explorer/ExplorerFilters.jsx": "56828b07ed43f0930eadee08493ffefbf65d147c4522377f24f498bce9eaa912",
       "app/src/views/roadmap/EntryBody.jsx": "d609917ec39cd5b11b47555f7227a272845c1c76b6a324c85df6955f1e3b2c18",
