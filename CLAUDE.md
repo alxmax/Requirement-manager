@@ -111,10 +111,11 @@ The viewer is the Vite + React app in `app/`; its single-file build is vendored 
 **Two independent version numbers — don't conflate them:**
 - **Colour tokens** — `design/tokens.json` is the single source for every colour in the
   product. `app/src/styles/colors_and_type.css` (three themes: paper, dark, hc) and the
-  `<style>` block in `plugin/scripts/reqmap_engine/site_template.py` are both GENERATED from
+  `<style>` blocks in `plugin/scripts/reqmap_engine/site_template.py` and
+  `docs/architecture.html` are all GENERATED from
   it, between `/*##TOKENS:KEY##*/` markers, by `scripts/gen_tokens.py` — the same idea as the
   engine's `<!--##REQMAP:KEY##-->` regions: everything outside a marker is authored and
-  preserved. Edit the JSON, run the script, commit both. CI runs `--check` and fails on
+  preserved. Edit the JSON, run the script, commit the results. CI runs `--check` and fails on
   divergence. The two surfaces had drifted to different accents with no shared name between
   them, which nothing could detect; this is the fix. Non-colour custom properties (type,
   spacing, radii, shadows, motion) stay hand-written in the CSS — they never diverged, and

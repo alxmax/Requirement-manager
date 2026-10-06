@@ -96,7 +96,7 @@
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130",
-      "scripts/gen_tokens.py": "95407693cd650664869768284de9e1e7e66895275cd9803a30e3c00a0f0be809"
+      "scripts/gen_tokens.py": "124496cc5539e3be51264333289a7af08e60dab14c9e3f47f251f7f1d5af25de"
     },
     "ARCH-SIMILAR-016": {
       "plugin/scripts/reqmap_engine/similar.py#_placeholder_contract": "8da20d58cf3045618e116dcfb06a7c62b6fbfb5803df3bca8e253708db2df17e",

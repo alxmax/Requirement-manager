@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # implements: ARCH-SELFGATE-039
-"""Colour tokens -> the two surfaces that render them (dev/CI tooling — NOT part
+"""Colour tokens -> the three surfaces that render them (dev/CI tooling — NOT part
 of the seeded engine).
 
-`design/tokens.json` is the source. Two files declare the same colours and used
-to do so independently:
+`design/tokens.json` is the source. Three files declare the same colours; the
+first two used to do so independently:
 
   app/src/styles/colors_and_type.css           the Vite viewer, three themes
   plugin/scripts/reqmap_engine/site_template.py  the project site `sync` emits
+  docs/architecture.html                         this repo's hand-authored page
 
 They had drifted to different accents — ink blue in one, terracotta in the other
 — with no shared name between them, so nothing could notice. This script writes
@@ -31,6 +32,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, "design", "tokens.json")
 CSS = os.path.join(ROOT, "app", "src", "styles", "colors_and_type.css")
 SITE = os.path.join(ROOT, "plugin", "scripts", "reqmap_engine", "site_template.py")
+PAGE = os.path.join(ROOT, "docs", "architecture.html")
 
 ALIAS = re.compile(r"^\{([A-Za-z0-9-]+)\}$")
 
@@ -179,6 +181,7 @@ def main():
           % (len(doc["tokens"]), len(doc["themes"])))
     ok = apply_to(CSS, css_regions(doc), args.check)
     ok &= apply_to(SITE, {"SITE": site_region(doc)}, args.check)
+    ok &= apply_to(PAGE, css_regions(doc), args.check)
 
     if not ok:
         print("\nA generated region does not match design/tokens.json.\n"
