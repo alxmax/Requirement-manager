@@ -8,6 +8,8 @@
    greys are browned, not neutral, so the two themes read as one book.
    Dark variant via <html data-theme="dark">.
 
+   Three themes: this one (paper), `data-theme="dark"`, and `data-theme="hc"`.
+
    Type is the platform UI stack, deliberately: no webfont is downloaded, so the
    self-contained _map.html renders identically opened by double-click, offline,
    from file:// — where a Google Fonts @import silently fell back mid-paint.
@@ -16,94 +18,103 @@
    ========================================================================== */
 
 :root {
-  /* ---- RAW PALETTE · warm paper (default / light) ----------------------- */
-  --paper-0:  #f2ead8;  /* page / chrome ground — the board the page sits on */
-  --paper-1:  #f8f2e5;  /* rails, raised chrome */
-  --paper-2:  #fdf8ed;  /* document sheets — the printed page */
-  --paper-3:  #eae1cc;  /* surface hover */
-  --line-1:   #e9e0cb;  /* hairline divider */
-  --line-2:   #dcd2b8;  /* border */
-  --line-3:   #c3b89b;  /* strong border / focus track */
-  --ink-3:    #a29a87;  /* faint / disabled text */
-  --ink-2:    #827a68;  /* muted body text */
-  --ink-1:    #4e483c;  /* secondary text */
-  --ink-0:    #24201a;  /* primary text — warm near-black, ink on paper */
+/*##TOKENS:LIGHT##*/
+  /* ---- RAW PALETTE · warm paper (default / light) ---------------------- */
+  --paper-0:              #f2ead8;  /* page / chrome ground — the board the page sits on */
+  --paper-1:              #f8f2e5;  /* rails, raised chrome */
+  --paper-2:              #fdf8ed;  /* document sheets — the printed page */
+  --paper-3:              #eae1cc;  /* surface hover */
+  --line-1:               #e9e0cb;  /* hairline divider */
+  --line-2:               #dcd2b8;  /* border */
+  --line-3:               #c3b89b;  /* strong border / focus track */
+  --ink-3:                #89816f;  /* faint / disabled — 3.03:1; 1.4.3 exempts disabled text */
+  --ink-2:                #6d6554;  /* muted body text — 4.52:1 on the darkest paper */
+  --ink-1:                #4e483c;  /* secondary text */
+  --ink-0:                #24201a;  /* primary text — warm near-black, ink on paper */
 
   /* ---- ACCENT · ink blue (the only brand hue) -------------------------- */
-  --indigo-700: #073a76;
-  --indigo-600: #0a54a8;
-  --indigo-500: #0d64c8;  /* PRIMARY accent — links, selection, focus */
-  --indigo-400: #3f8ada;
-  --indigo-300: #9cc2ea;
-  --indigo-tint:#e4edf9;
+  --indigo-700:           #073a76;
+  --indigo-600:           #0a54a8;
+  --indigo-500:           #0d64c8;  /* PRIMARY accent — links, selection, focus */
+  --indigo-400:           #3f8ada;
+  --indigo-300:           #9cc2ea;
+  --indigo-tint:          #e4edf9;
 
   /* ---- ORANGE · drift / warning ---------------------------------------- */
-  --amber-700: #85480a;   /* readable as text on paper */
-  --amber-600: #ab5f10;
-  --amber-500: #e08a12;
-  --amber-400: #eeae4d;
-  --amber-tint:#f7e7c6;
+  --amber-700:            #85480a;  /* readable as text on paper */
+  --amber-600:            #ab5f10;
+  --amber-500:            #e08a12;
+  --amber-400:            #eeae4d;
+  --amber-tint:           #f7e7c6;
 
   /* ---- PURPLE · bus layer ---------------------------------------------- */
-  --magenta-700: #55287f;
-  --magenta-600: #743ba8;
-  --magenta-500: #9d54d2;
-  --magenta-400: #b781e0;
-  --magenta-tint:#eee4f6;
+  --magenta-700:          #55287f;
+  --magenta-600:          #743ba8;
+  --magenta-500:          #9d54d2;
+  --magenta-400:          #b781e0;
+  --magenta-tint:         #eee4f6;
 
-  /* ---- RED · error ------------------------------------------------------ */
-  --coral-600: #b3110f;
-  --coral-500: #de392c;
-  --coral-tint:#f8e1db;
+  /* ---- RED · error ----------------------------------------------------- */
+  --coral-600:            #b3110f;
+  --coral-500:            #de392c;
+  --coral-tint:           #f8e1db;
 
   /* ---- STATUS · the requirement lifecycle ------------------------------ */
-  --status-confirmed:    var(--indigo-500);
-  --status-confirmed-bg: var(--indigo-tint);
-  --status-confirmed-ln: #c6dbf1;
-  --status-drift:        var(--amber-700);
-  --status-drift-bg:     var(--amber-tint);
-  --status-drift-ln:     #e9d2a0;
-  --status-error:        var(--coral-600);
-  --status-error-bg:     var(--coral-tint);
-  --status-error-ln:     #edc3ba;
-  --status-draft:        var(--ink-2);
-  --status-draft-bg:     #ebe3d2;
-  --status-draft-ln:     var(--line-2);
-  --status-bus:          var(--magenta-600);
-  --status-bus-bg:       var(--magenta-tint);
-  --status-bus-ln:       #dbc9ec;
-  --signal-gold:         #a1600a;            /* locate crosshair / highlight */
-  --signal-gold-hi:      #f5e1b3;
+  --status-confirmed:     var(--indigo-500);
+  --status-confirmed-bg:  var(--indigo-tint);
+  --status-confirmed-ln:  #c6dbf1;
+  --status-drift:         var(--amber-700);
+  --status-drift-bg:      var(--amber-tint);
+  --status-drift-ln:      #e9d2a0;
+  --status-error:         var(--coral-600);
+  --status-error-bg:      var(--coral-tint);
+  --status-error-ln:      #edc3ba;
+  --status-draft:         var(--ink-2);
+  --status-draft-bg:      #ebe3d2;
+  --status-draft-ln:      var(--line-2);
+  --status-bus:           var(--magenta-600);
+  --status-bus-bg:        var(--magenta-tint);
+  --status-bus-ln:        #dbc9ec;
+  --signal-gold:          #a1600a;  /* locate crosshair / highlight */
+  --signal-gold-hi:       #f5e1b3;
 
-  /* ---- COVERAGE · computed per-clause health (separate axis from status) */
-  --cov-tested:    #2c6b3a;  /* every contract clause has a live test */
-  --cov-tested-bg: #e3eedd;
-  --cov-tested-ln: #b9d6b3;
-  --cov-partial:   var(--amber-700);  /* some clauses uncovered */
-  --cov-untested:  var(--coral-600);  /* no live test, or stale ref */
-  --cov-exempt:    var(--ink-3);      /* deprecated — skipped */
+  /* ---- COVERAGE · computed per-clause health (separate axis from status) --- */
+  --cov-tested:           #2c6b3a;  /* every contract clause has a live test */
+  --cov-tested-bg:        #e3eedd;
+  --cov-tested-ln:        #b9d6b3;
+  --cov-partial:          var(--amber-700);  /* some clauses uncovered */
+  --cov-untested:         var(--coral-600);  /* no live test, or stale ref */
+  --cov-exempt:           var(--ink-3);  /* deprecated — skipped */
 
   /* ---- SEMANTIC SURFACES ----------------------------------------------- */
-  --bg:           var(--paper-0);
-  --bg-raised:    var(--paper-1);
-  --surface:      var(--paper-2);
-  --surface-hov:  var(--paper-3);
-  --border:       var(--line-2);
-  --border-soft:  var(--line-1);
-  --border-strong:var(--line-3);
-  --fg:           var(--ink-0);
-  --fg-secondary: var(--ink-1);
-  --fg-muted:     var(--ink-2);
-  --fg-faint:     var(--ink-3);
-  --accent:       var(--indigo-500);
-  --accent-hov:   var(--indigo-600);
-  --accent-soft:  var(--indigo-tint);
-  --accent-2:     var(--amber-500);
-  --on-accent:    #ffffff;
-  --focus-ring:   color-mix(in oklch, var(--indigo-500) 30%, transparent);
-  --chrome-glass: rgba(248,242,229,0.82);   /* translucent bar over the page */
+  --bg:                   var(--paper-0);
+  --bg-raised:            var(--paper-1);
+  --surface:              var(--paper-2);
+  --surface-hov:          var(--paper-3);
+  --border:               var(--line-2);
+  --border-soft:          var(--line-1);
+  --border-strong:        var(--line-3);
+  /* The border that IDENTIFIES a control (btn-secondary, btn-icon, input): 3:1
+     on surface. --border stays decorative at 1.4:1 — darkening it to pass would
+     thicken every hairline in the product, and hairlines are how this system
+     draws structure. */
+  --border-control:       #998f77;
+  --fg:                   var(--ink-0);
+  --fg-secondary:         var(--ink-1);
+  --fg-muted:             var(--ink-2);
+  --fg-faint:             var(--ink-3);
+  --accent:               var(--indigo-500);
+  --accent-hov:           var(--indigo-600);
+  --accent-soft:          var(--indigo-tint);
+  --accent-2:             var(--amber-500);
+  --on-accent:            #ffffff;
+  --chrome-glass:         rgba(248,242,229,0.82);  /* translucent bar over the page */
 
-  /* ---- TYPE FAMILIES ---------------------------------------------------- */
+  /* ---- TEXTURE · the map canvas ---------------------------------------- */
+  --dot-color:            rgba(70,52,18,0.07);  /* texture: faint dotted grid on the map canvas */
+/*##/TOKENS:LIGHT##*/
+  --focus-ring:   color-mix(in oklch, var(--indigo-500) 30%, transparent);
+
   /* One family. `--font-serif` is kept as an alias so existing selectors and
      the [data-voice] switch below still resolve — there is no display serif. */
   --font-sans:  -apple-system, BlinkMacSystemFont, "SF Pro Text",
@@ -113,7 +124,6 @@
   --font-mono:  ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono",
                 "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
 
-  /* ---- TYPE SCALE ------------------------------------------------------ */
   --text-display: 700 34px/1.08 var(--font-sans);
   --text-h1:      700 28px/1.16 var(--font-sans);
   --text-h2:      600 22px/1.22 var(--font-sans);
@@ -129,27 +139,20 @@
   --track-normal:  0em;
   --track-caps:    0.06em;
 
-  /* ---- SPACING · 4px grid ---------------------------------------------- */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
 
-  /* ---- RADII ------------------------------------------------------------ */
   --radius-1: 7px; --radius-2: 11px; --radius-3: 15px;
   --radius-pill: 999px; --radius-circle: 50%;
 
-  /* ---- ELEVATION · separation by tone, not by shadow -------------------- */
   --shadow-1: 0 1px 2px rgba(60,45,15,0.06);
   --shadow-2: 0 4px 16px -4px rgba(60,45,15,0.14);
   --shadow-pop: 0 12px 36px -8px rgba(60,45,15,0.22);
   --ring-soft: 0 0 0 1px var(--border-soft);
 
-  /* ---- MOTION ---------------------------------------------------------- */
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-fast: 120ms;
   --dur: 200ms;
-
-  /* texture: faint dotted grid on the map canvas */
-  --dot-color: rgba(70,52,18,0.07);
 }
 
 /* ============================================================================
@@ -159,74 +162,123 @@
    meaning at 4.5:1 on a dark surface.
    ========================================================================== */
 [data-theme="dark"] {
-  --paper-0:  #17140f;
-  --paper-1:  #1e1a14;
-  --paper-2:  #26211a;
-  --paper-3:  #322c23;
-  --line-1:   #2a251c;
-  --line-2:   #3a3427;
-  --line-3:   #4e4634;
-  --ink-3:    #7a7160;
-  --ink-2:    #9d9482;
-  --ink-1:    #c9c1ae;
-  --ink-0:    #f3ede0;
-
-  --indigo-700: #7dbcff;
-  --indigo-600: #5aa6fb;
-  --indigo-500: #3d92f5;
-  --indigo-400: #6fb0fa;
-  --indigo-300: #9ac8fb;
-  --indigo-tint:#152a3f;
-
-  --amber-700: #f0b95e;
-  --amber-600: #e6a437;
-  --amber-500: #e6a437;
-  --amber-400: #f2c882;
-  --amber-tint:#382b12;
-
-  --magenta-700: #d6a7ef;
-  --magenta-600: #bd76e8;
-  --magenta-500: #bd76e8;
-  --magenta-400: #cf9bef;
-  --magenta-tint:#2a1c36;
-
-  --coral-600: #f4796b;
-  --coral-500: #e8564a;
-  --coral-tint:#371a14;
-
-  --status-confirmed:    var(--indigo-600);
-  --status-confirmed-bg: var(--indigo-tint);
-  --status-confirmed-ln: #24405c;
-  --status-drift:        var(--amber-700);
-  --status-drift-bg:     var(--amber-tint);
-  --status-drift-ln:     #55431c;
-  --status-error:        var(--coral-600);
-  --status-error-bg:     var(--coral-tint);
-  --status-error-ln:     #57291f;
-  --status-draft:        var(--ink-2);
-  --status-draft-bg:     #2c271e;
-  --status-draft-ln:     var(--line-2);
-  --status-bus:          var(--magenta-600);
-  --status-bus-bg:       var(--magenta-tint);
-  --status-bus-ln:       #43305a;
-  --signal-gold:         #f0b95e;
-  --signal-gold-hi:      #3d2f11;
-
-  --cov-tested:    #62c97e;
-  --cov-tested-bg: #17271a;
-  --cov-tested-ln: #2d5436;
-  --cov-partial:   var(--amber-700);
-  --cov-untested:  var(--coral-600);
-  --cov-exempt:    var(--ink-3);
-
-  --on-accent: #0f1a26;
-  --chrome-glass: rgba(25,22,16,0.78);
+/*##TOKENS:DARK##*/
+  --paper-0:              #17140f;
+  --paper-1:              #1e1a14;
+  --paper-2:              #26211a;
+  --paper-3:              #322c23;
+  --line-1:               #2a251c;
+  --line-2:               #3a3427;
+  --line-3:               #4e4634;
+  --ink-3:                #7a7160;
+  --ink-2:                #9d9482;
+  --ink-1:                #c9c1ae;
+  --ink-0:                #f3ede0;
+  --indigo-700:           #7dbcff;
+  --indigo-600:           #5aa6fb;
+  --indigo-500:           #3d92f5;
+  --indigo-400:           #6fb0fa;
+  --indigo-300:           #9ac8fb;
+  --indigo-tint:          #152a3f;
+  --amber-700:            #f0b95e;
+  --amber-600:            #e6a437;
+  --amber-500:            #e6a437;
+  --amber-400:            #f2c882;
+  --amber-tint:           #382b12;
+  --magenta-700:          #d6a7ef;
+  --magenta-600:          #bd76e8;
+  --magenta-500:          #bd76e8;
+  --magenta-400:          #cf9bef;
+  --magenta-tint:         #2a1c36;
+  --coral-600:            #f4796b;
+  --coral-500:            #e8564a;
+  --coral-tint:           #371a14;
+  --status-confirmed:     var(--indigo-600);
+  --status-confirmed-bg:  var(--indigo-tint);
+  --status-confirmed-ln:  #24405c;
+  --status-drift:         var(--amber-700);
+  --status-drift-bg:      var(--amber-tint);
+  --status-drift-ln:      #55431c;
+  --status-error:         var(--coral-600);
+  --status-error-bg:      var(--coral-tint);
+  --status-error-ln:      #57291f;
+  --status-draft:         var(--ink-2);
+  --status-draft-bg:      #2c271e;
+  --status-draft-ln:      var(--line-2);
+  --status-bus:           var(--magenta-600);
+  --status-bus-bg:        var(--magenta-tint);
+  --status-bus-ln:        #43305a;
+  --signal-gold:          #f0b95e;
+  --signal-gold-hi:       #3d2f11;
+  --cov-tested:           #62c97e;
+  --cov-tested-bg:        #17271a;
+  --cov-tested-ln:        #2d5436;
+  --cov-partial:          var(--amber-700);
+  --cov-untested:         var(--coral-600);
+  --cov-exempt:           var(--ink-3);
+  --border-control:       #726b5c;
+  --on-accent:            #0f1a26;
+  --chrome-glass:         rgba(25,22,16,0.78);
+  --dot-color:            rgba(243,237,224,0.07);
+/*##/TOKENS:DARK##*/
   --shadow-1: 0 1px 2px rgba(0,0,0,0.5);
   --shadow-2: 0 4px 18px -4px rgba(0,0,0,0.65);
   --shadow-pop: 0 14px 40px -10px rgba(0,0,0,0.8);
   --focus-ring: color-mix(in oklch, var(--indigo-500) 45%, transparent);
-  --dot-color: rgba(243,237,224,0.07);
 }
+
+/* ============================================================================
+   HIGH CONTRAST — opt-in via <html data-theme="hc">, and automatic under
+   prefers-contrast: more.
+   A delta over the light theme, not a separate palette: only the sixteen values
+   below move, everything else inherits. Each was found by moving ONLY L in
+   OKLCH — hue and chroma untouched, so the mark does not shift. Text and marks
+   reach 7:1 on the sheet, structure 3:1; --ink-0 already cleared 12.7:1 and is
+   left alone. The weakest pair in the theme is 4.52:1.
+   The block is repeated under @media because a media rule cannot be merged with
+   a plain one; once tokens.json lands, both are generated from one source.
+   ========================================================================== */
+/*##TOKENS:HC##*/
+[data-theme="hc"] {
+  --paper-0:              #efe6cf;
+  --paper-2:              #fffdf8;
+  --paper-3:              #e2d8bf;
+  --line-1:               #c2b9a5;
+  --line-2:               #9c927a;
+  --line-3:               #7f7459;
+  --ink-3:                #6d6554;
+  --ink-2:                #504838;
+  --ink-1:                #3e382d;
+  --indigo-600:           #00489b;
+  --indigo-500:           #0045a7;
+  --amber-700:            #773b00;
+  --magenta-600:          #672c99;
+  --coral-600:            #9b0000;
+  --cov-tested:           #145627;
+  --border-control:       #7f7459;
+}
+
+@media (prefers-contrast: more) {
+  :root:not([data-theme="dark"]):not([data-theme="hc"]) {
+    --paper-0:              #efe6cf;
+    --paper-2:              #fffdf8;
+    --paper-3:              #e2d8bf;
+    --line-1:               #c2b9a5;
+    --line-2:               #9c927a;
+    --line-3:               #7f7459;
+    --ink-3:                #6d6554;
+    --ink-2:                #504838;
+    --ink-1:                #3e382d;
+    --indigo-600:           #00489b;
+    --indigo-500:           #0045a7;
+    --amber-700:            #773b00;
+    --magenta-600:          #672c99;
+    --coral-600:            #9b0000;
+    --cov-tested:           #145627;
+    --border-control:       #7f7459;
+  }
+}
+/*##/TOKENS:HC##*/
 
 /* ============================================================================
    SEMANTIC HELPER CLASSES

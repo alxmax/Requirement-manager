@@ -89,11 +89,11 @@ button { font-family: inherit; cursor: pointer; }
 .btn { font: var(--text-small); font-weight: 500; padding: 7px 14px; border-radius: var(--radius-1); border: 1px solid transparent; display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0; transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease); white-space: nowrap; }
 .btn-primary { background: var(--accent); color: var(--on-accent); }
 .btn-primary:hover { background: var(--accent-hov); }
-.btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+.btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border-control); }
 .btn-secondary:hover { background: var(--surface-hov); }
 .btn-ghost { background: transparent; color: var(--fg-secondary); }
 .btn-ghost:hover { background: var(--surface-hov); }
-.btn-icon { padding: 0; width: 30px; height: 30px; justify-content: center; background: var(--surface); border: 1px solid var(--border); color: var(--fg-secondary); border-radius: var(--radius-1); }
+.btn-icon { padding: 0; width: 30px; height: 30px; justify-content: center; background: var(--surface); border: 1px solid var(--border-control); color: var(--fg-secondary); border-radius: var(--radius-1); }
 .btn-icon:hover { background: var(--surface-hov); color: var(--fg); }
 .btn-icon.bare { border: none; background: transparent; }
 .btn-icon.bare:hover { background: color-mix(in oklch, var(--fg) 8%, transparent); color: var(--fg); }
@@ -188,7 +188,7 @@ button { font-family: inherit; cursor: pointer; }
 .panel .kv { display: flex; gap: 8px; font: var(--text-small); color: var(--fg-muted); margin-top: 8px; }
 .panel .kv .k { color: var(--fg-faint); width: 78px; flex: none; }
 .panel .kv .v { font: var(--text-id); color: var(--fg-secondary); }
-.locate-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-1); color: var(--signal-gold); }
+.locate-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--border-control); background: var(--surface); border-radius: var(--radius-1); color: var(--signal-gold); }
 .locate-btn:hover { background: var(--signal-gold-hi); border-color: var(--signal-gold); }
 
 /* ---- The requirement sheet ----------------------------------------------- */

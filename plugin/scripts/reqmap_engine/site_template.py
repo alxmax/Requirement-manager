@@ -19,14 +19,17 @@ SITE_TEMPLATE = """\
   `reqmap.py sync` on every run. Everything else is authored and preserved.
 -->
 <style>
+  /*##TOKENS:SITE##*/
   :root{
-    --paper:#ECE9E1; --card:#FBFAF6; --ink:#1F1D1A; --muted:#6B655C;
-    --line:#D9D4C8; --accent:#9A3B2E; --radius:12px; --maxw:980px;
+    --paper:#f2ead8; --card:#fdf8ed; --ink:#24201a; --muted:#6d6554;
+    --line:#dcd2b8; --accent:#0d64c8;
+    --radius:12px; --maxw:980px;
   }
   @media (prefers-color-scheme: dark){:root{
-    --paper:#171614; --card:#201F1C; --ink:#ECEAE4; --muted:#A39D92;
-    --line:#34312C; --accent:#D98474;
+    --paper:#17140f; --card:#26211a; --ink:#f3ede0; --muted:#9d9482;
+    --line:#3a3427; --accent:#3d92f5;
   }}
+  /*##/TOKENS:SITE##*/
   *{box-sizing:border-box}
   body{margin:0; background:var(--paper); color:var(--ink);
        font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,
