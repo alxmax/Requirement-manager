@@ -1,6 +1,6 @@
 ---
 generated: 2026-10-11
-engine: 2026-10-11
+engine: 2026-10-11.1
 nodes: 317
 edges: 121
 design pass-rate: 98% (121/124 source files without a design candidate)
@@ -414,30 +414,28 @@ graph LR
   f_plugin_scripts_reqmap_engine_scan_py_226_339["plugin/scripts/reqmap_engine/scan.py:226-339"]
   ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_engine_scan_py_226_339
   ARCH_ADOPT_075["Adoption before the whole tree is tagged<br><small>ARCH-ADOPT-075</small>"]
-  f_plugin_scripts_reqmap_engine_watch_py_217["plugin/scripts/reqmap_engine/watch.py:217"]
-  ARCH_ADOPT_075 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_217
+  f_plugin_scripts_reqmap_engine_watch_py_257["plugin/scripts/reqmap_engine/watch.py:257"]
+  ARCH_ADOPT_075 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_257
   REQ_WATCH_1092["Watch the files a change already touched<br><small>REQ-WATCH-1092</small>"]
   f_plugin_scripts_reqmap_py_330["plugin/scripts/reqmap.py:330"]
   REQ_WATCH_1092 -->|implements| f_plugin_scripts_reqmap_py_330
   f_plugin_scripts_test_reqmap_adopt_py_51["plugin/scripts/test_reqmap_adopt.py:51"]
   REQ_WATCH_1092 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_51
-  f_plugin_scripts_reqmap_engine_watch_py_22_218["plugin/scripts/reqmap_engine/watch.py:22-218"]
-  REQ_WATCH_1092 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_22_218
+  f_plugin_scripts_reqmap_engine_watch_py_24_258["plugin/scripts/reqmap_engine/watch.py:24-258"]
+  REQ_WATCH_1092 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_24_258
   REQ_PROPOSE_1093["The agent proposes a draft and a person confirms it<br><small>REQ-PROPOSE-1093</small>"]
   f_plugin_scripts_reqmap_py_330["plugin/scripts/reqmap.py:330"]
   REQ_PROPOSE_1093 -->|implements| f_plugin_scripts_reqmap_py_330
-  f_plugin_scripts_test_reqmap_adopt_py_133["plugin/scripts/test_reqmap_adopt.py:133"]
-  REQ_PROPOSE_1093 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_133
-  f_plugin_scripts_reqmap_engine_watch_py_22_218["plugin/scripts/reqmap_engine/watch.py:22-218"]
-  REQ_PROPOSE_1093 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_22_218
+  f_plugin_scripts_test_reqmap_adopt_py_163["plugin/scripts/test_reqmap_adopt.py:163"]
+  REQ_PROPOSE_1093 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_163
+  f_plugin_scripts_reqmap_engine_watch_py_24_258["plugin/scripts/reqmap_engine/watch.py:24-258"]
+  REQ_PROPOSE_1093 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_24_258
   REQ_EXTREPO_1094["The gate runs on a repository that is not this one<br><small>REQ-EXTREPO-1094</small>"]
-  f_plugin_scripts_test_reqmap_adopt_py_179["plugin/scripts/test_reqmap_adopt.py:179"]
-  REQ_EXTREPO_1094 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_179
+  f_plugin_scripts_test_reqmap_adopt_py_196["plugin/scripts/test_reqmap_adopt.py:196"]
+  REQ_EXTREPO_1094 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_196
   REQ_SURFACE_1095["The six verbs stay, and pip installs the same engine<br><small>REQ-SURFACE-1095</small>"]
-  f_plugin_scripts_test_reqmap_adopt_py_193["plugin/scripts/test_reqmap_adopt.py:193"]
-  REQ_SURFACE_1095 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_193
-  f_plugin_scripts_reqmap_engine_watch_py_233["plugin/scripts/reqmap_engine/watch.py:233"]
-  REQ_SURFACE_1095 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_233
+  f_plugin_scripts_test_reqmap_adopt_py_210["plugin/scripts/test_reqmap_adopt.py:210"]
+  REQ_SURFACE_1095 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_210
   ARCH_ATOMICITY_049["Statement atomicity<br><small>ARCH-ATOMICITY-049</small>"]
   f_plugin_scripts_test_reqmap_author_py_1584_2060["plugin/scripts/test_reqmap_author.py:1584-2060"]
   ARCH_ATOMICITY_049 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1584_2060
@@ -696,8 +694,8 @@ graph LR
   ARCH_MCP_073 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_3562
   f_plugin_scripts_test_reqmap_report_py_4891["plugin/scripts/test_reqmap_report.py:4891"]
   ARCH_MCP_073 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4891
-  f_plugin_scripts_reqmap_engine_mcp_py_10_399["plugin/scripts/reqmap_engine/mcp.py:10-399"]
-  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_10_399
+  f_plugin_scripts_reqmap_engine_mcp_py_10_380["plugin/scripts/reqmap_engine/mcp.py:10-380"]
+  ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcp_py_10_380
   f_plugin_scripts_reqmap_engine_mcpconfig_py_9["plugin/scripts/reqmap_engine/mcpconfig.py:9"]
   ARCH_MCP_073 -->|implements| f_plugin_scripts_reqmap_engine_mcpconfig_py_9
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
@@ -887,8 +885,8 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_perf_py_52
   f_scripts_test_check_retired_verbs_py_12["scripts/test_check_retired_verbs.py:12"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_retired_verbs_py_12
-  f_scripts_test_check_versions_py_94_101["scripts/test_check_versions.py:94-101"]
-  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_94_101
+  f_scripts_test_check_versions_py_97_104["scripts/test_check_versions.py:97-104"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_97_104
   f_scripts_test_pipeline_wiring_py_66["scripts/test_pipeline_wiring.py:66"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_pipeline_wiring_py_66
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]
@@ -1152,10 +1150,10 @@ graph LR
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
 | ARCH-ADOPT-075 | draft | 1 | 0 | unreviewed, untested | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |
-| REQ-WATCH-1092 | draft | 13 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-WATCH-1092 | draft | 15 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PROPOSE-1093 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-EXTREPO-1094 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SURFACE-1095 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-SURFACE-1095 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-LINTCHECKS-1089 | draft | 9 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PLANVERSIONBAR-1091 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VIEWER-1090 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

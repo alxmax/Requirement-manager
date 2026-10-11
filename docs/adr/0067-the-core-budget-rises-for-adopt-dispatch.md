@@ -3,7 +3,7 @@
 - **Status:** Accepted. Amends the number in [ADR-0065](0065-the-viewer-ships-no-demo-data.md).
 - **Decided:** 2026-10-11
 - **Evidence:** `python scripts/check_engine_budget.py` on this commit: core 6,646 logical
-  lines, physical total 17,774.
+  lines, physical total 17,788.
 
 ## Context
 

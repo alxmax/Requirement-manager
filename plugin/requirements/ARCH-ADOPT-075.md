@@ -14,7 +14,7 @@ owner: Alex
 
 Every bullet below is binding.
 - `init --watch REF` reports code files changed since REF that no requirement claims, and the commit subjects since REF, and it writes nothing. [[REQ-WATCH-1092]]
-- `init --propose` prints one requirement draft. The MCP tools `reqmap_watch` and `reqmap_propose` do the same work and do not write. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]
+- `init --propose` prints one requirement draft. It is a command-line flag, not an MCP tool. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]
 - `gate` run on a copy of a repository outside this one still reports that copy's own drift. [[REQ-EXTREPO-1094]]
 - The CLI stays six verbs, and a checkout can install that same engine with `pip install .`. [[REQ-SURFACE-1095]]
 
@@ -45,7 +45,8 @@ Every bullet below is binding.
 - A changed file that already has an `implements:` tag is not a suggestion. A file whose extension is not scanned code is not a suggestion.
 - A commit subject since REF is listed with `status` `draft`, except a subject of fewer than 8 characters and a subject that starts with `Merge `.
 - Issue trackers are not read, and the report says `issues` is `not read`.
-- A ref git cannot read exits 0 and the report's `error` says git could not read that ref.
+- A ref git cannot read exits 0 and the report's `error` says git could not read that ref. A ref that starts with `-` is the same answer: it is not passed to git, and the work tree is unchanged.
+- A path matching `.reqmapignore` is not a suggestion.
 - `gate --watch` exits 2 and names `init` as the verb that owns the flag.
 - At most 40 file suggestions and 40 commit subjects are printed. `truncated` is true only when a suggestion was left out.
 
@@ -80,6 +81,16 @@ CASE-6 — the caps say when a suggestion was left out
   When   `init --watch` runs
   Then   `truncated` is false
 
+CASE-7 — a ref that starts with a dash is not a git option
+  Given  `--watch` whose value starts with `-` and names a file
+  When   `init --watch` runs
+  Then   the process exits 0, `ok` is false, the error says git could not read that ref, and that file was not created
+
+CASE-8 — an ignored path is not a suggestion
+  Given  `.reqmapignore` matches `vendor/**` and that tree changed
+  When   `init --watch` runs
+  Then   no path under `vendor/` is a suggestion
+
 --------------------
 
 
@@ -100,7 +111,7 @@ Every bullet below is binding.
 - `init --propose TEXT` prints one requirement whose frontmatter `status` is `draft`, and it writes no file. The printed body tells a person to set `status: confirmed` after reading it. The frontmatter does not say confirmed.
 - `--propose-files` records those paths in the draft. Without `--propose` the command exits 2.
 - `--watch` and `--propose` on the same command exit 2 and write nothing.
-- `reqmap_watch` and `reqmap_propose` are read-only MCP tools. Their arguments become `init --watch` and `init --propose`. They are offered when the server was started without `--allow-writes`.
+- The MCP server does not offer a tool named `reqmap_watch` or `reqmap_propose`. The same work stays the command-line flags.
 
 ## Cases
 CASE-1 — propose prints a draft and writes nothing
@@ -108,10 +119,10 @@ CASE-1 — propose prints a draft and writes nothing
   When   `init --propose` runs with `--propose-files`
   Then   stdout contains `status: draft`, the frontmatter does not say confirmed, the body tells a person to set `status: confirmed`, the path is in the text, and no requirement file exists afterwards
 
-CASE-2 — the two MCP tools are read-only CLI calls
+CASE-2 — watch and propose are not MCP tools
   Given  the MCP tool table
-  When   `reqmap_watch` and `reqmap_propose` are read, and a server without `--allow-writes` lists tools
-  Then   both are read-only, both are listed, and their arguments are `init --watch` and `init --propose`
+  When   its names are read
+  Then   `reqmap_watch` and `reqmap_propose` are absent
 
 CASE-3 — watch and propose together are refused
   Given  both `--watch` and `--propose` on one `init`
@@ -162,7 +173,7 @@ owner: Alex
 
 Every bullet below is binding.
 - The command registry's verbs are `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`.
-- `pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap_engine.watch:console_main`.
+- `pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.
 - The licence string in that file is MIT.
 
 ## Cases
@@ -174,4 +185,4 @@ CASE-1 — the verb set is the six
 CASE-2 — the package metadata names reqmap
   Given  `pyproject.toml` at the repository root
   When   it is read
-  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap_engine.watch:console_main`
+  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap:_run_cli`

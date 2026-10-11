@@ -4,6 +4,7 @@ Neither command writes a requirement, and neither sets status: confirmed.
 Issue trackers are not read. Imported only when one of these flags is
 used, so a bare gate does not load this module.
 """
+import fnmatch
 import hashlib
 import json
 import os
@@ -11,6 +12,7 @@ import sys
 
 from . import config as cfg
 from .git import _git
+from .scan import load_ignore
 from .tags import TAG_RE
 
 FILE_CAP = 40
@@ -100,11 +102,39 @@ def _tagged(path):
     return any(role == "implements" for role, _id in TAG_RE.findall(text))
 
 
+def _commit(code_root, ref):
+    # implements: REQ-WATCH-1092
+    """The commit sha for ref, or None.
+
+    A ref that starts with '-' is refused before git sees it. Otherwise it
+    would be an option (`--output=...`) on the diff that follows, and git
+    would write a file while this command reports that it wrote nothing.
+    """
+    if not ref or ref.startswith("-"):
+        return None
+    out = _git(["rev-parse", "--verify", "--end-of-options",
+                ref + "^{commit}"], cwd=code_root)
+    if not out:
+        return None
+    sha = out.strip().splitlines()[0].strip()
+    if not sha or sha.startswith("-"):
+        return None
+    return sha
+
+
+def _ignored(code_root, rel):
+    # implements: REQ-WATCH-1092
+    """True when `.reqmapignore` would keep the scan off this path."""
+    reqs = os.path.join(code_root, "requirements")
+    pats = load_ignore(code_root, reqs)
+    return any(fnmatch.fnmatch(rel, pat) for pat in pats)
+
+
 def _paths_since(code_root, ref):
     # implements: REQ-WATCH-1092
     """Paths changed since ref, plus untracked files. None when ref fails."""
-    named = _git(["diff", "--name-only", "--relative", ref, "--"],
-                 cwd=code_root)
+    named = _git(["diff", "--name-only", "--relative", "--end-of-options",
+                  ref, "--"], cwd=code_root)
     if named is None:
         return None
     others = _git(["ls-files", "--others", "--exclude-standard"],
@@ -123,7 +153,8 @@ def _paths_since(code_root, ref):
 def _subjects(code_root, ref):
     # implements: REQ-WATCH-1092
     """Commit subjects since ref, without subjects that start with Merge."""
-    log = _git(["log", "--format=%s", ref + "..HEAD"], cwd=code_root)
+    log = _git(["log", "--format=%s", "--end-of-options", ref + "..HEAD"],
+               cwd=code_root)
     if log is None:
         return []
     kept = []
@@ -139,7 +170,7 @@ def _suggestions(code_root, ref, paths):
     # implements: REQ-WATCH-1092
     used, out, over = {}, [], 0
     for rel in paths:
-        if not _code_path(rel):
+        if not _code_path(rel) or _ignored(code_root, rel):
             continue
         full = os.path.join(code_root, *rel.split("/"))
         if _tagged(full):
@@ -172,7 +203,16 @@ def cmd_watch(code_root, ref):
     if not ref:
         print("reqmap init: --watch needs a git ref", file=sys.stderr)
         return 2
-    paths = _paths_since(code_root, ref)
+    sha = _commit(code_root, ref)
+    if sha is None:
+        payload = {
+            "ok": False, "ref": ref, "writes": False,
+            "error": "git could not read that ref",
+            "files": [], "commits": [], "issues": "not read",
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return 0
+    paths = _paths_since(code_root, sha)
     if paths is None:
         payload = {
             "ok": False, "ref": ref, "writes": False,
@@ -182,7 +222,7 @@ def cmd_watch(code_root, ref):
         print(json.dumps(payload, indent=2, ensure_ascii=False))
         return 0
     files, over = _suggestions(code_root, ref, paths)
-    subjects = _subjects(code_root, ref)
+    subjects = _subjects(code_root, sha)
     commits = [{"source": "commit", "subject": text, "status": "draft",
                 "needs_confirmation": True}
                for text in subjects[:COMMIT_CAP]]
@@ -227,10 +267,3 @@ def dispatch_adopt(args, code_root):
     if args.propose:
         return cmd_propose(args.propose, args.propose_files or "")
     return cmd_watch(code_root, args.watch)
-
-
-def console_main():
-    # implements: REQ-SURFACE-1095
-    """Entry point for the `reqmap` console script (`pip install .`)."""
-    import reqmap
-    sys.exit(reqmap._run_cli())

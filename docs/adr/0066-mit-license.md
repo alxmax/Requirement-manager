@@ -3,8 +3,7 @@
 - **Status:** Accepted. Supersedes [ADR-0013](0013-business-source-license.md).
 - **Decided:** 2026-10-11
 - **Evidence:** `LICENSE`; ADR-0013's revisit condition; `git shortlog -sn` (one human
-  author); the adoption notes that named the Business Source License as the review a
-  team walks away from.
+  author); `ROADMAP.md` (the parked licence item, now done); `.github/ISSUE_TEMPLATE/tried-on-my-repo.yml`.
 
 ## Context
 

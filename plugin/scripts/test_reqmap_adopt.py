@@ -129,6 +129,36 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
         self.assertEqual(2, done.returncode)
         self.assertIn("init", done.stderr)
 
+    def test_a_dash_ref_is_not_a_git_option(self):
+        # verifies: REQ-WATCH-1092#CASE-7
+        path = self._repo()
+        before = set(os.listdir(path))
+        done = _run(path, "init", "--watch", "--output=pwned x")
+        self.assertEqual(0, done.returncode, done.stderr)
+        report = json.loads(done.stdout)
+        self.assertFalse(report["ok"])
+        self.assertIn("git could not read that ref", report["error"])
+        self.assertFalse(os.path.exists(os.path.join(path, "pwned x")))
+        self.assertEqual(before, set(os.listdir(path)))
+
+    def test_an_ignored_path_is_not_suggested(self):
+        # verifies: REQ-WATCH-1092#CASE-8
+        path = self._repo()
+        vendor = os.path.join(path, "vendor")
+        os.makedirs(vendor)
+        with open(os.path.join(vendor, "lib.py"), "w", encoding="utf-8") as handle:
+            handle.write("x = 1\n")
+        with open(os.path.join(path, ".reqmapignore"), "w",
+                  encoding="utf-8") as handle:
+            handle.write("vendor/**\n")
+        _commit(path, "vendor code lands in the tree")
+        done = _run(path, "init", "--watch", "HEAD~1")
+        self.assertEqual(0, done.returncode, done.stderr)
+        report = json.loads(done.stdout)
+        self.assertTrue(report["ok"], report)
+        self.assertFalse(any(item["path"].startswith("vendor/")
+                             for item in report["files"]))
+
 
 class Propose(unittest.TestCase):  # tested-by: REQ-PROPOSE-1093 @unit
     def test_propose_prints_a_draft_and_writes_nothing(self):
@@ -146,24 +176,11 @@ class Propose(unittest.TestCase):  # tested-by: REQ-PROPOSE-1093 @unit
         self.assertIn("not written", done.stderr)
         self.assertFalse(os.path.isdir(os.path.join(path, "requirements")))
 
-    def test_the_mcp_tools_are_read_only_cli_calls(self):
+    def test_the_mcp_server_does_not_offer_watch_or_propose(self):
         # verifies: REQ-PROPOSE-1093#CASE-2
-        watch = next(t for t in R.mcp.MCP_TOOLS if t["name"] == "reqmap_watch")
-        propose = next(t for t in R.mcp.MCP_TOOLS
-                       if t["name"] == "reqmap_propose")
-        self.assertFalse(watch["writes"])
-        self.assertFalse(propose["writes"])
-        self.assertEqual(["init", "--watch", "main"],
-                         R.mcp.tool_argv(watch, {"ref": "main"}))
-        self.assertEqual(
-            ["init", "--propose", "Login rejects a blank email.",
-             "--propose-files", "src/login.py"],
-            R.mcp.tool_argv(propose, {
-                "summary": "Login rejects a blank email.",
-                "files": "src/login.py"}))
-        listed = {t["name"] for t in R.mcp.tool_list(False)}
-        self.assertIn("reqmap_watch", listed)
-        self.assertIn("reqmap_propose", listed)
+        names = {t["name"] for t in R.mcp.MCP_TOOLS}
+        self.assertNotIn("reqmap_watch", names)
+        self.assertNotIn("reqmap_propose", names)
 
     def test_watch_and_propose_together_are_refused(self):
         # verifies: REQ-PROPOSE-1093#CASE-3
@@ -205,5 +222,5 @@ class Surface(unittest.TestCase):  # tested-by: REQ-SURFACE-1095 @unit
         self.assertIn('name = "reqmap"', text)
         self.assertIn('requires-python = ">=3.9"', text)
         self.assertIn("MIT", text)
-        self.assertIn("reqmap_engine.watch:console_main", text)
-        self.assertTrue(callable(R.watch.console_main))
+        self.assertIn("reqmap:_run_cli", text)
+        self.assertTrue(callable(R._run_cli))

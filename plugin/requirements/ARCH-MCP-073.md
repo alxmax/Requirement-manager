@@ -134,10 +134,9 @@ Every bullet below is binding.
 - A call's result carries the command's output as text and, when the exit code is not zero,
   a second item naming it. `isError` is set only for an exit code the tool does not count as
   an answer: `reqmap_gate`'s exit 1 is a FAIL verdict, not an error.
-- The thirteen tools from `reqmap_gate` through `reqmap_release` stay, plus the read-only
-  `reqmap_watch` and `reqmap_propose`, which write nothing and do not set `status: confirmed`.
-- Removing or renaming one of the thirteen is a change to this clause first
-  (`reqmap_design` left with the design review in v8.2.0, ADR-0047).
+- The tool set is frozen at its thirteen tools until a consumer other than the maintainer
+  uses the server: a fourteenth, or a renamed one, is a change to this clause first.
+  `reqmap_design` left with the design review in v8.2.0 (ADR-0047).
 
 ## Cases
 CASE-1 — the tools name only what the CLI has
@@ -165,11 +164,11 @@ CASE-5 — a release plan passes --release with or without a version
   When   the arguments are built
   Then   they are `sync --json --release` and `sync --json --release v1.2.0`
 
-CASE-6 — the thirteen stay, and two read-only tools sit beside them
+CASE-6 — the tool set is frozen
   Given  the tool table
   When   its names are read
-  Then   it contains the thirteen from `reqmap_gate` to `reqmap_release`, plus
-         `reqmap_watch` and `reqmap_propose`, and no other name
+  Then   they are exactly the fourteen of 2026-09-21 less `reqmap_design`, from `reqmap_gate`
+         to `reqmap_release`
 
 
 --------------------

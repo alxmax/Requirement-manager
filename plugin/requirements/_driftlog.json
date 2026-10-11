@@ -306,8 +306,8 @@
       "reason": "Compact export contracts and cases"
     },
     "REQ-MCPTOOLS-1028": {
-      "hash": "9d9bc6ce141e",
-      "reason": "Shorten the REQ-MCPTOOLS-1028 tool-set clause so it stays under the statement-length lint."
+      "hash": "938eb7ec8f3e",
+      "reason": "REQ-MCPTOOLS-1028 stays the thirteen-tool freeze. init --watch and init --propose remain command-line flags."
     },
     "REQ-MODULEFILE-056": {
       "hash": "f5c9407f0cfe",

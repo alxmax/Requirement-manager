@@ -17,7 +17,7 @@ Homepage = "https://github.com/alxmax/requirement-manager"
 Repository = "https://github.com/alxmax/requirement-manager"
 
 [project.scripts]
-reqmap = "reqmap_engine.watch:console_main"
+reqmap = "reqmap:_run_cli"
 
 [tool.setuptools]
 package-dir = {"" = "plugin/scripts"}

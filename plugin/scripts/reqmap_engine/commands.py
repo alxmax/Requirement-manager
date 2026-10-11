@@ -60,7 +60,7 @@ COMMANDS = {
             {"name": "watch", "flag": "--watch",
              "consumer": [
                  "docs/commands.md",
-                 "plugin/scripts/reqmap_engine/mcp.py",
+                 "docs/stability.md",
              ],
              "type": "str",
              "help": "Print draft suggestions for code files changed since "
@@ -69,13 +69,13 @@ COMMANDS = {
             {"name": "propose", "flag": "--propose",
              "consumer": [
                  "docs/commands.md",
-                 "plugin/scripts/reqmap_engine/mcp.py",
+                 "docs/stability.md",
              ],
              "type": "str",
              "help": "Print one requirement draft from this description. "
                      "status stays draft. Writes nothing."},
             {"name": "propose_files", "flag": "--propose-files",
-             "consumer": "plugin/scripts/reqmap_engine/mcp.py",
+             "consumer": "docs/commands.md",
              "type": "str",
              "help": "With --propose: comma-separated paths the draft is "
                      "about."},

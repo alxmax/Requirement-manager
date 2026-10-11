@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "4557262deaf45da195681f8b622d5511295c1ccebaf6cb04215e967bf1f44b6f",
+      "plugin/scripts/reqmap_engine/__init__.py": "36f5721c7822981827830b8fadfb63d9188a388bf54da707bcad9740f0602e62",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -53,7 +53,7 @@
       "plugin/scripts/reqmap_engine/text.py#_title": "51c31658b44ec1f4f9842114eea2b428852d59f73bcf9d5aa8d091a8af297d1a"
     },
     "ARCH-MCP-073": {
-      "plugin/scripts/reqmap_engine/mcp.py": "f245f2f1a8ad29b3c51bc7c4cce40d3b604cf5db7572d34758555d54175693d4",
+      "plugin/scripts/reqmap_engine/mcp.py": "3b2f2f0e921f5dc71665d87aa19a0a092eb1a422526b9acfa35cb496891485ca",
       "plugin/scripts/reqmap_engine/mcpconfig.py": "aaedfc55b96808b974ffcc58eb0edd3ef6b678255c558e7ac5ba5b6c1a55c067"
     },
     "ARCH-MEMBERDRIFT-027": {
@@ -95,7 +95,7 @@
       "scripts/check_engine_budget.py": "42b1b160ae9701fc66938f688016c3e8a3823ae8fd5505c0657b67ee4eb38072",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
-      "scripts/check_versions.py": "856555c68b5bbb9d2a1a24eaa6c3d1baeaf9d006fa55be72b49f41d5df223130",
+      "scripts/check_versions.py": "551ca19cd2f14828363ae29a8008afd76ed881df759ad08a84363d68160609b7",
       "scripts/gen_tokens.py": "124496cc5539e3be51264333289a7af08e60dab14c9e3f47f251f7f1d5af25de"
     },
     "ARCH-SIMILAR-016": {
@@ -429,9 +429,6 @@
       "plugin/scripts/reqmap_engine/similar.py#_add_test_suite_links": "e08f67cb1e79680c579f560d48467d011d53e899d5ebbb5f1e1db6c52e265ce7",
       "plugin/scripts/reqmap_engine/similar.py#_test_suite_pairs": "d126a0b2084b3d99d483cd4110d3c08bc3803485662749d304f0cdab69828cbd"
     },
-    "REQ-SURFACE-1095": {
-      "plugin/scripts/reqmap_engine/watch.py#console_main": "7ade6ec3bc71a72d20eabe3167b4ced48830fdea22ad9ad3e5b377928cfca8aa"
-    },
     "REQ-TESTGAPS-1088": {
       "plugin/scripts/reqmap_engine/testgaps.py#case_gaps": "5dc6f710dde83112c1b7ea4f7eaaa3ea4a820ca9a9d396a77c5367b8880ac963",
       "plugin/scripts/reqmap_engine/testgaps.py#empty_exemptions": "3e3aa465b4d535d0b6d53446515e7c84a2064f5a5ee2289ea61a285cff41c273",
@@ -460,12 +457,14 @@
     },
     "REQ-WATCH-1092": {
       "plugin/scripts/reqmap_engine/watch.py#_code_path": "8f2c7fd02d6333463fdce42d905adede6aa5a299002e00a02782b3e1de8155b0",
-      "plugin/scripts/reqmap_engine/watch.py#_paths_since": "c8a20cf2de51e5cd77003e146bc8416629eed8957960e03bdaccb2da440e45da",
+      "plugin/scripts/reqmap_engine/watch.py#_commit": "0f0e0a874eef376ec2ae68d2fb6865134be3a50313c1db427edb1c6c4ebe04ff",
+      "plugin/scripts/reqmap_engine/watch.py#_ignored": "2d6e30f60d4dfac2f05032da4e194bfb2823b68d43b1f6273901cb9d84a030b4",
+      "plugin/scripts/reqmap_engine/watch.py#_paths_since": "ffcc7ff0624ac9d1fe61f712611d8cdff29e089a050ba449c5ac2e982625d8b1",
       "plugin/scripts/reqmap_engine/watch.py#_stem_token": "c7ce1aa070d2486225267aaddca6479f0f2a97aa2d8022ccb3fc093ec1cf4659",
-      "plugin/scripts/reqmap_engine/watch.py#_subjects": "3842909b544d7ce2e078fd612353ccafaf2d4d24660546f99b2ecdd14339c420",
-      "plugin/scripts/reqmap_engine/watch.py#_suggestions": "4c560892512eed59a9d78ccd330b593913249085386fa417375906b1addb071b",
+      "plugin/scripts/reqmap_engine/watch.py#_subjects": "8327a7ba61ee79dab26a5fa89e1bcad02247e83470d2565029e89eb977c00514",
+      "plugin/scripts/reqmap_engine/watch.py#_suggestions": "feaad7c2a1d5e89e0fd5653a01ea5f1505a9dbdda9421382ce0c6a46f9382971",
       "plugin/scripts/reqmap_engine/watch.py#_tagged": "0d020738b683d9539e208e0ab4ecd2908cb8ae55f3bfee45fcc7e67e02561754",
-      "plugin/scripts/reqmap_engine/watch.py#cmd_watch": "69fc0e360ecf4f03151585972214d058f37263b3405b434ee203f1ce0d01b299"
+      "plugin/scripts/reqmap_engine/watch.py#cmd_watch": "343570d7572fd6b59d7db46a97e2ee10396c553540ed5776c86db7f89414f04d"
     }
   }
 }

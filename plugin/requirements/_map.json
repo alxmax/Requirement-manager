@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-11",
+  "engine_version": "2026-10-11.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -313,7 +313,7 @@
       "intent": "A team that has to tag every file before the tool says anything useful does not start. The first run has to be useful on the files a change already touched, and a draft is not a contract until a person has read it.",
       "contract": [
         "`init --watch REF` reports code files changed since REF that no requirement claims, and the commit subjects since REF, and it writes nothing. [[REQ-WATCH-1092]]",
-        "`init --propose` prints one requirement draft. The MCP tools `reqmap_watch` and `reqmap_propose` do the same work and do not write. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]",
+        "`init --propose` prints one requirement draft. It is a command-line flag, not an MCP tool. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]",
         "`gate` run on a copy of a repository outside this one still reports that copy's own drift. [[REQ-EXTREPO-1094]]",
         "The CLI stays six verbs, and a checkout can install that same engine with `pip install .`. [[REQ-SURFACE-1095]]"
       ],
@@ -331,7 +331,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:217"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:257"
         }
       ],
       "test_exempt": null,
@@ -361,14 +361,15 @@
         "A changed file that already has an `implements:` tag is not a suggestion. A file whose extension is not scanned code is not a suggestion.",
         "A commit subject since REF is listed with `status` `draft`, except a subject of fewer than 8 characters and a subject that starts with `Merge `.",
         "Issue trackers are not read, and the report says `issues` is `not read`.",
-        "A ref git cannot read exits 0 and the report's `error` says git could not read that ref.",
+        "A ref git cannot read exits 0 and the report's `error` says git could not read that ref. A ref that starts with `-` is the same answer: it is not passed to git, and the work tree is unchanged.",
+        "A path matching `.reqmapignore` is not a suggestion.",
         "`gate --watch` exits 2 and names `init` as the verb that owns the flag.",
         "At most 40 file suggestions and 40 commit subjects are printed. `truncated` is true only when a suggestion was left out."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an untagged changed file is a draft suggestion\n  Given  a commit that adds a code file with no `implements:` tag, and a `.txt` file in the same commit\n  When   `init --watch` is run against the parent commit\n  Then   the code file is a suggestion with `status` `draft` and `needs_confirmation` true, the `.txt` file is absent, and no requirement file was written\n\nCASE-2 — a file that already has an implements tag is skipped\n  Given  a code file changed since REF whose text contains an `implements:` tag\n  When   `init --watch REF` runs\n  Then   that path is not among the suggestions\n\nCASE-3 — a subject that starts with Merge is omitted\n  Given  one commit subject that starts with `Merge ` and one that does not, both since REF\n  When   `init --watch REF` runs\n  Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`\n\nCASE-4 — a ref git cannot read exits 0\n  Given  a git repository and a ref that does not exist\n  When   `init --watch` is given that ref\n  Then   the process exits 0 and the report's `error` says git could not read that ref\n\nCASE-5 — gate does not own --watch\n  Given  `--watch` passed to `gate`\n  When   the command runs\n  Then   it exits 2 and the message names `init`\n\nCASE-6 — the caps say when a suggestion was left out\n  Given  fewer changed code files than 40 and fewer commit subjects than 40\n  When   `init --watch` runs\n  Then   `truncated` is false\n\n--------------------",
+      "accept": "CASE-1 — an untagged changed file is a draft suggestion\n  Given  a commit that adds a code file with no `implements:` tag, and a `.txt` file in the same commit\n  When   `init --watch` is run against the parent commit\n  Then   the code file is a suggestion with `status` `draft` and `needs_confirmation` true, the `.txt` file is absent, and no requirement file was written\n\nCASE-2 — a file that already has an implements tag is skipped\n  Given  a code file changed since REF whose text contains an `implements:` tag\n  When   `init --watch REF` runs\n  Then   that path is not among the suggestions\n\nCASE-3 — a subject that starts with Merge is omitted\n  Given  one commit subject that starts with `Merge ` and one that does not, both since REF\n  When   `init --watch REF` runs\n  Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`\n\nCASE-4 — a ref git cannot read exits 0\n  Given  a git repository and a ref that does not exist\n  When   `init --watch` is given that ref\n  Then   the process exits 0 and the report's `error` says git could not read that ref\n\nCASE-5 — gate does not own --watch\n  Given  `--watch` passed to `gate`\n  When   the command runs\n  Then   it exits 2 and the message names `init`\n\nCASE-6 — the caps say when a suggestion was left out\n  Given  fewer changed code files than 40 and fewer commit subjects than 40\n  When   `init --watch` runs\n  Then   `truncated` is false\n\nCASE-7 — a ref that starts with a dash is not a git option\n  Given  `--watch` whose value starts with `-` and names a file\n  When   `init --watch` runs\n  Then   the process exits 0, `ok` is false, the error says git could not read that ref, and that file was not created\n\nCASE-8 — an ignored path is not a suggestion\n  Given  `.reqmapignore` matches `vendor/**` and that tree changed\n  When   `init --watch` runs\n  Then   no path under `vendor/` is a suggestion\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -387,47 +388,55 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:22"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:27"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:29"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:36"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:38"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:72"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:74"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:82"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:84"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:93"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:95"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:104"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:106"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:124"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:126"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:139"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:134"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:168"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:218"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:170"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:199"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:258"
         }
       ],
       "test_exempt": null,
@@ -439,8 +448,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 6,
-      "covered": 6
+      "clauses": 8,
+      "covered": 8
     },
     {
       "id": "REQ-PROPOSE-1093",
@@ -454,12 +463,12 @@
         "`init --propose TEXT` prints one requirement whose frontmatter `status` is `draft`, and it writes no file. The printed body tells a person to set `status: confirmed` after reading it. The frontmatter does not say confirmed.",
         "`--propose-files` records those paths in the draft. Without `--propose` the command exits 2.",
         "`--watch` and `--propose` on the same command exit 2 and write nothing.",
-        "`reqmap_watch` and `reqmap_propose` are read-only MCP tools. Their arguments become `init --watch` and `init --propose`. They are offered when the server was started without `--allow-writes`."
+        "The MCP server does not offer a tool named `reqmap_watch` or `reqmap_propose`. The same work stays the command-line flags."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — propose prints a draft and writes nothing\n  Given  a description and one file path\n  When   `init --propose` runs with `--propose-files`\n  Then   stdout contains `status: draft`, the frontmatter does not say confirmed, the body tells a person to set `status: confirmed`, the path is in the text, and no requirement file exists afterwards\n\nCASE-2 — the two MCP tools are read-only CLI calls\n  Given  the MCP tool table\n  When   `reqmap_watch` and `reqmap_propose` are read, and a server without `--allow-writes` lists tools\n  Then   both are read-only, both are listed, and their arguments are `init --watch` and `init --propose`\n\nCASE-3 — watch and propose together are refused\n  Given  both `--watch` and `--propose` on one `init`\n  When   the command runs\n  Then   it exits 2 and writes no requirement file\n\n--------------------",
+      "accept": "CASE-1 — propose prints a draft and writes nothing\n  Given  a description and one file path\n  When   `init --propose` runs with `--propose-files`\n  Then   stdout contains `status: draft`, the frontmatter does not say confirmed, the body tells a person to set `status: confirmed`, the path is in the text, and no requirement file exists afterwards\n\nCASE-2 — watch and propose are not MCP tools\n  Given  the MCP tool table\n  When   its names are read\n  Then   `reqmap_watch` and `reqmap_propose` are absent\n\nCASE-3 — watch and propose together are refused\n  Given  both `--watch` and `--propose` on one `init`\n  When   the command runs\n  Then   it exits 2 and writes no requirement file\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -474,27 +483,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:133"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:163"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:22"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:27"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:29"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:36"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:38"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:200"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:218"
+          "loc": "plugin/scripts/reqmap_engine/watch.py:258"
         }
       ],
       "test_exempt": null,
@@ -534,7 +543,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:179"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:196"
         }
       ],
       "test_exempt": null,
@@ -559,13 +568,13 @@
       "intent": "Adding a verb breaks every document and every caller that lists them. A new flag on a verb that already exists does not. The copy-two-files install stays; pip is a second way to put that same engine on `PATH`.",
       "contract": [
         "The command registry's verbs are `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`.",
-        "`pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap_engine.watch:console_main`.",
+        "`pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.",
         "The licence string in that file is MIT."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap_engine.watch:console_main`",
+      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap:_run_cli`",
       "input": "",
       "output": "",
       "desc": "",
@@ -576,11 +585,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:193"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/watch.py:233"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:210"
         }
       ],
       "test_exempt": null,
@@ -9459,15 +9464,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:161"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:359"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:340"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:399"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:380"
         },
         {
           "role": "implements",
@@ -9516,19 +9521,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:256"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:237"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:359"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:340"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:383"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:364"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:399"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:380"
         }
       ],
       "test_exempt": null,
@@ -9552,13 +9557,12 @@
         "Each argument becomes its own argument to `reqmap.py`, never text for a shell; an unknown, missing required or wrongly typed argument is error -32602.",
         "`reqmap_show`, `reqmap_search` and `reqmap_dupes` run their command with `--json`.",
         "A call's result carries the command's output as text and, when the exit code is not zero, a second item naming it. `isError` is set only for an exit code the tool does not count as an answer: `reqmap_gate`'s exit 1 is a FAIL verdict, not an error.",
-        "The thirteen tools from `reqmap_gate` through `reqmap_release` stay, plus the read-only `reqmap_watch` and `reqmap_propose`, which write nothing and do not set `status: confirmed`.",
-        "Removing or renaming one of the thirteen is a change to this clause first (`reqmap_design` left with the design review in v8.2.0, ADR-0047)."
+        "The tool set is frozen at its thirteen tools until a consumer other than the maintainer uses the server: a fourteenth, or a renamed one, is a change to this clause first. `reqmap_design` left with the design review in v8.2.0 (ADR-0047)."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `ask --search \"a b\" --top 3` as separate arguments\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release v1.2.0`\n\nCASE-6 — the thirteen stay, and two read-only tools sit beside them\n  Given  the tool table\n  When   its names are read\n  Then   it contains the thirteen from `reqmap_gate` to `reqmap_release`, plus\n         `reqmap_watch` and `reqmap_propose`, and no other name\n\n\n--------------------",
+      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `ask --search \"a b\" --top 3` as separate arguments\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release v1.2.0`\n\nCASE-6 — the tool set is frozen\n  Given  the tool table\n  When   its names are read\n  Then   they are exactly the fourteen of 2026-09-21 less `reqmap_design`, from `reqmap_gate`\n         to `reqmap_release`\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -9579,19 +9583,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:161"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:186"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:216"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:236"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:217"
         }
       ],
       "test_exempt": null,
@@ -9686,19 +9690,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:273"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:254"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:282"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:263"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:305"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:286"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mcp.py:315"
+          "loc": "plugin/scripts/reqmap_engine/mcp.py:296"
         }
       ],
       "test_exempt": null,
@@ -15855,11 +15859,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:94"
+          "loc": "scripts/test_check_versions.py:97"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:101"
+          "loc": "scripts/test_check_versions.py:104"
         },
         {
           "role": "tested-by",
@@ -24414,7 +24418,7 @@
           "version": "v8.20.0",
           "date": "2026-10-11",
           "headline": "MIT, and a first run that does not ask you to tag the whole tree",
-          "body": "**MIT, and a first run that does not ask you to tag the whole tree.**\n\n- The licence is MIT (ADR-0066). ADR-0013's Business Source License 1.1 is superseded. The copyright holder is the sole human author, and the 2030-06-05 change date no longer applies\n- `init --watch REF` prints draft suggestions for code files changed since REF that no requirement claims, and the commit subjects in between. It writes nothing and exits 0, including when git cannot read the ref, so it can run on a pull request without failing the build. Issue trackers are not read (REQ-WATCH-1092)\n- `init --propose TEXT` prints one requirement draft. `status` stays `draft`. A person sets `status: confirmed` after reading it. The MCP server offers the same two jobs as the read-only tools `reqmap_watch` and `reqmap_propose`; the thirteen tools already there stay (REQ-PROPOSE-1093, REQ-MCPTOOLS-1028)\n- The six verbs are the stable command line from this version. Removing or renaming one is a major. `pip install .` from a checkout installs the same engine as the `reqmap` command; copying `reqmap.py` and `reqmap_engine/` stays the offline install (REQ-SURFACE-1095, [docs/stability.md](docs/stability.md))\n- `gate` on a copy of `examples/hello-drift` outside this repository is now a test (REQ-EXTREPO-1094). [docs/case-studies.md](docs/case-studies.md) asks for a write-up from a tree this project does not maintain. None is published yet\n- **One-time drift.** `REQ-MCPTOOLS-1028`'s contract now names the two new tools. Re-read it; this release accepts that drift\n- The engine's core rises from 6,640 to 6,646 logical lines (17,774 physical lines in all): the dispatch for `--watch` and `--propose`. The work itself loads only when those flags are used (ADR-0067)",
+          "body": "**MIT, and a first run that does not ask you to tag the whole tree.**\n\n- The licence is MIT (ADR-0066). ADR-0013's Business Source License 1.1 is superseded. The copyright holder is the sole human author, and the 2030-06-05 change date no longer applies\n- `init --watch REF` prints draft suggestions for code files changed since REF that no requirement claims, and the commit subjects in between. The ref is resolved to a commit before git sees it; a value that starts with `-` is not passed to git. A path matching `.reqmapignore` is not a suggestion. It writes nothing and exits 0, including when git cannot read the ref, so it can run on a pull request without failing the build. Issue trackers are not read (REQ-WATCH-1092)\n- `init --propose TEXT` prints one requirement draft. `status` stays `draft`. A person sets `status: confirmed` after reading it. These two jobs are command-line flags. The MCP server stays the thirteen tools it already had (REQ-PROPOSE-1093, REQ-MCPTOOLS-1028)\n- The six verbs are the stable command line from this version. Removing or renaming one is a major. `pip install .` from a checkout installs the same engine as the `reqmap` command; copying `reqmap.py` and `reqmap_engine/` stays the offline install (REQ-SURFACE-1095, [docs/stability.md](docs/stability.md))\n- `gate` on a copy of `examples/hello-drift` outside this repository is now a test (REQ-EXTREPO-1094). [docs/case-studies.md](docs/case-studies.md) asks for a write-up from a tree this project does not maintain. None is published yet\n- **One-time drift.** `REQ-MCPTOOLS-1028` stays the thirteen-tool freeze. Re-read it; this release accepts that the wording is the freeze, not two extra tools\n- The engine's core rises from 6,640 to 6,646 logical lines (17,788 physical lines in all): the dispatch for `--watch` and `--propose`. The work itself loads only when those flags are used (ADR-0067)",
           "first_commit": "2026-10-11",
           "last_commit": "2026-10-11"
         },
@@ -24762,7 +24766,7 @@
     "exempt": 0,
     "deprecated": 21,
     "confirmed": 288,
-    "implemented": 286,
+    "implemented": 285,
     "tested": 286,
     "drafts": 8,
     "orphans": 0,
@@ -24815,7 +24819,8 @@
         "id": "REQ-SURFACE-1095",
         "status": "draft",
         "why": [
-          "not confirmed"
+          "not confirmed",
+          "not implemented"
         ]
       },
       {
