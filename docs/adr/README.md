@@ -23,7 +23,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0010](0010-staleness-detection-in-the-action.md) | Staleness detection lives in the action, not the engine | Accepted |
 | [0011](0011-python-floor-is-what-ci-runs.md) | The Python floor is the oldest version CI runs | Accepted |
 | [0012](0012-internal-consistency-lint-rejected.md) | No internal-consistency lint | Rejected |
-| [0013](0013-business-source-license.md) | Business Source License 1.1 | Accepted (revisit trigger open) |
+| [0013](0013-business-source-license.md) | Business Source License 1.1 | Superseded by [0066](0066-mit-license.md) |
 | [0014](0014-engine-stays-one-file.md) | The engine stays one file, and gets no size gate | Accepted |
 | [0015](0015-aggregate-layer-instead-of-implicit-dependency-coverage.md) | A requirement covered by its dependencies is a declared layer, not an inference | Accepted |
 | [0016](0016-no-edge-case-marker.md) | No first-class edge-case marker, section, or heuristic | Rejected |
@@ -76,6 +76,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0063](0063-the-viewer-architecture-stays-whole.md) | ARCH-VIEWER-007 stays one capability, and its file-spread warning stands | Accepted |
 | [0064](0064-the-level-axis-is-a-tree.md) | The level axis is a tree: one parent each, needs nested one deep | Accepted |
 | [0065](0065-the-viewer-ships-no-demo-data.md) | The viewer ships no demo data; RM017 is retired with it | Accepted |
+| [0066](0066-mit-license.md) | MIT, brought forward from the BSL change date | Accepted |
+| [0067](0067-the-core-budget-rises-for-adopt-dispatch.md) | The core budget rises for the adopt-path dispatch | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

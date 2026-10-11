@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reqmap"
+version = "8.20.0"
+description = "Drift gate between a written requirement and the code that implements it."
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Schipor Alexandru"}]
+keywords = ["requirements", "drift", "traceability"]
+
+[project.urls]
+Homepage = "https://github.com/alxmax/requirement-manager"
+Repository = "https://github.com/alxmax/requirement-manager"
+
+[project.scripts]
+reqmap = "reqmap_engine.watch:console_main"
+
+[tool.setuptools]
+package-dir = {"" = "plugin/scripts"}
+py-modules = ["reqmap"]
+packages = ["reqmap_engine"]

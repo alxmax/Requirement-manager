@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v8.20.0` — 2026-10-11
+
+**MIT, and a first run that does not ask you to tag the whole tree.**
+
+- The licence is MIT (ADR-0066). ADR-0013's Business Source License 1.1 is superseded. The copyright holder is the sole human author, and the 2030-06-05 change date no longer applies
+- `init --watch REF` prints draft suggestions for code files changed since REF that no requirement claims, and the commit subjects in between. It writes nothing and exits 0, including when git cannot read the ref, so it can run on a pull request without failing the build. Issue trackers are not read (REQ-WATCH-1092)
+- `init --propose TEXT` prints one requirement draft. `status` stays `draft`. A person sets `status: confirmed` after reading it. The MCP server offers the same two jobs as the read-only tools `reqmap_watch` and `reqmap_propose`; the thirteen tools already there stay (REQ-PROPOSE-1093, REQ-MCPTOOLS-1028)
+- The six verbs are the stable command line from this version. Removing or renaming one is a major. `pip install .` from a checkout installs the same engine as the `reqmap` command; copying `reqmap.py` and `reqmap_engine/` stays the offline install (REQ-SURFACE-1095, [docs/stability.md](docs/stability.md))
+- `gate` on a copy of `examples/hello-drift` outside this repository is now a test (REQ-EXTREPO-1094). [docs/case-studies.md](docs/case-studies.md) asks for a write-up from a tree this project does not maintain. None is published yet
+- **One-time drift.** `REQ-MCPTOOLS-1028`'s contract now names the two new tools. Re-read it; this release accepts that drift
+- The engine's core rises from 6,640 to 6,646 logical lines (17,774 physical lines in all): the dispatch for `--watch` and `--propose`. The work itself loads only when those flags are used (ADR-0067)
+
 ## plugin `v8.19.0` — 2026-10-06
 
 **The viewer no longer invents requirements when it has no map.**

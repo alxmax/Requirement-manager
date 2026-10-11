@@ -105,6 +105,25 @@ MCP_TOOLS = (
      "description": "The questions a requirement has not answered, as "
                     "JSON; with no id, for the whole corpus.",
      "params": [_param("id", "str", _ID)]},
+    {"name": "reqmap_watch", "argv": ["init"], "writes": False,
+     "description": "Suggest draft requirements for code files changed "
+                    "since a git ref, plus commit subjects as unconfirmed "
+                    "intents. Writes nothing and does not fail a build. "
+                    "A person confirms any draft.",
+     "params": [_param("ref", "str",
+                       "Git ref to compare, for example main.",
+                       "--watch", required=True)]},
+    {"name": "reqmap_propose", "argv": ["init"], "writes": False,
+     "description": "Propose one requirement draft from a short "
+                    "description of new behaviour. status stays draft. "
+                    "Writes nothing. A person sets status: confirmed "
+                    "after reading it.",
+     "params": [_param("summary", "str",
+                       "What the new behaviour should do.",
+                       "--propose", required=True),
+                _param("files", "str",
+                       "Comma-separated paths the draft is about.",
+                       "--propose-files")]},
     {"name": "reqmap_release_plan", "argv": ["sync", *_JSON],
      "writes": False,
      "description": "The release `reqmap_release` would cut, as JSON: "

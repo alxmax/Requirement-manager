@@ -25,6 +25,7 @@ from test_reqmap_scan import *        # noqa: F401,F403
 from test_reqmap_gate import *        # noqa: F401,F403
 from test_reqmap_author import *      # noqa: F401,F403
 from test_reqmap_report import *      # noqa: F401,F403
+from test_reqmap_adopt import *       # noqa: F401,F403
 
 
 

@@ -114,8 +114,5 @@ Do not push tags by hand.
 
 ## Licensing
 
-The project is under the Business Source License 1.1 (see `LICENSE`) — source-available,
-not open source, converting to Apache 2.0 on 2030-06-05. By opening a PR you agree your
-contribution ships under those same terms. If that is a blocker for you, say so in an
-issue: the licence choice is on the roadmap to revisit, and a real contributor is exactly
-the trigger for revisiting it.
+The project is under the MIT License (see `LICENSE`). By opening a pull request you agree
+your contribution is under those same terms (ADR-0066).

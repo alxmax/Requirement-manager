@@ -3,7 +3,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_init",
-      "description": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring. ",
+      "description": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring. --watch REF prints draft suggestions for code files changed since REF, and the commit subjects in between, and writes nothing. --propose TEXT prints one requirement draft for a person to confirm, and writes nothing. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -34,6 +34,18 @@
           "no_site": {
             "type": "boolean",
             "description": "Skip the final site step (scaffolding docs/architecture.html)."
+          },
+          "watch": {
+            "type": "string",
+            "description": "Print draft suggestions for code files changed since this git ref, and the commit subjects in between. Writes nothing and exits 0."
+          },
+          "propose": {
+            "type": "string",
+            "description": "Print one requirement draft from this description. status stays draft. Writes nothing."
+          },
+          "propose_files": {
+            "type": "string",
+            "description": "With --propose: comma-separated paths the draft is about."
           }
         },
         "required": []

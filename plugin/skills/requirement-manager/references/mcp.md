@@ -20,10 +20,15 @@ works the same from the shell.
 | What is unanswered in a requirement? | `reqmap_clarify(id)` | `clarify ID --json` |
 | Review plan / tag coverage | `reqmap_review(id)` / `reqmap_untagged` | `ask --review` / `gate --risk --untagged` |
 | What would the next release cut? | `reqmap_release_plan` | `sync --release --json` |
+| What changed since this ref has no requirement yet? | `reqmap_watch(ref)` | `init --watch REF` |
+| Draft a requirement for what I just built | `reqmap_propose(summary)` | `init --propose TEXT` |
 
 **Resources.** `reqmap://requirement/<id>` is one requirement's dossier, and `reqmap://map`
 the committed `_map.json`. Attach a requirement as a resource when the task is "implement
 or change this requirement", so the contract is in context before any code is written.
+
+`reqmap_propose` returns a draft with `status: draft`. A person sets `status: confirmed`
+after reading it. The tool does not.
 
 **Writing is opt-in.** `reqmap_sync`, `reqmap_new` (deprecated) and `reqmap_release` exist only when the
 user started the server with `--allow-writes`. Without them, run `sync` in the terminal as

@@ -5,8 +5,10 @@
 
 ### Plain CLI (any tool, or no tool)
 
-Copy `reqmap.py` from `plugin/scripts/` into your repo's `scripts/` directory and
-run it directly. No AI assistant needed:
+Copy `reqmap.py` and the `reqmap_engine/` package from `plugin/scripts/` into your
+repo's `scripts/` directory and run them directly. No AI assistant needed. From a
+checkout of this repository, `pip install .` is the same engine on `PATH`; the copy
+stays the offline install ([docs/stability.md](stability.md)).
 
 ```bash
 # one-time copy
@@ -35,7 +37,8 @@ download.
 ### MCP server (Claude Code, VS Code with Copilot, any MCP client)
 
 `reqmap.py mcp` serves the engine over the Model Context Protocol on stdio. The assistant
-sees thirteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
+sees fifteen tools named for what they answer — `reqmap_gate`, `reqmap_next`,
+`reqmap_watch`, `reqmap_propose`,
 `reqmap_show(id)`, `reqmap_search(query)`, `reqmap_audit`, … — each one `reqmap.py`
 invocation in a fresh process, so the answer is exactly what the CLI prints, as JSON wherever
 the command has `--json`. It is **read-only by default**; `reqmap_sync` and `reqmap_release`

@@ -4745,12 +4745,12 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
     FROZEN_TOOLS = {"reqmap_gate", "reqmap_next", "reqmap_health", "reqmap_show", "reqmap_search",
                     "reqmap_audit", "reqmap_dupes", "reqmap_untagged",
                     "reqmap_review", "reqmap_clarify", "reqmap_release_plan", "reqmap_sync",
-                    "reqmap_release"}
+                    "reqmap_release", "reqmap_watch", "reqmap_propose"}
 
     def test_the_tool_set_is_frozen(self):  # verifies: REQ-MCPTOOLS-1028#CASE-6
         self.assertEqual(self.FROZEN_TOOLS, {t["name"] for t in R.mcp.MCP_TOOLS},
-                         "the MCP tool set is frozen until a consumer other than the maintainer "
-                         "uses the server (ROADMAP V2); change REQ-MCPTOOLS-1028 first")
+                         "the thirteen stay, and only reqmap_watch and reqmap_propose "
+                         "were added; change REQ-MCPTOOLS-1028 before changing this set")
 
     def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
         # verifies: ARCH-MCP-073#CASE-2
