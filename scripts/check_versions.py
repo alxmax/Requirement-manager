@@ -11,7 +11,8 @@ they agree, so drift fails the build instead of shipping silently.
 Three independent axes are checked:
   - semver  — canonical source is plugin/.claude-plugin/plugin.json `version`.
               Every occurrence in .claude-plugin/marketplace.json must equal it
-              (top-level `version` + each `plugins[].version`).
+              (top-level `version` + each `plugins[].version`), and so must
+              `[project].version` in pyproject.toml.
   - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py is
               an ISO date with a different purpose (staleness compare); it is
               only sanity-checked for valid YYYY-MM-DD shape, with an optional
@@ -78,11 +79,63 @@ def _load_json(path: Path) -> dict:
         raise SystemExit(2)
 
 
+def _pyproject_version() -> str:
+    """`[project].version` from pyproject.toml. Exits 2 when the file or the
+    key is missing: a checkout that installs with pip must not drift silently."""
+    path = REPO_ROOT / "pyproject.toml"
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as e:
+        print(f"ERROR  cannot read pyproject.toml: {e}")
+        raise SystemExit(2)
+    in_project = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_project = stripped == "[project]"
+            continue
+        if not in_project:
+            continue
+        matched = re.match(r'version\s*=\s*"([^"]+)"', stripped)
+        if matched:
+            return matched.group(1)
+    print("ERROR  no [project].version in pyproject.toml")
+    raise SystemExit(2)
+
+
+def _fix_pyproject(canonical: str) -> None:
+    """Rewrite `[project].version` to `canonical`. Leaves every other line."""
+    path = REPO_ROOT / "pyproject.toml"
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    in_project = False
+    found = False
+    rewritten = False
+    out = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_project = stripped == "[project]"
+        matched = re.match(r'(\s*version\s*=\s*")([^"]+)(".*)', line)
+        if in_project and matched and not found:
+            found = True
+            if matched.group(2) != canonical:
+                ending = "\n" if line.endswith("\n") else ""
+                line = matched.group(1) + canonical + matched.group(3)
+                if ending and not line.endswith("\n"):
+                    line += ending
+                rewritten = True
+        out.append(line)
+    if rewritten:
+        path.write_text("".join(out), encoding="utf-8")
+        print(f"fixed  pyproject.toml synced to {canonical!r}.")
+
+
 def _fix(canonical: str) -> int:
     """Propagate the canonical plugin.json version into every marketplace.json
-    occurrence, so a bump is one edit + one command instead of three hand-edits.
-    Rewrites only when something changed; preserves 2-space indent + trailing
-    NL."""
+    occurrence and into pyproject.toml, so a bump is one edit + one command
+    instead of four hand-edits. Rewrites only when something changed;
+    preserves 2-space indent + trailing NL."""
+    _fix_pyproject(canonical)
     market = _load_json(MARKETPLACE_JSON)
     before = json.dumps(market, sort_keys=True)
     market["version"] = canonical
@@ -205,6 +258,11 @@ def main(argv=None) -> int:
     # Every semver occurrence in marketplace.json must equal the canonical
     # source.
     occurrences, errors = _marketplace_checks(canonical)
+    py_ver = _pyproject_version()
+    occurrences.append(("pyproject.version", py_ver))
+    if py_ver != canonical:
+        errors.append(f"  pyproject.toml [project].version = {py_ver!r} "
+                      f"(expected {canonical!r})")
 
     # Engine version is a separate axis — only validate it is a real ISO date.
     try:

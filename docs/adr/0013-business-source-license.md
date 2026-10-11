@@ -1,6 +1,7 @@
 # ADR-0013 — Business Source License 1.1
 
-- **Status:** Accepted, with an open revisit trigger
+- **Status:** Superseded by [ADR-0066](0066-mit-license.md) (2026-10-11). The
+  reasoning below is left exactly as decided on 2026-06-05.
 - **Decided:** 2026-06-05 (change date set), SPDX id corrected 2026-06-16
 - **Evidence:** `LICENSE`; `CHANGELOG.md` `v2.3.1`; `TODO.md` v3
 

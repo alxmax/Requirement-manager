@@ -1,5 +1,28 @@
 # Changelog
 
+## plugin `v8.21.0` — 2026-10-11
+
+**A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks.**
+
+- `todos` in `_map.json` carries an item's indented lines as `detail`, dedented. An item with none has no `detail` key, so a `TODO.md` without indented lines produces the same map as before (REQ-MAP-871#CASE-8)
+- A version opened on the Plan lists its open `TODO.md` items in file order; an item with a `detail` opens to show it. Done items and other versions' items are not listed (REQ-PLANCADENCE-1000#CASE-8)
+- **The shipped band no longer stretches a patch series over weeks it did not ship in.** Patch releases of one minor version are drawn one block per ISO week, from the first to the last of their changelog dates; a series that runs over several weeks is labelled `v3.2.0-v3.2.3`, `v3.2.4-v3.2.9`, and a week with no release draws nothing. The commit dates stay on each release in the note. A release with no sibling is drawn as before (REQ-HISTORYWEEK-1098)
+- **A `|` inside an item's title stays in its name.** Only trailing `| key: value` segments are metadata, so `` - [ ] Split on `a|b` `` is no longer cut to ``Split on `a``. One behaviour change: a trailing `| text` that is not `key: value` used to be dropped from the name and is now part of it (REQ-MAP-871#CASE-9)
+- **One-time drift.** `REQ-HISTORY-1081` now says a `vX.Y.x` block is one ISO week on changelog dates, where it said first commit to last commit. Re-read it
+- The engine's core falls from 6,646 to 6,629 logical lines (17,819 physical lines in 75 files): TODO.md parsing moved to `todoparse.py`, which loads only where a `TODO.md` exists
+
+## plugin `v8.20.0` — 2026-10-11
+
+**MIT, and a first run that does not ask you to tag the whole tree.**
+
+- The licence is MIT (ADR-0066). ADR-0013's Business Source License 1.1 is superseded. The copyright holder is the sole human author, and the 2030-06-05 change date no longer applies
+- `init --watch REF` prints draft suggestions for code files changed since REF that no requirement claims, and the commit subjects in between. The ref is resolved to a commit before git sees it; a value that starts with `-` is not passed to git. A path matching `.reqmapignore` is not a suggestion. It writes nothing and exits 0, including when git cannot read the ref, so it can run on a pull request without failing the build. Issue trackers are not read (REQ-WATCH-1092)
+- `init --propose TEXT` prints one requirement draft. `status` stays `draft`. A person sets `status: confirmed` after reading it. These two jobs are command-line flags. The MCP server stays the thirteen tools it already had (REQ-PROPOSE-1093, REQ-MCPTOOLS-1028)
+- The six verbs are the stable command line from this version. Removing or renaming one is a major. `pip install .` from a checkout installs the same engine as the `reqmap` command; copying `reqmap.py` and `reqmap_engine/` stays the offline install (REQ-SURFACE-1095, [docs/stability.md](docs/stability.md))
+- `gate` on a copy of `examples/hello-drift` outside this repository is now a test (REQ-EXTREPO-1094). [docs/case-studies.md](docs/case-studies.md) asks for a write-up from a tree this project does not maintain. None is published yet
+- **One-time drift.** `REQ-MCPTOOLS-1028` stays the thirteen-tool freeze. Re-read it; this release accepts that the wording is the freeze, not two extra tools
+- The engine's core rises from 6,640 to 6,646 logical lines (17,788 physical lines in all): the dispatch for `--watch` and `--propose`. The work itself loads only when those flags are used (ADR-0067)
+
 ## plugin `v8.19.0` — 2026-10-06
 
 **The viewer no longer invents requirements when it has no map.**

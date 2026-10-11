@@ -3,8 +3,8 @@
  * handed to the components that draw it. Nothing here renders; nothing in
  * the components measures. */
 import {
-  parseIso, isoLocal, dayIndex, buildMonthBands, buildWeekBands, buildDayBands,
-  stackBars,
+  parseIso, isoLocal, isoWeekKey, dayIndex, buildMonthBands, buildWeekBands,
+  buildDayBands, stackBars,
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
 
@@ -236,9 +236,40 @@ function cmpVer(a, b) {
   return 0;
 }
 
-/** Patch releases of one minor version become one block, `vX.Y.x`,
- *  spanning every commit of that line. A release with no sibling keeps
- *  its own version. implements: REQ-HISTORY-1081 */
+/** The day a release is drawn on: its changelog date, else its start. */
+const shippedOn = (r) => (parseIso(r.date) ? r.date : r.start);
+const weekOf = (r) => {
+  const d = parseIso(shippedOn(r));
+  return d ? isoWeekKey(d) : "";
+};
+
+/** One ISO week of one minor version's releases, drawn on their changelog
+ *  dates; the commit dates ride along for the note. `whole` is the
+ *  `vX.Y.x` label when the series fits in this one week.
+ *  implements: REQ-HISTORYWEEK-1098 */
+function weekBlock(members, whole) {
+  const days = members.map(shippedOn).sort();
+  const starts = members.map((m) => m.start).sort();
+  const ends = members.map((m) => m.end).sort();
+  const span = {
+    start: days[0], end: days[days.length - 1],
+    commitStart: starts[0], commitEnd: ends[ends.length - 1],
+  };
+  if (members.length === 1) return { ...members[0], ...span };
+  const version = whole
+    || `${members[0].version}-${members[members.length - 1].version}`;
+  return {
+    version, headline: "", date: members[members.length - 1].date,
+    month: members[0].month, ...span, members,
+  };
+}
+
+/** Patch releases of one minor version released in one ISO week become one
+ *  block, `vX.Y.x`, from the first to the last of their changelog dates; a
+ *  series that runs over several weeks is one block per week, labelled
+ *  from its lowest version to its highest, and a week with no release
+ *  draws nothing. A release with no sibling keeps its own version and its
+ *  commits. implements: REQ-HISTORY-1081  implements: REQ-HISTORYWEEK-1098 */
 export function groupPatchReleases(releases) {
   const buckets = new Map();
   for (const r of releases) {
@@ -250,19 +281,23 @@ export function groupPatchReleases(releases) {
   const out = [];
   for (const [key, list] of buckets) {
     if (list.length === 1) { out.push(list[0]); continue; }
-    const members = list.slice().sort((a, b) => cmpVer(a.version, b.version));
-    const start = members.reduce((s, r) => (r.start < s ? r.start : s),
-      members[0].start);
-    const end = members.reduce((s, r) => (r.end > s ? r.end : s),
-      members[0].end);
-    const version = `${key}.x`;
-    out.push({
-      version, headline: "", date: members[members.length - 1].date,
-      month: members[0].month, start, end, members,
-    });
+    const sorted = list.slice().sort((a, b) => cmpVer(a.version, b.version));
+    const weeks = new Map();
+    for (const r of sorted) {
+      const w = weekOf(r);
+      if (weeks.has(w)) weeks.get(w).push(r);
+      else weeks.set(w, [r]);
+    }
+    for (const members of weeks.values()) {
+      out.push(weekBlock(members, weeks.size === 1 ? `${key}.x` : ""));
+    }
   }
   return out.sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0));
 }
+
+/** A release drawn on its changelog date still lists its own commits. */
+const asMember = (r) => (r.commitStart
+  ? { ...r, start: r.commitStart, end: r.commitEnd } : r);
 
 /** Releases that start on the same day are one block, labelled from the
  *  lowest version to the highest: `v5.10.x-v6.3.0`. A patch group already
@@ -281,7 +316,7 @@ export function groupSameStart(releases) {
     const sorted = list.slice().sort((a, b) => cmpVer(a.version, b.version));
     const end = sorted.reduce((s, r) => (r.end > s ? r.end : s), sorted[0].end);
     const members = sorted
-      .flatMap((r) => r.members || [r])
+      .flatMap((r) => r.members || [asMember(r)])
       .sort((a, b) => cmpVer(a.version, b.version));
     const version = `${sorted[0].version}-${sorted[sorted.length - 1].version}`;
     out.push({

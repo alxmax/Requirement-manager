@@ -42,6 +42,9 @@ def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
     (d / "plugin" / "scripts" / "reqmap_engine").mkdir()
     (d / "plugin" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
         'MAP_ENGINE_VERSION = "{}"\n'.format(engine), encoding="utf-8")
+    (d / "pyproject.toml").write_text(
+        '[project]\nname = "reqmap"\nversion = "{}"\n'.format(
+            plugin_ver or "0.0.0"), encoding="utf-8")
     return d
 
 
@@ -134,6 +137,14 @@ class CheckVersions(unittest.TestCase):
                 "`@v1` is frozen and no longer moves." + chr(10) +
                 "- uses: alxmax/requirement-manager/check@v2", encoding="utf-8")
             self.assertEqual(self._run(d), 0)
+
+    def test_pyproject_version_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d)
+            (Path(d) / "pyproject.toml").write_text(
+                '[project]\nname = "reqmap"\nversion = "9.9.9"\n',
+                encoding="utf-8")
+            self.assertEqual(self._run(d), 1)
 
     def test_engine_version_revision_suffix(self):
         for engine, expected in [("2026-06-03.2", 0),   # valid same-day revision

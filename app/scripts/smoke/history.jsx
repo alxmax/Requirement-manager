@@ -152,10 +152,10 @@ test("history: patch releases of one minor share a vX.Y.x block", () => {
     versions: ["v7.21.0", "v7.21.1", "v7.21.10", "v7.22.0"],
     landmark: "v7.21.0", headline: "x",
     entries: [
-      { version: "v7.21.10", date: "2026-09-20", headline: "ten",
-        first_commit: "2026-09-18", last_commit: "2026-09-20" },
-      { version: "v7.21.1", date: "2026-09-10", headline: "one",
-        first_commit: "2026-09-08", last_commit: "2026-09-10" },
+      { version: "v7.21.10", date: "2026-09-04", headline: "ten",
+        first_commit: "2026-09-03", last_commit: "2026-09-04" },
+      { version: "v7.21.1", date: "2026-09-03", headline: "one",
+        first_commit: "2026-09-02", last_commit: "2026-09-03" },
       { version: "v7.21.0", date: "2026-09-02", headline: "zero",
         first_commit: "2026-09-01", last_commit: "2026-09-02" },
       { version: "v7.22.0", date: "2026-09-28", headline: "next",
@@ -165,9 +165,60 @@ test("history: patch releases of one minor share a vX.Y.x block", () => {
   const group = lay.pastBars.find((b) => b.version === "v7.21.x");
   const alone = lay.pastBars.find((b) => b.version === "v7.22.0");
   return lay.pastBars.length === 2 && group && alone
-    && group.start === "2026-09-01" && group.end === "2026-09-20"
+    && group.start === "2026-09-02" && group.end === "2026-09-04"
+    && group.commitStart === "2026-09-01"
     && group.members.map((m) => m.version).join()
       === "v7.21.0,v7.21.1,v7.21.10";
+});
+
+// tested-by: REQ-HISTORYWEEK-1098 @unit
+const weekMonth = (entries) => [{
+  month: "2026-10", count: entries.length, first: "2026-09-12",
+  last: "2026-10-06", versions: entries.map((e) => e.version),
+  landmark: entries[0].version, headline: "h", entries,
+}];
+const shipped = (version, date, first) => ({
+  version, date, headline: "h", first_commit: first || date, last_commit: date,
+});
+
+// verifies: REQ-HISTORYWEEK-1098#CASE-1
+test("history: a series over two weeks is one block per week", () => {
+  const lay = layoutPlan({ lanes: ["Feature"] }, weekMonth([
+    shipped("v3.2.4", "2026-10-06"), shipped("v3.2.3", "2026-10-05"),
+    shipped("v3.2.2", "2026-10-02"), shipped("v3.2.1", "2026-10-01"),
+    shipped("v3.2.0", "2026-09-30"),
+  ]), "en");
+  const one = lay.pastBars.find((b) => b.version === "v3.2.0-v3.2.2");
+  const two = lay.pastBars.find((b) => b.version === "v3.2.3-v3.2.4");
+  return lay.pastBars.length === 2 && one && two
+    && one.start === "2026-09-30" && one.end === "2026-10-02"
+    && two.start === "2026-10-05" && two.end === "2026-10-06"
+    && one.end < "2026-10-05";
+});
+
+// verifies: REQ-HISTORYWEEK-1098#CASE-2
+test("history: a block starts on the changelog date, not the first commit", () => {
+  const lay = layoutPlan({ lanes: ["Feature"] }, weekMonth([
+    shipped("v3.2.1", "2026-10-01"),
+    shipped("v3.2.0", "2026-09-30", "2026-09-09"),
+  ]), "en");
+  const block = lay.pastBars.find((b) => b.version === "v3.2.x");
+  const note = renderToString(
+    <ReleaseNote release={block} t={(s) => s} onClose={noop} />);
+  return lay.pastBars.length === 1 && block.start === "2026-09-30"
+    && block.commitStart === "2026-09-09" && note.includes("2026-09-09");
+});
+
+// verifies: REQ-HISTORYWEEK-1098#CASE-3
+test("history: a lone release in a week keeps its own version", () => {
+  const lay = layoutPlan({ lanes: ["Feature"] }, weekMonth([
+    shipped("v3.2.2", "2026-10-06", "2026-09-20"),
+    shipped("v3.2.1", "2026-10-01"), shipped("v3.2.0", "2026-09-30"),
+  ]), "en");
+  const alone = lay.pastBars.find((b) => b.version === "v3.2.2");
+  const pair = lay.pastBars.find((b) => b.version === "v3.2.0-v3.2.1");
+  return lay.pastBars.length === 2 && alone && pair
+    && alone.start === "2026-10-06" && alone.end === "2026-10-06";
 });
 
 // verifies: REQ-HISTORY-1081#CASE-6

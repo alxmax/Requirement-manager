@@ -326,6 +326,10 @@ def main():
     if a.cmd == "mcp":      # a long-running server: no workspace of its own
         from reqmap_engine.mcp import serve
         return serve(a)
+    if a.cmd == "init" and (a.watch or a.propose or a.propose_files):
+        # implements: REQ-WATCH-1092  # implements: REQ-PROPOSE-1093
+        from reqmap_engine.watch import dispatch_adopt
+        return dispatch_adopt(a, code_root)
     if a.cmd == "init" and not a.plan:
         from reqmap_engine.init import cmd_init  # only on init (ADR-0053)
         return cmd_init(reqs_dir, code_root, wipe=a.wipe,
@@ -431,7 +435,7 @@ _ENGINE_MODULES = (
 _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
                  "plandrift", "planschema", "release",
-                 "testgaps", "init", "levelshape")
+                 "testgaps", "init", "levelshape", "watch", "todoparse")
 
 
 def __getattr__(name):

@@ -40,11 +40,11 @@ body:
   - type: dropdown
     id: license
     attributes:
-      label: Did the license (BSL 1.1) block or slow adoption?
+      label: Did the licence or the setup block you?
       options:
         - "No"
-        - "Yes: I could not use it"
-        - "Yes: it needed a review first"
+        - "Yes: setup was too much before any value"
+        - "Yes: something else (say what under What failed)"
         - "I did not check"
     validations:
       required: true

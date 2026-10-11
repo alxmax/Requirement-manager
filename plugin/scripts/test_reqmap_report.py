@@ -4749,8 +4749,8 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
 
     def test_the_tool_set_is_frozen(self):  # verifies: REQ-MCPTOOLS-1028#CASE-6
         self.assertEqual(self.FROZEN_TOOLS, {t["name"] for t in R.mcp.MCP_TOOLS},
-                         "the MCP tool set is frozen until a consumer other than the maintainer "
-                         "uses the server (ROADMAP V2); change REQ-MCPTOOLS-1028 first")
+                         "the tool set is frozen (REQ-MCPTOOLS-1028); change that "
+                         "clause before adding or renaming a tool")
 
     def test_writing_tools_need_allow_writes(self):  # verifies: REQ-MCPTOOLS-1028#CASE-2
         # verifies: ARCH-MCP-073#CASE-2

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-06.1",
+  "engine_version": "2026-10-11.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -304,6 +304,303 @@
       "covered": 5
     },
     {
+      "id": "ARCH-ADOPT-075",
+      "layer": "feature",
+      "level": null,
+      "status": "draft",
+      "area": "ARCH",
+      "title": "Adoption before the whole tree is tagged",
+      "intent": "A team that has to tag every file before the tool says anything useful does not start. The first run has to be useful on the files a change already touched, and a draft is not a contract until a person has read it.",
+      "contract": [
+        "`init --watch REF` reports code files changed since REF that no requirement claims, and the commit subjects since REF, and it writes nothing. [[REQ-WATCH-1092]]",
+        "`init --propose` prints one requirement draft. It is a command-line flag, not an MCP tool. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]",
+        "`gate` run on a copy of a repository outside this one still reports that copy's own drift. [[REQ-EXTREPO-1094]]",
+        "The CLI stays six verbs, and a checkout can install that same engine with `pip install .`. [[REQ-SURFACE-1095]]"
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a draft is not a confirmed contract\n  Given  `init --watch` or `init --propose`\n  When   either command finishes\n  Then   it has written no requirement file and it has not set `status: confirmed`\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:257"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        },
+        {
+          "signal": "untested",
+          "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
+        }
+      ]
+    },
+    {
+      "id": "REQ-WATCH-1092",
+      "layer": "feature",
+      "level": null,
+      "status": "draft",
+      "area": "REQ",
+      "title": "Watch the files a change already touched",
+      "intent": "Tagging the whole tree is the adoption wall. The first question is which of the files in this change no requirement claims yet, and the answer has to be safe to run in CI.",
+      "contract": [
+        "`init --watch REF` prints JSON and writes no file. A code file changed since REF with no `implements:` tag is one suggestion, with `status` `draft` and `needs_confirmation` true.",
+        "A changed file that already has an `implements:` tag is not a suggestion. A file whose extension is not scanned code is not a suggestion.",
+        "A commit subject since REF is listed with `status` `draft`, except a subject of fewer than 8 characters and a subject that starts with `Merge `.",
+        "Issue trackers are not read, and the report says `issues` is `not read`.",
+        "A ref git cannot read exits 0 and the report's `error` says git could not read that ref. A ref that starts with `-` is the same answer: it is not passed to git, and the work tree is unchanged.",
+        "A path matching `.reqmapignore` is not a suggestion.",
+        "`gate --watch` exits 2 and names `init` as the verb that owns the flag.",
+        "At most 40 file suggestions and 40 commit subjects are printed. `truncated` is true only when a suggestion was left out."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — an untagged changed file is a draft suggestion\n  Given  a commit that adds a code file with no `implements:` tag, and a `.txt` file in the same commit\n  When   `init --watch` is run against the parent commit\n  Then   the code file is a suggestion with `status` `draft` and `needs_confirmation` true, the `.txt` file is absent, and no requirement file was written\n\nCASE-2 — a file that already has an implements tag is skipped\n  Given  a code file changed since REF whose text contains an `implements:` tag\n  When   `init --watch REF` runs\n  Then   that path is not among the suggestions\n\nCASE-3 — a subject that starts with Merge is omitted\n  Given  one commit subject that starts with `Merge ` and one that does not, both since REF\n  When   `init --watch REF` runs\n  Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`\n\nCASE-4 — a ref git cannot read exits 0\n  Given  a git repository and a ref that does not exist\n  When   `init --watch` is given that ref\n  Then   the process exits 0 and the report's `error` says git could not read that ref\n\nCASE-5 — gate does not own --watch\n  Given  `--watch` passed to `gate`\n  When   the command runs\n  Then   it exits 2 and the message names `init`\n\nCASE-6 — the caps say when a suggestion was left out\n  Given  fewer changed code files than 40 and fewer commit subjects than 40\n  When   `init --watch` runs\n  Then   `truncated` is false\n\nCASE-7 — a ref that starts with a dash is not a git option\n  Given  `--watch` whose value starts with `-` and names a file\n  When   `init --watch` runs\n  Then   the process exits 0, `ok` is false, the error says git could not read that ref, and that file was not created\n\nCASE-8 — an ignored path is not a suggestion\n  Given  `.reqmapignore` matches `vendor/**` and that tree changed\n  When   `init --watch` runs\n  Then   no path under `vendor/` is a suggestion\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:330"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_adopt.py:51"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:24"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:29"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:38"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:74"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:84"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:95"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:106"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:126"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:134"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:154"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:170"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:199"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:258"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 8,
+      "covered": 8
+    },
+    {
+      "id": "REQ-PROPOSE-1093",
+      "layer": "feature",
+      "level": null,
+      "status": "draft",
+      "area": "REQ",
+      "title": "The agent proposes a draft and a person confirms it",
+      "intent": "The gate checks a contract. It does not write one. An assistant that just implemented something new can propose the draft, and the status stays `draft` until a person reads it.",
+      "contract": [
+        "`init --propose TEXT` prints one requirement whose frontmatter `status` is `draft`, and it writes no file. The printed body tells a person to set `status: confirmed` after reading it. The frontmatter does not say confirmed.",
+        "`--propose-files` records those paths in the draft. Without `--propose` the command exits 2.",
+        "`--watch` and `--propose` on the same command exit 2 and write nothing.",
+        "The MCP server does not offer a tool named `reqmap_watch` or `reqmap_propose`. The same work stays the command-line flags."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — propose prints a draft and writes nothing\n  Given  a description and one file path\n  When   `init --propose` runs with `--propose-files`\n  Then   stdout contains `status: draft`, the frontmatter does not say confirmed, the body tells a person to set `status: confirmed`, the path is in the text, and no requirement file exists afterwards\n\nCASE-2 — watch and propose are not MCP tools\n  Given  the MCP tool table\n  When   its names are read\n  Then   `reqmap_watch` and `reqmap_propose` are absent\n\nCASE-3 — watch and propose together are refused\n  Given  both `--watch` and `--propose` on one `init`\n  When   the command runs\n  Then   it exits 2 and writes no requirement file\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:330"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_adopt.py:163"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:24"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:29"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:38"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:240"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/watch.py:258"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-EXTREPO-1094",
+      "layer": "feature",
+      "level": null,
+      "status": "draft",
+      "area": "REQ",
+      "title": "The gate runs on a repository that is not this one",
+      "intent": "Dogfooding this repository does not show that the engine works on someone else's tree. A copy of the hello-drift example, placed outside this checkout, is the smallest such tree.",
+      "contract": [
+        "Running this engine's `gate` with its working directory set to a copy of `examples/hello-drift` reports `RM018` for `HELLO-GREET-001` and exits 0."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a copied hello-drift still shows drift\n  Given  a temp directory that is a copy of `examples/hello-drift` and not this repository\n  When   `gate` runs with that directory as its working directory\n  Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_adopt.py:196"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 1,
+      "covered": 1
+    },
+    {
+      "id": "REQ-SURFACE-1095",
+      "layer": "feature",
+      "level": null,
+      "status": "draft",
+      "area": "REQ",
+      "title": "The six verbs stay, and pip installs the same engine",
+      "intent": "Adding a verb breaks every document and every caller that lists them. A new flag on a verb that already exists does not. The copy-two-files install stays; pip is a second way to put that same engine on `PATH`.",
+      "contract": [
+        "The command registry's verbs are `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`.",
+        "`pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.",
+        "The licence string in that file is MIT."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap:_run_cli`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_adopt.py:210"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 2,
+      "covered": 2
+    },
+    {
       "id": "ARCH-ATOMICITY-049",
       "layer": "feature",
       "level": "architecture",
@@ -349,11 +646,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1584"
+          "loc": "plugin/scripts/test_reqmap_author.py:1608"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2060"
+          "loc": "plugin/scripts/test_reqmap_author.py:2084"
         },
         {
           "role": "implements",
@@ -412,11 +709,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1584"
+          "loc": "plugin/scripts/test_reqmap_author.py:1608"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2060"
+          "loc": "plugin/scripts/test_reqmap_author.py:2084"
         },
         {
           "role": "implements",
@@ -474,11 +771,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1584"
+          "loc": "plugin/scripts/test_reqmap_author.py:1608"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2060"
+          "loc": "plugin/scripts/test_reqmap_author.py:2084"
         },
         {
           "role": "implements",
@@ -1121,11 +1418,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1522"
+          "loc": "plugin/scripts/test_reqmap_author.py:1546"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2226"
+          "loc": "plugin/scripts/test_reqmap_author.py:2250"
         },
         {
           "role": "tested-by",
@@ -1244,7 +1541,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1522"
+          "loc": "plugin/scripts/test_reqmap_author.py:1546"
         },
         {
           "role": "tested-by",
@@ -1343,11 +1640,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1522"
+          "loc": "plugin/scripts/test_reqmap_author.py:1546"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2226"
+          "loc": "plugin/scripts/test_reqmap_author.py:2250"
         },
         {
           "role": "implements",
@@ -1413,7 +1710,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3187"
+          "loc": "plugin/scripts/test_reqmap_author.py:3211"
         },
         {
           "role": "implements",
@@ -1461,7 +1758,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3187"
+          "loc": "plugin/scripts/test_reqmap_author.py:3211"
         },
         {
           "role": "implements",
@@ -1508,7 +1805,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3187"
+          "loc": "plugin/scripts/test_reqmap_author.py:3211"
         },
         {
           "role": "implements",
@@ -2329,15 +2626,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2316"
+          "loc": "plugin/scripts/test_reqmap_author.py:2340"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2838"
+          "loc": "plugin/scripts/test_reqmap_author.py:2862"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2903"
+          "loc": "plugin/scripts/test_reqmap_author.py:2927"
         },
         {
           "role": "implements",
@@ -2405,11 +2702,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2316"
+          "loc": "plugin/scripts/test_reqmap_author.py:2340"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2903"
+          "loc": "plugin/scripts/test_reqmap_author.py:2927"
         },
         {
           "role": "implements",
@@ -2469,7 +2766,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2316"
+          "loc": "plugin/scripts/test_reqmap_author.py:2340"
         },
         {
           "role": "implements",
@@ -2515,7 +2812,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2838"
+          "loc": "plugin/scripts/test_reqmap_author.py:2862"
         },
         {
           "role": "implements",
@@ -2629,7 +2926,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:51"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:54"
         },
         {
           "role": "implements",
@@ -2829,11 +3126,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:92"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:95"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:106"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:109"
         }
       ],
       "test_exempt": null,
@@ -3431,31 +3728,31 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1686"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1748"
+          "loc": "plugin/scripts/test_reqmap_author.py:1772"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1842"
+          "loc": "plugin/scripts/test_reqmap_author.py:1866"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1936"
+          "loc": "plugin/scripts/test_reqmap_author.py:1960"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2100"
+          "loc": "plugin/scripts/test_reqmap_author.py:2124"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2680"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2996"
+          "loc": "plugin/scripts/test_reqmap_author.py:3020"
         },
         {
           "role": "tested-by",
@@ -3546,11 +3843,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1686"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2100"
+          "loc": "plugin/scripts/test_reqmap_author.py:2124"
         },
         {
           "role": "implements",
@@ -3601,7 +3898,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1686"
         },
         {
           "role": "implements",
@@ -3660,15 +3957,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1686"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1748"
+          "loc": "plugin/scripts/test_reqmap_author.py:1772"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2680"
         },
         {
           "role": "implements",
@@ -3716,7 +4013,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2996"
+          "loc": "plugin/scripts/test_reqmap_author.py:3020"
         },
         {
           "role": "implements",
@@ -5159,11 +5456,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1562"
+          "loc": "plugin/scripts/test_reqmap_author.py:1586"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2112"
+          "loc": "plugin/scripts/test_reqmap_author.py:2136"
         },
         {
           "role": "tested-by",
@@ -5267,7 +5564,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2112"
+          "loc": "plugin/scripts/test_reqmap_author.py:2136"
         },
         {
           "role": "implements",
@@ -5332,7 +5629,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2112"
+          "loc": "plugin/scripts/test_reqmap_author.py:2136"
         },
         {
           "role": "implements",
@@ -5397,11 +5694,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1562"
+          "loc": "plugin/scripts/test_reqmap_author.py:1586"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2112"
+          "loc": "plugin/scripts/test_reqmap_author.py:2136"
         },
         {
           "role": "implements",
@@ -5460,7 +5757,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1974"
+          "loc": "plugin/scripts/test_reqmap_author.py:1998"
         },
         {
           "role": "implements",
@@ -5536,7 +5833,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3317"
+          "loc": "plugin/scripts/test_reqmap_author.py:3341"
         },
         {
           "role": "implements",
@@ -5603,11 +5900,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1862"
+          "loc": "plugin/scripts/test_reqmap_author.py:1886"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2073"
+          "loc": "plugin/scripts/test_reqmap_author.py:2097"
         },
         {
           "role": "implements",
@@ -5668,11 +5965,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1862"
+          "loc": "plugin/scripts/test_reqmap_author.py:1886"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2073"
+          "loc": "plugin/scripts/test_reqmap_author.py:2097"
         },
         {
           "role": "implements",
@@ -6875,7 +7172,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2282"
+          "loc": "plugin/scripts/test_reqmap_author.py:2306"
         },
         {
           "role": "implements",
@@ -6929,11 +7226,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2282"
+          "loc": "plugin/scripts/test_reqmap_author.py:2306"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4204"
+          "loc": "plugin/scripts/test_reqmap_author.py:4228"
         },
         {
           "role": "implements",
@@ -7126,7 +7423,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1094"
+          "loc": "plugin/scripts/test_reqmap_author.py:1118"
         },
         {
           "role": "implements",
@@ -7199,7 +7496,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1094"
+          "loc": "plugin/scripts/test_reqmap_author.py:1118"
         },
         {
           "role": "implements",
@@ -7243,7 +7540,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1094"
+          "loc": "plugin/scripts/test_reqmap_author.py:1118"
         },
         {
           "role": "implements",
@@ -7300,7 +7597,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1094"
+          "loc": "plugin/scripts/test_reqmap_author.py:1118"
         },
         {
           "role": "implements",
@@ -7402,7 +7699,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "tested-by",
@@ -7476,11 +7773,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2244"
+          "loc": "plugin/scripts/test_reqmap_author.py:2268"
         },
         {
           "role": "tested-by",
@@ -7567,11 +7864,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2244"
+          "loc": "plugin/scripts/test_reqmap_author.py:2268"
         },
         {
           "role": "implements",
@@ -7643,15 +7940,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1310"
+          "loc": "plugin/scripts/test_reqmap_author.py:1334"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1365"
+          "loc": "plugin/scripts/test_reqmap_author.py:1389"
         },
         {
           "role": "tested-by",
@@ -7756,7 +8053,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "implements",
@@ -7814,7 +8111,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "implements",
@@ -7859,7 +8156,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1310"
+          "loc": "plugin/scripts/test_reqmap_author.py:1334"
         },
         {
           "role": "implements",
@@ -7910,7 +8207,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "implements",
@@ -7961,7 +8258,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:723"
+          "loc": "plugin/scripts/test_reqmap_author.py:747"
         },
         {
           "role": "implements",
@@ -8010,7 +8307,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1365"
+          "loc": "plugin/scripts/test_reqmap_author.py:1389"
         },
         {
           "role": "implements",
@@ -8068,6 +8365,7 @@
       "contract": [
         "`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]",
         "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]",
+        "A `TODO.md` item's indented lines ride into `todos` as its `detail`, and a `|` inside its title stays in its name. [[REQ-TODODETAIL-1096]]",
         "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]",
         "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]",
         "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]",
@@ -8111,7 +8409,8 @@
         "REQ-MAP-872",
         "REQ-MAP-873",
         "REQ-PLANCADENCE-1000",
-        "REQ-HISTORY-1003"
+        "REQ-HISTORY-1003",
+        "REQ-TODODETAIL-1096"
       ],
       "members": [
         {
@@ -8439,7 +8738,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/author.py:231"
+          "loc": "plugin/scripts/reqmap_engine/author.py:207"
         },
         {
           "role": "implements",
@@ -8615,15 +8914,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/GanttLanes.jsx:92"
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:94"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:222"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:253"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:396"
+          "loc": "app/src/views/roadmap/ganttLayout.js:431"
         },
         {
           "role": "tested-by",
@@ -8731,6 +9030,55 @@
       "risks": [],
       "clauses": 7,
       "covered": 7
+    },
+    {
+      "id": "REQ-TODODETAIL-1096",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A TODO.md item carries its own description, and keeps a pipe in its title",
+      "intent": "A position in `TODO.md` is more than its checkbox line: the lines under it say what is wrong and where. The map carried only the title, so a viewer could count the work but not describe it.",
+      "contract": [
+        "An item's indented lines carry into its `todos` entry as `detail`, dedented, and an item with none has no `detail` key.",
+        "A line that is not indented under an item ends that item's `detail`.",
+        "Only trailing `| key: value` segments of an item line are metadata, so a `|` inside the title stays in the item's name."
+      ],
+      "verify": [],
+      "notes": [
+        "`distinct_from: REQ-MAP-871` - `REQ-MAP-871` says `todos` is derived from `TODO.md`; this says what each entry carries."
+      ],
+      "current_impl": [],
+      "accept": "CASE-1 — an item's indented lines become its detail\n  Given  a `TODO.md` item followed by two indented lines\n  When   the todos are parsed\n  Then   the item's `detail` holds those two lines, its `name` is only its own line, and an item\n         with no indented lines has no `detail` key\n\nCASE-2 — a pipe inside the title is not metadata\n  Given  a `TODO.md` item whose title contains `a|b` and no `| key: value` suffix\n  When   the todos are parsed\n  Then   its `name` keeps the whole title and its `lane` is `feature`\n\nCASE-3 — an unindented line ends the detail\n  Given  a `TODO.md` item, then a line of prose at column 0, then an indented line\n  When   the todos are parsed\n  Then   the indented line is not the item's `detail`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MAP-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:666"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/todoparse.py:14"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/todoparse.py:28"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-MAPDIAGRAMS-055",
@@ -9892,7 +10240,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1748"
+          "loc": "plugin/scripts/test_reqmap_author.py:1772"
         },
         {
           "role": "tested-by",
@@ -11095,11 +11443,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:372"
+          "loc": "plugin/scripts/reqmap.py:376"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:393"
+          "loc": "plugin/scripts/reqmap.py:397"
         },
         {
           "role": "tested-by",
@@ -11143,7 +11491,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:393"
+          "loc": "plugin/scripts/reqmap.py:397"
         },
         {
           "role": "tested-by",
@@ -11340,11 +11688,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2199"
+          "loc": "plugin/scripts/test_reqmap_author.py:2223"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2716"
+          "loc": "plugin/scripts/test_reqmap_author.py:2740"
         },
         {
           "role": "tested-by",
@@ -11409,7 +11757,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2199"
+          "loc": "plugin/scripts/test_reqmap_author.py:2223"
         },
         {
           "role": "implements",
@@ -11460,7 +11808,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2716"
+          "loc": "plugin/scripts/test_reqmap_author.py:2740"
         },
         {
           "role": "implements",
@@ -12213,7 +12561,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3756"
+          "loc": "plugin/scripts/test_reqmap_author.py:3780"
         },
         {
           "role": "implements",
@@ -12293,7 +12641,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3425"
+          "loc": "plugin/scripts/test_reqmap_author.py:3449"
         },
         {
           "role": "implements",
@@ -12345,7 +12693,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3478"
+          "loc": "plugin/scripts/test_reqmap_author.py:3502"
         },
         {
           "role": "implements",
@@ -12389,7 +12737,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3512"
+          "loc": "plugin/scripts/test_reqmap_author.py:3536"
         },
         {
           "role": "implements",
@@ -12447,7 +12795,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3542"
+          "loc": "plugin/scripts/test_reqmap_author.py:3566"
         },
         {
           "role": "implements",
@@ -12498,7 +12846,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3564"
+          "loc": "plugin/scripts/test_reqmap_author.py:3588"
         },
         {
           "role": "implements",
@@ -12579,7 +12927,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3676"
+          "loc": "plugin/scripts/test_reqmap_author.py:3700"
         },
         {
           "role": "implements",
@@ -12637,7 +12985,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3564"
+          "loc": "plugin/scripts/test_reqmap_author.py:3588"
         },
         {
           "role": "implements",
@@ -12690,7 +13038,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3797"
+          "loc": "plugin/scripts/test_reqmap_author.py:3821"
         },
         {
           "role": "implements",
@@ -12760,7 +13108,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3912"
+          "loc": "plugin/scripts/test_reqmap_author.py:3936"
         },
         {
           "role": "implements",
@@ -12924,15 +13272,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1936"
+          "loc": "plugin/scripts/test_reqmap_author.py:1960"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2472"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2941"
+          "loc": "plugin/scripts/test_reqmap_author.py:2965"
         },
         {
           "role": "tested-by",
@@ -13010,7 +13358,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2472"
         },
         {
           "role": "implements",
@@ -13068,7 +13416,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2472"
         },
         {
           "role": "implements",
@@ -13149,11 +13497,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2472"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2941"
+          "loc": "plugin/scripts/test_reqmap_author.py:2965"
         },
         {
           "role": "implements",
@@ -13220,7 +13568,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2472"
         },
         {
           "role": "implements",
@@ -13301,7 +13649,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1446"
+          "loc": "plugin/scripts/test_reqmap_author.py:1470"
         },
         {
           "role": "implements",
@@ -13366,7 +13714,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1446"
+          "loc": "plugin/scripts/test_reqmap_author.py:1470"
         },
         {
           "role": "implements",
@@ -13589,6 +13937,14 @@
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/mapdata.py:358"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/todoparse.py:13"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/todoparse.py:27"
         }
       ],
       "test_exempt": null,
@@ -14005,7 +14361,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3912"
+          "loc": "plugin/scripts/test_reqmap_author.py:3936"
         },
         {
           "role": "implements",
@@ -15562,11 +15918,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:94"
+          "loc": "scripts/test_check_versions.py:97"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:101"
+          "loc": "scripts/test_check_versions.py:104"
         },
         {
           "role": "tested-by",
@@ -16664,7 +17020,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3968"
+          "loc": "plugin/scripts/test_reqmap_author.py:3992"
         },
         {
           "role": "implements",
@@ -16774,7 +17130,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3971"
+          "loc": "plugin/scripts/test_reqmap_author.py:3995"
         },
         {
           "role": "implements",
@@ -17908,7 +18264,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1005"
+          "loc": "plugin/scripts/test_reqmap_author.py:1029"
         },
         {
           "role": "implements",
@@ -17967,7 +18323,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1005"
+          "loc": "plugin/scripts/test_reqmap_author.py:1029"
         },
         {
           "role": "implements",
@@ -18019,7 +18375,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:281"
+          "loc": "app/src/lib/i18n.jsx:282"
         },
         {
           "role": "implements",
@@ -18027,7 +18383,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1005"
+          "loc": "plugin/scripts/test_reqmap_author.py:1029"
         },
         {
           "role": "tested-by",
@@ -18127,7 +18483,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:316"
+          "loc": "app/src/lib/i18n.jsx:317"
         }
       ],
       "test_exempt": null,
@@ -18458,7 +18814,7 @@
         "The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]",
         "The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]",
         "Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]",
-        "The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]]",
+        "The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]",
         "The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]",
         "The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
@@ -18469,7 +18825,8 @@
         "Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]",
         "The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]",
         "Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]",
-        "Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]"
+        "Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]",
+        "Selecting a version on the plan lists the open `TODO.md` items filed under it, each with its description folded beneath. [[REQ-VERSIONTODOS-1097]]"
       ],
       "verify": [],
       "notes": [
@@ -18522,7 +18879,9 @@
         "REQ-VIEWER-1082",
         "REQ-VIEWER-1084",
         "REQ-VIEWER-1090",
-        "REQ-VIEWER-1087"
+        "REQ-VIEWER-1087",
+        "REQ-VERSIONTODOS-1097",
+        "REQ-HISTORYWEEK-1098"
       ],
       "members": [
         {
@@ -18821,11 +19180,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:270"
+          "loc": "app/src/lib/i18n.jsx:271"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:324"
+          "loc": "app/src/lib/i18n.jsx:325"
         }
       ],
       "test_exempt": null,
@@ -18979,11 +19338,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:237"
+          "loc": "app/src/lib/i18n.jsx:238"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:341"
+          "loc": "app/src/lib/i18n.jsx:342"
         },
         {
           "role": "implements",
@@ -19262,7 +19621,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:250"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:283"
         }
       ],
       "test_exempt": null,
@@ -19312,11 +19671,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:117"
+          "loc": "app/src/lib/timeline.js:125"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/GanttLanes.jsx:212"
+          "loc": "app/src/views/roadmap/GanttLanes.jsx:214"
         },
         {
           "role": "implements",
@@ -19370,7 +19729,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:90"
+          "loc": "app/src/lib/timeline.js:98"
         },
         {
           "role": "implements",
@@ -19391,9 +19750,9 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Each shipped release, drawn on the plan",
-      "intent": "The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader looks at a chart. Patch releases of one minor version share a block, as wide as the commits of that whole line and at least as wide as the version on it. A second row appears only where two of those boxes would cover each other.",
+      "intent": "The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader looks at a chart. Patch releases of one minor version share a block per ISO week, as wide as their release dates and at least as wide as the version on it. A second row appears only where two of those boxes would cover each other.",
       "contract": [
-        "The Plan draws shipped work on the Shipped band. Patch releases of the same minor version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from the earliest `first_commit` to the latest `last_commit`; a release with no sibling keeps its own version. The changelog date stands in when a commit date is absent.",
+        "The Plan draws shipped work on the Shipped band. Patch releases of the same minor version — `v7.21.0`, `v7.21.1`, `v7.21.10` — released in one ISO week share one block labelled `vX.Y.x`, from the earliest to the latest of their changelog dates, and a series over several weeks is split by [[REQ-HISTORYWEEK-1098]]. A release with no sibling keeps its own version and its first-to-last commit span, and the changelog date stands in when a commit date is absent.",
         "The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the count of releases it holds, so a release shorter than its label is still readable.",
         "Blocks share a row. A block takes the next row only when its drawn box would cover another's.",
         "Releases that start on the same day share one block, labelled from the lowest version to the highest with a hyphen, as in `v5.10.x-v6.3.0`. A `vX.Y.x` patch group counts as one end of that range. The block shows that label, not a headline.",
@@ -19407,7 +19766,7 @@
         "-------------------"
       ],
       "current_impl": [],
-      "accept": "CASE-1 — one block per release\n  Given  an export whose `history` holds two releases\n  When   the Plan renders\n  Then   the Shipped band draws one block per release, each labelled by its version\n\nCASE-2 — the headline stays in the note\n  Given  a release with a headline\n  When   the Plan renders, and that release is opened\n  Then   the block shows the version and not the headline, and the note shows the headline\n\nCASE-3 — no history means no band\n  Given  an export with no `history`\n  When   the Plan renders\n  Then   no Shipped band is drawn\n\nCASE-4 — a release opens to what it did and when\n  Given  a release with a headline, a CHANGELOG entry and commit dates\n  When   the reader selects that release\n  Then   a note shows the headline, both commit dates and the entry, and the\n         note scrolls inside itself\n\nCASE-5 — a second row only where the drawn boxes would cover each other\n  Given  two releases whose dates do not overlap, and two whose dates do\n  When   the Plan lays them out\n  Then   the first pair shares a row and the second pair does not\n\nCASE-6 — a release shorter than its version widens to it\n  Given  a one-day release whose version is longer than a day, with a neighbour the next\n         day, and several releases that start on one day, a patch line among them\n  When   the Plan lays them out\n  Then   the one-day block is wider than one day and the neighbour takes another row,\n         and the releases that share a start share one block labelled from the lowest\n         version to the highest, as in `v5.10.x-v6.3.0`\n\nCASE-7 — patch releases of one minor version share a block\n  Given  `v7.21.0`, `v7.21.1` and `v7.21.10`, and a `v7.22.0` beside them\n  When   the Plan lays them out\n  Then   the three share one block labelled `v7.21.x` spanning the earliest commit to the\n         latest, and `v7.22.0` stays its own block",
+      "accept": "CASE-1 — one block per release\n  Given  an export whose `history` holds two releases\n  When   the Plan renders\n  Then   the Shipped band draws one block per release, each labelled by its version\n\nCASE-2 — the headline stays in the note\n  Given  a release with a headline\n  When   the Plan renders, and that release is opened\n  Then   the block shows the version and not the headline, and the note shows the headline\n\nCASE-3 — no history means no band\n  Given  an export with no `history`\n  When   the Plan renders\n  Then   no Shipped band is drawn\n\nCASE-4 — a release opens to what it did and when\n  Given  a release with a headline, a CHANGELOG entry and commit dates\n  When   the reader selects that release\n  Then   a note shows the headline, both commit dates and the entry, and the\n         note scrolls inside itself\n\nCASE-5 — a second row only where the drawn boxes would cover each other\n  Given  two releases whose dates do not overlap, and two whose dates do\n  When   the Plan lays them out\n  Then   the first pair shares a row and the second pair does not\n\nCASE-6 — a release shorter than its version widens to it\n  Given  a one-day release whose version is longer than a day, with a neighbour the next\n         day, and several releases that start on one day, a patch line among them\n  When   the Plan lays them out\n  Then   the one-day block is wider than one day and the neighbour takes another row,\n         and the releases that share a start share one block labelled from the lowest\n         version to the highest, as in `v5.10.x-v6.3.0`\n\nCASE-7 — patch releases of one minor version released in one week share a block\n  Given  `v7.21.0`, `v7.21.1` and `v7.21.10` released on three days of one ISO week, and a\n         `v7.22.0` beside them\n  When   the Plan lays them out\n  Then   the three share one block labelled `v7.21.x` from the earliest changelog date to the\n         latest, and `v7.22.0` stays its own block",
       "input": "",
       "output": "",
       "desc": "",
@@ -19448,15 +19807,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:241"
+          "loc": "app/src/views/roadmap/ganttLayout.js:272"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:270"
+          "loc": "app/src/views/roadmap/ganttLayout.js:305"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:297"
+          "loc": "app/src/views/roadmap/ganttLayout.js:332"
         }
       ],
       "test_exempt": null,
@@ -19665,6 +20024,102 @@
         {
           "role": "implements",
           "loc": "app/src/views/roadmap/ganttLayout.js:135"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-VERSIONTODOS-1097",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "An opened plan version lists the TODO.md items filed under it",
+      "intent": "The plan says when a version is due and which bars it carries; the work itself lives in `TODO.md`. Opening a version shows that work, so \"what is in v3.2.0\" is answered where it is asked and not in a copy kept by hand.",
+      "contract": [
+        "A version opened on the plan lists the open `TODO.md` items whose `milestone` is that version, in file order.",
+        "An item with a `detail` opens to show it beneath its name; an item with none is a plain row.",
+        "A done item, and an item filed under another version, is not listed.",
+        "A version with no bars and no open items says nothing is planned on it."
+      ],
+      "verify": [],
+      "notes": [
+        "`distinct_from: REQ-PLANCADENCE-1000` - `REQ-PLANCADENCE-1000` computes the release dates the version pills sit on; this says what opening one shows."
+      ],
+      "current_impl": [],
+      "accept": "CASE-1 — open items are listed, their detail folded\n  Given  a version with two open items (one with `detail`), one done item, and an item filed\n         under another version\n  When   the version is selected on the plan\n  Then   the note lists the two open items and shows the `detail` of the one that has it,\n         and names neither the done item nor the other version's\n\nCASE-2 — a version with nothing planned says so\n  Given  a version with no bars and no open items\n  When   the version is selected on the plan\n  Then   the note says nothing is planned on it\n\nCASE-3 — an item with no detail is a plain row\n  Given  a version with one open item that has no `detail`\n  When   the version is selected on the plan\n  Then   the note lists the item by its name, with nothing to expand",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/plan.jsx:509"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:227"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-HISTORYWEEK-1098",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A series of patch releases is drawn one block per week, on the days it shipped",
+      "intent": "A repository that ships a hotfix a day put a month of releases on one bar that began weeks before the first of them, so the chart said \"continuous work\" about a month in which nothing shipped for three weeks. The band answers \"what shipped when\": a block never crosses a week, and it stands on release dates, not on the first commit after the last tag.",
+      "contract": [
+        "Releases of one minor version are grouped by the ISO week of their changelog date, and no block holds releases of two weeks.",
+        "A block runs from the earliest to the latest changelog date of the releases in it; the commit dates stay on each release in the note.",
+        "A series that fits in one week keeps the label `vX.Y.x`; one that runs over several is labelled from its lowest version to its highest in each week, and a lone release in a week keeps its own version.",
+        "A week with no release draws nothing, so a pause shows."
+      ],
+      "verify": [],
+      "notes": [
+        "`distinct_from: REQ-HISTORY-1081` - `REQ-HISTORY-1081` says how a shipped release is drawn and opened; this says how a series is cut into weeks."
+      ],
+      "current_impl": [],
+      "accept": "CASE-1 — a series over two weeks is two blocks\n  Given  `v3.2.0`, `v3.2.1` and `v3.2.2` released on three days of one ISO week, and `v3.2.3`\n         and `v3.2.4` released the Monday and Tuesday after\n  When   the Plan lays them out\n  Then   there are two blocks, `v3.2.0-v3.2.2` and `v3.2.3-v3.2.4`, and none crosses the week\n         boundary\n\nCASE-2 — a block starts on its first release's changelog date\n  Given  `v3.2.0` whose first commit is three weeks before its changelog date, and `v3.2.1` the\n         next day\n  When   the Plan lays them out\n  Then   the block starts on `v3.2.0`'s changelog date, and the note still lists `v3.2.0`'s\n         first commit\n\nCASE-3 — a lone release in a week keeps its own version\n  Given  `v3.2.0` and `v3.2.1` in one week and `v3.2.2` alone in the next\n  When   the Plan lays them out\n  Then   the next week holds a block labelled `v3.2.2`, drawn on its changelog date",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/history.jsx:174"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/ganttLayout.js:249"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/ganttLayout.js:272"
         }
       ],
       "test_exempt": null,
@@ -21651,6 +22106,10 @@
       "ARCH-MAP-007"
     ],
     [
+      "REQ-TODODETAIL-1096",
+      "ARCH-MAP-007"
+    ],
+    [
       "ARCH-MAPDIAGRAMS-055",
       "SYS-VISUAL-106"
     ],
@@ -22327,6 +22786,14 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-VERSIONTODOS-1097",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-HISTORYWEEK-1098",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "ARCH-VIEWERFILE-074",
       "SYS-VISUAL-106"
     ],
@@ -22581,8 +23048,8 @@
       "name": "An Apache-2.0 / MIT licence instead of BSL 1.1",
       "horizon": "later",
       "req": null,
-      "unpark": "the first internal evaluator at a company that needs a grant",
-      "done": false,
+      "unpark": null,
+      "done": true,
       "category": "Adoption",
       "context": "",
       "section_date": null
@@ -24100,9 +24567,9 @@
     },
     {
       "month": "2026-10",
-      "count": 8,
+      "count": 10,
       "first": "2026-10-01",
-      "last": "2026-10-06",
+      "last": "2026-10-11",
       "versions": [
         "v8.13.0",
         "v8.14.0",
@@ -24111,11 +24578,29 @@
         "v8.16.0",
         "v8.17.0",
         "v8.18.0",
-        "v8.19.0"
+        "v8.19.0",
+        "v8.20.0",
+        "v8.21.0"
       ],
-      "landmark": "v8.19.0",
-      "headline": "The viewer no longer invents requirements when it has no map",
+      "landmark": "v8.21.0",
+      "headline": "A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks",
       "entries": [
+        {
+          "version": "v8.21.0",
+          "date": "2026-10-11",
+          "headline": "A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks",
+          "body": "**A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks.**\n\n- `todos` in `_map.json` carries an item's indented lines as `detail`, dedented. An item with none has no `detail` key, so a `TODO.md` without indented lines produces the same map as before (REQ-MAP-871#CASE-8)\n- A version opened on the Plan lists its open `TODO.md` items in file order; an item with a `detail` opens to show it. Done items and other versions' items are not listed (REQ-PLANCADENCE-1000#CASE-8)\n- **The shipped band no longer stretches a patch series over weeks it did not ship in.** Patch releases of one minor version are drawn one block per ISO week, from the first to the last of their changelog dates; a series that runs over several weeks is labelled `v3.2.0-v3.2.3`, `v3.2.4-v3.2.9`, and a week with no release draws nothing. The commit dates stay on each release in the note. A release with no sibling is drawn as before (REQ-HISTORYWEEK-1098)\n- **A `|` inside an item's title stays in its name.** Only trailing `| key: value` segments are metadata, so `` - [ ] Split on `a|b` `` is no longer cut to ``Split on `a``. One behaviour change: a trailing `| text` that is not `key: value` used to be dropped from the name and is now part of it (REQ-MAP-871#CASE-9)\n- **One-time drift.** `REQ-HISTORY-1081` now says a `vX.Y.x` block is one ISO week on changelog dates, where it said first commit to last commit. Re-read it\n- The engine's core falls from 6,646 to 6,629 logical lines (17,819 physical lines in 75 files): TODO.md parsing moved to `todoparse.py`, which loads only where a `TODO.md` exists",
+          "first_commit": "2026-10-11",
+          "last_commit": "2026-10-11"
+        },
+        {
+          "version": "v8.20.0",
+          "date": "2026-10-11",
+          "headline": "MIT, and a first run that does not ask you to tag the whole tree",
+          "body": "**MIT, and a first run that does not ask you to tag the whole tree.**\n\n- The licence is MIT (ADR-0066). ADR-0013's Business Source License 1.1 is superseded. The copyright holder is the sole human author, and the 2030-06-05 change date no longer applies\n- `init --watch REF` prints draft suggestions for code files changed since REF that no requirement claims, and the commit subjects in between. The ref is resolved to a commit before git sees it; a value that starts with `-` is not passed to git. A path matching `.reqmapignore` is not a suggestion. It writes nothing and exits 0, including when git cannot read the ref, so it can run on a pull request without failing the build. Issue trackers are not read (REQ-WATCH-1092)\n- `init --propose TEXT` prints one requirement draft. `status` stays `draft`. A person sets `status: confirmed` after reading it. These two jobs are command-line flags. The MCP server stays the thirteen tools it already had (REQ-PROPOSE-1093, REQ-MCPTOOLS-1028)\n- The six verbs are the stable command line from this version. Removing or renaming one is a major. `pip install .` from a checkout installs the same engine as the `reqmap` command; copying `reqmap.py` and `reqmap_engine/` stays the offline install (REQ-SURFACE-1095, [docs/stability.md](docs/stability.md))\n- `gate` on a copy of `examples/hello-drift` outside this repository is now a test (REQ-EXTREPO-1094). [docs/case-studies.md](docs/case-studies.md) asks for a write-up from a tree this project does not maintain. None is published yet\n- **One-time drift.** `REQ-MCPTOOLS-1028` stays the thirteen-tool freeze. Re-read it; this release accepts that the wording is the freeze, not two extra tools\n- The engine's core rises from 6,640 to 6,646 logical lines (17,788 physical lines in all): the dispatch for `--watch` and `--propose`. The work itself loads only when those flags are used (ADR-0067)",
+          "first_commit": "2026-10-11",
+          "last_commit": "2026-10-11"
+        },
         {
           "version": "v8.19.0",
           "date": "2026-10-06",
@@ -24187,7 +24672,7 @@
     {
       "name": "init",
       "group": "author",
-      "summary": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring.",
+      "summary": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring. --watch REF prints draft suggestions for code files changed since REF, and the commit subjects in between, and writes nothing. --propose TEXT prints one requirement draft for a person to confirm, and writes nothing.",
       "arg": null,
       "flags": [
         {
@@ -24213,6 +24698,18 @@
         {
           "flag": "--no-site",
           "help": "Skip the final site step (scaffolding docs/architecture.html)."
+        },
+        {
+          "flag": "--watch",
+          "help": "Print draft suggestions for code files changed since this git ref, and the commit subjects in between. Writes nothing and exits 0."
+        },
+        {
+          "flag": "--propose",
+          "help": "Print one requirement draft from this description. status stays draft. Writes nothing."
+        },
+        {
+          "flag": "--propose-files",
+          "help": "With --propose: comma-separated paths the draft is about."
         }
       ]
     },
@@ -24398,11 +24895,11 @@
     }
   ],
   "design": {
-    "files": 123,
-    "clean_files": 120,
-    "score": 98,
+    "files": 125,
+    "clean_files": 121,
+    "score": 97,
     "candidates": {
-      "encapsulation": 0,
+      "encapsulation": 2,
       "abstraction": 2,
       "inheritance": 0,
       "polymorphism": 0,
@@ -24415,7 +24912,7 @@
         "file": "app/scripts/smoke/plan.jsx",
         "line": 1,
         "name": "plan.jsx",
-        "detail": "521 lines (over 500)"
+        "detail": "559 lines (over 500)"
       },
       {
         "pillar": "abstraction",
@@ -24426,40 +24923,73 @@
         "detail": "`ShippedBand` nests 5 levels deep (over 4)"
       },
       {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "app/src/views/roadmap/PlanNotes.jsx",
+        "line": 254,
+        "name": "VersionNote",
+        "detail": "`VersionNote` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "app/src/views/roadmap/PlanNotes.jsx",
+        "line": 313,
+        "name": "PickedNote",
+        "detail": "`PickedNote` takes 7 parameters (over 6)"
+      },
+      {
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap.py",
         "line": 280,
         "name": "main",
-        "detail": "`main` is 91 lines (over 80)"
+        "detail": "`main` is 95 lines (over 80)"
       }
     ],
     "advice": {
       "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
-      "long-function": "a function this long hides several steps: extract each step under a name that says what it does"
+      "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
+      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together"
     }
   },
   "health": {
-    "score": 99,
-    "total": 312,
-    "scored": 291,
-    "healthy": 288,
+    "score": 97,
+    "total": 320,
+    "scored": 299,
+    "healthy": 291,
     "exempt": 0,
     "deprecated": 21,
-    "confirmed": 288,
-    "implemented": 282,
-    "tested": 282,
-    "drafts": 3,
+    "confirmed": 291,
+    "implemented": 288,
+    "tested": 289,
+    "drafts": 8,
     "orphans": 0,
-    "untested": 0,
+    "untested": 1,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 288,
+    "reviewed_total": 291,
     "unhealthy": [
+      {
+        "id": "ARCH-ADOPT-075",
+        "status": "draft",
+        "why": [
+          "not confirmed",
+          "not tested"
+        ]
+      },
+      {
+        "id": "REQ-EXTREPO-1094",
+        "status": "draft",
+        "why": [
+          "not confirmed",
+          "not implemented"
+        ]
+      },
       {
         "id": "REQ-LINTCHECKS-1089",
         "status": "draft",
@@ -24475,7 +25005,29 @@
         ]
       },
       {
+        "id": "REQ-PROPOSE-1093",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-SURFACE-1095",
+        "status": "draft",
+        "why": [
+          "not confirmed",
+          "not implemented"
+        ]
+      },
+      {
         "id": "REQ-VIEWER-1090",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-WATCH-1092",
         "status": "draft",
         "why": [
           "not confirmed"

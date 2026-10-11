@@ -17,12 +17,37 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 17,487 lines across
+map of how everything connects. The engine is stdlib only, 17,819 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
+From a checkout, `pip install .` installs the same engine as the `reqmap` command.
+The copy stays the offline install. See [docs/stability.md](docs/stability.md).
 
 **▶ [Live requirement map](https://alxmax.github.io/Requirement-manager/map.html)** —
 this repo's own requirement graph, republished on every push to `main`.
+
+## 60-second quickstart
+
+From a checkout of this repository:
+
+```bash
+cd examples/hello-drift
+python ../../plugin/scripts/reqmap.py gate
+```
+
+You should see `WARN RM018 HELLO-GREET-001: DRIFT` and then `gate: PASS`. The requirement
+changed; `hello.py` did not. That warning is the product. Details:
+[examples/hello-drift](examples/hello-drift).
+
+On your own tree, the first run does not have to tag every file:
+
+```bash
+python scripts/reqmap.py init --watch main   # drafts for files changed since main; writes nothing
+python scripts/reqmap.py gate                # the verdict, once something is confirmed
+```
+
+`init --watch` exits 0 even when there is nothing to say, so it can sit on a pull request
+without failing the build. A draft stays `status: draft` until a person has read it.
 
 ## Three commands
 
@@ -84,6 +109,8 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 | [Internals](docs/internals.md) | how this repo is laid out, and measured numbers on a 10,000-file tree |
 | [`workflow.md`](plugin/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |
 | [Decision records](docs/adr/README.md) | why it works the way it does — including four things considered and not built |
+| [60-second path, and what stays still](docs/stability.md) | the six verbs, the two installs, `init --watch` |
+| [Case studies](docs/case-studies.md) | none from outside this repo yet — a write-up of a real tree belongs here |
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md) · security: [`SECURITY.md`](SECURITY.md)
-· licence: [LICENSE](LICENSE), Business Source License 1.1.
+· licence: [LICENSE](LICENSE), MIT.

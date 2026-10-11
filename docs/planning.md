@@ -15,7 +15,7 @@ version file says what the repository is. The engine reads all three as `vX.Y.Z`
   the file already uses.
 
 **A version is a milestone; a bar is the work.** The Plan reads in three bands: what
-shipped (drawn from the CHANGELOG, patch releases folded into one `vX.Y.x` block), the
+shipped (drawn from the CHANGELOG, patch releases folded into one `vX.Y.x` block per ISO week), the
 work (one bar per piece of work, each naming the requirement it delivers with `req:`), and
 the releases (one pill per milestone, on its `due` day). A bar titled `v1.4.0 · Export` with
 no `req:` is the version drawn a second time, and the work it ships has no bar at all —
@@ -100,7 +100,12 @@ version. Completed items (`[x]`) stay out of that chart.
 ## v1.14
 - [ ] Promote-todo command    | lane: feature
 - [ ] Milestone id rejected on Windows paths | lane: bug
+  Fails on `C:\x`; see src/ids.py:40.
 ```
+
+Only trailing `| key: value` segments are metadata, so a `|` inside a title stays in the name.
+Lines indented under an item are carried as its `detail`, and a version opened on the Plan lists
+its open items with that text folded beneath each.
 
 A `## ` heading that does not start with a version leaves the milestone above it in force,
 and `sync` warns about it. A section that is deliberately not a milestone ends the one above

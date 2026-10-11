@@ -43,3 +43,7 @@ docs/map.html
 # Working pages kept local, off the published site.
 docs/engine_components.html
 docs/plan-source-audit.html
+
+# pip install . in a checkout writes a second copy of the engine
+build/
+*.egg-info/

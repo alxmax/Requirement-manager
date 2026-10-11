@@ -46,6 +46,9 @@ def _add_query_flags(ap):
                     default=False, metavar="REASON")
     ap.add_argument("--since", metavar="REF")
     ap.add_argument("--wipe", action="store_true")
+    ap.add_argument("--watch", metavar="REF", default=None)
+    ap.add_argument("--propose", metavar="TEXT", default=None)
+    ap.add_argument("--propose-files", dest="propose_files", default=None)
 
 def _add_todo_and_mode_flags(ap):
     # implements: ARCH-CMDREGISTRY-033

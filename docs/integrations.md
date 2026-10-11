@@ -5,8 +5,10 @@
 
 ### Plain CLI (any tool, or no tool)
 
-Copy `reqmap.py` from `plugin/scripts/` into your repo's `scripts/` directory and
-run it directly. No AI assistant needed:
+Copy `reqmap.py` and the `reqmap_engine/` package from `plugin/scripts/` into your
+repo's `scripts/` directory and run them directly. No AI assistant needed. From a
+checkout of this repository, `pip install .` is the same engine on `PATH`; the copy
+stays the offline install ([docs/stability.md](stability.md)).
 
 ```bash
 # one-time copy

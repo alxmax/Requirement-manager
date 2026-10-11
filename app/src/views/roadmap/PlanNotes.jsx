@@ -124,8 +124,8 @@ function ShippedEntry({ e, entryRef }) {
  *  first and last commit of the work.
  *  implements: REQ-HISTORY-1081 */
 export function ReleaseNote({ release, t, onClose }) {
-  const meta = `${say(t, "first commit")} ${release.start}`
-    + ` · ${say(t, "last commit")} ${release.end}`;
+  const meta = `${say(t, "first commit")} ${release.commitStart || release.start}`
+    + ` · ${say(t, "last commit")} ${release.commitEnd || release.end}`;
   const members = Array.isArray(release.members) ? release.members : null;
   const list = members && (
     <ul style={NOTE_LIST}>
@@ -218,12 +218,44 @@ function PlannedBar({ bar, openSpec, onPickBar }) {
   );
 }
 
-/** A planned version, opened: its due date, its label and the bars planned
- *  on it. implements: REQ-PLANCADENCE-1000 */
+const TODO_DETAIL = {
+  margin: "4px 0 0", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap",
+  color: "var(--fg-faint)", font: "inherit",
+};
+
+/** The open `TODO.md` items filed under a version, in file order; an item
+ *  with indented lines opens to show them. implements: REQ-VERSIONTODOS-1097 */
+function VersionTodos({ items, t }) {
+  if (!items.length) return null;
+  return (
+    <div data-todos="">
+      <div style={FAINT}>{say(t, "Open in TODO.md")} · {items.length}</div>
+      <ul style={NOTE_LIST}>
+        {items.map((it, i) => (
+          <li key={`${i}-${it.name}`} style={{ fontSize: 12.5, lineHeight: 1.5 }}>
+            {it.detail
+              ? (
+                <details>
+                  <summary style={{ cursor: "pointer" }}>{it.name}</summary>
+                  <pre style={TODO_DETAIL}>{it.detail}</pre>
+                </details>
+              )
+              : it.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** A planned version, opened: its due date, its label, the bars planned
+ *  on it and the open `TODO.md` items filed under it.
+ *  implements: REQ-PLANCADENCE-1000 */
 export function VersionNote(
-  { version, bars, t, openSpec, onClose, onPickBar },
+  { version, bars, todos = [], t, openSpec, onClose, onPickBar },
 ) {
   const planned = bars.filter((b) => b.milestone === version.ms);
+  const open = todos.filter((x) => x && !x.done && x.milestone === version.ms);
   const meta = `${version.due}${version.label ? ` · ${version.label}` : ""}`;
   const list = (
     <ul style={NOTE_LIST}>
@@ -238,9 +270,10 @@ export function VersionNote(
       <NoteHead title={version.ms} t={t} onClose={onClose} meta={meta} />
       {planned.length
         ? list
-        : <div style={FAINT}>
+        : open.length ? null : <div style={FAINT}>
             {say(t, "Nothing planned on this version yet.")}
           </div>}
+      <VersionTodos items={open} t={t} />
     </div>
   );
 }
@@ -277,7 +310,9 @@ function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
 }
 
 /** Whichever note the selection is: a shipped month, a version, or a bar. */
-export function PickedNote({ picked, lay, roadmap, t, openSpec, onPick }) {
+export function PickedNote(
+  { picked, lay, roadmap, todos, t, openSpec, onPick },
+) {
   const close = () => onPick(null);
   if (picked.kind === "release") {
     return <ReleaseNote release={picked} t={t} onClose={close} />;
@@ -287,7 +322,7 @@ export function PickedNote({ picked, lay, roadmap, t, openSpec, onPick }) {
                         onClose={close} />;
   }
   if (picked.kind === "version") {
-    return <VersionNote version={picked} bars={lay.bars} t={t}
+    return <VersionNote version={picked} bars={lay.bars} todos={todos} t={t}
                         openSpec={openSpec}
                         onClose={close} onPickBar={onPick} />;
   }

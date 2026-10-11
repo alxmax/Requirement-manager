@@ -62,12 +62,14 @@ export function ShippedBand({ sel, t }) {
         const pick = () => toggle({ kind: "release", ...h });
         const caption = h.members && !String(h.version).includes("-v")
           ? `${h.members.length} ${t("releases")}` : "";
+        const first = h.commitStart || h.start;
+        const last = h.commitEnd || h.end;
         const tip = h.members
-          ? `${h.version}\n${t("first commit")} ${h.start}\n`
-            + `${t("last commit")} ${h.end}\n`
+          ? `${h.version}\n${t("first commit")} ${first}\n`
+            + `${t("last commit")} ${last}\n`
             + h.members.map((m) => m.version).join("\n")
-          : `${h.version}\n${t("first commit")} ${h.start}\n`
-            + `${t("last commit")} ${h.end}`;
+          : `${h.version}\n${t("first commit")} ${first}\n`
+            + `${t("last commit")} ${last}`;
         return (
           <div key={h.key} data-release={h.version} role="button"
             tabIndex={0} onClick={pick} onKeyDown={onActivate(pick)}

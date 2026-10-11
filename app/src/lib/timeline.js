@@ -64,6 +64,14 @@ export function isoWeek(d) {
   return 1 + Math.round((t - jan4) / (7 * 86400000));
 }
 
+/** `2026-W40`: the ISO week of a day with its ISO year, read off the week's
+ *  Thursday like `isoWeek`, so 1 January can sit in the year before. */
+export function isoWeekKey(d) {
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));
+  return `${t.getFullYear()}-W${isoWeek(d)}`;
+}
+
 /** Week bands over [origin .. origin+totalDays), labelled with the ISO
  *  week of the year (W23, W24, …) and aligned to real Monday boundaries
  *  — so the first band is short whenever the range does not start on a

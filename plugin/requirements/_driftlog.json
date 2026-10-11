@@ -70,8 +70,8 @@
       "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
     },
     "ARCH-MAP-007": {
-      "hash": "6c6e17fd7e12",
-      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
+      "hash": "837acd003e9a",
+      "reason": null
     },
     "ARCH-MAPDIAGRAMS-055": {
       "hash": "0e45d4b8d45e",
@@ -138,7 +138,7 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "2bc38d74f005",
+      "hash": "44b1e42f2c8c",
       "reason": null
     },
     "ARCH-VLEVEL-037": {
@@ -258,7 +258,11 @@
       "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "REQ-HISTORY-1081": {
-      "hash": "3b4547bd8773",
+      "hash": "86134f4c0e1d",
+      "reason": null
+    },
+    "REQ-HISTORYWEEK-1098": {
+      "hash": "bd851bf3b7ab",
       "reason": null
     },
     "REQ-INIT-860": {
@@ -299,7 +303,7 @@
     },
     "REQ-MAP-871": {
       "hash": "7e73678111e9",
-      "reason": "Compact export contracts and cases"
+      "reason": null
     },
     "REQ-MAPDIAGRAMS-874": {
       "hash": "68d4a52da578",
@@ -307,7 +311,7 @@
     },
     "REQ-MCPTOOLS-1028": {
       "hash": "938eb7ec8f3e",
-      "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
+      "reason": "REQ-MCPTOOLS-1028 stays the thirteen-tool freeze. init --watch and init --propose remain command-line flags."
     },
     "REQ-MODULEFILE-056": {
       "hash": "f5c9407f0cfe",
@@ -484,6 +488,10 @@
     "REQ-VERSIONFILES-1014": {
       "hash": "ebb1422db3b0",
       "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
+    },
+    "REQ-VERSIONTODOS-1097": {
+      "hash": "aea77e6864fe",
+      "reason": null
     },
     "REQ-VIEWER-1082": {
       "hash": "73bdeb584cd9",

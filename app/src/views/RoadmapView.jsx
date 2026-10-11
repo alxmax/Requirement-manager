@@ -2,7 +2,7 @@
 /* RoadmapView — the dated Plan. Zoom is remembered per reader:
    it shrinks the chart and its scroll extent together. */
 import {
-  TARGETS, ROADMAP, HISTORY, BRANCH,
+  TARGETS, ROADMAP, HISTORY, BRANCH, TODOS,
 } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
@@ -102,6 +102,7 @@ export function RoadmapView(props) {
         <div style={{ zoom: zoom / 100 }}>
           <PlanGantt planning={TARGETS} history={history}
                      roadmap={props.initialRoadmap || ROADMAP}
+                     todos={props.initialTodos || TODOS}
                      branch={props.initialBranch || BRANCH}
                      locale={locale} t={t} zoom={100} openSpec={openSpec} />
         </div>

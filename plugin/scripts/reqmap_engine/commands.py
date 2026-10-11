@@ -21,7 +21,10 @@ COMMANDS = {
             "the lock and map, and print guided next steps. Idempotent — safe "
             "to re-run; never clobbers an existing .reqmapignore. --plan emits "
             "the extraction plan as JSON and writes no requirement files, for "
-            "looking before authoring. "
+            "looking before authoring. --watch REF prints draft suggestions "
+            "for code files changed since REF, and the commit subjects in "
+            "between, and writes nothing. --propose TEXT prints one "
+            "requirement draft for a person to confirm, and writes nothing. "
        
         ),
         "arg": None,
@@ -54,6 +57,28 @@ COMMANDS = {
              "type": "bool",
              "help": "Skip the final site step (scaffolding "
                      "docs/architecture.html)."},
+            {"name": "watch", "flag": "--watch",
+             "consumer": [
+                 "docs/commands.md",
+                 "docs/stability.md",
+             ],
+             "type": "str",
+             "help": "Print draft suggestions for code files changed since "
+                     "this git ref, and the commit subjects in between. "
+                     "Writes nothing and exits 0."},
+            {"name": "propose", "flag": "--propose",
+             "consumer": [
+                 "docs/commands.md",
+                 "docs/stability.md",
+             ],
+             "type": "str",
+             "help": "Print one requirement draft from this description. "
+                     "status stays draft. Writes nothing."},
+            {"name": "propose_files", "flag": "--propose-files",
+             "consumer": "docs/commands.md",
+             "type": "str",
+             "help": "With --propose: comma-separated paths the draft is "
+                     "about."},
         ],
     },
     "gate": {
