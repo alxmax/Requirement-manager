@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.21.1` — 2026-10-11
+
+**Follow-ups to v8.21.0: a watch that skips dot directories, a budget probe that does not read the machine's TEMP, and contracts that say what the code does.**
+
+- `init --watch` no longer suggests files under a dot directory. A leading `./` was stripped with `lstrip("./")`, which also took the dot off `.github/x.py`, so the dot-directory test never saw it and the file was suggested as `github/x.py`. A ref git cannot read is now said on stderr as well as in the report; the exit stays 0 (REQ-WATCH-1092)
+- The core budget probe builds its fixture one level inside its temp directory. The engine reads `TODO.md` from the parent of the root, and the parent of a bare temp directory is the machine's TEMP, where a stray `TODO.md` loaded `todoparse.py` into the measured core (6,664 against 6,629). The core is 6,629 logical lines and has no headroom: the next line in the core has to move code out in the same commit
+- REQ-HISTORY-1081 says a release is a lone one when it is the only release of its minor version in the export, and ARCH-VIEWER-007 no longer says every release is drawn first commit to last. REQ-TODODETAIL-1096 says what the parser does: a trailing `|` segment that starts with a word and a colon is metadata, every such segment is read (`| lane: bug | req: X` keeps its lane, which only the last segment did before), and any other `|` stays in the name; `a|b: c` is cut at the pipe. REQ-HISTORYWEEK-1098 gains a case for an ISO week that spans New Year
+- **One-time drift.** REQ-HISTORY-1081, REQ-HISTORYWEEK-1098, REQ-TODODETAIL-1096 and ARCH-VIEWER-007 were reworded. Re-read them; the behaviour they describe is the one v8.21.0 shipped
+- 17,826 physical lines in 75 files; the core is unchanged at 6,629 logical lines
+
 ## plugin `v8.21.0` — 2026-10-11
 
 **A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks.**
