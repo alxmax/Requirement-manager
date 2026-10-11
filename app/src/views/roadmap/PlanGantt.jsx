@@ -15,7 +15,7 @@ export {
 
 export function PlanGantt(props) {
   const {
-    planning, history, roadmap, branch, locale, t, zoom, openSpec,
+    planning, history, roadmap, todos, branch, locale, t, zoom, openSpec,
   } = props;
   const [picked, setPicked] = useState(null);
   const noteRef = useRef(null);
@@ -64,7 +64,8 @@ export function PlanGantt(props) {
       {picked && (
         <div ref={noteRef}
              style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
-          <PickedNote picked={picked} lay={lay} roadmap={roadmap} t={t}
+          <PickedNote picked={picked} lay={lay} roadmap={roadmap}
+                      todos={todos} t={t}
                       openSpec={openSpec}
                       onPick={setPicked} />
         </div>

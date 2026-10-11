@@ -77,6 +77,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "last commit": "ultimul commit",
   "Nothing planned on this version yet.":
     "Nimic planificat încă pe versiunea asta.",
+  "Open in TODO.md": "Deschise în TODO.md",
   "Now": "Acum",
   "Next": "Urmează",
   "Later": "Mai târziu",

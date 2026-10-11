@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.21.0` — 2026-10-11
+
+**A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks.**
+
+- `todos` in `_map.json` carries an item's indented lines as `detail`, dedented. An item with none has no `detail` key, so a `TODO.md` without indented lines produces the same map as before (REQ-MAP-871#CASE-8)
+- A version opened on the Plan lists its open `TODO.md` items in file order; an item with a `detail` opens to show it. Done items and other versions' items are not listed (REQ-PLANCADENCE-1000#CASE-8)
+- **The shipped band no longer stretches a patch series over weeks it did not ship in.** Patch releases of one minor version are drawn one block per ISO week, from the first to the last of their changelog dates; a series that runs over several weeks is labelled `v3.2.0-v3.2.3`, `v3.2.4-v3.2.9`, and a week with no release draws nothing. The commit dates stay on each release in the note. A release with no sibling is drawn as before (REQ-HISTORYWEEK-1098)
+- **A `|` inside an item's title stays in its name.** Only trailing `| key: value` segments are metadata, so `` - [ ] Split on `a|b` `` is no longer cut to ``Split on `a``. One behaviour change: a trailing `| text` that is not `key: value` used to be dropped from the name and is now part of it (REQ-MAP-871#CASE-9)
+- **One-time drift.** `REQ-HISTORY-1081` now says a `vX.Y.x` block is one ISO week on changelog dates, where it said first commit to last commit. Re-read it
+- The engine's core falls from 6,646 to 6,629 logical lines (17,819 physical lines in 75 files): TODO.md parsing moved to `todoparse.py`, which loads only where a `TODO.md` exists
+
 ## plugin `v8.20.0` — 2026-10-11
 
 **MIT, and a first run that does not ask you to tag the whole tree.**

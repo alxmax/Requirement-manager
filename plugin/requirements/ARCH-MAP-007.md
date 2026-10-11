@@ -20,6 +20,7 @@ satisfies: [SYS-VISUAL-106]
 Every bullet below is binding.
 - `sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]
 - `_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]
+- A `TODO.md` item's indented lines ride into `todos` as its `detail`, and a `|` inside its title stays in its name. [[REQ-TODODETAIL-1096]]
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
@@ -510,3 +511,46 @@ CASE-7 — a release spans the commits since the previous tag
          with no tag stays on its changelog date. With no git history both
          dates are the changelog date
 
+---
+id: REQ-TODODETAIL-1096
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+distinct_from: [REQ-MAP-871]
+---
+
+# A TODO.md item carries its own description, and keeps a pipe in its title
+
+## Description
+> A position in `TODO.md` is more than its checkbox line: the lines under it say what is wrong
+> and where. The map carried only the title, so a viewer could count the work but not describe it.
+
+Every bullet below is binding.
+- An item's indented lines carry into its `todos` entry as `detail`, dedented, and an item with
+  none has no `detail` key.
+- A line that is not indented under an item ends that item's `detail`.
+- Only trailing `| key: value` segments of an item line are metadata, so a `|` inside the title
+  stays in the item's name.
+
+## Cases
+CASE-1 — an item's indented lines become its detail
+  Given  a `TODO.md` item followed by two indented lines
+  When   the todos are parsed
+  Then   the item's `detail` holds those two lines, its `name` is only its own line, and an item
+         with no indented lines has no `detail` key
+
+CASE-2 — a pipe inside the title is not metadata
+  Given  a `TODO.md` item whose title contains `a|b` and no `| key: value` suffix
+  When   the todos are parsed
+  Then   its `name` keeps the whole title and its `lane` is `feature`
+
+CASE-3 — an unindented line ends the detail
+  Given  a `TODO.md` item, then a line of prose at column 0, then an indented line
+  When   the todos are parsed
+  Then   the indented line is not the item's `detail`
+
+## Context
+**Notes**
+- `distinct_from: REQ-MAP-871` - `REQ-MAP-871` says `todos` is derived from `TODO.md`; this says what each entry carries.

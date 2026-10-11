@@ -196,36 +196,12 @@ NOT_MILESTONE_RE = re.compile(r"<!--\s*reqmap:\s*not-milestone\s*-->")
 
 
 def _parse_todos_from_text(text):  # implements: REQ-ROADMAP-907
-    """Parse TODO.md content → list of {name, lane, milestone, done} dicts.
-    Pure. Items before the first ## vX.Y heading, or under a heading marked
-    `<!-- reqmap: not-milestone -->`, are silently ignored (milestone is
-    required)."""
-    todos, current_ms = [], None
-    for line in text.splitlines():
-        # match the version token at the heading start; a trailing annotation
-        # like `## v2.8 (deferred — demand-gated)` is harmless (the capture
-        # group isolates the version) and must not drop the milestone's items.
-        ms_m = re.match(r"^##\s+(v\d[\d.]*)\b", line.strip())
-        if ms_m or (line.strip().startswith("## ")
-                    and NOT_MILESTONE_RE.search(line)):
-            current_ms = ms_m.group(1) if ms_m else None
-            continue
-        item_m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", line.strip())
-        if item_m and current_ms:
-            done = item_m.group(1).lower() == "x"
-            rest = item_m.group(2)
-            if "|" in rest:
-                name_part, meta = rest.rsplit("|", 1)
-                name = name_part.strip()
-                # one word: bug|feature (bus|ops still parse; the roadmap
-                # files them as features)
-                lane_m = re.search(r"lane:\s*(\w+)", meta)
-                lane = lane_m.group(1) if lane_m else "feature"
-            else:
-                name, lane = rest.strip(), "feature"
-            todos.append({"name": name, "lane": lane,
-                         "milestone": current_ms, "done": done})
-    return todos
+    """Parse TODO.md content → list of {name, lane, milestone, done[, detail]}
+    dicts. Pure. Items before the first ## vX.Y heading, or under a heading
+    marked `<!-- reqmap: not-milestone -->`, are silently ignored (milestone
+    is required). The parsing lives in `todoparse`, loaded only here."""
+    from .todoparse import parse_todos  # only a repo with a TODO.md
+    return parse_todos(text, NOT_MILESTONE_RE)
 
 
 def _parse_todos(root):  # implements: REQ-MAP-871

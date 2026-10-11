@@ -505,6 +505,44 @@ test("gantt: an opened version lists the work planned on it",
     return html.includes("on it") && !html.includes("elsewhere")
       && html.includes("2026-09-25");
   })());
+
+// tested-by: REQ-VERSIONTODOS-1097 @unit
+// verifies: REQ-VERSIONTODOS-1097#CASE-1
+test("gantt: an opened version lists its open TODO.md items, detail folded",
+  (() => {
+    const version = { ms: "v9.8.0", due: "2026-09-25", label: "L" };
+    const todos = [
+      { name: "open one", milestone: "v9.8.0", done: false,
+        detail: "why it hurts\n  src/a.py:3" },
+      { name: "open plain", milestone: "v9.8.0", done: false },
+      { name: "closed one", milestone: "v9.8.0", done: true },
+      { name: "elsewhere", milestone: "v9.9.0", done: false },
+    ];
+    const html = renderToString(<VersionNote version={version} bars={[]}
+      todos={todos} t={(x) => x} onClose={noop} onPickBar={noop} />);
+    return html.includes("open one") && html.includes("<details")
+      && html.includes("why it hurts") && html.includes("open plain")
+      && !html.includes("closed one") && !html.includes("elsewhere")
+      && !html.includes("Nothing planned");
+  })());
+// verifies: REQ-VERSIONTODOS-1097#CASE-2
+test("gantt: a version with no bars and no open items says nothing is planned",
+  (() => {
+    const html = renderToString(<VersionNote
+      version={{ ms: "v9.8.0", due: "2026-09-25" }} bars={[]}
+      todos={[{ name: "gone", milestone: "v9.8.0", done: true }]}
+      t={(x) => x} onClose={noop} onPickBar={noop} />);
+    return html.includes("Nothing planned") && !html.includes("gone");
+  })());
+// verifies: REQ-VERSIONTODOS-1097#CASE-3
+test("gantt: an open item with no detail is a plain row, nothing to expand",
+  (() => {
+    const html = renderToString(<VersionNote
+      version={{ ms: "v9.8.0", due: "2026-09-25" }} bars={[]}
+      todos={[{ name: "plain item", milestone: "v9.8.0", done: false }]}
+      t={(x) => x} onClose={noop} onPickBar={noop} />);
+    return html.includes("plain item") && !html.includes("<details");
+  })());
 // ---- ISO week header ------------------------------------------------------
 // The week row is labelled with the week OF THE YEAR, not a count from
 // the chart's left edge: the same calendar week has to read the same in

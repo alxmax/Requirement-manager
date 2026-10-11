@@ -55,7 +55,9 @@ PACKAGE = "reqmap_engine"
 # to 6,640 by ADR-0065, which retires RM017 with the viewer's demo fixture.
 # Raised to 6,646 by ADR-0067: flag registration and dispatch for
 # `init --watch` / `--propose`. watch.py stays lazy and is not in this number.
-CORE_LOGICAL_BUDGET = 6646
+# Lowered to 6,629 by the cut that moved TODO.md parsing to `todoparse.py`,
+# which only a repository that keeps a TODO.md loads.
+CORE_LOGICAL_BUDGET = 6629
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

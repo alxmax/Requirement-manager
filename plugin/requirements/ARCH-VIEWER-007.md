@@ -23,7 +23,7 @@ Every bullet below is binding.
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
-- The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]]
+- The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
@@ -35,6 +35,7 @@ Every bullet below is binding.
 - The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]
 - Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
 - Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]
+- Selecting a version on the plan lists the open `TODO.md` items filed under it, each with its description folded beneath. [[REQ-VERSIONTODOS-1097]]
 
 ## Cases
 CASE-1
@@ -826,15 +827,17 @@ distinct_from: [REQ-HISTORY-1003]
 
 ## Description
 > The engine reads the CHANGELOG and groups it by month (REQ-HISTORY-1003); the reader
-> looks at a chart. Patch releases of one minor version share a block, as wide as the
-> commits of that whole line and at least as wide as the version on it. A second row
+> looks at a chart. Patch releases of one minor version share a block per ISO week, as
+> wide as their release dates and at least as wide as the version on it. A second row
 > appears only where two of those boxes would cover each other.
 
 Every bullet below is binding.
 - The Plan draws shipped work on the Shipped band. Patch releases of the same minor
-  version — `v7.21.0`, `v7.21.1`, `v7.21.10` — share one block labelled `vX.Y.x`, from
-  the earliest `first_commit` to the latest `last_commit`; a release with no
-  sibling keeps its own version. The changelog date stands in when a commit date is absent.
+  version — `v7.21.0`, `v7.21.1`, `v7.21.10` — released in one ISO week share one block
+  labelled `vX.Y.x`, from the earliest to the latest of their changelog dates, and a series
+  over several weeks is split by [[REQ-HISTORYWEEK-1098]]. A release with no sibling keeps
+  its own version and its first-to-last commit span, and the changelog date stands in
+  when a commit date is absent.
 - The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the
   count of releases it holds, so a release shorter than its label is still readable.
 - Blocks share a row. A block takes the next row only when its drawn box would cover
@@ -885,10 +888,11 @@ CASE-6 — a release shorter than its version widens to it
          and the releases that share a start share one block labelled from the lowest
          version to the highest, as in `v5.10.x-v6.3.0`
 
-CASE-7 — patch releases of one minor version share a block
-  Given  `v7.21.0`, `v7.21.1` and `v7.21.10`, and a `v7.22.0` beside them
+CASE-7 — patch releases of one minor version released in one week share a block
+  Given  `v7.21.0`, `v7.21.1` and `v7.21.10` released on three days of one ISO week, and a
+         `v7.22.0` beside them
   When   the Plan lays them out
-  Then   the three share one block labelled `v7.21.x` spanning the earliest commit to the
+  Then   the three share one block labelled `v7.21.x` from the earliest changelog date to the
          latest, and `v7.22.0` stays its own block
 
 ## Context
@@ -1080,3 +1084,101 @@ CASE-3 — one milestone keeps its pill where it always was
 ## Context
 **Notes**
 - `distinct_from: REQ-PLANSTACK-1012` - `REQ-PLANSTACK-1012` keeps bars from covering each other; this keeps version pills from covering each other.
+
+---
+id: REQ-VERSIONTODOS-1097
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+distinct_from: [REQ-PLANCADENCE-1000]
+---
+
+# An opened plan version lists the TODO.md items filed under it
+
+## Description
+> The plan says when a version is due and which bars it carries; the work itself lives in
+> `TODO.md`. Opening a version shows that work, so "what is in v3.2.0" is answered where it
+> is asked and not in a copy kept by hand.
+
+Every bullet below is binding.
+- A version opened on the plan lists the open `TODO.md` items whose `milestone` is that
+  version, in file order.
+- An item with a `detail` opens to show it beneath its name; an item with none is a plain row.
+- A done item, and an item filed under another version, is not listed.
+- A version with no bars and no open items says nothing is planned on it.
+
+## Cases
+CASE-1 — open items are listed, their detail folded
+  Given  a version with two open items (one with `detail`), one done item, and an item filed
+         under another version
+  When   the version is selected on the plan
+  Then   the note lists the two open items and shows the `detail` of the one that has it,
+         and names neither the done item nor the other version's
+
+CASE-2 — a version with nothing planned says so
+  Given  a version with no bars and no open items
+  When   the version is selected on the plan
+  Then   the note says nothing is planned on it
+
+CASE-3 — an item with no detail is a plain row
+  Given  a version with one open item that has no `detail`
+  When   the version is selected on the plan
+  Then   the note lists the item by its name, with nothing to expand
+
+## Context
+**Notes**
+- `distinct_from: REQ-PLANCADENCE-1000` - `REQ-PLANCADENCE-1000` computes the release dates the version pills sit on; this says what opening one shows.
+
+---
+id: REQ-HISTORYWEEK-1098
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+distinct_from: [REQ-HISTORY-1081]
+---
+
+# A series of patch releases is drawn one block per week, on the days it shipped
+
+## Description
+> A repository that ships a hotfix a day put a month of releases on one bar that began weeks
+> before the first of them, so the chart said "continuous work" about a month in which
+> nothing shipped for three weeks. The band answers "what shipped when": a block never
+> crosses a week, and it stands on release dates, not on the first commit after the last tag.
+
+Every bullet below is binding.
+- Releases of one minor version are grouped by the ISO week of their changelog date, and no
+  block holds releases of two weeks.
+- A block runs from the earliest to the latest changelog date of the releases in it; the
+  commit dates stay on each release in the note.
+- A series that fits in one week keeps the label `vX.Y.x`; one that runs over several is
+  labelled from its lowest version to its highest in each week, and a lone release in a week
+  keeps its own version.
+- A week with no release draws nothing, so a pause shows.
+
+## Cases
+CASE-1 — a series over two weeks is two blocks
+  Given  `v3.2.0`, `v3.2.1` and `v3.2.2` released on three days of one ISO week, and `v3.2.3`
+         and `v3.2.4` released the Monday and Tuesday after
+  When   the Plan lays them out
+  Then   there are two blocks, `v3.2.0-v3.2.2` and `v3.2.3-v3.2.4`, and none crosses the week
+         boundary
+
+CASE-2 — a block starts on its first release's changelog date
+  Given  `v3.2.0` whose first commit is three weeks before its changelog date, and `v3.2.1` the
+         next day
+  When   the Plan lays them out
+  Then   the block starts on `v3.2.0`'s changelog date, and the note still lists `v3.2.0`'s
+         first commit
+
+CASE-3 — a lone release in a week keeps its own version
+  Given  `v3.2.0` and `v3.2.1` in one week and `v3.2.2` alone in the next
+  When   the Plan lays them out
+  Then   the next week holds a block labelled `v3.2.2`, drawn on its changelog date
+
+## Context
+**Notes**
+- `distinct_from: REQ-HISTORY-1081` - `REQ-HISTORY-1081` says how a shipped release is drawn and opened; this says how a series is cut into weeks.

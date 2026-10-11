@@ -663,7 +663,31 @@ class StripLineTag(unittest.TestCase):  # tested-by: ARCH-INIT-012
         self.assertEqual(R._strip_line_tag("def f(): pass\n"), "def f(): pass\n")
 
 
-class ParseTodos(unittest.TestCase):
+class ParseTodos(unittest.TestCase):  # tested-by: REQ-TODODETAIL-1096
+    def test_indented_lines_become_detail(self):  # verifies: REQ-TODODETAIL-1096#CASE-1  # verifies: REQ-TODODETAIL-1096#CASE-3
+        text = ("## v3.2.0\n"
+                "- [ ] `P1` **Export drops a column** | lane: bug\n"
+                "  The header row is written twice.\n"
+                "    src/export.py:88\n"
+                "- [ ] Next item\n"
+                "Prose under no item.\n"
+                "  not detail of anything\n")
+        todos = R._parse_todos_from_text(text)
+        self.assertEqual(todos[0]["name"], "`P1` **Export drops a column**")
+        self.assertEqual(todos[0]["lane"], "bug")
+        self.assertEqual(todos[0]["detail"],
+                         "The header row is written twice.\n  src/export.py:88")
+        self.assertNotIn("detail", todos[1])
+
+    def test_pipe_inside_title_stays_in_the_name(self):  # verifies: REQ-TODODETAIL-1096#CASE-2
+        todos = R._parse_todos_from_text(
+            "## v3.2.0\n- [ ] Split on `a|b` in the parser\n"
+            "- [ ] Escape `x|y` | lane: bug | req: REQ-X-001\n")
+        self.assertEqual(todos[0]["name"], "Split on `a|b` in the parser")
+        self.assertEqual(todos[0]["lane"], "feature")
+        self.assertEqual(todos[1]["name"], "Escape `x|y`")
+        self.assertEqual(todos[1]["lane"], "bug")
+
     def test_basic_items(self):
         text = (
             "# TODO\n\n"
