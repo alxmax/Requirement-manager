@@ -23,7 +23,7 @@ Every bullet below is binding.
 - The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
 - The viewer's outline applies a requested scope from its first render, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
-- The viewer draws shipped releases from the first commit to the last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
+- The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
@@ -835,9 +835,9 @@ Every bullet below is binding.
 - The Plan draws shipped work on the Shipped band. Patch releases of the same minor
   version — `v7.21.0`, `v7.21.1`, `v7.21.10` — released in one ISO week share one block
   labelled `vX.Y.x`, from the earliest to the latest of their changelog dates, and a series
-  over several weeks is split by [[REQ-HISTORYWEEK-1098]]. A release with no sibling keeps
-  its own version and its first-to-last commit span, and the changelog date stands in
-  when a commit date is absent.
+  over several weeks is split by [[REQ-HISTORYWEEK-1098]]. A release that is the only one
+  of its minor version in the export keeps its own version and its first-to-last commit
+  span, and the changelog date stands in when a commit date is absent.
 - The block is at least as wide as its version, and for a `vX.Y.x` group as wide as the
   count of releases it holds, so a release shorter than its label is still readable.
 - Blocks share a row. A block takes the next row only when its drawn box would cover
@@ -1178,6 +1178,12 @@ CASE-3 — a lone release in a week keeps its own version
   Given  `v3.2.0` and `v3.2.1` in one week and `v3.2.2` alone in the next
   When   the Plan lays them out
   Then   the next week holds a block labelled `v3.2.2`, drawn on its changelog date
+
+CASE-4 — an ISO week that spans New Year is one week
+  Given  `v3.2.0` released on 2026-12-31, `v3.2.1` on 2027-01-01 (the same ISO week) and `v3.2.2`
+         on 2027-01-04
+  When   the Plan lays them out
+  Then   `v3.2.0` and `v3.2.1` share one block, and `v3.2.2` is a block of its own
 
 ## Context
 **Notes**

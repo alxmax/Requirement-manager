@@ -221,6 +221,24 @@ test("history: a lone release in a week keeps its own version", () => {
     && alone.start === "2026-10-06" && alone.end === "2026-10-06";
 });
 
+// verifies: REQ-HISTORYWEEK-1098#CASE-4
+test("history: an ISO week that spans New Year stays one block", () => {
+  const lay = layoutPlan({ lanes: ["Feature"] }, [{
+    month: "2027-01", count: 3, first: "2026-12-31", last: "2027-01-04",
+    versions: ["v3.2.0", "v3.2.1", "v3.2.2"], landmark: "v3.2.0",
+    headline: "h",
+    entries: [
+      shipped("v3.2.2", "2027-01-04"), shipped("v3.2.1", "2027-01-01"),
+      shipped("v3.2.0", "2026-12-31"),
+    ],
+  }], "en");
+  const pair = lay.pastBars.find((b) => b.version === "v3.2.0-v3.2.1");
+  const alone = lay.pastBars.find((b) => b.version === "v3.2.2");
+  return lay.pastBars.length === 2 && pair && alone
+    && pair.start === "2026-12-31" && pair.end === "2027-01-01"
+    && alone.start === "2027-01-04";
+});
+
 // verifies: REQ-HISTORY-1081#CASE-6
 test("history: releases that start on one day share a range block", () => {
   const day = "2026-09-06";

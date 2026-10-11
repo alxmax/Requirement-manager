@@ -138,7 +138,7 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "44b1e42f2c8c",
+      "hash": "9901746b2201",
       "reason": null
     },
     "ARCH-VLEVEL-037": {
@@ -258,11 +258,11 @@
       "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
     },
     "REQ-HISTORY-1081": {
-      "hash": "86134f4c0e1d",
+      "hash": "68ff32fee279",
       "reason": null
     },
     "REQ-HISTORYWEEK-1098": {
-      "hash": "bd851bf3b7ab",
+      "hash": "68f91122acaf",
       "reason": null
     },
     "REQ-INIT-860": {
@@ -464,6 +464,10 @@
     "REQ-SITE-924": {
       "hash": "0cf310579c78",
       "reason": "Bare sync leaves a page with no engine region alone"
+    },
+    "REQ-TODODETAIL-1096": {
+      "hash": "9b21df18bebf",
+      "reason": null
     },
     "REQ-TRACE-934": {
       "hash": "e1ca981110a3",

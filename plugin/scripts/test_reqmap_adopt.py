@@ -121,6 +121,7 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
         self.assertFalse(report["ok"])
         self.assertIn("git could not read that ref", report["error"])
         self.assertEqual([], report["files"])
+        self.assertIn("could not read the ref", done.stderr)
 
     def test_gate_refuses_watch(self):
         # verifies: REQ-WATCH-1092#CASE-5
@@ -140,6 +141,20 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
         self.assertIn("git could not read that ref", report["error"])
         self.assertFalse(os.path.exists(os.path.join(path, "pwned x")))
         self.assertEqual(before, set(os.listdir(path)))
+
+    def test_a_dot_directory_is_not_suggested(self):
+        # verifies: REQ-WATCH-1092#CASE-1
+        path = self._repo()
+        for rel in (".github/x.py", ".venv/v.py", "src/ok.py", ".hidden.py"):
+            full = os.path.join(path, *rel.split("/"))
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            with open(full, "w", encoding="utf-8") as handle:
+                handle.write("x = 1\n")
+        _commit(path, "code lands under dot directories and a dotfile")
+        done = _run(path, "init", "--watch", "HEAD~1")
+        self.assertEqual(0, done.returncode, done.stderr)
+        report = json.loads(done.stdout)
+        self.assertEqual(["src/ok.py"], [item["path"] for item in report["files"]])
 
     def test_an_ignored_path_is_not_suggested(self):
         # verifies: REQ-WATCH-1092#CASE-8

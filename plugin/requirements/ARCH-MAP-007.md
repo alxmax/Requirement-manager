@@ -531,8 +531,9 @@ Every bullet below is binding.
 - An item's indented lines carry into its `todos` entry as `detail`, dedented, and an item with
   none has no `detail` key.
 - A line that is not indented under an item ends that item's `detail`.
-- Only trailing `| key: value` segments of an item line are metadata, so a `|` inside the title
-  stays in the item's name.
+- A trailing `|` segment that starts with a word and a colon (`| lane: bug`) is metadata, and
+  every such segment is read, so `| lane: bug | req: X` keeps its lane; any other `|` stays in
+  the item's name.
 
 ## Cases
 CASE-1 — an item's indented lines become its detail

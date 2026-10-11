@@ -44,6 +44,25 @@ class EngineBudget(unittest.TestCase):
         self.assertEqual(0, rc)
         self.assertTrue(out.startswith("OK  core is "), out)
 
+    def test_a_stray_todo_md_in_temp_does_not_enter_the_core(self):
+        # The engine reads TODO.md from the parent of the root. The probe's
+        # fixture used to sit directly in TEMP, so a TODO.md there loaded
+        # todoparse.py into a core it does not belong to.
+        here = os.path.dirname(os.path.abspath(__file__))
+        code = ("import sys; sys.path.insert(0, {!r}); "
+                "import check_engine_budget as C; "
+                "print('reqmap_engine.todoparse' in C.core_modules())"
+                .format(here))
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "TODO.md").write_text(
+                "## v1.0\n- [ ] stray\n", encoding="utf-8")
+            env = dict(os.environ, TMP=tmp, TEMP=tmp, TMPDIR=tmp)
+            out = subprocess.run(
+                [sys.executable, "-X", "utf8", "-c", code], env=env,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                universal_newlines=True, encoding="utf-8")
+        self.assertEqual("False", out.stdout.strip(), out.stderr)
+
     def test_the_real_core_is_within_its_budget(self):
         rc, out = self._run()
         self.assertEqual(0, rc, out)

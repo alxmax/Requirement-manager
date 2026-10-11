@@ -105,12 +105,17 @@ def core_modules(scripts_dir=ENGINE_DIR):
     """The engine modules `sync` + `gate --full` load, sorted: derived by
     running both in one subprocess against a fixture repository."""
     with tempfile.TemporaryDirectory() as d:
-        _write_fixture(Path(d))
+        # One level inside the temp dir: the engine reads TODO.md from the
+        # parent of the root, and the parent of a bare temp dir is the
+        # machine's TEMP, where a stray TODO.md changed the measured core.
+        root = Path(d) / "repo"
+        root.mkdir()
+        _write_fixture(root)
         p = subprocess.run(
             [sys.executable, "-X", "utf8", "-c", _PROBE,
-             str(scripts_dir), d],
+             str(scripts_dir), str(root)],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            universal_newlines=True, encoding="utf-8", cwd=d)
+            universal_newlines=True, encoding="utf-8", cwd=str(root))
     line = p.stdout.rpartition("\nCORE ")[2].strip()
     if p.returncode or not line:
         raise RuntimeError("core probe failed:\n" + p.stdout + p.stderr)

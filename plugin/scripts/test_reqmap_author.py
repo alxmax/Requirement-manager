@@ -688,6 +688,12 @@ class ParseTodos(unittest.TestCase):  # tested-by: REQ-TODODETAIL-1096
         self.assertEqual(todos[1]["name"], "Escape `x|y`")
         self.assertEqual(todos[1]["lane"], "bug")
 
+    def test_a_word_and_colon_after_a_pipe_is_metadata(self):  # verifies: REQ-TODODETAIL-1096#CASE-2
+        # The documented edge: the rule is "starts with a word and a colon",
+        # so `a|b: c` reads `b: c` as metadata and the name is cut at the pipe.
+        todos = R._parse_todos_from_text("## v3.2.0\n- [ ] Split on a|b: c\n")
+        self.assertEqual(todos[0]["name"], "Split on a")
+
     def test_basic_items(self):
         text = (
             "# TODO\n\n"

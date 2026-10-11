@@ -82,7 +82,10 @@ def _stem_token(path):
 
 def _code_path(rel):
     # implements: REQ-WATCH-1092
-    rel = rel.replace("\\", "/").lstrip("./")
+    rel = rel.replace("\\", "/")
+    while rel.startswith("./"):
+        rel = rel[2:]
+    rel = rel.lstrip("/")
     if not rel or rel.startswith("requirements/"):
         return False
     if any(part.startswith(".") for part in rel.split("/")):
@@ -195,6 +198,22 @@ def _suggestions(code_root, ref, paths):
     return out, over
 
 
+def _unreadable(ref):
+    # implements: REQ-WATCH-1092
+    """The report for a ref git cannot read: said on stderr as well, so a
+    person at a terminal sees it. The exit stays 0 (a pull request check
+    must not fail on it)."""
+    print("reqmap init: git could not read the ref {!r}".format(ref),
+          file=sys.stderr)
+    payload = {
+        "ok": False, "ref": ref, "writes": False,
+        "error": "git could not read that ref",
+        "files": [], "commits": [], "issues": "not read",
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_watch(code_root, ref):
     # implements: REQ-WATCH-1092
     """Print suggestions for one ref. Writes nothing. Exits 0, or 2
@@ -205,22 +224,10 @@ def cmd_watch(code_root, ref):
         return 2
     sha = _commit(code_root, ref)
     if sha is None:
-        payload = {
-            "ok": False, "ref": ref, "writes": False,
-            "error": "git could not read that ref",
-            "files": [], "commits": [], "issues": "not read",
-        }
-        print(json.dumps(payload, indent=2, ensure_ascii=False))
-        return 0
+        return _unreadable(ref)
     paths = _paths_since(code_root, sha)
     if paths is None:
-        payload = {
-            "ok": False, "ref": ref, "writes": False,
-            "error": "git could not read that ref",
-            "files": [], "commits": [], "issues": "not read",
-        }
-        print(json.dumps(payload, indent=2, ensure_ascii=False))
-        return 0
+        return _unreadable(ref)
     files, over = _suggestions(code_root, ref, paths)
     subjects = _subjects(code_root, sha)
     commits = [{"source": "commit", "subject": text, "status": "draft",
