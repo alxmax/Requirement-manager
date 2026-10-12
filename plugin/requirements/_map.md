@@ -1,5 +1,5 @@
 ---
-generated: 2026-10-11
+generated: 2026-10-12
 engine: 2026-10-11.3
 nodes: 320
 edges: 121
@@ -805,10 +805,10 @@ graph LR
   ARCH_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1476
   f_plugin_scripts_reqmap_engine_review_py_11["plugin/scripts/reqmap_engine/review.py:11"]
   ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_engine_review_py_11
-  f_plugin_skills_requirement_quality_review_SKILL_md_6["plugin/skills/requirement-quality-review/SKILL.md:6"]
-  ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_md_6
-  f_plugin_skills_requirement_quality_review_SKILL_universal_md_9["plugin/skills/requirement-quality-review/SKILL.universal.md:9"]
-  ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_9
+  f_plugin_skills_requirement_quality_review_SKILL_md_13["plugin/skills/requirement-quality-review/SKILL.md:13"]
+  ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_md_13
+  f_plugin_skills_requirement_quality_review_SKILL_universal_md_16["plugin/skills/requirement-quality-review/SKILL.universal.md:16"]
+  ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_16
   ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
   f_plugin_scripts_test_reqmap_report_py_2225_4417["plugin/scripts/test_reqmap_report.py:2225-4417"]
   ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2225_4417
@@ -888,8 +888,8 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_perf_py_52
   f_scripts_test_check_retired_verbs_py_12["scripts/test_check_retired_verbs.py:12"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_retired_verbs_py_12
-  f_scripts_test_check_versions_py_97_104["scripts/test_check_versions.py:97-104"]
-  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_97_104
+  f_scripts_test_check_versions_py_110_117["scripts/test_check_versions.py:110-117"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_110_117
   f_scripts_test_pipeline_wiring_py_66["scripts/test_pipeline_wiring.py:66"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_pipeline_wiring_py_66
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]

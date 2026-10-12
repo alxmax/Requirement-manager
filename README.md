@@ -22,6 +22,8 @@ map of how everything connects. The engine is stdlib only, 17,826 lines across
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 From a checkout, `pip install .` installs the same engine as the `reqmap` command.
 The copy stays the offline install. See [docs/stability.md](docs/stability.md).
+The two skills also install into Copilot, Cursor, Codex, Gemini and others with
+[APM](docs/integrations.md#apm-agent-package-manager).
 
 **▶ [Live requirement map](https://alxmax.github.io/Requirement-manager/map.html)** —
 this repo's own requirement graph, republished on every push to `main`.
@@ -104,7 +106,7 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 |---|---|
 | [Writing a requirement](docs/requirements.md) | the file format, the optional specification levels, the jargon in plain words |
 | [All commands](docs/commands.md) | every verb and flag: `gate`, `ask`, `sync`, `clarify`, `init`, `mcp` |
-| [Integrations](docs/integrations.md) | plain CLI, the Claude Code plugin, the MCP server, other assistants, the CI action |
+| [Integrations](docs/integrations.md) | plain CLI, the Claude Code plugin, APM, the MCP server, other assistants, the CI action |
 | [Planning and releasing](docs/planning.md) | `ROADMAP.md`, `_planning.json`, `CHANGELOG.md` and `sync --release` |
 | [Internals](docs/internals.md) | how this repo is laid out, and measured numbers on a 10,000-file tree |
 | [`workflow.md`](plugin/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |

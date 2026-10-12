@@ -19,7 +19,7 @@ import check_versions as CV
 
 
 def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
-           engine="2026-06-21.4", plugins=None, action_majors=()):
+           engine="2026-06-21.4", plugins=None, action_majors=(), apm_ver=None):
     """action_majors: the major each file in CV.ACTION_REF_FILES (in order) references;
     None for a file that carries no reference at all. Files past the end of the
     tuple default to "v2"."""
@@ -45,21 +45,27 @@ def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
     (d / "pyproject.toml").write_text(
         '[project]\nname = "reqmap"\nversion = "{}"\n'.format(
             plugin_ver or "0.0.0"), encoding="utf-8")
+    (d / "plugin" / "apm.yml").write_text(
+        "name: requirement-manager\nversion: {}\n".format(
+            apm_ver or plugin_ver or "0.0.0"), encoding="utf-8")
     return d
 
 
 class CheckVersions(unittest.TestCase):
     def _run(self, d):
-        saved = (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY)
+        saved = (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
+                 CV.APM_YML)
         CV.REPO_ROOT = Path(d)
         CV.PLUGIN_JSON = Path(d) / "plugin" / ".claude-plugin" / "plugin.json"
         CV.MARKETPLACE_JSON = Path(d) / ".claude-plugin" / "marketplace.json"
         CV.REQMAP_PY = Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
+        CV.APM_YML = Path(d) / "plugin" / "apm.yml"
         try:
             with redirect_stdout(io.StringIO()):
                 return CV.main([])
         finally:
-            CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY = saved
+            (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
+             CV.APM_YML) = saved
 
     def test_aligned_passes(self):
         with tempfile.TemporaryDirectory() as d:
@@ -74,6 +80,13 @@ class CheckVersions(unittest.TestCase):
     def test_plugin_entry_mismatch_fails(self):
         with tempfile.TemporaryDirectory() as d:
             _setup(d, plug_ver="9.9.9")
+            self.assertEqual(self._run(d), 1)
+
+    def test_apm_manifest_mismatch_fails(self):
+        """APM requires a `version:` in plugin/apm.yml; a release that bumps
+        plugin.json and leaves it behind must fail the build."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, apm_ver="9.9.9")
             self.assertEqual(self._run(d), 1)
 
     def test_missing_plugin_version_exits_2(self):

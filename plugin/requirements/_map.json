@@ -13661,11 +13661,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/skills/requirement-quality-review/SKILL.md:6"
+          "loc": "plugin/skills/requirement-quality-review/SKILL.md:13"
         },
         {
           "role": "implements",
-          "loc": "plugin/skills/requirement-quality-review/SKILL.universal.md:9"
+          "loc": "plugin/skills/requirement-quality-review/SKILL.universal.md:16"
         }
       ],
       "test_exempt": null,
@@ -13726,7 +13726,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/skills/requirement-quality-review/SKILL.md:6"
+          "loc": "plugin/skills/requirement-quality-review/SKILL.md:13"
         }
       ],
       "test_exempt": null,
@@ -15922,11 +15922,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:97"
+          "loc": "scripts/test_check_versions.py:110"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:104"
+          "loc": "scripts/test_check_versions.py:117"
         },
         {
           "role": "tested-by",
@@ -24571,9 +24571,9 @@
     },
     {
       "month": "2026-10",
-      "count": 11,
+      "count": 12,
       "first": "2026-10-01",
-      "last": "2026-10-11",
+      "last": "2026-10-12",
       "versions": [
         "v8.13.0",
         "v8.14.0",
@@ -24585,11 +24585,20 @@
         "v8.19.0",
         "v8.20.0",
         "v8.21.0",
-        "v8.21.1"
+        "v8.21.1",
+        "v8.22.0"
       ],
-      "landmark": "v8.21.0",
-      "headline": "A plan version lists the `TODO.md` items filed under it, and the shipped band stops stretching a series over weeks",
+      "landmark": "v8.22.0",
+      "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
       "entries": [
+        {
+          "version": "v8.22.0",
+          "date": "2026-10-12",
+          "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
+          "body": "**The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser.**\n\n- `plugin/apm.yml` is the [APM](https://github.com/microsoft/apm) manifest for the two skills: `apm install alxmax/requirement-manager/plugin` deploys them into whichever agents APM detects. It carries `name`, `version`, `description`, `author` and `license`\n- The frontmatter `description` of `requirement-quality-review` was a plain scalar holding `Trigger words: ...`, which a strict parser rejects (`mapping values are not allowed here`). It is a `>` block now, like `requirement-manager`'s\n- Every skill `description` is ASCII-only (APM rejects anything else; there was one `—` in each) and says it works with any assistant that can run shell commands\n- `check_versions.py` also asserts `plugin/apm.yml`'s `version:` equals `plugin.json`'s, and `--fix` rewrites it\n- `plugin.json` and `marketplace.json` descriptions say the engine is driven by any assistant, not only Claude Code\n- No engine change: `MAP_ENGINE_VERSION` is unchanged",
+          "first_commit": "2026-10-12",
+          "last_commit": "2026-10-12"
+        },
         {
           "version": "v8.21.1",
           "date": "2026-10-11",

@@ -12,7 +12,8 @@ Three independent axes are checked:
   - semver  — canonical source is plugin/.claude-plugin/plugin.json `version`.
               Every occurrence in .claude-plugin/marketplace.json must equal it
               (top-level `version` + each `plugins[].version`), and so must
-              `[project].version` in pyproject.toml.
+              `[project].version` in pyproject.toml and `version:` in
+              plugin/apm.yml (the APM package manifest, which requires one).
   - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py is
               an ISO date with a different purpose (staleness compare); it is
               only sanity-checked for valid YYYY-MM-DD shape, with an optional
@@ -51,6 +52,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
+APM_YML = REPO_ROOT / "plugin" / "apm.yml"
 # Files that quote the action's major-alias tag. action.yml is listed first: it
 # is the file the tag actually publishes, so it is reported as the canonical one
 # on a mismatch.
@@ -130,12 +132,40 @@ def _fix_pyproject(canonical: str) -> None:
         print(f"fixed  pyproject.toml synced to {canonical!r}.")
 
 
+APM_VERSION_RE = re.compile(r'^(version:[ \t]*)(\S+)', re.M)
+
+
+def _apm_version() -> str:
+    """`version:` from plugin/apm.yml. Exits 2 when the file or the key is
+    missing: the APM manifest requires one and must not drift silently."""
+    try:
+        m = APM_VERSION_RE.search(APM_YML.read_text(encoding="utf-8"))
+    except OSError as e:
+        print(f"ERROR  cannot read {APM_YML.relative_to(REPO_ROOT)}: {e}")
+        raise SystemExit(2)
+    if not m:
+        print(f"ERROR  no `version:` in {APM_YML.relative_to(REPO_ROOT)}")
+        raise SystemExit(2)
+    return m.group(2)
+
+
+def _fix_apm(canonical: str) -> None:
+    """Rewrite `version:` in plugin/apm.yml to `canonical`; every other byte
+    of the file is kept."""
+    text = APM_YML.read_text(encoding="utf-8")
+    new = APM_VERSION_RE.sub(lambda m: m.group(1) + canonical, text, count=1)
+    if new != text:
+        APM_YML.write_text(new, encoding="utf-8")
+        print(f"fixed  apm.yml synced to {canonical!r}.")
+
+
 def _fix(canonical: str) -> int:
     """Propagate the canonical plugin.json version into every marketplace.json
-    occurrence and into pyproject.toml, so a bump is one edit + one command
-    instead of four hand-edits. Rewrites only when something changed;
+    occurrence, pyproject.toml and plugin/apm.yml, so a bump is one edit + one
+    command instead of hand-edits. Rewrites only when something changed;
     preserves 2-space indent + trailing NL."""
     _fix_pyproject(canonical)
+    _fix_apm(canonical)
     market = _load_json(MARKETPLACE_JSON)
     before = json.dumps(market, sort_keys=True)
     market["version"] = canonical
@@ -262,6 +292,11 @@ def main(argv=None) -> int:
     occurrences.append(("pyproject.version", py_ver))
     if py_ver != canonical:
         errors.append(f"  pyproject.toml [project].version = {py_ver!r} "
+                      f"(expected {canonical!r})")
+    apm_ver = _apm_version()
+    occurrences.append(("apm.version", apm_ver))
+    if apm_ver != canonical:
+        errors.append(f"  plugin/apm.yml version = {apm_ver!r} "
                       f"(expected {canonical!r})")
 
     # Engine version is a separate axis — only validate it is a real ISO date.

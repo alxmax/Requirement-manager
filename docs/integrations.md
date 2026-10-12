@@ -34,6 +34,23 @@ On first use in any repo the skill copies `scripts/reqmap.py` into that repo and
 runs `init`. The requirement template is built into the script — nothing else to
 download.
 
+### APM (Agent Package Manager)
+
+`plugin/apm.yml` makes the two skills installable with
+[APM](https://github.com/microsoft/apm), which deploys them into every agent it
+detects (Copilot, Claude, Cursor, Codex, Gemini and others):
+
+```bash
+apm install alxmax/requirement-manager/plugin
+```
+
+APM copies each `skills/<name>/` directory into the agent's skills directory. The
+engine sits beside the skills, in `plugin/scripts/`, so it is not part of that copy:
+seed it as under [Plain CLI](#plain-cli-any-tool-or-no-tool). APM reads `SKILL.md`
+frontmatter strictly and accepts ASCII only, so a skill's `description` is a `>`
+block with no dash or quote outside ASCII. `scripts/check_versions.py` keeps
+`apm.yml`'s `version:` equal to `plugin.json`'s.
+
 ### MCP server (Claude Code, VS Code with Copilot, any MCP client)
 
 `reqmap.py mcp` serves the engine over the Model Context Protocol on stdio. The assistant
