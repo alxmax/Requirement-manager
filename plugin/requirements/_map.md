@@ -3,7 +3,7 @@ generated: 2026-10-12
 engine: 2026-10-11.3
 nodes: 320
 edges: 121
-design pass-rate: 97% (121/125 source files without a design candidate)
+design pass-rate: 97% (122/126 source files without a design candidate)
 ---
 
 # Requirement Map

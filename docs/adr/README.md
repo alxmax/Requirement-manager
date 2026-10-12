@@ -78,6 +78,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0065](0065-the-viewer-ships-no-demo-data.md) | The viewer ships no demo data; RM017 is retired with it | Accepted |
 | [0066](0066-mit-license.md) | MIT, brought forward from the BSL change date | Accepted |
 | [0067](0067-the-core-budget-rises-for-adopt-dispatch.md) | The core budget rises for the adopt-path dispatch | Accepted |
+| [0068](0068-the-skill-carries-the-engine.md) | The skill carries a generated copy of the engine, so an APM install has one | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

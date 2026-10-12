@@ -38,6 +38,8 @@ jobs:
         run: python scripts/check_versions.py
       - name: Colour tokens match design/tokens.json
         run: python scripts/gen_tokens.py --check
+      - name: Skill carries the current engine
+        run: python scripts/bundle_skill_engine.py --check
       - name: Version-gate tests
         run: python -X utf8 scripts/test_check_versions.py
       # The published action's own probe: it runs in CONSUMER repos, never here, so this
@@ -141,6 +143,8 @@ jobs:
         run: python -X utf8 -m unittest test_reqmap -v
       - name: Version-gate tests
         run: python -X utf8 scripts/test_check_versions.py
+      - name: Skill engine bundle tests
+        run: python -X utf8 scripts/test_bundle_skill_engine.py
       - name: Engine-bump check tests
         run: python -X utf8 scripts/test_check_engine_bump.py
       - name: Engine line-budget tests

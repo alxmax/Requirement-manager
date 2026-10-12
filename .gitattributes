@@ -14,6 +14,7 @@ plugin/hooks/pre-commit text eol=lf
 # rather than of the machine that last built them.
 app/viewer.html text eol=lf
 plugin/scripts/_map_viewer.html text eol=lf
+plugin/skills/requirement-manager/scripts/_map_viewer.html text eol=lf
 docs/full_architecture.html text eol=lf
 
 # GENERATED artifacts: never merged, always regenerated. Two branches that both ran

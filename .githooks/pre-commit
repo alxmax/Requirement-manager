@@ -20,6 +20,11 @@ if ! "$PY" scripts/check_versions.py; then
   echo "version drift — run 'python scripts/check_versions.py --fix' to sync, then re-stage." >&2
   exit 1
 fi
+if ! "$PY" scripts/bundle_skill_engine.py --check; then
+  echo "" >&2
+  echo "the skill's engine copy is stale — run 'python scripts/bundle_skill_engine.py' and re-stage." >&2
+  exit 1
+fi
 if ! "$PY" -X utf8 scripts/check_engine_bump.py --staged; then
   echo "" >&2
   echo "engine changed without a MAP_ENGINE_VERSION bump — set it to today's date in reqmap_engine/__init__.py and re-stage." >&2
