@@ -24571,7 +24571,7 @@
     },
     {
       "month": "2026-10",
-      "count": 13,
+      "count": 14,
       "first": "2026-10-01",
       "last": "2026-10-12",
       "versions": [
@@ -24587,11 +24587,20 @@
         "v8.21.0",
         "v8.21.1",
         "v8.22.0",
-        "v8.22.1"
+        "v8.22.1",
+        "v8.22.2"
       ],
       "landmark": "v8.22.0",
       "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
       "entries": [
+        {
+          "version": "v8.22.2",
+          "date": "2026-10-12",
+          "headline": "The plugin folder has its own README, and `plugin.json` names a homepage",
+          "body": "**The plugin folder has its own README, and `plugin.json` names a homepage.**\n\n- `plugin/README.md` says what the plugin runs, reads, writes and sends. A plugin directory reads the README in the plugin folder, which is `plugin/`, not the repository's front page, and an installer gets only that folder\n- `plugin.json` gains `homepage`, and `repository` takes the repository's real capitalisation\n- No engine change: `MAP_ENGINE_VERSION` is unchanged",
+          "first_commit": "2026-10-12",
+          "last_commit": "2026-10-12"
+        },
         {
           "version": "v8.22.1",
           "date": "2026-10-12",
