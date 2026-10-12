@@ -79,7 +79,7 @@
       "plugin/scripts/reqmap_engine/versions.py": "b1a2133037cbbb15acfdf9d3f99d2547d5d6b5eda810f1fe15c8ad899ebd37c6"
     },
     "ARCH-REVIEW-022": {
-      "plugin/skills/requirement-quality-review/SKILL.universal.md": "a40ea50be8db8989769f2256d919e5e9c2fa355f4e8e08f3906d451c98cce88a"
+      "plugin/skills/requirement-quality-review/SKILL.universal.md": "cccb42ac13eaf897cf1761febf8384e71cb4b72cdacc8654b0609bd439db70d1"
     },
     "ARCH-RULES-059": {
       "plugin/scripts/reqmap_engine/model.py#Rule": "3c911b1e97ad572738a99a386a135deb1174d1a5a2b945170745d83f0d2fd07f",
@@ -95,7 +95,7 @@
       "scripts/check_engine_budget.py": "39ec520e884f33b6ce61cea32f77915b819dc955e368c41ba50c9a691e01198a",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
-      "scripts/check_versions.py": "551ca19cd2f14828363ae29a8008afd76ed881df759ad08a84363d68160609b7",
+      "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
       "scripts/gen_tokens.py": "124496cc5539e3be51264333289a7af08e60dab14c9e3f47f251f7f1d5af25de"
     },
     "ARCH-SIMILAR-016": {

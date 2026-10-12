@@ -1,6 +1,13 @@
 ---
 name: requirement-quality-review
-description: Use on-demand to AI-review the SEMANTIC quality of requirement files (is a contract clause actually testable, does the WHY explain intent or just restate the title, does the acceptance cover the contract) — judgements deterministic `lint` cannot make. Advisory only, never the gate, never auto-applied. Trigger words: "review my requirements", "are these requirements testable", "AI quality check the specs".
+description: >
+  Use on-demand to AI-review the SEMANTIC quality of requirement files (is a
+  contract clause actually testable, does the WHY explain intent or just restate
+  the title, does the acceptance cover the contract), the judgements
+  deterministic `lint` cannot make. Advisory only, never the gate, never
+  auto-applied. Works with any AI assistant that can read files. Trigger words:
+  "review my requirements", "are these requirements testable", "AI quality
+  check the specs".
 ---
 
 <!-- implements: ARCH-REVIEW-022 -->  <!-- implements: REQ-REVIEW-906 -->

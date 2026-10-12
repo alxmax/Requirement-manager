@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v8.22.0` — 2026-10-12
+
+**The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser.**
+
+- `plugin/apm.yml` is the [APM](https://github.com/microsoft/apm) manifest for the two skills: `apm install alxmax/requirement-manager/plugin` deploys them into whichever agents APM detects. It carries `name`, `version`, `description`, `author` and `license`
+- The frontmatter `description` of `requirement-quality-review` was a plain scalar holding `Trigger words: ...`, which a strict parser rejects (`mapping values are not allowed here`). It is a `>` block now, like `requirement-manager`'s
+- Every skill `description` is ASCII-only (APM rejects anything else; there was one `—` in each) and says it works with any assistant that can run shell commands
+- `check_versions.py` also asserts `plugin/apm.yml`'s `version:` equals `plugin.json`'s, and `--fix` rewrites it
+- `plugin.json` and `marketplace.json` descriptions say the engine is driven by any assistant, not only Claude Code
+- No engine change: `MAP_ENGINE_VERSION` is unchanged
+
 ## plugin `v8.21.1` — 2026-10-11
 
 **Follow-ups to v8.21.0: a watch that skips dot directories, a budget probe that does not read the machine's TEMP, and contracts that say what the code does.**

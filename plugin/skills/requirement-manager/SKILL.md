@@ -2,12 +2,13 @@
 name: requirement-manager
 description: >
   Use when working on a project that needs a single source of truth for
-  requirements/capabilities — especially with multiple agents or vibe coding,
+  requirements/capabilities, especially with multiple agents or vibe coding,
   to prevent drift between code, docs and intent and to avoid duplicated /
   divergent implementations. Use to create or reconcile requirements, run the
   drift gate before a commit/merge, generate the requirement map, or extract
-  draft requirements from legacy code. Trigger words: requirement, SSOT, spec,
-  capability, drift, reconcile, "what does this do", "where is X implemented".
+  draft requirements from legacy code. Works with any AI assistant that can run
+  shell commands. Trigger words: requirement, SSOT, spec, capability, drift,
+  reconcile, "what does this do", "where is X implemented".
 ---
 
 # Requirement manager
