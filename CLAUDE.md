@@ -36,11 +36,13 @@ The viewer's tests and rebuild are in `app/CLAUDE.md`; any `app/` change needs `
 From the **repo root**, the packaging side:
 
 ```bash
-python scripts/check_versions.py [--fix]          # plugin.json semver == marketplace.json (x2), Action major, MAP_ENGINE_VERSION shape
+python scripts/check_versions.py [--fix]          # plugin.json semver == marketplace.json (x2) == pyproject == apm.yml, Action major, MAP_ENGINE_VERSION shape
 python scripts/gen_tokens.py [--check]           # design/tokens.json -> colors_and_type.css + site_template.py
+python scripts/bundle_skill_engine.py [--check]  # plugin/scripts/ -> plugin/skills/requirement-manager/scripts/ (ADR-0068); run after ANY engine edit
 python scripts/check_engine_bump.py --base main   # reqmap.py or reqmap_engine/ changed => MAP_ENGINE_VERSION changed
 python scripts/check_engine_budget.py             # core logical-line budget + physical ceiling
 python -X utf8 scripts/test_check_versions.py
+python -X utf8 scripts/test_bundle_skill_engine.py
 python -X utf8 scripts/test_check_engine_bump.py
 python -X utf8 scripts/test_changelog_notes.py    # CI runs it with cwd=scripts/
 python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync -> gate -> map

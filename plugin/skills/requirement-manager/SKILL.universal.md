@@ -38,7 +38,8 @@ ordinary `init` also seeds planning, release, MCP and site files.
 
 For any assistant with shell access, set `REQMAP_PLUGIN_ROOT` to the installed
 plugin directory containing `scripts/reqmap.py`. Locate the installation; do not
-guess a versioned cache path. Present the action menu as a numbered list.
+guess a versioned cache path. Installed by APM, that directory is this skill's
+own: it carries `scripts/`. Present the action menu as a numbered list.
 
 The engine requires Python 3.9+ and only the standard library. Seed both
 `scripts/reqmap.py` and the adjacent `scripts/reqmap_engine/` package. Copy

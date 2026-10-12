@@ -9,6 +9,10 @@
 
 plugin/scripts/_map_viewer.html
 
+# The skill's generated copy of the engine (ADR-0068). Same reason as build/**
+# below: scanned, every member would be counted twice.
+plugin/skills/requirement-manager/scripts/**
+
 plugin/skills/excalidraw-diagram/SKILL.md
 plugin/skills/excalidraw-diagram/SKILL.universal.md
 plugin/skills/excalidraw-diagram/examples/*.py

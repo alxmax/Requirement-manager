@@ -28,6 +28,10 @@ skills/excalidraw-diagram/references/excalidraw_format.md
 skills/requirement-manager/SKILL.md
 skills/requirement-manager/SKILL.universal.md
 skills/requirement-manager/references/*.md
+# The engine the skill carries so an APM install has one (ADR-0068): a generated
+# copy of scripts/, never a member. Counted, every tag in it would be a second
+# claim on the same requirement.
+skills/requirement-manager/scripts/**
 
 # --- working docs / specs ---
 # Design specs and superpowers working notes under docs/ are sync_only prose

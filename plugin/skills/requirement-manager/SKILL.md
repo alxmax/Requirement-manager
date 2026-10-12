@@ -38,7 +38,9 @@ ordinary `init` also seeds planning, release, MCP and site files.
 
 For Claude Code, the installed root is `${CLAUDE_PLUGIN_ROOT}`. Use
 `AskUserQuestion` for the action menu when needed. Set `REQMAP_PLUGIN_ROOT`
-to that installed root for the copy commands below.
+to that installed root for the copy commands below. Installed by APM instead,
+there is no plugin root: this skill's own directory carries `scripts/`, so set
+`REQMAP_PLUGIN_ROOT` to it.
 
 The engine requires Python 3.9+ and only the standard library. Seed both
 `scripts/reqmap.py` and the adjacent `scripts/reqmap_engine/` package. Copy

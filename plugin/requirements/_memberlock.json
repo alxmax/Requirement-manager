@@ -416,7 +416,7 @@
       "plugin/scripts/reqmap_engine/search.py#_text_matches": "b815d123c6815d2a8f0b3b78b64a99c525e6d8409490685704d6bc6b3b51e24f"
     },
     "REQ-SELFGATE-1070": {
-      ".githooks/pre-commit": "7dae83d22a9a50bf9b2ec858bd56ec60782fecb8921b80e200f3af51749ec81c",
+      ".githooks/pre-commit": "6a7f7d4ab6bfb8ce90fe536177545bdf3581d49fdf246ca80691e59c3505db52",
       ".githooks/pre-push": "9e60b94d18741cc33ca28832a3efcac42e01521be4b926b79bd1c15ea37562c4"
     },
     "REQ-SELFGATE-1072": {
