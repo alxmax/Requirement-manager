@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.22.3` — 2026-10-12
+
+**The plugin has an icon, and its README says why two files may look like a credential and minified code.**
+
+- `plugin/.claude-plugin/icon.png` (1024 x 1024, 51 KiB): a checked requirement above three code members, in the viewer's accent colour. A directory listing takes its icon from the first submission and does not change it afterwards, so it is committed before one
+- `plugin/README.md` explains `github.token` in the release-workflow template inside `release.py`, and that `_map_viewer.html` is the built viewer whose source is `app/`. A directory scan reads both as findings; the README is where a reviewer looks
+- No engine change: `MAP_ENGINE_VERSION` is unchanged
+
 ## plugin `v8.22.2` — 2026-10-12
 
 **The plugin folder has its own README, and `plugin.json` names a homepage.**
