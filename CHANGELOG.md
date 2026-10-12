@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.22.2` — 2026-10-12
+
+**The plugin folder has its own README, and `plugin.json` names a homepage.**
+
+- `plugin/README.md` says what the plugin runs, reads, writes and sends. A plugin directory reads the README in the plugin folder, which is `plugin/`, not the repository's front page, and an installer gets only that folder
+- `plugin.json` gains `homepage`, and `repository` takes the repository's real capitalisation
+- No engine change: `MAP_ENGINE_VERSION` is unchanged
+
 ## plugin `v8.22.1` — 2026-10-12
 
 **An APM install of `requirement-manager` has an engine to seed.**
