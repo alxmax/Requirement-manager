@@ -60,6 +60,15 @@ requirements and code stay on your machine.
 A requirement becomes `confirmed` only when a person edits its status. The engine and the
 skills draft; they do not confirm.
 
+## Two files a scanner may flag
+
+- `scripts/reqmap_engine/release.py` (and the skill's copy of the engine) holds the text of
+  a GitHub Actions workflow that `init` can write into your repository. That text names
+  `github.token`, the token GitHub Actions itself provides to the job. The plugin reads no
+  credential from your machine.
+- `scripts/_map_viewer.html` is the built single-file requirement-map viewer. Its source is
+  the `app/` directory of the repository, and the engine only fills one data marker in it.
+
 ## Licence
 
 MIT. Source, design records and the requirement corpus the engine describes itself with:

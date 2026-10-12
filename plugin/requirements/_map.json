@@ -24571,7 +24571,7 @@
     },
     {
       "month": "2026-10",
-      "count": 14,
+      "count": 15,
       "first": "2026-10-01",
       "last": "2026-10-12",
       "versions": [
@@ -24588,11 +24588,20 @@
         "v8.21.1",
         "v8.22.0",
         "v8.22.1",
-        "v8.22.2"
+        "v8.22.2",
+        "v8.22.3"
       ],
       "landmark": "v8.22.0",
       "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
       "entries": [
+        {
+          "version": "v8.22.3",
+          "date": "2026-10-12",
+          "headline": "The plugin has an icon, and its README says why two files may look like a credential and minified code",
+          "body": "**The plugin has an icon, and its README says why two files may look like a credential and minified code.**\n\n- `plugin/.claude-plugin/icon.png` (1024 x 1024, 57 KiB): a smiling requirement card, its nose a check, above three code members, in the viewer's accent colour. A directory listing takes its icon from the first submission and does not change it afterwards, so it is committed before one\n- `plugin/README.md` explains `github.token` in the release-workflow template inside `release.py`, and that `_map_viewer.html` is the built viewer whose source is `app/`. A directory scan reads both as findings; the README is where a reviewer looks\n- No engine change: `MAP_ENGINE_VERSION` is unchanged",
+          "first_commit": "2026-10-12",
+          "last_commit": "2026-10-12"
+        },
         {
           "version": "v8.22.2",
           "date": "2026-10-12",
