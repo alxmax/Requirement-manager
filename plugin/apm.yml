@@ -1,5 +1,5 @@
 name: requirement-manager
-version: 8.22.3
+version: 8.22.4
 description: Drift gate between a written requirement and the code that implements it.
 author: Schipor Alexandru
 license: MIT

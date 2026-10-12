@@ -24571,7 +24571,7 @@
     },
     {
       "month": "2026-10",
-      "count": 15,
+      "count": 16,
       "first": "2026-10-01",
       "last": "2026-10-12",
       "versions": [
@@ -24589,11 +24589,20 @@
         "v8.22.0",
         "v8.22.1",
         "v8.22.2",
-        "v8.22.3"
+        "v8.22.3",
+        "v8.22.4"
       ],
       "landmark": "v8.22.0",
       "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
       "entries": [
+        {
+          "version": "v8.22.4",
+          "date": "2026-10-12",
+          "headline": "The README names the environment variables the engine reads",
+          "body": "**The README names the environment variables the engine reads.**\n\n- `plugin/README.md` lists the four: `REQMAP_EXTRA_CODE_EXTS`, `REQMAP_REPO`, `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR`, none a secret, and says the pre-commit hook runs `\"$PY\" -X utf8 scripts/reqmap.py gate` locally. A directory scan reads those two together as a credential leaving the machine in two steps; the README is where a reviewer looks for what each one does\n- No engine change: `MAP_ENGINE_VERSION` is unchanged",
+          "first_commit": "2026-10-12",
+          "last_commit": "2026-10-12"
+        },
         {
           "version": "v8.22.3",
           "date": "2026-10-12",
