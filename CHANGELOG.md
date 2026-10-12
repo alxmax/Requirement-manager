@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v8.22.4` — 2026-10-12
+
+**The README names the environment variables the engine reads.**
+
+- `plugin/README.md` lists the four: `REQMAP_EXTRA_CODE_EXTS`, `REQMAP_REPO`, `CLAUDE_PLUGIN_ROOT` and `CLAUDE_PROJECT_DIR`, none a secret, and says the pre-commit hook runs `"$PY" -X utf8 scripts/reqmap.py gate` locally. A directory scan reads those two together as a credential leaving the machine in two steps; the README is where a reviewer looks for what each one does
+- No engine change: `MAP_ENGINE_VERSION` is unchanged
+
 ## plugin `v8.22.3` — 2026-10-12
 
 **The plugin has an icon, and its README says why two files may look like a credential and minified code.**

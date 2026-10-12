@@ -40,7 +40,18 @@ configuration. It does not call a language model.
 **Sends.** Nothing. The engine opens no network connection and has no telemetry. Your
 requirements and code stay on your machine.
 
-**Reads.** The files under the repository root, minus what `.reqmapignore` excludes.
+**Reads.** The files under the repository root, minus what `.reqmapignore` excludes, and
+four environment variables. None holds a secret, and the engine reads no other:
+
+- `REQMAP_EXTRA_CODE_EXTS`: extra source-file extensions to scan, comma separated.
+- `REQMAP_REPO`: the project's web address for links in the map, instead of the one derived
+  from `remote.origin.url`; empty turns the links off.
+- `CLAUDE_PLUGIN_ROOT`: the plugin's install path, to tell you when your seeded engine
+  is older than the installed one.
+- `CLAUDE_PROJECT_DIR`: the project path the MCP server resolves relative paths against.
+
+`hooks/pre-commit` runs `"$PY" -X utf8 scripts/reqmap.py gate`, where `PY` is `python3` or
+`python`, whichever the machine has. It runs locally and makes no network connection.
 
 **Writes.**
 
