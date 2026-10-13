@@ -236,6 +236,6 @@ class Surface(unittest.TestCase):  # tested-by: REQ-SURFACE-1095 @unit
             text = handle.read()
         self.assertIn('name = "reqmap"', text)
         self.assertIn('requires-python = ">=3.9"', text)
-        self.assertIn("MIT", text)
+        self.assertIn("Apache-2.0", text)
         self.assertIn("reqmap:_run_cli", text)
         self.assertTrue(callable(R._run_cli))

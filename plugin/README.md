@@ -82,5 +82,5 @@ skills draft; they do not confirm.
 
 ## Licence
 
-MIT. Source, design records and the requirement corpus the engine describes itself with:
+Apache-2.0. Source, design records and the requirement corpus the engine describes itself with:
 <https://github.com/alxmax/Requirement-manager>.

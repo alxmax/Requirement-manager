@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.23.0` — 2026-10-13
+
+**The licence is Apache 2.0 (ADR-0069).**
+
+- `LICENSE` holds the Apache License 2.0; `pyproject.toml`, `plugin.json` and `apm.yml` say `Apache-2.0`, and ARCH-ADOPT-075's package-metadata clause names it. ADR-0066 (MIT) is superseded: the engine ships inside other plugins by the same author that moved to Apache 2.0, and Apache 2.0 adds the express patent grant ADR-0066 named as its revisit condition
+- Releases up to v8.22.4 stay under MIT. Contributions from this version on are under Apache 2.0
+- No engine change: `MAP_ENGINE_VERSION` is unchanged
+
 ## plugin `v8.22.4` — 2026-10-12
 
 **The README names the environment variables the engine reads.**

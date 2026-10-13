@@ -1,6 +1,8 @@
 # ADR-0066 — MIT, brought forward from the BSL change date
 
-- **Status:** Accepted. Supersedes [ADR-0013](0013-business-source-license.md).
+- **Status:** Superseded by [ADR-0069](0069-apache-2-license.md) (2026-10-13). The
+  reasoning below is left exactly as decided on 2026-10-11. It superseded
+  [ADR-0013](0013-business-source-license.md).
 - **Decided:** 2026-10-11
 - **Evidence:** `LICENSE`; ADR-0013's revisit condition; `git shortlog -sn` (one human
   author); `ROADMAP.md` (the parked licence item, now done); `.github/ISSUE_TEMPLATE/tried-on-my-repo.yml`.

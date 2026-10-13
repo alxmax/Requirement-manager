@@ -174,7 +174,7 @@ owner: Alex
 Every bullet below is binding.
 - The command registry's verbs are `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`.
 - `pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.
-- The licence string in that file is MIT.
+- The licence string in that file is Apache-2.0.
 
 ## Cases
 CASE-1 — the verb set is the six
@@ -185,4 +185,4 @@ CASE-1 — the verb set is the six
 CASE-2 — the package metadata names reqmap
   Given  `pyproject.toml` at the repository root
   When   it is read
-  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap:_run_cli`
+  Then   it names `reqmap`, requires Python `>=3.9`, declares Apache-2.0, and points the console script at `reqmap:_run_cli`
