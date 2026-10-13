@@ -254,8 +254,8 @@
       "reason": "REQ-HEALTH-968: the score names its exemptions (CASE-4)"
     },
     "REQ-HISTORY-1003": {
-      "hash": "2e86ab266804",
-      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
+      "hash": "8b863e0c4f08",
+      "reason": "REQ-HISTORY-1003: spans read from the tags, not HEAD; folded into CASE-7 (AC limit 7); bugfix requested by the maintainer"
     },
     "REQ-HISTORY-1081": {
       "hash": "68ff32fee279",

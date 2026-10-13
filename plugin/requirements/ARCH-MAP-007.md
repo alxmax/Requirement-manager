@@ -462,6 +462,8 @@ Every bullet below is binding.
   `first_commit` and `last_commit`, newest first.
 - `first_commit` and `last_commit` are the oldest and newest committer dates after the previous
   release tag, up to this release's tag. With no git history or no tag, both are the changelog date.
+- The spans are read from the release tags, not from the checked-out commit, so a branch that
+  merged the default branch and that branch's merge commit give the same dates.
 - A changelog date that falls strictly inside that span ends it: `first_commit` becomes the day
   after the latest such date, and never later than `last_commit`. A release with no tag stays on
   its changelog date, so a neighbour's commits cannot cover it.
@@ -509,7 +511,8 @@ CASE-7 — a release spans the commits since the previous tag
   Then   each release runs from the commit after the previous tag to its own
          tag, that span starts the day after the date inside it, and a release
          with no tag stays on its changelog date. With no git history both
-         dates are the changelog date
+         dates are the changelog date. A branch whose merge commit has the
+         newest tag as its second parent gives the same spans as the default branch
 
 ---
 id: REQ-TODODETAIL-1096

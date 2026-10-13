@@ -2844,6 +2844,42 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         self.assertEqual("2026-06-18", kept["first_commit"])
         self.assertEqual("2026-06-20", kept["last_commit"])
 
+    def test_spans_do_not_depend_on_the_checked_out_branch(self):  # verifies: REQ-HISTORY-1003#CASE-7
+        # A branch that merged main carries the newest tag as the merge's
+        # SECOND parent. Walking HEAD's first-parent line missed it, so the
+        # committed map and CI's merge commit computed different spans.
+        if shutil.which("git") is None:
+            self.skipTest("git not installed")
+        with tempfile.TemporaryDirectory() as d:
+            def git(*args, when=None):
+                env = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t",
+                           GIT_COMMITTER_NAME="t", GIT_COMMITTER_EMAIL="t@t")
+                if when:
+                    env["GIT_AUTHOR_DATE"] = env["GIT_COMMITTER_DATE"] = when + "T12:00:00"
+                subprocess.run(["git", "-c", "core.hooksPath=/dev/null", *args], cwd=d,
+                               env=env, check=True, capture_output=True)
+
+            git("init", "-q", "-b", "main")
+            for day, tag in (("2026-06-01", None), ("2026-06-05", "v1.0.0"),
+                             ("2026-06-10", None), ("2026-06-12", "v1.1.0")):
+                git("commit", "-q", "--allow-empty", "-m", day, when=day)
+                if tag:
+                    git("tag", tag)
+            git("checkout", "-q", "-b", "feat", "v1.0.0")
+            git("commit", "-q", "--allow-empty", "-m", "feat", when="2026-06-11")
+            git("merge", "-q", "--no-ff", "--no-edit", "main", when="2026-06-13")
+            entries = [
+                {"version": "v1.1.0", "date": "2026-06-12", "headline": "b"},
+                {"version": "v1.0.0", "date": "2026-06-05", "headline": "a"},
+            ]
+            on_feat = {e["version"]: (e["first_commit"], e["last_commit"])
+                       for e in R.history.release_spans(entries, d)}
+            git("checkout", "-q", "main")
+            on_main = {e["version"]: (e["first_commit"], e["last_commit"])
+                       for e in R.history.release_spans(entries, d)}
+        self.assertEqual(("2026-06-10", "2026-06-12"), on_main["v1.1.0"])
+        self.assertEqual(on_main, on_feat)
+
     def test_a_span_stops_at_a_changelog_release_inside_it(self):  # verifies: REQ-HISTORY-1003#CASE-7
         # v1.35.0 has no tag. Its changelog date sits inside v2.1.0's
         # commits, so v2.1.0 starts the next day — its own tag. v1.11.0
