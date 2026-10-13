@@ -114,5 +114,5 @@ Do not push tags by hand.
 
 ## Licensing
 
-The project is under the MIT License (see `LICENSE`). By opening a pull request you agree
-your contribution is under those same terms (ADR-0066).
+The project is under the Apache License 2.0 (see `LICENSE`). By opening a pull request you agree
+your contribution is under those same terms (ADR-0069).

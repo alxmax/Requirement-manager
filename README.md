@@ -115,4 +115,4 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 | [Case studies](docs/case-studies.md) | none from outside this repo yet — a write-up of a real tree belongs here |
 
 Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md) · security: [`SECURITY.md`](SECURITY.md)
-· licence: [LICENSE](LICENSE), MIT.
+· licence: [LICENSE](LICENSE), Apache-2.0.

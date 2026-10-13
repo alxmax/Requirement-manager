@@ -573,12 +573,12 @@
       "contract": [
         "The command registry's verbs are `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`.",
         "`pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.",
-        "The licence string in that file is MIT."
+        "The licence string in that file is Apache-2.0."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares MIT, and points the console script at `reqmap:_run_cli`",
+      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares Apache-2.0, and points the console script at `reqmap:_run_cli`",
       "input": "",
       "output": "",
       "desc": "",
@@ -24571,9 +24571,9 @@
     },
     {
       "month": "2026-10",
-      "count": 16,
+      "count": 17,
       "first": "2026-10-01",
-      "last": "2026-10-12",
+      "last": "2026-10-13",
       "versions": [
         "v8.13.0",
         "v8.14.0",
@@ -24590,11 +24590,20 @@
         "v8.22.1",
         "v8.22.2",
         "v8.22.3",
-        "v8.22.4"
+        "v8.22.4",
+        "v8.23.0"
       ],
-      "landmark": "v8.22.0",
-      "headline": "The skills install through APM, and `requirement-quality-review` loads under a strict YAML parser",
+      "landmark": "v8.23.0",
+      "headline": "The licence is Apache 2.0 (ADR-0069)",
       "entries": [
+        {
+          "version": "v8.23.0",
+          "date": "2026-10-13",
+          "headline": "The licence is Apache 2.0 (ADR-0069)",
+          "body": "**The licence is Apache 2.0 (ADR-0069).**\n\n- `LICENSE` holds the Apache License 2.0; `pyproject.toml`, `plugin.json` and `apm.yml` say `Apache-2.0`, and ARCH-ADOPT-075's package-metadata clause names it. ADR-0066 (MIT) is superseded: the engine ships inside other plugins by the same author that moved to Apache 2.0, and Apache 2.0 adds the express patent grant ADR-0066 named as its revisit condition\n- Releases up to v8.22.4 stay under MIT. Contributions from this version on are under Apache 2.0\n- No engine change: `MAP_ENGINE_VERSION` is unchanged",
+          "first_commit": "2026-10-13",
+          "last_commit": "2026-10-13"
+        },
         {
           "version": "v8.22.4",
           "date": "2026-10-12",
