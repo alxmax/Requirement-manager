@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.23.1` — 2026-10-13
+
+**Release spans no longer depend on the checked-out branch.**
+
+- `history._spans_from_git` walked `git log --first-parent` from HEAD. On a branch that merged the default branch, the newest release tag is the merge's second parent, so HEAD's first-parent line never reached it and that release fell back to its changelog date. The map committed on the branch then disagreed with the one CI recomputes on the PR's merge commit, and `gate` failed map freshness ("map is stale: _map.json") although the branch was in sync. The walk now starts at the tags (`--tags`); on a history whose tags all sit on the default branch the spans are unchanged
+- REQ-HISTORY-1003 says so, and its CASE-7 now covers a branch that merged main, verified by a real-git test that it gives the same spans as main itself
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-13.1`; 17,832 physical lines in 75 files (the README says so), the core unchanged at 6,629 logical lines
+
 ## plugin `v8.23.0` — 2026-10-13
 
 **The licence is Apache 2.0 (ADR-0069).**
