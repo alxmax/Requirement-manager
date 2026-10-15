@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-15",
+  "engine_version": "2026-10-15.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -24565,7 +24565,7 @@
     },
     {
       "month": "2026-10",
-      "count": 19,
+      "count": 20,
       "first": "2026-10-01",
       "last": "2026-10-15",
       "versions": [
@@ -24587,11 +24587,20 @@
         "v8.22.4",
         "v8.23.0",
         "v8.23.1",
-        "v8.23.2"
+        "v8.23.2",
+        "v8.23.3"
       ],
       "landmark": "v8.23.0",
       "headline": "The licence is Apache 2.0 (ADR-0069)",
       "entries": [
+        {
+          "version": "v8.23.3",
+          "date": "2026-10-15",
+          "headline": "RM036 reads an id with the same pattern as the tag scan",
+          "body": "**RM036 reads an id with the same pattern as the tag scan.**\n\n- `wikilinks.py` builds its `[[ID]]` pattern from `tags._ID_PAT` instead of a hand-kept copy of the same id shape, so RM036 and the tag scan cannot disagree on what an id is. The pattern is unchanged character for character. The single-use code-span pattern is inlined at its one call, so the import costs no logical line\n- `docs/commands.md`: the scan recipe puts the shared flags in one variable, so no line in the section exceeds 100 columns\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-15.1`; 17,834 physical lines in 75 files (the README says so), the core unchanged at 6,629 logical lines",
+          "first_commit": "2026-10-15",
+          "last_commit": "2026-10-15"
+        },
         {
           "version": "v8.23.2",
           "date": "2026-10-15",
