@@ -933,6 +933,36 @@ class ShellTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # teste
             self.assertEqual(R._test_link_problem(p), "")
 
 
+class GoogleTestTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by: REQ-TESTLINK-932
+    """A C++ suite declares its tests with GoogleTest macros, which no other pattern
+    matched, so every C++ tested-by link warned."""
+
+    def test_googletest_macros_recognized(self):  # verifies: REQ-TESTLINK-932#CASE-5
+        bodies = ("TEST(Widget, Closes) {\n  EXPECT_TRUE(close());\n}\n",
+                  "TEST_F(WidgetFixture, Stops) {\n  ASSERT_EQ(0, stop());\n}\n",
+                  "TEST_P(WidgetParam, Retries) {}\n",
+                  "TYPED_TEST(WidgetTyped, Opens) {}\n",
+                  "TYPED_TEST_P(WidgetTypedP, Opens) {}\n")
+        with tempfile.TemporaryDirectory() as d:
+            for i, body in enumerate(bodies):
+                p = os.path.join(d, "widget_test{}.cpp".format(i))
+                _write(p, '#include <gtest/gtest.h>\n' + body)
+                self.assertEqual(R._test_link_problem(p), "", body)
+
+    def test_mock_only_header_is_not_a_test(self):  # verifies: REQ-TESTLINK-932#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "mock_widget.h")
+            _write(p, "class MockWidget : public Widget {\n"
+                      " public:\n  MOCK_METHOD(int, close, (), (override));\n};\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_lowercase_test_call_in_cpp_is_not_a_test(self):  # verifies: REQ-TESTLINK-932#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "widget.cpp")
+            _write(p, "int run() { return self_test(1) + MY_TEST(2); }\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+
 class TestLinkOnDraft(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by: REQ-TESTLINK-930  # tested-by: REQ-TESTLINK-933
     """A tested-by pointing at a non-test file is wrong the day it is written; the
     check ran only on `confirmed`, so a draft-only corpus audited nothing."""

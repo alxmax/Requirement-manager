@@ -17,7 +17,7 @@ def login(email, password): ...
 ```
 
 and a small Python script checks that the two never fall out of sync — then draws you a
-map of how everything connects. The engine is stdlib only, 17,832 lines across
+map of how everything connects. The engine is stdlib only, 17,834 lines across
 `scripts/reqmap.py` and the `reqmap_engine/` package beside it: Python 3.9+, no install,
 no AI SDK. Copy the two into any repo and it runs, with any assistant or none.
 From a checkout, `pip install .` installs the same engine as the `reqmap` command.
@@ -50,6 +50,9 @@ python scripts/reqmap.py gate                # the verdict, once something is co
 
 `init --watch` exits 0 even when there is nothing to say, so it can sit on a pull request
 without failing the build. A draft stays `status: draft` until a person has read it.
+
+To look at a repo without adopting the tool at all, four read-only commands scan it and
+write nothing: [Scanning a repo without adopting it](docs/commands.md#scanning-a-repo-without-adopting-it).
 
 ## Three commands
 

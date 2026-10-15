@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-13.1",
+  "engine_version": "2026-10-15",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -289,7 +289,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2827"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2857"
         },
         {
           "role": "implements",
@@ -1941,47 +1941,47 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1020"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1050"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1088"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1118"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1292"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1322"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1944"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1974"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2062"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2092"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2156"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2149"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2179"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2190"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2220"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2798"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2828"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3019"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3049"
         },
         {
           "role": "tested-by",
@@ -2161,7 +2161,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
         },
         {
           "role": "implements",
@@ -2263,7 +2263,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3574"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3604"
         },
         {
           "role": "implements",
@@ -2308,11 +2308,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1020"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1050"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2798"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2828"
         },
         {
           "role": "implements",
@@ -2367,7 +2367,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
         },
         {
           "role": "tested-by",
@@ -2517,7 +2517,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2899"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2929"
         },
         {
           "role": "implements",
@@ -2567,11 +2567,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3184"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3214"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3495"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3525"
         },
         {
           "role": "implements",
@@ -3122,11 +3122,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3078"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3108"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3130"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3160"
         },
         {
           "role": "implements",
@@ -3183,7 +3183,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3151"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3181"
         },
         {
           "role": "implements",
@@ -3237,7 +3237,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2008"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2038"
         },
         {
           "role": "implements",
@@ -3353,7 +3353,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3573"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3603"
         },
         {
           "role": "tested-by",
@@ -4931,7 +4931,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2929"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2959"
         },
         {
           "role": "implements",
@@ -4980,7 +4980,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2929"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2959"
         },
         {
           "role": "implements",
@@ -5054,15 +5054,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2156"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2509"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2654"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2684"
         },
         {
           "role": "tested-by",
@@ -5134,11 +5134,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2156"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2509"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         },
         {
           "role": "tested-by",
@@ -5198,7 +5198,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2509"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         },
         {
           "role": "implements",
@@ -5260,7 +5260,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2654"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2684"
         },
         {
           "role": "implements",
@@ -7291,11 +7291,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2252"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2282"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2560"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2590"
         },
         {
           "role": "implements",
@@ -7359,11 +7359,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2252"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2282"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2560"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2590"
         },
         {
           "role": "implements",
@@ -7707,7 +7707,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3053"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3083"
         },
         {
           "role": "implements",
@@ -7785,7 +7785,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3053"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3083"
         },
         {
           "role": "implements",
@@ -8419,19 +8419,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:975"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1005"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2212"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2242"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3378"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3408"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3455"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3485"
         },
         {
           "role": "tested-by",
@@ -8718,15 +8718,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:975"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1005"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2212"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2242"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3425"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3455"
         },
         {
           "role": "tested-by",
@@ -9508,7 +9508,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3562"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3592"
         },
         {
           "role": "tested-by",
@@ -10015,7 +10015,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2435"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2465"
         },
         {
           "role": "implements",
@@ -10913,7 +10913,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2608"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2638"
         },
         {
           "role": "implements",
@@ -10978,7 +10978,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2608"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2638"
         },
         {
           "role": "implements",
@@ -11136,7 +11136,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3572"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3602"
         },
         {
           "role": "tested-by",
@@ -11456,7 +11456,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2231"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2261"
         }
       ],
       "test_exempt": null,
@@ -11500,7 +11500,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2231"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2261"
         }
       ],
       "test_exempt": null,
@@ -12259,11 +12259,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1845"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1875"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2574"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2604"
         }
       ],
       "test_exempt": null,
@@ -12320,11 +12320,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1845"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1875"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2574"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2604"
         }
       ],
       "test_exempt": null,
@@ -14292,7 +14292,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3232"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3262"
         },
         {
           "role": "implements",
@@ -14479,15 +14479,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2343"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2373"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2735"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2765"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3353"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3383"
         },
         {
           "role": "implements",
@@ -14531,11 +14531,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:95"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:97"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:161"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:163"
         }
       ],
       "test_exempt": null,
@@ -14576,7 +14576,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2343"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2373"
         },
         {
           "role": "implements",
@@ -14600,7 +14600,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:161"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:163"
         }
       ],
       "test_exempt": null,
@@ -14641,7 +14641,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2343"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2373"
         },
         {
           "role": "implements",
@@ -14722,7 +14722,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2735"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2765"
         },
         {
           "role": "implements",
@@ -17546,7 +17546,7 @@
       "contract": [
         "The gate checks every `tested-by` link, at every status, as the deterministic half of behavior-sync. [[REQ-TESTLINK-930]]",
         "The gate recognizes a test function lexically, by language-specific patterns such as Python `def test...(` or a Jest `it(`/`test(` call. [[REQ-TESTLINK-931]]",
-        "The gate also recognizes a Rust `#[test]`, a shell `test_x()`/bats `@test`, and a stdlib-style Python `run`/`main` entry point under `if __name__ == \"__main__\"`. [[REQ-TESTLINK-932]]",
+        "The gate also recognizes a Rust `#[test]`, a GoogleTest `TEST(` macro in C++, a shell `test_x()`/bats `@test`, and a stdlib-style Python `run`/`main` entry point under `if __name__ == \"__main__\"`. [[REQ-TESTLINK-932]]",
         "When a `tested-by` file is missing, unreadable, or holds no test function, the gate adds one warning naming the requirement and the file. [[REQ-TESTLINK-933]]"
       ],
       "verify": [],
@@ -17592,7 +17592,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin/scripts/test_reqmap_gate.py:966"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
         },
         {
           "role": "implements",
@@ -17600,11 +17604,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:60"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:62"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:85"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:87"
         }
       ],
       "test_exempt": null,
@@ -17612,15 +17616,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Verificarea integrității legăturilor de test",
-          "intent": "O cerință poate pretinde că este testată indicând un fișier de test — dar dacă acel fișier a dispărut sau nu conține niciun test real, legătura este o minciună, iar plasa de siguranță există doar pe hârtie. Aceasta face ca gate să verifice acele legături: avertizează când un fișier `tested-by` lipsește sau nu conține niciun test, astfel încât o legătură ruptă nu se poate da drept acoperire. Fără ea, un proiect poate părea complet testat în timp ce testele lui au dispărut în tăcere.",
-          "contract": "> O cerință poate pretinde că este testată indicând un fișier de test — dar dacă acel fișier\n> a dispărut sau nu conține niciun test real, legătura este o minciună, iar plasa de\n> siguranță există doar pe hârtie. Aceasta face ca gate să verifice acele legături: avertizează\n> când un fișier `tested-by` lipsește sau nu conține niciun test, astfel încât o legătură ruptă\n> nu se poate da drept acoperire. Fără ea, un proiect poate părea complet testat în timp ce testele lui au dispărut în tăcere.\n\nFiecare punct de mai jos este obligatoriu.\n- Gate verifică fiecare legătură `tested-by`, la fiecare status, ca jumătate deterministă a behavior-sync. [[REQ-TESTLINK-930]]\n- Gate recunoaște o funcție de test lexical, prin tipare specifice limbajului precum Python `def test...(` sau un apel Jest `it(`/`test(`. [[REQ-TESTLINK-931]]\n- Gate mai recunoaște un `#[test]` Rust, un `test_x()` shell/bats `@test`, și un punct de intrare `run`/`main` stil-stdlib Python sub `if __name__ == \"__main__\"`. [[REQ-TESTLINK-932]]\n- Când un fișier `tested-by` lipsește, este ilizibil, sau nu conține nicio funcție de test, gate adaugă un avertisment care numește cerința și fișierul. [[REQ-TESTLINK-933]]",
-          "acceptance": "CASE-1\n  Given  o cerință confirmed al cărei fișier `tested-by` lipsește\n  When   rulează gate\n  Then   adaugă un avertisment care numește cerința și fișierul\n\nCASE-2\n  Given  o cerință confirmed al cărei fișier `tested-by` există și conține un `def test...(`\n  When   rulează gate\n  Then   nu adaugă niciun avertisment pentru acea legătură\n\nCASE-3\n  Given  o cerință confirmed al cărei fișier `tested-by` există dar nu conține nicio funcție de test\n  When   rulează gate\n  Then   adaugă un avertisment\n\nCASE-4\n  Given  oricare dintre cele de mai sus\n  When   rulează gate\n  Then   numărul de erori rămâne neschimbat (verificarea este doar avertisment)\n\nCASE-5\n  Given  o cerință confirmed al cărei `tested-by` este un fișier `.py` fără `def test...`,\n         dar care definește un punct de intrare `run()`/`main()` sub o gardă\n         `if __name__ == \"__main__\"`\n  When   rulează gate\n  Then   nu adaugă niciun avertisment pentru acea legătură\n\nCASE-6\n  Given  un fișier `tested-by` care este un script shell ce conține o funcție `test_x()`\n  When   rulează gate\n  Then   nu adaugă niciun avertisment pentru acea legătură\n\nCASE-7\n  Given  o cerință draft al cărei fișier `tested-by` nu conține nicio funcție de test\n  When   rulează gate cu `--strict`\n  Then   adaugă un avertisment și codul de ieșire rămâne 0"
-        }
-      }
+      "covered": 7
     },
     {
       "id": "REQ-TESTLINK-930",
@@ -17655,11 +17651,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:936"
+          "loc": "plugin/scripts/test_reqmap_gate.py:966"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:60"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:62"
         }
       ],
       "test_exempt": null,
@@ -17712,11 +17708,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:61"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
         }
       ],
       "test_exempt": null,
@@ -17746,12 +17742,13 @@
         "A Rust `#[test]` counts.",
         "A `.py` file with no `def test...` also counts when it drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == \"__main__\"` guard.",
         "A shell `test_x()` function, a `function test_x` definition, or a bats `@test` counts.",
-        "A shell file named by a test convention, such as `x.test.sh`, counts on its name alone."
+        "A shell file named by a test convention, such as `x.test.sh`, counts on its name alone.",
+        "A GoogleTest `TEST(`, `TEST_F(`, `TEST_P(`, `TYPED_TEST(` or `TYPED_TEST_P(` macro counts, matched case-sensitively as a whole word. A mock that declares only `MOCK_METHOD` does not count."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a Rust #[test] attribute passes the check\n  Given  a `.rs` file containing `#[test]\\n  fn checks() {}`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\"\n\nCASE-2 — a run()-under-__main__ Python file passes the check\n  Given  a `.py` file with `def run(): return 0` and `if __name__ == \"__main__\": raise SystemExit(run())`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\"\n\nCASE-3 — a bash test_x() function and a bats @test case both pass\n  Given  a `.sh` file with `test_backup_runs() { [ -f x ]; }` and a `.bats` file with `@test \"restore drill\" { run ./restore }`\n  When   `_test_link_problem` runs on each file\n  Then   both return \"\"\n\nCASE-4 — a *.test.sh file with no test-shaped body still passes\n  Given  a file named `backup-check.test.sh` whose only content is `./backup-check --dry-run || exit 1`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\", recognized by filename alone\n\n\n--------------------",
+      "accept": "CASE-1 — a Rust #[test] attribute passes the check\n  Given  a `.rs` file containing `#[test]\\n  fn checks() {}`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\"\n\nCASE-2 — a run()-under-__main__ Python file passes the check\n  Given  a `.py` file with `def run(): return 0` and `if __name__ == \"__main__\": raise SystemExit(run())`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\"\n\nCASE-3 — a bash test_x() function and a bats @test case both pass\n  Given  a `.sh` file with `test_backup_runs() { [ -f x ]; }` and a `.bats` file with `@test \"restore drill\" { run ./restore }`\n  When   `_test_link_problem` runs on each file\n  Then   both return \"\"\n\nCASE-4 — a *.test.sh file with no test-shaped body still passes\n  Given  a file named `backup-check.test.sh` whose only content is `./backup-check --dry-run || exit 1`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\", recognized by filename alone\n\nCASE-5 — a GoogleTest macro in a C++ file passes the check\n  Given  a `.cpp` file containing `TEST_F(WidgetFixture, Stops) { ASSERT_EQ(0, stop()); }`\n  When   `_test_link_problem` runs on that file\n  Then   it returns \"\"\n\nCASE-6 — a mock-only header or a call merely ending in test( fails the check\n  Given  a `.h` file whose only macro is `MOCK_METHOD`, and a `.cpp` file calling `self_test(1)` and `MY_TEST(2)`\n  When   `_test_link_problem` runs on each file\n  Then   both return a string containing \"no test function\"\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -17771,28 +17768,24 @@
           "loc": "plugin/scripts/test_reqmap_gate.py:901"
         },
         {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:61"
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:936"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:85"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:87"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Recunoașterea punctelor de intrare de test Rust, shell și stil-stdlib",
-          "intent": "Nu orice suită scrie un `def test...` — o suită Python doar-stdlib își conduce de obicei verificările dintr-un `run()`/`main()` protejat de `if __name__ == \"__main__\"`, iar suitele shell folosesc funcții `test_x()`, bats `@test`, sau doar un nume de fișier `*.test.sh`. Fiecare dintre aceste forme recunoscute există pentru că un proiect real din acest corpus a folosit-o deja și ar fi altfel avertizat la nesfârșit.",
-          "contract": "> Nu orice suită scrie un `def test...` — o suită Python doar-stdlib își conduce de obicei\n> verificările dintr-un `run()`/`main()` protejat de `if __name__ == \"__main__\"`, iar suitele\n> shell folosesc funcții `test_x()`, bats `@test`, sau doar un nume de fișier `*.test.sh`.\n> Fiecare dintre aceste forme recunoscute există pentru că un proiect real din acest corpus\n> a folosit-o deja și ar fi altfel avertizat la nesfârșit.\n\nFiecare punct de mai jos este obligatoriu.\n- Un `#[test]` Rust contează.\n- Un fișier `.py` fără niciun `def test...` contează de asemenea când își conduce verificările dintr-un\n  punct de intrare `run`/`run_tests`/`main` sub o gardă `if __name__ == \"__main__\"`.\n- O funcție shell `test_x()`, o definiție `function test_x`, sau un `@test` bats contează.\n- Un fișier shell numit după o convenție de test, precum `x.test.sh`, contează doar după numele lui.",
-          "acceptance": "CASE-1 — un atribut Rust #[test] trece verificarea\n  Given  un fișier `.rs` conținând `#[test]\\n  fn checks() {}`\n  When   `_test_link_problem` rulează pe acel fișier\n  Then   returnează \"\"\n\nCASE-2 — un fișier Python run()-sub-__main__ trece verificarea\n  Given  un fișier `.py` cu `def run(): return 0` și `if __name__ == \"__main__\": raise SystemExit(run())`\n  When   `_test_link_problem` rulează pe acel fișier\n  Then   returnează \"\"\n\nCASE-3 — o funcție bash test_x() și un caz bats @test trec ambele\n  Given  un fișier `.sh` cu `test_backup_runs() { [ -f x ]; }` și un fișier `.bats` cu `@test \"restore drill\" { run ./restore }`\n  When   `_test_link_problem` rulează pe fiecare fișier\n  Then   ambele returnează \"\"\n\nCASE-4 — un fișier *.test.sh fără niciun corp în formă de test trece totuși\n  Given  un fișier numit `backup-check.test.sh` al cărui unic conținut este `./backup-check --dry-run || exit 1`\n  When   `_test_link_problem` rulează pe acel fișier\n  Then   returnează \"\", recunoscut doar după nume\n\n\n--------------------"
-        }
-      }
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "REQ-TESTLINK-933",
@@ -17825,11 +17818,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:936"
+          "loc": "plugin/scripts/test_reqmap_gate.py:966"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
         },
         {
           "role": "implements",
@@ -17895,7 +17888,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1156"
         },
         {
           "role": "implements",
@@ -17992,7 +17985,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1156"
         },
         {
           "role": "implements",
@@ -18067,7 +18060,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:1126"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1156"
         },
         {
           "role": "implements",
@@ -20589,7 +20582,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2618"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2648"
         },
         {
           "role": "implements",
@@ -20633,7 +20626,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2295"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2325"
         },
         {
           "role": "implements",
@@ -24572,9 +24565,9 @@
     },
     {
       "month": "2026-10",
-      "count": 18,
+      "count": 19,
       "first": "2026-10-01",
-      "last": "2026-10-13",
+      "last": "2026-10-15",
       "versions": [
         "v8.13.0",
         "v8.14.0",
@@ -24593,11 +24586,20 @@
         "v8.22.3",
         "v8.22.4",
         "v8.23.0",
-        "v8.23.1"
+        "v8.23.1",
+        "v8.23.2"
       ],
       "landmark": "v8.23.0",
       "headline": "The licence is Apache 2.0 (ADR-0069)",
       "entries": [
+        {
+          "version": "v8.23.2",
+          "date": "2026-10-15",
+          "headline": "A GoogleTest suite counts as a test",
+          "body": "**A GoogleTest suite counts as a test.**\n\n- RM012 warned \"contains no test function\" on every C++ `tested-by` link, because no pattern matched a GoogleTest macro. `_DEF_TEST_RE` now also matches `TEST(`, `TEST_F(`, `TEST_P(`, `TYPED_TEST(` and `TYPED_TEST_P(`, case-sensitively and as a whole word, so `self_test(` and `MY_TEST(` still do not count. `MOCK_METHOD` is left out on purpose: a mock-only header is a helper, not a test\n- The pattern joins the unguarded markers, like Go's `func TestX(`, rather than getting an extension guard of its own like JS `it(`: the guard cost four logical lines over the core budget, and the shape is distinctive enough that REQ-TESTLINK-931's accepted lexical false positive covers it\n- REQ-TESTLINK-932 says so, with CASE-5 (each macro passes) and CASE-6 (a mock-only header and a lowercase `test(` call fail); ARCH-TESTLINK-018 names GoogleTest\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-15`; 17,834 physical lines in 75 files (the README says so), the core unchanged at 6,629 logical lines",
+          "first_commit": "2026-10-15",
+          "last_commit": "2026-10-15"
+        },
         {
           "version": "v8.23.1",
           "date": "2026-10-13",

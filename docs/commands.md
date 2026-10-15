@@ -76,6 +76,32 @@ viewer) and minified JSON without cached translations; `["ro"]` keeps Romanian o
 Compact JSON keeps every contract, case, note and link. The offline `_map.html` embeds
 minified JSON in either profile, and map freshness compares JSON by content, not bytes.
 
+## Scanning a repo without adopting it
+
+To look at a repository you do not own, or before deciding to adopt the tool, point `--code` at
+it and `--reqs` at an empty directory outside it. These four commands then leave the repo
+untouched and write nothing into that directory:
+
+```bash
+python reqmap.py gate --audit         --code <repo> --reqs <empty-dir>   # one report of every pass below
+python reqmap.py ask --design         --code <repo> --reqs <empty-dir>   # long functions, long parameter lists, deep nesting
+python reqmap.py gate --risk --untagged --code <repo> --reqs <empty-dir> # tag coverage per directory
+python reqmap.py init --plan --out plan.json --code <repo> --reqs <empty-dir>  # capability candidates as JSON
+```
+
+`init --plan` lists, per candidate, its files, `loc`, `split_candidate` (too large), `tested_by`
+(empty: no test found) and `importer_count` (how many candidates import it; read for Python only,
+so it is 0 for every other language). The `Health` line of `gate --audit` is `0/100` with no
+requirements and says nothing about the code.
+
+What these do not give is traceability: requirements with no code, code and tests naming a
+requirement that does not exist, cases no test verifies. That needs requirements in this
+tool's Markdown form and `implements:` / `tested-by:` / `verifies:` tags. A repo that keeps
+its own requirement files and its own tag syntax can be checked by converting both into a
+copy outside it and running `gate --full --no-lint --no-map-check` on the copy. Bare `init`
+is not a scan: it writes `requirements/`, client configs and a tag at the top of each
+source file.
+
 > Removed in `v4.0.0`: the old one-verb-per-question CLI (`map`, `next`, `scan`,
 > `lint`, `show`, `health`, `export`, `draft`, `plan`, `findings`, `confirm`,
 > `coverage`, `site`, `dupes`, `search`, `review`, `check`). Each is now a flag
