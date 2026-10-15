@@ -83,10 +83,11 @@ it and `--reqs` at an empty directory outside it. These four commands then leave
 untouched and write nothing into that directory:
 
 ```bash
-python reqmap.py gate --audit         --code <repo> --reqs <empty-dir>   # one report of every pass below
-python reqmap.py ask --design         --code <repo> --reqs <empty-dir>   # long functions, long parameter lists, deep nesting
-python reqmap.py gate --risk --untagged --code <repo> --reqs <empty-dir> # tag coverage per directory
-python reqmap.py init --plan --out plan.json --code <repo> --reqs <empty-dir>  # capability candidates as JSON
+W="--code <repo> --reqs <empty-dir>"
+python reqmap.py gate --audit $W                  # one report of every pass below
+python reqmap.py ask --design $W                  # long functions and parameter lists, deep nesting
+python reqmap.py gate --risk --untagged $W        # tag coverage per directory
+python reqmap.py init --plan --out plan.json $W   # capability candidates as JSON
 ```
 
 `init --plan` lists, per candidate, its files, `loc`, `split_candidate` (too large), `tested_by`
