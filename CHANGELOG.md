@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v8.23.3` — 2026-10-15
+
+**RM036 reads an id with the same pattern as the tag scan.**
+
+- `wikilinks.py` builds its `[[ID]]` pattern from `tags._ID_PAT` instead of a hand-kept copy of the same id shape, so RM036 and the tag scan cannot disagree on what an id is. The pattern is unchanged character for character. The single-use code-span pattern is inlined at its one call, so the import costs no logical line
+- `docs/commands.md`: the scan recipe puts the shared flags in one variable, so no line in the section exceeds 100 columns
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-15.1`; 17,834 physical lines in 75 files (the README says so), the core unchanged at 6,629 logical lines
+
 ## plugin `v8.23.2` — 2026-10-15
 
 **A GoogleTest suite counts as a test.**
