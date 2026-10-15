@@ -21,7 +21,7 @@ satisfies: [SYS-GATE-102]
 Every bullet below is binding.
 - The gate checks every `tested-by` link, at every status, as the deterministic half of behavior-sync. [[REQ-TESTLINK-930]]
 - The gate recognizes a test function lexically, by language-specific patterns such as Python `def test...(` or a Jest `it(`/`test(` call. [[REQ-TESTLINK-931]]
-- The gate also recognizes a Rust `#[test]`, a shell `test_x()`/bats `@test`, and a stdlib-style Python `run`/`main` entry point under `if __name__ == "__main__"`. [[REQ-TESTLINK-932]]
+- The gate also recognizes a Rust `#[test]`, a GoogleTest `TEST(` macro in C++, a shell `test_x()`/bats `@test`, and a stdlib-style Python `run`/`main` entry point under `if __name__ == "__main__"`. [[REQ-TESTLINK-932]]
 - When a `tested-by` file is missing, unreadable, or holds no test function, the gate adds one warning naming the requirement and the file. [[REQ-TESTLINK-933]]
 
 ## Cases
@@ -212,6 +212,9 @@ Every bullet below is binding.
   `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
 - A shell `test_x()` function, a `function test_x` definition, or a bats `@test` counts.
 - A shell file named by a test convention, such as `x.test.sh`, counts on its name alone.
+- A GoogleTest `TEST(`, `TEST_F(`, `TEST_P(`, `TYPED_TEST(` or `TYPED_TEST_P(` macro counts,
+  matched case-sensitively as a whole word. A mock that declares only `MOCK_METHOD` does
+  not count.
 
 ## Cases
 CASE-1 — a Rust #[test] attribute passes the check
@@ -233,6 +236,16 @@ CASE-4 — a *.test.sh file with no test-shaped body still passes
   Given  a file named `backup-check.test.sh` whose only content is `./backup-check --dry-run || exit 1`
   When   `_test_link_problem` runs on that file
   Then   it returns "", recognized by filename alone
+
+CASE-5 — a GoogleTest macro in a C++ file passes the check
+  Given  a `.cpp` file containing `TEST_F(WidgetFixture, Stops) { ASSERT_EQ(0, stop()); }`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
+
+CASE-6 — a mock-only header or a call merely ending in test( fails the check
+  Given  a `.h` file whose only macro is `MOCK_METHOD`, and a `.cpp` file calling `self_test(1)` and `MY_TEST(2)`
+  When   `_test_link_problem` runs on each file
+  Then   both return a string containing "no test function"
 
 
 --------------------

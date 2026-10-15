@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.23.2` — 2026-10-15
+
+**A GoogleTest suite counts as a test.**
+
+- RM012 warned "contains no test function" on every C++ `tested-by` link, because no pattern matched a GoogleTest macro. `_DEF_TEST_RE` now also matches `TEST(`, `TEST_F(`, `TEST_P(`, `TYPED_TEST(` and `TYPED_TEST_P(`, case-sensitively and as a whole word, so `self_test(` and `MY_TEST(` still do not count. `MOCK_METHOD` is left out on purpose: a mock-only header is a helper, not a test
+- The pattern joins the unguarded markers, like Go's `func TestX(`, rather than getting an extension guard of its own like JS `it(`: the guard cost four logical lines over the core budget, and the shape is distinctive enough that REQ-TESTLINK-931's accepted lexical false positive covers it
+- REQ-TESTLINK-932 says so, with CASE-5 (each macro passes) and CASE-6 (a mock-only header and a lowercase `test(` call fail); ARCH-TESTLINK-018 names GoogleTest
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-15`; 17,834 physical lines in 75 files (the README says so), the core unchanged at 6,629 logical lines
+
 ## plugin `v8.23.1` — 2026-10-13
 
 **Release spans no longer depend on the checked-out branch.**

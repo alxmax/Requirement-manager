@@ -129,6 +129,10 @@
       "hash": "906bc44a1966",
       "reason": "distinct_from; CHECK-831 fold"
     },
+    "ARCH-TESTLINK-018": {
+      "hash": "9da9f9f0aae8",
+      "reason": null
+    },
     "ARCH-TRACE-020": {
       "hash": "fb4530000681",
       "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
@@ -464,6 +468,10 @@
     "REQ-SITE-924": {
       "hash": "0cf310579c78",
       "reason": "Bare sync leaves a page with no engine region alone"
+    },
+    "REQ-TESTLINK-932": {
+      "hash": "c69a8b33555e",
+      "reason": null
     },
     "REQ-TODODETAIL-1096": {
       "hash": "9b21df18bebf",
