@@ -279,6 +279,10 @@ adoptMapExport({ nodes: [
     clarify: [CLARIFY_Q("vague-term", "advisory", "wording"),
       CLARIFY_Q("clause-without-case", "advisory", "count"),
       CLARIFY_Q("no-cases", "blocking", "structure")] }),
+  adaptNode({ id: "Q-OLD-005", title: "retired", area: "Q", layer: "feature",
+    status: "deprecated", intent: "i", contract: [], acc: [], members: [],
+    verify: ["Was this ever needed?"], deps: [], used_by: [],
+    clarify: [CLARIFY_Q("no-cases", "blocking", "structure")] }),
 ] });
 const merged = computeProblems();
 const asked = computeQuestions();
@@ -334,6 +338,10 @@ const mergeChecks = [
         "Clause without case", "Optional"].every(
         (l) => firstOpen.includes(`>${l}<span`))
       && firstOpen.includes("1 must fix — a section is missing")],
+  // verifies: REQ-VIEWER-1101#CASE-9
+  ["questions: a deprecated requirement asks nothing",
+    !Object.values(asked).flat().some((r) => r.id === "Q-OLD-005")
+      && !firstOpen.includes("Q-OLD-005")],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
 

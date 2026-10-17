@@ -1,6 +1,6 @@
 ---
 generated: 2026-10-17
-engine: 2026-10-17.1
+engine: 2026-10-17.2
 nodes: 323
 edges: 121
 design pass-rate: 96% (123/128 source files without a design candidate)
@@ -491,10 +491,10 @@ graph LR
   f_plugin_scripts_reqmap_engine_sections_py_131_284["plugin/scripts/reqmap_engine/sections.py:131-284"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_sections_py_131_284
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2412_3047["plugin/scripts/test_reqmap_author.py:2412-3047"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2412_3047
-  f_plugin_scripts_reqmap_engine_clarify_py_146_307["plugin/scripts/reqmap_engine/clarify.py:146-307"]
-  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_146_307
+  f_plugin_scripts_test_reqmap_author_py_2412_3053["plugin/scripts/test_reqmap_author.py:2412-3053"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2412_3053
+  f_plugin_scripts_reqmap_engine_clarify_py_146_310["plugin/scripts/reqmap_engine/clarify.py:146-310"]
+  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_146_310
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_85["plugin/scripts/reqmap.py:85"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_85
@@ -526,8 +526,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_orphans_py_153_181["plugin/scripts/reqmap_engine/orphans.py:153-181"]
   ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_engine_orphans_py_153_181
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_scripts_test_reqmap_author_py_1758_3140["plugin/scripts/test_reqmap_author.py:1758-3140"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1758_3140
+  f_plugin_scripts_test_reqmap_author_py_1758_3146["plugin/scripts/test_reqmap_author.py:1758-3146"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1758_3146
   f_plugin_scripts_test_reqmap_report_py_5172["plugin/scripts/test_reqmap_report.py:5172"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5172
   f_plugin_scripts_reqmap_engine_decompose_py_54_114["plugin/scripts/reqmap_engine/decompose.py:54-114"]
@@ -783,8 +783,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_health_py_125_319["plugin/scripts/reqmap_engine/health.py:125-319"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_engine_health_py_125_319
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_scripts_test_reqmap_author_py_3900["plugin/scripts/test_reqmap_author.py:3900"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3900
+  f_plugin_scripts_test_reqmap_author_py_3906["plugin/scripts/test_reqmap_author.py:3906"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3906
   f_plugin_scripts_reqmap_engine_plandrift_py_362_428["plugin/scripts/reqmap_engine/plandrift.py:362-428"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_362_428
   f_plugin_scripts_reqmap_engine_release_py_1_386["plugin/scripts/reqmap_engine/release.py:1-386"]
@@ -797,8 +797,8 @@ graph LR
   f_scripts_test_pipeline_wiring_py_238["scripts/test_pipeline_wiring.py:238"]
   ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_238
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2032_3085["plugin/scripts/test_reqmap_author.py:2032-3085"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2032_3085
+  f_plugin_scripts_test_reqmap_author_py_2032_3091["plugin/scripts/test_reqmap_author.py:2032-3091"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2032_3091
   f_plugin_scripts_test_reqmap_report_py_5172["plugin/scripts/test_reqmap_report.py:5172"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5172
   f_plugin_scripts_reqmap_engine_retire_py_12_229["plugin/scripts/reqmap_engine/retire.py:12-229"]
@@ -910,8 +910,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_scripts_reqmap_py_246["plugin/scripts/reqmap.py:246"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_246
-  f_plugin_scripts_test_reqmap_author_py_4112["plugin/scripts/test_reqmap_author.py:4112"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4112
+  f_plugin_scripts_test_reqmap_author_py_4118["plugin/scripts/test_reqmap_author.py:4118"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4118
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_319["plugin/scripts/reqmap_engine/init.py:319"]

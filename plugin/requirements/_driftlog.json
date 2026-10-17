@@ -186,8 +186,8 @@
       "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-CLARIFY-956": {
-      "hash": "42f713887fca",
-      "reason": "Findings from running the engine on its own repository"
+      "hash": "13a4760c20eb",
+      "reason": null
     },
     "REQ-CMDREGISTRY-1031": {
       "hash": "63640fbd5f7e",

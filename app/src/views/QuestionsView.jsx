@@ -17,6 +17,7 @@ const ANSWER_FIX = "Answer it: fold the answer into the Description and "
 function verifyRows(origin) {
   const out = [];
   REQUIREMENTS.forEach((r) => {
+    if (r.status === "deprecated") return;   // retired: nothing to answer
     const qs = openQuestions(r)
       .filter((q) => isObserved(q) === (origin === "code"));
     if (!qs.length) return;
@@ -40,7 +41,7 @@ export const basisOf = (q) => (BASIS_ORDER[q.basis] !== undefined ? q.basis
 export function computeQuestions() {
   const clarify = [];
   REQUIREMENTS.forEach((r) => {
-    const qs = clarifyQuestions(r);
+    const qs = r.status === "deprecated" ? [] : clarifyQuestions(r);
     if (!qs.length) return;
     clarify.push({ id: r.id, title: r.title, status: r.status,
       questions: [...qs].sort((a, b) => BASIS_ORDER[basisOf(a)]

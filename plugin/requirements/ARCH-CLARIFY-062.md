@@ -79,6 +79,8 @@ Every bullet below is binding.
   about the kind that is missing, unless that kind is the corpus's own subject.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every
   other question is advisory.
+- A deprecated requirement raises no question at all: it is retired, so nothing in it
+  waits for an answer.
 
 ## Cases
 CASE-1 — a hedge word is questioned by name
@@ -112,6 +114,11 @@ CASE-6 — the corpus's own subject is not that signal
   Given  a corpus in which nearly every case of every requirement starts from the same noun
   When   the detectors run on one of them
   Then   no question is raised about it, because the noun is the domain, not a narrow focus
+
+CASE-7 — a deprecated requirement asks nothing
+  Given  a deprecated requirement with no labelled case and a clause reading "quickly"
+  When   the detectors run
+  Then   no question is raised, blocking or advisory
 
 ## Context
 **Fire rate, measured 2026-09-04**

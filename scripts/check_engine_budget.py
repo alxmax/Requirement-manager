@@ -57,10 +57,10 @@ PACKAGE = "reqmap_engine"
 # `init --watch` / `--propose`. watch.py stays lazy and is not in this number.
 # Lowered to 6,629 by the cut that moved TODO.md parsing to `todoparse.py`,
 # which only a repository that keeps a TODO.md loads.
-# Raised to 6,636 by ADR-0070: `clarify` questions in the map with the basis
-# each rests on, and the call into the draft question builder.
-# draftquestions.py stays lazy.
-CORE_LOGICAL_BUDGET = 6636
+# Raised to 6,638 by ADR-0070: `clarify` questions in the map with the basis
+# each rests on, a deprecated requirement asking nothing, and the call into
+# the draft question builder. draftquestions.py stays lazy.
+CORE_LOGICAL_BUDGET = 6638
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

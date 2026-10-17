@@ -1227,6 +1227,7 @@ Every bullet below is binding.
 - The Optional tab filters by rule. The tab bar states at its right whether a section is
   missing anywhere.
 - The authored placeholder (a bullet starting `None`) is not a question.
+- A deprecated requirement contributes no question from any source.
 - The rail count for Questions is the All tab's count, shown like every other entry's
   count.
 - The Problems inbox has no Questions tab and lists no question row.
@@ -1246,6 +1247,12 @@ CASE-3 — the placeholder is still not a question
   Given  a requirement whose Verify intent holds only the authored placeholder
   When   the Questions page is computed
   Then   that requirement appears on no tab
+
+CASE-9 — a deprecated requirement asks nothing
+  Given  a deprecated requirement whose Verify intent holds a question and whose map node
+         carries a `clarify` question
+  When   the Questions page is computed
+  Then   that requirement appears on no tab and adds nothing to the rail's count
 
 CASE-4 — clarify questions are listed by basis, Optional on its own tab
   Given  a requirement whose map node carries a `count`, a `wording` and a `structure`

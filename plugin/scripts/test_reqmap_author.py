@@ -3029,6 +3029,12 @@ class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # test
         sev = {q["rule"]: q["severity"] for q in nodes["AREA-Q-003"]["clarify"]}
         self.assertEqual(sev.get("no-cases"), "blocking")
 
+    def test_deprecated_requirement_asks_nothing(self):  # verifies: REQ-CLARIFY-956#CASE-7
+        reqs, nodes = self._nodes({"AREA-Q-005": _spec(
+            "AREA-Q-005", ["`gate` reports errors quickly."], (), status="deprecated")})
+        self.assertEqual(R._clarify_questions("AREA-Q-005", reqs["AREA-Q-005"], reqs), [])
+        self.assertEqual(nodes["AREA-Q-005"]["clarify"], [])
+
     def test_each_rule_names_the_basis_it_rests_on(self):  # verifies: REQ-CLARIFY-1100#CASE-4
         self.assertEqual(
             {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "structure"},

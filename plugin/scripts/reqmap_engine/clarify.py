@@ -257,7 +257,10 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
     written; everything else is advice. `domain` is
     `_domain_heads(reqs)`, passed in by the corpus-wide callers so it
     is read once rather than recomputed per requirement (it was 90% of
-    a `sync`'s question pass, and quadratic in the corpus)."""
+    a `sync`'s question pass, and quadratic in the corpus). A deprecated
+    requirement is retired, so nothing in it waits for an answer."""
+    if r["meta"].get("status") == "deprecated":
+        return []
     body = r["body"]
     clauses = _from_any(_bullets, body, CONTRACT_LABELS)
     cases_raw = _from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""

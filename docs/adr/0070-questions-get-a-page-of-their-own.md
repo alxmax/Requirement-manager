@@ -8,7 +8,7 @@
   (192 `unbounded-quantity`, 118 `clause-without-case`, 48 `vague-term`, 48
   `number-without-unit`, 36 `over-scoped`, 36 `case-monoculture`, 32 `no-failure-case`,
   4 `ambiguous-actor`), 0 blocking. `python scripts/check_engine_budget.py` on this
-  commit: core 6,636 logical lines.
+  commit: core 6,638 logical lines.
 
 ## Context
 
@@ -54,9 +54,13 @@ volume problem ADR-0028 names as its revisit condition.
   `wording` questions false positives ("every candidate", "how many releases", "4
   blocks"); a `structure` or `count` question states a fact, though acting on a count
   stays a judgment.
-- `CORE_LOGICAL_BUDGET` is 6,636. The seven lines are the map export (four, in
-  `mapdata.py`), the rule-to-basis table (one, in `clarify.py`) and the call into the
-  question builder (two, in `draft.py`). The builder, `draftquestions.py`, is imported at
+- **A deprecated requirement asks nothing.** It is retired, so no question on it waits
+  for an answer: `clarify` returns none for it, and the Questions page skips its
+  Verify-intent bullets too. On this corpus that removes 21 questions (8 count, 13
+  wording) from 7 deprecated requirements.
+- `CORE_LOGICAL_BUDGET` is 6,638. The nine lines are the map export (four, in
+  `mapdata.py`), the rule-to-basis table and the deprecated check (three, in
+  `clarify.py`) and the call into the question builder (two, in `draft.py`). The builder, `draftquestions.py`, is imported at
   call time and is not in the number.
 
 ## Consequences
@@ -75,5 +79,5 @@ volume problem ADR-0028 names as its revisit condition.
   corpus.
 - A `wording` rule is made precise enough that its questions are mostly real, which
   moves it to a stronger basis.
-- A cut on the gate path brings the measured core under 6,636. The budget drops in that
+- A cut on the gate path brings the measured core under 6,638. The budget drops in that
   commit.

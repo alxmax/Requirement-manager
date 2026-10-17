@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-17.1",
+  "engine_version": "2026-10-17.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2005,7 +2005,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3331"
+          "loc": "plugin/scripts/test_reqmap_author.py:3337"
         },
         {
           "role": "implements",
@@ -2054,7 +2054,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3331"
+          "loc": "plugin/scripts/test_reqmap_author.py:3337"
         },
         {
           "role": "implements",
@@ -2121,7 +2121,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3331"
+          "loc": "plugin/scripts/test_reqmap_author.py:3337"
         },
         {
           "role": "implements",
@@ -3100,7 +3100,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3047"
+          "loc": "plugin/scripts/test_reqmap_author.py:3053"
         },
         {
           "role": "implements",
@@ -3124,7 +3124,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:307"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:310"
         }
       ],
       "test_exempt": null,
@@ -3170,12 +3170,13 @@
         "A clause whose subject is \"It\" or \"the system\" raises a question asking which component acts.",
         "A requirement with more clauses than cases raises ONE question naming how many are uncovered, and saying that a count cannot tell which. It never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that.",
         "A requirement whose cases nearly all start from the same kind of input raises one question about the kind that is missing, unless that kind is the corpus's own subject.",
-        "A requirement with no clause, or with no labelled case, raises a blocking question; every other question is advisory."
+        "A requirement with no clause, or with no labelled case, raises a blocking question; every other question is advisory.",
+        "A deprecated requirement raises no question at all: it is retired, so nothing in it waits for an answer."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a bare number is questioned, an identifier is not\n  Given  one clause reading \"retries 3 times\", one reading \"emits CASE-2 for v4.0.0\"\n         and one reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   the first raises a missing-unit question and the other two raise none\n\nCASE-3 — a happy-path-only acceptance raises the failure question\n  Given  a requirement whose cases mention no invalid, missing or failing input\n  When   the detectors run\n  Then   one question asks what happens on the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned\n  Given  a requirement whose every case opens on the same noun, and a corpus in which that\n         noun is not the subject every other requirement starts from\n  When   the detectors run\n  Then   one question names that noun and asks which other kind a caller would supply\n\nCASE-6 — the corpus's own subject is not that signal\n  Given  a corpus in which nearly every case of every requirement starts from the same noun\n  When   the detectors run on one of them\n  Then   no question is raised about it, because the noun is the domain, not a narrow focus",
+      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a bare number is questioned, an identifier is not\n  Given  one clause reading \"retries 3 times\", one reading \"emits CASE-2 for v4.0.0\"\n         and one reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   the first raises a missing-unit question and the other two raise none\n\nCASE-3 — a happy-path-only acceptance raises the failure question\n  Given  a requirement whose cases mention no invalid, missing or failing input\n  When   the detectors run\n  Then   one question asks what happens on the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned\n  Given  a requirement whose every case opens on the same noun, and a corpus in which that\n         noun is not the subject every other requirement starts from\n  When   the detectors run\n  Then   one question names that noun and asks which other kind a caller would supply\n\nCASE-6 — the corpus's own subject is not that signal\n  Given  a corpus in which nearly every case of every requirement starts from the same noun\n  When   the detectors run on one of them\n  Then   no question is raised about it, because the noun is the domain, not a narrow focus\n\nCASE-7 — a deprecated requirement asks nothing\n  Given  a deprecated requirement with no labelled case and a clause reading \"quickly\"\n  When   the detectors run\n  Then   no question is raised, blocking or advisory",
       "input": "",
       "output": "",
       "desc": "",
@@ -3192,7 +3193,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3047"
+          "loc": "plugin/scripts/test_reqmap_author.py:3053"
         },
         {
           "role": "implements",
@@ -3219,8 +3220,8 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "vague-term",
@@ -3255,7 +3256,7 @@
           "basis": "count",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "2 clause(s) have no case: there are 9 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         },
         {
@@ -3264,7 +3265,7 @@
           "basis": "count",
           "where": "Description",
           "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
+          "question": "This requirement carries 9 clauses (advisory limit 7). Which of them is a separate requirement?",
           "suggest": "Split the ones that could change for a different reason."
         }
       ]
@@ -3303,7 +3304,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:307"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:310"
         }
       ],
       "test_exempt": null,
@@ -4648,7 +4649,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3140"
+          "loc": "plugin/scripts/test_reqmap_author.py:3146"
         },
         {
           "role": "tested-by",
@@ -4933,7 +4934,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3140"
+          "loc": "plugin/scripts/test_reqmap_author.py:3146"
         },
         {
           "role": "implements",
@@ -5782,53 +5783,7 @@
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "A class with no field at all is skipped for cohesion. A `dict` subclass keys its state elsewhere, so it has no field two methods could share.",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 7",
-          "quote": "`DESIGN_RFC_MAX` is a `CONFIG_KEYS` entry, so a repo can retune it like every other number in the review; the pillar stays advisory and never enters the gate — including through the committed artifacts the review is written into, which is where it leaked. [[REQ-DESIGN-991]]",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 8",
-          "quote": "The pillar names its own known weakness where it prints: RFC counts every distinct method name a class calls, including library calls, so it over-reports routers, GUI callback classes and builder DSLs.",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "4 clause(s) have no case: there are 8 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-DESIGN-979",
@@ -5903,26 +5858,7 @@
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`_design_lcom` counts only the methods that touch at least one instance field. A method touching none has no state to share, and counting it as disjoint from every sibling adds one pair per sibling while measuring nothing.",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-DESIGN-991",
@@ -7293,7 +7229,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3461"
+          "loc": "plugin/scripts/test_reqmap_author.py:3467"
         },
         {
           "role": "implements",
@@ -8881,17 +8817,7 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 clause(s) have no case: there are 6 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Ce afirmă briefing-ul de implementare",
@@ -8932,17 +8858,7 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "case-monoculture",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Indicând unde trăiește acest tip de cod",
@@ -9151,7 +9067,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4348"
+          "loc": "plugin/scripts/test_reqmap_author.py:4354"
         },
         {
           "role": "implements",
@@ -11783,26 +11699,7 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "An architecture box shows how many code requirements sit under it.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Specification Hierarchy: doar muchii satisfies, cod numărat nu desenat",
@@ -12786,17 +12683,7 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`new` refuses an id that no `# implements:` tag could ever spell — anything outside `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+` — printing why and exiting 2 without writing a file.",
-          "question": "What unit is \"2\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-NEW-882",
@@ -14971,17 +14858,7 @@
       "milestone": "v1.14",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`new --from-todo` does not modify `TODO.md` by default; `--mark-done` checks off the matched item, best-effort. [[REQ-PROMOTE-TODO-899]]",
-          "question": "What is the measurable threshold behind \"best-effort\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Promovarea unui element TODO într-un draft de cerință",
@@ -15025,26 +14902,7 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Ștanțarea unui draft dintr-un item TODO potrivit",
@@ -15128,17 +14986,7 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "That flip is best-effort: a write failure warns and does not fail the command.",
-          "question": "What is the measurable threshold behind \"best-effort\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "TODO.md rămâne neatins cu excepția cazului în care --mark-done cere altfel",
@@ -15802,7 +15650,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3900"
+          "loc": "plugin/scripts/test_reqmap_author.py:3906"
         },
         {
           "role": "implements",
@@ -15911,7 +15759,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3569"
+          "loc": "plugin/scripts/test_reqmap_author.py:3575"
         },
         {
           "role": "implements",
@@ -15974,7 +15822,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3622"
+          "loc": "plugin/scripts/test_reqmap_author.py:3628"
         },
         {
           "role": "implements",
@@ -16029,7 +15877,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3656"
+          "loc": "plugin/scripts/test_reqmap_author.py:3662"
         },
         {
           "role": "implements",
@@ -16107,7 +15955,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3686"
+          "loc": "plugin/scripts/test_reqmap_author.py:3692"
         },
         {
           "role": "implements",
@@ -16169,7 +16017,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3708"
+          "loc": "plugin/scripts/test_reqmap_author.py:3714"
         },
         {
           "role": "implements",
@@ -16261,7 +16109,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3820"
+          "loc": "plugin/scripts/test_reqmap_author.py:3826"
         },
         {
           "role": "implements",
@@ -16320,7 +16168,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3708"
+          "loc": "plugin/scripts/test_reqmap_author.py:3714"
         },
         {
           "role": "implements",
@@ -16384,7 +16232,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3941"
+          "loc": "plugin/scripts/test_reqmap_author.py:3947"
         },
         {
           "role": "implements",
@@ -16492,7 +16340,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4056"
+          "loc": "plugin/scripts/test_reqmap_author.py:4062"
         },
         {
           "role": "implements",
@@ -16696,7 +16544,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3085"
+          "loc": "plugin/scripts/test_reqmap_author.py:3091"
         },
         {
           "role": "tested-by",
@@ -16958,7 +16806,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3085"
+          "loc": "plugin/scripts/test_reqmap_author.py:3091"
         },
         {
           "role": "implements",
@@ -18038,7 +17886,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4056"
+          "loc": "plugin/scripts/test_reqmap_author.py:4062"
         },
         {
           "role": "implements",
@@ -21499,7 +21347,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4112"
+          "loc": "plugin/scripts/test_reqmap_author.py:4118"
         },
         {
           "role": "implements",
@@ -21610,7 +21458,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4115"
+          "loc": "plugin/scripts/test_reqmap_author.py:4121"
         },
         {
           "role": "implements",
@@ -23106,17 +22954,7 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-TRANSLATE-996",
@@ -23173,26 +23011,7 @@
       "clauses": 7,
       "covered": 1,
       "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4, CASE-5, CASE-6",
-      "clarify": [
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`LANGUAGE` in `requirements/_config.json` accepts exactly `en`, `ro` or `both`; any other value is reported and ignored, and the default is `en`.",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "unbounded-quantity",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`ask --i18n` lists every gap with its locale, id, reason and title; `--json` emits each gap's `title`, `intent`, `contract` and `acceptance` exactly as `translation_hash` was computed over them, plus that `hash`, so the writer stores the four translated fields under the id with the same key.",
-          "question": "Is there an upper bound, and what happens when it is reached?",
-          "suggest": "Name the limit, or say explicitly that there is none."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-TRANSLATE-1080",
@@ -23223,7 +23042,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:341"
+          "loc": "app/scripts/smoke/explorer.jsx:349"
         },
         {
           "role": "implements",
@@ -24291,26 +24110,7 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "The rail badge for authored questions is hidden at zero rather than rendered as a proud `0`.",
-          "question": "What unit is \"0\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "O singură căsuță de intrare, cu originea unui semnal drept filă",
@@ -25291,13 +25091,14 @@
         "Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`, `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.",
         "The Optional tab filters by rule. The tab bar states at its right whether a section is missing anywhere.",
         "The authored placeholder (a bullet starting `None`) is not a question.",
+        "A deprecated requirement contributes no question from any source.",
         "The rail count for Questions is the All tab's count, shown like every other entry's count.",
         "The Problems inbox has no Questions tab and lists no question row."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a person's question is on its own tab\n  Given  a requirement whose Verify intent holds one question a person wrote\n  When   the Asked by a person tab is rendered\n  Then   it lists that requirement with the question's text, and no observed question\n\nCASE-2 — an Observed bullet is listed as code\n  Given  a requirement whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed\n  Then   it is listed on the Observed in code tab and not on Asked by a person\n\nCASE-3 — the placeholder is still not a question\n  Given  a requirement whose Verify intent holds only the authored placeholder\n  When   the Questions page is computed\n  Then   that requirement appears on no tab\n\nCASE-4 — clarify questions are listed by basis, Optional on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Optional tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Optional tab\n         shows the `wording` one marked grey and not the `structure` one\n\nCASE-5 — the rail counts the All tab, which leaves Optional out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-6 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-7 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-8 — All leaves Optional out, and a tab names each kind\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and not the\n         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,\n         Clause without case and Optional, and says a section is missing",
+      "accept": "CASE-1 — a person's question is on its own tab\n  Given  a requirement whose Verify intent holds one question a person wrote\n  When   the Asked by a person tab is rendered\n  Then   it lists that requirement with the question's text, and no observed question\n\nCASE-2 — an Observed bullet is listed as code\n  Given  a requirement whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed\n  Then   it is listed on the Observed in code tab and not on Asked by a person\n\nCASE-3 — the placeholder is still not a question\n  Given  a requirement whose Verify intent holds only the authored placeholder\n  When   the Questions page is computed\n  Then   that requirement appears on no tab\n\nCASE-9 — a deprecated requirement asks nothing\n  Given  a deprecated requirement whose Verify intent holds a question and whose map node\n         carries a `clarify` question\n  When   the Questions page is computed\n  Then   that requirement appears on no tab and adds nothing to the rail's count\n\nCASE-4 — clarify questions are listed by basis, Optional on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Optional tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Optional tab\n         shows the `wording` one marked grey and not the `structure` one\n\nCASE-5 — the rail counts the All tab, which leaves Optional out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-6 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-7 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-8 — All leaves Optional out, and a tab names each kind\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and not the\n         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,\n         Clause without case and Optional, and says a section is missing",
       "input": "",
       "output": "",
       "desc": "",
@@ -25334,8 +25135,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 8,
-      "covered": 8,
+      "clauses": 9,
+      "covered": 9,
       "clarify": [
         {
           "rule": "unbounded-quantity",
@@ -25369,6 +25170,15 @@
           "severity": "advisory",
           "basis": "wording",
           "where": "clause 8",
+          "quote": "A deprecated requirement contributes no question from any source.",
+          "question": "Is there an upper bound, and what happens when it is reached?",
+          "suggest": "Name the limit, or say explicitly that there is none."
+        },
+        {
+          "rule": "unbounded-quantity",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "clause 9",
           "quote": "The rail count for Questions is the All tab's count, shown like every other entry's count.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
@@ -25379,7 +25189,7 @@
           "basis": "count",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 9 clauses and 8 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "1 clause(s) have no case: there are 10 clauses and 9 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         },
         {
@@ -25388,7 +25198,7 @@
           "basis": "count",
           "where": "Description",
           "quote": "",
-          "question": "This requirement carries 9 clauses (advisory limit 7). Which of them is a separate requirement?",
+          "question": "This requirement carries 10 clauses (advisory limit 7). Which of them is a separate requirement?",
           "suggest": "Split the ones that could change for a different reason."
         }
       ]
@@ -30161,7 +29971,7 @@
           "version": "v8.24.0",
           "date": "2026-10-17",
           "headline": "Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070)",
-          "body": "**Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**\n\n- A code draft written by `init` asks one Verify-intent question per line where the scan finds a signal, naming `file:line` and the code on it: a `TODO`/`FIXME`/`HACK`/`XXX` marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `NOLINT`) and an empty `catch` in every language; in Python, also an `except` that only passes or returns nothing, a number other than -1/0/1/2 in a comparison or keyword argument, and a statement after an unconditional exit. At most eight per file, the rest counted under Context. A file with no signal keeps the generic question it always had. REQ-EXTRACT-1099\n- `_map.json` carries every `clarify` question per node (`clarify`: rule, severity, basis, where, quote, question, suggest), computed by the same function the CLI runs. REQ-CLARIFY-1100\n- Every `clarify` question names the basis its rule rests on: `structure` when a section is absent (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`, `over-scoped`), `wording` when a word on a list matched (the other six rules). `clarify` prints it beside the rule. In a sample of four questions per rule on this corpus, most `wording` questions were false positives. REQ-CLARIFY-1100\n- The viewer has a Questions page in the Workspace rail, below Commands, with one tab per kind of question, in the tab bar Problems uses: All, Must fix (only while a section is missing), Asked by a person, Observed in code, one tab per `clarify` rule resting on a count (Clause without case, Over-scoped), and Optional. A requirement's questions are ordered by basis and marked `structure` red as \"must fix\", `count` amber as \"to check\" and `wording` grey as \"optional\". All leaves Optional out, and the rail shows All's count like every other entry's: 158 on this corpus, with 367 more on the Optional tab, filterable by rule. Problems loses its Questions tab. REQ-VIEWER-1101 supersedes REQ-VIEWER-966, now deprecated; ADR-0070 supersedes ADR-0028\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.1`; 17,997 physical lines in 76 files (the README says so). The core rises to 6,636 logical lines (ADR-0070): four for the map export, one for the rule-to-basis table, two for the call into `draftquestions.py`, which is imported at call time and stays out of the core",
+          "body": "**Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**\n\n- A code draft written by `init` asks one Verify-intent question per line where the scan finds a signal, naming `file:line` and the code on it: a `TODO`/`FIXME`/`HACK`/`XXX` marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `NOLINT`) and an empty `catch` in every language; in Python, also an `except` that only passes or returns nothing, a number other than -1/0/1/2 in a comparison or keyword argument, and a statement after an unconditional exit. At most eight per file, the rest counted under Context. A file with no signal keeps the generic question it always had. REQ-EXTRACT-1099\n- `_map.json` carries every `clarify` question per node (`clarify`: rule, severity, basis, where, quote, question, suggest), computed by the same function the CLI runs. REQ-CLARIFY-1100\n- A deprecated requirement asks nothing: `clarify` returns no question for it, and the Questions page skips its Verify-intent bullets too. That removes 21 questions from 7 deprecated requirements. REQ-CLARIFY-956 CASE-7, REQ-VIEWER-1101 CASE-9\n- Every `clarify` question names the basis its rule rests on: `structure` when a section is absent (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`, `over-scoped`), `wording` when a word on a list matched (the other six rules). `clarify` prints it beside the rule. In a sample of four questions per rule on this corpus, most `wording` questions were false positives. REQ-CLARIFY-1100\n- The viewer has a Questions page in the Workspace rail, below Commands, with one tab per kind of question, in the tab bar Problems uses: All, Must fix (only while a section is missing), Asked by a person, Observed in code, one tab per `clarify` rule resting on a count (Clause without case, Over-scoped), and Optional. A requirement's questions are ordered by basis and marked `structure` red as \"must fix\", `count` amber as \"to check\" and `wording` grey as \"optional\". All leaves Optional out, and the rail shows All's count like every other entry's: 158 on this corpus, with 367 more on the Optional tab, filterable by rule. Problems loses its Questions tab. REQ-VIEWER-1101 supersedes REQ-VIEWER-966, now deprecated; ADR-0070 supersedes ADR-0028\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.2`; 18,000 physical lines in 76 files (the README says so). The core rises to 6,638 logical lines (ADR-0070): four for the map export, three for the rule-to-basis table and the deprecated check, two for the call into `draftquestions.py`, which is imported at call time and stays out of the core",
           "first_commit": "2026-10-17",
           "last_commit": "2026-10-17"
         },
