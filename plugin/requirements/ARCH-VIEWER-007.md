@@ -25,7 +25,7 @@ Every bullet below is binding.
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
 - The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
-- The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
+- The viewer gives open questions a page of their own, grouped by whether the code, a person or `clarify` raised them, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
@@ -397,7 +397,8 @@ CASE-4 — a map with no command list says so
   Then   a named empty state appears naming the command that regenerates it
 ---
 id: REQ-VIEWER-966
-status: confirmed
+status: deprecated
+superseded_by: REQ-VIEWER-1101
 level: code
 layer: feature
 owner: Alex
@@ -1188,3 +1189,98 @@ CASE-4 — an ISO week that spans New Year is one week
 ## Context
 **Notes**
 - `distinct_from: REQ-HISTORY-1081` - `REQ-HISTORY-1081` says how a shipped release is drawn and opened; this says how a series is cut into weeks.
+
+--------------------
+
+
+---
+id: REQ-VIEWER-1101
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Questions have a page of their own
+
+## Description
+> A question has three sources: the code, read by `draft`; a person, writing in Verify
+> intent; and `clarify`, reading the requirement's own text. The Problems inbox showed
+> only the second, and adding the third would have put five hundred advisory rows beside
+> three health rows. A page of its own keeps what is broken apart from what is unanswered.
+> See [ADR-0070](../../docs/adr/0070-questions-get-a-page-of-their-own.md).
+
+Every bullet below is binding.
+- The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page
+  of every open question.
+- The page has one tab per kind of question, in the Problems tab bar's form, each with
+  its count: All; Must fix, present only while a `structure` question exists; Asked by
+  a person (a Verify-intent bullet not starting `Observed`); Observed in code (one
+  starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause
+  without case and Over-scoped; and Optional, every `wording` question.
+- All lists every question except the Optional ones, and opens first.
+- Within a requirement, `clarify` questions are listed by basis, `structure` then
+  `count` then `wording`, each with its rule, location, quoted clause and suggestion.
+- Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`,
+  `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.
+- The Optional tab filters by rule. The tab bar states at its right whether a section is
+  missing anywhere.
+- The authored placeholder (a bullet starting `None`) is not a question.
+- A deprecated requirement contributes no question from any source.
+- The rail count for Questions is the All tab's count, shown like every other entry's
+  count.
+- The Problems inbox has no Questions tab and lists no question row.
+
+## Cases
+CASE-1 — a person's question is on its own tab
+  Given  a requirement whose Verify intent holds one question a person wrote
+  When   the Asked by a person tab is rendered
+  Then   it lists that requirement with the question's text, and no observed question
+
+CASE-2 — an Observed bullet is listed as code
+  Given  a requirement whose Verify intent holds a bullet starting `Observed at`
+  When   the Questions page is computed
+  Then   it is listed on the Observed in code tab and not on Asked by a person
+
+CASE-3 — the placeholder is still not a question
+  Given  a requirement whose Verify intent holds only the authored placeholder
+  When   the Questions page is computed
+  Then   that requirement appears on no tab
+
+CASE-9 — a deprecated requirement asks nothing
+  Given  a deprecated requirement whose Verify intent holds a question and whose map node
+         carries a `clarify` question
+  When   the Questions page is computed
+  Then   that requirement appears on no tab and adds nothing to the rail's count
+
+CASE-4 — clarify questions are listed by basis, Optional on its own tab
+  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`
+         question
+  When   the page's questions are computed and the Optional tab is rendered
+  Then   they are kept in the order structure, count, wording, and the Optional tab
+         shows the `wording` one marked grey and not the `structure` one
+
+CASE-5 — the rail counts the All tab, which leaves Optional out
+  Given  one person's question, one observed question, and one `structure`, one
+         `count` and one `wording` `clarify` question
+  When   the rail is rendered
+  Then   the Questions entry shows 4
+
+CASE-6 — Problems no longer holds questions
+  Given  a registry holding questions of every origin
+  When   the Problems inbox is rendered
+  Then   it offers no Questions tab and holds no question row
+
+CASE-7 — the page sits below Commands in the rail
+  Given  the rail rendered over any registry
+  When   its Workspace entries are read in order
+  Then   Questions comes after Commands
+
+CASE-8 — All leaves Optional out, and a tab names each kind
+  Given  questions of every origin, with a `structure`, a `count` and a `wording`
+         `clarify` question
+  When   the page first opens
+  Then   it is on All, which shows the `structure` question marked red and not the
+         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,
+         Clause without case and Optional, and says a section is missing

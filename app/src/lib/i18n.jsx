@@ -212,6 +212,19 @@ const RO = {  // implements: REQ-VIEWER-943
   "Warnings": "Avertismente",
   "Questions": "Întrebări",
   "ASKED": "NOTAT",
+  "Observed in code": "Observate în cod",
+  "Asked by a person": "Puse de un om",
+  "No open questions here.": "Nicio întrebare deschisă aici.",
+  "Must fix": "De reparat",
+  "Clause without case": "Clauză fără caz",
+  "Over-scoped": "Prea largă",
+  "Optional": "Opțional",
+  "nothing missing": "nu lipsește nimic",
+  "{n} must fix — a section is missing": "{n} de reparat — lipsește o secțiune",
+  ["A word on a list matched. Often not a real gap; read it when you "
+    + "have time."]:
+    "S-a potrivit un cuvânt dintr-o listă. Adesea nu e o lipsă reală; "
+      + "citește-le când ai timp.",
   "Review": "De revizuit",
   "{n} only await confirmation — see Review.":
     "{n} așteaptă doar confirmarea — vezi De revizuit.",

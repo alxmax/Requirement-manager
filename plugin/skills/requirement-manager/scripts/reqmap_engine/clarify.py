@@ -128,11 +128,27 @@ def _domain_heads(reqs):
                      if c / float(total) >= CLARIFY_DOMAIN_SHARE)
 
 
+# What each rule rests on, so a reader can tell a fact from a guess: a
+# section that is absent, two numbers that disagree, or a word on a list.
+# Sampled on this corpus, most `wording` questions were false positives
+# ("every candidate", "how many releases"); `structure` and `count` never are,
+# though acting on a count stays a judgment. # implements: REQ-CLARIFY-1100
+CLARIFY_BASIS = {
+    "no-contract": "structure", "no-cases": "structure",
+    "clause-without-case": "count", "over-scoped": "count",
+    "vague-term": "wording", "number-without-unit": "wording",
+    "unbounded-quantity": "wording", "ambiguous-actor": "wording",
+    "no-failure-case": "wording", "case-monoculture": "wording",
+}
+
+
 def _clarify_item(rule, severity, where, quote, question, suggest):
     # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
+    # implements: REQ-CLARIFY-1100
     """One open-question record, in the shape `_clarify_questions` emits."""
-    return {"rule": rule, "severity": severity, "where": where,
-            "quote": quote, "question": question, "suggest": suggest}
+    return {"rule": rule, "severity": severity, "basis": CLARIFY_BASIS[rule],
+            "where": where, "quote": quote, "question": question,
+            "suggest": suggest}
 
 
 def _clause_questions(clauses):
@@ -241,7 +257,10 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
     written; everything else is advice. `domain` is
     `_domain_heads(reqs)`, passed in by the corpus-wide callers so it
     is read once rather than recomputed per requirement (it was 90% of
-    a `sync`'s question pass, and quadratic in the corpus)."""
+    a `sync`'s question pass, and quadratic in the corpus). A deprecated
+    requirement is retired, so nothing in it waits for an answer."""
+    if r["meta"].get("status") == "deprecated":
+        return []
     body = r["body"]
     clauses = _from_any(_bullets, body, CONTRACT_LABELS)
     cases_raw = _from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""
@@ -338,7 +357,8 @@ def cmd_clarify(reqs, cap_id, as_json=False):
             print("\n{}".format(sev.upper()))
             for q in group:
                 n += 1
-                print(" {:>2}. [{}] {}".format(n, q["rule"], q["where"]))
+                print(" {:>2}. [{} · {}] {}".format(
+                    n, q["rule"], q["basis"], q["where"]))
                 if q["quote"]:
                     print("     \"{}\"".format(_ellipsis(q["quote"], 92)))
                 print("     {}".format(q["question"]))

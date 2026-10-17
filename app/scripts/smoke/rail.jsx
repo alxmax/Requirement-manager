@@ -12,7 +12,7 @@ import {
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
 import {
-  ProblemsView, computeProblems, computeQuestions,
+  ProblemsView, computeProblems,
 } from "../../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {

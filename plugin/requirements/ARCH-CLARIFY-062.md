@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `clarify` detects the shapes that cannot be verified as written and turns each into one question about the requirement's own text. [[REQ-CLARIFY-956]]
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
+- The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -78,6 +79,8 @@ Every bullet below is binding.
   about the kind that is missing, unless that kind is the corpus's own subject.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every
   other question is advisory.
+- A deprecated requirement raises no question at all: it is retired, so nothing in it
+  waits for an answer.
 
 ## Cases
 CASE-1 — a hedge word is questioned by name
@@ -111,6 +114,11 @@ CASE-6 — the corpus's own subject is not that signal
   Given  a corpus in which nearly every case of every requirement starts from the same noun
   When   the detectors run on one of them
   Then   no question is raised about it, because the noun is the domain, not a narrow focus
+
+CASE-7 — a deprecated requirement asks nothing
+  Given  a deprecated requirement with no labelled case and a clause reading "quickly"
+  When   the detectors run
+  Then   no question is raised, blocking or advisory
 
 ## Context
 **Fire rate, measured 2026-09-04**
@@ -223,3 +231,59 @@ CASE-3 — a new requirement's questions are not reported as new
   Given  a requirement that has never been in the snapshot
   When   `sync` runs
   Then   its questions are not reported as new
+
+--------------------
+
+
+---
+id: REQ-CLARIFY-1100
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CLARIFY-062]
+---
+
+# The map carries what clarify asks
+
+## Description
+> `clarify` asks what a requirement's text leaves open, but its answers reached only the
+> terminal and a snapshot of rule names. The viewer reads `_map.json` and nothing else,
+> so it could not show a single one of them. Writing them into the map lets the viewer
+> show them beside the questions a person wrote.
+
+Every bullet below is binding.
+- Every node in `_map.json` carries a `clarify` list: the records `clarify` emits for that
+  requirement, each with `rule`, `severity`, `basis`, `where`, `quote`, `question` and
+  `suggest`, in the order `clarify` prints them.
+- Every record names the `basis` its rule rests on: `structure` when a section is absent
+  (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`,
+  `over-scoped`), and `wording` when a word on a list matched (every other rule).
+  `clarify` prints the basis beside the rule.
+- The list holds blocking and advisory questions alike; filtering is the reader's
+  choice.
+- A requirement with nothing unclear carries an empty list, never an absent field.
+- The map and `clarify` compute the questions with the same function, so the two never
+  disagree about a requirement.
+
+## Cases
+CASE-1 — a node carries the questions clarify prints, in order
+  Given  a requirement whose clause says `quickly` and names a bare number
+  When   the map is built
+  Then   its node's `clarify` list equals what `clarify` computes for it, field for field
+
+CASE-2 — nothing unclear is an empty list
+  Given  a requirement with one plain clause and a failure-path case
+  When   the map is built
+  Then   its node's `clarify` list is empty
+
+CASE-3 — a blocking question keeps its severity
+  Given  a requirement with no case at all
+  When   the map is built
+  Then   its node's `clarify` list holds `no-cases` with severity `blocking`
+
+CASE-4 — each question names the basis its rule rests on
+  Given  a requirement with no case and a clause that says `quickly`
+  When   the map is built
+  Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,
+         and only `clause-without-case` and `over-scoped` rest on `count`

@@ -1589,6 +1589,72 @@ class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-
             self.assertFalse(R._is_test_path(p), p)
 
 
+class DraftQuestions(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-1099
+    """A code draft's Verify intent names the lines the scan found, not one sentence for all."""
+
+    def _draft(self, name, src):
+        with tempfile.TemporaryDirectory() as d:
+            code = os.path.join(d, "code")
+            _write(os.path.join(code, name), src)
+            rd = os.path.join(d, "requirements")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_extract(R.Workspace({}, {}, rd, code))
+            made = [n for n in os.listdir(rd) if n.startswith("DRAFT-")]
+            with open(os.path.join(rd, made[0]), encoding="utf-8") as f:
+                text = f.read()
+        verify = text.split("## Verify intent")[1].split("\n## ")[0]
+        return text, [ln for ln in verify.splitlines() if ln.startswith("- ")]
+
+    def test_each_python_signal_is_one_located_question(self):  # verifies: REQ-EXTRACT-1099#CASE-1
+        src = ("def load(p):\n"
+               "    # TODO: retry on 429\n"
+               "    try:\n"
+               "        return open(p).read()\n"
+               "    except OSError:\n"
+               "        return None\n"
+               "def wait(n):\n"
+               "    if n > 37:\n"
+               "        return n\n"
+               "        n += 1\n")
+        _text, asks = self._draft("svc.py", src)
+        self.assertEqual(len(asks), 4, asks)
+        for line in (2, 5, 8, 10):
+            self.assertTrue(any("`svc.py:{}`".format(line) in a for a in asks), (line, asks))
+        self.assertTrue(all(a.startswith("- Observed at `") for a in asks))
+        self.assertIn("swallows the error", asks[1])
+        self.assertIn("unnamed number", asks[2])
+        self.assertIn("can never run", asks[3])
+
+    def test_marker_outside_a_comment_is_not_a_question(self):  # verifies: REQ-EXTRACT-1099#CASE-2
+        src = ('label = "TODO later"\n'
+               "# keep TODO.md in step\n"
+               "def go():\n"
+               "    return 1\n")
+        _text, asks = self._draft("plain.py", src)
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+
+    def test_clean_file_keeps_the_generic_question(self):  # verifies: REQ-EXTRACT-1099#CASE-3
+        _text, asks = self._draft("clean.py", "def go():\n    return 1\n")
+        self.assertEqual(len(asks), 1)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+
+    def test_questions_are_capped_and_the_rest_counted(self):  # verifies: REQ-EXTRACT-1099#CASE-4
+        cap = R.DRAFT_QUESTION_MAX
+        src = "".join("x{0} = {0}  # noqa\n".format(i) for i in range(cap + 3))
+        text, asks = self._draft("many.py", src)
+        self.assertEqual(len(asks), cap)
+        self.assertIn("3 more signal(s)", text.split("## Context")[1])
+
+    def test_regex_signals_apply_to_any_language(self):  # verifies: REQ-EXTRACT-1099#CASE-5
+        src = "try { go(); } catch (e) {}\n// FIXME: race on reload\n"
+        _text, asks = self._draft("app.js", src)
+        self.assertEqual(len(asks), 2, asks)
+        self.assertIn("`app.js:1`", asks[0])
+        self.assertIn("swallows the error", asks[0])
+        self.assertIn("`app.js:2`", asks[1])
+
+
 class DraftObservedSurface(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-851
     def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: ARCH-EXTRACT-008#CASE-6
         with tempfile.TemporaryDirectory() as d:
@@ -2928,6 +2994,60 @@ class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062
             _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
             out = self._sync(d)                            # never been in the snapshot
             self.assertNotIn("New open question(s)", out)
+
+
+class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-1100
+    """The map carries what `clarify` asks, so the viewer can show it."""
+
+    def _nodes(self, files):
+        with tempfile.TemporaryDirectory() as d:
+            for rid, text in files.items():
+                _write(os.path.join(d, rid + ".md"), text)
+            reqs = R.load_requirements(d)
+            data = R._build_map_data(reqs, {})
+        return reqs, {n["id"]: n for n in data["nodes"]}
+
+    def test_node_carries_the_cli_questions_in_order(self):  # verifies: REQ-CLARIFY-1100#CASE-1
+        reqs, nodes = self._nodes({"AREA-Q-001": _spec(
+            "AREA-Q-001", ["`gate` reports errors quickly.", "`gate` retries 3 times."],
+            ("CASE-1 — c\n  Given x\n  When y\n  Then z",))})
+        want = R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
+        self.assertEqual(nodes["AREA-Q-001"]["clarify"], want)
+        self.assertIn("vague-term", [q["rule"] for q in want])
+        self.assertTrue(all(set(q) == {"rule", "severity", "basis", "where", "quote", "question",
+                                       "suggest"} for q in want))
+
+    def test_nothing_unclear_is_an_empty_list(self):  # verifies: REQ-CLARIFY-1100#CASE-2
+        _reqs, nodes = self._nodes({"AREA-Q-002": _spec(
+            "AREA-Q-002", ["`gate` writes the lock."],
+            ("CASE-1 — bad\n  Given an invalid lock\n  When it runs\n  Then it refuses",))})
+        self.assertEqual(nodes["AREA-Q-002"]["clarify"], [])
+
+    def test_blocking_questions_keep_their_severity(self):  # verifies: REQ-CLARIFY-1100#CASE-3
+        _reqs, nodes = self._nodes({"AREA-Q-003": _spec(
+            "AREA-Q-003", ["`gate` writes the lock."], ())})
+        sev = {q["rule"]: q["severity"] for q in nodes["AREA-Q-003"]["clarify"]}
+        self.assertEqual(sev.get("no-cases"), "blocking")
+
+    def test_deprecated_requirement_asks_nothing(self):  # verifies: REQ-CLARIFY-956#CASE-7
+        reqs, nodes = self._nodes({"AREA-Q-005": _spec(
+            "AREA-Q-005", ["`gate` reports errors quickly."], (), status="deprecated")})
+        self.assertEqual(R._clarify_questions("AREA-Q-005", reqs["AREA-Q-005"], reqs), [])
+        self.assertEqual(nodes["AREA-Q-005"]["clarify"], [])
+
+    def test_each_rule_names_the_basis_it_rests_on(self):  # verifies: REQ-CLARIFY-1100#CASE-4
+        self.assertEqual(
+            {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "structure"},
+            {"no-contract", "no-cases"})
+        self.assertEqual(
+            {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "count"},
+            {"clause-without-case", "over-scoped"})
+        self.assertEqual(set(R.CLARIFY_BASIS.values()), {"structure", "count", "wording"})
+        _reqs, nodes = self._nodes({"AREA-Q-004": _spec(
+            "AREA-Q-004", ["`gate` reports errors quickly."], ())})
+        basis = {q["rule"]: q["basis"] for q in nodes["AREA-Q-004"]["clarify"]}
+        self.assertEqual(basis["no-cases"], "structure")
+        self.assertEqual(basis["vague-term"], "wording")
 
 
 class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956

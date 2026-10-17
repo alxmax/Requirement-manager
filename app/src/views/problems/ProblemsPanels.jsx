@@ -22,7 +22,6 @@ export function ProblemTabBar({
   return (
     <div className="tabbar">
       <Tab k="ALL" label={t("All")} n={counts.all} />
-      <Tab k="QUESTION" label={t("Questions")} n={counts.QUESTION || 0} />
       <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW || 0} />
       {healthCount != null && (
         <Tab k="HEALTH" label={t("Health")} n={healthCount} />
@@ -74,7 +73,7 @@ function PillarGroup({ pillar, rows, advice }) {
 
 /** A row of filter chips: `All` plus one per key, each with its count.
  * implements: REQ-VIEWER-1084 */
-function ChipRow({ counts, total, value, setValue, label }) {
+export function ChipRow({ counts, total, value, setValue, label }) {
   const { t } = useI18n();
   const keys = [null, ...Object.keys(counts).sort()];
   return (

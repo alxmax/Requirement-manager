@@ -341,7 +341,7 @@ _NODE_KEYS = frozenset((
     "intent", "contract", "notes", "current_impl", "verify",
     "accept", "desc", "input", "output",
     "depends_on", "used_by", "satisfies", "satisfied_by",
-    "members", "risks", "test_exempt", "milestone", "priority",
+    "members", "risks", "test_exempt", "milestone", "priority", "clarify",
 ))
 # Attached AFTER _build_map_data by cmd_map, so they are absent here and optional in
 # the committed file: _attach_ac_coverage adds clauses/covered only for a requirement
