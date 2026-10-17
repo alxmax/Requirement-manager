@@ -84,6 +84,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0071](0071-clarify-reads-values-and-delegation.md) | `clarify` tells a value from a quantity and a handed-on clause from its own | Accepted |
 | [0072](0072-retire-unbounded-quantity.md) | `clarify` retires `unbounded-quantity` | Accepted |
 | [0073](0073-mcp-values-stay-values.md) | An MCP value stays a value, a message is checked before it is read, and a fan-out band is checked before it is used | Accepted |
+| [0074](0074-a-baseline-is-checked-and-a-waiver-is-kept.md) | A baseline is checked before it is trusted, and a waiver is not recorded over a log that cannot keep it | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

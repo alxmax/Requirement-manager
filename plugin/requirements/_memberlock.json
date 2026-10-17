@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "b4ced2e14e3a357cf8092fb253d4042aa9ab5effcbee412be7aee6f96b1d3087",
+      "plugin/scripts/reqmap_engine/__init__.py": "eeda8e414a281d4876c8707de569858c2a26a4044e3d4e2dea79952979d1d160",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -92,7 +92,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "a480da868cdbdd803024f4509b65fe08b707b5063b1564e697c88029284771e7",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "32f6fbb6d72f60757248cbafbc8cf3b30a964ed1ff927b73519258b8c5731f34",
+      "scripts/check_engine_budget.py": "b81568b13765c99645318daccd5c811d74fc935aae9048e82e92b722a026fbba",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
@@ -251,6 +251,9 @@
       "plugin/scripts/reqmap_engine/design_brace.py#_design_brace": "1f66f78b8ab1f1fd5f4d9740e9eee86f20990b128dcb49475f2a9f5eda76af59",
       "plugin/scripts/reqmap_engine/design_brace.py#_design_mask": "cf5a1c193ccf09c99c16c546ac4380713d3d802ff64980c90459dea86d283e9e"
     },
+    "REQ-DRIFT-1104": {
+      "plugin/scripts/reqmap_engine/locks.py#driftlog_problem": "db871dc9006ef6f1ebad3c31d5823dc37f4fd474a8981eab4ba6e63a10e6e03c"
+    },
     "REQ-DRIFT-988": {
       "plugin/scripts/reqmap_engine/locks.py#_driftlog_path": "2342c7d88fa2bd4f84b618770a92411413003e13f75e0dc3579087d42aee38df",
       "plugin/scripts/reqmap_engine/locks.py#load_driftlog": "ec757dadc6d0f89b9346a3a8c688a7e1b7452c289aaec73b5626550de752f5af",
@@ -374,7 +377,7 @@
       "plugin/scripts/reqmap_engine/plandrift.py#version_bar_lines": "aa2de276d9c6ad3705ac7a8ac51af2c88712b9cb72f270fd9f373a694bf892aa"
     },
     "REQ-PROMOTE-974": {
-      "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "cba0f092c9473e700e5da56825c11ee4deef30a67ddf7e523955fc5170941dfa"
+      "plugin/scripts/reqmap_engine/gate.py#_unchanged_since_lock": "6c1913d213b5ff580cdcd31ca3687d75df211300994520ce71cfae02d86b95ae"
     },
     "REQ-PROPOSE-1093": {
       "plugin/scripts/reqmap_engine/watch.py#cmd_propose": "d2e4f812013b12ed79859a40d4c0d635b3ced0d352be4da73cc3174c8250e997"

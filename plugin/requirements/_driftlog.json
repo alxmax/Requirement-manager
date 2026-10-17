@@ -46,8 +46,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-DRIFT-003": {
-      "hash": "d29eb01c1e04",
-      "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
+      "hash": "adea2ca03f99",
+      "reason": null
     },
     "ARCH-EXTRACT-008": {
       "hash": "a66264af4df1",
@@ -386,8 +386,8 @@
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
     },
     "REQ-PROMOTE-974": {
-      "hash": "68bb32619455",
-      "reason": "REQ-PROMOTE-974: unchanged-since-lock-commit files keep their confirmation (CASE-4)"
+      "hash": "a50e9c5df96c",
+      "reason": null
     },
     "REQ-PROSE-900": {
       "hash": "880304bce879",

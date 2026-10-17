@@ -21,6 +21,7 @@ Every bullet below is binding.
 - `binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body. [[REQ-DRIFT-841]]
 - `load_lock`/`save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`, failing open to `{}` on a missing or corrupt file. [[REQ-DRIFT-842]]
 - Waiving the drift check records who was waived and why, in a versioned sidecar the diff shows, so the one escape hatch in the gate is not also the one thing nobody reviews. [[REQ-DRIFT-988]]
+- A baseline that exists and cannot be used is named, and a waiver is not recorded over a log this engine cannot keep. [[REQ-DRIFT-1103]] [[REQ-DRIFT-1104]]
 
 ## Cases
 CASE-1
@@ -242,3 +243,106 @@ CASE-5 — a forward schema fails open
   Given  a `_driftlog.json` whose `_schema` is newer than this engine's
   When   it is loaded
   Then   it reads as an empty record and nothing raises
+
+--------------------
+
+
+---
+id: REQ-DRIFT-1103
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DRIFT-003]
+---
+
+# A baseline that exists and cannot be used is named
+
+## Description
+> Reading a baseline fails open, so that a repository with none still gates. The same rule
+> hid the other case: a baseline that is there and unusable reads as empty, and the drift
+> signal it carries is off with nothing saying so. A `null` where a hash belongs was enough
+> to turn an edited contract into a pass under `--strict`.
+> See [ADR-0074](../../docs/adr/0074-a-baseline-is-checked-and-a-waiver-is-kept.md).
+
+Every bullet below is binding.
+- RM016 names a `_reqlock.json` that cannot be read as an object, and one that holds an id
+  with no hash: a value that is not text, or is empty.
+- RM016 names a `_memberlock.json` that cannot be read as an object, carries another
+  schema than this engine reads, or holds anything but `{id: {file: hash}}`.
+- A baseline that is absent is first use, and says nothing; reading both still fails open.
+
+## Cases
+CASE-1 — a lock entry with no hash is named, and strict fails on it
+  Given  a baselined confirmed requirement whose `_reqlock.json` entry is `null`, an empty
+         string, a number or a list, and whose contract is then edited
+  When   `gate --strict` runs
+  Then   it reports RM016 naming the id, as an error, where a real hash reports RM018
+
+CASE-2 — a member lock that cannot be used is named
+  Given  a `_memberlock.json` of schema 99, schema 1, none, not JSON, not an object, with
+         `members` not an object, with a record that is not an object, or with a hash that
+         is not text
+  When   `gate --strict` runs
+  Then   each reports one RM016 naming `_memberlock.json`, as an error
+
+CASE-3 — an absent or valid baseline says nothing
+  Given  a repository with no baseline yet, and then one synced once
+  When   `gate --strict` runs on each
+  Then   neither reports RM016
+
+CASE-4 — a valid baseline still catches member drift
+  Given  a synced requirement whose member file is then edited, its contract untouched
+  When   `gate --strict` runs
+  Then   it reports RM019
+
+
+--------------------
+
+
+---
+id: REQ-DRIFT-1104
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DRIFT-003]
+---
+
+# A waiver is not recorded over a log this engine cannot keep
+
+## Description
+> Reading the drift log fails open, which is right for a gate. Writing it back from what
+> that read returned is not: a log this engine does not understand reads as empty, and the
+> next waiver rewrites the file with only itself in it, in an older schema. Every waiver
+> already on record, and the reason given for it, is gone.
+
+Every bullet below is binding.
+- Before it records a waiver, whether from `--accept-drift` or from an unchanged file under a
+  new engine, `sync` and `init` check that `_driftlog.json` can be rewritten without losing
+  what it holds. One that is not valid JSON, not an object, of a newer schema than the engine
+  writes, or whose `accepted` is not an object cannot.
+- When it cannot, nothing is advanced: the run prints the reason, reports it as an
+  `INPUT:driftlog` error, exits 1, and leaves `_driftlog.json`, `_reqlock.json` and
+  `_memberlock.json` byte for byte as they were, and the requirement's status unchanged.
+- An absent log, and one of the schema the engine writes, take the waiver as before; reading
+  the log still fails open.
+
+## Cases
+CASE-1 — a log this engine cannot keep is not overwritten
+  Given  a baselined confirmed requirement with an edited contract, and a `_driftlog.json`
+         of schema 2, not JSON, a list, or with `accepted` a list
+  When   `sync --accept-drift why` runs
+  Then   it exits 1 with `INPUT:driftlog`, the three baseline files are byte for byte what
+         they were, and the requirement is still `confirmed`
+
+CASE-2 — an upgrade waiver is refused the same way
+  Given  a committed lock holding an older hash for unchanged text, from an older engine, and
+         a `_driftlog.json` of schema 2
+  When   `sync` runs
+  Then   it exits 1 with `INPUT:driftlog` and `_reqlock.json` is unchanged
+
+CASE-3 — an absent or valid log takes the waiver
+  Given  an edited confirmed contract, with no `_driftlog.json` and then with one of schema 1
+  When   `sync --accept-drift why` runs
+  Then   it exits 0, says it accepted the drift, and the log carries the reason `why`

@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.24.4` — 2026-10-17
+
+**A confirmed contract can no longer change unseen, and an unusable baseline is named (ADR-0074).**
+
+- `init` accepted drift without being asked: over an existing baseline it kept an edited contract `confirmed`, advanced the lock and wrote a waiver with `reason: null`. `cmd_check` no longer accepts unless the caller asks, so `init` demotes an edited confirmed contract as `sync` does and writes no waiver. REQ-PROMOTE-974 CASE-6
+- The exception that keeps a confirmation when a lock hash moves under unchanged text now needs the map committed beside that lock to name an engine other than the running one. A lock committed with a contract edit it never took up used to be read as an engine upgrade. REQ-PROMOTE-974 CASE-5
+- RM016 now also names a `_reqlock.json` that holds an id with no hash, and a `_memberlock.json` that is unreadable, of another schema or not `{id: {file: hash}}`. A `null` hash used to turn RM018 off, and a schema-99 member lock member drift, with nothing said; under `--strict` both are now errors. An absent baseline, first use, stays quiet. REQ-DRIFT-1103
+- A waiver is no longer recorded over a `_driftlog.json` this engine cannot keep (not JSON, not an object, a newer schema, `accepted` not an object). `sync --accept-drift` used to rewrite a schema-2 log as schema 1 and drop every waiver in it. It now exits 1 with `INPUT:driftlog` and leaves the log, the lock and the status untouched. REQ-DRIFT-1104
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.6`; 18,150 physical lines in 76 files (the README says so). The core rises to 6,694 logical lines (ADR-0074)
+
 ## plugin `v8.24.3` — 2026-10-17
 
 **A read-only MCP tool can no longer write, a malformed message no longer ends the server, and a bad fan-out band is reported (ADR-0073).**
