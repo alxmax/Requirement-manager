@@ -247,8 +247,12 @@ satisfies: [ARCH-CLARIFY-062]
 
 Every bullet below is binding.
 - Every node in `_map.json` carries a `clarify` list: the records `clarify` emits for that
-  requirement, each with `rule`, `severity`, `where`, `quote`, `question` and `suggest`,
-  in the order `clarify` prints them.
+  requirement, each with `rule`, `severity`, `basis`, `where`, `quote`, `question` and
+  `suggest`, in the order `clarify` prints them.
+- Every record names the `basis` its rule rests on: `structure` when a section is absent
+  (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`,
+  `over-scoped`), and `wording` when a word on a list matched (every other rule).
+  `clarify` prints the basis beside the rule.
 - The list holds blocking and advisory questions alike; filtering is the reader's
   choice.
 - A requirement with nothing unclear carries an empty list, never an absent field.
@@ -270,3 +274,9 @@ CASE-3 — a blocking question keeps its severity
   Given  a requirement with no case at all
   When   the map is built
   Then   its node's `clarify` list holds `no-cases` with severity `blocking`
+
+CASE-4 — each question names the basis its rule rests on
+  Given  a requirement with no case and a clause that says `quickly`
+  When   the map is built
+  Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,
+         and only `clause-without-case` and `over-scoped` rest on `count`

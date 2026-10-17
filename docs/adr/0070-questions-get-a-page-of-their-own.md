@@ -8,7 +8,7 @@
   (192 `unbounded-quantity`, 118 `clause-without-case`, 48 `vague-term`, 48
   `number-without-unit`, 36 `over-scoped`, 36 `case-monoculture`, 32 `no-failure-case`,
   4 `ambiguous-actor`), 0 blocking. `python scripts/check_engine_budget.py` on this
-  commit: core 6,635 logical lines.
+  commit: core 6,636 logical lines.
 
 ## Context
 
@@ -39,16 +39,25 @@ volume problem ADR-0028 names as its revisit condition.
   rule, but are not counted in the badge. 514 advisory questions in the badge would make it
   noise.
 - **`_map.json` carries every `clarify` question per node** (`clarify`: rule, severity,
-  where, quote, question, suggest), computed by the same function the CLI runs.
+  basis, where, quote, question, suggest), computed by the same function the CLI runs.
 - **A code draft asks one question per signal the scan can point at**, naming
   `file:line` and the code on it: a marker in a comment, a suppression, a swallowed error
   (regex in every language; `ast` in Python), a number hard-coded in a comparison or a
   keyword argument, and a statement after an unconditional exit (both `ast`, Python only).
   At most eight per file; the rest are counted under Context. A file with no signal keeps
   the generic question.
-- `CORE_LOGICAL_BUDGET` is 6,635. The six lines are the map export (four, in
-  `mapdata.py`) and the call into the question builder (two, in `draft.py`). The builder,
-  `draftquestions.py`, is imported at call time and is not in the number.
+- **Every `clarify` question names the basis it rests on**: `structure` (a section is
+  absent: `no-contract`, `no-cases`), `count` (two numbers disagree: `clause-without-case`,
+  `over-scoped`) or `wording` (a word on a list: the other six rules). The viewer shows
+  `structure` in red, `count` in amber and `wording` in grey as "heuristic", and hides the
+  heuristics until asked. A sample of four questions per rule on this corpus found most
+  `wording` questions false positives ("every candidate", "how many releases", "4
+  blocks"); a `structure` or `count` question states a fact, though acting on a count
+  stays a judgment.
+- `CORE_LOGICAL_BUDGET` is 6,636. The seven lines are the map export (four, in
+  `mapdata.py`), the rule-to-basis table (one, in `clarify.py`) and the call into the
+  question builder (two, in `draft.py`). The builder, `draftquestions.py`, is imported at
+  call time and is not in the number.
 
 ## Consequences
 
@@ -64,5 +73,7 @@ volume problem ADR-0028 names as its revisit condition.
 
 - The page's advisory volume buries the questions a person wrote, measured on a consumer
   corpus.
-- A cut on the gate path brings the measured core under 6,635. The budget drops in that
+- A `wording` rule is made precise enough that its questions are mostly real, which
+  moves it to a stronger basis.
+- A cut on the gate path brings the measured core under 6,636. The budget drops in that
   commit.

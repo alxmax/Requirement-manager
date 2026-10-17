@@ -29,16 +29,24 @@ function verifyRows(origin) {
   return out;
 }
 
+/* What a `clarify` question rests on, strongest first: a section that is
+ * absent, two numbers that disagree, a word on a list (ADR-0070). */
+const BASIS_ORDER = { structure: 0, count: 1, wording: 2 };
+const BASIS_LABEL = { structure: "structure", count: "count",
+  wording: "heuristic" };
+export const basisOf = (q) => (BASIS_ORDER[q.basis] !== undefined ? q.basis
+  : q.severity === "blocking" ? "structure" : "wording");
+
 /** Every open question, by origin. `clarify` rows carry the records the
- * map holds; blocking ones first inside each requirement. */
+ * map holds, strongest basis first inside each requirement. */
 export function computeQuestions() {
   const clarify = [];
   REQUIREMENTS.forEach((r) => {
     const qs = clarifyQuestions(r);
     if (!qs.length) return;
     clarify.push({ id: r.id, title: r.title, status: r.status,
-      questions: [...qs].sort((a, b) => (a.severity === "blocking" ? 0 : 1)
-        - (b.severity === "blocking" ? 0 : 1)) });
+      questions: [...qs].sort((a, b) => BASIS_ORDER[basisOf(a)]
+        - BASIS_ORDER[basisOf(b)]) });
   });
   return { code: verifyRows("code"), person: verifyRows("person"), clarify };
 }
@@ -53,9 +61,11 @@ export function questionCount(qs = computeQuestions()) {
 }
 
 const MUTED = { color: "var(--fg-muted)", font: "var(--text-small)" };
+const BADGE = { marginRight: 6, padding: "1px 6px" };
 
-function ClarifyRow({ row, rule, openSpec }) {
-  const qs = row.questions.filter((q) => !rule || q.rule === rule);
+function ClarifyRow({ row, rule, heuristics, openSpec }) {
+  const qs = row.questions.filter((q) => (!rule || q.rule === rule)
+    && (heuristics || basisOf(q) !== "wording"));
   if (!qs.length) return null;
   return (
     <div className="prob-row question-row" onClick={() => openSpec(row.id)}>
@@ -69,9 +79,8 @@ function ClarifyRow({ row, rule, openSpec }) {
         <ul className="finding-qs">
           {qs.map((q, j) => (
             <li key={j}>
-              <span className={"prob-sev sev-"
-                + (q.severity === "blocking" ? "WARN" : "REVIEW")}
-                style={{ marginRight: 6 }}>{q.severity}</span>
+              <span className={"prob-sev basis-" + basisOf(q)}
+                style={BADGE}>{BASIS_LABEL[basisOf(q)]}</span>
               <code>{q.rule}</code> · {q.where}
               {q.quote && <div style={MUTED}>“{q.quote}”</div>}
               <div>{q.question}</div>
@@ -91,24 +100,29 @@ const NOTE = {
     + "can call intended or a bug.",
   person: "Written down by a person in the requirement's Verify intent "
     + "section.",
-  clarify: "Asked by `clarify` of the requirement's own text. Blocking means "
-    + "it cannot be implemented as written; advisory is a suggestion.",
+  clarify: "Asked by `clarify` of the requirement's own text. Red: a section "
+    + "is missing. Amber: two counts disagree. Grey: a word on a list matched, "
+    + "a heuristic that is often wrong.",
 };
 
-export function QuestionsView({ openSpec, initialOrigin = null }) {
+export function QuestionsView({
+  openSpec, initialOrigin = null, initialHeuristics = false,
+}) {
   const { t } = useI18n();
   const qs = computeQuestions();
+  const [heuristics, setHeuristics] = useState(initialHeuristics);
+  const all = qs.clarify.flatMap((r) => r.questions);
+  const shown = all.filter((q) => heuristics || basisOf(q) !== "wording");
+  const hidden = all.length - shown.length;
   const sizes = {
-    code: qs.code.length, person: qs.person.length,
-    clarify: qs.clarify.reduce((a, r) => a + r.questions.length, 0),
+    code: qs.code.length, person: qs.person.length, clarify: shown.length,
   };
   const [origin, setOrigin] = useState(initialOrigin
     || ORIGINS.find((o) => sizes[o] > 0) || "code");
   const [rule, setRule] = useState(null);
   const rules = {};
-  qs.clarify.forEach((r) => r.questions.forEach((q) => {
-    rules[q.rule] = (rules[q.rule] || 0) + 1;
-  }));
+  shown.forEach((q) => { rules[q.rule] = (rules[q.rule] || 0) + 1; });
+  const toggle = () => { setHeuristics((v) => !v); setRule(null); };
   const label = { code: "Observed in code", person: "Asked by a person",
     clarify: "Asked by clarify" };
   return (
@@ -127,13 +141,21 @@ export function QuestionsView({ openSpec, initialOrigin = null }) {
         <div className="prob-chip" style={{ cursor: "default" }}>
           {t(NOTE[origin])}
         </div>
+        {origin === "clarify" && (heuristics || hidden > 0) && (
+          <button type="button" className={"ex-chip" + (heuristics ? " on" : "")}
+            aria-pressed={heuristics} onClick={toggle}>
+            {heuristics ? t("Hide heuristics")
+              : t("Show {n} heuristic question(s)", { n: hidden })}
+          </button>
+        )}
         {origin === "clarify" && sizes.clarify > 0 && (
           <ChipRow counts={rules} total={sizes.clarify} value={rule}
             setValue={setRule} label={(k) => k} />
         )}
         {origin === "clarify"
           ? qs.clarify.map((r) => (
-            <ClarifyRow key={r.id} row={r} rule={rule} openSpec={openSpec} />
+            <ClarifyRow key={r.id} row={r} rule={rule} heuristics={heuristics}
+              openSpec={openSpec} />
           ))
           : qs[origin].map((p) => (
             <ProblemRow key={p.id} p={p} openSpec={openSpec} t={t} />

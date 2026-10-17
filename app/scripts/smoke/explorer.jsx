@@ -252,7 +252,8 @@ for (const [label, ok] of layerChecks) test(label, ok);
 // tested-by: REQ-VIEWER-1101
 // ADR-0070: three sources of question, one page, grouped by where each came
 // from; Problems keeps only what is broken or awaits review.
-const CLARIFY_Q = (rule, severity) => ({ rule, severity, where: "clause 1",
+const CLARIFY_Q = (rule, severity, basis) => ({ rule, severity, basis,
+  where: "clause 1",
   quote: "`gate` retries 3 times.", question: `the ${rule} question`,
   suggest: "say it" });
 adoptMapExport({ nodes: [
@@ -275,14 +276,17 @@ adoptMapExport({ nodes: [
   adaptNode({ id: "Q-TEXT-004", title: "text", area: "Q", layer: "feature",
     status: "draft", intent: "i", contract: [], acc: [], members: [],
     verify: [], deps: [], used_by: [],
-    clarify: [CLARIFY_Q("vague-term", "advisory"),
-      CLARIFY_Q("no-cases", "blocking")] }),
+    clarify: [CLARIFY_Q("vague-term", "advisory", "wording"),
+      CLARIFY_Q("clause-without-case", "advisory", "count"),
+      CLARIFY_Q("no-cases", "blocking", "structure")] }),
 ] });
 const merged = computeProblems();
 const asked = computeQuestions();
 const problemsHtml = renderToString(<ProblemsView openSpec={noop} />);
-const pageHtml = (origin) => renderToString(
-  <QuestionsView openSpec={noop} initialOrigin={origin} />);
+const pageHtml = (origin, heuristics = false) => renderToString(
+  <QuestionsView openSpec={noop} initialOrigin={origin}
+    initialHeuristics={heuristics} />);
+const firstOpen = pageHtml("clarify");
 const railHtml = renderToString(
   <Rail view="questions" setView={noop} focus={null} setFocus={noop}
     problems={merged} openProblems={noop} />);
@@ -301,10 +305,11 @@ const mergeChecks = [
   ["questions: the placeholder verify bullet is still not a question",
     !Object.values(asked).flat().some((r) => r.id === "Q-QUIET-002")],
   // verifies: REQ-VIEWER-1101#CASE-4
-  ["questions: clarify questions are listed, blocking ones first",
+  ["questions: clarify questions are listed by basis, structure first",
     asked.clarify.length === 1
-      && asked.clarify[0].questions[0].rule === "no-cases"
-      && pageHtml("clarify").includes("the vague-term question")],
+      && asked.clarify[0].questions.map((q) => q.basis).join()
+        === "structure,count,wording"
+      && pageHtml("clarify", true).includes("the vague-term question")],
   // verifies: REQ-VIEWER-1101#CASE-5
   ["questions: the rail counts what blocks and what a human wrote, not advice",
     questionCount(asked) === 3],
@@ -315,6 +320,13 @@ const mergeChecks = [
   // verifies: REQ-VIEWER-1101#CASE-7
   ["questions: the page sits in the rail below Commands",
     navAt("Questions") > navAt("Commands") && navAt("Commands") > 0],
+  // verifies: REQ-VIEWER-1101#CASE-8
+  ["questions: heuristics are hidden until asked for, the basis is marked",
+    firstOpen.includes("the no-cases question")
+      && firstOpen.includes("basis-structure")
+      && !firstOpen.includes("the vague-term question")
+      && firstOpen.includes("Show 1 heuristic question(s)")
+      && pageHtml("clarify", true).includes("basis-wording")],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
 

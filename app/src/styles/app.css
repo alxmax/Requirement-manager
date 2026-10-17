@@ -388,6 +388,11 @@ h1 .i18n-badge { font-size: 12px; }
 /* An author's own open question: the one row here nobody derived. */
 .sev-QUESTION { background: var(--status-drift-bg); color: var(--status-drift); }
 .prob-row.question-row { border-left: 3px solid var(--status-drift); }
+/* What a clarify question rests on (ADR-0070): a missing section, two counts
+   that disagree, or a word on a list. */
+.basis-structure { background: var(--status-error-bg); color: var(--status-error); }
+.basis-count { background: var(--status-drift-bg); color: var(--status-drift); }
+.basis-wording { background: var(--status-draft-bg); color: var(--fg-muted); }
 .prob-body { min-width: 0; }
 .prob-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
 .prob-id { font: var(--text-id); color: var(--fg-muted); }

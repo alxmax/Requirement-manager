@@ -1217,9 +1217,13 @@ Every bullet below is binding.
 - The page groups questions by origin, one tab each: observed in code (a Verify-intent
   bullet starting `Observed`), asked by a person (any other Verify-intent bullet) and
   asked by `clarify` (the map's `clarify` list).
-- The `clarify` tab lists blocking questions before advisory ones within a requirement,
-  shows each question's rule, location, quoted clause and suggestion, and filters by
-  rule.
+- The `clarify` tab lists a requirement's questions by basis, `structure` then `count`
+  then `wording`, shows each question's rule, location, quoted clause and suggestion,
+  and filters by rule.
+- Each `clarify` question is marked by its basis: `structure` in red, `count` in amber,
+  and `wording` in grey, labelled `heuristic`.
+- The `clarify` tab hides `wording` questions until the reader asks for them, and says
+  how many it hides.
 - The authored placeholder (a bullet starting `None`) is not a question.
 - The rail count for Questions is every Verify-intent question plus every blocking
   `clarify` question, and it is hidden at zero.
@@ -1241,10 +1245,11 @@ CASE-3 — the placeholder is still not a question
   When   the Questions page is computed
   Then   that requirement appears under no origin
 
-CASE-4 — clarify questions are listed, blocking first
-  Given  a requirement whose map node carries one advisory and one blocking question
-  When   the clarify tab is rendered
-  Then   both are shown and the blocking one comes first
+CASE-4 — clarify questions are listed by basis, structure first
+  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`
+         question
+  When   the clarify tab is rendered with heuristics shown
+  Then   all three are shown, in the order structure, count, wording
 
 CASE-5 — the rail counts what is open for a human, not advice
   Given  one person's question, one observed question, and one blocking and one advisory
@@ -1261,3 +1266,9 @@ CASE-7 — the page sits below Commands in the rail
   Given  the rail rendered over any registry
   When   its Workspace entries are read in order
   Then   Questions comes after Commands
+
+CASE-8 — heuristics are hidden until asked for, and the basis is marked
+  Given  a requirement whose map node carries a `structure` and a `wording` question
+  When   the clarify tab is rendered as it first opens
+  Then   the `structure` question is shown marked red, the `wording` one is not shown,
+         and the tab offers to show the one hidden heuristic

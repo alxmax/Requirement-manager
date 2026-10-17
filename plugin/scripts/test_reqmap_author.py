@@ -3014,8 +3014,8 @@ class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # test
         want = R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
         self.assertEqual(nodes["AREA-Q-001"]["clarify"], want)
         self.assertIn("vague-term", [q["rule"] for q in want])
-        self.assertTrue(all(set(q) == {"rule", "severity", "where", "quote", "question", "suggest"}
-                            for q in want))
+        self.assertTrue(all(set(q) == {"rule", "severity", "basis", "where", "quote", "question",
+                                       "suggest"} for q in want))
 
     def test_nothing_unclear_is_an_empty_list(self):  # verifies: REQ-CLARIFY-1100#CASE-2
         _reqs, nodes = self._nodes({"AREA-Q-002": _spec(
@@ -3028,6 +3028,20 @@ class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # test
             "AREA-Q-003", ["`gate` writes the lock."], ())})
         sev = {q["rule"]: q["severity"] for q in nodes["AREA-Q-003"]["clarify"]}
         self.assertEqual(sev.get("no-cases"), "blocking")
+
+    def test_each_rule_names_the_basis_it_rests_on(self):  # verifies: REQ-CLARIFY-1100#CASE-4
+        self.assertEqual(
+            {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "structure"},
+            {"no-contract", "no-cases"})
+        self.assertEqual(
+            {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "count"},
+            {"clause-without-case", "over-scoped"})
+        self.assertEqual(set(R.CLARIFY_BASIS.values()), {"structure", "count", "wording"})
+        _reqs, nodes = self._nodes({"AREA-Q-004": _spec(
+            "AREA-Q-004", ["`gate` reports errors quickly."], ())})
+        basis = {q["rule"]: q["basis"] for q in nodes["AREA-Q-004"]["clarify"]}
+        self.assertEqual(basis["no-cases"], "structure")
+        self.assertEqual(basis["vague-term"], "wording")
 
 
 class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956

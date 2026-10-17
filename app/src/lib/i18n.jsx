@@ -222,10 +222,14 @@ const RO = {  // implements: REQ-VIEWER-943
       + "numi intenționată sau bug.",
   "Written down by a person in the requirement's Verify intent section.":
     "Notate de un om în secțiunea Verify intent a cerinței.",
-  ["Asked by `clarify` of the requirement's own text. Blocking means "
-    + "it cannot be implemented as written; advisory is a suggestion."]:
-    "Puse de `clarify` textului cerinței. Blocking înseamnă că nu poate fi "
-      + "implementată cum e scrisă; advisory e o sugestie.",
+  ["Asked by `clarify` of the requirement's own text. Red: a section "
+    + "is missing. Amber: two counts disagree. Grey: a word on a list matched, "
+    + "a heuristic that is often wrong."]:
+    "Puse de `clarify` textului cerinței. Roșu: lipsește o secțiune. "
+      + "Portocaliu: două numărători nu se potrivesc. Gri: s-a potrivit un "
+      + "cuvânt dintr-o listă, o euristică adesea greșită.",
+  "Hide heuristics": "Ascunde euristicile",
+  "Show {n} heuristic question(s)": "Arată {n} întrebări euristice",
   "Review": "De revizuit",
   "{n} only await confirmation — see Review.":
     "{n} așteaptă doar confirmarea — vezi De revizuit.",
