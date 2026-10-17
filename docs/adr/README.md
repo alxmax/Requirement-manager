@@ -81,6 +81,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0068](0068-the-skill-carries-the-engine.md) | The skill carries a generated copy of the engine, so an APM install has one | Accepted |
 | [0069](0069-apache-2-license.md) | Apache 2.0, the same licence as the projects that ship this engine | Accepted |
 | [0070](0070-questions-get-a-page-of-their-own.md) | Questions get a page of their own, and `clarify` rides in the map | Accepted |
+| [0071](0071-clarify-reads-values-and-delegation.md) | `clarify` tells a value from a quantity and a handed-on clause from its own | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

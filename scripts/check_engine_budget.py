@@ -60,7 +60,9 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,638 by ADR-0070: `clarify` questions in the map with the basis
 # each rests on, a deprecated requirement asking nothing, and the call into
 # the draft question builder. draftquestions.py stays lazy.
-CORE_LOGICAL_BUDGET = 6638
+# Raised to 6,640 by ADR-0071: whole-word hedges outside code, and clauses
+# that hand their cases to another requirement left out of both counts.
+CORE_LOGICAL_BUDGET = 6640
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

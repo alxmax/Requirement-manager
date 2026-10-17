@@ -40,6 +40,12 @@ CLARIFY_HEDGES = (
     "best-effort", "gracefully", "large", "small", "many", "several",
     "various",
 )
+# A hedge counts only as a whole word outside a code span, so "smaller" is not
+# "small", a quoted `appropriate` is an example, and "how many" asks for a
+# count rather than hedging one. A code span leaves group 1 empty.
+_CLARIFY_HEDGE_RE = re.compile(r"`[^`]*`|(?<![\w-])(" + "|".join(
+    r"(?<!how )many" if w == "many" else re.escape(w)
+    for w in CLARIFY_HEDGES) + r")(?![\w-])")
 # A case mentioning any of these is exercising a failure path. Absence of ALL
 # of them across every case is the signal -- a requirement whose acceptance
 # is pure happy path.
@@ -58,13 +64,28 @@ CLARIFY_UNIT_RE = re.compile(
     r"file|files|"
     r"byte|bytes|request|requests|item|items|entry|entries|pair|pairs|"
     r"clause|clauses|"
-    r"criterion|criteria|px|em|rem|x)$", re.I)
+    r"criterion|criteria|px|em|rem|x|word|words|letter|letters|column|columns|"
+    r"block|blocks|case|cases|member|members|dependent|dependents|"
+    r"requirement|requirements)$", re.I)
 # A bare number in a clause. Excluded by construction: anything glued to a
-# word or a dot (`v4.0.0`, `CASE-2`, `utf-8`), because those are identifiers,
-# not quantities.
-_CLARIFY_NUM_RE = re.compile(r"(?<![\w.\-#])(\d+(?:\.\d+)?)\s*([A-Za-z%]*)")
-# An exit code is a value, not a quantity: "exits 2" has no unit to ask for.
-_CLARIFY_EXIT_RE = re.compile(r"\bexit(?:s|\s+code|\s+status)?\s*$", re.I)
+# word or a dot (`v4.0.0`, `CASE-2`, `utf-8`, `U+2028`), a date or a version
+# (`2026-06-21`, `7.19.0`), and any number inside a code span, because those
+# are identifiers or literal values, not quantities. A code span matches the
+# first alternative and leaves group 1 empty, so the caller skips it. A unit
+# may follow a hyphen (`12-character`), and `50,000` is one number.
+_CLARIFY_NUM_RE = re.compile(
+    r"`[^`]*`|(?<![\w.\-#+])(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)(?![.\-]?\d)"
+    r"[\s+\-]*([A-Za-z%]*)")
+# A clause that ends by naming another requirement (`... [[REQ-X-001]]`, or
+# `[[REQ-X-001]] details the behaviour.`) hands its cases to that requirement.
+_CLARIFY_DELEGATES_RE = re.compile(
+    r"\]\](?:\s+details the behaviou?r)?\s*\.?\s*$")
+# A value, not a quantity, has no unit to ask for: an exit code ("exits 2",
+# "exits with code 0", "the exit code stays 0"), and a setting's default,
+# whose unit the clause named with the setting ("`LINT_X` words, default 3").
+_CLARIFY_EXIT_RE = re.compile(
+    r"\b(?:exit(?:s|ing)?(?:\s+(?:with\s+)?(?:code|status))?(?:\s+stays)?"
+    r"|default)\s*$", re.I)
 
 
 # Every case of ARCH-SEARCH-036 described its input as prose to be matched:
@@ -153,26 +174,26 @@ def _clarify_item(rule, severity, where, quote, question, suggest):
 
 def _clause_questions(clauses):
     # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
+    # implements: REQ-CLARIFY-1102
     """Per-clause advisory questions: vague terms, bare numbers without
     a unit, unbounded quantities, and ambiguous actors."""
     out = []
     for i, c in enumerate(clauses, 1):
         low = c.lower()
         where = "clause {}".format(i)
-        for w in CLARIFY_HEDGES:
-            if w in low:
-                out.append(_clarify_item(
-                    "vague-term", "advisory", where, c,
-                    'What is the measurable threshold behind "{}"?'
-                    .format(w.strip()),
-                    "Replace it with a number and a unit, or with the "
-                    "observable "
-                    "condition it stands for."))
-                # one hedge per clause is enough to start the
-                # conversation
-                break
-        m = next((n for n in _CLARIFY_NUM_RE.finditer(c)
-                  if not _CLARIFY_EXIT_RE.search(c, 0, n.start())), None)
+        # one hedge per clause is enough to start the conversation
+        h = next((x for x in _CLARIFY_HEDGE_RE.finditer(low) if x.group(1)),
+                 None)
+        if h:
+            out.append(_clarify_item(
+                "vague-term", "advisory", where, c,
+                'What is the measurable threshold behind "{}"?'
+                .format(h.group(1)),
+                "Replace it with a number and a unit, or with the "
+                "observable "
+                "condition it stands for."))
+        m = next((n for n in _CLARIFY_NUM_RE.finditer(c) if n.group(1)
+                  and not _CLARIFY_EXIT_RE.search(c, 0, n.start())), None)
         if m and not CLARIFY_UNIT_RE.match(m.group(2) or ""):
             out.append(_clarify_item(
                 "number-without-unit", "advisory", where, c,
@@ -250,6 +271,7 @@ def _monoculture_question(body, reqs, domain):
 
 def _clarify_questions(rid, r, reqs=None, domain=None):
     # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
+    # implements: REQ-CLARIFY-1102
     """The open questions one requirement has not answered, as records:
     {rule, severity, where, quote, question, suggest}. Deterministic --
     the same requirement always yields the same list, in the same
@@ -283,7 +305,10 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
             "Add `CASE-1` with Given / When / Then, one per clause."))
 
     out.extend(_clause_questions(clauses))
-    out.extend(_clause_case_gap_question(clauses, n_cases))
+    # a clause that hands its cases to another requirement is proved there,
+    # so neither count below holds it
+    own = [c for c in clauses if not _CLARIFY_DELEGATES_RE.search(c)]
+    out.extend(_clause_case_gap_question(own, n_cases))
 
     if n_cases and not any(w in cases_low for w in CLARIFY_FAILURE_WORDS):
         out.append(_clarify_item(
@@ -295,13 +320,13 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
 
     out.extend(_monoculture_question(body, reqs, domain))
 
-    if len(clauses) > cfg.LINT_AC_MAX:
+    if len(own) > cfg.LINT_AC_MAX:
         out.append(_clarify_item(
             "over-scoped", "advisory", "Description", "",
             "This requirement carries {} clauses (advisory limit {}). "
             "Which of "
             "them is a separate requirement?".format(
-                len(clauses), cfg.LINT_AC_MAX),
+                len(own), cfg.LINT_AC_MAX),
             "Split the ones that could change for a different reason."))
     return out
 

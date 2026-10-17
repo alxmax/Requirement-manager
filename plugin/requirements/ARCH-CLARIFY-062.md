@@ -25,6 +25,7 @@ Every bullet below is binding.
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 - The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
+- `clarify` asks nothing of a value, a whole word it only contains, or a clause that hands its cases to another requirement. [[REQ-CLARIFY-1102]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -287,3 +288,56 @@ CASE-4 — each question names the basis its rule rests on
   When   the map is built
   Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,
          and only `clause-without-case` and `over-scoped` rest on `count`
+
+--------------------
+
+
+---
+id: REQ-CLARIFY-1102
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CLARIFY-062]
+---
+
+# What clarify does not mistake for a question
+
+## Description
+> Reading `clarify`'s questions one by one showed most of three rules were not questions:
+> a unit asked of a date or an exit code, a hedge found inside "smaller" or "how many", and
+> a missing case counted on a bullet that only points at the child carrying its cases.
+> Each was a property of the rule, so the fix belongs in the rule, not in 82 edits to
+> requirements that were already right. See
+> [ADR-0071](../../docs/adr/0071-clarify-reads-values-and-delegation.md).
+
+Every bullet below is binding.
+- A hedge counts only as a whole word outside a code span, and "how many" asks for a count
+  rather than hedging one.
+- A number is a value, not a quantity, and raises no unit question when it sits inside a
+  code span, is a date, a version or a code point such as `U+2028`, or follows "default",
+  "exiting", "exits with code" or "the exit code stays".
+- A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), and `50,000` is
+  one number.
+- A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that
+  requirement, so neither the clause-against-case count nor the over-scoped count holds it.
+
+## Cases
+CASE-1 — a hedge is a whole word outside code
+  Given  clauses reading "how many criteria", "the smaller set" and "words such as
+         `appropriate`", and one reading "keeps many entries"
+  When   the detectors run
+  Then   only the last raises a vague-term question
+
+CASE-2 — a value is not a bare number
+  Given  clauses naming `>=3.9`, a date, `U+2028`, "default 150", "exits with code 0",
+         "12-character" and "50,000 characters", and one reading "amber below 60"
+  When   the detectors run
+  Then   only the last raises a missing-unit question
+
+CASE-3 — a clause that hands its cases on is not counted
+  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and
+         one case, and another with two clauses of its own and one case
+  When   the detectors run
+  Then   the first raises neither a clause-without-case nor an over-scoped question, and
+         the second still raises clause-without-case

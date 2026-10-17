@@ -2409,7 +2409,7 @@ def _rules(qs):
     return [q["rule"] for q in qs]
 
 
-class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956  # tested-by: REQ-CLARIFY-957
+class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956  # tested-by: REQ-CLARIFY-957  # tested-by: REQ-CLARIFY-1102
     def _qs(self, clauses, cases=("CASE-1 — c\n  Given x\n  When y\n  Then z",)):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-Q-001.md"), _spec("AREA-Q-001", clauses, cases))
@@ -2444,6 +2444,33 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
                        cases=("CASE-1 — bad\n  Given an invalid lock\n  When it runs\n  Then it refuses",))
         self.assertIn("no-failure-case", _rules(happy))
         self.assertNotIn("no-failure-case", _rules(sad))
+
+    def test_hedge_is_a_whole_word_outside_code(self):  # verifies: REQ-CLARIFY-1102#CASE-1
+        for clause in ("`show` states how many criteria are tagged.",
+                       "`dupes` keeps the smaller set.",
+                       "`lint` flags words such as `appropriate`."):
+            self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
+        self.assertIn("vague-term", _rules(self._qs(["`gate` keeps many entries."])))
+
+    def test_a_value_is_not_a_bare_number(self):  # verifies: REQ-CLARIFY-1102#CASE-2
+        for clause in ("`init` requires Python `>=3.9` to run.",
+                       "`gate` was reviewed on 2026-06-21 by the maintainer.",
+                       "`render` escapes U+2028 in the payload.",
+                       "`lint` counts `LINT_X` words, default 150.",
+                       "`gate` prints the list and exits with code 0.",
+                       "`hash` is a 12-character hex digest.",
+                       "`map` stops before 50,000 characters."):
+            self.assertNotIn("number-without-unit", _rules(self._qs([clause])), clause)
+        self.assertIn("number-without-unit",
+                      _rules(self._qs(["`viewer` turns amber below 60."])))
+
+    def test_a_delegating_clause_is_not_counted(self):  # verifies: REQ-CLARIFY-1102#CASE-3
+        handed = ["`map` does thing {}. [[REQ-A-{:03d}]]".format(i, i) for i in range(1, 10)]
+        qs = self._qs(handed + ["`map` writes the file."])
+        self.assertNotIn("clause-without-case", _rules(qs))
+        self.assertNotIn("over-scoped", _rules(qs))
+        own = self._qs(["`map` writes the file.", "`map` names the file."])
+        self.assertIn("clause-without-case", _rules(own))
 
     def test_no_clause_or_no_case_is_blocking(self):  # verifies: REQ-CLARIFY-956#CASE-4
         with tempfile.TemporaryDirectory() as d:
