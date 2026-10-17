@@ -18,7 +18,7 @@
       "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
-      "hash": "b6935514a0a3",
+      "hash": "081ede207606",
       "reason": null
     },
     "ARCH-CMDREGISTRY-033": {
@@ -186,7 +186,7 @@
       "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-CLARIFY-956": {
-      "hash": "13a4760c20eb",
+      "hash": "6b8a15e6562c",
       "reason": null
     },
     "REQ-CMDREGISTRY-1031": {

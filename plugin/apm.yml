@@ -1,5 +1,5 @@
 name: requirement-manager
-version: 8.24.1
+version: 8.24.2
 description: Drift gate between a written requirement and the code that implements it.
 author: Schipor Alexandru
 license: Apache-2.0

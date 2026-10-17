@@ -25,7 +25,7 @@ Every bullet below is binding.
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 - The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
-- `clarify` asks nothing of a value, a whole word it only contains, or a clause that hands its cases to another requirement. [[REQ-CLARIFY-1102]]
+- `clarify` asks nothing of a value, a whole word it only contains, a clause that hands its cases to another requirement, or a clause quantified over "all", "every" or "any". [[REQ-CLARIFY-1102]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -67,8 +67,6 @@ Every bullet below is binding.
   identifier such as a version or a case label is not a bare number.
 - The number after "exit", "exits" or "exit code" is a value, not a quantity, and raises
   no unit question.
-- A clause quantified over "all", "every" or "any" with no stated limit raises a question about
-  the upper bound.
 - A clause whose subject is "It" or "the system" raises a question asking which component acts.
 - A requirement with more clauses than cases raises ONE question naming how many are
   uncovered, and saying that a count cannot tell which. It never accuses a clause by
@@ -129,6 +127,11 @@ CASE-7 — a deprecated requirement asks nothing
 - the exclusion is what turns the signal from noise into a question.
 - It is the detector that would have asked the question nobody asked about `search`, whose four
 - cases each varied the quality of one kind of input and never its kind.
+
+**Retired 2026-10-17**
+- `unbounded-quantity`, which asked for an upper bound wherever a clause said "all", "every"
+  or "any", is retired ([ADR-0072](../../docs/adr/0072-retire-unbounded-quantity.md)): 1 of
+  20 sampled questions was real. [[REQ-CLARIFY-1102]] states that the words ask nothing.
 
 ---
 id: REQ-CLARIFY-957
@@ -195,7 +198,7 @@ satisfies: [ARCH-CLARIFY-062]
 
 ## Description
 > Clarifying a requirement means editing it, and an edit is new text: a clause that
-> answers one question can introduce an unbounded quantity, a number with no unit, or a
+> answers one question can introduce a vague term, a number with no unit, or a
 > case with no failure path. Nobody re-reads the whole corpus after an edit, so the new
 > question sits unread. `sync` runs after every edit anyway, which makes it the one place
 > the comparison costs nothing.
@@ -321,6 +324,8 @@ Every bullet below is binding.
   one number.
 - A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that
   requirement, so neither the clause-against-case count nor the over-scoped count holds it.
+- A clause quantified over "all", "every" or "any" raises no question: in a requirement the
+  words nearly always range over a finite set the engine already owns.
 
 ## Cases
 CASE-1 — a hedge is a whole word outside code
@@ -341,3 +346,8 @@ CASE-3 — a clause that hands its cases on is not counted
   When   the detectors run
   Then   the first raises neither a clause-without-case nor an over-scoped question, and
          the second still raises clause-without-case
+
+CASE-4 — all, every and any ask nothing
+  Given  a clause reading "`gate` reads every file, all tags and any requirement."
+  When   the detectors run
+  Then   no question is raised
