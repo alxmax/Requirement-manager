@@ -2481,7 +2481,7 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         blocking = [q for q in qs if q["severity"] == "blocking"]
         self.assertEqual({"no-contract", "no-cases"}, {q["rule"] for q in blocking})
 
-    def test_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-1
+    def test_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-6
         qs = self._qs(["It scans all files when the input is missing."])
         self.assertIn("ambiguous-actor", _rules(qs))
 
@@ -2506,7 +2506,7 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         self.assertTrue(mono, _rules(qs))
         self.assertIn("query", mono[0]["question"])
 
-    def test_the_corpus_own_subject_is_not_that_signal(self):  # verifies: REQ-CLARIFY-956#CASE-6
+    def test_the_corpus_own_subject_is_not_that_signal(self):  # verifies: REQ-CLARIFY-956#CASE-5
         """A corpus of requirements about requirements starts every case the same way; that
         is the domain, not a narrow focus, and flagging it would fire on 17% and say nothing."""
         cases = tuple(
@@ -3017,6 +3017,9 @@ class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062
             self._sync(d)                                  # first sight of the question
             out = self._sync(d)                            # same question, second run
             self.assertNotIn("New open question(s)", out)
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does two things.\n")
+            out = self._sync(d)                            # reworded, same rule
+            self.assertNotIn("New open question(s)", out)
 
     def test_a_brand_new_requirement_is_not_reported(self):  # verifies: REQ-CLARIFY-975#CASE-3
         with tempfile.TemporaryDirectory() as d:
@@ -3024,6 +3027,45 @@ class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062
             _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
             out = self._sync(d)                            # never been in the snapshot
             self.assertNotIn("New open question(s)", out)
+
+    def test_only_the_new_rule_is_named(self):  # verifies: REQ-CLARIFY-975#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            self._sync(d)                                  # records no-cases
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD)  # no clause either
+            out = self._sync(d)
+            line = next(ln for ln in out.splitlines() if "AREA-Q-001:" in ln)
+            self.assertIn("no-contract", line)
+            self.assertNotIn("no-cases", line)
+
+    def test_a_corrupt_snapshot_fails_open(self):  # verifies: REQ-CLARIFY-975#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            _write(os.path.join(rq, "_clarifylock.json"), "{not json")
+            out = self._sync(d)
+            self.assertNotIn("New open question(s)", out)
+
+    def test_a_new_question_never_changes_the_exit_code(self):  # verifies: REQ-CLARIFY-975#CASE-6
+        def run(d):
+            rq = os.path.join(d, "requirements")
+            ws = R.Workspace(R.load_requirements(rq), R.scan_members(d, rq), rq, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+                code = R.cmd_check(ws, True, accept_drift=True)
+            return code, buf.getvalue()
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            run(d)                                         # records no question
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            reported, out = run(d)
+            self.assertIn("New open question(s)", out)
+            os.remove(os.path.join(rq, "_clarifylock.json"))
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            silent, out = run(d)
+            self.assertNotIn("New open question(s)", out)
+            self.assertEqual(reported, silent)
 
 
 class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-1100
@@ -3102,7 +3144,7 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
             return [q for q in R._clarify_questions("AREA-G-001", reqs["AREA-G-001"], reqs)
                     if q["rule"] == "clause-without-case"]
 
-    def test_five_clauses_two_cases_raise_one_question_not_three(self):
+    def test_five_clauses_two_cases_raise_one_question_not_three(self):  # verifies: REQ-CLARIFY-956#CASE-3
         qs = self._questions(5, 2)
         self.assertEqual(len(qs), 1)
         self.assertIn("3 clause(s) have no case", qs[0]["question"])

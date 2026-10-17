@@ -64,9 +64,8 @@ satisfies: [ARCH-CLARIFY-062]
 Every bullet below is binding.
 - A clause carrying a hedge word with no measurable threshold raises one question naming that word.
 - A bare number in a clause with no unit beside it raises a question asking for the unit; an
-  identifier such as a version or a case label is not a bare number.
-- The number after "exit", "exits" or "exit code" is a value, not a quantity, and raises
-  no unit question.
+  identifier such as a version or a case label is not a bare number, and neither is the
+  number after "exit", "exits" or "exit code", which is a value, not a quantity.
 - A clause whose subject is "It" or "the system" raises a question asking which component acts.
 - A requirement with more clauses than cases raises ONE question naming how many are
   uncovered, and saying that a count cannot tell which. It never accuses a clause by
@@ -93,26 +92,29 @@ CASE-2 — a bare number is questioned, an identifier is not
   When   the detectors run
   Then   the first raises a missing-unit question and the other two raise none
 
-CASE-3 — a happy-path-only acceptance raises the failure question
-  Given  a requirement whose cases mention no invalid, missing or failing input
+CASE-3 — a clause-against-case gap and a happy-path-only acceptance are questioned
+  Given  a requirement with five clauses and two cases, none mentioning invalid, missing
+         or failing input
   When   the detectors run
-  Then   one question asks what happens on the failure path
+  Then   one question says 3 clauses have no case without naming which, and one asks
+         what happens on the failure path
 
 CASE-4 — no clause or no case is blocking
   Given  a requirement with an empty Description, and one with no labelled case
   When   the detectors run on each
   Then   each raises a question of severity blocking
 
-CASE-5 — cases that all start from one kind of input are questioned
-  Given  a requirement whose every case opens on the same noun, and a corpus in which that
-         noun is not the subject every other requirement starts from
+CASE-5 — cases that all start from one kind of input are questioned, unless it is the domain
+  Given  a requirement whose every case opens on the same noun, once in a corpus where that
+         noun is rare and once in a corpus where nearly every case starts from it
   When   the detectors run
-  Then   one question names that noun and asks which other kind a caller would supply
+  Then   the first names that noun and asks which other kind a caller would supply, and
+         the second raises no such question, because the noun is the domain
 
-CASE-6 — the corpus's own subject is not that signal
-  Given  a corpus in which nearly every case of every requirement starts from the same noun
-  When   the detectors run on one of them
-  Then   no question is raised about it, because the noun is the domain, not a narrow focus
+CASE-6 — an unnamed actor is questioned
+  Given  a clause reading "It scans all files when the input is missing."
+  When   the detectors run
+  Then   one question asks which command or component performs it
 
 CASE-7 — a deprecated requirement asks nothing
   Given  a deprecated requirement with no labelled case and a clause reading "quickly"
@@ -221,27 +223,45 @@ Every bullet below is binding.
   conversation, not a build failure.
 
 ## Cases
-CASE-1 — an edit that raises a new question is reported
-  Given  a requirement synced once, then edited so a new blocking rule fires
+CASE-1 — a requirement recorded with no question, then given one, is reported
+  Given  a requirement synced once with no blocking question, then edited so one fires
   When   `sync` runs
-  Then   it names that requirement and the new rule, and the exit code is unchanged
+  Then   it names that requirement as having a new question
 
-CASE-2 — an unchanged question is not re-reported
-  Given  a requirement whose blocking questions are the same as at the last sync
+CASE-2 — an unchanged or reworded question is not re-reported
+  Given  a requirement whose blocking question is the same rule as at the last sync, once
+         unchanged and once after its clause is reworded
   When   `sync` runs
-  Then   nothing is reported as new
+  Then   nothing is reported as new either time
 
 CASE-3 — a new requirement's questions are not reported as new
   Given  a requirement that has never been in the snapshot
   When   `sync` runs
   Then   its questions are not reported as new
 
+CASE-4 — only the rule that is new is named
+  Given  a requirement recorded with `no-cases`, then edited so `no-contract` also fires
+  When   `sync` runs
+  Then   it names `no-contract` as new and does not name `no-cases`
+
+CASE-5 — a corrupt snapshot fails open
+  Given  a `_clarifylock.json` that is not valid JSON, and a requirement with a blocking
+         question
+  When   `sync` runs
+  Then   it does not crash and reports nothing as new
+
+CASE-6 — reporting a new question never changes the exit code
+  Given  the same tree synced once with a snapshot that makes a question new and once
+         with no snapshot at all
+  When   `sync` runs
+  Then   both runs exit with the same code
+
 --------------------
 
 
 ---
 id: REQ-CLARIFY-1100
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -259,7 +279,8 @@ satisfies: [ARCH-CLARIFY-062]
 Every bullet below is binding.
 - Every node in `_map.json` carries a `clarify` list: the records `clarify` emits for that
   requirement, each with `rule`, `severity`, `basis`, `where`, `quote`, `question` and
-  `suggest`, in the order `clarify` prints them.
+  `suggest`, in the order `clarify` prints them. The map computes them with the same
+  function `clarify` runs, so the two never disagree about a requirement.
 - Every record names the `basis` its rule rests on: `structure` when a section is absent
   (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`,
   `over-scoped`), and `wording` when a word on a list matched (every other rule).
@@ -267,8 +288,6 @@ Every bullet below is binding.
 - The list holds blocking and advisory questions alike; filtering is the reader's
   choice.
 - A requirement with nothing unclear carries an empty list, never an absent field.
-- The map and `clarify` compute the questions with the same function, so the two never
-  disagree about a requirement.
 
 ## Cases
 CASE-1 — a node carries the questions clarify prints, in order
@@ -297,7 +316,7 @@ CASE-4 — each question names the basis its rule rests on
 
 ---
 id: REQ-CLARIFY-1102
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -319,9 +338,8 @@ Every bullet below is binding.
   rather than hedging one.
 - A number is a value, not a quantity, and raises no unit question when it sits inside a
   code span, is a date, a version or a code point such as `U+2028`, or follows "default",
-  "exiting", "exits with code" or "the exit code stays".
-- A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), and `50,000` is
-  one number.
+  "exiting", "exits with code" or "the exit code stays". A unit may follow a hyphen or a
+  plus sign (`12-character`, `3+ letters`), and `50,000` is one number.
 - A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that
   requirement, so neither the clause-against-case count nor the over-scoped count holds it.
 - A clause quantified over "all", "every" or "any" raises no question: in a requirement the
