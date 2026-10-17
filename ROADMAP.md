@@ -16,6 +16,15 @@ Cadence: one release a week, not one per merge.
 - [ ] Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63) | req: ARCH-SELFGATE-039
 - [ ] An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to | req: SYS-SSOT-001
 
+### Version 8.25 (19 to 23 October)
+
+- [ ] `retire --apply` strips a tag only from the comment it was written in, checks every write and stops a batch at its first failure. Done when: a string literal holding the tag's text survives, `applied: true` is not reported after a failed block removal (`retireapply.py:41-45` sets it and returns 0 either way), and a consumer whose retirement failed leaves its base requirement alone | req: ARCH-RETIRE-064
+- [ ] The words about `sync` match what it does. Done when: `docs/commands.md:62` and `mcp.py:127` say an edited confirmed contract is demoted to draft (they say `sync` refuses), and `app/scripts/sync-data.mjs:4` points to `sync`, not to `reqmap.py export`, which no longer exists | req: ARCH-MCP-073
+- [ ] CI checks the engine budget on the pull request, and a release waits for the published-action smoke test. Done when: a pull request that adds one logical line over `CORE_LOGICAL_BUDGET` fails before merge (the script runs only in the `release` job, `ci.yml:375`, and the PR jobs run its test, `ci.yml:85,151`), and `release` does not go ahead while `dogfood.yml` is red | req: ARCH-SELFGATE-039
+- [ ] The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays | req: ARCH-RELEASE-072
+- [ ] The `clause-without-case` and `over-scoped` questions are answered family by family. Done when: ARCH-VIEWER-007's nine are, and the next four families by count are too: fold obligations split over bullets, add the cases that are really missing with their tests, and split what is over-scoped with `clarify --decompose` | req: ARCH-CLARIFY-062
+- [ ] Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped | req: REQ-DRIFT-1103
+
 ## Next
 
 ### Planning and releasing
