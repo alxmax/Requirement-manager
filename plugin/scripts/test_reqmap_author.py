@@ -2481,10 +2481,13 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         blocking = [q for q in qs if q["severity"] == "blocking"]
         self.assertEqual({"no-contract", "no-cases"}, {q["rule"] for q in blocking})
 
-    def test_unbounded_and_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-1
+    def test_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-1
         qs = self._qs(["It scans all files when the input is missing."])
-        self.assertIn("unbounded-quantity", _rules(qs))
         self.assertIn("ambiguous-actor", _rules(qs))
+
+    def test_all_every_any_ask_nothing(self):  # verifies: REQ-CLARIFY-1102#CASE-4
+        qs = self._qs(["`gate` reads every file, all tags and any requirement."])
+        self.assertEqual([q for q in qs if q["where"] == "clause 1"], [])
 
     def test_cases_all_from_one_input_kind_are_questioned(self):  # verifies: REQ-CLARIFY-956#CASE-5
         """The shape that let `search` ship: four cases, four qualities of one input kind."""

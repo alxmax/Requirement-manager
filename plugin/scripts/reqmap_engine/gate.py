@@ -234,7 +234,7 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
                      else compute_member_hashes(code_root, full_members))
     print("lock updated.")
     # Clarifying one requirement can raise questions the previous text never had
-    # — a new clause with an unbounded quantity, a case with no failure path.
+    # — a new clause with a number and no unit, a case with no failure path.
     # Nobody re-reads the whole corpus after an edit, so the diff is reported
     # here, where every edit already passes.  # implements: REQ-CLARIFY-975
     _q_now = blocking_question_rules(reqs)

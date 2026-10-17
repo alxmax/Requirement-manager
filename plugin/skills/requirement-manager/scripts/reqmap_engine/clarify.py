@@ -55,8 +55,6 @@ CLARIFY_FAILURE_WORDS = (
     "unreadable", "not found", "timeout", "conflict", "duplicate", "unknown",
     "no ", "none", "cannot", "without",
 )
-CLARIFY_LIMIT_WORDS = ("at most", "up to", "no more than", "maximum",
-                       "max ", "limit", "capped", "bounded", "first ", "top ")
 CLARIFY_UNIT_RE = re.compile(
     r"^(ms|s|sec|secs|second|seconds|min|mins|minute|minutes|hour|hours|"
     r"day|days|"
@@ -158,7 +156,7 @@ CLARIFY_BASIS = {
     "no-contract": "structure", "no-cases": "structure",
     "clause-without-case": "count", "over-scoped": "count",
     "vague-term": "wording", "number-without-unit": "wording",
-    "unbounded-quantity": "wording", "ambiguous-actor": "wording",
+    "ambiguous-actor": "wording",
     "no-failure-case": "wording", "case-monoculture": "wording",
 }
 
@@ -176,7 +174,9 @@ def _clause_questions(clauses):
     # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
     # implements: REQ-CLARIFY-1102
     """Per-clause advisory questions: vague terms, bare numbers without
-    a unit, unbounded quantities, and ambiguous actors."""
+    a unit, and ambiguous actors. "All", "every" and "any" ask nothing:
+    in a requirement they nearly always range over a finite set the engine
+    owns, and 19 of 20 such questions were not real (ADR-0072)."""
     out = []
     for i, c in enumerate(clauses, 1):
         low = c.lower()
@@ -199,14 +199,6 @@ def _clause_questions(clauses):
                 "number-without-unit", "advisory", where, c,
                 'What unit is "{}" in?'.format(m.group(1)),
                 "State the unit beside the number so a test can assert it."))
-        if (" all " in " " + low or low.startswith("all ")
-                or " every " in low or " any " in low) \
-                and not any(w in low for w in CLARIFY_LIMIT_WORDS):
-            out.append(_clarify_item(
-                "unbounded-quantity", "advisory", where, c,
-                "Is there an upper bound, and what happens when it is "
-                "reached?",
-                "Name the limit, or say explicitly that there is none."))
         if low.startswith("it ") or " the system " in low:
             out.append(_clarify_item(
                 "ambiguous-actor", "advisory", where, c,

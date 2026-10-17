@@ -62,7 +62,8 @@ PACKAGE = "reqmap_engine"
 # the draft question builder. draftquestions.py stays lazy.
 # Raised to 6,640 by ADR-0071: whole-word hedges outside code, and clauses
 # that hand their cases to another requirement left out of both counts.
-CORE_LOGICAL_BUDGET = 6640
+# Lowered to 6,637 by ADR-0072, which retires `unbounded-quantity`.
+CORE_LOGICAL_BUDGET = 6637
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.24.2` — 2026-10-17
+
+**`clarify` retires `unbounded-quantity` (ADR-0072).**
+
+- The rule asked for an upper bound wherever a clause said "all", "every" or "any". Read one by one, 1 of 20 randomly drawn questions was real; the other 19 ranged over a finite set the engine owns ("every candidate", "on every push to `main`") or were a negation or a remainder ("any other value"). It was 192 of the 427 questions `clarify` asked
+- The words now ask nothing. REQ-CLARIFY-1102 says so with CASE-4, and REQ-CLARIFY-956 no longer lists the rule. On this corpus `clarify` asks 235 questions: 129 to check and 106 optional, down from 298
+- The one real question, REQ-SIMILAR-923's unbounded pair list, can be asked by hand in its Verify intent
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.4`; 18,017 physical lines in 76 files (the README says so). The core falls to 6,637 logical lines and the budget with it (ADR-0072)
+
 ## plugin `v8.24.1` — 2026-10-17
 
 **`clarify` stops asking about values and handed-on clauses (ADR-0071).**
