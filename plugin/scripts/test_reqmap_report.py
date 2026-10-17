@@ -3254,6 +3254,23 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertEqual(R.CODE_EXTS[-2:], (".foo", ".bar"))
         self.assertTrue(R._is_code_file("x.foo"))
 
+    def test_config_reports_a_fanout_band_that_is_not_one(self):  # verifies: REQ-CONFIG-949#CASE-6
+        self._restore("LINT_FANOUT_BANDS", "LINT_AC_MAX")
+        for bad in (5, [1], ["a", "b"], [10, 2], [None, None], [True, 3], [-1, 3], [1.5, 3]):
+            err, problems = io.StringIO(), []
+            R.apply_config({"LINT_FANOUT_BANDS": {"system": bad}}, out=err, problems=problems)
+            self.assertEqual(R.LINT_FANOUT_BANDS["system"], (None, 10), bad)
+            self.assertEqual(1, len(problems), bad)
+            self.assertIn("ignoring LINT_FANOUT_BANDS['system']", err.getvalue())
+        problems = []
+        applied = R.apply_config({"LINT_FANOUT_BANDS": {"system": [3, 2], "architecture": [None, 8]},
+                                  "LINT_AC_MAX": 9}, out=io.StringIO(), problems=problems)
+        self.assertEqual((None, 8), R.LINT_FANOUT_BANDS["architecture"])
+        self.assertEqual((None, 10), R.LINT_FANOUT_BANDS["system"])
+        self.assertEqual(9, R.LINT_AC_MAX)
+        self.assertIn("LINT_AC_MAX", applied)
+        self.assertEqual(1, len(problems))
+
     def test_config_file_is_read_fail_open(self):  # verifies: REQ-CONFIG-949#CASE-4
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(R.load_config(d), {})
@@ -4804,7 +4821,7 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
                                   self._call(2, "reqmap_search", {"query": "x", "top": "3"}),
                                   self._call(3, "reqmap_search", {"query": "a b", "top": 3})])
         self.assertEqual([-32602, -32602], [m["error"]["code"] for m in out[:2]])
-        self.assertEqual([["ask", "--json", "--search", "a b", "--top", "3"]], calls)
+        self.assertEqual([["ask", "--json", "--search=a b", "--top=3"]], calls)
 
     def test_a_fail_verdict_is_an_answer_a_failed_command_is_an_error(self):  # verifies: REQ-MCPTOOLS-1028#CASE-4
         out, _ = self._serve([self._call(1, "reqmap_gate", {}),
@@ -4819,8 +4836,49 @@ class McpServer(unittest.TestCase):  # tested-by: REQ-MCPPROTOCOL-1027 @unit  # 
     def test_a_release_plan_passes_release_with_or_without_a_version(self):  # verifies: REQ-MCPTOOLS-1028#CASE-5
         tool = next(t for t in R.mcp.MCP_TOOLS if t["name"] == "reqmap_release_plan")
         self.assertEqual(["sync", "--json", "--release"], R.mcp.tool_argv(tool, {}))
-        self.assertEqual(["sync", "--json", "--release", "v1.2.0"],
+        self.assertEqual(["sync", "--json", "--release=v1.2.0"],
                          R.mcp.tool_argv(tool, {"version": "v1.2.0"}))
+
+    def test_a_value_that_looks_like_an_option_stays_a_value(self):  # verifies: REQ-MCPTOOLS-1028#CASE-7
+        by = {t["name"]: t for t in R.mcp.MCP_TOOLS}
+        hostile = "--apply"
+        for name, args in (("reqmap_gate", {"since": hostile}),
+                           ("reqmap_search", {"query": hostile}),
+                           ("reqmap_sync", {"accept_drift": hostile})):
+            argv = R.mcp.tool_argv(by[name], args)
+            self.assertNotIn(hostile, argv, name)
+            self.assertIn("=" + hostile, " ".join(argv), name)
+        for name, args in (("reqmap_release_plan", {"version": hostile}),
+                           ("reqmap_release_plan", {"version": "v1.2.0 --apply"}),
+                           ("reqmap_show", {"id": hostile}),
+                           ("reqmap_clarify", {"id": "--apply"}),
+                           ("reqmap_review", {"id": "-x"})):
+            with self.assertRaises(ValueError, msg=name):
+                R.mcp.tool_argv(by[name], args)
+        out, calls = self._serve([self._call(1, "reqmap_release_plan", {"version": hostile}),
+                                  self._call(2, "reqmap_release_plan", {"version": "v1.2.0"})])
+        self.assertEqual(-32602, out[0]["error"]["code"])
+        self.assertEqual([["sync", "--json", "--release=v1.2.0"]], calls)
+
+    def test_a_malformed_message_is_answered_and_the_server_goes_on(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-3  # verifies: REQ-MCPTOOLS-1028#CASE-3
+        out, calls = self._serve([
+            {"jsonrpc": "2.0", "id": 1, "method": ["tools/list"]},
+            self._req(2, "tools/call", ["reqmap_gate"]),
+            self._call(3, "reqmap_gate", 7),
+            self._req(4, "resources/read", "reqmap://map"),
+            self._req(5, "ping")])
+        self.assertEqual([-32600, -32602, -32602, -32602],
+                         [m["error"]["code"] for m in out[:4]])
+        self.assertEqual({"jsonrpc": "2.0", "id": 5, "result": {}}, out[4])
+        self.assertEqual([], calls)
+
+    def test_a_run_that_raises_is_an_error_and_not_the_end(self):  # verifies: REQ-MCPPROTOCOL-1027#CASE-5
+        def boom(argv):
+            raise FileNotFoundError("no python")
+        out, _ = self._serve([self._call(1, "reqmap_gate", {}), self._req(2, "ping")], run=boom)
+        self.assertEqual(-32603, out[0]["error"]["code"])
+        self.assertIn("no python", out[0]["error"]["message"])
+        self.assertEqual({}, out[1]["result"])
 
 
 class McpResources(unittest.TestCase):  # tested-by: REQ-MCPRESOURCES-1030 @unit
@@ -4926,6 +4984,45 @@ class McpConfigSeed(unittest.TestCase):  # tested-by: REQ-MCPSEED-1029 @unit
 
 class McpEndToEnd(unittest.TestCase):  # tested-by: ARCH-MCP-073 @integration
     """The server as a process, spoken to over real stdio."""
+
+    @staticmethod
+    def _snapshot(root):
+        seen = {}
+        for dirpath, _dirs, files in os.walk(root):
+            for fn in files:
+                p = os.path.join(dirpath, fn)
+                with open(p, "rb") as f:
+                    seen[os.path.relpath(p, root)] = f.read()
+        return seen
+
+    def test_a_read_only_call_leaves_the_workspace_unchanged(self):  # verifies: ARCH-MCP-073#CASE-5
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["`gate` writes the lock file."]))
+            _write(os.path.join(d, "a.py"), "# implements: REQ-A-001\nx = 1\n")
+            _write(os.path.join(d, "VERSION"), "1.0.0\n")
+            before = self._snapshot(d)
+            call = lambda i, name, args: {"jsonrpc": "2.0", "id": i, "method": "tools/call",
+                                          "params": {"name": name, "arguments": args}}
+            msgs = [call(1, "reqmap_release_plan", {"version": "--apply"}),
+                    call(2, "reqmap_release_plan", {"version": "v9.9.9"}),
+                    call(3, "reqmap_gate", {"since": "--apply"}),
+                    call(4, "reqmap_search", {"query": "--apply"}),
+                    {"jsonrpc": "2.0", "id": 5, "method": [1]},
+                    {"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": 3},
+                    {"jsonrpc": "2.0", "id": 7, "method": "ping"}]
+            done = subprocess.run(
+                [sys.executable, "-X", "utf8", engine, "mcp", "--root", d],
+                input="".join(json.dumps(m) + "\n" for m in msgs), capture_output=True,
+                text=True, encoding="utf-8", timeout=300, env=dict(os.environ, CLAUDE_PROJECT_DIR=""))
+            after = self._snapshot(d)
+        replies = {r["id"]: r for r in map(json.loads, done.stdout.splitlines())}
+        self.assertEqual(before, after, "a read-only call changed the workspace")
+        self.assertEqual(-32602, replies[1]["error"]["code"], done.stderr)
+        self.assertEqual(-32600, replies[5]["error"]["code"])
+        self.assertEqual(-32602, replies[6]["error"]["code"])
+        self.assertEqual({}, replies[7]["result"], "the server stopped answering")
 
     def test_initialize_list_and_call_over_stdio(self):  # verifies: ARCH-MCP-073#CASE-1
         engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")

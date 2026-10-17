@@ -63,7 +63,8 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,640 by ADR-0071: whole-word hedges outside code, and clauses
 # that hand their cases to another requirement left out of both counts.
 # Lowered to 6,637 by ADR-0072, which retires `unbounded-quantity`.
-CORE_LOGICAL_BUDGET = 6637
+# Raised to 6,644 by ADR-0073: a fan-out band is checked when the config is read.
+CORE_LOGICAL_BUDGET = 6644
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000
