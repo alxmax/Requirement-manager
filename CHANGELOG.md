@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.24.3` — 2026-10-17
+
+**A read-only MCP tool can no longer write, a malformed message no longer ends the server, and a bad fan-out band is reported (ADR-0073).**
+
+- `reqmap_release_plan`, declared read-only, built `sync --json --release --apply` from `version: "--apply"`, which would have bumped the version files and written the CHANGELOG. A flag and its value are now one argument (`--release=v1.2.0`), so a value that looks like an option stays a value, and a requirement id or a version that is not one is -32602 and runs nothing. REQ-MCPTOOLS-1028 CASE-7, ARCH-MCP-073 CASE-5 (a read-only call leaves a real workspace byte-identical)
+- A `method` that is not text, `params` or `arguments` that are not objects each ended the server with a traceback; they are now -32600 or -32602, and a call that raises is -32603. The server keeps reading after each. REQ-MCPPROTOCOL-1027 CASE-3 and CASE-5
+- A `LINT_FANOUT_BANDS` entry that is not `[low, high]` (`high` a whole number, `low` one or null, no more than `high`) crashed the lint or was accepted as a band nothing fits. It is now named on stderr, shown as an `INPUT:config` warning (an error under `--strict`) and leaves that level on its default. REQ-CONFIG-949 CASE-6
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.5`; 18,056 physical lines in 76 files (the README says so). The core rises to 6,644 logical lines (ADR-0073)
+
 ## plugin `v8.24.2` — 2026-10-17
 
 **`clarify` retires `unbounded-quantity` (ADR-0072).**

@@ -78,8 +78,8 @@
       "reason": "Compact export contracts and cases"
     },
     "ARCH-MCP-073": {
-      "hash": "bf318590b46e",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "ad5d4d772e9c",
+      "reason": null
     },
     "ARCH-MEMBERDRIFT-027": {
       "hash": "b308de40357d",
@@ -198,8 +198,8 @@
       "reason": "Shared assistant workflow and discoverable adapters"
     },
     "REQ-CONFIG-949": {
-      "hash": "268d8fc44951",
-      "reason": "Findings from running the engine on its own repository"
+      "hash": "74ff030aeb44",
+      "reason": null
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
@@ -313,9 +313,13 @@
       "hash": "68d4a52da578",
       "reason": "Compact export contracts and cases"
     },
+    "REQ-MCPPROTOCOL-1027": {
+      "hash": "b5c8310c2f62",
+      "reason": null
+    },
     "REQ-MCPTOOLS-1028": {
-      "hash": "938eb7ec8f3e",
-      "reason": "REQ-MCPTOOLS-1028 stays the thirteen-tool freeze. init --watch and init --propose remain command-line flags."
+      "hash": "35ea796c139e",
+      "reason": null
     },
     "REQ-MODULEFILE-056": {
       "hash": "f5c9407f0cfe",

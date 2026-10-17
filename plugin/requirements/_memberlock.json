@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "194ee7342e2c582486edeb3bdf99fffa68c308ea44c12a065d85ebdc4e6b8105",
+      "plugin/scripts/reqmap_engine/__init__.py": "b4ced2e14e3a357cf8092fb253d4042aa9ab5effcbee412be7aee6f96b1d3087",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -53,7 +53,7 @@
       "plugin/scripts/reqmap_engine/text.py#_title": "51c31658b44ec1f4f9842114eea2b428852d59f73bcf9d5aa8d091a8af297d1a"
     },
     "ARCH-MCP-073": {
-      "plugin/scripts/reqmap_engine/mcp.py": "3b2f2f0e921f5dc71665d87aa19a0a092eb1a422526b9acfa35cb496891485ca",
+      "plugin/scripts/reqmap_engine/mcp.py": "d65be76bc7ecaad8d8fc5581ae405be82fdb61d3d5ef26d0e58ee13bcdf5ac0d",
       "plugin/scripts/reqmap_engine/mcpconfig.py": "aaedfc55b96808b974ffcc58eb0edd3ef6b678255c558e7ac5ba5b6c1a55c067"
     },
     "ARCH-MEMBERDRIFT-027": {
@@ -92,7 +92,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "a480da868cdbdd803024f4509b65fe08b707b5063b1564e697c88029284771e7",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "f28b4ce002de0f56425d395adecd053dd9cd4b8dbd525e0678da6ddef8c4fee7",
+      "scripts/check_engine_budget.py": "32f6fbb6d72f60757248cbafbc8cf3b30a964ed1ff927b73519258b8c5731f34",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
@@ -206,6 +206,9 @@
       "plugin/scripts/reqmap_engine/registry.py#_write_region": "4dbad0ece0a4d17d74311e6f640ca242c68219e58d5238c83058810ad306ee2c",
       "plugin/scripts/reqmap_engine/registry.py#cmd_gen_integration": "2bb2a9534d940446e45073f816614da088e61e88d37787f3414d6479c5fdf595"
     },
+    "REQ-CONFIG-949": {
+      "plugin/scripts/reqmap_engine/config.py#_band_ok": "128479268201596ea687c3738296940b49b251bafe46913d59223c4c169b8a7b"
+    },
     "REQ-DECOMPOSE-994": {
       "plugin/scripts/reqmap_engine/groups.py#_assign_cases": "960daa563591b2ee86a044956b67de8ca9a626a6061df20ee244feb5480d09e4",
       "plugin/scripts/reqmap_engine/groups.py#_case_raw_blocks": "89a9d6fdc6ca1fc90a8b465c2a976fdf76f5d2e4f9f9f9839cd3030e02644a69",
@@ -312,10 +315,10 @@
       "plugin/scripts/reqmap_engine/mcpconfig.py#server_entry": "d339b67d2d3b3084b11d4a43a70b847e6f674b158792b9e22b7f5c3b8fb1caa9"
     },
     "REQ-MCPTOOLS-1028": {
-      "plugin/scripts/reqmap_engine/mcp.py#_param": "978367849029087b7903d87216b44486d75ef9b985419ca6e3afee9d1483ae0f",
-      "plugin/scripts/reqmap_engine/mcp.py#call_tool": "9b0d0be7b2747e3185e180923d6a8e640d1c59e7cf3c0fb5278b187188554c5e",
+      "plugin/scripts/reqmap_engine/mcp.py#_param": "ba9a174aa3b19234134a7be5ea5cc54bdfc518970057c571b5d57fae62119fe4",
+      "plugin/scripts/reqmap_engine/mcp.py#call_tool": "e7ebe305a1016ccdbd7e1e2eebcdfd6ca17a42e1f6f0d186de7859f7889e3847",
       "plugin/scripts/reqmap_engine/mcp.py#run_tool": "83b6f8a6b22a07fdb154596a6d955523ad9d7bfb453affa2ffe2d5aa822c5019",
-      "plugin/scripts/reqmap_engine/mcp.py#tool_argv": "22e2a030991b069cc0ffcc60dd551cf04a1913225de77a487ef489f0fc1ef76d"
+      "plugin/scripts/reqmap_engine/mcp.py#tool_argv": "dc973bc382d38c461288e818e65e5c9496658f62be31cefe89fc5c01dadcfd05"
     },
     "REQ-MEMBERDRIFT-982": {
       "plugin/scripts/reqmap_engine/locks.py#_span_sha": "2201c9b41fbdeaa1c45487e171c048fb336e6bce56883b21b5aed5ee9416570b"

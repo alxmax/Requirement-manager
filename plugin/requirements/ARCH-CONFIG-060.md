@@ -64,7 +64,7 @@ satisfies: [ARCH-CONFIG-060]
 Every bullet below is binding.
 - `load_config(reqs_dir)` returns the parsed object from `requirements/_config.json`, or `{}` when the file is absent, unreadable, not JSON, or not a JSON object.
 - `apply_config(cfg)` sets each key named in `CONFIG_KEYS` on the module and returns the list of names it applied.
-- A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.
+- A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple. A fan-out band that is not `[low, high]`, with `high` a whole number, `low` one or null and no more than `high`, is reported on stderr and skipped, and the other entries still apply.
 - `extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.
 - A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.
 - `main` collects the diagnostics of `load_config` and `apply_config` in one `problems` list before scanning, and prints each on stderr.
@@ -91,6 +91,14 @@ CASE-4 — the file is read fail-open
   Given  no file, a malformed file, a JSON list, and a valid object in turn
   When   `load_config` reads each
   Then   it returns `{}` for the first three and the object for the last
+
+CASE-6 — a fan-out band that is not one is reported and skipped
+  Given  `{"LINT_FANOUT_BANDS": {"system": [3, 2], "architecture": [null, 8]}, "LINT_AC_MAX": 9}`,
+         and bands that are a number, a one-element list, strings, `[null, null]`, a boolean,
+         a negative and a fraction
+  When   `apply_config` runs on each
+  Then   each bad band is named on stderr and the `system` band keeps its default, while the
+         valid `architecture` band and `LINT_AC_MAX` apply
 
 CASE-5 — the verdict carries a bad entry
   Given  `{"MAP_PROFIL": 1}`

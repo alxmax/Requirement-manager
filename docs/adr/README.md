@@ -83,6 +83,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0070](0070-questions-get-a-page-of-their-own.md) | Questions get a page of their own, and `clarify` rides in the map | Accepted |
 | [0071](0071-clarify-reads-values-and-delegation.md) | `clarify` tells a value from a quantity and a handed-on clause from its own | Accepted |
 | [0072](0072-retire-unbounded-quantity.md) | `clarify` retires `unbounded-quantity` | Accepted |
+| [0073](0073-mcp-values-stay-values.md) | An MCP value stays a value, a message is checked before it is read, and a fan-out band is checked before it is used | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
