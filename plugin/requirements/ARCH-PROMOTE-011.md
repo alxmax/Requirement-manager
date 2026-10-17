@@ -147,9 +147,10 @@ satisfies: [ARCH-PROMOTE-011]
 > the easy path and re-reading it the hard one. Now the safe outcome is the default.
 
 Every bullet below is binding.
-- When `sync` updates the lock and finds a `confirmed` or `implemented` requirement whose
-  binding hash differs from the committed one, it writes `status: draft` into that
-  requirement.
+- When `sync` or `init` updates the lock and finds a `confirmed` or `implemented`
+  requirement whose binding hash differs from the committed one, it writes `status: draft`
+  into that requirement. Neither takes a waiver the caller did not ask for; only
+  `sync --accept-drift` does.
 - **A brand-new requirement is not drift.** A requirement absent from the lock has no
   previous text to have changed, so it is never demoted.
 - The run **names every demoted requirement**, with its previous status, and states that
@@ -160,9 +161,12 @@ Every bullet below is binding.
   advances.
 - **An unchanged file is not an edit.** A drifted requirement whose file is identical to its
   copy in the commit that last wrote the lock keeps its status: its hash moved because a
-  newer engine hashes differently. The run says so, and the waiver is recorded in the drift
-  log with that commit. Without git, a lock never committed or a file git does not track,
-  the requirement is demoted as before.
+  newer engine hashes differently. That holds only if the engine changed, which the file
+  does not show: the map committed beside the lock records the engine that wrote it, and
+  must name another engine than the one running. The run says so, and the waiver is
+  recorded in the drift log with that commit. Without git, a lock never committed, a file
+  git does not track, or a map that is missing, unreadable or names this same engine, the
+  requirement is demoted as before.
 - The in-memory status is updated too, so the same run's own summary counts the
   requirement as a draft rather than reporting a status it has just changed.
 
@@ -189,3 +193,14 @@ CASE-4 — a new hash on unchanged text keeps the confirmation
   When   `sync` runs
   Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log
          names the lock commit; had the file been edited after that commit, it is demoted
+
+CASE-5 — a lock written by this same engine is not an upgrade
+  Given  the same committed lock, once with a map naming the running engine and once with
+         no map at that commit
+  When   `sync` runs
+  Then   the requirement is demoted and nothing is re-baselined
+
+CASE-6 — init demotes an edited contract and records no waiver
+  Given  a `confirmed` requirement, synced once, whose contract is then edited
+  When   `init --minimal` runs over it
+  Then   it is demoted to `draft` and no `_driftlog.json` is written

@@ -2920,9 +2920,10 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             self.assertEqual(self._status(rq), "status: confirmed")
 
 
-    def _commit_with_older_hash(self, d, rq):
+    def _commit_with_older_hash(self, d, rq, engine="2025-01-01"):
         """A git repo whose committed lock holds a hash an older engine wrote for the
-        same, unchanged text — the state a consumer is in right after re-vendoring."""
+        same, unchanged text — the state a consumer is in right after re-vendoring. The
+        map committed beside it names the engine that wrote it; `None` commits no map."""
         def git(*args):
             subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", *args],
                            cwd=d, check=True, capture_output=True)
@@ -2934,6 +2935,9 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
         data["AREA-E-001"] = "0123456789ab"
         with open(lock, "w", encoding="utf-8") as f:
             json.dump(data, f)
+        if engine:
+            _write(os.path.join(rq, "_map.json"),
+                   json.dumps({"engine_version": engine, "nodes": []}))
         git("add", "-A")
         git("commit", "-q", "-m", "baseline")
 
@@ -2959,6 +2963,162 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             self.assertIn("demoted: AREA-E-001", out)
             self.assertNotIn("re-baselined", out)
             self.assertEqual(self._status(rq), "status: draft")
+
+    def test_a_lock_written_by_this_same_engine_is_not_an_upgrade(self):  # verifies: REQ-PROMOTE-974#CASE-5
+        for engine in (R.MAP_ENGINE_VERSION, None):
+            with tempfile.TemporaryDirectory() as d:
+                rq = self._seed(d)
+                self._commit_with_older_hash(d, rq, engine=engine)
+                out = self._sync(d)
+                self.assertIn("demoted: AREA-E-001", out, engine)
+                self.assertNotIn("re-baselined", out, engine)
+                self.assertEqual(self._status(rq), "status: draft", engine)
+
+    def test_init_over_an_edited_contract_demotes_it_and_records_nothing(self):  # verifies: REQ-PROMOTE-974#CASE-6
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._sync(d)
+            self._edit(rq)
+            done = subprocess.run(
+                [sys.executable, "-X", "utf8", engine, "init", "--minimal", "--no-site",
+                 "--root", d], capture_output=True, text=True, encoding="utf-8",
+                timeout=300, env=dict(os.environ, CLAUDE_PROJECT_DIR=""))
+            self.assertIn("demoted: AREA-E-001", done.stdout, done.stderr)
+            self.assertEqual(self._status(rq), "status: draft")
+            self.assertFalse(os.path.exists(os.path.join(rq, "_driftlog.json")))
+
+
+class BaselineInputs(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: REQ-DRIFT-1103  # tested-by: REQ-DRIFT-1104
+    """A baseline that exists and cannot be used is said so, and a drift log this engine
+    cannot keep is not overwritten. An absent baseline is first use and stays quiet."""
+
+    BODY = DemoteOnEdit.BODY
+    _seed = DemoteOnEdit._seed
+    _status = DemoteOnEdit._status
+    _edit = DemoteOnEdit._edit
+    _sync = DemoteOnEdit._sync
+    _commit_with_older_hash = DemoteOnEdit._commit_with_older_hash
+
+    def _run(self, d, update=False, strict=False, accept=False):
+        rq = os.path.join(d, "requirements")
+        ws = R.Workspace(R.load_requirements(rq), R.scan_members(d, rq), rq, d)
+        found, buf = [], io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            rc = R.cmd_check(ws, update, strict=strict, accept_drift=accept, findings=found)
+        return rc, found, buf.getvalue()
+
+    @staticmethod
+    def _rules(found):
+        return {f["rule"] for f in found}
+
+    def _baselined(self, d):
+        rq = self._seed(d)
+        self._run(d, update=True)
+        return rq
+
+    def test_a_lock_entry_with_no_hash_is_named_and_strict_fails_on_it(self):  # verifies: REQ-DRIFT-1103#CASE-1
+        for bad in (None, "", 7, ["x"]):
+            with tempfile.TemporaryDirectory() as d:
+                rq = self._baselined(d)
+                lock = os.path.join(rq, "_reqlock.json")
+                with open(lock, encoding="utf-8") as f:
+                    data = json.load(f)
+                data["AREA-E-001"] = bad
+                with open(lock, "w", encoding="utf-8") as f:
+                    json.dump(data, f)
+                self._edit(rq)
+                _rc, found, _out = self._run(d, strict=True)
+                hit = [f for f in found if f["rule"] == "RM016"]
+                self.assertEqual(["error"], [f["severity"] for f in hit], repr(bad))
+                self.assertIn("AREA-E-001", str(hit[0]))
+        with tempfile.TemporaryDirectory() as d:        # control: a real hash is drift
+            rq = self._baselined(d)
+            self._edit(rq)
+            _rc, found, _out = self._run(d, strict=True)
+            self.assertIn("RM018", self._rules(found))
+            self.assertNotIn("RM016", self._rules(found))
+
+    def test_a_member_lock_that_cannot_be_used_is_named(self):  # verifies: REQ-DRIFT-1103#CASE-2
+        unusable = {"schema": '{"_schema": 99, "members": {}}',
+                    "old schema": '{"_schema": 1, "members": {}}',
+                    "no schema": '{"members": {}}',
+                    "corrupt": '{ not json',
+                    "not an object": '[1, 2]',
+                    "members not an object": '{"_schema": 2, "members": [1]}',
+                    "record not an object": '{"_schema": 2, "members": {"A-B-001": 5}}',
+                    "hash not text": '{"_schema": 2, "members": {"A-B-001": {"a.py": null}}}'}
+        for label, text in unusable.items():
+            with tempfile.TemporaryDirectory() as d:
+                rq = self._baselined(d)
+                _write(os.path.join(rq, "_memberlock.json"), text)
+                _rc, found, _out = self._run(d, strict=True)
+                hit = [f for f in found if f["rule"] == "RM016"]
+                self.assertEqual(1, len(hit), label)
+                self.assertIn("_memberlock.json", str(hit[0]), label)
+                self.assertEqual("error", hit[0]["severity"], label)
+
+    def test_an_absent_or_valid_baseline_is_not_a_problem(self):  # verifies: REQ-DRIFT-1103#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)                              # first use: nothing written yet
+            _rc, found, _out = self._run(d, strict=True)
+            self.assertNotIn("RM016", self._rules(found))
+            self._run(d, update=True)                  # both baselines now valid
+            _rc, found, _out = self._run(d, strict=True)
+            self.assertNotIn("RM016", self._rules(found))
+
+    def test_a_valid_baseline_still_catches_member_drift(self):  # verifies: REQ-DRIFT-1103#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self._baselined(d)
+            with open(os.path.join(d, "m.py"), "a", encoding="utf-8") as f:
+                f.write("x = 2\n")
+            _rc, found, _out = self._run(d, strict=True)
+            self.assertIn("RM019", self._rules(found))
+
+    def test_a_drift_log_this_engine_cannot_keep_is_not_overwritten(self):  # verifies: REQ-DRIFT-1104#CASE-1
+        keep = {"newer schema": '{"_schema": 2, "accepted": {"B-C-001": {"hash": "ab", '
+                                  '"reason": "keep me"}}}',
+                "corrupt": '{ not json', "not an object": '[1]',
+                "accepted not an object": '{"_schema": 1, "accepted": [1]}'}
+        for label, text in keep.items():
+            with tempfile.TemporaryDirectory() as d:
+                rq = self._baselined(d)
+                self._edit(rq)
+                _write(os.path.join(rq, "_driftlog.json"), text)
+                before = {n: open(os.path.join(rq, n), "rb").read()
+                          for n in ("_driftlog.json", "_reqlock.json", "_memberlock.json")}
+                rc, found, out = self._run(d, update=True, accept="why")
+                self.assertEqual(1, rc, label)
+                self.assertIn("INPUT:driftlog", self._rules(found), label)
+                self.assertIn("the baseline was not advanced", out, label)
+                for name, data in before.items():
+                    with open(os.path.join(rq, name), "rb") as f:
+                        self.assertEqual(data, f.read(), "{}: {}".format(label, name))
+                self.assertEqual(self._status(rq), "status: confirmed", label)
+
+    def test_an_upgrade_waiver_is_refused_too_when_the_log_cannot_be_kept(self):  # verifies: REQ-DRIFT-1104#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._commit_with_older_hash(d, rq)
+            _write(os.path.join(rq, "_driftlog.json"), '{"_schema": 2, "accepted": {}}')
+            before = open(os.path.join(rq, "_reqlock.json"), "rb").read()
+            rc, found, _out = self._run(d, update=True)
+            self.assertEqual(1, rc)
+            self.assertIn("INPUT:driftlog", self._rules(found))
+            self.assertEqual(before, open(os.path.join(rq, "_reqlock.json"), "rb").read())
+
+    def test_an_absent_or_valid_drift_log_takes_the_acceptance(self):  # verifies: REQ-DRIFT-1104#CASE-3
+        for log in (None, '{"_schema": 1, "accepted": {}}'):
+            with tempfile.TemporaryDirectory() as d:
+                rq = self._baselined(d)
+                self._edit(rq)
+                if log:
+                    _write(os.path.join(rq, "_driftlog.json"), log)
+                rc, _found, out = self._run(d, update=True, accept="why")
+                self.assertEqual(0, rc, repr(log))
+                self.assertIn("accepted drift on 1", out)
+                with open(os.path.join(rq, "_driftlog.json"), encoding="utf-8") as f:
+                    self.assertEqual("why", json.load(f)["accepted"]["AREA-E-001"]["reason"])
 
 
 class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-975

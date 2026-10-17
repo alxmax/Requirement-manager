@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-17.5",
+  "engine_version": "2026-10-17.6",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1083,7 +1083,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:43"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:35"
         },
         {
           "role": "implements",
@@ -1230,7 +1230,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:43"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:35"
         },
         {
           "role": "implements",
@@ -1854,7 +1854,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3409"
+          "loc": "plugin/scripts/test_reqmap_author.py:3569"
         },
         {
           "role": "implements",
@@ -1903,7 +1903,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3409"
+          "loc": "plugin/scripts/test_reqmap_author.py:3569"
         },
         {
           "role": "implements",
@@ -1970,7 +1970,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3409"
+          "loc": "plugin/scripts/test_reqmap_author.py:3569"
         },
         {
           "role": "implements",
@@ -2177,35 +2177,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:184"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:256"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:271"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:274"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:289"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:287"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:302"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:342"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:192"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:276"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:380"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:464"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:388"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:472"
         },
         {
           "role": "implements",
@@ -2217,7 +2217,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:192"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:184"
         },
         {
           "role": "implements",
@@ -2343,7 +2343,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:78"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:70"
         }
       ],
       "test_exempt": null,
@@ -2453,7 +2453,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:192"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:276"
         }
       ],
       "test_exempt": null,
@@ -2530,11 +2530,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:180"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:192"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:184"
         }
       ],
       "test_exempt": null,
@@ -2590,19 +2590,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:185"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:196"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:257"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:272"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:288"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:343"
         }
       ],
       "test_exempt": null,
@@ -2664,19 +2664,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:185"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:196"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:257"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:272"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:288"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:328"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:343"
         }
       ],
       "test_exempt": null,
@@ -2859,15 +2859,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2964"
+          "loc": "plugin/scripts/test_reqmap_author.py:3124"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3071"
+          "loc": "plugin/scripts/test_reqmap_author.py:3231"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3125"
+          "loc": "plugin/scripts/test_reqmap_author.py:3285"
         },
         {
           "role": "implements",
@@ -2939,7 +2939,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3125"
+          "loc": "plugin/scripts/test_reqmap_author.py:3285"
         },
         {
           "role": "implements",
@@ -3057,7 +3057,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2964"
+          "loc": "plugin/scripts/test_reqmap_author.py:3124"
         },
         {
           "role": "implements",
@@ -3065,19 +3065,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:239"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:254"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:160"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:244"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:164"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:248"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:183"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:267"
         }
       ],
       "test_exempt": null,
@@ -3118,7 +3118,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3071"
+          "loc": "plugin/scripts/test_reqmap_author.py:3231"
         },
         {
           "role": "implements",
@@ -4228,7 +4228,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3218"
+          "loc": "plugin/scripts/test_reqmap_author.py:3378"
         },
         {
           "role": "tested-by",
@@ -4513,7 +4513,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3218"
+          "loc": "plugin/scripts/test_reqmap_author.py:3378"
         },
         {
           "role": "implements",
@@ -5450,7 +5450,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:116"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:108"
         }
       ],
       "test_exempt": null,
@@ -5673,7 +5673,8 @@
       "contract": [
         "`binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body. [[REQ-DRIFT-841]]",
         "`load_lock`/`save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`, failing open to `{}` on a missing or corrupt file. [[REQ-DRIFT-842]]",
-        "Waiving the drift check records who was waived and why, in a versioned sidecar the diff shows, so the one escape hatch in the gate is not also the one thing nobody reviews. [[REQ-DRIFT-988]]"
+        "Waiving the drift check records who was waived and why, in a versioned sidecar the diff shows, so the one escape hatch in the gate is not also the one thing nobody reviews. [[REQ-DRIFT-988]]",
+        "A baseline that exists and cannot be used is named, and a waiver is not recorded over a log this engine cannot keep. [[REQ-DRIFT-1103]] [[REQ-DRIFT-1104]]"
       ],
       "verify": [],
       "notes": [
@@ -5705,9 +5706,15 @@
       "satisfied_by": [
         "REQ-DRIFT-841",
         "REQ-DRIFT-842",
-        "REQ-DRIFT-988"
+        "REQ-DRIFT-988",
+        "REQ-DRIFT-1103",
+        "REQ-DRIFT-1104"
       ],
       "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:2992"
+        },
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_gate.py:52"
@@ -5750,11 +5757,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:132"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:77"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:212"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:21"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:69"
         },
         {
           "role": "implements",
@@ -5928,7 +5943,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the reason is recorded beside the hash\n  Given  a confirmed contract that changed\n  When   `sync --accept-drift \"renamed the flag\"` runs\n  Then   `_driftlog.json` holds that requirement's new hash and that reason\n\nCASE-2 — a bare waiver is recorded with no reason\n  Given  the same contract\n  When   `sync --accept-drift` runs with no reason\n  Then   the entry exists and its reason is null\n\nCASE-3 — a demotion records nothing\n  Given  the same contract\n  When   `sync` runs without `--accept-drift`\n  Then   the requirement is demoted to draft and no `_driftlog.json` is written\n\nCASE-4 — a retired id is pruned\n  Given  a drift log holding an id no longer in the corpus\n  When   a later waiver is recorded\n  Then   that id is gone from the log\n\nCASE-5 — a forward schema fails open\n  Given  a `_driftlog.json` whose `_schema` is newer than this engine's\n  When   it is loaded\n  Then   it reads as an empty record and nothing raises",
+      "accept": "CASE-1 — the reason is recorded beside the hash\n  Given  a confirmed contract that changed\n  When   `sync --accept-drift \"renamed the flag\"` runs\n  Then   `_driftlog.json` holds that requirement's new hash and that reason\n\nCASE-2 — a bare waiver is recorded with no reason\n  Given  the same contract\n  When   `sync --accept-drift` runs with no reason\n  Then   the entry exists and its reason is null\n\nCASE-3 — a demotion records nothing\n  Given  the same contract\n  When   `sync` runs without `--accept-drift`\n  Then   the requirement is demoted to draft and no `_driftlog.json` is written\n\nCASE-4 — a retired id is pruned\n  Given  a drift log holding an id no longer in the corpus\n  When   a later waiver is recorded\n  Then   that id is gone from the log\n\nCASE-5 — a forward schema fails open\n  Given  a `_driftlog.json` whose `_schema` is newer than this engine's\n  When   it is loaded\n  Then   it reads as an empty record and nothing raises\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -5945,19 +5960,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:98"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:155"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:102"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:159"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:119"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:199"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:132"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:212"
         }
       ],
       "test_exempt": null,
@@ -5977,6 +5992,124 @@
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
+    },
+    {
+      "id": "REQ-DRIFT-1103",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A baseline that exists and cannot be used is named",
+      "intent": "Reading a baseline fails open, so that a repository with none still gates. The same rule hid the other case: a baseline that is there and unusable reads as empty, and the drift signal it carries is off with nothing saying so. A `null` where a hash belongs was enough to turn an edited contract into a pass under `--strict`. See [ADR-0074](../../docs/adr/0074-a-baseline-is-checked-and-a-waiver-is-kept.md).",
+      "contract": [
+        "RM016 names a `_reqlock.json` that cannot be read as an object, and one that holds an id with no hash: a value that is not text, or is empty.",
+        "RM016 names a `_memberlock.json` that cannot be read as an object, carries another schema than this engine reads, or holds anything but `{id: {file: hash}}`.",
+        "A baseline that is absent is first use, and says nothing; reading both still fails open."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a lock entry with no hash is named, and strict fails on it\n  Given  a baselined confirmed requirement whose `_reqlock.json` entry is `null`, an empty\n         string, a number or a list, and whose contract is then edited\n  When   `gate --strict` runs\n  Then   it reports RM016 naming the id, as an error, where a real hash reports RM018\n\nCASE-2 — a member lock that cannot be used is named\n  Given  a `_memberlock.json` of schema 99, schema 1, none, not JSON, not an object, with\n         `members` not an object, with a record that is not an object, or with a hash that\n         is not text\n  When   `gate --strict` runs\n  Then   each reports one RM016 naming `_memberlock.json`, as an error\n\nCASE-3 — an absent or valid baseline says nothing\n  Given  a repository with no baseline yet, and then one synced once\n  When   `gate --strict` runs on each\n  Then   neither reports RM016\n\nCASE-4 — a valid baseline still catches member drift\n  Given  a synced requirement whose member file is then edited, its contract untouched\n  When   `gate --strict` runs\n  Then   it reports RM019\n\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-DRIFT-003"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:2992"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/locks.py:48"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/locks.py:61"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:21"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": []
+    },
+    {
+      "id": "REQ-DRIFT-1104",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A waiver is not recorded over a log this engine cannot keep",
+      "intent": "Reading the drift log fails open, which is right for a gate. Writing it back from what that read returned is not: a log this engine does not understand reads as empty, and the next waiver rewrites the file with only itself in it, in an older schema. Every waiver already on record, and the reason given for it, is gone.",
+      "contract": [
+        "Before it records a waiver, whether from `--accept-drift` or from an unchanged file under a new engine, `sync` and `init` check that `_driftlog.json` can be rewritten without losing what it holds. One that is not valid JSON, not an object, of a newer schema than the engine writes, or whose `accepted` is not an object cannot.",
+        "When it cannot, nothing is advanced: the run prints the reason, reports it as an `INPUT:driftlog` error, exits 1, and leaves `_driftlog.json`, `_reqlock.json` and `_memberlock.json` byte for byte as they were, and the requirement's status unchanged.",
+        "An absent log, and one of the schema the engine writes, take the waiver as before; reading the log still fails open."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a log this engine cannot keep is not overwritten\n  Given  a baselined confirmed requirement with an edited contract, and a `_driftlog.json`\n         of schema 2, not JSON, a list, or with `accepted` a list\n  When   `sync --accept-drift why` runs\n  Then   it exits 1 with `INPUT:driftlog`, the three baseline files are byte for byte what\n         they were, and the requirement is still `confirmed`\n\nCASE-2 — an upgrade waiver is refused the same way\n  Given  a committed lock holding an older hash for unchanged text, from an older engine, and\n         a `_driftlog.json` of schema 2\n  When   `sync` runs\n  Then   it exits 1 with `INPUT:driftlog` and `_reqlock.json` is unchanged\n\nCASE-3 — an absent or valid log takes the waiver\n  Given  an edited confirmed contract, with no `_driftlog.json` and then with one of schema 1\n  When   `sync --accept-drift why` runs\n  Then   it exits 0, says it accepted the drift, and the log carries the reason `why`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-DRIFT-003"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:2992"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/gate.py:241"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/locks.py:48"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/locks.py:180"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/locks.py:230"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "ARCH-DRIFTIMPACT-035",
@@ -6024,7 +6157,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:77"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:69"
         }
       ],
       "test_exempt": null,
@@ -6082,7 +6215,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:78"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:70"
         }
       ],
       "test_exempt": null,
@@ -6634,7 +6767,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3539"
+          "loc": "plugin/scripts/test_reqmap_author.py:3699"
         },
         {
           "role": "implements",
@@ -8285,7 +8418,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4426"
+          "loc": "plugin/scripts/test_reqmap_author.py:4586"
         },
         {
           "role": "implements",
@@ -9765,7 +9898,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:213"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:205"
         },
         {
           "role": "implements",
@@ -10001,7 +10134,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:223"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:215"
         }
       ],
       "test_exempt": null,
@@ -11212,39 +11345,39 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:61"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:118"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:66"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:84"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:141"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:214"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:232"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:316"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:266"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:350"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:278"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:362"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:324"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:408"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:95"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:87"
         }
       ],
       "test_exempt": null,
@@ -11299,23 +11432,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:61"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:118"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:66"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:84"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:141"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:266"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:350"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:278"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:362"
         }
       ],
       "test_exempt": null,
@@ -11379,7 +11512,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:324"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:408"
         }
       ],
       "test_exempt": null,
@@ -11438,11 +11571,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:232"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:316"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/locks.py:251"
+          "loc": "plugin/scripts/reqmap_engine/locks.py:335"
         }
       ],
       "test_exempt": null,
@@ -12423,7 +12556,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:166"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:158"
         }
       ],
       "test_exempt": null,
@@ -13401,18 +13534,18 @@
       "title": "An edited contract loses its confirmation",
       "intent": "A `confirmed` status is a claim that a human read THIS text. Once the text changes, the claim is about something that no longer exists. Before this, `sync` refused to advance the baseline and told the caller to pass `--accept-drift`, which made accepting the edit the easy path and re-reading it the hard one. Now the safe outcome is the default.",
       "contract": [
-        "When `sync` updates the lock and finds a `confirmed` or `implemented` requirement whose binding hash differs from the committed one, it writes `status: draft` into that requirement.",
+        "When `sync` or `init` updates the lock and finds a `confirmed` or `implemented` requirement whose binding hash differs from the committed one, it writes `status: draft` into that requirement. Neither takes a waiver the caller did not ask for; only `sync --accept-drift` does.",
         "**A brand-new requirement is not drift.** A requirement absent from the lock has no previous text to have changed, so it is never demoted.",
         "The run **names every demoted requirement**, with its previous status, and states that they no longer gate.",
         "After demoting, the lock and the member lock advance in the same run. The next run is clean, so the demotion happens once, not on every sync.",
         "`--accept-drift` skips the demotion entirely: the status stays and the baseline advances.",
-        "**An unchanged file is not an edit.** A drifted requirement whose file is identical to its copy in the commit that last wrote the lock keeps its status: its hash moved because a newer engine hashes differently. The run says so, and the waiver is recorded in the drift log with that commit. Without git, a lock never committed or a file git does not track, the requirement is demoted as before.",
+        "**An unchanged file is not an edit.** A drifted requirement whose file is identical to its copy in the commit that last wrote the lock keeps its status: its hash moved because a newer engine hashes differently. That holds only if the engine changed, which the file does not show: the map committed beside the lock records the engine that wrote it, and must name another engine than the one running. The run says so, and the waiver is recorded in the drift log with that commit. Without git, a lock never committed, a file git does not track, or a map that is missing, unreadable or names this same engine, the requirement is demoted as before.",
         "The in-memory status is updated too, so the same run's own summary counts the requirement as a draft rather than reporting a status it has just changed."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an edited confirmed contract is demoted, and the lock advances\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `sync` runs without `--accept-drift`\n  Then   the file reads `status: draft`, the output names it, and a second `sync` reports\n         no drift\n\nCASE-2 — a new requirement is not demoted\n  Given  a `confirmed` requirement that has never been in the lock\n  When   `sync` runs\n  Then   its status is unchanged and nothing is reported as demoted\n\nCASE-3 — accept-drift keeps the status\n  Given  a `confirmed` requirement whose contract was edited\n  When   `sync --accept-drift` runs\n  Then   the status stays `confirmed` and the lock advances\n\nCASE-4 — a new hash on unchanged text keeps the confirmation\n  Given  a committed lock holding another hash for a `confirmed` requirement whose file is\n         unchanged since that commit\n  When   `sync` runs\n  Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log\n         names the lock commit; had the file been edited after that commit, it is demoted",
+      "accept": "CASE-1 — an edited confirmed contract is demoted, and the lock advances\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `sync` runs without `--accept-drift`\n  Then   the file reads `status: draft`, the output names it, and a second `sync` reports\n         no drift\n\nCASE-2 — a new requirement is not demoted\n  Given  a `confirmed` requirement that has never been in the lock\n  When   `sync` runs\n  Then   its status is unchanged and nothing is reported as demoted\n\nCASE-3 — accept-drift keeps the status\n  Given  a `confirmed` requirement whose contract was edited\n  When   `sync --accept-drift` runs\n  Then   the status stays `confirmed` and the lock advances\n\nCASE-4 — a new hash on unchanged text keeps the confirmation\n  Given  a committed lock holding another hash for a `confirmed` requirement whose file is\n         unchanged since that commit\n  When   `sync` runs\n  Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log\n         names the lock commit; had the file been edited after that commit, it is demoted\n\nCASE-5 — a lock written by this same engine is not an upgrade\n  Given  the same committed lock, once with a map naming the running engine and once with\n         no map at that commit\n  When   `sync` runs\n  Then   the requirement is demoted and nothing is re-baselined\n\nCASE-6 — init demotes an edited contract and records no waiver\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `init --minimal` runs over it\n  Then   it is demoted to `draft` and no `_driftlog.json` is written",
       "input": "",
       "output": "",
       "desc": "",
@@ -13433,23 +13566,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:210"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:222"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:229"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:244"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:274"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:289"
         }
       ],
       "test_exempt": null,
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 6,
+      "covered": 6,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -13457,7 +13590,7 @@
           "basis": "count",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 7 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
@@ -14240,7 +14373,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3978"
+          "loc": "plugin/scripts/test_reqmap_author.py:4138"
         },
         {
           "role": "implements",
@@ -14331,7 +14464,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3647"
+          "loc": "plugin/scripts/test_reqmap_author.py:3807"
         },
         {
           "role": "implements",
@@ -14384,7 +14517,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3700"
+          "loc": "plugin/scripts/test_reqmap_author.py:3860"
         },
         {
           "role": "implements",
@@ -14439,7 +14572,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3734"
+          "loc": "plugin/scripts/test_reqmap_author.py:3894"
         },
         {
           "role": "implements",
@@ -14517,7 +14650,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3764"
+          "loc": "plugin/scripts/test_reqmap_author.py:3924"
         },
         {
           "role": "implements",
@@ -14579,7 +14712,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3786"
+          "loc": "plugin/scripts/test_reqmap_author.py:3946"
         },
         {
           "role": "implements",
@@ -14661,7 +14794,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3898"
+          "loc": "plugin/scripts/test_reqmap_author.py:4058"
         },
         {
           "role": "implements",
@@ -14720,7 +14853,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3786"
+          "loc": "plugin/scripts/test_reqmap_author.py:3946"
         },
         {
           "role": "implements",
@@ -14774,7 +14907,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4019"
+          "loc": "plugin/scripts/test_reqmap_author.py:4179"
         },
         {
           "role": "implements",
@@ -14845,7 +14978,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4134"
+          "loc": "plugin/scripts/test_reqmap_author.py:4294"
         },
         {
           "role": "implements",
@@ -15030,7 +15163,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3163"
+          "loc": "plugin/scripts/test_reqmap_author.py:3323"
         },
         {
           "role": "tested-by",
@@ -15274,7 +15407,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3163"
+          "loc": "plugin/scripts/test_reqmap_author.py:3323"
         },
         {
           "role": "implements",
@@ -16232,7 +16365,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4134"
+          "loc": "plugin/scripts/test_reqmap_author.py:4294"
         },
         {
           "role": "implements",
@@ -16371,19 +16504,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:184"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:256"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:271"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:287"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:302"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:327"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:342"
         },
         {
           "role": "implements",
@@ -16537,19 +16670,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:186"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:258"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:273"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:289"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:304"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:329"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:344"
         },
         {
           "role": "implements",
@@ -19231,7 +19364,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4190"
+          "loc": "plugin/scripts/test_reqmap_author.py:4350"
         },
         {
           "role": "implements",
@@ -19342,7 +19475,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4193"
+          "loc": "plugin/scripts/test_reqmap_author.py:4353"
         },
         {
           "role": "implements",
@@ -20419,7 +20552,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:128"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:120"
         }
       ],
       "test_exempt": null,
@@ -20894,7 +21027,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:155"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:147"
         },
         {
           "role": "implements",
@@ -20958,7 +21091,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:156"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:148"
         },
         {
           "role": "implements",
@@ -21033,7 +21166,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:141"
+          "loc": "plugin/scripts/reqmap_engine/rulesrepo.py:133"
         }
       ],
       "test_exempt": null,
@@ -24708,6 +24841,14 @@
       "ARCH-DRIFT-003"
     ],
     [
+      "REQ-DRIFT-1103",
+      "ARCH-DRIFT-003"
+    ],
+    [
+      "REQ-DRIFT-1104",
+      "ARCH-DRIFT-003"
+    ],
+    [
       "ARCH-DRIFTIMPACT-035",
       "SYS-DRIFT-109"
     ],
@@ -27389,7 +27530,7 @@
     },
     {
       "month": "2026-10",
-      "count": 24,
+      "count": 25,
       "first": "2026-10-01",
       "last": "2026-10-17",
       "versions": [
@@ -27416,11 +27557,20 @@
         "v8.24.0",
         "v8.24.1",
         "v8.24.2",
-        "v8.24.3"
+        "v8.24.3",
+        "v8.24.4"
       ],
       "landmark": "v8.24.0",
       "headline": "Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070)",
       "entries": [
+        {
+          "version": "v8.24.4",
+          "date": "2026-10-17",
+          "headline": "A confirmed contract can no longer change unseen, and an unusable baseline is named (ADR-0074)",
+          "body": "**A confirmed contract can no longer change unseen, and an unusable baseline is named (ADR-0074).**\n\n- `init` accepted drift without being asked: over an existing baseline it kept an edited contract `confirmed`, advanced the lock and wrote a waiver with `reason: null`. `cmd_check` no longer accepts unless the caller asks, so `init` demotes an edited confirmed contract as `sync` does and writes no waiver. REQ-PROMOTE-974 CASE-6\n- The exception that keeps a confirmation when a lock hash moves under unchanged text now needs the map committed beside that lock to name an engine other than the running one. A lock committed with a contract edit it never took up used to be read as an engine upgrade. REQ-PROMOTE-974 CASE-5\n- RM016 now also names a `_reqlock.json` that holds an id with no hash, and a `_memberlock.json` that is unreadable, of another schema or not `{id: {file: hash}}`. A `null` hash used to turn RM018 off, and a schema-99 member lock member drift, with nothing said; under `--strict` both are now errors. An absent baseline, first use, stays quiet. REQ-DRIFT-1103\n- A waiver is no longer recorded over a `_driftlog.json` this engine cannot keep (not JSON, not an object, a newer schema, `accepted` not an object). `sync --accept-drift` used to rewrite a schema-2 log as schema 1 and drop every waiver in it. It now exits 1 with `INPUT:driftlog` and leaves the log, the lock and the status untouched. REQ-DRIFT-1104\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.6`; 18,150 physical lines in 76 files (the README says so). The core rises to 6,694 logical lines (ADR-0074)",
+          "first_commit": "2026-10-17",
+          "last_commit": "2026-10-17"
+        },
         {
           "version": "v8.24.3",
           "date": "2026-10-17",
@@ -27927,16 +28077,16 @@
     }
   },
   "health": {
-    "score": 97,
-    "total": 324,
-    "scored": 302,
+    "score": 96,
+    "total": 326,
+    "scored": 304,
     "healthy": 292,
     "exempt": 0,
     "deprecated": 22,
     "confirmed": 292,
-    "implemented": 291,
-    "tested": 292,
-    "drafts": 10,
+    "implemented": 293,
+    "tested": 294,
+    "drafts": 12,
     "orphans": 0,
     "untested": 1,
     "open_intent": 0,
@@ -27952,6 +28102,20 @@
         "why": [
           "not confirmed",
           "not tested"
+        ]
+      },
+      {
+        "id": "REQ-DRIFT-1103",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-DRIFT-1104",
+        "status": "draft",
+        "why": [
+          "not confirmed"
         ]
       },
       {
