@@ -74,6 +74,9 @@ export function adaptNode(n) {
     // lib/tree.js (openQuestions) so the viewer and `collect_findings`
     // agree on what counts.
     verify: Array.isArray(n.verify) ? n.verify : [],
+    // What `clarify` asks of the text: {rule, severity, where, quote,
+    // question, suggest}. Absent in a map written before v8.24.0.
+    clarify: Array.isArray(n.clarify) ? n.clarify : [],
     status: n.status || "draft",
     intent: n.intent || "",
     contract: Array.isArray(n.contract) ? n.contract : [],

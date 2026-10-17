@@ -167,6 +167,9 @@ attempt and rejected it).
    as a placeholder and `findings` skips it. Once the human answers, fold the answer
    into the Contract (or Notes) and delete the bullet — the section should shrink toward
    empty as the requirement matures.
+   A bullet that starts `Observed` records something seen in the code; `init` writes one
+   per signal its scan finds, as ``Observed at `file:line`: `code` …``. The viewer's
+   Questions page lists those apart from the questions a person asked.
    A question a reviewer can answer at a glance is asked as a decision, in this form
    (names and numbers invented):
 

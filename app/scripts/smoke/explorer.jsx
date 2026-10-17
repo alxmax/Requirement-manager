@@ -9,8 +9,12 @@ import {
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
 import {
-  ProblemsView, computeProblems, computeQuestions,
+  ProblemsView, computeProblems,
 } from "../../src/views/ProblemsView.jsx";
+import {
+  QuestionsView, computeQuestions, questionCount,
+} from "../../src/views/QuestionsView.jsx";
+import { Rail } from "../../src/components/Rail.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
   PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
@@ -92,7 +96,8 @@ const treeChecks = [
       verify: ["Is a stale tested-by range an error or a warning?"],
     }).length === 1],
   ["findings: the live corpus reports zero open questions",
-    computeQuestions().length === 0],
+    computeQuestions().person.length === 0
+      && computeQuestions().code.length === 0],
 ];
 for (const [label, ok] of treeChecks) test(label, ok);
 
@@ -243,10 +248,13 @@ const layerChecks = [
 ];
 for (const [label, ok] of layerChecks) test(label, ok);
 
-// ---- author questions live in Problems (REQ-VIEWER-966) --------------------
-// Two screens until v4.0.0: Problems was ~618 rows of draft review noise and
-// a real question dropped in there was invisible. What survives the merge is
-// the distinction — origin is a tab, never a severity.
+// ---- questions have a page of their own (REQ-VIEWER-1101) ------------------
+// tested-by: REQ-VIEWER-1101
+// ADR-0070: three sources of question, one page, grouped by where each came
+// from; Problems keeps only what is broken or awaits review.
+const CLARIFY_Q = (rule, severity) => ({ rule, severity, where: "clause 1",
+  quote: "`gate` retries 3 times.", question: `the ${rule} question`,
+  suggest: "say it" });
 adoptMapExport({ nodes: [
   adaptNode({ id: "Q-ASKED-001", title: "asked", area: "Q", layer: "feature",
     status: "confirmed",
@@ -259,26 +267,54 @@ adoptMapExport({ nodes: [
     intent: "i", contract: ["a clause"], acc: [],
     members: [{ role: "implements", loc: "b.py:1" }],
     verify: ["None — authored from known intent."], deps: [], used_by: [] }),
+  adaptNode({ id: "Q-SEEN-003", title: "seen", area: "Q", layer: "feature",
+    status: "draft", intent: "i", contract: [], acc: [], members: [],
+    verify: ["Observed at `src/x.py:6`: `except OSError:` swallows the "
+      + "error. Intended fail-open, or a bug to fix?"], deps: [],
+    used_by: [] }),
+  adaptNode({ id: "Q-TEXT-004", title: "text", area: "Q", layer: "feature",
+    status: "draft", intent: "i", contract: [], acc: [], members: [],
+    verify: [], deps: [], used_by: [],
+    clarify: [CLARIFY_Q("vague-term", "advisory"),
+      CLARIFY_Q("no-cases", "blocking")] }),
 ] });
 const merged = computeProblems();
 const asked = computeQuestions();
-const mergedHtml = renderToString(<ProblemsView openSpec={noop} />);
+const problemsHtml = renderToString(<ProblemsView openSpec={noop} />);
+const pageHtml = (origin) => renderToString(
+  <QuestionsView openSpec={noop} initialOrigin={origin} />);
+const railHtml = renderToString(
+  <Rail view="questions" setView={noop} focus={null} setFocus={noop}
+    problems={merged} openProblems={noop} />);
+const navAt = (label) => railHtml.indexOf(`</svg>${label}<`);
 const mergeChecks = [
-  // verifies: REQ-VIEWER-966#CASE-1
-  ["problems: an author's open question is a row here",
-    merged.some((p) => p.id === "Q-ASKED-001" && p.sev === "QUESTION")],
-  // it may still raise a computed WARN (confirmed, no tested-by) — what it
-  // must not raise is a QUESTION, because no human asked anything
-  // verifies: REQ-VIEWER-966#CASE-2
-  ["problems: the placeholder verify bullet is still not a question",
-    !merged.some((p) => p.id === "Q-QUIET-002" && p.sev === "QUESTION")],
-  // verifies: REQ-VIEWER-966#CASE-3
-  ["problems: questions are counted apart from computed signals",
-    asked.length === 1 && asked[0].id === "Q-ASKED-001"],
-  // verifies: REQ-VIEWER-966#CASE-4
-  ["problems: the question tab is offered, and the question text is shown",
-    mergedHtml.includes("Questions")
-      && mergedHtml.includes("stale tested-by range")],
+  // verifies: REQ-VIEWER-1101#CASE-1
+  ["questions: a person's question is on the page, under its own origin",
+    asked.person.length === 1 && asked.person[0].id === "Q-ASKED-001"
+      && pageHtml("person").includes("stale tested-by range")],
+  // verifies: REQ-VIEWER-1101#CASE-2
+  ["questions: an Observed bullet is listed as code, never as a person's",
+    asked.code.length === 1 && asked.code[0].id === "Q-SEEN-003"
+      && !asked.person.some((r) => r.id === "Q-SEEN-003")
+      && pageHtml("code").includes("src/x.py:6")],
+  // verifies: REQ-VIEWER-1101#CASE-3
+  ["questions: the placeholder verify bullet is still not a question",
+    !Object.values(asked).flat().some((r) => r.id === "Q-QUIET-002")],
+  // verifies: REQ-VIEWER-1101#CASE-4
+  ["questions: clarify questions are listed, blocking ones first",
+    asked.clarify.length === 1
+      && asked.clarify[0].questions[0].rule === "no-cases"
+      && pageHtml("clarify").includes("the vague-term question")],
+  // verifies: REQ-VIEWER-1101#CASE-5
+  ["questions: the rail counts what blocks and what a human wrote, not advice",
+    questionCount(asked) === 3],
+  // verifies: REQ-VIEWER-1101#CASE-6
+  ["questions: Problems has no Questions tab and lists no question row",
+    !problemsHtml.includes(">Questions<")
+      && !merged.some((p) => p.sev === "QUESTION")],
+  // verifies: REQ-VIEWER-1101#CASE-7
+  ["questions: the page sits in the rail below Commands",
+    navAt("Questions") > navAt("Commands") && navAt("Commands") > 0],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
 

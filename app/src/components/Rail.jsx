@@ -6,12 +6,14 @@ import {
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { ENFORCED } from "../views/SpecDoc.jsx";
+import { questionCount } from "../views/QuestionsView.jsx";
 
 const NAV = [
   { key: "explorer", label: "Explorer", icon: "list-checks" },
   { key: "problems", label: "Problems", icon: "triangle-alert" },
   { key: "roadmap", label: "Roadmap", icon: "list-checks" },
   { key: "commands", label: "Commands", icon: "terminal" },
+  { key: "questions", label: "Questions", icon: "circle-help" },
 ];
 
 function Gauge({ pct, tone, size = 28 }) {
@@ -42,7 +44,8 @@ const ASKED_BADGE = {
 function RailNav({ view, setView, problems }) {
   const { t } = useI18n();
   const errCount = problems.filter((p) => p.sev === "ERROR").length;
-  const questionCount = problems.filter((p) => p.sev === "QUESTION").length;
+  // what a human still has to answer; hidden at zero, never a proud `0`
+  const asked = questionCount();
   /* Open work on the Roadmap tab, whichever plan the repo keeps: `TODO.md`
    * items and `ROADMAP.md` horizons. Counting only TODOS made the badge
    * read 0 the day this repo retired its own TODO.md — with ten open
@@ -52,14 +55,15 @@ function RailNav({ view, setView, problems }) {
     + ROADMAP.filter((item) => !item.done
         && (item.horizon === "now" || item.horizon === "next"
             || item.horizon === "later")).length;
-  const badge = (key) => (key !== "problems" ? undefined
-    : errCount > 0 ? ERROR_BADGE : questionCount > 0 ? ASKED_BADGE : undefined);
+  const badge = (key) => (key === "problems" && errCount > 0 ? ERROR_BADGE
+    : key === "questions" && asked > 0 ? ASKED_BADGE : undefined);
   const counts = {
     explorer: REQUIREMENTS.length,
     problems: problems.length,
     spec: REQUIREMENTS.length,
     roadmap: todoCount,
     commands: CLI.length || null,
+    questions: asked || null,
   };
   return (
     <>

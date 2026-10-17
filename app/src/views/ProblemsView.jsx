@@ -1,5 +1,4 @@
 // implements: ARCH-VIEWER-007
-// implements: REQ-VIEWER-966
 // implements: REQ-VIEWER-977
 // implements: REQ-VIEWER-1084
 import { useState } from "react";
@@ -8,7 +7,6 @@ import {
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
-import { openQuestions } from "../lib/tree.js";
 import {
   ProblemTabBar, DesignProblemsPanel, HealthPanel, ProblemRow,
   ProblemsEmpty, onlyUnconfirmed, gateRowsForHealth,
@@ -67,16 +65,6 @@ export function computeProblems() {
           || "" });
     }
   });
-  REQUIREMENTS.forEach((r) => {
-    const qs = openQuestions(r);
-    if (!qs.length) return;
-    out.push({ id: r.id, title: r.title, signal: "question", sev: "QUESTION",
-      status: r.status, questions: qs,
-      msg: `${qs.length} open verify-intent question(s).`,
-      fix: "Answer it: fold the answer into the Description and delete the "
-        + "bullet, or keep it under the question as `*Answer (YYYY-MM-DD):* …`.",
-      loc: "" });
-  });
   const design = (DESIGN && Array.isArray(DESIGN.findings))
     ? DESIGN.findings : [];
   const advice = (DESIGN && DESIGN.advice) || {};
@@ -90,13 +78,9 @@ export function computeProblems() {
           + "--design` names it.",
       loc: `${f.file}:${f.line}` });
   });
-  const order = { ERROR: 0, WARN: 1, QUESTION: 2, REVIEW: 3, DESIGN: 4 };
+  const order = { ERROR: 0, WARN: 1, REVIEW: 2, DESIGN: 3 };
   return out.sort(
     (a, b) => order[a.sev] - order[b.sev] || a.id.localeCompare(b.id));
-}
-
-export function computeQuestions() {
-  return computeProblems().filter((p) => p.sev === "QUESTION");
 }
 
 /* Tabs that render a panel of their own instead of the problem list. */

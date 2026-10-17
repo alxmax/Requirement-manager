@@ -1,6 +1,7 @@
 # ADR-0028 — One inbox for every open signal, with origin as a tab
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0070](0070-questions-get-a-page-of-their-own.md) (2026-10-17). The
+  reasoning below is left exactly as decided on 2026-09-04.
 - **Decided:** 2026-09-04
 - **Evidence:** the corpus measured on the day of the decision (224 requirements, 0 risk
   signals, 0 real verify-intent questions, 0 drafts); the draft-collapse affordance added to

@@ -212,6 +212,20 @@ const RO = {  // implements: REQ-VIEWER-943
   "Warnings": "Avertismente",
   "Questions": "Întrebări",
   "ASKED": "NOTAT",
+  "Observed in code": "Observate în cod",
+  "Asked by a person": "Puse de un om",
+  "Asked by clarify": "Puse de clarify",
+  "No open questions here.": "Nicio întrebare deschisă aici.",
+  ["Written from the code: a line the scan found that only the author "
+    + "can call intended or a bug."]:
+    "Scrise din cod: o linie găsită de scanare, pe care doar autorul o poate "
+      + "numi intenționată sau bug.",
+  "Written down by a person in the requirement's Verify intent section.":
+    "Notate de un om în secțiunea Verify intent a cerinței.",
+  ["Asked by `clarify` of the requirement's own text. Blocking means "
+    + "it cannot be implemented as written; advisory is a suggestion."]:
+    "Puse de `clarify` textului cerinței. Blocking înseamnă că nu poate fi "
+      + "implementată cum e scrisă; advisory e o sugestie.",
   "Review": "De revizuit",
   "{n} only await confirmation — see Review.":
     "{n} așteaptă doar confirmarea — vezi De revizuit.",

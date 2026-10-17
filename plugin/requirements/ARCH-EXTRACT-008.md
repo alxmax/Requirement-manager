@@ -25,6 +25,7 @@ Every bullet below is binding.
 - `draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size, and never overwrites an existing draft. [[REQ-EXTRACT-851]] details the behaviour.
 - Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.
 - Extraction links each source file to the draft it produced by writing that file’s membership tag into it, reversibly, so a stub never ships with zero members. [[REQ-INITTAG-1008]]
+- `draft` asks one question per line where the scan finds a marker, a suppression, a swallowed error, an unnamed number or unreachable code, naming the line. [[REQ-EXTRACT-1099]]
 
 ## Cases
 CASE-1
@@ -403,3 +404,77 @@ CASE-7 — an existing tag is left alone
   pair `--wipe` already used, so non-UTF-8 bytes elsewhere in the file round-trip verbatim.
   It splits with `splitlines(keepends=True)` rather than the scan's normalising reader,
   because a rewrite must preserve the bytes a line number is measured against.
+
+--------------------
+
+
+---
+id: REQ-EXTRACT-1099
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-EXTRACT-008]
+---
+
+# A code draft asks about the lines the scan found
+
+## Description
+> A draft used to ask every file the same sentence: "anything that looks like an accident
+> (swallowed error, magic constant, dead branch), intended, or a bug to fix?". With a
+> hundred drafts, `_findings.md` held a hundred copies of it and named no line, while
+> the scan had already seen the `TODO`, the `noqa` and the empty `except` and kept only
+> a risk score. A question that names its line can be answered; one that names nothing
+> is skipped.
+
+Every bullet below is binding.
+- `draft` writes one Verify-intent question per line where the scan finds a signal, each
+  reading `Observed at `<file>:<line>`: `<code>`` followed by what only the author can
+  answer.
+- The signals found in every language, by pattern, are a `TODO`/`FIXME`/`HACK`/`XXX`
+  marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`,
+  `@ts-ignore`, `NOLINT`), and an empty `catch` block.
+- The signals found in Python only, by parsing, are an `except` whose body only passes,
+  continues or returns nothing; a number other than -1, 0, 1 and 2 written into a
+  comparison or a keyword argument inside a function; and a statement after an
+  unconditional `return`, `raise`, `continue` or `break`.
+- A marker in a string literal, or in a file name such as `TODO.md`, is not a signal.
+- `draft` writes at most eight questions per file, in line order, and names how many it
+  left out under Context.
+- A file with no signal keeps the generic question it always had.
+
+## Cases
+CASE-1 — each Python signal is one question naming its line
+  Given  an untagged `.py` file with a `TODO` comment, an `except` that returns `None`,
+         a comparison against 37, and a statement after a `return`
+  When   `draft` runs
+  Then   its Verify intent holds four questions, each starting `Observed at` and naming
+         `svc.py:<line>` for the line it is about
+
+CASE-2 — a marker outside a comment is not a question
+  Given  an untagged `.py` file whose only `TODO` is in a string and whose only comment
+         mentions `TODO.md`
+  When   `draft` runs
+  Then   its Verify intent holds only the generic question
+
+CASE-3 — a clean file keeps the generic question
+  Given  an untagged `.py` file with no marker, suppression or swallowed error
+  When   `draft` runs
+  Then   its Verify intent holds the generic question and nothing else
+
+CASE-4 — the questions stop at eight and the rest are counted
+  Given  an untagged `.py` file with eleven suppressed lines
+  When   `draft` runs
+  Then   its Verify intent holds eight questions and its Context says 3 more signals exist
+
+CASE-5 — the pattern signals apply to a language with no parser
+  Given  an untagged `.js` file with an empty `catch` block and a `FIXME` comment
+  When   `draft` runs
+  Then   its Verify intent holds one question for each, naming `app.js:1` and `app.js:2`
+
+## Context
+**Notes**
+- The questions are built in `draftquestions.py`, which `draft` imports at call time, so
+  the module stays out of the core `sync` and `gate --full` load (ADR-0070).
+- The engine's own fail-open `except Exception: return None` is asked about like any
+  other swallowed error. The scan cannot read intent, and the question says so.

@@ -25,7 +25,7 @@ Every bullet below is binding.
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
 - The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
-- The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
+- The viewer gives open questions a page of their own, grouped by whether the code, a person or `clarify` raised them, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
@@ -397,7 +397,8 @@ CASE-4 — a map with no command list says so
   Then   a named empty state appears naming the command that regenerates it
 ---
 id: REQ-VIEWER-966
-status: confirmed
+status: deprecated
+superseded_by: REQ-VIEWER-1101
 level: code
 layer: feature
 owner: Alex
@@ -1188,3 +1189,75 @@ CASE-4 — an ISO week that spans New Year is one week
 ## Context
 **Notes**
 - `distinct_from: REQ-HISTORY-1081` - `REQ-HISTORY-1081` says how a shipped release is drawn and opened; this says how a series is cut into weeks.
+
+--------------------
+
+
+---
+id: REQ-VIEWER-1101
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Questions have a page of their own
+
+## Description
+> A question has three sources: the code, read by `draft`; a person, writing in Verify
+> intent; and `clarify`, reading the requirement's own text. The Problems inbox showed
+> only the second, and adding the third would have put five hundred advisory rows beside
+> three health rows. A page of its own keeps what is broken apart from what is unanswered.
+> See [ADR-0070](../../docs/adr/0070-questions-get-a-page-of-their-own.md).
+
+Every bullet below is binding.
+- The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page
+  of every open question.
+- The page groups questions by origin, one tab each: observed in code (a Verify-intent
+  bullet starting `Observed`), asked by a person (any other Verify-intent bullet) and
+  asked by `clarify` (the map's `clarify` list).
+- The `clarify` tab lists blocking questions before advisory ones within a requirement,
+  shows each question's rule, location, quoted clause and suggestion, and filters by
+  rule.
+- The authored placeholder (a bullet starting `None`) is not a question.
+- The rail count for Questions is every Verify-intent question plus every blocking
+  `clarify` question, and it is hidden at zero.
+- The Problems inbox has no Questions tab and lists no question row.
+
+## Cases
+CASE-1 — a person's question is on the page under its origin
+  Given  a requirement whose Verify intent holds one question a person wrote
+  When   the Questions page is computed
+  Then   that requirement is listed under "Asked by a person" with the question's text
+
+CASE-2 — an Observed bullet is listed as code
+  Given  a requirement whose Verify intent holds a bullet starting `Observed at`
+  When   the Questions page is computed
+  Then   it is listed under "Observed in code" and not under "Asked by a person"
+
+CASE-3 — the placeholder is still not a question
+  Given  a requirement whose Verify intent holds only the authored placeholder
+  When   the Questions page is computed
+  Then   that requirement appears under no origin
+
+CASE-4 — clarify questions are listed, blocking first
+  Given  a requirement whose map node carries one advisory and one blocking question
+  When   the clarify tab is rendered
+  Then   both are shown and the blocking one comes first
+
+CASE-5 — the rail counts what is open for a human, not advice
+  Given  one person's question, one observed question, and one blocking and one advisory
+         `clarify` question
+  When   the rail count is computed
+  Then   it is 3
+
+CASE-6 — Problems no longer holds questions
+  Given  a registry holding questions of every origin
+  When   the Problems inbox is rendered
+  Then   it offers no Questions tab and holds no question row
+
+CASE-7 — the page sits below Commands in the rail
+  Given  the rail rendered over any registry
+  When   its Workspace entries are read in order
+  Then   Questions comes after Commands

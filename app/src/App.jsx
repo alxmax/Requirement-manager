@@ -6,6 +6,7 @@ import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 import { ExplorerView } from "./views/ExplorerView.jsx";
 import { CommandsView } from "./views/CommandsView.jsx";
+import { QuestionsView } from "./views/QuestionsView.jsx";
 import { TopBar } from "./components/TopBar.jsx";
 import { Rail } from "./components/Rail.jsx";
 
@@ -117,6 +118,7 @@ export default function App() {
           )}
           {view === "roadmap" && <RoadmapView openSpec={openSpec} />}
           {view === "commands" && <CommandsView />}
+          {view === "questions" && <QuestionsView openSpec={openSpec} />}
         </ErrorBoundary>
       </div>
     </div>

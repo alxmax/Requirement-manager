@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v8.24.0` — 2026-10-17
+
+**Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**
+
+- A code draft written by `init` asks one Verify-intent question per line where the scan finds a signal, naming `file:line` and the code on it: a `TODO`/`FIXME`/`HACK`/`XXX` marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `NOLINT`) and an empty `catch` in every language; in Python, also an `except` that only passes or returns nothing, a number other than -1/0/1/2 in a comparison or keyword argument, and a statement after an unconditional exit. At most eight per file, the rest counted under Context. A file with no signal keeps the generic question it always had. REQ-EXTRACT-1099
+- `_map.json` carries every `clarify` question per node (`clarify`: rule, severity, where, quote, question, suggest), computed by the same function the CLI runs. REQ-CLARIFY-1100
+- The viewer has a Questions page in the Workspace rail, below Commands, with one tab per origin: observed in code, asked by a person, asked by `clarify`. The `clarify` tab puts blocking questions first and filters by rule. The rail count is every Verify-intent question plus every blocking `clarify` question; this corpus's 514 advisory questions are on the page, not in the badge. Problems loses its Questions tab. REQ-VIEWER-1101 supersedes REQ-VIEWER-966, now deprecated; ADR-0070 supersedes ADR-0028
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17`; 17,980 physical lines in 76 files (the README says so). The core rises to 6,635 logical lines (ADR-0070): four for the map export, two for the call into `draftquestions.py`, which is imported at call time and stays out of the core
+
 ## plugin `v8.23.3` — 2026-10-15
 
 **RM036 reads an id with the same pattern as the tag scan.**

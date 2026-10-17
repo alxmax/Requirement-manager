@@ -4,7 +4,7 @@
 // tested-by: ARCH-VIEWER-007
 // tested-by: REQ-VIEWER-944
 // tested-by: REQ-VIEWER-945
-// tested-by: REQ-VIEWER-966
+// tested-by: REQ-VIEWER-1101
 // tested-by: ARCH-SEARCH-036
 // tested-by: REQ-SEARCH-965
 // tested-by: REQ-VIEWER-969
@@ -27,7 +27,7 @@ import {
 } from "../../src/lib/data.js";
 import { adaptNode, loadData } from "../../src/lib/loadData.js";
 import {
-  ProblemsView, computeProblems, computeQuestions,
+  ProblemsView, computeProblems,
 } from "../../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
@@ -217,7 +217,7 @@ const decChecks = [
   ["decision: a line-start label is italic and markup stays escaped",
     decRow.includes("<em>Default:</em> b)") && decRow.includes("&lt;b&gt;x")
       && !decRow.includes("<b>x</b>")],
-  ["decision: a plain question in the Problems list is the text it was",
+  ["decision: a plain question in the Questions list is the text it was",
     decRow.includes("<li>plain **q** `c`</li>")],
   ["decision: a cross-reference in an option is a link with its own id",
     decRow.includes('data-req="LINK-DST-002"')],

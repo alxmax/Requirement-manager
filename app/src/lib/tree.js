@@ -45,6 +45,20 @@ export function hasOpenQuestions(r) {
   return openQuestions(r).length > 0;
 }
 
+/* A Verify-intent bullet that starts "Observed" was written from the code (by
+ * `init`'s draft, or by an author following the template), not asked by a
+ * person. The Questions page shows the two apart.
+ * implements: REQ-VIEWER-1101 */
+export function isObserved(q) {
+  return /^[*_ ]*observed\b/i.test(String(q));
+}
+
+/* What `clarify` asks of a requirement's text, as the map carries it. A map
+ * written before the field existed has none. */
+export function clarifyQuestions(r) {
+  return r && Array.isArray(r.clarify) ? r.clarify : [];
+}
+
 /* ---- hierarchy -------------------------------------------------------------
  * `satisfies` is authoritative; `satisfied_by` fills a parent in for a node
  * that declares none (the two are mirrors in a well-formed export, but a
