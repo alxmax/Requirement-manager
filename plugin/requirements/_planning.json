@@ -44,7 +44,65 @@
       "end": "2026-10-30",
       "req": "SYS-SSOT-001",
       "progress": 0
+    },
+    {
+      "title": "Retire: comments only, writes checked",
+      "lane": "Feature",
+      "start": "2026-10-19",
+      "end": "2026-10-21",
+      "req": "ARCH-RETIRE-064",
+      "milestone": "v8.25.0",
+      "roadmap": "`retire --apply` strips a tag only from the comment it was written in, checks every write and stops a batch at its first failure. Done when: a string literal holding the tag's text survives, `applied: true` is not reported after a failed block removal (`retireapply.py:41-45` sets it and returns 0 either way), and a consumer whose retirement failed leaves its base requirement alone"
+    },
+    {
+      "title": "Words match the engine",
+      "lane": "Feature",
+      "start": "2026-10-19",
+      "end": "2026-10-20",
+      "req": "ARCH-MCP-073",
+      "milestone": "v8.25.0",
+      "roadmap": "The words about `sync` match what it does. Done when: `docs/commands.md:62` and `mcp.py:127` say an edited confirmed contract is demoted to draft (they say `sync` refuses), and `app/scripts/sync-data.mjs:4` points to `sync`, not to `reqmap.py export`, which no longer exists"
+    },
+    {
+      "title": "CI: budget on the PR, release waits for the smoke test",
+      "lane": "Feature",
+      "start": "2026-10-21",
+      "end": "2026-10-22",
+      "req": "ARCH-SELFGATE-039",
+      "milestone": "v8.25.0",
+      "roadmap": "CI checks the engine budget on the pull request, and a release waits for the published-action smoke test. Done when: a pull request that adds one logical line over `CORE_LOGICAL_BUDGET` fails before merge (the script runs only in the `release` job, `ci.yml:375`, and the PR jobs run its test, `ci.yml:85,151`), and `release` does not go ahead while `dogfood.yml` is red"
+    },
+    {
+      "title": "The plan keeps only what is open",
+      "lane": "Feature",
+      "start": "2026-10-19",
+      "end": "2026-10-19",
+      "req": "ARCH-RELEASE-072",
+      "milestone": "v8.25.0",
+      "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays"
+    },
+    {
+      "title": "Answer the count questions, family by family",
+      "lane": "Feature",
+      "start": "2026-10-20",
+      "end": "2026-10-23",
+      "req": "ARCH-CLARIFY-062",
+      "milestone": "v8.25.0",
+      "roadmap": "The `clause-without-case` and `over-scoped` questions are answered family by family. Done when: ARCH-VIEWER-007's nine are, and the next four families by count are too: fold obligations split over bullets, add the cases that are really missing with their tests, and split what is over-scoped with `clarify --decompose`"
+    },
+    {
+      "title": "Confirm the four drafts",
+      "lane": "Feature",
+      "start": "2026-10-23",
+      "end": "2026-10-23",
+      "req": "REQ-DRIFT-1103",
+      "milestone": "v8.25.0",
+      "roadmap": "Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped"
     }
   ],
-  "milestones": {}
+  "milestones": {
+    "v8.25.0": {
+      "due": "2026-10-23"
+    }
+  }
 }
