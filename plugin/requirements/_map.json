@@ -23015,7 +23015,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:300"
+          "loc": "app/src/lib/i18n.jsx:295"
         },
         {
           "role": "implements",
@@ -23163,7 +23163,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:335"
+          "loc": "app/src/lib/i18n.jsx:330"
         }
       ],
       "test_exempt": null,
@@ -23223,7 +23223,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:334"
+          "loc": "app/scripts/smoke/explorer.jsx:341"
         },
         {
           "role": "implements",
@@ -24041,11 +24041,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:289"
+          "loc": "app/src/lib/i18n.jsx:284"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:343"
+          "loc": "app/src/lib/i18n.jsx:338"
         }
       ],
       "test_exempt": null,
@@ -24231,11 +24231,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:256"
+          "loc": "app/src/lib/i18n.jsx:251"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:360"
+          "loc": "app/src/lib/i18n.jsx:355"
         },
         {
           "role": "implements",
@@ -25285,18 +25285,19 @@
       "intent": "A question has three sources: the code, read by `draft`; a person, writing in Verify intent; and `clarify`, reading the requirement's own text. The Problems inbox showed only the second, and adding the third would have put five hundred advisory rows beside three health rows. A page of its own keeps what is broken apart from what is unanswered. See [ADR-0070](../../docs/adr/0070-questions-get-a-page-of-their-own.md).",
       "contract": [
         "The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page of every open question.",
-        "The page groups questions by origin, one tab each: observed in code (a Verify-intent bullet starting `Observed`), asked by a person (any other Verify-intent bullet) and asked by `clarify` (the map's `clarify` list).",
-        "The `clarify` tab lists a requirement's questions by basis, `structure` then `count` then `wording`, shows each question's rule, location, quoted clause and suggestion, and filters by rule.",
-        "Each `clarify` question is marked by its basis: `structure` in red, `count` in amber, and `wording` in grey, labelled `heuristic`.",
-        "The `clarify` tab hides `wording` questions until the reader asks for them, and says how many it hides.",
+        "The page has one tab per kind of question, in the Problems tab bar's form, each with its count: All; Must fix, present only while a `structure` question exists; Asked by a person (a Verify-intent bullet not starting `Observed`); Observed in code (one starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause without case and Over-scoped; and Optional, every `wording` question.",
+        "All lists every question except the Optional ones, and opens first.",
+        "Within a requirement, `clarify` questions are listed by basis, `structure` then `count` then `wording`, each with its rule, location, quoted clause and suggestion.",
+        "Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`, `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.",
+        "The Optional tab filters by rule. The tab bar states at its right whether a section is missing anywhere.",
         "The authored placeholder (a bullet starting `None`) is not a question.",
-        "The rail count for Questions is every Verify-intent question plus every blocking `clarify` question, and it is hidden at zero.",
+        "The rail count for Questions is the All tab's count, shown like every other entry's count.",
         "The Problems inbox has no Questions tab and lists no question row."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a person's question is on the page under its origin\n  Given  a requirement whose Verify intent holds one question a person wrote\n  When   the Questions page is computed\n  Then   that requirement is listed under \"Asked by a person\" with the question's text\n\nCASE-2 — an Observed bullet is listed as code\n  Given  a requirement whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed\n  Then   it is listed under \"Observed in code\" and not under \"Asked by a person\"\n\nCASE-3 — the placeholder is still not a question\n  Given  a requirement whose Verify intent holds only the authored placeholder\n  When   the Questions page is computed\n  Then   that requirement appears under no origin\n\nCASE-4 — clarify questions are listed by basis, structure first\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the clarify tab is rendered with heuristics shown\n  Then   all three are shown, in the order structure, count, wording\n\nCASE-5 — the rail counts what is open for a human, not advice\n  Given  one person's question, one observed question, and one blocking and one advisory\n         `clarify` question\n  When   the rail count is computed\n  Then   it is 3\n\nCASE-6 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-7 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-8 — heuristics are hidden until asked for, and the basis is marked\n  Given  a requirement whose map node carries a `structure` and a `wording` question\n  When   the clarify tab is rendered as it first opens\n  Then   the `structure` question is shown marked red, the `wording` one is not shown,\n         and the tab offers to show the one hidden heuristic",
+      "accept": "CASE-1 — a person's question is on its own tab\n  Given  a requirement whose Verify intent holds one question a person wrote\n  When   the Asked by a person tab is rendered\n  Then   it lists that requirement with the question's text, and no observed question\n\nCASE-2 — an Observed bullet is listed as code\n  Given  a requirement whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed\n  Then   it is listed on the Observed in code tab and not on Asked by a person\n\nCASE-3 — the placeholder is still not a question\n  Given  a requirement whose Verify intent holds only the authored placeholder\n  When   the Questions page is computed\n  Then   that requirement appears on no tab\n\nCASE-4 — clarify questions are listed by basis, Optional on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Optional tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Optional tab\n         shows the `wording` one marked grey and not the `structure` one\n\nCASE-5 — the rail counts the All tab, which leaves Optional out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-6 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-7 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-8 — All leaves Optional out, and a tab names each kind\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and not the\n         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,\n         Clause without case and Optional, and says a section is missing",
       "input": "",
       "output": "",
       "desc": "",
@@ -25346,22 +25347,40 @@
           "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
-          "rule": "vague-term",
+          "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
-          "where": "clause 5",
-          "quote": "The `clarify` tab hides `wording` questions until the reader asks for them, and says how many it hides.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
+          "where": "clause 2",
+          "quote": "The page has one tab per kind of question, in the Problems tab bar's form, each with its count: All; Must fix, present only while a `structure` question exists; Asked by a person (a Verify-intent bullet not starting `Observed`); Observed in code (one starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause without case and Over-scoped; and Optional, every `wording` question.",
+          "question": "Is there an upper bound, and what happens when it is reached?",
+          "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
-          "where": "clause 7",
-          "quote": "The rail count for Questions is every Verify-intent question plus every blocking `clarify` question, and it is hidden at zero.",
+          "where": "clause 3",
+          "quote": "All lists every question except the Optional ones, and opens first.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
+        },
+        {
+          "rule": "unbounded-quantity",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "clause 8",
+          "quote": "The rail count for Questions is the All tab's count, shown like every other entry's count.",
+          "question": "Is there an upper bound, and what happens when it is reached?",
+          "suggest": "Name the limit, or say explicitly that there is none."
+        },
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "count",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 9 clauses and 8 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         },
         {
           "rule": "over-scoped",
@@ -25369,7 +25388,7 @@
           "basis": "count",
           "where": "Description",
           "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
+          "question": "This requirement carries 9 clauses (advisory limit 7). Which of them is a separate requirement?",
           "suggest": "Split the ones that could change for a different reason."
         }
       ]
@@ -30142,7 +30161,7 @@
           "version": "v8.24.0",
           "date": "2026-10-17",
           "headline": "Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070)",
-          "body": "**Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**\n\n- A code draft written by `init` asks one Verify-intent question per line where the scan finds a signal, naming `file:line` and the code on it: a `TODO`/`FIXME`/`HACK`/`XXX` marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `NOLINT`) and an empty `catch` in every language; in Python, also an `except` that only passes or returns nothing, a number other than -1/0/1/2 in a comparison or keyword argument, and a statement after an unconditional exit. At most eight per file, the rest counted under Context. A file with no signal keeps the generic question it always had. REQ-EXTRACT-1099\n- `_map.json` carries every `clarify` question per node (`clarify`: rule, severity, basis, where, quote, question, suggest), computed by the same function the CLI runs. REQ-CLARIFY-1100\n- Every `clarify` question names the basis its rule rests on: `structure` when a section is absent (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`, `over-scoped`), `wording` when a word on a list matched (the other six rules). `clarify` prints it beside the rule. In a sample of four questions per rule on this corpus, most `wording` questions were false positives. REQ-CLARIFY-1100\n- The viewer has a Questions page in the Workspace rail, below Commands, with one tab per origin: observed in code, asked by a person, asked by `clarify`. The `clarify` tab orders a requirement's questions by basis, marks `structure` red, `count` amber and `wording` grey as \"heuristic\", hides the heuristics until asked, and filters by rule. The rail count is every Verify-intent question plus every blocking `clarify` question; this corpus's 514 advisory questions are on the page, not in the badge. Problems loses its Questions tab. REQ-VIEWER-1101 supersedes REQ-VIEWER-966, now deprecated; ADR-0070 supersedes ADR-0028\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.1`; 17,997 physical lines in 76 files (the README says so). The core rises to 6,636 logical lines (ADR-0070): four for the map export, one for the rule-to-basis table, two for the call into `draftquestions.py`, which is imported at call time and stays out of the core",
+          "body": "**Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**\n\n- A code draft written by `init` asks one Verify-intent question per line where the scan finds a signal, naming `file:line` and the code on it: a `TODO`/`FIXME`/`HACK`/`XXX` marker inside a comment, a suppression (`noqa`, `type: ignore`, `eslint-disable`, `@ts-ignore`, `NOLINT`) and an empty `catch` in every language; in Python, also an `except` that only passes or returns nothing, a number other than -1/0/1/2 in a comparison or keyword argument, and a statement after an unconditional exit. At most eight per file, the rest counted under Context. A file with no signal keeps the generic question it always had. REQ-EXTRACT-1099\n- `_map.json` carries every `clarify` question per node (`clarify`: rule, severity, basis, where, quote, question, suggest), computed by the same function the CLI runs. REQ-CLARIFY-1100\n- Every `clarify` question names the basis its rule rests on: `structure` when a section is absent (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`, `over-scoped`), `wording` when a word on a list matched (the other six rules). `clarify` prints it beside the rule. In a sample of four questions per rule on this corpus, most `wording` questions were false positives. REQ-CLARIFY-1100\n- The viewer has a Questions page in the Workspace rail, below Commands, with one tab per kind of question, in the tab bar Problems uses: All, Must fix (only while a section is missing), Asked by a person, Observed in code, one tab per `clarify` rule resting on a count (Clause without case, Over-scoped), and Optional. A requirement's questions are ordered by basis and marked `structure` red as \"must fix\", `count` amber as \"to check\" and `wording` grey as \"optional\". All leaves Optional out, and the rail shows All's count like every other entry's: 158 on this corpus, with 367 more on the Optional tab, filterable by rule. Problems loses its Questions tab. REQ-VIEWER-1101 supersedes REQ-VIEWER-966, now deprecated; ADR-0070 supersedes ADR-0028\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.1`; 17,997 physical lines in 76 files (the README says so). The core rises to 6,636 logical lines (ADR-0070): four for the map export, one for the rule-to-basis table, two for the call into `draftquestions.py`, which is imported at call time and stays out of the core",
           "first_commit": "2026-10-17",
           "last_commit": "2026-10-17"
         },

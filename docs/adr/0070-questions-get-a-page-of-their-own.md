@@ -29,15 +29,15 @@ volume problem ADR-0028 names as its revisit condition.
 
 ## Decision
 
-- **Questions are a Workspace page of their own**, below Commands, grouped by where the
-  question came from: observed in code (a `## Verify intent` bullet that starts
-  `Observed`, the template's own convention), asked by a person (any other Verify-intent
-  bullet) and asked by `clarify`. Problems loses its `QUESTION` tab, and `All` no longer
-  counts questions.
-- **The rail count is what is open for a human to answer**: Verify-intent questions plus
-  blocking `clarify` questions. Advisory `clarify` questions are on the page, filterable by
-  rule, but are not counted in the badge. 514 advisory questions in the badge would make it
-  noise.
+- **Questions are a Workspace page of their own**, below Commands, with one tab per kind
+  of question in the same tab bar Problems uses: All; Must fix, only while a section is
+  missing somewhere; Asked by a person; Observed in code (a `## Verify intent` bullet that
+  starts `Observed`, the template's own convention); one tab per `clarify` rule resting on
+  a count (Clause without case, Over-scoped); and Optional. Problems loses its `QUESTION`
+  tab, and its `All` no longer counts questions.
+- **All leaves Optional out, and the rail shows All's count** like every other entry's:
+  158 on this corpus. 367 word-list questions in that number would make it noise; they
+  are one click away, on the Optional tab, filterable by rule.
 - **`_map.json` carries every `clarify` question per node** (`clarify`: rule, severity,
   basis, where, quote, question, suggest), computed by the same function the CLI runs.
 - **A code draft asks one question per signal the scan can point at**, naming
@@ -49,8 +49,8 @@ volume problem ADR-0028 names as its revisit condition.
 - **Every `clarify` question names the basis it rests on**: `structure` (a section is
   absent: `no-contract`, `no-cases`), `count` (two numbers disagree: `clause-without-case`,
   `over-scoped`) or `wording` (a word on a list: the other six rules). The viewer shows
-  `structure` in red, `count` in amber and `wording` in grey as "heuristic", and hides the
-  heuristics until asked. A sample of four questions per rule on this corpus found most
+  `structure` in red as "must fix", `count` in amber as "to check" and `wording` in grey
+  as "optional". A sample of four questions per rule on this corpus found most
   `wording` questions false positives ("every candidate", "how many releases", "4
   blocks"); a `structure` or `count` question states a fact, though acting on a count
   stays a judgment.

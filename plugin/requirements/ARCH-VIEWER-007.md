@@ -1214,48 +1214,51 @@ satisfies: [ARCH-VIEWER-007]
 Every bullet below is binding.
 - The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page
   of every open question.
-- The page groups questions by origin, one tab each: observed in code (a Verify-intent
-  bullet starting `Observed`), asked by a person (any other Verify-intent bullet) and
-  asked by `clarify` (the map's `clarify` list).
-- The `clarify` tab lists a requirement's questions by basis, `structure` then `count`
-  then `wording`, shows each question's rule, location, quoted clause and suggestion,
-  and filters by rule.
-- Each `clarify` question is marked by its basis: `structure` in red, `count` in amber,
-  and `wording` in grey, labelled `heuristic`.
-- The `clarify` tab hides `wording` questions until the reader asks for them, and says
-  how many it hides.
+- The page has one tab per kind of question, in the Problems tab bar's form, each with
+  its count: All; Must fix, present only while a `structure` question exists; Asked by
+  a person (a Verify-intent bullet not starting `Observed`); Observed in code (one
+  starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause
+  without case and Over-scoped; and Optional, every `wording` question.
+- All lists every question except the Optional ones, and opens first.
+- Within a requirement, `clarify` questions are listed by basis, `structure` then
+  `count` then `wording`, each with its rule, location, quoted clause and suggestion.
+- Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`,
+  `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.
+- The Optional tab filters by rule. The tab bar states at its right whether a section is
+  missing anywhere.
 - The authored placeholder (a bullet starting `None`) is not a question.
-- The rail count for Questions is every Verify-intent question plus every blocking
-  `clarify` question, and it is hidden at zero.
+- The rail count for Questions is the All tab's count, shown like every other entry's
+  count.
 - The Problems inbox has no Questions tab and lists no question row.
 
 ## Cases
-CASE-1 — a person's question is on the page under its origin
+CASE-1 — a person's question is on its own tab
   Given  a requirement whose Verify intent holds one question a person wrote
-  When   the Questions page is computed
-  Then   that requirement is listed under "Asked by a person" with the question's text
+  When   the Asked by a person tab is rendered
+  Then   it lists that requirement with the question's text, and no observed question
 
 CASE-2 — an Observed bullet is listed as code
   Given  a requirement whose Verify intent holds a bullet starting `Observed at`
   When   the Questions page is computed
-  Then   it is listed under "Observed in code" and not under "Asked by a person"
+  Then   it is listed on the Observed in code tab and not on Asked by a person
 
 CASE-3 — the placeholder is still not a question
   Given  a requirement whose Verify intent holds only the authored placeholder
   When   the Questions page is computed
-  Then   that requirement appears under no origin
+  Then   that requirement appears on no tab
 
-CASE-4 — clarify questions are listed by basis, structure first
+CASE-4 — clarify questions are listed by basis, Optional on its own tab
   Given  a requirement whose map node carries a `count`, a `wording` and a `structure`
          question
-  When   the clarify tab is rendered with heuristics shown
-  Then   all three are shown, in the order structure, count, wording
+  When   the page's questions are computed and the Optional tab is rendered
+  Then   they are kept in the order structure, count, wording, and the Optional tab
+         shows the `wording` one marked grey and not the `structure` one
 
-CASE-5 — the rail counts what is open for a human, not advice
-  Given  one person's question, one observed question, and one blocking and one advisory
-         `clarify` question
-  When   the rail count is computed
-  Then   it is 3
+CASE-5 — the rail counts the All tab, which leaves Optional out
+  Given  one person's question, one observed question, and one `structure`, one
+         `count` and one `wording` `clarify` question
+  When   the rail is rendered
+  Then   the Questions entry shows 4
 
 CASE-6 — Problems no longer holds questions
   Given  a registry holding questions of every origin
@@ -1267,8 +1270,10 @@ CASE-7 — the page sits below Commands in the rail
   When   its Workspace entries are read in order
   Then   Questions comes after Commands
 
-CASE-8 — heuristics are hidden until asked for, and the basis is marked
-  Given  a requirement whose map node carries a `structure` and a `wording` question
-  When   the clarify tab is rendered as it first opens
-  Then   the `structure` question is shown marked red, the `wording` one is not shown,
-         and the tab offers to show the one hidden heuristic
+CASE-8 — All leaves Optional out, and a tab names each kind
+  Given  questions of every origin, with a `structure`, a `count` and a `wording`
+         `clarify` question
+  When   the page first opens
+  Then   it is on All, which shows the `structure` question marked red and not the
+         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,
+         Clause without case and Optional, and says a section is missing

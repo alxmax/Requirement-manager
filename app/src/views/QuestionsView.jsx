@@ -8,9 +8,6 @@ import { Pill, statusKind } from "../lib/ui.jsx";
 import { openQuestions, isObserved, clarifyQuestions } from "../lib/tree.js";
 import { ChipRow, ProblemRow } from "./problems/ProblemsPanels.jsx";
 
-/* Where a question came from. The order is the tab order. */
-export const ORIGINS = ["code", "person", "clarify"];
-
 const ANSWER_FIX = "Answer it: fold the answer into the Description and "
   + "delete the bullet, or keep it under the question as "
   + "`*Answer (YYYY-MM-DD):* …`.";
@@ -30,10 +27,11 @@ function verifyRows(origin) {
 }
 
 /* What a `clarify` question rests on, strongest first: a section that is
- * absent, two numbers that disagree, a word on a list (ADR-0070). */
+ * absent, two numbers that disagree, a word on a list (ADR-0070). The last
+ * one is shown as Optional. */
 const BASIS_ORDER = { structure: 0, count: 1, wording: 2 };
-const BASIS_LABEL = { structure: "structure", count: "count",
-  wording: "heuristic" };
+const BASIS_LABEL = { structure: "must fix", count: "to check",
+  wording: "optional" };
 export const basisOf = (q) => (BASIS_ORDER[q.basis] !== undefined ? q.basis
   : q.severity === "blocking" ? "structure" : "wording");
 
@@ -51,21 +49,58 @@ export function computeQuestions() {
   return { code: verifyRows("code"), person: verifyRows("person"), clarify };
 }
 
-/** What a human still has to answer: every Verify-intent question, and the
- * `clarify` questions that block implementing the text as written. The
- * advisory ones are on the page, not in this number. */
+/** The count of the All tab, which is also the rail's: every Verify-intent
+ * question, and every `clarify` question that is not Optional. */
 export function questionCount(qs = computeQuestions()) {
   const n = (rows) => rows.reduce((a, r) => a + r.questions.length, 0);
   return n(qs.code) + n(qs.person) + qs.clarify.reduce((a, r) => a
-    + r.questions.filter((q) => q.severity === "blocking").length, 0);
+    + r.questions.filter((q) => basisOf(q) !== "wording").length, 0);
+}
+
+/* A count rule's tab name; a rule the viewer has not met keeps its own. */
+const RULE_TAB = { "clause-without-case": "Clause without case",
+  "over-scoped": "Over-scoped" };
+const ruleTitle = (rule) => RULE_TAB[rule] || rule;
+
+/** The tabs, in order, each with what it keeps and its count. Must fix
+ * appears only when a section is missing; every rule resting on a count
+ * gets a tab of its own; Optional holds every word-list question. */
+export function questionTabs(qs = computeQuestions()) {
+  const all = qs.clarify.flatMap((r) => r.questions);
+  const n = (keep) => all.filter(keep).length;
+  const countRules = [...new Set(all.filter((q) => basisOf(q) === "count")
+    .map((q) => q.rule))].sort();
+  const tabs = [
+    { key: "all", label: "All", n: questionCount(qs), verify: ["person", "code"],
+      keep: (q) => basisOf(q) !== "wording" },
+    { key: "structure", label: "Must fix",
+      keep: (q) => basisOf(q) === "structure" },
+    { key: "person", label: "Asked by a person", verify: ["person"],
+      keep: () => false },
+    { key: "code", label: "Observed in code", verify: ["code"],
+      keep: () => false },
+    ...countRules.map((rule) => ({ key: rule, label: ruleTitle(rule),
+      keep: (q) => q.rule === rule })),
+    { key: "optional", label: "Optional", rules: true,
+      keep: (q) => basisOf(q) === "wording" },
+  ];
+  tabs.forEach((tab) => {
+    if (tab.n === undefined) {
+      tab.n = n(tab.keep) + (tab.verify || []).reduce(
+        (a, o) => a + qs[o].reduce((b, r) => b + r.questions.length, 0), 0);
+    }
+  });
+  return tabs.filter((tab) => tab.key !== "structure" || tab.n > 0);
 }
 
 const MUTED = { color: "var(--fg-muted)", font: "var(--text-small)" };
 const BADGE = { marginRight: 6, padding: "1px 6px" };
+const COUNT = {
+  marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11,
+};
 
-function ClarifyRow({ row, rule, heuristics, openSpec }) {
-  const qs = row.questions.filter((q) => (!rule || q.rule === rule)
-    && (heuristics || basisOf(q) !== "wording"));
+function ClarifyRow({ row, keep, openSpec }) {
+  const qs = row.questions.filter(keep);
   if (!qs.length) return null;
   return (
     <div className="prob-row question-row" onClick={() => openSpec(row.id)}>
@@ -95,72 +130,65 @@ function ClarifyRow({ row, rule, heuristics, openSpec }) {
   );
 }
 
-const NOTE = {
-  code: "Written from the code: a line the scan found that only the author "
-    + "can call intended or a bug.",
-  person: "Written down by a person in the requirement's Verify intent "
-    + "section.",
-  clarify: "Asked by `clarify` of the requirement's own text. Red: a section "
-    + "is missing. Amber: two counts disagree. Grey: a word on a list matched, "
-    + "a heuristic that is often wrong.",
-};
+const OPTIONAL_NOTE = "A word on a list matched. Often not a real gap; read "
+  + "it when you have time.";
 
-export function QuestionsView({
-  openSpec, initialOrigin = null, initialHeuristics = false,
-}) {
+export function QuestionsView({ openSpec, initialTab = "all" }) {
   const { t } = useI18n();
   const qs = computeQuestions();
-  const [heuristics, setHeuristics] = useState(initialHeuristics);
-  const all = qs.clarify.flatMap((r) => r.questions);
-  const shown = all.filter((q) => heuristics || basisOf(q) !== "wording");
-  const hidden = all.length - shown.length;
-  const sizes = {
-    code: qs.code.length, person: qs.person.length, clarify: shown.length,
-  };
-  const [origin, setOrigin] = useState(initialOrigin
-    || ORIGINS.find((o) => sizes[o] > 0) || "code");
+  const tabs = questionTabs(qs);
+  const [key, setKey] = useState(
+    tabs.some((tab) => tab.key === initialTab) ? initialTab : "all");
   const [rule, setRule] = useState(null);
+  const tab = tabs.find((x) => x.key === key);
+  const missing = (tabs.find((x) => x.key === "structure") || {}).n || 0;
+  const keep = (q) => tab.keep(q) && (!rule || q.rule === rule);
   const rules = {};
-  shown.forEach((q) => { rules[q.rule] = (rules[q.rule] || 0) + 1; });
-  const toggle = () => { setHeuristics((v) => !v); setRule(null); };
-  const label = { code: "Observed in code", person: "Asked by a person",
-    clarify: "Asked by clarify" };
+  if (tab.rules) {
+    qs.clarify.forEach((r) => r.questions.filter(tab.keep).forEach((q) => {
+      rules[q.rule] = (rules[q.rule] || 0) + 1;
+    }));
+  }
   return (
     <div className="main">
       <div className="tabbar">
-        {ORIGINS.map((o) => (
-          <button key={o} className={"tab" + (origin === o ? " on" : "")}
-            onClick={() => setOrigin(o)}>
-            {t(label[o])}
-            <span style={{ marginLeft: 6, opacity: .7,
-              fontFamily: "var(--font-mono)", fontSize: 11 }}>{sizes[o]}</span>
+        {tabs.map((x) => (
+          <button key={x.key} className={"tab" + (key === x.key ? " on" : "")}
+            onClick={() => { setKey(x.key); setRule(null); }}>
+            {t(x.label)}<span style={COUNT}>{x.n}</span>
           </button>
         ))}
+        <div className="tab-legend">
+          {missing > 0
+            ? <>
+                <Icon name="triangle-alert" size={14}
+                  style={{ color: "var(--status-error)" }} />
+                {" "}{t("{n} must fix — a section is missing", { n: missing })}
+              </>
+            : <>
+                <Icon name="shield-check" size={14}
+                  style={{ color: "var(--status-confirmed)" }} />
+                {" "}{t("nothing missing")}
+              </>}
+        </div>
       </div>
       <div className="problems">
-        <div className="prob-chip" style={{ cursor: "default" }}>
-          {t(NOTE[origin])}
-        </div>
-        {origin === "clarify" && (heuristics || hidden > 0) && (
-          <button type="button" className={"ex-chip" + (heuristics ? " on" : "")}
-            aria-pressed={heuristics} onClick={toggle}>
-            {heuristics ? t("Hide heuristics")
-              : t("Show {n} heuristic question(s)", { n: hidden })}
-          </button>
+        {tab.rules && tab.n > 0 && (
+          <>
+            <div className="prob-chip" style={{ cursor: "default" }}>
+              {t(OPTIONAL_NOTE)}
+            </div>
+            <ChipRow counts={rules} total={tab.n} value={rule}
+              setValue={setRule} label={(k) => k} />
+          </>
         )}
-        {origin === "clarify" && sizes.clarify > 0 && (
-          <ChipRow counts={rules} total={sizes.clarify} value={rule}
-            setValue={setRule} label={(k) => k} />
-        )}
-        {origin === "clarify"
-          ? qs.clarify.map((r) => (
-            <ClarifyRow key={r.id} row={r} rule={rule} heuristics={heuristics}
-              openSpec={openSpec} />
-          ))
-          : qs[origin].map((p) => (
-            <ProblemRow key={p.id} p={p} openSpec={openSpec} t={t} />
-          ))}
-        {sizes[origin] === 0 && (
+        {(tab.verify || []).flatMap((o) => qs[o].map((p) => (
+          <ProblemRow key={o + p.id} p={p} openSpec={openSpec} t={t} />
+        )))}
+        {qs.clarify.map((r) => (
+          <ClarifyRow key={r.id} row={r} keep={keep} openSpec={openSpec} />
+        ))}
+        {tab.n === 0 && (
           <div className="prob-empty">
             <Icon name="shield-check" size={26}
               style={{ color: "var(--cov-tested)" }} />

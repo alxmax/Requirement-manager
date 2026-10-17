@@ -37,14 +37,11 @@ const BADGE = {
 const ERROR_BADGE = {
   ...BADGE, color: "var(--status-error)", background: "var(--status-error-bg)",
 };
-const ASKED_BADGE = {
-  ...BADGE, color: "var(--status-drift)", background: "var(--status-drift-bg)",
-};
 
 function RailNav({ view, setView, problems }) {
   const { t } = useI18n();
   const errCount = problems.filter((p) => p.sev === "ERROR").length;
-  // what a human still has to answer; hidden at zero, never a proud `0`
+  // the Questions page's All tab, counted like every other entry
   const asked = questionCount();
   /* Open work on the Roadmap tab, whichever plan the repo keeps: `TODO.md`
    * items and `ROADMAP.md` horizons. Counting only TODOS made the badge
@@ -56,14 +53,14 @@ function RailNav({ view, setView, problems }) {
         && (item.horizon === "now" || item.horizon === "next"
             || item.horizon === "later")).length;
   const badge = (key) => (key === "problems" && errCount > 0 ? ERROR_BADGE
-    : key === "questions" && asked > 0 ? ASKED_BADGE : undefined);
+    : undefined);
   const counts = {
     explorer: REQUIREMENTS.length,
     problems: problems.length,
     spec: REQUIREMENTS.length,
     roadmap: todoCount,
     commands: CLI.length || null,
-    questions: asked || null,
+    questions: asked,
   };
   return (
     <>

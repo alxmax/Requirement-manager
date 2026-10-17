@@ -283,36 +283,39 @@ adoptMapExport({ nodes: [
 const merged = computeProblems();
 const asked = computeQuestions();
 const problemsHtml = renderToString(<ProblemsView openSpec={noop} />);
-const pageHtml = (origin, heuristics = false) => renderToString(
-  <QuestionsView openSpec={noop} initialOrigin={origin}
-    initialHeuristics={heuristics} />);
-const firstOpen = pageHtml("clarify");
+const pageHtml = (tab) => renderToString(
+  <QuestionsView openSpec={noop} initialTab={tab} />);
+const firstOpen = pageHtml();
 const railHtml = renderToString(
   <Rail view="questions" setView={noop} focus={null} setFocus={noop}
     problems={merged} openProblems={noop} />);
 const navAt = (label) => railHtml.indexOf(`</svg>${label}<`);
 const mergeChecks = [
   // verifies: REQ-VIEWER-1101#CASE-1
-  ["questions: a person's question is on the page, under its own origin",
+  ["questions: a person's question is on the page, under its own tab",
     asked.person.length === 1 && asked.person[0].id === "Q-ASKED-001"
-      && pageHtml("person").includes("stale tested-by range")],
+      && pageHtml("person").includes("stale tested-by range")
+      && !pageHtml("person").includes("src/x.py:6")],
   // verifies: REQ-VIEWER-1101#CASE-2
   ["questions: an Observed bullet is listed as code, never as a person's",
     asked.code.length === 1 && asked.code[0].id === "Q-SEEN-003"
       && !asked.person.some((r) => r.id === "Q-SEEN-003")
-      && pageHtml("code").includes("src/x.py:6")],
+      && pageHtml("code").includes("src/x.py:6")
+      && !pageHtml("code").includes("stale tested-by range")],
   // verifies: REQ-VIEWER-1101#CASE-3
   ["questions: the placeholder verify bullet is still not a question",
     !Object.values(asked).flat().some((r) => r.id === "Q-QUIET-002")],
   // verifies: REQ-VIEWER-1101#CASE-4
-  ["questions: clarify questions are listed by basis, structure first",
+  ["questions: clarify questions are listed by basis, Optional on its tab",
     asked.clarify.length === 1
       && asked.clarify[0].questions.map((q) => q.basis).join()
         === "structure,count,wording"
-      && pageHtml("clarify", true).includes("the vague-term question")],
+      && pageHtml("optional").includes("the vague-term question")
+      && pageHtml("optional").includes("basis-wording")
+      && !pageHtml("optional").includes("the no-cases question")],
   // verifies: REQ-VIEWER-1101#CASE-5
-  ["questions: the rail counts what blocks and what a human wrote, not advice",
-    questionCount(asked) === 3],
+  ["questions: the rail counts the All tab, which leaves Optional out",
+    questionCount(asked) === 4 && railHtml.includes(">4<")],
   // verifies: REQ-VIEWER-1101#CASE-6
   ["questions: Problems has no Questions tab and lists no question row",
     !problemsHtml.includes(">Questions<")
@@ -321,12 +324,16 @@ const mergeChecks = [
   ["questions: the page sits in the rail below Commands",
     navAt("Questions") > navAt("Commands") && navAt("Commands") > 0],
   // verifies: REQ-VIEWER-1101#CASE-8
-  ["questions: heuristics are hidden until asked for, the basis is marked",
+  ["questions: All leaves Optional out, and a tab names each kind",
     firstOpen.includes("the no-cases question")
       && firstOpen.includes("basis-structure")
+      && firstOpen.includes("the clause-without-case question")
+      && firstOpen.includes("stale tested-by range")
       && !firstOpen.includes("the vague-term question")
-      && firstOpen.includes("Show 1 heuristic question(s)")
-      && pageHtml("clarify", true).includes("basis-wording")],
+      && ["Must fix", "Asked by a person", "Observed in code",
+        "Clause without case", "Optional"].every(
+        (l) => firstOpen.includes(`>${l}<span`))
+      && firstOpen.includes("1 must fix — a section is missing")],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
 

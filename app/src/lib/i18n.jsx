@@ -214,22 +214,17 @@ const RO = {  // implements: REQ-VIEWER-943
   "ASKED": "NOTAT",
   "Observed in code": "Observate în cod",
   "Asked by a person": "Puse de un om",
-  "Asked by clarify": "Puse de clarify",
   "No open questions here.": "Nicio întrebare deschisă aici.",
-  ["Written from the code: a line the scan found that only the author "
-    + "can call intended or a bug."]:
-    "Scrise din cod: o linie găsită de scanare, pe care doar autorul o poate "
-      + "numi intenționată sau bug.",
-  "Written down by a person in the requirement's Verify intent section.":
-    "Notate de un om în secțiunea Verify intent a cerinței.",
-  ["Asked by `clarify` of the requirement's own text. Red: a section "
-    + "is missing. Amber: two counts disagree. Grey: a word on a list matched, "
-    + "a heuristic that is often wrong."]:
-    "Puse de `clarify` textului cerinței. Roșu: lipsește o secțiune. "
-      + "Portocaliu: două numărători nu se potrivesc. Gri: s-a potrivit un "
-      + "cuvânt dintr-o listă, o euristică adesea greșită.",
-  "Hide heuristics": "Ascunde euristicile",
-  "Show {n} heuristic question(s)": "Arată {n} întrebări euristice",
+  "Must fix": "De reparat",
+  "Clause without case": "Clauză fără caz",
+  "Over-scoped": "Prea largă",
+  "Optional": "Opțional",
+  "nothing missing": "nu lipsește nimic",
+  "{n} must fix — a section is missing": "{n} de reparat — lipsește o secțiune",
+  ["A word on a list matched. Often not a real gap; read it when you "
+    + "have time."]:
+    "S-a potrivit un cuvânt dintr-o listă. Adesea nu e o lipsă reală; "
+      + "citește-le când ai timp.",
   "Review": "De revizuit",
   "{n} only await confirmation — see Review.":
     "{n} așteaptă doar confirmarea — vezi De revizuit.",
