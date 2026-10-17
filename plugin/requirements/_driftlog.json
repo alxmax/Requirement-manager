@@ -186,7 +186,11 @@
       "reason": "distinct_from; CHECK-831 fold"
     },
     "REQ-CLARIFY-956": {
-      "hash": "6b8a15e6562c",
+      "hash": "1cb14d7f33f2",
+      "reason": null
+    },
+    "REQ-CLARIFY-975": {
+      "hash": "78430d83d975",
       "reason": null
     },
     "REQ-CMDREGISTRY-1031": {

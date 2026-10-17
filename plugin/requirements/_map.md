@@ -492,8 +492,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_sections_py_131_284["plugin/scripts/reqmap_engine/sections.py:131-284"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_sections_py_131_284
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2412_3083["plugin/scripts/test_reqmap_author.py:2412-3083"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2412_3083
+  f_plugin_scripts_test_reqmap_author_py_2412_3125["plugin/scripts/test_reqmap_author.py:2412-3125"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2412_3125
   f_plugin_scripts_reqmap_engine_clarify_py_165_327["plugin/scripts/reqmap_engine/clarify.py:165-327"]
   ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_165_327
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
@@ -527,8 +527,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_orphans_py_153_181["plugin/scripts/reqmap_engine/orphans.py:153-181"]
   ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_engine_orphans_py_153_181
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_scripts_test_reqmap_author_py_1758_3176["plugin/scripts/test_reqmap_author.py:1758-3176"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1758_3176
+  f_plugin_scripts_test_reqmap_author_py_1758_3218["plugin/scripts/test_reqmap_author.py:1758-3218"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1758_3218
   f_plugin_scripts_test_reqmap_report_py_5269["plugin/scripts/test_reqmap_report.py:5269"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5269
   f_plugin_scripts_reqmap_engine_decompose_py_54_114["plugin/scripts/reqmap_engine/decompose.py:54-114"]
@@ -784,8 +784,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_health_py_125_319["plugin/scripts/reqmap_engine/health.py:125-319"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_engine_health_py_125_319
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_scripts_test_reqmap_author_py_3936["plugin/scripts/test_reqmap_author.py:3936"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3936
+  f_plugin_scripts_test_reqmap_author_py_3978["plugin/scripts/test_reqmap_author.py:3978"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3978
   f_plugin_scripts_reqmap_engine_plandrift_py_362_428["plugin/scripts/reqmap_engine/plandrift.py:362-428"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_362_428
   f_plugin_scripts_reqmap_engine_release_py_1_386["plugin/scripts/reqmap_engine/release.py:1-386"]
@@ -798,8 +798,8 @@ graph LR
   f_scripts_test_pipeline_wiring_py_238["scripts/test_pipeline_wiring.py:238"]
   ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_238
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2032_3121["plugin/scripts/test_reqmap_author.py:2032-3121"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2032_3121
+  f_plugin_scripts_test_reqmap_author_py_2032_3163["plugin/scripts/test_reqmap_author.py:2032-3163"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2032_3163
   f_plugin_scripts_test_reqmap_report_py_5269["plugin/scripts/test_reqmap_report.py:5269"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5269
   f_plugin_scripts_reqmap_engine_retire_py_12_229["plugin/scripts/reqmap_engine/retire.py:12-229"]
@@ -911,8 +911,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_scripts_reqmap_py_246["plugin/scripts/reqmap.py:246"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_246
-  f_plugin_scripts_test_reqmap_author_py_4148["plugin/scripts/test_reqmap_author.py:4148"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4148
+  f_plugin_scripts_test_reqmap_author_py_4190["plugin/scripts/test_reqmap_author.py:4190"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4190
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_319["plugin/scripts/reqmap_engine/init.py:319"]
@@ -1139,8 +1139,6 @@ graph LR
     REQ_PROPOSE_1093["The agent proposes a draft and a person confirms it<br><small>REQ-PROPOSE-1093</small><br>unreviewed"]
     REQ_EXTREPO_1094["The gate runs on a repository that is not this one<br><small>REQ-EXTREPO-1094</small><br>unreviewed"]
     REQ_SURFACE_1095["The six verbs stay, and pip installs the same engine<br><small>REQ-SURFACE-1095</small><br>unreviewed"]
-    REQ_CLARIFY_1100["The map carries what clarify asks<br><small>REQ-CLARIFY-1100</small><br>unreviewed"]
-    REQ_CLARIFY_1102["What clarify does not mistake for a question<br><small>REQ-CLARIFY-1102</small><br>unreviewed"]
     REQ_EXTRACT_1099["A code draft asks about the lines the scan found<br><small>REQ-EXTRACT-1099</small><br>unreviewed"]
     REQ_LINTCHECKS_1089["Decision questions the person answering can read<br><small>REQ-LINTCHECKS-1089</small><br>unreviewed"]
     REQ_PLANVERSIONBAR_1091["A bar that is a version, not work, is counted<br><small>REQ-PLANVERSIONBAR-1091</small><br>unreviewed"]
@@ -1155,8 +1153,6 @@ graph LR
   style REQ_PROPOSE_1093 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_EXTREPO_1094 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SURFACE_1095 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CLARIFY_1100 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CLARIFY_1102 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_EXTRACT_1099 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_LINTCHECKS_1089 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PLANVERSIONBAR_1091 fill:#fff3cd,stroke:#a66,color:#630
@@ -1173,8 +1169,6 @@ graph LR
 | REQ-PROPOSE-1093 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-EXTREPO-1094 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SURFACE-1095 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CLARIFY-1100 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CLARIFY-1102 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-EXTRACT-1099 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-LINTCHECKS-1089 | draft | 9 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PLANVERSIONBAR-1091 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

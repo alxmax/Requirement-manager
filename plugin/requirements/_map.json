@@ -1854,7 +1854,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3367"
+          "loc": "plugin/scripts/test_reqmap_author.py:3409"
         },
         {
           "role": "implements",
@@ -1903,7 +1903,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3367"
+          "loc": "plugin/scripts/test_reqmap_author.py:3409"
         },
         {
           "role": "implements",
@@ -1970,7 +1970,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3367"
+          "loc": "plugin/scripts/test_reqmap_author.py:3409"
         },
         {
           "role": "implements",
@@ -2863,11 +2863,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3029"
+          "loc": "plugin/scripts/test_reqmap_author.py:3071"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3083"
+          "loc": "plugin/scripts/test_reqmap_author.py:3125"
         },
         {
           "role": "implements",
@@ -2912,8 +2912,7 @@
       "intent": "Each detector encodes one question a reviewer asks by reflex. They are deliberately shallow — lexical, per clause, no model of meaning — because a question that is occasionally unnecessary costs a sentence, while a missed ambiguity costs a rewrite.",
       "contract": [
         "A clause carrying a hedge word with no measurable threshold raises one question naming that word.",
-        "A bare number in a clause with no unit beside it raises a question asking for the unit; an identifier such as a version or a case label is not a bare number.",
-        "The number after \"exit\", \"exits\" or \"exit code\" is a value, not a quantity, and raises no unit question.",
+        "A bare number in a clause with no unit beside it raises a question asking for the unit; an identifier such as a version or a case label is not a bare number, and neither is the number after \"exit\", \"exits\" or \"exit code\", which is a value, not a quantity.",
         "A clause whose subject is \"It\" or \"the system\" raises a question asking which component acts.",
         "A requirement with more clauses than cases raises ONE question naming how many are uncovered, and saying that a count cannot tell which. It never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that.",
         "A requirement whose cases nearly all start from the same kind of input raises one question about the kind that is missing, unless that kind is the corpus's own subject.",
@@ -2923,7 +2922,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a bare number is questioned, an identifier is not\n  Given  one clause reading \"retries 3 times\", one reading \"emits CASE-2 for v4.0.0\"\n         and one reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   the first raises a missing-unit question and the other two raise none\n\nCASE-3 — a happy-path-only acceptance raises the failure question\n  Given  a requirement whose cases mention no invalid, missing or failing input\n  When   the detectors run\n  Then   one question asks what happens on the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned\n  Given  a requirement whose every case opens on the same noun, and a corpus in which that\n         noun is not the subject every other requirement starts from\n  When   the detectors run\n  Then   one question names that noun and asks which other kind a caller would supply\n\nCASE-6 — the corpus's own subject is not that signal\n  Given  a corpus in which nearly every case of every requirement starts from the same noun\n  When   the detectors run on one of them\n  Then   no question is raised about it, because the noun is the domain, not a narrow focus\n\nCASE-7 — a deprecated requirement asks nothing\n  Given  a deprecated requirement with no labelled case and a clause reading \"quickly\"\n  When   the detectors run\n  Then   no question is raised, blocking or advisory",
+      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a bare number is questioned, an identifier is not\n  Given  one clause reading \"retries 3 times\", one reading \"emits CASE-2 for v4.0.0\"\n         and one reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   the first raises a missing-unit question and the other two raise none\n\nCASE-3 — a clause-against-case gap and a happy-path-only acceptance are questioned\n  Given  a requirement with five clauses and two cases, none mentioning invalid, missing\n         or failing input\n  When   the detectors run\n  Then   one question says 3 clauses have no case without naming which, and one asks\n         what happens on the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned, unless it is the domain\n  Given  a requirement whose every case opens on the same noun, once in a corpus where that\n         noun is rare and once in a corpus where nearly every case starts from it\n  When   the detectors run\n  Then   the first names that noun and asks which other kind a caller would supply, and\n         the second raises no such question, because the noun is the domain\n\nCASE-6 — an unnamed actor is questioned\n  Given  a clause reading \"It scans all files when the input is missing.\"\n  When   the detectors run\n  Then   one question asks which command or component performs it\n\nCASE-7 — a deprecated requirement asks nothing\n  Given  a deprecated requirement with no labelled case and a clause reading \"quickly\"\n  When   the detectors run\n  Then   no question is raised, blocking or advisory",
       "input": "",
       "output": "",
       "desc": "",
@@ -2940,7 +2939,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3083"
+          "loc": "plugin/scripts/test_reqmap_author.py:3125"
         },
         {
           "role": "implements",
@@ -2969,26 +2968,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-CLARIFY-957",
@@ -3064,7 +3044,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an edit that raises a new question is reported\n  Given  a requirement synced once, then edited so a new blocking rule fires\n  When   `sync` runs\n  Then   it names that requirement and the new rule, and the exit code is unchanged\n\nCASE-2 — an unchanged question is not re-reported\n  Given  a requirement whose blocking questions are the same as at the last sync\n  When   `sync` runs\n  Then   nothing is reported as new\n\nCASE-3 — a new requirement's questions are not reported as new\n  Given  a requirement that has never been in the snapshot\n  When   `sync` runs\n  Then   its questions are not reported as new\n\n--------------------",
+      "accept": "CASE-1 — a requirement recorded with no question, then given one, is reported\n  Given  a requirement synced once with no blocking question, then edited so one fires\n  When   `sync` runs\n  Then   it names that requirement as having a new question\n\nCASE-2 — an unchanged or reworded question is not re-reported\n  Given  a requirement whose blocking question is the same rule as at the last sync, once\n         unchanged and once after its clause is reworded\n  When   `sync` runs\n  Then   nothing is reported as new either time\n\nCASE-3 — a new requirement's questions are not reported as new\n  Given  a requirement that has never been in the snapshot\n  When   `sync` runs\n  Then   its questions are not reported as new\n\nCASE-4 — only the rule that is new is named\n  Given  a requirement recorded with `no-cases`, then edited so `no-contract` also fires\n  When   `sync` runs\n  Then   it names `no-contract` as new and does not name `no-cases`\n\nCASE-5 — a corrupt snapshot fails open\n  Given  a `_clarifylock.json` that is not valid JSON, and a requirement with a blocking\n         question\n  When   `sync` runs\n  Then   it does not crash and reports nothing as new\n\nCASE-6 — reporting a new question never changes the exit code\n  Given  the same tree synced once with a snapshot that makes a question new and once\n         with no snapshot at all\n  When   `sync` runs\n  Then   both runs exit with the same code\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3104,43 +3084,23 @@
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 clause(s) have no case: there are 6 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ]
+      "clauses": 6,
+      "covered": 6,
+      "clarify": []
     },
     {
       "id": "REQ-CLARIFY-1100",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The map carries what clarify asks",
       "intent": "`clarify` asks what a requirement's text leaves open, but its answers reached only the terminal and a snapshot of rule names. The viewer reads `_map.json` and nothing else, so it could not show a single one of them. Writing them into the map lets the viewer show them beside the questions a person wrote.",
       "contract": [
-        "Every node in `_map.json` carries a `clarify` list: the records `clarify` emits for that requirement, each with `rule`, `severity`, `basis`, `where`, `quote`, `question` and `suggest`, in the order `clarify` prints them.",
+        "Every node in `_map.json` carries a `clarify` list: the records `clarify` emits for that requirement, each with `rule`, `severity`, `basis`, `where`, `quote`, `question` and `suggest`, in the order `clarify` prints them. The map computes them with the same function `clarify` runs, so the two never disagree about a requirement.",
         "Every record names the `basis` its rule rests on: `structure` when a section is absent (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`, `over-scoped`), and `wording` when a word on a list matched (every other rule). `clarify` prints the basis beside the rule.",
         "The list holds blocking and advisory questions alike; filtering is the reader's choice.",
-        "A requirement with nothing unclear carries an empty list, never an absent field.",
-        "The map and `clarify` compute the questions with the same function, so the two never disagree about a requirement."
+        "A requirement with nothing unclear carries an empty list, never an absent field."
       ],
       "verify": [],
       "notes": [],
@@ -3158,7 +3118,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3029"
+          "loc": "plugin/scripts/test_reqmap_author.py:3071"
         },
         {
           "role": "implements",
@@ -3180,38 +3140,22 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-CLARIFY-1102",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "What clarify does not mistake for a question",
       "intent": "Reading `clarify`'s questions one by one showed most of three rules were not questions: a unit asked of a date or an exit code, a hedge found inside \"smaller\" or \"how many\", and a missing case counted on a bullet that only points at the child carrying its cases. Each was a property of the rule, so the fix belongs in the rule, not in 82 edits to requirements that were already right. See [ADR-0071](../../docs/adr/0071-clarify-reads-values-and-delegation.md).",
       "contract": [
         "A hedge counts only as a whole word outside a code span, and \"how many\" asks for a count rather than hedging one.",
-        "A number is a value, not a quantity, and raises no unit question when it sits inside a code span, is a date, a version or a code point such as `U+2028`, or follows \"default\", \"exiting\", \"exits with code\" or \"the exit code stays\".",
-        "A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), and `50,000` is one number.",
+        "A number is a value, not a quantity, and raises no unit question when it sits inside a code span, is a date, a version or a code point such as `U+2028`, or follows \"default\", \"exiting\", \"exits with code\" or \"the exit code stays\". A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), and `50,000` is one number.",
         "A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that requirement, so neither the clause-against-case count nor the over-scoped count holds it.",
         "A clause quantified over \"all\", \"every\" or \"any\" raises no question: in a requirement the words nearly always range over a finite set the engine already owns."
       ],
@@ -3245,25 +3189,10 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "ARCH-CMDREGISTRY-033",
@@ -4299,7 +4228,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3176"
+          "loc": "plugin/scripts/test_reqmap_author.py:3218"
         },
         {
           "role": "tested-by",
@@ -4584,7 +4513,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3176"
+          "loc": "plugin/scripts/test_reqmap_author.py:3218"
         },
         {
           "role": "implements",
@@ -6705,7 +6634,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3497"
+          "loc": "plugin/scripts/test_reqmap_author.py:3539"
         },
         {
           "role": "implements",
@@ -8356,7 +8285,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4384"
+          "loc": "plugin/scripts/test_reqmap_author.py:4426"
         },
         {
           "role": "implements",
@@ -14311,7 +14240,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3936"
+          "loc": "plugin/scripts/test_reqmap_author.py:3978"
         },
         {
           "role": "implements",
@@ -14402,7 +14331,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3605"
+          "loc": "plugin/scripts/test_reqmap_author.py:3647"
         },
         {
           "role": "implements",
@@ -14455,7 +14384,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3658"
+          "loc": "plugin/scripts/test_reqmap_author.py:3700"
         },
         {
           "role": "implements",
@@ -14510,7 +14439,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3692"
+          "loc": "plugin/scripts/test_reqmap_author.py:3734"
         },
         {
           "role": "implements",
@@ -14588,7 +14517,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3722"
+          "loc": "plugin/scripts/test_reqmap_author.py:3764"
         },
         {
           "role": "implements",
@@ -14650,7 +14579,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3744"
+          "loc": "plugin/scripts/test_reqmap_author.py:3786"
         },
         {
           "role": "implements",
@@ -14732,7 +14661,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3856"
+          "loc": "plugin/scripts/test_reqmap_author.py:3898"
         },
         {
           "role": "implements",
@@ -14791,7 +14720,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3744"
+          "loc": "plugin/scripts/test_reqmap_author.py:3786"
         },
         {
           "role": "implements",
@@ -14845,7 +14774,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3977"
+          "loc": "plugin/scripts/test_reqmap_author.py:4019"
         },
         {
           "role": "implements",
@@ -14916,7 +14845,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4092"
+          "loc": "plugin/scripts/test_reqmap_author.py:4134"
         },
         {
           "role": "implements",
@@ -15101,7 +15030,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3121"
+          "loc": "plugin/scripts/test_reqmap_author.py:3163"
         },
         {
           "role": "tested-by",
@@ -15345,7 +15274,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3121"
+          "loc": "plugin/scripts/test_reqmap_author.py:3163"
         },
         {
           "role": "implements",
@@ -16303,7 +16232,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4092"
+          "loc": "plugin/scripts/test_reqmap_author.py:4134"
         },
         {
           "role": "implements",
@@ -19302,7 +19231,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4148"
+          "loc": "plugin/scripts/test_reqmap_author.py:4190"
         },
         {
           "role": "implements",
@@ -19413,7 +19342,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4151"
+          "loc": "plugin/scripts/test_reqmap_author.py:4193"
         },
         {
           "role": "implements",
@@ -27998,16 +27927,16 @@
     }
   },
   "health": {
-    "score": 96,
+    "score": 97,
     "total": 324,
     "scored": 302,
-    "healthy": 290,
+    "healthy": 292,
     "exempt": 0,
     "deprecated": 22,
-    "confirmed": 290,
+    "confirmed": 292,
     "implemented": 291,
     "tested": 292,
-    "drafts": 12,
+    "drafts": 10,
     "orphans": 0,
     "untested": 1,
     "open_intent": 0,
@@ -28015,7 +27944,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 290,
+    "reviewed_total": 292,
     "unhealthy": [
       {
         "id": "ARCH-ADOPT-075",
@@ -28023,20 +27952,6 @@
         "why": [
           "not confirmed",
           "not tested"
-        ]
-      },
-      {
-        "id": "REQ-CLARIFY-1100",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CLARIFY-1102",
-        "status": "draft",
-        "why": [
-          "not confirmed"
         ]
       },
       {
