@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-17.2",
+  "engine_version": "2026-10-17.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -155,15 +155,6 @@
           "quote": "For a confirmed requirement that labels its criteria and carries at least one `verifies` tag, the gate warns once, naming every labelled criterion that has no tag.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "That single warning also states how many labelled criteria are tagged, so partial adoption reads as progress rather than as a growing pile of warnings.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
         }
       ],
       "i18n": {
@@ -381,17 +372,7 @@
           "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
         }
       ],
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 clause(s) have no case: there are 4 clauses and 1 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-WATCH-1092",
@@ -683,15 +664,6 @@
       "covered": 2,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "`pyproject.toml` names the project `reqmap`, requires Python `>=3.9`, and its console script is `reqmap:_run_cli`.",
-          "question": "What unit is \"3.9\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "count",
@@ -843,15 +815,6 @@
       "clauses": 5,
       "covered": 5,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "A clause normally holds no more than `LINT_STATEMENT_WORDS` words, default 150.",
-          "question": "What unit is \"150\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -1162,15 +1125,6 @@
           "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
           "rule": "case-monoculture",
           "severity": "advisory",
           "basis": "wording",
@@ -1385,17 +1339,7 @@
       "risks": [],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The report states how many requirements declare a `level:`, how they spread across the rungs, and how many `satisfies:` edges exist.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Dacă corpusul are sau nu o formă",
@@ -2005,7 +1949,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3337"
+          "loc": "plugin/scripts/test_reqmap_author.py:3364"
         },
         {
           "role": "implements",
@@ -2054,7 +1998,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3337"
+          "loc": "plugin/scripts/test_reqmap_author.py:3364"
         },
         {
           "role": "implements",
@@ -2121,7 +2065,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3337"
+          "loc": "plugin/scripts/test_reqmap_author.py:3364"
         },
         {
           "role": "implements",
@@ -2385,26 +2329,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 clause(s) have no case: there are 9 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 9 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-CHECK-828",
@@ -2473,15 +2398,6 @@
           "quote": "`gate` reports an `ERROR` and exits non-zero for every condition in this group.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
     },
@@ -3061,7 +2977,8 @@
         "`clarify` detects the shapes that cannot be verified as written and turns each into one question about the requirement's own text. [[REQ-CLARIFY-956]]",
         "`clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]",
         "`sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]",
-        "The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]"
+        "The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]",
+        "`clarify` asks nothing of a value, a whole word it only contains, or a clause that hands its cases to another requirement. [[REQ-CLARIFY-1102]]"
       ],
       "verify": [],
       "notes": [],
@@ -3083,7 +3000,8 @@
         "REQ-CLARIFY-956",
         "REQ-CLARIFY-957",
         "REQ-CLARIFY-975",
-        "REQ-CLARIFY-1100"
+        "REQ-CLARIFY-1100",
+        "REQ-CLARIFY-1102"
       ],
       "members": [
         {
@@ -3092,39 +3010,39 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2934"
+          "loc": "plugin/scripts/test_reqmap_author.py:2961"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2999"
+          "loc": "plugin/scripts/test_reqmap_author.py:3026"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3053"
+          "loc": "plugin/scripts/test_reqmap_author.py:3080"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:146"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:155"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:176"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:199"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:220"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:226"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:247"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:252"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:273"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:310"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:335"
         }
       ],
       "test_exempt": null,
@@ -3142,15 +3060,6 @@
           "quote": "The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
     },
@@ -3193,27 +3102,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3053"
+          "loc": "plugin/scripts/test_reqmap_author.py:3080"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:146"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:155"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:176"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:199"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:220"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:226"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:247"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:252"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:273"
         }
       ],
       "test_exempt": null,
@@ -3223,15 +3132,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "A requirement with more clauses than cases raises ONE question naming how many are uncovered, and saying that a count cannot tell which. It never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -3304,7 +3204,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:310"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:335"
         }
       ],
       "test_exempt": null,
@@ -3366,7 +3266,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2934"
+          "loc": "plugin/scripts/test_reqmap_author.py:2961"
         },
         {
           "role": "implements",
@@ -3443,7 +3343,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a node carries the questions clarify prints, in order\n  Given  a requirement whose clause says `quickly` and names a bare number\n  When   the map is built\n  Then   its node's `clarify` list equals what `clarify` computes for it, field for field\n\nCASE-2 — nothing unclear is an empty list\n  Given  a requirement with one plain clause and a failure-path case\n  When   the map is built\n  Then   its node's `clarify` list is empty\n\nCASE-3 — a blocking question keeps its severity\n  Given  a requirement with no case at all\n  When   the map is built\n  Then   its node's `clarify` list holds `no-cases` with severity `blocking`\n\nCASE-4 — each question names the basis its rule rests on\n  Given  a requirement with no case and a clause that says `quickly`\n  When   the map is built\n  Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,\n         and only `clause-without-case` and `over-scoped` rest on `count`",
+      "accept": "CASE-1 — a node carries the questions clarify prints, in order\n  Given  a requirement whose clause says `quickly` and names a bare number\n  When   the map is built\n  Then   its node's `clarify` list equals what `clarify` computes for it, field for field\n\nCASE-2 — nothing unclear is an empty list\n  Given  a requirement with one plain clause and a failure-path case\n  When   the map is built\n  Then   its node's `clarify` list is empty\n\nCASE-3 — a blocking question keeps its severity\n  Given  a requirement with no case at all\n  When   the map is built\n  Then   its node's `clarify` list holds `no-cases` with severity `blocking`\n\nCASE-4 — each question names the basis its rule rests on\n  Given  a requirement with no case and a clause that says `quickly`\n  When   the map is built\n  Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,\n         and only `clause-without-case` and `over-scoped` rest on `count`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3456,15 +3356,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2999"
+          "loc": "plugin/scripts/test_reqmap_author.py:3026"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:135"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:156"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:147"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:168"
         },
         {
           "role": "implements",
@@ -3494,6 +3394,70 @@
           "where": "Cases",
           "quote": "",
           "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-CLARIFY-1102",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "What clarify does not mistake for a question",
+      "intent": "Reading `clarify`'s questions one by one showed most of three rules were not questions: a unit asked of a date or an exit code, a hedge found inside \"smaller\" or \"how many\", and a missing case counted on a bullet that only points at the child carrying its cases. Each was a property of the rule, so the fix belongs in the rule, not in 82 edits to requirements that were already right. See [ADR-0071](../../docs/adr/0071-clarify-reads-values-and-delegation.md).",
+      "contract": [
+        "A hedge counts only as a whole word outside a code span, and \"how many\" asks for a count rather than hedging one.",
+        "A number is a value, not a quantity, and raises no unit question when it sits inside a code span, is a date, a version or a code point such as `U+2028`, or follows \"default\", \"exiting\", \"exits with code\" or \"the exit code stays\".",
+        "A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), and `50,000` is one number.",
+        "A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that requirement, so neither the clause-against-case count nor the over-scoped count holds it."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a hedge is a whole word outside code\n  Given  clauses reading \"how many criteria\", \"the smaller set\" and \"words such as\n         `appropriate`\", and one reading \"keeps many entries\"\n  When   the detectors run\n  Then   only the last raises a vague-term question\n\nCASE-2 — a value is not a bare number\n  Given  clauses naming `>=3.9`, a date, `U+2028`, \"default 150\", \"exits with code 0\",\n         \"12-character\" and \"50,000 characters\", and one reading \"amber below 60\"\n  When   the detectors run\n  Then   only the last raises a missing-unit question\n\nCASE-3 — a clause that hands its cases on is not counted\n  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and\n         one case, and another with two clauses of its own and one case\n  When   the detectors run\n  Then   the first raises neither a clause-without-case nor an over-scoped question, and\n         the second still raises clause-without-case",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CLARIFY-062"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:2412"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:177"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:274"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "count",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
@@ -3865,15 +3829,6 @@
       "clauses": 5,
       "covered": 5,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`ask --design` and `ask --i18n` are accepted through v8.x and do nothing but print one stderr line naming v8.2.0 and ADR-0047, exiting 0; so are `init --no-site` and `sync --attach`.",
-          "question": "What unit is \"0\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -4564,17 +4519,7 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "The coverage report states how many files it excluded and why, and points at the other report, so the exclusion is visible rather than silent.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "ARCH-DECOMPOSE-050",
@@ -4645,11 +4590,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2752"
+          "loc": "plugin/scripts/test_reqmap_author.py:2779"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3146"
+          "loc": "plugin/scripts/test_reqmap_author.py:3173"
         },
         {
           "role": "tested-by",
@@ -4875,7 +4820,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2752"
+          "loc": "plugin/scripts/test_reqmap_author.py:2779"
         },
         {
           "role": "implements",
@@ -4934,7 +4879,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3146"
+          "loc": "plugin/scripts/test_reqmap_author.py:3173"
         },
         {
           "role": "implements",
@@ -5004,15 +4949,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "A parent case is copied to a child only when the case's text names exactly one group's subject; a case naming none or more than one goes to no child, and the run reports how many did.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -5140,24 +5076,6 @@
           "quote": "The design payload is excluded from every freshness comparison, so advisory data can never fail the gate. [[REQ-DESIGN-991]]",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "4 clause(s) have no case: there are 8 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
         }
       ]
     },
@@ -5477,16 +5395,7 @@
           "basis": "wording",
           "where": "clause 1",
           "quote": "A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.",
-          "question": "What unit is \"500\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A file with lines wider than `DESIGN_LINE_MAX` columns (default 120) is one `line-too-long` candidate reporting the count and the first such line.",
-          "question": "What unit is \"120\" in?",
+          "question": "What unit is \"1\" in?",
           "suggest": "State the unit beside the number so a test can assert it."
         },
         {
@@ -6297,17 +6206,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body. [[REQ-DRIFT-841]]",
-          "question": "What unit is \"12\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-DRIFT-841",
@@ -6365,15 +6264,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body.",
-          "question": "What unit is \"12\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "no-failure-case",
           "severity": "advisory",
@@ -7229,7 +7119,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3467"
+          "loc": "plugin/scripts/test_reqmap_author.py:3494"
         },
         {
           "role": "implements",
@@ -7272,15 +7162,6 @@
           "quote": "A file that already carries any membership tag is never given a second one, and a file the scan cannot decode is never rewritten.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 7",
-          "quote": "`init` reports how many of the sources it drafted it managed to link.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
         }
       ]
     },
@@ -7381,15 +7262,6 @@
           "suggest": "State the unit beside the number so a test can assert it."
         },
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`draft` writes at most eight questions per file, in line order, and names how many it left out under Context.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "count",
@@ -7473,15 +7345,6 @@
       "covered": 6,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it, and warns when a parent's child count leaves the useful band for its level (`system`: ceiling 10, `architecture`: ceiling 30, undeclared level: 5–20). [[REQ-FANOUT-852]]",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "number-without-unit",
           "severity": "advisory",
           "basis": "wording",
@@ -7553,15 +7416,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -7773,15 +7627,6 @@
           "quote": "`sync` excludes anything below a line in that section declaring itself a non-binding authoring hint — the scaffold's own list of a source file's headings is context, not a question. Every verify-intent reader goes through the one collection step, so the viewer, the CLI and the gate summary cannot report different counts.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 7",
-          "quote": "A question carrying an indented `*Answer (YYYY-MM-DD):* …` line, or that same line as a nested bullet, is answered when the date is a real calendar day. It leaves every open count and every list, and stays in the file where the author wrote it. Any other shape leaves the question open: no date, or a date that is not a day, such as `2026-02-31` (ADR-0058).",
-          "question": "What unit is \"2026\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
         },
         {
           "rule": "unbounded-quantity",
@@ -9067,7 +8912,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4354"
+          "loc": "plugin/scripts/test_reqmap_author.py:4381"
         },
         {
           "role": "implements",
@@ -9603,15 +9448,6 @@
           "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`--apply` writes the two upper rungs with the edges (ADR-0038), in `init`'s shape: one draft `ARCH-<FAMILY>-001` per id-prefix family of at least `LEVEL_FAMILY_MIN` code members (smaller prefixes share `ARCH-NEEDS-A-NAME-001`), `SYS-NEEDS-A-NAME-001` at the apex, `satisfies:` from every non-draft code requirement to its family and from every placeholder or unlinked architecture requirement to the apex. `depends_on` is never read.",
-          "question": "What is the measurable threshold behind \"small\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -10090,24 +9926,6 @@
       "covered": 5,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The `statement-too-long` check warns on a Contract bullet spanning more than `LINT_CLAUSE_SENTENCES` sentences, default 3.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "The `stacked-conditions` check warns on a normative line that joins at least `LINT_STACKED_CONNECTORS` clauses, default 3, with conjunctions.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -10171,44 +9989,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The `ac-count-low` check warns on an Acceptance section holding fewer than `LINT_AC_MIN`, default 3, criteria.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "The `ac-count-high` check warns on more than `LINT_AC_MAX`, default 7, criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
-          "question": "What unit is \"7\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "The `over-scoped` check warns on a requirement over both ceilings at once: more than `LINT_CONTRACT_MAX` scope units, default 10, with more than `LINT_AC_MAX` criteria.",
-          "question": "What unit is \"10\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "The `file-spread` check warns on a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX`, default 3, distinct directories; files in one directory count once.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-LINTCHECKS-867",
@@ -10255,24 +10036,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "The `atomic-story-overlong` check warns on an atomic-form story quote listing more than `LINT_ATOMIC_STORY_BULLETS_MAX`, default 3, `- ` facts — beyond that it is no longer one obligation.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "The `layer-mismatch` check warns on a `layer: bus` requirement that nothing depends on and that itself depends on at least `LINT_BUS_FANOUT_MIN`, default 3, requirements.",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -10335,15 +10098,6 @@
       "clauses": 3,
       "covered": 3,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The `vague-term` check warns on a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words such as `appropriate`.",
-          "question": "What is the measurable threshold behind \"appropriate\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "case-monoculture",
           "severity": "advisory",
@@ -10499,24 +10253,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`question-too-long` warns when the bold question runs over `LINT_QUESTION_WORDS` words (default 15) or `LINT_QUESTION_SENTENCES` sentences (default 1).",
-          "question": "What unit is \"15\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`context-repeats-question` warns when the context line holds bold text or repeats over `LINT_QUESTION_OVERLAP` of the question's words (default 0.5); the labels are `LINT_QUESTION_CONTEXT_LABELS`.",
-          "question": "What unit is \"0.5\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -10771,17 +10507,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-MAP-870",
@@ -11564,15 +11290,6 @@
           "suggest": "State the unit beside the number so a test can assert it."
         },
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "The Risk diagram shows only requirements with at least one risk signal (confirmed with zero members; `draft`/`baseline`; ≥3 dependents), each paired with a scripted recommendation. [[REQ-MAPDIAGRAMS-878]]",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "no-failure-case",
           "severity": "advisory",
           "basis": "wording",
@@ -11653,15 +11370,6 @@
           "basis": "wording",
           "where": "clause 2",
           "quote": "In the default full profile, `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies and Risk.",
-          "question": "What unit is \"4\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "Each of those 4 blocks carries a legend.",
           "question": "What unit is \"4\" in?",
           "suggest": "State the unit beside the number so a test can assert it."
         }
@@ -11825,17 +11533,7 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "Req→Code omits `level: code` requirements: they are counted in the hierarchy diagram and drawn in the viewer, and drawing them here with their function-level members pushed the block past the 50,000 characters GitHub renders.",
-          "question": "What unit is \"50\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Dependency Map este la nivel de arie; Req→Code colorează și colapsează linii",
@@ -11895,17 +11593,7 @@
       "risks": [],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The Risk diagram shows only requirements with at least one risk signal (confirmed with zero members; `draft`/`baseline`; ≥3 dependents).",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Diagrama Risk: doar cerințe semnalate, fiecare cu un sfat",
@@ -12058,15 +11746,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`initialize` answers with protocol revision `2025-06-18`, the `tools` capability and the server's name and engine version.",
-          "question": "What unit is \"2025\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -12576,15 +12255,6 @@
       "covered": 4,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`_memberlock.json` declares `_schema: 2`. A lock written by an older engine is rejected as unreadable and rebaselined on the next `sync`, never half-read.",
-          "question": "What unit is \"2\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -12940,24 +12610,6 @@
           "quote": "`next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]",
           "question": "What is the measurable threshold behind \"several\"?",
           "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "4 clause(s) have no case: there are 8 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
         }
       ]
     },
@@ -13568,15 +13220,6 @@
       "covered": 4,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`next` prints a `Cases without a test` bucket naming each confirmed requirement, not `test_exempt` and not exempt from implementation, whose automatable cases are not all tagged, with how many of how many are missing, most missing first. A requirement with no case tagged at all is included.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -13728,15 +13371,6 @@
       "clauses": 5,
       "covered": 5,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 7",
-          "quote": "The check is warn-only and never changes the gate's exit code, including under `--strict`. <!-- Rationale: the 2026-06-21 review of ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -->",
-          "question": "What unit is \"2026\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -14369,15 +14003,6 @@
       "covered": 3,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "When the command's standard output turns out to be a closed pipe, `reqmap.py` ends the command, prints no traceback, and exits with code 0.",
-          "question": "What unit is \"0\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -14586,7 +14211,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2812"
+          "loc": "plugin/scripts/test_reqmap_author.py:2839"
         },
         {
           "role": "tested-by",
@@ -14615,17 +14240,7 @@
       "risks": [],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-PROMOTE-894",
@@ -14760,7 +14375,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2812"
+          "loc": "plugin/scripts/test_reqmap_author.py:2839"
         },
         {
           "role": "implements",
@@ -15650,7 +15265,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3906"
+          "loc": "plugin/scripts/test_reqmap_author.py:3933"
         },
         {
           "role": "implements",
@@ -15701,15 +15316,6 @@
       "covered": 3,
       "clarify": [
         {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "7 clause(s) have no case: there are 10 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
           "rule": "case-monoculture",
           "severity": "advisory",
           "basis": "wording",
@@ -15717,15 +15323,6 @@
           "quote": "",
           "question": "Every case starts from the same kind of input (\"repository\"). What is the other kind a caller would supply?",
           "suggest": "Add one case written from the caller's side, not the implementation's."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 10 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
         }
       ]
     },
@@ -15759,7 +15356,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3575"
+          "loc": "plugin/scripts/test_reqmap_author.py:3602"
         },
         {
           "role": "implements",
@@ -15822,7 +15419,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3628"
+          "loc": "plugin/scripts/test_reqmap_author.py:3655"
         },
         {
           "role": "implements",
@@ -15877,7 +15474,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3662"
+          "loc": "plugin/scripts/test_reqmap_author.py:3689"
         },
         {
           "role": "implements",
@@ -15955,7 +15552,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3692"
+          "loc": "plugin/scripts/test_reqmap_author.py:3719"
         },
         {
           "role": "implements",
@@ -16017,7 +15614,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3714"
+          "loc": "plugin/scripts/test_reqmap_author.py:3741"
         },
         {
           "role": "implements",
@@ -16109,7 +15706,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3826"
+          "loc": "plugin/scripts/test_reqmap_author.py:3853"
         },
         {
           "role": "implements",
@@ -16168,7 +15765,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3714"
+          "loc": "plugin/scripts/test_reqmap_author.py:3741"
         },
         {
           "role": "implements",
@@ -16232,7 +15829,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3947"
+          "loc": "plugin/scripts/test_reqmap_author.py:3974"
         },
         {
           "role": "implements",
@@ -16271,15 +15868,6 @@
       "covered": 7,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A bar whose `end` has passed is reported as needing its `end` moved unless it is done. A bar is done when it carries `progress: 100`, when every ROADMAP item it carries out is ticked, or when the requirement it names is confirmed or implemented; one predicate decides this for every reader.",
-          "question": "What unit is \"100\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -16296,15 +15884,6 @@
           "quote": "A bar that carries out ROADMAP items is done only when all of them are ticked: an open one keeps it open whatever its requirement's status, and no date is suggested for it.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "A bar whose requirement was already confirmed or implemented in the last commit of its file before the bar's `start` produces nothing on that requirement: neither the requirement's status nor a later commit to its code counts the bar as done, and only `progress: 100` or its ticked ROADMAP items do. When git cannot say, the requirement counts as not done before the bar.",
-          "question": "What unit is \"100\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
         }
       ]
     },
@@ -16340,7 +15919,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4062"
+          "loc": "plugin/scripts/test_reqmap_author.py:4089"
         },
         {
           "role": "implements",
@@ -16540,11 +16119,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2544"
+          "loc": "plugin/scripts/test_reqmap_author.py:2571"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3091"
+          "loc": "plugin/scripts/test_reqmap_author.py:3118"
         },
         {
           "role": "tested-by",
@@ -16623,7 +16202,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2544"
+          "loc": "plugin/scripts/test_reqmap_author.py:2571"
         },
         {
           "role": "implements",
@@ -16701,7 +16280,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2544"
+          "loc": "plugin/scripts/test_reqmap_author.py:2571"
         },
         {
           "role": "implements",
@@ -16802,11 +16381,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2544"
+          "loc": "plugin/scripts/test_reqmap_author.py:2571"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3091"
+          "loc": "plugin/scripts/test_reqmap_author.py:3118"
         },
         {
           "role": "implements",
@@ -16893,7 +16472,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2544"
+          "loc": "plugin/scripts/test_reqmap_author.py:2571"
         },
         {
           "role": "implements",
@@ -17264,26 +16843,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "5 clause(s) have no case: there are 11 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 11 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-ROADMAP-907",
@@ -17757,15 +17317,6 @@
       "covered": 6,
       "clarify": [
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "Every version is compared in one form, `vX.Y.Z`, the form tags and CHANGELOG headings use: `plugin.json`'s `7.19.0` is `v7.19.0`, and a short key `vX.Y` is read as `vX.Y.0`. A milestone equal to the baseline is stale, because that version has been declared. A name that is not a version is never compared.",
-          "question": "What unit is \"7.19\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -17886,7 +17437,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4062"
+          "loc": "plugin/scripts/test_reqmap_author.py:4089"
         },
         {
           "role": "implements",
@@ -17959,17 +17510,7 @@
       ],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "A bar is a version when it has no `req:` and the first word of its title is the same version as its own `milestone`, compared in one form: `v2.3` equals `2.3.0`.",
-          "question": "What unit is \"2.3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "ARCH-RULES-059",
@@ -19070,24 +18611,6 @@
           "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`search` applies a relevance floor (`0.05` by default) and reports plainly, in a message distinct from an empty query, when nothing clears it. [[REQ-SEARCH-914]]",
-          "question": "What unit is \"0.05\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
           "rule": "case-monoculture",
           "severity": "advisory",
           "basis": "wording",
@@ -19335,15 +18858,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The floor defaults to `0.05`.",
-          "question": "What unit is \"0.05\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "case-monoculture",
           "severity": "advisory",
@@ -19895,15 +19409,6 @@
           "quote": "The Action's `check@vN` alias is named identically in every file that documents it and equals the plugin's major; `scripts/check_versions.py` refuses a tree where either is untrue.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "4 clause(s) have no case: there are 7 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
     },
@@ -20697,42 +20202,6 @@
           "quote": "`dupes` reports pairs of requirements whose contracts overlap, and never writes any file. [[REQ-SIMILAR-920]]",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "Each requirement's comparison text is a bag of words from its title, intent line and Contract bullets, tokenized to lowercase words of 3+ letters. [[REQ-SIMILAR-921]]",
-          "question": "What unit is \"3\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 7",
-          "quote": "Only pairs at or above the threshold (default `0.35`, overridable with `--threshold`) are reported, most-similar-first with their shared terms; `dupes` always exits zero. [[REQ-SIMILAR-923]]",
-          "question": "What unit is \"0.35\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 8 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
         }
       ]
     },
@@ -20885,15 +20354,6 @@
           "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
         },
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "`dupes` skips a requirement whose Contract bullets are all still the draft placeholder (`TODO: …`), and prints how many it skipped. An unauthored contract has nothing to compare.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -20901,15 +20361,6 @@
           "quote": "`dupes` skips a requirement whose Contract bullets are all still the draft placeholder (`TODO: …`), and prints how many it skipped. An unauthored contract has nothing to compare.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "`dupes` skips a pair linked by `tested-by` — one requirement's `tested-by` file is the other's `implements` file, so the second requirement IS the first one's test suite — and prints how many such pairs it skipped. Such a pair shares vocabulary by construction and is a known link, not a duplicate.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
         },
         {
           "rule": "clause-without-case",
@@ -20982,15 +20433,6 @@
       "clauses": 3,
       "covered": 3,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).",
-          "question": "What unit is \"1\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -21065,15 +20507,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "The threshold defaults to `0.35`.",
-          "question": "What unit is \"0.35\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -21188,24 +20621,6 @@
       "covered": 3,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "`dupes` skips a pair named by `distinct_from:` on either side, and prints how many it skipped.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "`dupes` does not compare a `deprecated` requirement, and prints how many it left out.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "count",
@@ -21277,15 +20692,6 @@
           "suggest": "Name the limit, or say explicitly that there is none."
         },
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`next` reports each group once, naming its ids and how many could be folded away.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -21347,7 +20753,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4118"
+          "loc": "plugin/scripts/test_reqmap_author.py:4145"
         },
         {
           "role": "implements",
@@ -21458,7 +20864,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4121"
+          "loc": "plugin/scripts/test_reqmap_author.py:4148"
         },
         {
           "role": "implements",
@@ -21638,15 +21044,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "In `warn` the message is a warning and the exit code stays 0.",
-          "question": "What unit is \"0\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -22750,17 +22147,7 @@
       "risks": [],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-TRANSLATE-937",
@@ -22805,15 +22192,6 @@
       "clauses": 3,
       "covered": 3,
       "clarify": [
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "**No subcommand invokes an external process.** `gate`, `sync`, `new`, `init`, `confirm` and `clarify` read and write files only. The `translate` command, which was the single exception, was removed on 2026-09-05.",
-          "question": "What unit is \"2026\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
-        },
         {
           "rule": "unbounded-quantity",
           "severity": "advisory",
@@ -23391,15 +22769,6 @@
       "covered": 6,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "The check skips paths matching `.reqmapignore`, files under the SSOT directory, files whose basename starts with `_`, `.git` or `.reqmap` (their comments quote tags as examples), and files larger than one megabyte. Any other dotfile, such as `.env`, is checked like any file.",
-          "question": "What is the measurable threshold behind \"large\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -23718,24 +23087,6 @@
           "quote": "Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Cases",
-          "quote": "",
-          "question": "15 clause(s) have no case: there are 18 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
-        {
-          "rule": "over-scoped",
-          "severity": "advisory",
-          "basis": "count",
-          "where": "Description",
-          "quote": "",
-          "question": "This requirement carries 18 clauses (advisory limit 7). Which of them is a separate requirement?",
-          "suggest": "Split the ones that could change for a different reason."
         }
       ]
     },
@@ -24649,15 +24000,6 @@
           "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
         },
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "The block shows its version, and for a `vX.Y.x` group that stands alone how many releases it holds. The headline is not drawn on the block.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "unbounded-quantity",
           "severity": "advisory",
           "basis": "wording",
@@ -24790,17 +24132,7 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A row whose only failing axis is `not confirmed` is left out of the Health tab and its count, because the Review tab already lists it; the tab says how many it left out.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-VIEWER-1090",
@@ -25428,15 +24760,6 @@
           "quote": "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order. All three are V8 no-ops: a backslash is silently ignored before `/`, `!` and `-`.",
           "question": "Is there an upper bound, and what happens when it is reached?",
           "suggest": "Name the limit, or say explicitly that there is none."
-        },
-        {
-          "rule": "number-without-unit",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "`render_html` also escapes U+2028 and U+2029 to their `\\\\u2028`/`\\\\u2029` forms. Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the assignment into an unterminated string on any engine older than ES2019. The escaped forms denote the same characters in JSON, so the parsed graph is unchanged.",
-          "question": "What unit is \"2028\" in?",
-          "suggest": "State the unit beside the number so a test can assert it."
         },
         {
           "rule": "unbounded-quantity",
@@ -27102,6 +26425,10 @@
     ],
     [
       "REQ-CLARIFY-1100",
+      "ARCH-CLARIFY-062"
+    ],
+    [
+      "REQ-CLARIFY-1102",
       "ARCH-CLARIFY-062"
     ],
     [
@@ -29938,7 +29265,7 @@
     },
     {
       "month": "2026-10",
-      "count": 21,
+      "count": 22,
       "first": "2026-10-01",
       "last": "2026-10-17",
       "versions": [
@@ -29962,11 +29289,20 @@
         "v8.23.1",
         "v8.23.2",
         "v8.23.3",
-        "v8.24.0"
+        "v8.24.0",
+        "v8.24.1"
       ],
       "landmark": "v8.24.0",
       "headline": "Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070)",
       "entries": [
+        {
+          "version": "v8.24.1",
+          "date": "2026-10-17",
+          "headline": "`clarify` stops asking about values and handed-on clauses (ADR-0071)",
+          "body": "**`clarify` stops asking about values and handed-on clauses (ADR-0071).**\n\n- A number inside a code span, a date, a version, a code point, and the number after \"default\" or an exit-code phrase (\"exits with code 0\", \"the exit code stays 0\") no longer ask for a unit. A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), `50,000` is one number, and the unit list gains words, letters, columns, blocks, cases, members, dependents and requirements. `number-without-unit` falls from 47 questions to 9 on this corpus\n- A hedge counts only as a whole word outside a code span, and \"how many\" is not a hedge. `vague-term` falls from 46 to 26\n- A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to it, so neither `clause-without-case` nor `over-scoped` counts it: 115 → 98 and 36 → 29\n- On the 323 requirements this change found, `clarify` asks 425 questions instead of 507: 127 to check, 298 optional. REQ-CLARIFY-1102 says so, with three cases\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.3`; 18,025 physical lines in 76 files (the README says so). The core rises to 6,640 logical lines (ADR-0071)",
+          "first_commit": "2026-10-17",
+          "last_commit": "2026-10-17"
+        },
         {
           "version": "v8.24.0",
           "date": "2026-10-17",
@@ -30434,15 +29770,15 @@
   },
   "health": {
     "score": 96,
-    "total": 323,
-    "scored": 301,
+    "total": 324,
+    "scored": 302,
     "healthy": 290,
     "exempt": 0,
     "deprecated": 22,
     "confirmed": 290,
-    "implemented": 290,
-    "tested": 291,
-    "drafts": 11,
+    "implemented": 291,
+    "tested": 292,
+    "drafts": 12,
     "orphans": 0,
     "untested": 1,
     "open_intent": 0,
@@ -30462,6 +29798,13 @@
       },
       {
         "id": "REQ-CLARIFY-1100",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-CLARIFY-1102",
         "status": "draft",
         "why": [
           "not confirmed"

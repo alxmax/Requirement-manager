@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v8.24.1` — 2026-10-17
+
+**`clarify` stops asking about values and handed-on clauses (ADR-0071).**
+
+- A number inside a code span, a date, a version, a code point, and the number after "default" or an exit-code phrase ("exits with code 0", "the exit code stays 0") no longer ask for a unit. A unit may follow a hyphen or a plus sign (`12-character`, `3+ letters`), `50,000` is one number, and the unit list gains words, letters, columns, blocks, cases, members, dependents and requirements. `number-without-unit` falls from 47 questions to 9 on this corpus
+- A hedge counts only as a whole word outside a code span, and "how many" is not a hedge. `vague-term` falls from 46 to 26
+- A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to it, so neither `clause-without-case` nor `over-scoped` counts it: 115 → 98 and 36 → 29
+- On the 323 requirements this change found, `clarify` asks 425 questions instead of 507: 127 to check, 298 optional. REQ-CLARIFY-1102 says so, with three cases
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-17.3`; 18,025 physical lines in 76 files (the README says so). The core rises to 6,640 logical lines (ADR-0071)
+
 ## plugin `v8.24.0` — 2026-10-17
 
 **Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070).**
