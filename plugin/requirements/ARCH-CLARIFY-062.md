@@ -25,13 +25,13 @@ Every bullet below is binding.
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 - The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
-- `clarify` asks nothing of a value, a whole word it only contains, a clause that hands its cases to another requirement, or a clause quantified over "all", "every" or "any". [[REQ-CLARIFY-1102]]
+- `clarify` asks nothing of a whole word it only contains, a clause that hands its cases to another requirement, or a clause quantified over "all", "every" or "any", and asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
   Given  a requirement whose clauses carry no hedge, no bare number and a case per clause
   When   `clarify` runs on it
-  Then   it reports nothing unclear and points at `implement`
+  Then   it reports nothing unclear and points at `gate --show <ID>`
 
 CASE-2 — the questions are deterministic
   Given  the same requirement, unchanged
@@ -63,16 +63,16 @@ satisfies: [ARCH-CLARIFY-062]
 
 Every bullet below is binding.
 - A clause carrying a hedge word with no measurable threshold raises one question naming that word.
-- A bare number in a clause with no unit beside it raises a question asking for the unit; an
-  identifier such as a version or a case label is not a bare number, and neither is the
-  number after "exit", "exits" or "exit code", which is a value, not a quantity.
-- A clause whose subject is "It" or "the system" raises a question asking which component acts.
+- A number in a clause raises no question: whether it needs a unit is the reader's call.
+- A clause that opens with "It" or "The system" as its subject raises a question asking which
+  component acts; "the system" later in a clause names a thing, not the actor, and raises none.
 - A requirement with more clauses than cases raises ONE question naming how many are
   uncovered, and saying that a count cannot tell which. It never accuses a clause by
   position: it compares two numbers and never reads a case, so pointing at the tail
   clauses was a guess — wrong whenever an early clause is the uncovered one, such as a
   clause that delegates its cases to another requirement. A requirement whose cases never
-  mention a failure path raises a question about that.
+  mention a failure path raises a question about that, unless it is a stakeholder need
+  (`layer: need`), which is one story with one Scenario.
 - A requirement whose cases nearly all start from the same kind of input raises one question
   about the kind that is missing, unless that kind is the corpus's own subject.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every
@@ -86,18 +86,19 @@ CASE-1 — a hedge word is questioned by name
   When   the detectors run
   Then   one question names "quickly" and asks for the measurable threshold
 
-CASE-2 — a bare number is questioned, an identifier is not
-  Given  one clause reading "retries 3 times", one reading "emits CASE-2 for v4.0.0"
-         and one reading "prints the list and exits 2"
+CASE-2 — a number is not questioned
+  Given  one clause reading "retries 3 times", one reading "turns amber below 60" and one
+         reading "prints the list and exits 2"
   When   the detectors run
-  Then   the first raises a missing-unit question and the other two raise none
+  Then   none of them raises a question
 
 CASE-3 — a clause-against-case gap and a happy-path-only acceptance are questioned
   Given  a requirement with five clauses and two cases, none mentioning invalid, missing
          or failing input
   When   the detectors run
   Then   one question says 3 clauses have no case without naming which, and one asks
-         what happens on the failure path
+         what happens on the failure path; the same happy path at `layer: need` is not
+         asked about the failure path
 
 CASE-4 — no clause or no case is blocking
   Given  a requirement with an empty Description, and one with no labelled case
@@ -111,10 +112,11 @@ CASE-5 — cases that all start from one kind of input are questioned, unless it
   Then   the first names that noun and asks which other kind a caller would supply, and
          the second raises no such question, because the noun is the domain
 
-CASE-6 — an unnamed actor is questioned
-  Given  a clause reading "It scans all files when the input is missing."
+CASE-6 — an unnamed actor is questioned, a noun is not
+  Given  a clause reading "It scans all files when the input is missing.", and one reading
+         "Every draft declares `satisfies:` the system placeholder."
   When   the detectors run
-  Then   one question asks which command or component performs it
+  Then   only the first raises a question asking which command or component performs it
 
 CASE-7 — a deprecated requirement asks nothing
   Given  a deprecated requirement with no labelled case and a clause reading "quickly"
@@ -134,6 +136,12 @@ CASE-7 — a deprecated requirement asks nothing
 - `unbounded-quantity`, which asked for an upper bound wherever a clause said "all", "every"
   or "any", is retired ([ADR-0072](../../docs/adr/0072-retire-unbounded-quantity.md)): 1 of
   20 sampled questions was real. [[REQ-CLARIFY-1102]] states that the words ask nothing.
+
+**Retired 2026-10-18**
+- `number-without-unit`, which asked for a unit beside a bare number, is retired
+  ([ADR-0075](../../docs/adr/0075-clarify-retires-number-without-unit.md)): none of the 9
+  questions it asked on this corpus was real ("at line 1", "a score of 2", "4 Mermaid code
+  blocks").
 
 ---
 id: REQ-CLARIFY-957
@@ -199,11 +207,11 @@ satisfies: [ARCH-CLARIFY-062]
 # An answer can raise a question the old text never had
 
 ## Description
-> Clarifying a requirement means editing it, and an edit is new text: a clause that
-> answers one question can introduce a vague term, a number with no unit, or a
-> case with no failure path. Nobody re-reads the whole corpus after an edit, so the new
-> question sits unread. `sync` runs after every edit anyway, which makes it the one place
-> the comparison costs nothing.
+> Clarifying a requirement means editing it, and an edit is new text: it can drop the last
+> clause or the last case, leaving nothing to implement or nothing to prove. Nobody re-reads
+> the whole corpus after an edit, so the loss sits unread. `sync` runs after every edit
+> anyway, which makes it the one place the comparison costs nothing. Only the two blocking
+> rules are tracked: an advisory question is read with `clarify`, never reported here.
 
 Every bullet below is binding.
 - `sync` records, per requirement, the RULES of its blocking open questions, in
@@ -256,6 +264,11 @@ CASE-6 — reporting a new question never changes the exit code
   When   `sync` runs
   Then   both runs exit with the same code
 
+CASE-7 — an advisory question is not tracked
+  Given  a requirement synced once with no question, then edited so a clause says "quickly"
+  When   `sync` runs
+  Then   nothing is reported as new
+
 --------------------
 
 
@@ -282,8 +295,9 @@ Every bullet below is binding.
   `suggest`, in the order `clarify` prints them. The map computes them with the same
   function `clarify` runs, so the two never disagree about a requirement.
 - Every record names the `basis` its rule rests on: `structure` when a section is absent
-  (`no-contract`, `no-cases`), `count` when two numbers disagree (`clause-without-case`,
-  `over-scoped`), and `wording` when a word on a list matched (every other rule).
+  (`no-contract`, `no-cases`), `count` when two numbers disagree and the disagreement is the
+  finding (`over-scoped`), and `wording` when the question is a guess: a word on a list
+  matched, or a count that never reads a case (`clause-without-case`, every other rule).
   `clarify` prints the basis beside the rule.
 - The list holds blocking and advisory questions alike; filtering is the reader's
   choice.
@@ -308,8 +322,8 @@ CASE-3 — a blocking question keeps its severity
 CASE-4 — each question names the basis its rule rests on
   Given  a requirement with no case and a clause that says `quickly`
   When   the map is built
-  Then   `no-cases` carries basis `structure`, `vague-term` carries basis `wording`,
-         and only `clause-without-case` and `over-scoped` rest on `count`
+  Then   `no-cases` carries basis `structure`, `vague-term` and `clause-without-case`
+         carry basis `wording`, and only `over-scoped` rests on `count`
 
 --------------------
 
@@ -336,14 +350,13 @@ satisfies: [ARCH-CLARIFY-062]
 Every bullet below is binding.
 - A hedge counts only as a whole word outside a code span, and "how many" asks for a count
   rather than hedging one.
-- A number is a value, not a quantity, and raises no unit question when it sits inside a
-  code span, is a date, a version or a code point such as `U+2028`, or follows "default",
-  "exiting", "exits with code" or "the exit code stays". A unit may follow a hyphen or a
-  plus sign (`12-character`, `3+ letters`), and `50,000` is one number.
 - A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that
   requirement, so neither the clause-against-case count nor the over-scoped count holds it.
 - A clause quantified over "all", "every" or "any" raises no question: in a requirement the
   words nearly always range over a finite set the engine already owns.
+- A requirement is over-scoped only on `lint`'s own measure: more than `LINT_CONTRACT_MAX`
+  clauses of its own and more than `LINT_AC_MAX` cases, so `clarify` never asks for a split
+  that `lint` does not warn about.
 
 ## Cases
 CASE-1 — a hedge is a whole word outside code
@@ -352,20 +365,21 @@ CASE-1 — a hedge is a whole word outside code
   When   the detectors run
   Then   only the last raises a vague-term question
 
-CASE-2 — a value is not a bare number
-  Given  clauses naming `>=3.9`, a date, `U+2028`, "default 150", "exits with code 0",
-         "12-character" and "50,000 characters", and one reading "amber below 60"
-  When   the detectors run
-  Then   only the last raises a missing-unit question
-
-CASE-3 — a clause that hands its cases on is not counted
+CASE-2 — a clause that hands its cases on is not counted
   Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and
          one case, and another with two clauses of its own and one case
   When   the detectors run
   Then   the first raises neither a clause-without-case nor an over-scoped question, and
          the second still raises clause-without-case
 
-CASE-4 — all, every and any ask nothing
+CASE-3 — all, every and any ask nothing
   Given  a clause reading "`gate` reads every file, all tags and any requirement."
   When   the detectors run
   Then   no question is raised
+
+CASE-4 — a split is asked only where lint warns
+  Given  a requirement with eight clauses and four cases, and one with eleven clauses and
+         eight cases
+  When   the detectors run and `lint` runs
+  Then   only the second raises an over-scoped question, and `lint` warns `over-scoped` on
+         it too

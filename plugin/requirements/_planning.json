@@ -82,13 +82,13 @@
       "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays"
     },
     {
-      "title": "Answer the count questions, family by family",
+      "title": "Read the clause-without-case questions, family by family",
       "lane": "Feature",
       "start": "2026-10-20",
       "end": "2026-10-23",
       "req": "ARCH-CLARIFY-062",
       "milestone": "v8.25.0",
-      "roadmap": "The `clause-without-case` and `over-scoped` questions are answered family by family. Done when: ARCH-VIEWER-007's nine are, and the next four families by count are too: fold obligations split over bullets, add the cases that are really missing with their tests, and split what is over-scoped with `clarify --decompose`"
+      "roadmap": "The `clause-without-case` questions are read family by family, as the guesses they are (ADR-0075: 7 of 20 real). Done when: ARCH-VIEWER-007's nine are read, and the next four families by count too: add the cases that are really missing with their tests, and leave a clause a case already proves as it is"
     },
     {
       "title": "Confirm the four drafts",

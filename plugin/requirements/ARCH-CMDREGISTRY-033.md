@@ -214,7 +214,7 @@ Every bullet below is binding.
 CASE-1 — the registry splits the flags
   Given  the command registry
   When   the flags of `gate` and `ask` are read
-  Then   `gate` has eleven, none of them a moved flag, and `ask` has every moved flag
+  Then   `gate` has twelve, none of them a moved flag, and `ask` has every moved flag
 
 CASE-2 — the old spelling is refused
   Given  a corpus and each moved spelling

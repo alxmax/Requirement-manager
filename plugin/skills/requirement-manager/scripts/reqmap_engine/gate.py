@@ -248,10 +248,11 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
                      if full_member_hashes is not None
                      else compute_member_hashes(code_root, full_members))
     print("lock updated.")
-    # Clarifying one requirement can raise questions the previous text never had
-    # — a new clause with a number and no unit, a case with no failure path.
-    # Nobody re-reads the whole corpus after an edit, so the diff is reported
-    # here, where every edit already passes.  # implements: REQ-CLARIFY-975
+    # An edit can leave a requirement with no clause or no case, which the
+    # previous text never had. Nobody re-reads the whole corpus after an edit,
+    # so the diff is reported here, where every edit already passes. Only the
+    # blocking rules are kept; the advisory ones are read with `clarify`.
+    # implements: REQ-CLARIFY-975
     _q_now = blocking_question_rules(reqs)
     _q_before = load_clarifylock(reqs_dir)
     _fresh = sorted((rid, sorted(set(rules) - set(_q_before.get(rid, []))))

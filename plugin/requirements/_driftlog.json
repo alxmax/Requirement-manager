@@ -18,8 +18,8 @@
       "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
-      "hash": "081ede207606",
-      "reason": null
+      "hash": "4224c55dad1b",
+      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
     },
     "ARCH-CMDREGISTRY-033": {
       "hash": "93c7a2a3ece7",
@@ -185,17 +185,25 @@
       "hash": "b6348e2ee27e",
       "reason": "distinct_from; CHECK-831 fold"
     },
+    "REQ-CLARIFY-1100": {
+      "hash": "5ae6158affc7",
+      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+    },
+    "REQ-CLARIFY-1102": {
+      "hash": "1372e6e35029",
+      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+    },
     "REQ-CLARIFY-956": {
-      "hash": "1cb14d7f33f2",
-      "reason": null
+      "hash": "5a881f4f53d3",
+      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
     },
     "REQ-CLARIFY-975": {
-      "hash": "78430d83d975",
-      "reason": null
+      "hash": "68801ba55936",
+      "reason": "clarify: over-scoped on lint's predicate, actor in subject position, sync tracks blocking rules only"
     },
     "REQ-CMDREGISTRY-1031": {
-      "hash": "63640fbd5f7e",
-      "reason": "gate owns twelve flags now: --full (ADR-0049)"
+      "hash": "6a3e2b9a405e",
+      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
     },
     "REQ-CMDREGISTRY-834": {
       "hash": "7e6c909fe620",
