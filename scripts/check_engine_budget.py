@@ -66,7 +66,8 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,644 by ADR-0073: a fan-out band is checked when the config is read.
 # Raised to 6,694 by ADR-0074: baselines are checked, and a waiver is refused over
 # a drift log the engine cannot keep.
-CORE_LOGICAL_BUDGET = 6694
+# Lowered to 6,688 by ADR-0075, which retires `number-without-unit`.
+CORE_LOGICAL_BUDGET = 6688
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

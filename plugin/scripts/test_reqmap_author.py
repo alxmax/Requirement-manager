@@ -2429,13 +2429,25 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         self.assertTrue(vague)
         self.assertIn("quickly", vague[0]["question"])
 
-    def test_bare_number_asked_identifier_not(self):  # verifies: REQ-CLARIFY-956#CASE-2
-        numbered = self._qs(["`gate` retries 3 times before it fails."])
-        ident = self._qs(["`gate` emits CASE-2 for v4.0.0 when the input is invalid."])
-        code = self._qs(["`gate` prints the list and exits 2."])
-        self.assertIn("number-without-unit", _rules(numbered))
-        self.assertNotIn("number-without-unit", _rules(ident))
-        self.assertNotIn("number-without-unit", _rules(code))
+    def test_a_number_asks_nothing(self):  # verifies: REQ-CLARIFY-956#CASE-2
+        for clause in ("`gate` retries 3 times before it fails.",
+                       "`viewer` turns amber below 60.",
+                       "`gate` prints the list and exits 2."):
+            self.assertEqual([q for q in self._qs([clause]) if q["where"] == "clause 1"], [],
+                             clause)
+        self.assertNotIn("number-without-unit", R.CLARIFY_BASIS)
+
+    def test_a_need_is_not_asked_for_a_failure_path(self):  # verifies: REQ-CLARIFY-956#CASE-3
+        happy = ("CASE-1 — ok\n  Given a repo\n  When it runs\n  Then it writes",)
+        for layer, asked in (("need", False), ("feature", True)):
+            with tempfile.TemporaryDirectory() as d:
+                _write(os.path.join(d, "AREA-N-001.md"),
+                       _spec("AREA-N-001", ["`gate` writes the lock."], happy)
+                       .replace("layer: feature", "layer: " + layer))
+                reqs = R.load_requirements(d)
+                self.assertEqual(reqs["AREA-N-001"]["meta"].get("layer"), layer)
+                rules = _rules(R._clarify_questions("AREA-N-001", reqs["AREA-N-001"], reqs))
+            self.assertEqual(asked, "no-failure-case" in rules, layer)
 
     def test_happy_path_only_asks_about_failure(self):  # verifies: REQ-CLARIFY-956#CASE-3
         happy = self._qs(["`gate` writes the lock."],
@@ -2452,19 +2464,7 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
             self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
         self.assertIn("vague-term", _rules(self._qs(["`gate` keeps many entries."])))
 
-    def test_a_value_is_not_a_bare_number(self):  # verifies: REQ-CLARIFY-1102#CASE-2
-        for clause in ("`init` requires Python `>=3.9` to run.",
-                       "`gate` was reviewed on 2026-06-21 by the maintainer.",
-                       "`render` escapes U+2028 in the payload.",
-                       "`lint` counts `LINT_X` words, default 150.",
-                       "`gate` prints the list and exits with code 0.",
-                       "`hash` is a 12-character hex digest.",
-                       "`map` stops before 50,000 characters."):
-            self.assertNotIn("number-without-unit", _rules(self._qs([clause])), clause)
-        self.assertIn("number-without-unit",
-                      _rules(self._qs(["`viewer` turns amber below 60."])))
-
-    def test_a_delegating_clause_is_not_counted(self):  # verifies: REQ-CLARIFY-1102#CASE-3
+    def test_a_delegating_clause_is_not_counted(self):  # verifies: REQ-CLARIFY-1102#CASE-2
         handed = ["`map` does thing {}. [[REQ-A-{:03d}]]".format(i, i) for i in range(1, 10)]
         qs = self._qs(handed + ["`map` writes the file."])
         self.assertNotIn("clause-without-case", _rules(qs))
@@ -2484,8 +2484,30 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
     def test_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-6
         qs = self._qs(["It scans all files when the input is missing."])
         self.assertIn("ambiguous-actor", _rules(qs))
+        self.assertIn("ambiguous-actor", _rules(self._qs(["The system retries the write."])))
+        for clause in ("Every draft declares `satisfies:` the system placeholder.",
+                       "The System Map groups nodes by area."):
+            self.assertNotIn("ambiguous-actor", _rules(self._qs([clause])), clause)
 
-    def test_all_every_any_ask_nothing(self):  # verifies: REQ-CLARIFY-1102#CASE-4
+    def test_a_split_is_asked_only_where_lint_warns(self):  # verifies: REQ-CLARIFY-1102#CASE-4
+        def run(n_clauses, n_cases):
+            clauses = ["`map` does thing {}.".format(i) for i in range(n_clauses)]
+            cases = tuple("CASE-{} — c\n  Given x\n  When y\n  Then z".format(i)
+                          for i in range(1, n_cases + 1))
+            with tempfile.TemporaryDirectory() as d:
+                _write(os.path.join(d, "AREA-S-001.md"), _spec("AREA-S-001", clauses, cases))
+                reqs = R.load_requirements(d)
+                r = reqs["AREA-S-001"]
+                return (_rules(R._clarify_questions("AREA-S-001", r, reqs)),
+                        [f["check"] for f in R.lint_requirement("AREA-S-001", r)])
+        small_q, small_lint = run(8, 4)
+        big_q, big_lint = run(11, 8)
+        self.assertNotIn("over-scoped", small_q)
+        self.assertNotIn("over-scoped", small_lint)
+        self.assertIn("over-scoped", big_q)
+        self.assertIn("over-scoped", big_lint)
+
+    def test_all_every_any_ask_nothing(self):  # verifies: REQ-CLARIFY-1102#CASE-3
         qs = self._qs(["`gate` reads every file, all tags and any requirement."])
         self.assertEqual([q for q in qs if q["where"] == "clause 1"], [])
 
@@ -2562,9 +2584,12 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
                          cases=("CASE-1 — ok\n  Given an invalid lock\n  When `gate` runs\n  Then it refuses",)))
             missing, _ = self._run(d, "NOPE-X-001")
             clean, out = self._run(d, "AREA-C-001")
+            _, corpus = self._run(d)
         self.assertEqual(1, missing)
         self.assertEqual(0, clean)
         self.assertIn("nothing unclear", out)
+        self.assertIn("gate --show AREA-C-001", out)
+        self.assertNotIn("<ID>", corpus)
 
     def test_questions_are_deterministic(self):  # verifies: ARCH-CLARIFY-062#CASE-2
         clauses = ["It scans all files quickly, retrying 3 times."]
@@ -3227,6 +3252,17 @@ class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062
             self.assertNotIn("New open question(s)", out)
             self.assertEqual(reported, silent)
 
+    def test_an_advisory_question_is_not_tracked(self):  # verifies: REQ-CLARIFY-975#CASE-7
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- `gate` does one thing.\n")
+            self._sync(d)                                  # records no question
+            self._write_req(rq, "- `gate` does one thing quickly.\n")
+            reqs = R.load_requirements(rq)
+            self.assertIn("vague-term",
+                          _rules(R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)))
+            out = self._sync(d)
+            self.assertNotIn("New open question(s)", out)
+
 
 class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-1100
     """The map carries what `clarify` asks, so the viewer can show it."""
@@ -3273,7 +3309,8 @@ class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # test
             {"no-contract", "no-cases"})
         self.assertEqual(
             {rule for rule, basis in R.CLARIFY_BASIS.items() if basis == "count"},
-            {"clause-without-case", "over-scoped"})
+            {"over-scoped"})
+        self.assertEqual(R.CLARIFY_BASIS["clause-without-case"], "wording")
         self.assertEqual(set(R.CLARIFY_BASIS.values()), {"structure", "count", "wording"})
         _reqs, nodes = self._nodes({"AREA-Q-004": _spec(
             "AREA-Q-004", ["`gate` reports errors quickly."], ())})

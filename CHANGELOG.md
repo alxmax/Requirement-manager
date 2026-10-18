@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v8.24.5` — 2026-10-18
+
+**`clarify` asks for a split only where `lint` warns, calls a clause-against-case count a guess, retires `number-without-unit`, and says what `sync` tracks (ADR-0075).**
+
+- `over-scoped` compared a requirement's clauses with `LINT_AC_MAX`, the acceptance ceiling, so it asked "which of them is a separate requirement?" of 28 requirements that `lint`'s rule of the same name passes. Both now run one predicate: more than `LINT_CONTRACT_MAX` clauses and more than `LINT_AC_MAX` cases. On this corpus the 28 questions go. REQ-CLARIFY-1102 CASE-5
+- `ambiguous-actor` fired on "the system" anywhere in a clause, so "the system placeholder" and a user story's "the shape of the system" were asked who acts. It now fires only when the clause opens with "It" or "The system" followed by a lower-case word, never on a name such as "The System Map". The 4 questions it asked here were all false. REQ-CLARIFY-956 CASE-6
+- `sync`'s new-question report tracks only `no-contract` and `no-cases`, but REQ-CLARIFY-975 said an edit adding a vague term or a unitless number would be reported. The text now says what the code does, and CASE-7 pins that an advisory question is not reported
+- A clean `clarify <ID>` points at `gate --show <ID>`, as ARCH-CLARIFY-062 CASE-1 now says (it named the retired `implement`), and a clean corpus run points at `gate --risk` instead of printing `<ID>`
+- `clause-without-case` moves from basis `count` to `wording`, so it leaves the viewer's "to check" tab for Optional. Read against their cases, 7 of 20 randomly drawn questions were real and 9 were not; the number of uncovered clauses it states was right in 4 of the 7, because one case often proves two clauses. It still asks. REQ-CLARIFY-1100 CASE-4
+- `number-without-unit` is retired: none of its 9 questions here was real ("at line 1", "a score of 2", "4 Mermaid code blocks"). A number asks nothing. REQ-CLARIFY-956 CASE-2; REQ-CLARIFY-1102 loses its clause about values
+- `no-failure-case` asks nothing of a `layer: need`, a story with one Scenario; 9 of its 30 questions were on needs. REQ-CLARIFY-956 CASE-3
+- REQ-CMDREGISTRY-1031 CASE-1 said `gate` has eleven flags; it has twelve, as the clause and the test say
+- `clarify` asks 177 questions on this corpus instead of 227, all of them Optional
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-18`; 18,135 physical lines in 76 files (the README says so). The core falls to 6,688 logical lines and the budget with it (ADR-0075)
+
 ## plugin `v8.24.4` — 2026-10-17
 
 **A confirmed contract can no longer change unseen, and an unusable baseline is named (ADR-0074).**
