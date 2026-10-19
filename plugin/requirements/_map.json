@@ -21108,7 +21108,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:416"
+          "loc": "app/scripts/smoke/explorer.jsx:422"
         },
         {
           "role": "implements",
@@ -22938,7 +22938,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:254"
+          "loc": "app/scripts/smoke/explorer.jsx:256"
         },
         {
           "role": "tested-by",
@@ -22983,12 +22983,13 @@
         "Choosing a row on the Questions page opens a panel beside the list and never leaves the page; the chosen row is marked.",
         "The panel shows the requirement's id, title and status, then the row's questions as the list shows them on the current tab, a decision question with its options on their own lines.",
         "Below the questions the panel shows the requirement's Description clauses and its Cases.",
-        "A button in the panel opens the requirement, and another closes the panel."
+        "A button in the panel opens the requirement, and another closes the panel. Both come before the questions, so a long requirement never pushes them out of sight.",
+        "Below 820px the panel is a sheet fixed to the bottom of the screen, so a row chosen far down a long list still shows its panel."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — choosing a question shows it beside the list\n  Given  a requirement with a person's decision question and a `clarify` question\n  When   the Questions page is rendered with that requirement chosen\n  Then   a panel beside the list holds the decision question with each option on its\n         own line, the `clarify` question with its suggestion, the clauses and the cases,\n         and the chosen row is marked\n\nCASE-2 — nothing chosen, no panel\n  Given  the same registry\n  When   the Questions page first opens\n  Then   no panel is shown and no row is marked\n\nCASE-3 — the panel opens the requirement only when asked\n  Given  the panel for a chosen requirement\n  When   its open button is used\n  Then   the requirement opens; choosing a row never opens it",
+      "accept": "CASE-1 — choosing a question shows it beside the list\n  Given  a requirement with a person's decision question and a `clarify` question\n  When   the Questions page is rendered with that requirement chosen\n  Then   a panel beside the list holds the decision question with each option on its\n         own line, the `clarify` question with its suggestion, the clauses and the cases,\n         and the chosen row is marked\n\nCASE-2 — nothing chosen, no panel\n  Given  the same registry\n  When   the Questions page first opens\n  Then   no panel is shown and no row is marked\n\nCASE-3 — the panel opens the requirement only when asked\n  Given  the panel for a chosen requirement\n  When   its open button is used, and the panel's layout is read\n  Then   the requirement opens, choosing a row never opens it, the buttons precede the\n         questions, and the narrow layout pins the panel to the bottom of the screen",
       "input": "",
       "output": "",
       "desc": "",
@@ -23001,7 +23002,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:351"
+          "loc": "app/scripts/smoke/explorer.jsx:353"
         },
         {
           "role": "implements",
@@ -23021,7 +23022,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]

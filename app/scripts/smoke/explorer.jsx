@@ -1,6 +1,8 @@
 // tested-by: ARCH-VIEWER-007
 /* Render smoke test, part: explorer, tally, commands, search, questions. */
 import { renderToString } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import App from "../../src/App.jsx";
 import { rankRequirements, searchRequirements } from "../../src/lib/search.js";
@@ -351,6 +353,7 @@ for (const [label, ok] of mergeChecks) test(label, ok);
 // tested-by: REQ-VIEWER-1114
 // A row used to open its requirement and leave the page; it now opens a panel
 // and the requirement opens only from the panel's button.
+const APP_CSS = readFileSync(resolve(process.cwd(), "src/styles/app.css"), "utf8");
 adoptMapExport({ nodes: [
   adaptNode({ id: "Q-PICK-001", title: "picked", area: "Q", layer: "feature",
     status: "confirmed", intent: "i",
@@ -408,7 +411,10 @@ const pickChecks = [
   ["questions: choosing a row picks it, only the panel's button opens it",
     panel.includes("Open requirement") && panel.includes("Close")
       && picks.join() === "Q-PICK-001,Q-PICK-001" && beforeOpen === 0
-      && opened.join() === "open:Q-PICK-001"],
+      && opened.join() === "open:Q-PICK-001"
+      && panel.indexOf("Open requirement") < panel.indexOf("Should the panel stay open?")
+      && /@media \(max-width: 820px\) \{[^@]*\.q-panel \{ position: fixed;[^}]*bottom: 0/
+        .test(APP_CSS)],
 ];
 for (const [label, ok] of pickChecks) test(label, ok);
 

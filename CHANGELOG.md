@@ -47,6 +47,7 @@
 **Choosing a question on the viewer's Questions page shows it beside the list instead of leaving the page.**
 
 - A row opened its requirement, so the reader lost the list for every question. It now opens a panel with the requirement's id, title and status, its questions as the current tab shows them (a decision question's options on their own lines), and its Description clauses and Cases. A button opens the requirement and another closes the panel; the Problems inbox still opens a requirement from its row. REQ-VIEWER-1114
+- The panel's buttons come before its questions, so a long requirement never pushes them out of sight; below 820px the panel is a sheet fixed to the bottom of the screen. Seen in a headless render at 700px, the narrow layout had put the panel under a 150-row list, where a chosen row never showed it. REQ-VIEWER-1114
 
 **`clarify`'s word lists are a repository's to set, so a corpus written in another language is not judged by English words (ADR-0079).**
 
