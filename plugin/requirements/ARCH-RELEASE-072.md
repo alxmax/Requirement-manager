@@ -188,6 +188,11 @@ CASE-4 — a tag above the files is reported
   When   the alignment is checked
   Then   one line says `v1.5.0` is above the declared version
 
+CASE-5 — nothing to compare reports nothing
+  Given  a repository with no version file, no CHANGELOG and no tag
+  When   the alignment is checked
+  Then   no line is reported, because absent inputs disagree with nothing
+
 ---
 id: REQ-NEXTVERSION-1017
 status: confirmed

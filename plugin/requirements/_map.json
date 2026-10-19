@@ -56,11 +56,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:585"
+          "loc": "plugin/scripts/test_reqmap_scan.py:586"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:965"
+          "loc": "plugin/scripts/test_reqmap_scan.py:966"
         },
         {
           "role": "implements",
@@ -303,7 +303,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2857"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2863"
         },
         {
           "role": "implements",
@@ -922,15 +922,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3461"
+          "loc": "plugin/scripts/test_reqmap_report.py:3476"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3670"
+          "loc": "plugin/scripts/test_reqmap_report.py:3685"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5360"
+          "loc": "plugin/scripts/test_reqmap_report.py:5375"
         },
         {
           "role": "implements",
@@ -1127,11 +1127,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3461"
+          "loc": "plugin/scripts/test_reqmap_report.py:3476"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5360"
+          "loc": "plugin/scripts/test_reqmap_report.py:5375"
         },
         {
           "role": "implements",
@@ -1205,7 +1205,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3461"
+          "loc": "plugin/scripts/test_reqmap_report.py:3476"
         },
         {
           "role": "implements",
@@ -1257,7 +1257,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3461"
+          "loc": "plugin/scripts/test_reqmap_report.py:3476"
         },
         {
           "role": "implements",
@@ -1315,7 +1315,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3461"
+          "loc": "plugin/scripts/test_reqmap_report.py:3476"
         },
         {
           "role": "implements",
@@ -1412,7 +1412,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3670"
+          "loc": "plugin/scripts/test_reqmap_report.py:3685"
         },
         {
           "role": "implements",
@@ -1992,7 +1992,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:548"
+          "loc": "plugin/scripts/test_reqmap_scan.py:549"
         },
         {
           "role": "implements",
@@ -2081,13 +2081,13 @@
         "`draft --plan` walks the code with the same exclusions as scanning: noise dirs, the SSOT dir, and `.reqmapignore` resolved in `requirements/` first.",
         "`draft --plan` gathers per-file facts: module and symbol docstrings, top-level signatures, import targets, and line count.",
         "`draft --plan` lists every scannable code file as a candidate, the same set `draft` walks. A file in a language `draft --plan` cannot parse is still a candidate, with empty facts.",
-        "`draft --plan` reads top-level signatures from Python via `ast` — functions, classes and the public methods of each class — and from JS/TS via best-effort parsing.",
+        "`draft --plan` reads top-level signatures from Python via `ast` — functions, classes and the public methods of each class. JS/TS has no parser: a pattern reads the names of `function` declarations and of `const`/`let`/`var` bindings anywhere in the file, nested ones included, and the leading block comment as the module doc; imports are not read.",
         "An unparseable file yields empty facts. It never aborts the plan."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — plan emits one JSON object with the documented shape\n  Given  a small codebase\n  When   `draft --plan` runs with no `--out`\n  Then   stdout parses as one JSON object carrying `engine_version`, `bus` and `candidates`\n\nCASE-2 — plan writes zero .md files\n  Given  an untagged codebase\n  When   `plan --out plan.json` runs\n  Then   no `.md` file appears anywhere in the requirements directory\n\nCASE-3 — plan skips the same paths scanning skips\n  Given  a file listed in `.reqmapignore` and a file inside `node_modules`\n  When   `draft --plan` runs\n  Then   neither file appears in any candidate's `files`\n\nCASE-4 — per-file facts capture docstrings, signatures, imports and size\n  Given  a Python file with a module docstring, one function, and one import\n  When   `draft --plan` runs\n  Then   that file's candidate carries the docstring, the function signature, the import, and a line count\n\nCASE-5 — an unparseable file still becomes a candidate\n  Given  a `.go` file among the scanned files\n  When   `draft --plan` runs\n  Then   that file appears as a candidate with empty facts, not omitted\n\nCASE-6 — Python signatures come from ast, not text matching\n  Given  a Python file defining a class with one public and one `_private` method\n  When   `draft --plan` reads its signatures\n  Then   the public method appears in the candidate's `signatures` and the private one does not\n\nCASE-7 — an unparseable file never aborts the run\n  Given  a codebase containing one syntactically broken Python file among valid ones\n  When   `draft --plan` runs\n  Then   it completes and emits candidates for the valid files, with empty facts for the broken one\n\n\n--------------------",
+      "accept": "CASE-1 — plan emits one JSON object with the documented shape\n  Given  a small codebase\n  When   `draft --plan` runs with no `--out`\n  Then   stdout parses as one JSON object carrying `engine_version`, `bus` and `candidates`\n\nCASE-2 — plan writes zero .md files\n  Given  an untagged codebase\n  When   `plan --out plan.json` runs\n  Then   no `.md` file appears anywhere in the requirements directory\n\nCASE-3 — plan skips the same paths scanning skips\n  Given  a file listed in `.reqmapignore` and a file inside `node_modules`\n  When   `draft --plan` runs\n  Then   neither file appears in any candidate's `files`\n\nCASE-4 — per-file facts capture docstrings, signatures, imports and size\n  Given  a Python file with a module docstring, one function, and one import\n  When   `draft --plan` runs\n  Then   that file's candidate carries the docstring, the function signature, the import, and a line count\n\nCASE-5 — an unparseable file still becomes a candidate\n  Given  a `.go` file among the scanned files\n  When   `draft --plan` runs\n  Then   that file appears as a candidate with empty facts, not omitted\n\nCASE-6 — Python signatures come from ast, JS/TS names from a pattern\n  Given  a Python file defining a class with one public and one `_private` method, and a JS\n         file opening with a block comment, exporting `function foo` with a nested\n         `function inner`, and binding `const bar`\n  When   `draft --plan` reads their facts\n  Then   the public method appears in the Python `signatures` and the private one does not;\n         the JS module doc is the comment's first line, its signatures hold `foo`, `inner`\n         and `bar`, and no import is listed\n\nCASE-7 — an unparseable file never aborts the run\n  Given  a codebase containing one syntactically broken Python file among valid ones\n  When   `draft --plan` runs\n  Then   it completes and emits candidates for the valid files, with empty facts for the broken one\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2108,7 +2108,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:548"
+          "loc": "plugin/scripts/test_reqmap_scan.py:507"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_scan.py:549"
         },
         {
           "role": "implements",
@@ -2153,25 +2157,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "`draft --plan` reads top-level signatures from Python via `ast` — functions, classes and the public methods of each class — and from JS/TS via best-effort parsing.",
-          "question": "What is the measurable threshold behind \"best-effort\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Forma JSON a planului și scanarea read-only",
-          "intent": "Tot restul din pipeline — `draft`, `review`, `confirm` — scrie fișiere. `draft --plan` în mod deliberat nu scrie: este pasul de \"privește înainte de a sări\" pentru o bază de cod neetichetată, astfel încât un plan greșit sau pe jumătate format poate fi aruncat cu zero curățenie. Parcurge codul cu aceleași excluderi ca scanarea, deci nu listează niciodată un fișier pe care o scanare reală l-ar sări.",
-          "contract": "> Tot restul din pipeline — `draft`, `review`, `confirm` — scrie fișiere. `draft --plan`\n> în mod deliberat nu scrie: este pasul de \"privește înainte de a sări\" pentru o bază de cod\n> neetichetată, astfel încât un plan greșit sau pe jumătate format poate fi aruncat cu zero\n> curățenie. Parcurge codul cu aceleași excluderi ca scanarea, deci nu listează niciodată un\n> fișier pe care o scanare reală l-ar sări.\n\nFiecare punct de mai jos este obligatoriu.\n- `draft --plan` emite un singur obiect JSON, la stdout sau la `--out PATH`, cu forma\n  `{engine_version, bus[], candidates[]}`.\n- `draft --plan` NU scrie fișiere `.md`. Nu poate repeta eșecul de stub gol al lui `draft`.\n- `draft --plan` parcurge codul cu aceleași excluderi ca scanarea: directoare de zgomot, directorul SSOT,\n  și `.reqmapignore` rezolvat mai întâi în `requirements/`.\n- `draft --plan` adună fapte per fișier: docstring-uri de modul și simbol, semnături de nivel superior,\n  ținte de import și numărul de linii.\n- `draft --plan` listează fiecare fișier de cod scanabil drept candidat, același set pe care `draft` îl parcurge.\n  Un fișier într-un limbaj pe care `draft --plan` nu îl poate parsa este tot un candidat, cu fapte goale.\n- `draft --plan` citește semnăturile de nivel superior din Python via `ast` — funcții, clase și\n  metodele publice ale fiecărei clase — și din JS/TS via parsare best-effort.\n- Un fișier neparsabil produce fapte goale. Nu abandonează niciodată planul.",
-          "acceptance": "CASE-1 — planul emite un obiect JSON cu forma documentată\n  Given  o bază de cod mică\n  When   `draft --plan` rulează fără `--out`\n  Then   stdout se parsează ca un obiect JSON purtând `engine_version`, `bus` și `candidates`\n\nCASE-2 — planul scrie zero fișiere .md\n  Given  o bază de cod neetichetată\n  When   `plan --out plan.json` rulează\n  Then   niciun fișier `.md` nu apare nicăieri în directorul requirements\n\nCASE-3 — planul sare aceleași căi pe care le sare scanarea\n  Given  un fișier listat în `.reqmapignore` și un fișier în interiorul `node_modules`\n  When   `draft --plan` rulează\n  Then   niciun fișier nu apare în `files`-ul vreunui candidat\n\nCASE-4 — faptele per fișier captează docstring-uri, semnături, importuri și dimensiune\n  Given  un fișier Python cu un docstring de modul, o funcție și un import\n  When   `draft --plan` rulează\n  Then   candidatul acelui fișier poartă docstring-ul, semnătura funcției, importul și un număr de linii\n\nCASE-5 — un fișier neparsabil tot devine candidat\n  Given  un fișier `.go` printre fișierele scanate\n  When   `draft --plan` rulează\n  Then   acel fișier apare ca un candidat cu fapte goale, nu este omis\n\nCASE-6 — semnăturile Python provin din ast, nu din potrivire de text\n  Given  un fișier Python care definește o clasă cu o metodă publică și una `_private`\n  When   `draft --plan` citește semnăturile ei\n  Then   metoda publică apare în `signatures`-ul candidatului iar cea privată nu\n\nCASE-7 — un fișier neparsabil nu abandonează niciodată rularea\n  Given  o bază de cod conținând un fișier Python sintactic stricat printre altele valide\n  When   `draft --plan` rulează\n  Then   se termină și emite candidați pentru fișierele valide, cu fapte goale pentru cel stricat\n\n\n--------------------"
-        }
-      }
+      "clarify": []
     },
     {
       "id": "REQ-CANDIDATES-827",
@@ -2567,19 +2553,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2828"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2834"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3049"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3060"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:736"
+          "loc": "plugin/scripts/test_reqmap_report.py:747"
         },
         {
           "role": "implements",
@@ -2757,7 +2743,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "implements",
@@ -2871,7 +2857,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3604"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3615"
         },
         {
           "role": "implements",
@@ -2931,7 +2917,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2828"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2834"
         },
         {
           "role": "implements",
@@ -2987,7 +2973,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2612"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "tested-by",
@@ -3126,7 +3112,7 @@
         "Measured before shipping, 2026-09-22: 0 requirements fire on this corpus (292), on two consumer corpora (191 and 21) and on a third consumer's corpus as it stood before it was removed (96). A broken link is wrong by construction, so a fire rate of zero is the expected state, not a signal below ADR-0016's floor."
       ],
       "current_impl": [],
-      "accept": "CASE-1 — a pointer to a deleted child warns\n  Given  a Description with one `[[ID]]` naming an existing requirement and one naming none\n  When   `gate` runs\n  Then   one RM036 warning names the missing target and not the existing one\n\nCASE-2 — a pointer to an existing requirement is silent\n  Given  a Description whose every `[[ID]]` names a requirement in the corpus\n  When   `gate` runs\n  Then   no RM036 warning is reported\n\nCASE-3 — examples and prose links are not links\n  Given  a Description holding `[[REQ-X-001]]` inside backticks and a bare `[[child]]`\n  When   `gate` runs\n  Then   no RM036 warning is reported",
+      "accept": "CASE-1 — a pointer to a deleted child warns\n  Given  a Description with one `[[ID]]` naming an existing requirement and one naming none\n  When   `gate` runs\n  Then   one RM036 warning names the missing target and not the existing one\n\nCASE-2 — a pointer to an existing requirement is silent\n  Given  a Description whose every `[[ID]]` names a requirement in the corpus\n  When   `gate` runs\n  Then   no RM036 warning is reported\n\nCASE-3 — examples and prose links are not links\n  Given  a Description holding `[[REQ-X-001]]` inside backticks and a bare `[[child]]`\n  When   `gate` runs\n  Then   no RM036 warning is reported\n\nCASE-4 — a link outside the Description is not checked\n  Given  a requirement whose Context names `[[REQ-P-GONE]]`, which no requirement defines\n  When   `gate` runs\n  Then   no RM036 warning is reported, because Context records history, not structure",
       "input": "",
       "output": "",
       "desc": "",
@@ -3139,7 +3125,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2929"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2935"
         },
         {
           "role": "implements",
@@ -3154,8 +3140,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
+      "clauses": 4,
+      "covered": 4,
       "clarify": [
         {
           "rule": "case-monoculture",
@@ -3163,7 +3149,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 of 3 Given lines open on the same word (\"description\"). Do the cases cover the other kinds of input a caller can supply?",
+          "question": "3 of 4 Given lines open on the same word (\"description\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
@@ -3200,11 +3186,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3214"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3225"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3525"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3536"
         },
         {
           "role": "implements",
@@ -3658,23 +3644,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1941"
+          "loc": "plugin/scripts/test_reqmap_report.py:1956"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4010"
+          "loc": "plugin/scripts/test_reqmap_report.py:4025"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5155"
+          "loc": "plugin/scripts/test_reqmap_report.py:5170"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5657"
+          "loc": "plugin/scripts/test_reqmap_report.py:5672"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6225"
+          "loc": "plugin/scripts/test_reqmap_report.py:6240"
         },
         {
           "role": "implements",
@@ -3745,15 +3731,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1941"
+          "loc": "plugin/scripts/test_reqmap_report.py:1956"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4010"
+          "loc": "plugin/scripts/test_reqmap_report.py:4025"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6334"
+          "loc": "plugin/scripts/test_reqmap_report.py:6349"
         },
         {
           "role": "implements",
@@ -3828,7 +3814,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5155"
+          "loc": "plugin/scripts/test_reqmap_report.py:5170"
         },
         {
           "role": "implements",
@@ -3901,11 +3887,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3108"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3119"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3160"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3171"
         },
         {
           "role": "implements",
@@ -3973,7 +3959,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3181"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3192"
         },
         {
           "role": "implements",
@@ -4100,11 +4086,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5657"
+          "loc": "plugin/scripts/test_reqmap_report.py:5672"
         },
         {
           "role": "implements",
@@ -4169,11 +4155,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3603"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3614"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "implements",
@@ -4243,11 +4229,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:546"
+          "loc": "plugin/scripts/test_reqmap_report.py:553"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3996"
+          "loc": "plugin/scripts/test_reqmap_report.py:4011"
         },
         {
           "role": "implements",
@@ -4302,11 +4288,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:546"
+          "loc": "plugin/scripts/test_reqmap_report.py:553"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3996"
+          "loc": "plugin/scripts/test_reqmap_report.py:4011"
         },
         {
           "role": "implements",
@@ -4383,7 +4369,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1612"
+          "loc": "plugin/scripts/test_reqmap_report.py:1627"
         },
         {
           "role": "implements",
@@ -4442,15 +4428,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1613"
+          "loc": "plugin/scripts/test_reqmap_report.py:1628"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1629"
+          "loc": "plugin/scripts/test_reqmap_report.py:1644"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4573"
+          "loc": "plugin/scripts/test_reqmap_report.py:4588"
         },
         {
           "role": "implements",
@@ -4512,7 +4498,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5394"
+          "loc": "plugin/scripts/test_reqmap_report.py:5409"
         },
         {
           "role": "implements",
@@ -4889,7 +4875,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "implements",
@@ -5307,15 +5293,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5936"
+          "loc": "plugin/scripts/test_reqmap_report.py:5951"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6055"
+          "loc": "plugin/scripts/test_reqmap_report.py:6070"
         },
         {
           "role": "implements",
@@ -5374,7 +5360,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "implements",
@@ -5468,7 +5454,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "implements",
@@ -5537,7 +5523,9 @@
         "A Python file that does not parse yields no candidate, standards included, and no error.",
         "`design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries."
       ],
-      "verify": [],
+      "verify": [
+        "**Should a Python file that does not parse count as clean in the design score?**\na) No: it leaves the score, and the report names it. *(recommended)*\nb) No: it counts as one file with a candidate.\nc) Yes: it stays clean, as today.\nd) Yes, but the line and file-length standards still run on it.\n*Default:* stays c). A file the review cannot read raises the score.\n*Context:* The score is the share of files with no candidate, and an unreadable file has none.\n*Recommendation source:* the draft scan's rule, where a partial scan never reads as clean.\n*For the developer:* `design_report.py:26` returns `[]` before `writing_standards`; [[REQ-EXTRACT-1099]]; `python scripts/reqmap.py ask --design`."
+      ],
       "notes": [],
       "current_impl": [],
       "accept": "CASE-1 — grouped report, tests skipped, exit 0\n  Given  a module and a test file both writing a global\n  When   `cmd_design` runs\n  Then   it returns 0, prints `Encapsulation (1)` with the module's line, omits the test file and ends with the advisory note\n\nCASE-2 — JSON and the clean case\n  Given  a repo with one clean module\n  When   `cmd_design` runs with and without `--json`\n  Then   the JSON reads `files 1, findings []` and the text run says no candidates were found\n\nCASE-3 — a syntax error is not a finding\n  Given  a file that does not parse\n  When   `_design_file` reads it\n  Then   it returns an empty list\n\nCASE-4 — thresholds come from the config\n  Given  `DESIGN_PARAMS_MAX` set to 2 through `apply_config`\n  When   `_design_file` reads a three-parameter function\n  Then   it reports `long-parameter-list`\n\n--------------------",
@@ -5553,7 +5541,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "implements",
@@ -5571,7 +5559,12 @@
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [],
+      "risks": [
+        {
+          "signal": "unverified-intent",
+          "advice": "Has open `## Verify intent` question(s): run `reqmap.py sync`, resolve each in `requirements/_findings.md`, then fold the answer into the Contract or delete the bullet."
+        }
+      ],
       "clauses": 4,
       "covered": 4,
       "clarify": [
@@ -5616,7 +5609,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "implements",
@@ -5680,7 +5673,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5936"
+          "loc": "plugin/scripts/test_reqmap_report.py:5951"
         },
         {
           "role": "implements",
@@ -5752,7 +5745,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5693"
+          "loc": "plugin/scripts/test_reqmap_report.py:5708"
         },
         {
           "role": "implements",
@@ -5829,7 +5822,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5937"
+          "loc": "plugin/scripts/test_reqmap_report.py:5952"
         },
         {
           "role": "implements",
@@ -6009,7 +6002,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6055"
+          "loc": "plugin/scripts/test_reqmap_report.py:6070"
         },
         {
           "role": "implements",
@@ -6121,7 +6114,7 @@
         "`distinct_from: REQ-ORPHANCODE-888` - `REQ-ORPHANCODE-888` warns on untagged program files; this on untagged HTML under `docs/`. Each names the other's scope."
       ],
       "current_impl": [],
-      "accept": "CASE-1 — a large untagged docs/ HTML file is flagged\n  Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag\n  When   `untagged_doc_bundles` scans the repo\n  Then   it returns `[\"docs/arch.html\"]`, which `gate` folds into its warnings only —\n         never an error, leaving the exit code unaffected\n\nCASE-2 — a large untagged HTML file outside docs/ is never flagged\n  Given  a large, untagged `top.html` at the repo root, outside `docs/`\n  When   `untagged_doc_bundles` scans the repo\n  Then   `top.html` is absent from the result\n\nCASE-3 — engine outputs are excluded even when large and untagged\n  Given  large, untagged `docs/map.html` and `docs/_x.html`\n  When   `untagged_doc_bundles` scans the repo\n  Then   neither file appears in the result, because the engine freshness-checks those\n         two separately, on its own path\n\nCASE-4 — a .reqmapignore pattern suppresses the finding\n  Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`\n  When   `untagged_doc_bundles` scans the repo\n  Then   `docs/poster.html` is absent from the result",
+      "accept": "CASE-1 — a large untagged docs/ HTML file is flagged\n  Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag\n  When   `untagged_doc_bundles` scans the repo\n  Then   it returns `[\"docs/arch.html\"]`, which `gate` folds into its warnings only —\n         never an error, leaving the exit code unaffected\n\nCASE-2 — a large untagged HTML file outside docs/ is never flagged\n  Given  a large, untagged `top.html` at the repo root, outside `docs/`\n  When   `untagged_doc_bundles` scans the repo\n  Then   `top.html` is absent from the result\n\nCASE-3 — engine outputs are excluded even when large and untagged\n  Given  large, untagged `docs/map.html` and `docs/_x.html`\n  When   `untagged_doc_bundles` scans the repo\n  Then   neither file appears in the result, because the engine freshness-checks those\n         two separately, on its own path\n\nCASE-4 — a .reqmapignore pattern suppresses the finding\n  Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`\n  When   `untagged_doc_bundles` scans the repo\n  Then   `docs/poster.html` is absent from the result\n\nCASE-5 — a small file or a tagged one is not flagged\n  Given  an untagged `docs/small.html` below `DOC_BUNDLE_MIN_BYTES`, and a large\n         `docs/arch.html` carrying a `generated-from:` tag\n  When   `untagged_doc_bundles` scans the repo\n  Then   neither file is in the result",
       "input": "",
       "output": "",
       "desc": "",
@@ -6145,8 +6138,8 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 5,
+      "covered": 5,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -6154,27 +6147,10 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 7 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        },
-        {
-          "rule": "case-monoculture",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 of 4 Given lines open on the same word (\"large\"). Do the cases cover the other kinds of input a caller can supply?",
-          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Semnalarea unui pachet HTML mare și nelegat din docs/",
-          "intent": "O pagină de arhitectură generată poate deriva prin drift față de cerințele din care a fost construită timp de zile fără ca nimeni să observe, pentru că detectarea de drift se declanșează doar prin tag-uri pe care le poate vedea. Gate-ul avertizează pentru orice fișier `docs/*.html` mare fără niciun tag de descendență `generated-from:` — excluzând ieșirile proprii generate ale motorului, orice este exclus de `.reqmapignore` și orice se află în afara `docs/`, deoarece un prag de dimensiune în octeți este doar un proxy pentru „pachet generat\", nu o dovadă a unuia.",
-          "contract": "> O pagină de arhitectură generată poate deriva prin drift față de cerințele din care a fost construită\n> timp de zile fără ca nimeni să observe, pentru că detectarea de drift se declanșează doar prin tag-uri pe care le poate vedea.\n> Gate-ul avertizează pentru orice fișier `docs/*.html` mare fără niciun tag de descendență `generated-from:` —\n> excluzând ieșirile proprii generate ale motorului, orice este exclus de `.reqmapignore`, și\n> orice se află în afara `docs/`, deoarece un prag de dimensiune în octeți este doar un proxy pentru „generated\n> bundle\", nu o dovadă a unuia.\n\nFiecare punct de mai jos este obligatoriu.\n- Gate-ul avertizează pentru fiecare fișier din `docs/` care se termină în `.html` și care nu poartă\n  niciun tag de apartenență `generated-from:`, odată ce acel fișier are cel puțin `DOC_BUNDLE_MIN_BYTES`\n  în dimensiune.\n- Gate-ul ia în considerare doar fișierele din `docs/`.\n- Verificarea sare peste ieșirile generate de motor: un fișier al cărui nume de bază începe cu `_`,\n  și vizualizatorul publicat `map.html`.\n- Motorul deține aceste două și le verifică separat prospețimea.\n- Verificarea respectă `.reqmapignore` și parcurgerea standard a scanării, astfel încât un repo poate marca o\n  artefact regenerabil ca fiind în afara domeniului, în loc să îl taguiască.\n- Parcurgerea în sine — ce elimină, ce ignoră și cum tratează un fișier pe care nu îl poate citi — este\n  contractul lui [[ARCH-SCAN-002]], nu este repetat aici.\n- Verificarea este doar-avertizare și nu modifică niciodată codul de ieșire al gate-ului.",
-          "acceptance": "CASE-1 — un fișier HTML mare și netaguit din docs/ este semnalat\n  Given  `docs/arch.html` la sau peste `DOC_BUNDLE_MIN_BYTES`, fără niciun tag `generated-from:`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   returnează `[\"docs/arch.html\"]`, pe care `gate` îl încorporează doar în avertismentele sale —\n         niciodată o eroare, lăsând codul de ieșire neafectat\n\nCASE-2 — un fișier HTML mare și netaguit din afara docs/ nu este niciodată semnalat\n  Given  un `top.html` mare și netaguit la rădăcina repo-ului, în afara `docs/`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   `top.html` lipsește din rezultat\n\nCASE-3 — ieșirile motorului sunt excluse chiar și atunci când sunt mari și netaguite\n  Given  `docs/map.html` și `docs/_x.html`, mari și netaguite\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   niciun fișier nu apare în rezultat, pentru că motorul le verifică prospețimea separat pentru\n         aceste două, pe propria cale\n\nCASE-4 — un tipar din .reqmapignore suprimă constatarea\n  Given  un `docs/poster.html` mare și netaguit, potrivit de o linie `.reqmapignore` `docs/poster.html`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   `docs/poster.html` lipsește din rezultat"
-        }
-      }
+      ]
     },
     {
       "id": "ARCH-DOCCLAIMS-071",
@@ -6217,7 +6193,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2959"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2970"
         },
         {
           "role": "implements",
@@ -6267,7 +6243,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2959"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2970"
         },
         {
           "role": "implements",
@@ -6367,11 +6343,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2684"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2690"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1502"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1503"
         },
         {
           "role": "implements",
@@ -6431,7 +6407,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — binding_hash returns a fixed-length hex digest\n  Given  a requirement body with a `## Description` and `## Cases` section\n  When   `binding_hash` runs on that body\n  Then   it returns a 12-character lowercase hex string\n\nCASE-2 — the legacy Output heading is still treated as normative\n  Given  a requirement body using the legacy `## Output` heading instead of `## Contract`\n  When   the clause under `## Output` is edited\n  Then   `binding_hash` changes, proving the legacy heading feeds the hash\n\nCASE-3 — editing Notes and the member list leaves the hash unchanged\n  Given  a requirement body with `## Notes & known limitations` and `## Members in code` sections\n  When   only the text under those sections is edited\n  Then   `binding_hash` returns the same value before and after the edit\n\nCASE-4 — binding_hash is deterministic across repeated calls\n  Given  the same requirement body\n  When   `binding_hash` runs on it twice, independently\n  Then   both calls return the identical 12-character hash\n\n\n--------------------",
+      "accept": "CASE-1 — binding_hash returns a fixed-length hex digest\n  Given  a requirement body with a `## Description` and `## Cases` section\n  When   `binding_hash` runs on that body\n  Then   it returns a 12-character lowercase hex string\n\nCASE-2 — the legacy Output heading is still treated as normative\n  Given  a requirement body using the legacy `## Output` heading instead of `## Contract`\n  When   the clause under `## Output` is edited\n  Then   `binding_hash` changes, proving the legacy heading feeds the hash\n\nCASE-3 — editing Notes and the member list leaves the hash unchanged\n  Given  a requirement body with `## Notes & known limitations` and `## Members in code` sections\n  When   only the text under those sections is edited\n  Then   `binding_hash` returns the same value before and after the edit\n\nCASE-4 — binding_hash is deterministic across repeated calls\n  Given  the same requirement body\n  When   `binding_hash` runs on it twice, independently\n  Then   both calls return the identical 12-character hash\n\nCASE-5 — a body with no normative section still hashes, and filling it drifts\n  Given  a requirement body holding only a title and a `## Context` section\n  When   `binding_hash` runs on it, then on the same body with a Description clause added\n  Then   the first is the hash of empty normative text, and the second differs from it\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -6456,7 +6432,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1502"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1503"
         },
         {
           "role": "implements",
@@ -6467,27 +6443,9 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Hashing doar al secțiunilor normative",
-          "intent": "Un fișier de cerință amestecă o promisiune obligatorie cu text care o explică — motivația, întrebări deschise, lista de membri. Hashing-ul întregului fișier ar raporta drift de fiecare dată când cineva îmbunătățește o propoziție explicativă, obișnuind pe toată lumea să ignore avertismentul. Hashing doar al Contract și Acceptance înseamnă că amprenta se schimbă exact atunci când se schimbă promisiunea.",
-          "contract": "> Un fișier de cerință amestecă o promisiune obligatorie cu text care o explică — motivația, întrebări\n> deschise, lista de membri. Hashing-ul întregului fișier ar raporta drift de fiecare dată când cineva\n> îmbunătățește o propoziție explicativă, obișnuind pe toată lumea să ignore avertismentul. Hashing doar\n> al Contract și Acceptance înseamnă că amprenta se schimbă exact atunci când se schimbă promisiunea.\n\nFiecare bullet de mai jos este obligatoriu.\n- `binding_hash` calculează un hash de conținut hex stabil de 12 caractere doar pe\n  secțiunile normative ale corpului unei cerințe.\n- Secțiunile normative sunt titlurile `Contract` și `Acceptance`, plus titlurile legacy\n  `Input`/`Output`/`Acceptance` păstrate pentru compatibilitate retroactivă.\n- Motivația, notele, verify-intent, link-urile și lista de membri rămân în afara hash-ului, astfel\n  încât se pot schimba fără a declanșa drift.\n- Hash-ul este determinist pentru conținut normativ identic.",
-          "acceptance": "CASE-1 — binding_hash returnează un digest hex de lungime fixă\n  Given  un corp de cerință cu o secțiune `## Description` și `## Cases`\n  When   `binding_hash` rulează pe acel corp\n  Then   returnează un șir hex de 12 caractere, litere mici\n\nCASE-2 — titlul legacy Output este încă tratat ca normativ\n  Given  un corp de cerință care folosește titlul legacy `## Output` în loc de `## Contract`\n  When   clauza de sub `## Output` este editată\n  Then   `binding_hash` se schimbă, dovedind că titlul legacy alimentează hash-ul\n\nCASE-3 — editarea Notes și a listei de membri lasă hash-ul neschimbat\n  Given  un corp de cerință cu secțiunile `## Notes & known limitations` și `## Members in code`\n  When   doar textul de sub acele secțiuni este editat\n  Then   `binding_hash` returnează aceeași valoare înainte și după editare\n\nCASE-4 — binding_hash este determinist la apeluri repetate\n  Given  același corp de cerință\n  When   `binding_hash` rulează pe el de două ori, independent\n  Then   ambele apeluri returnează hash-ul identic de 12 caractere\n\n\n--------------------"
-        }
-      }
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "REQ-DRIFT-842",
@@ -6586,7 +6544,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2684"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2690"
         },
         {
           "role": "implements",
@@ -6773,7 +6731,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4499"
+          "loc": "plugin/scripts/test_reqmap_report.py:4514"
         },
         {
           "role": "implements",
@@ -6831,7 +6789,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4499"
+          "loc": "plugin/scripts/test_reqmap_report.py:4514"
         },
         {
           "role": "implements",
@@ -7198,7 +7156,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a marker-heavy file scores as higher risk\n  Given  an untagged file containing `TODO`, `FIXME` and a suppression comment\n  When   `draft` runs\n  Then   its proposal carries a higher risk score than a clean file of the same size\n\nCASE-2 — the risk score routes the proposal's status hint\n  Given  one file scoring 2 and one file scoring 0\n  When   `draft` runs\n  Then   the first proposal is flagged `REVIEW` and the second `auto-baseline`\n\nCASE-3 — re-running draft leaves an existing proposal untouched\n  Given  a `DRAFT-*.md` written by an earlier `draft` run, since hand-edited\n  When   `draft` runs again over the same file\n  Then   the existing proposal's content is unchanged\n\nCASE-4 — a Python proposal's WHERE names the docstring and top-level signatures\n  Given  an untagged `.py` file with a module docstring and two top-level functions\n  When   `draft` runs\n  Then   the proposal's WHERE section names the docstring's first line and both function signatures\n\nCASE-5 — the extracted surface never leaks into the Contract\n  Given  the same `.py` file's proposal, whose WHERE lists two function signatures\n  When   the proposal's Contract section is inspected\n  Then   it is still the TODO placeholder, unchanged by what WHERE captured",
+      "accept": "CASE-1 — a marker-heavy file scores as higher risk\n  Given  an untagged file containing `TODO`, `FIXME` and a suppression comment\n  When   `draft` runs\n  Then   its proposal carries a higher risk score than a clean file of the same size\n\nCASE-2 — the risk score routes the proposal's status hint\n  Given  one file scoring 2 and one file scoring 0\n  When   `draft` runs\n  Then   the first proposal is flagged `REVIEW` and the second `auto-baseline`\n\nCASE-3 — re-running draft leaves an existing proposal untouched\n  Given  a `DRAFT-*.md` written by an earlier `draft` run, since hand-edited\n  When   `draft` runs again over the same file\n  Then   the existing proposal's content is unchanged\n\nCASE-4 — a Python proposal's WHERE names the docstring and top-level signatures\n  Given  an untagged `.py` file with a module docstring and two top-level functions\n  When   `draft` runs\n  Then   the proposal's WHERE section names the docstring's first line and both function signatures\n\nCASE-5 — the extracted surface never leaks into the Contract\n  Given  the same `.py` file's proposal, whose WHERE lists two function signatures\n  When   the proposal's Contract section is inspected\n  Then   it is still the TODO placeholder, unchanged by what WHERE captured\n\nCASE-6 — a language with no parser gets no surface\n  Given  an untagged `.go` file, a language the engine has no parser for\n  When   `draft` runs\n  Then   its proposal carries no observed surface at all, rather than an empty one",
       "input": "",
       "output": "",
       "desc": "",
@@ -7226,27 +7184,9 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Scorarea riscului și captarea unui indiciu de redactare",
-          "intent": "Nu fiecare draft are nevoie de aceeași scrutin, deci `draft` scorează ieftin fiecare fișier pe baza marcajelor `TODO`/`FIXME`/`HACK`/`XXX`, suppresiilor și dimensiunii, direcționând fișierele mai riscante spre `REVIEW`. Când limbajul are un parser, înregistrează de asemenea docstring-ul fișierului și semnăturile de nivel superior sub WHERE ca indiciu pentru om — niciodată ca linie de Contract, deoarece Contract-ul rămâne un TODO până când o persoană îl scrie.",
-          "contract": "> Nu fiecare draft are nevoie de aceeași scrutin, deci `draft` scorează ieftin fiecare fișier pe\n> baza marcajelor `TODO`/`FIXME`/`HACK`/`XXX`, suppresiilor și dimensiunii, direcționând\n> fișierele mai riscante spre `REVIEW`. Când limbajul are un parser, înregistrează de asemenea\n> docstring-ul fișierului și semnăturile de nivel superior sub WHERE ca indiciu pentru om — niciodată\n> ca linie de Contract, deoarece Contract-ul rămâne un TODO până când o persoană îl scrie.\n\nFiecare bullet de mai jos este obligatoriu.\n- `draft` atribuie un scor de risc ieftin pe baza marcajelor `TODO`/`FIXME`/`HACK`/`XXX`,\n  suppresiilor și dimensiunii fișierului.\n- `draft` direcționează un scor de 2 sau mai mult spre `REVIEW`, și orice scor mai mic spre\n  `auto-baseline`.\n- Rerularea `draft` nu suprascrie niciodată un draft existent.\n- Secțiunea WHERE a unei propuneri de cod listează suprafața observată a fișierului — prima\n  linie a docstring-ului modulului și semnăturile sale de nivel superior — când limbajul are un parser.\n- Acea suprafață este un indiciu de redactare sub WHERE, niciodată o linie de Contract. Contract-ul\n  rămâne un TODO până când un om îl scrie.",
-          "acceptance": "CASE-1 — un fișier plin de marcaje are un scor de risc mai mare\n  Given  un fișier netagat conținând `TODO`, `FIXME` și un comentariu de suppresie\n  When   `draft` rulează\n  Then   propunerea sa poartă un scor de risc mai mare decât un fișier curat de aceeași dimensiune\n\nCASE-2 — scorul de risc direcționează indiciul de status al propunerii\n  Given  un fișier cu scor 2 și un fișier cu scor 0\n  When   `draft` rulează\n  Then   prima propunere este marcată `REVIEW` iar a doua `auto-baseline`\n\nCASE-3 — rerularea draft lasă o propunere existentă neatinsă\n  Given  un `DRAFT-*.md` scris de o rulare `draft` anterioară, de atunci editat manual\n  When   `draft` rulează din nou peste același fișier\n  Then   conținutul propunerii existente rămâne neschimbat\n\nCASE-4 — WHERE-ul unei propuneri Python numește docstring-ul și semnăturile de nivel superior\n  Given  un fișier `.py` netagat cu un docstring de modul și două funcții de nivel superior\n  When   `draft` rulează\n  Then   secțiunea WHERE a propunerii numește prima linie a docstring-ului și ambele semnături de funcție\n\nCASE-5 — suprafața extrasă nu se scurge niciodată în Contract\n  Given  propunerea aceluiași fișier `.py`, al cărei WHERE listează două semnături de funcție\n  When   secțiunea Contract a propunerii este inspectată\n  Then   este tot placeholder-ul TODO, neschimbat de ceea ce a captat WHERE"
-        }
-      }
+      "clauses": 6,
+      "covered": 6,
+      "clarify": []
     },
     {
       "id": "REQ-EXTRACT-981",
@@ -7671,15 +7611,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:705"
+          "loc": "plugin/scripts/test_reqmap_report.py:716"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2308"
+          "loc": "plugin/scripts/test_reqmap_report.py:2323"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4042"
+          "loc": "plugin/scripts/test_reqmap_report.py:4057"
         },
         {
           "role": "implements",
@@ -7767,7 +7707,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4042"
+          "loc": "plugin/scripts/test_reqmap_report.py:4057"
         },
         {
           "role": "implements",
@@ -7928,7 +7868,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2308"
+          "loc": "plugin/scripts/test_reqmap_report.py:2323"
         },
         {
           "role": "implements",
@@ -7996,7 +7936,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1583"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1584"
         },
         {
           "role": "implements",
@@ -8054,7 +7994,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1583"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1584"
         },
         {
           "role": "implements",
@@ -8141,19 +8081,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1772"
+          "loc": "plugin/scripts/test_reqmap_report.py:1787"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4187"
+          "loc": "plugin/scripts/test_reqmap_report.py:4202"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "implements",
@@ -8232,11 +8172,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4187"
+          "loc": "plugin/scripts/test_reqmap_report.py:4202"
         },
         {
           "role": "implements",
@@ -8304,11 +8244,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4187"
+          "loc": "plugin/scripts/test_reqmap_report.py:4202"
         },
         {
           "role": "implements",
@@ -8389,11 +8329,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4187"
+          "loc": "plugin/scripts/test_reqmap_report.py:4202"
         },
         {
           "role": "implements",
@@ -8469,7 +8409,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "implements",
@@ -8554,7 +8494,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1481"
         },
         {
           "role": "implements",
@@ -8621,7 +8561,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6181"
+          "loc": "plugin/scripts/test_reqmap_report.py:6196"
         },
         {
           "role": "implements",
@@ -8823,11 +8763,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2161"
+          "loc": "plugin/scripts/test_reqmap_report.py:2176"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "implements",
@@ -8958,7 +8898,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4661"
+          "loc": "plugin/scripts/test_reqmap_author.py:4668"
         },
         {
           "role": "implements",
@@ -9020,7 +8960,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2590"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2596"
         },
         {
           "role": "implements",
@@ -9089,7 +9029,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2590"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2596"
         },
         {
           "role": "implements",
@@ -9488,7 +9428,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3083"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3094"
         },
         {
           "role": "implements",
@@ -9567,7 +9507,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3083"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3094"
         },
         {
           "role": "implements",
@@ -9754,7 +9694,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:569"
+          "loc": "plugin/scripts/test_reqmap_scan.py:570"
         },
         {
           "role": "implements",
@@ -10271,11 +10211,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3408"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3419"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3485"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3496"
         },
         {
           "role": "tested-by",
@@ -10291,47 +10231,47 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:546"
+          "loc": "plugin/scripts/test_reqmap_report.py:553"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:773"
+          "loc": "plugin/scripts/test_reqmap_report.py:784"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:961"
+          "loc": "plugin/scripts/test_reqmap_report.py:972"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1843"
+          "loc": "plugin/scripts/test_reqmap_report.py:1858"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1882"
+          "loc": "plugin/scripts/test_reqmap_report.py:1897"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2161"
+          "loc": "plugin/scripts/test_reqmap_report.py:2176"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2494"
+          "loc": "plugin/scripts/test_reqmap_report.py:2509"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2698"
+          "loc": "plugin/scripts/test_reqmap_report.py:2713"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3976"
+          "loc": "plugin/scripts/test_reqmap_report.py:3991"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:585"
+          "loc": "plugin/scripts/test_reqmap_scan.py:586"
         },
         {
           "role": "implements",
@@ -10480,11 +10420,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1882"
+          "loc": "plugin/scripts/test_reqmap_report.py:1897"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6289"
+          "loc": "plugin/scripts/test_reqmap_report.py:6304"
         },
         {
           "role": "implements",
@@ -10546,7 +10486,7 @@
       "title": "Repo, engine version, todos, and freshness checking",
       "intent": "`repo` and `engine_version` describe the environment the map was built in, not the corpus itself — so both are excluded from the freshness diff, or a plain clone into a different fork, or bumping the vendored engine, would make every committed map falsely look stale. `todos` rides alongside for the same reason a picture needs planned work next to what already exists. `map --check` is the freshness gate that reads all of this: a committed file that no longer matches a fresh render is stale, and the gate surfaces that as a warning so a commit prepared with `gate` alone is never surprised by it later in CI.",
       "contract": [
-        "`_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo directory name, else null.",
+        "`_map.json` carries a top-level `repo` field: the `REQMAP_REPO` environment variable when set (an empty value means null), else the last two path parts of the git `remote.origin.url` as `owner/repo`, else the repo directory name, else null.",
         "`repo` identifies the project the map describes, for display in the viewer header.",
         "`repo` is derived from the git remote, so it differs across forks and clones. It is therefore excluded from the `map --check` freshness diff.",
         "Resolving `repo` never raises and never blocks map generation, because git may be absent or the tree may not be a checkout.",
@@ -10561,7 +10501,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a changed repo field never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-2 — map succeeds when the tree has no git remote\n  Given  a working tree with no `.git` directory\n  When   `map` runs\n  Then   it completes without raising, and `_map.json`'s `repo` field is null\n\nCASE-3 — a changed engine_version never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-4 — map derives the todos array from TODO.md\n  Given  a `TODO.md` with one open item under a milestone section\n  When   `map` runs\n  Then   `_map.json`'s top-level `todos` array contains that item\n\nCASE-5 — map --check fails on a genuinely stale committed map\n  Given  a committed `_map.json` generated from one requirement title, then that title changed\n  When   `map --check` runs\n  Then   it exits non-zero and reports the file as stale; formatting and advisory design\n         alone never make full or compact JSON stale\n\nCASE-6 — the gate warns about a stale map without failing the commit\n  Given  a committed `_map.json` that no longer matches a fresh render\n  When   `gate` runs\n  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself\n\n\n--------------------\n\nCASE-7 — a probe that cannot run says so\n  Given  a corpus whose map cannot be built\n  When   `gate` runs\n  Then   it warns that the freshness probe failed, names the error, and exits 0",
+      "accept": "CASE-1 — a changed repo field never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-2 — repo is resolved in a fixed order, and no remote never fails map\n  Given  a remote `git@github.com:acme/widgets.git`, then `REQMAP_REPO` set to\n         `owner/public`, then to an empty value, then a tree with no remote; and a graph\n         carrying no `repo`\n  When   the repo name is resolved each time, and the graph is written as `_map.json`\n  Then   it is `acme/widgets`, then `owner/public`, then null, then the directory name,\n         never raising; the written `repo` field is null\n\nCASE-3 — a changed engine_version never trips map --check\n  Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`\n  When   `map --check` runs\n  Then   it reports no staleness\n\nCASE-4 — map derives the todos array from TODO.md\n  Given  a `TODO.md` with one open item under a milestone section\n  When   `map` runs\n  Then   `_map.json`'s top-level `todos` array contains that item\n\nCASE-5 — map --check fails on a genuinely stale committed map\n  Given  a committed `_map.json` generated from one requirement title, then that title changed\n  When   `map --check` runs\n  Then   it exits non-zero and reports the file as stale; formatting and advisory design\n         alone never make full or compact JSON stale\n\nCASE-6 — the gate warns about a stale map without failing the commit\n  Given  a committed `_map.json` that no longer matches a fresh render\n  When   `gate` runs\n  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself\n\n\n--------------------\n\nCASE-7 — a probe that cannot run says so\n  Given  a corpus whose map cannot be built\n  When   `gate` runs\n  Then   it warns that the freshness probe failed, names the error, and exits 0",
       "input": "",
       "output": "",
       "desc": "",
@@ -10582,7 +10522,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3455"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3466"
         },
         {
           "role": "tested-by",
@@ -10590,11 +10530,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:961"
+          "loc": "plugin/scripts/test_reqmap_report.py:972"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6289"
+          "loc": "plugin/scripts/test_reqmap_report.py:6304"
         },
         {
           "role": "implements",
@@ -10632,15 +10572,6 @@
       "clauses": 7,
       "covered": 7,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo directory name, else null.",
-          "question": "What is the measurable threshold behind \"best-effort\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -10681,7 +10612,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:773"
+          "loc": "plugin/scripts/test_reqmap_report.py:784"
         },
         {
           "role": "implements",
@@ -10736,7 +10667,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an atomic requirement's intent collapses into its contract\n  Given  an atomic requirement whose quote and single Contract clause are the same text\n  When   `_distinct_intent` runs\n  Then   it returns \"\", while the clause still survives under `contract`\n\nCASE-2 — a sectioned requirement's intent survives as real rationale\n  Given  a sectioned requirement whose quote is rationale distinct from its Contract clauses\n  When   `_distinct_intent` runs\n  Then   it returns the quote unchanged\n\nCASE-3 — intent dedup ignores only whitespace differences\n  Given  an atomic requirement whose quote is re-wrapped across two physical lines but is\n         otherwise identical to its single Contract clause\n  When   `_distinct_intent` runs\n  Then   it still returns \"\", because the comparison collapses whitespace before comparing\n\n--------------------",
+      "accept": "CASE-1 — an atomic requirement's intent collapses into its contract\n  Given  an atomic requirement whose quote and single Contract clause are the same text\n  When   `_distinct_intent` runs\n  Then   it returns \"\", while the clause still survives under `contract`\n\nCASE-2 — a sectioned requirement's intent survives as real rationale\n  Given  a sectioned requirement whose quote is rationale distinct from its Contract clauses\n  When   `_distinct_intent` runs\n  Then   it returns the quote unchanged\n\nCASE-3 — intent dedup ignores only whitespace differences\n  Given  an atomic requirement whose quote is re-wrapped across two physical lines but is\n         otherwise identical to its single Contract clause\n  When   `_distinct_intent` runs\n  Then   it still returns \"\", because the comparison collapses whitespace before comparing\n\nCASE-4 — a requirement with no quote has an empty intent\n  Given  a requirement whose body holds no blockquote\n  When   `_distinct_intent` runs\n  Then   it returns \"\", and nothing is borrowed from the Contract to fill it\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -10749,7 +10680,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:546"
+          "loc": "plugin/scripts/test_reqmap_report.py:553"
         },
         {
           "role": "implements",
@@ -10764,8 +10695,8 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
+      "clauses": 4,
+      "covered": 4,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -10773,17 +10704,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        },
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
         }
       ]
     },
@@ -10837,7 +10759,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2494"
+          "loc": "plugin/scripts/test_reqmap_report.py:2509"
         },
         {
           "role": "implements",
@@ -10900,7 +10822,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2698"
+          "loc": "plugin/scripts/test_reqmap_report.py:2713"
         },
         {
           "role": "implements",
@@ -11073,11 +10995,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2451"
+          "loc": "plugin/scripts/test_reqmap_report.py:2466"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4523"
+          "loc": "plugin/scripts/test_reqmap_report.py:4538"
         },
         {
           "role": "implements",
@@ -11164,15 +11086,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2451"
+          "loc": "plugin/scripts/test_reqmap_report.py:2466"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4523"
+          "loc": "plugin/scripts/test_reqmap_report.py:4538"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6289"
+          "loc": "plugin/scripts/test_reqmap_report.py:6304"
         },
         {
           "role": "implements",
@@ -11270,7 +11192,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2451"
+          "loc": "plugin/scripts/test_reqmap_report.py:2466"
         },
         {
           "role": "implements",
@@ -11332,11 +11254,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2451"
+          "loc": "plugin/scripts/test_reqmap_report.py:2466"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "implements",
@@ -11396,11 +11318,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2451"
+          "loc": "plugin/scripts/test_reqmap_report.py:2466"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4523"
+          "loc": "plugin/scripts/test_reqmap_report.py:4538"
         },
         {
           "role": "implements",
@@ -11466,11 +11388,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3592"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3603"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4985"
+          "loc": "plugin/scripts/test_reqmap_report.py:5000"
         },
         {
           "role": "implements",
@@ -11532,7 +11454,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4731"
+          "loc": "plugin/scripts/test_reqmap_report.py:4746"
         },
         {
           "role": "implements",
@@ -11591,7 +11513,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4731"
+          "loc": "plugin/scripts/test_reqmap_report.py:4746"
         },
         {
           "role": "implements",
@@ -11652,7 +11574,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4940"
+          "loc": "plugin/scripts/test_reqmap_report.py:4955"
         },
         {
           "role": "implements",
@@ -11714,7 +11636,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4884"
+          "loc": "plugin/scripts/test_reqmap_report.py:4899"
         },
         {
           "role": "implements",
@@ -12240,39 +12162,39 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1117"
+          "loc": "plugin/scripts/test_reqmap_report.py:1128"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1126"
+          "loc": "plugin/scripts/test_reqmap_report.py:1137"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1132"
+          "loc": "plugin/scripts/test_reqmap_report.py:1143"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2124"
+          "loc": "plugin/scripts/test_reqmap_report.py:2139"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2370"
+          "loc": "plugin/scripts/test_reqmap_report.py:2385"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2410"
+          "loc": "plugin/scripts/test_reqmap_report.py:2425"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5489"
+          "loc": "plugin/scripts/test_reqmap_report.py:5504"
         },
         {
           "role": "implements",
@@ -12365,11 +12287,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "implements",
@@ -12439,11 +12361,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "implements",
@@ -12518,7 +12440,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2411"
+          "loc": "plugin/scripts/test_reqmap_report.py:2426"
         },
         {
           "role": "implements",
@@ -12577,11 +12499,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "implements",
@@ -12646,15 +12568,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "implements",
@@ -12719,11 +12641,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1009"
+          "loc": "plugin/scripts/test_reqmap_report.py:1020"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3781"
         },
         {
           "role": "implements",
@@ -12790,7 +12712,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5489"
+          "loc": "plugin/scripts/test_reqmap_report.py:5504"
         },
         {
           "role": "implements",
@@ -12859,7 +12781,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5600"
+          "loc": "plugin/scripts/test_reqmap_report.py:5615"
         },
         {
           "role": "implements",
@@ -12943,7 +12865,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2638"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2644"
         },
         {
           "role": "implements",
@@ -13009,7 +12931,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2638"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2644"
         },
         {
           "role": "implements",
@@ -13102,7 +13024,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "tested-by",
@@ -13110,11 +13032,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:521"
+          "loc": "plugin/scripts/test_reqmap_scan.py:522"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:934"
+          "loc": "plugin/scripts/test_reqmap_scan.py:935"
         },
         {
           "role": "implements",
@@ -13179,7 +13101,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3602"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3613"
         },
         {
           "role": "tested-by",
@@ -13187,7 +13109,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1493"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1494"
         },
         {
           "role": "implements",
@@ -13357,7 +13279,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1095"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1096"
         },
         {
           "role": "implements",
@@ -13439,7 +13361,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1185"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1186"
         },
         {
           "role": "implements",
@@ -13629,7 +13551,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:2961"
         },
         {
           "role": "implements",
@@ -13680,7 +13602,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:2961"
         },
         {
           "role": "implements",
@@ -13787,11 +13709,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1843"
+          "loc": "plugin/scripts/test_reqmap_report.py:1858"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2124"
+          "loc": "plugin/scripts/test_reqmap_report.py:2139"
         },
         {
           "role": "implements",
@@ -14190,11 +14112,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1080"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1081"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1364"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1365"
         },
         {
           "role": "implements",
@@ -14340,7 +14262,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1364"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1365"
         },
         {
           "role": "implements",
@@ -14404,7 +14326,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2604"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2610"
         }
       ],
       "test_exempt": null,
@@ -14476,7 +14398,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2604"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2610"
         }
       ],
       "test_exempt": null,
@@ -14535,7 +14457,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1636"
+          "loc": "plugin/scripts/test_reqmap_report.py:1651"
         },
         {
           "role": "implements",
@@ -14583,11 +14505,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1648"
+          "loc": "plugin/scripts/test_reqmap_report.py:1663"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4647"
+          "loc": "plugin/scripts/test_reqmap_report.py:4662"
         },
         {
           "role": "implements",
@@ -14643,11 +14565,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1648"
+          "loc": "plugin/scripts/test_reqmap_report.py:1663"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4647"
+          "loc": "plugin/scripts/test_reqmap_report.py:4662"
         },
         {
           "role": "implements",
@@ -14732,7 +14654,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4213"
+          "loc": "plugin/scripts/test_reqmap_author.py:4220"
         },
         {
           "role": "implements",
@@ -14918,7 +14840,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — files that disagree are named\n  Given  a `package.json` at 1.4.0 and a `VERSION` file at 1.3.0\n  When   the alignment is checked\n  Then   one line names both files and their versions\n\nCASE-2 — a CHANGELOG behind the files asks for the entry\n  Given  version files at 1.4.0 and a CHANGELOG whose newest release is 1.3.0\n  When   the alignment is checked\n  Then   a line names `v1.3.0` and asks for the entry\n\nCASE-3 — a tag below the files is the normal state\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.3.0`\n  When   the alignment is checked\n  Then   nothing is reported\n\nCASE-4 — a tag above the files is reported\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.5.0`\n  When   the alignment is checked\n  Then   one line says `v1.5.0` is above the declared version",
+      "accept": "CASE-1 — files that disagree are named\n  Given  a `package.json` at 1.4.0 and a `VERSION` file at 1.3.0\n  When   the alignment is checked\n  Then   one line names both files and their versions\n\nCASE-2 — a CHANGELOG behind the files asks for the entry\n  Given  version files at 1.4.0 and a CHANGELOG whose newest release is 1.3.0\n  When   the alignment is checked\n  Then   a line names `v1.3.0` and asks for the entry\n\nCASE-3 — a tag below the files is the normal state\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.3.0`\n  When   the alignment is checked\n  Then   nothing is reported\n\nCASE-4 — a tag above the files is reported\n  Given  version files and CHANGELOG at 1.4.0 and a newest tag `v1.5.0`\n  When   the alignment is checked\n  Then   one line says `v1.5.0` is above the declared version\n\nCASE-5 — nothing to compare reports nothing\n  Given  a repository with no version file, no CHANGELOG and no tag\n  When   the alignment is checked\n  Then   no line is reported, because absent inputs disagree with nothing",
       "input": "",
       "output": "",
       "desc": "",
@@ -14958,28 +14880,9 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        },
-        {
-          "rule": "case-monoculture",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 of 4 Given lines open on the same word (\"version\"). Do the cases cover the other kinds of input a caller can supply?",
-          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
-        }
-      ]
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "REQ-NEXTVERSION-1017",
@@ -15009,7 +14912,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3999"
+          "loc": "plugin/scripts/test_reqmap_author.py:4006"
         },
         {
           "role": "implements",
@@ -15071,7 +14974,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4021"
+          "loc": "plugin/scripts/test_reqmap_author.py:4028"
         },
         {
           "role": "implements",
@@ -15153,7 +15056,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4133"
+          "loc": "plugin/scripts/test_reqmap_author.py:4140"
         },
         {
           "role": "implements",
@@ -15212,7 +15115,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4021"
+          "loc": "plugin/scripts/test_reqmap_author.py:4028"
         },
         {
           "role": "implements",
@@ -15266,7 +15169,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4254"
+          "loc": "plugin/scripts/test_reqmap_author.py:4261"
         },
         {
           "role": "implements",
@@ -15337,7 +15240,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4369"
+          "loc": "plugin/scripts/test_reqmap_author.py:4376"
         },
         {
           "role": "implements",
@@ -15526,7 +15429,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5269"
+          "loc": "plugin/scripts/test_reqmap_report.py:5284"
         },
         {
           "role": "implements",
@@ -16102,23 +16005,23 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2225"
+          "loc": "plugin/scripts/test_reqmap_report.py:2240"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2606"
+          "loc": "plugin/scripts/test_reqmap_report.py:2621"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2663"
+          "loc": "plugin/scripts/test_reqmap_report.py:2678"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3071"
+          "loc": "plugin/scripts/test_reqmap_report.py:3086"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4470"
+          "loc": "plugin/scripts/test_reqmap_report.py:4485"
         },
         {
           "role": "implements",
@@ -16216,11 +16119,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2225"
+          "loc": "plugin/scripts/test_reqmap_report.py:2240"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4470"
+          "loc": "plugin/scripts/test_reqmap_report.py:4485"
         },
         {
           "role": "implements",
@@ -16297,7 +16200,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2225"
+          "loc": "plugin/scripts/test_reqmap_report.py:2240"
         },
         {
           "role": "implements",
@@ -16380,7 +16283,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3071"
+          "loc": "plugin/scripts/test_reqmap_report.py:3086"
         },
         {
           "role": "implements",
@@ -16507,7 +16410,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2494"
+          "loc": "plugin/scripts/test_reqmap_report.py:2509"
         },
         {
           "role": "implements",
@@ -16556,7 +16459,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2606"
+          "loc": "plugin/scripts/test_reqmap_report.py:2621"
         },
         {
           "role": "implements",
@@ -16622,7 +16525,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3262"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3273"
         },
         {
           "role": "implements",
@@ -16697,7 +16600,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4369"
+          "loc": "plugin/scripts/test_reqmap_author.py:4376"
         },
         {
           "role": "implements",
@@ -16748,7 +16651,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2663"
+          "loc": "plugin/scripts/test_reqmap_report.py:2678"
         },
         {
           "role": "implements",
@@ -16811,11 +16714,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2765"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2771"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:3383"
+          "loc": "plugin/scripts/test_reqmap_gate.py:3394"
         },
         {
           "role": "implements",
@@ -17073,7 +16976,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2765"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2771"
         },
         {
           "role": "implements",
@@ -17160,23 +17063,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:792"
+          "loc": "plugin/scripts/test_reqmap_scan.py:793"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:981"
+          "loc": "plugin/scripts/test_reqmap_scan.py:982"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1073"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1074"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1521"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1522"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1901"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1902"
         },
         {
           "role": "implements",
@@ -17361,7 +17264,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:792"
+          "loc": "plugin/scripts/test_reqmap_scan.py:793"
         },
         {
           "role": "implements",
@@ -17433,7 +17336,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1521"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1522"
         },
         {
           "role": "implements",
@@ -17497,7 +17400,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:632"
+          "loc": "plugin/scripts/test_reqmap_scan.py:633"
         },
         {
           "role": "implements",
@@ -17573,11 +17476,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:632"
+          "loc": "plugin/scripts/test_reqmap_scan.py:633"
         },
         {
           "role": "implements",
@@ -17679,15 +17582,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1374"
+          "loc": "plugin/scripts/test_reqmap_report.py:1389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4057"
+          "loc": "plugin/scripts/test_reqmap_report.py:4072"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5190"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -17769,11 +17672,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1374"
+          "loc": "plugin/scripts/test_reqmap_report.py:1389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4057"
+          "loc": "plugin/scripts/test_reqmap_report.py:4072"
         },
         {
           "role": "implements",
@@ -17840,11 +17743,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1374"
+          "loc": "plugin/scripts/test_reqmap_report.py:1389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4057"
+          "loc": "plugin/scripts/test_reqmap_report.py:4072"
         },
         {
           "role": "implements",
@@ -17912,11 +17815,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1374"
+          "loc": "plugin/scripts/test_reqmap_report.py:1389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4057"
+          "loc": "plugin/scripts/test_reqmap_report.py:4072"
         },
         {
           "role": "implements",
@@ -17978,11 +17881,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1374"
+          "loc": "plugin/scripts/test_reqmap_report.py:1389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4057"
+          "loc": "plugin/scripts/test_reqmap_report.py:4072"
         },
         {
           "role": "implements",
@@ -18048,7 +17951,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5190"
+          "loc": "plugin/scripts/test_reqmap_report.py:5205"
         },
         {
           "role": "implements",
@@ -18111,7 +18014,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1654"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1655"
         },
         {
           "role": "implements",
@@ -18168,7 +18071,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1654"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1655"
         },
         {
           "role": "implements",
@@ -18234,7 +18137,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1300"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1301"
         },
         {
           "role": "implements",
@@ -18334,7 +18237,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5052"
+          "loc": "plugin/scripts/test_reqmap_report.py:5067"
         },
         {
           "role": "implements",
@@ -18651,11 +18554,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap_report.py:5052"
+          "loc": "plugin/scripts/test_reqmap_report.py:5067"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5052"
+          "loc": "plugin/scripts/test_reqmap_report.py:5067"
         }
       ],
       "test_exempt": null,
@@ -18782,11 +18685,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1166"
+          "loc": "plugin/scripts/test_reqmap_report.py:1177"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3915"
+          "loc": "plugin/scripts/test_reqmap_report.py:3930"
         },
         {
           "role": "implements",
@@ -18846,11 +18749,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1166"
+          "loc": "plugin/scripts/test_reqmap_report.py:1177"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3915"
+          "loc": "plugin/scripts/test_reqmap_report.py:3930"
         },
         {
           "role": "implements",
@@ -18897,7 +18800,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — show lists a reverse dependency under Depended on by\n  Given  `REQ-B-002` with `depends_on: [CORE-A-001]`\n  When   `show CORE-A-001` runs\n  Then   its output contains \"Depended on by\" and \"REQ-B-002\"\n\nCASE-2 — a tagged member prints its role and file:line\n  Given  a member `(\"implements\", \"src/foo.py\", 42)` for `REQ-X-001`\n  When   `show REQ-X-001` runs\n  Then   its output contains \"implements\" and \"src/foo.py:42\"\n\nCASE-3 — a levelled tested-by member is annotated with its level\n  Given  a `tested-by` member at `t.py:2` whose `levels` mapping marks it `integration`\n  When   `show REQ-X-001` runs with that level data\n  Then   its output contains \"@integration\"\n\n\n--------------------",
+      "accept": "CASE-1 — show lists a reverse dependency under Depended on by\n  Given  `REQ-B-002` with `depends_on: [CORE-A-001]`\n  When   `show CORE-A-001` runs\n  Then   its output contains \"Depended on by\" and \"REQ-B-002\"\n\nCASE-2 — a tagged member prints its role and file:line\n  Given  a member `(\"implements\", \"src/foo.py\", 42)` for `REQ-X-001`\n  When   `show REQ-X-001` runs\n  Then   its output contains \"implements\" and \"src/foo.py:42\"\n\nCASE-3 — a levelled tested-by member is annotated with its level\n  Given  a `tested-by` member at `t.py:2` whose `levels` mapping marks it `integration`\n  When   `show REQ-X-001` runs with that level data\n  Then   its output contains \"@integration\"\n\nCASE-4 — a requirement with no tagged member says so\n  Given  `REQ-X-001` with no member in code\n  When   `show REQ-X-001` runs\n  Then   its output reads \"Members in code (0):\" followed by \"(none tagged)\"\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -18910,7 +18813,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1166"
+          "loc": "plugin/scripts/test_reqmap_report.py:1177"
         },
         {
           "role": "implements",
@@ -18925,27 +18828,9 @@
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Dependențe în ambele sensuri, și membrii de cod",
-          "intent": "A ști ce va afecta o cerință înseamnă a vedea atât de ce depinde, cât și ce depinde de ea, plus exact ce cod o implementează. `show` calculează muchiile inverse scanând `depends_on`-ul fiecărei cerințe la fiecare apel — corpusul este suficient de mic încât asta nu are nevoie de niciun cache — și listează membrii cu nivelul lor de verificare când tag-ul lor `tested-by:` poartă unul.",
-          "contract": "> A ști ce va afecta o cerință înseamnă a vedea atât de ce depinde, cât și ce depinde de\n> ea, plus exact ce cod o implementează. `show` calculează muchiile inverse scanând\n> `depends_on`-ul fiecărei cerințe la fiecare apel — corpusul este suficient de mic încât\n> asta nu are nevoie de niciun cache — și listează membrii cu nivelul lor de verificare când\n> tag-ul lor `tested-by:` poartă unul.\n\nFiecare punct de mai jos este obligatoriu.\n- `show` afișează dependențele în ambele direcții: id-urile `depends_on`, și muchiile inverse.\n- `show` listează membrii de cod grupați după role, fiecare cu `file:line`-ul lui. Când niciun membru nu\n  este etichetat, `show` spune asta.\n- `show` afișează nivelul de verificare lângă un membru al cărui tag `tested-by:` poartă unul.",
-          "acceptance": "CASE-1 — show listează o dependență inversă sub Depended on by\n  Given  `REQ-B-002` cu `depends_on: [CORE-A-001]`\n  When   `show CORE-A-001` rulează\n  Then   ieșirea lui conține \"Depended on by\" și \"REQ-B-002\"\n\nCASE-2 — un membru etichetat afișează role-ul lui și file:line\n  Given  un membru `(\"implements\", \"src/foo.py\", 42)` pentru `REQ-X-001`\n  When   `show REQ-X-001` rulează\n  Then   ieșirea lui conține \"implements\" și \"src/foo.py:42\"\n\nCASE-3 — un membru tested-by cu nivel este adnotat cu nivelul lui\n  Given  un membru `tested-by` la `t.py:2` a cărui mapare `levels` îl marchează `integration`\n  When   `show REQ-X-001` rulează cu acele date de nivel\n  Then   ieșirea lui conține \"@integration\"\n\n\n--------------------"
-        }
-      }
+      "clauses": 4,
+      "covered": 4,
+      "clarify": []
     },
     {
       "id": "REQ-SHOW-919",
@@ -18977,11 +18862,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1166"
+          "loc": "plugin/scripts/test_reqmap_report.py:1177"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3915"
+          "loc": "plugin/scripts/test_reqmap_report.py:3930"
         },
         {
           "role": "implements",
@@ -19055,15 +18940,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1293"
+          "loc": "plugin/scripts/test_reqmap_report.py:1308"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2426"
+          "loc": "plugin/scripts/test_reqmap_report.py:2441"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4336"
+          "loc": "plugin/scripts/test_reqmap_report.py:4351"
         },
         {
           "role": "implements",
@@ -19146,11 +19031,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1293"
+          "loc": "plugin/scripts/test_reqmap_report.py:1308"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4336"
+          "loc": "plugin/scripts/test_reqmap_report.py:4351"
         },
         {
           "role": "implements",
@@ -19211,19 +19096,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1293"
+          "loc": "plugin/scripts/test_reqmap_report.py:1308"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2426"
+          "loc": "plugin/scripts/test_reqmap_report.py:2441"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3218"
+          "loc": "plugin/scripts/test_reqmap_report.py:3233"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4336"
+          "loc": "plugin/scripts/test_reqmap_report.py:4351"
         },
         {
           "role": "implements",
@@ -19297,11 +19182,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1293"
+          "loc": "plugin/scripts/test_reqmap_report.py:1308"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4336"
+          "loc": "plugin/scripts/test_reqmap_report.py:4351"
         },
         {
           "role": "implements",
@@ -19361,11 +19246,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1293"
+          "loc": "plugin/scripts/test_reqmap_report.py:1308"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4336"
+          "loc": "plugin/scripts/test_reqmap_report.py:4351"
         },
         {
           "role": "implements",
@@ -19413,7 +19298,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3359"
         },
         {
           "role": "implements",
@@ -19458,7 +19343,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3371"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -19524,7 +19409,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3141"
+          "loc": "plugin/scripts/test_reqmap_report.py:3156"
         },
         {
           "role": "implements",
@@ -19590,7 +19475,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4425"
+          "loc": "plugin/scripts/test_reqmap_author.py:4432"
         },
         {
           "role": "implements",
@@ -19701,7 +19586,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4428"
+          "loc": "plugin/scripts/test_reqmap_author.py:4435"
         },
         {
           "role": "implements",
@@ -20200,7 +20085,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2575"
         },
         {
           "role": "implements",
@@ -20314,7 +20199,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2575"
         },
         {
           "role": "implements",
@@ -20430,7 +20315,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2569"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2575"
         },
         {
           "role": "implements",
@@ -20761,7 +20646,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:850"
+          "loc": "plugin/scripts/test_reqmap_scan.py:851"
         },
         {
           "role": "implements",
@@ -20821,11 +20706,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:850"
+          "loc": "plugin/scripts/test_reqmap_scan.py:851"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1449"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1450"
         },
         {
           "role": "implements",
@@ -21019,7 +20904,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:295"
+          "loc": "app/src/lib/i18n.jsx:297"
         },
         {
           "role": "implements",
@@ -21031,7 +20916,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6318"
+          "loc": "plugin/scripts/test_reqmap_report.py:6333"
         },
         {
           "role": "implements",
@@ -21129,7 +21014,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:330"
+          "loc": "app/src/lib/i18n.jsx:332"
         }
       ],
       "test_exempt": null,
@@ -21170,7 +21055,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:349"
+          "loc": "app/scripts/smoke/explorer.jsx:416"
         },
         {
           "role": "implements",
@@ -21232,11 +21117,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1763"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1764"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1842"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1843"
         },
         {
           "role": "implements",
@@ -21300,7 +21185,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1763"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1764"
         },
         {
           "role": "implements",
@@ -21375,7 +21260,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1020"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1021"
         },
         {
           "role": "implements",
@@ -21435,11 +21320,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1020"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1021"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1387"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1388"
         },
         {
           "role": "implements",
@@ -21489,6 +21374,7 @@
         "The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]",
         "The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]",
         "The viewer gives open questions a page of their own, grouped by whether the code, a person or `clarify` raised them, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]",
+        "Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]",
         "Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]",
@@ -21555,7 +21441,8 @@
         "REQ-VIEWER-1087",
         "REQ-VERSIONTODOS-1097",
         "REQ-HISTORYWEEK-1098",
-        "REQ-VIEWER-1101"
+        "REQ-VIEWER-1101",
+        "REQ-VIEWER-1114"
       ],
       "members": [
         {
@@ -21864,11 +21751,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:284"
+          "loc": "app/src/lib/i18n.jsx:286"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:338"
+          "loc": "app/src/lib/i18n.jsx:340"
         }
       ],
       "test_exempt": null,
@@ -22054,11 +21941,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:251"
+          "loc": "app/src/lib/i18n.jsx:253"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:355"
+          "loc": "app/src/lib/i18n.jsx:357"
         },
         {
           "role": "implements",
@@ -22998,7 +22885,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:252"
+          "loc": "app/scripts/smoke/explorer.jsx:254"
         },
         {
           "role": "tested-by",
@@ -23027,6 +22914,66 @@
           "where": "Cases",
           "quote": "",
           "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-VIEWER-1114",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "Choosing a question shows it beside the list",
+      "intent": "A row on the Questions page used to open its requirement, which left the page: the reader lost the list and had to come back to it for every question. Answering a question needs the question and the text it is about, side by side, while the list stays put.",
+      "contract": [
+        "Choosing a row on the Questions page opens a panel beside the list and never leaves the page; the chosen row is marked.",
+        "The panel shows the requirement's id, title and status, then the row's questions as the list shows them on the current tab, a decision question with its options on their own lines.",
+        "Below the questions the panel shows the requirement's Description clauses and its Cases.",
+        "A button in the panel opens the requirement, and another closes the panel."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — choosing a question shows it beside the list\n  Given  a requirement with a person's decision question and a `clarify` question\n  When   the Questions page is rendered with that requirement chosen\n  Then   a panel beside the list holds the decision question with each option on its\n         own line, the `clarify` question with its suggestion, the clauses and the cases,\n         and the chosen row is marked\n\nCASE-2 — nothing chosen, no panel\n  Given  the same registry\n  When   the Questions page first opens\n  Then   no panel is shown and no row is marked\n\nCASE-3 — the panel opens the requirement only when asked\n  Given  the panel for a chosen requirement\n  When   its open button is used\n  Then   the requirement opens; choosing a row never opens it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/explorer.jsx:351"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/QuestionsView.jsx:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -23074,15 +23021,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:499"
+          "loc": "plugin/scripts/test_reqmap_report.py:506"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1900"
+          "loc": "plugin/scripts/test_reqmap_report.py:1915"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4255"
+          "loc": "plugin/scripts/test_reqmap_report.py:4270"
         },
         {
           "role": "implements",
@@ -23139,11 +23086,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:499"
+          "loc": "plugin/scripts/test_reqmap_report.py:506"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4255"
+          "loc": "plugin/scripts/test_reqmap_report.py:4270"
         },
         {
           "role": "implements",
@@ -23208,15 +23155,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:499"
+          "loc": "plugin/scripts/test_reqmap_report.py:506"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1882"
+          "loc": "plugin/scripts/test_reqmap_report.py:1897"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4255"
+          "loc": "plugin/scripts/test_reqmap_report.py:4270"
         },
         {
           "role": "implements",
@@ -23319,11 +23266,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1250"
+          "loc": "plugin/scripts/test_reqmap_report.py:1265"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1259"
+          "loc": "plugin/scripts/test_reqmap_report.py:1274"
         },
         {
           "role": "tested-by",
@@ -23531,7 +23478,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_gate.py:2648"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2654"
         },
         {
           "role": "implements",
@@ -25867,6 +25814,10 @@
     ],
     [
       "REQ-VIEWER-1101",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-VIEWER-1114",
       "ARCH-VIEWER-007"
     ],
     [
@@ -28261,10 +28212,10 @@
   ],
   "design": {
     "files": 132,
-    "clean_files": 125,
-    "score": 95,
+    "clean_files": 124,
+    "score": 94,
     "candidates": {
-      "encapsulation": 3,
+      "encapsulation": 4,
       "abstraction": 4,
       "inheritance": 0,
       "polymorphism": 0,
@@ -28278,6 +28229,14 @@
         "line": 1,
         "name": "plan.jsx",
         "detail": "559 lines (over 500)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "app/src/views/QuestionsView.jsx",
+        "line": 147,
+        "name": "QuestionPanel",
+        "detail": "`QuestionPanel` takes 7 parameters (over 6)"
       },
       {
         "pillar": "abstraction",
@@ -28344,23 +28303,40 @@
     }
   },
   "health": {
-    "score": 100,
-    "total": 336,
-    "scored": 314,
-    "healthy": 314,
+    "score": 99,
+    "total": 337,
+    "scored": 315,
+    "healthy": 313,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 314,
-    "implemented": 305,
-    "tested": 305,
-    "drafts": 0,
+    "implemented": 306,
+    "tested": 306,
+    "drafts": 1,
     "orphans": 0,
     "untested": 0,
-    "open_intent": 0,
+    "open_intent": 1,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "unhealthy": [],
+    "reviewed_score": 100,
+    "reviewed_total": 314,
+    "unhealthy": [
+      {
+        "id": "REQ-DESIGN-952",
+        "status": "confirmed",
+        "why": [
+          "open question"
+        ]
+      },
+      {
+        "id": "REQ-VIEWER-1114",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      }
+    ],
     "exempt_ids": [
       {
         "id": "ARCH-VIEWER-007",

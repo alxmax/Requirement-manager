@@ -283,13 +283,13 @@ class DocBundle(unittest.TestCase):  # tested-by: ARCH-DOCBUNDLE-026  # tested-b
             members = R.scan_members(d, None)
             self.assertEqual(R.untagged_doc_bundles(d, members), ["docs/arch.html"])
 
-    def test_small_docs_html_not_flagged(self):  # verifies: ARCH-DOCBUNDLE-026#CASE-2
+    def test_small_docs_html_not_flagged(self):  # verifies: ARCH-DOCBUNDLE-026#CASE-2  # verifies: REQ-DOCBUNDLE-840#CASE-5
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "small.html"), "<html>tiny</html>")
             members = R.scan_members(d, None)
             self.assertEqual(R.untagged_doc_bundles(d, members), [])
 
-    def test_tagged_large_docs_html_not_flagged(self):  # verifies: ARCH-DOCBUNDLE-026#CASE-3
+    def test_tagged_large_docs_html_not_flagged(self):  # verifies: ARCH-DOCBUNDLE-026#CASE-3  # verifies: REQ-DOCBUNDLE-840#CASE-5
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"), self._gtag("REQ-DOC-001") + self._big())
             members = R.scan_members(d, None)
@@ -2553,6 +2553,12 @@ class CasesDrift(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: 
         body = "# T\n\n## Description\n- shall do X.\n"
         self.assertEqual(R.binding_hash(body), R.binding_hash(body))
 
+    def test_no_normative_section_hashes_and_filling_it_drifts(self):  # verifies: REQ-DRIFT-841#CASE-5
+        empty = "# T\n\n## Context\n- a note.\n"
+        self.assertEqual(R.binding_hash(empty), R.binding_hash("# Other\n"))
+        filled = empty + "\n## Description\n- `gate` writes the lock.\n"
+        self.assertNotEqual(R.binding_hash(empty), R.binding_hash(filled))
+
     def test_save_lock_writes_sorted_indented_json(self):  # verifies: REQ-DRIFT-842#CASE-4
         with tempfile.TemporaryDirectory() as d:
             R.save_lock(d, {"Z-9": "aaaaaaaaaaaa", "A-1": "bbbbbbbbbbbb"})
@@ -2929,10 +2935,11 @@ class DanglingVerifies(unittest.TestCase):  # tested-by: REQ-DANGLINGVERIFY-1009
 class DanglingWikiLink(unittest.TestCase):  # tested-by: REQ-CHECK-1035
     """RM036: an `[[ID]]` in a Description whose target no requirement defines."""
 
-    def _rm036(self, parent_clauses, others=()):
+    def _rm036(self, parent_clauses, others=(), tail=""):
         with tempfile.TemporaryDirectory() as d:
             rdir = os.path.join(d, "requirements")
-            _write(os.path.join(rdir, "ARCH-P-001.md"), _spec("ARCH-P-001", parent_clauses))
+            _write(os.path.join(rdir, "ARCH-P-001.md"),
+                   _spec("ARCH-P-001", parent_clauses) + tail)
             for rid in others:
                 _write(os.path.join(rdir, rid + ".md"), _spec(rid, ["`gate` writes the lock."]))
             reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
@@ -2954,6 +2961,10 @@ class DanglingWikiLink(unittest.TestCase):  # tested-by: REQ-CHECK-1035
         # A code span is an example; `[[child]]` is not id-shaped. Both are prose.
         self.assertEqual([], self._rm036(["Write `see [[REQ-X-001]]` to point at a child.",
                                           "Each group becomes one [[child]] line."]))
+
+    def test_a_link_outside_the_description_is_not_checked(self):  # verifies: REQ-CHECK-1035#CASE-4
+        self.assertEqual([], self._rm036(["`gate` writes the lock."],
+                                         tail="\n## Context\n- Replaced [[REQ-P-GONE]].\n"))
 
 
 class DocClaims(unittest.TestCase):  # tested-by: ARCH-DOCCLAIMS-071  # tested-by: REQ-DOCCLAIMS-1012

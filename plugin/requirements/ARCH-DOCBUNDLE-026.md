@@ -141,6 +141,12 @@ CASE-4 — a .reqmapignore pattern suppresses the finding
   When   `untagged_doc_bundles` scans the repo
   Then   `docs/poster.html` is absent from the result
 
+CASE-5 — a small file or a tagged one is not flagged
+  Given  an untagged `docs/small.html` below `DOC_BUNDLE_MIN_BYTES`, and a large
+         `docs/arch.html` carrying a `generated-from:` tag
+  When   `untagged_doc_bundles` scans the repo
+  Then   neither file is in the result
+
 ## Context
 **Notes**
 - `distinct_from: REQ-ORPHANCODE-888` - `REQ-ORPHANCODE-888` warns on untagged program files; this on untagged HTML under `docs/`. Each names the other's scope.

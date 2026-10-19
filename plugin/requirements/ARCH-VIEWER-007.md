@@ -27,6 +27,7 @@ Every bullet below is binding.
 - The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer gives open questions a page of their own, grouped by whether the code, a person or `clarify` raised them, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
+- Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
@@ -1277,3 +1278,46 @@ CASE-7 — All leaves Optional out, and a tab names each kind
   Then   it is on All, which shows the `structure` question marked red and not the
          `wording` one; the bar offers Must fix, Asked by a person, Observed in code,
          Clause without case and Optional, and says a section is missing
+
+---
+id: REQ-VIEWER-1114
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Choosing a question shows it beside the list
+
+## Description
+> A row on the Questions page used to open its requirement, which left the page: the
+> reader lost the list and had to come back to it for every question. Answering a question
+> needs the question and the text it is about, side by side, while the list stays put.
+
+Every bullet below is binding.
+- Choosing a row on the Questions page opens a panel beside the list and never leaves the
+  page; the chosen row is marked.
+- The panel shows the requirement's id, title and status, then the row's questions as the
+  list shows them on the current tab, a decision question with its options on their own
+  lines.
+- Below the questions the panel shows the requirement's Description clauses and its Cases.
+- A button in the panel opens the requirement, and another closes the panel.
+
+## Cases
+CASE-1 — choosing a question shows it beside the list
+  Given  a requirement with a person's decision question and a `clarify` question
+  When   the Questions page is rendered with that requirement chosen
+  Then   a panel beside the list holds the decision question with each option on its
+         own line, the `clarify` question with its suggestion, the clauses and the cases,
+         and the chosen row is marked
+
+CASE-2 — nothing chosen, no panel
+  Given  the same registry
+  When   the Questions page first opens
+  Then   no panel is shown and no row is marked
+
+CASE-3 — the panel opens the requirement only when asked
+  Given  the panel for a chosen requirement
+  When   its open button is used
+  Then   the requirement opens; choosing a row never opens it

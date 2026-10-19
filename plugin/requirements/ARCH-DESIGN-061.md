@@ -186,6 +186,19 @@ Every bullet below is binding.
 - A Python file that does not parse yields no candidate, standards included, and no error.
 - `design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries.
 
+## Verify intent
+<!-- audience: developer -->
+- **Should a Python file that does not parse count as clean in the design score?**
+  a) No: it leaves the score, and the report names it. *(recommended)*
+  b) No: it counts as one file with a candidate.
+  c) Yes: it stays clean, as today.
+  d) Yes, but the line and file-length standards still run on it.
+  *Default:* stays c). A file the review cannot read raises the score.
+  *Context:* The score is the share of files with no candidate, and an unreadable file has none.
+  *Recommendation source:* the draft scan's rule, where a partial scan never reads as clean.
+  *For the developer:* `design_report.py:26` returns `[]` before `writing_standards`;
+  [[REQ-EXTRACT-1099]]; `python scripts/reqmap.py ask --design`.
+
 ## Cases
 CASE-1 — grouped report, tests skipped, exit 0
   Given  a module and a test file both writing a global

@@ -191,8 +191,9 @@ satisfies: [ARCH-MAP-007]
 > with `gate` alone is never surprised by it later in CI.
 
 Every bullet below is binding.
-- `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
-  repo directory name, else null.
+- `_map.json` carries a top-level `repo` field: the `REQMAP_REPO` environment variable when
+  set (an empty value means null), else the last two path parts of the git
+  `remote.origin.url` as `owner/repo`, else the repo directory name, else null.
 - `repo` identifies the project the map describes, for display in the viewer header.
 - `repo` is derived from the git remote, so it differs across forks and clones. It is
   therefore excluded from the `map --check` freshness diff.
@@ -220,10 +221,13 @@ CASE-1 — a changed repo field never trips map --check
   When   `map --check` runs
   Then   it reports no staleness
 
-CASE-2 — map succeeds when the tree has no git remote
-  Given  a working tree with no `.git` directory
-  When   `map` runs
-  Then   it completes without raising, and `_map.json`'s `repo` field is null
+CASE-2 — repo is resolved in a fixed order, and no remote never fails map
+  Given  a remote `git@github.com:acme/widgets.git`, then `REQMAP_REPO` set to
+         `owner/public`, then to an empty value, then a tree with no remote; and a graph
+         carrying no `repo`
+  When   the repo name is resolved each time, and the graph is written as `_map.json`
+  Then   it is `acme/widgets`, then `owner/public`, then null, then the directory name,
+         never raising; the written `repo` field is null
 
 CASE-3 — a changed engine_version never trips map --check
   Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`
@@ -253,7 +257,6 @@ CASE-7 — a probe that cannot run says so
   Given  a corpus whose map cannot be built
   When   `gate` runs
   Then   it warns that the freshness probe failed, names the error, and exits 0
-
 ---
 id: REQ-MAP-872
 status: confirmed
@@ -344,6 +347,11 @@ CASE-3 — intent dedup ignores only whitespace differences
          otherwise identical to its single Contract clause
   When   `_distinct_intent` runs
   Then   it still returns "", because the comparison collapses whitespace before comparing
+
+CASE-4 — a requirement with no quote has an empty intent
+  Given  a requirement whose body holds no blockquote
+  When   `_distinct_intent` runs
+  Then   it returns "", and nothing is borrowed from the Contract to fill it
 
 --------------------
 

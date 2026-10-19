@@ -37,6 +37,16 @@
 - The skill's `references/assistant-steps.md` quotes the new wording
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.5`; 18,927 physical lines in 78 files (the README says so). The core drops to 6,740 logical lines
 
+**The real questions a sample of `clarify` found are answered in the requirements, and the one that needs a decision is asked.**
+
+- Seven requirements gain the case their own clause already promised, each with a test: `show` with no tagged member (REQ-SHOW-918), a draft in a language with no parser (REQ-EXTRACT-851), a link outside the Description (REQ-CHECK-1035), a small or tagged docs file (REQ-DOCBUNDLE-840), a body with no quote (REQ-MAP-873), a repository with nothing to compare (REQ-VERSIONALIGN-1016) and a body with no normative section (REQ-DRIFT-841). REQ-MAP-871 and REQ-CANDIDATES-826 replace "best-effort" with the order and the patterns the code follows
+- REQ-DESIGN-952 asks, in Verify intent, whether a Python file that does not parse counts as clean in the design score; today it does
+- `clarify` asks 149 questions here instead of 160
+
+**Choosing a question on the viewer's Questions page shows it beside the list instead of leaving the page.**
+
+- A row opened its requirement, so the reader lost the list for every question. It now opens a panel with the requirement's id, title and status, its questions as the current tab shows them (a decision question's options on their own lines), and its Description clauses and Cases. A button opens the requirement and another closes the panel; the Problems inbox still opens a requirement from its row. REQ-VIEWER-1114, a draft until it is read
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

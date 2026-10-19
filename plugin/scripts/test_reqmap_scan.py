@@ -504,12 +504,13 @@ class RiderGuards(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-b
         self.assertEqual(R.ENFORCED, {"implemented", "confirmed"})
 
 
-class JsFacts(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009
-    def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested
-        f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){}\nconst bar = 1;\n")
+class JsFacts(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-by: REQ-CANDIDATES-826
+    def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested  # verifies: REQ-CANDIDATES-826#CASE-6
+        f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){\n"
+                        "  function inner(){}\n}\nconst bar = 1;\n")
         self.assertEqual(f["docstrings"].get("module"), "Module doc.")
-        self.assertIn("foo", f["signatures"])
-        self.assertIn("bar", f["signatures"])
+        self.assertEqual(f["signatures"], ["foo", "inner", "bar"])
+        self.assertEqual(f["imports"], [])
 
     def test_leading_comment_scan_is_linear_on_star_run(self):  # bug: js-doc-comment-redos
         import time

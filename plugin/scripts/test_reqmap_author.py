@@ -1684,7 +1684,7 @@ class DraftQuestions(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # teste
 
 
 class DraftObservedSurface(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-851
-    def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: ARCH-EXTRACT-008#CASE-6
+    def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: REQ-EXTRACT-851#CASE-6  # verifies: ARCH-EXTRACT-008#CASE-6
         with tempfile.TemporaryDirectory() as d:
             code = os.path.join(d, "code")
             _write(os.path.join(code, "svc.py"),
@@ -3994,6 +3994,13 @@ class VersionAlignment(unittest.TestCase):  # tested-by: REQ-VERSIONALIGN-1016 @
             with mock.patch.object(R.versions, "newest_tag", return_value=((1, 5, 0), "v1.5.0")):
                 lines = R.version_alignment_lines(reqs, d)
             self.assertEqual(1, sum("git tag v1.5.0 is above" in ln for ln in lines))
+
+    def test_nothing_to_compare_reports_nothing(self):  # verifies: REQ-VERSIONALIGN-1016#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            reqs = os.path.join(d, "requirements")
+            os.makedirs(reqs)
+            with mock.patch.object(R.versions, "newest_tag", return_value=None):
+                self.assertEqual([], R.version_alignment_lines(reqs, d))
 
 
 class NextVersion(unittest.TestCase):  # tested-by: REQ-NEXTVERSION-1017 @unit

@@ -563,6 +563,11 @@ CASE-3 — examples and prose links are not links
   When   `gate` runs
   Then   no RM036 warning is reported
 
+CASE-4 — a link outside the Description is not checked
+  Given  a requirement whose Context names `[[REQ-P-GONE]]`, which no requirement defines
+  When   `gate` runs
+  Then   no RM036 warning is reported, because Context records history, not structure
+
 ## Context
 **Notes**
 - Measured before shipping, 2026-09-22: 0 requirements fire on this corpus (292), on two

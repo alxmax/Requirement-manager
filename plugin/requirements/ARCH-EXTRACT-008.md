@@ -251,6 +251,11 @@ CASE-5 — the extracted surface never leaks into the Contract
   When   the proposal's Contract section is inspected
   Then   it is still the TODO placeholder, unchanged by what WHERE captured
 
+CASE-6 — a language with no parser gets no surface
+  Given  an untagged `.go` file, a language the engine has no parser for
+  When   `draft` runs
+  Then   its proposal carries no observed surface at all, rather than an empty one
+
 ---
 id: REQ-EXTRACT-981
 status: confirmed

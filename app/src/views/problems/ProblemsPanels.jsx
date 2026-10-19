@@ -215,10 +215,12 @@ export function HealthPanel({
   );
 }
 
-export function ProblemRow({ p, openSpec, t }) {
+export function ProblemRow({ p, openSpec, t, onPick = null, picked = false }) {
   return (
-    <div className={"prob-row" + (p.sev === "QUESTION" ? " question-row" : "")}
-      onClick={() => !p.noSpec && p.id !== "—" && openSpec(p.id)}>
+    <div className={"prob-row" + (p.sev === "QUESTION" ? " question-row" : "")
+      + (picked ? " picked" : "")}
+      onClick={() => (onPick ? onPick(p.id)
+        : !p.noSpec && p.id !== "—" && openSpec(p.id))}>
       <span className={"prob-sev sev-" + p.sev}>
         {p.sev === "QUESTION" ? t("ASKED") : p.sev}
       </span>
