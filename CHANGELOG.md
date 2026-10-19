@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v8.24.6` — 2026-10-19
+
+**Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**
+
+- Confirmed after reading each contract against its code and tests: ARCH-ADOPT-075, REQ-WATCH-1092, REQ-PROPOSE-1093, REQ-EXTREPO-1094, REQ-SURFACE-1095, REQ-DRIFT-1103, REQ-DRIFT-1104, REQ-EXTRACT-1099, REQ-LINTCHECKS-1089, REQ-PLANVERSIONBAR-1091, REQ-VIEWER-1090 and REQ-VIEWER-1101. `gate --risk` now lists no unreviewed requirement
+- ARCH-ADOPT-075 and its four children declared no `level:` and no `satisfies:`. They now sit under SYS-SHIP-108, as one architecture requirement and four code ones
+- REQ-EXTREPO-1094 and REQ-SURFACE-1095 had no `implements:` member, which RM006 makes an error once they are confirmed. `--root`'s default in `cliflags.py`, the registry in `commands.py` and `pyproject.toml` now carry them. REQ-EXTREPO-1094 gains CASE-2 (`gate --strict` on the copy exits 1) and CASE-3 (`gate --root` reaches it from another directory); REQ-SURFACE-1095 moves the licence into CASE-3; ARCH-ADOPT-075 gains CASE-2, CASE-3 and an `@integration` test link
+- Confirming brought two requirements under `ac-count-high` for the first time. REQ-WATCH-1092 merges CASE-4 and CASE-7, two cases of one clause (a ref git cannot read). REQ-VIEWER-1101 merges a person's and an observed question (CASE-1 and 2) and the placeholder and a deprecated requirement (CASE-3 and 9), and is renumbered to seven
+- Eight readability warnings on confirmed text are reworded, with no change in behaviour: ARCH-CLARIFY-062's REQ-CLARIFY-1102 bullet and CASE-4, REQ-CONFIG-949's numeric and band clause (now three bullets), REQ-MCPTOOLS-1028 CASE-7, and REQ-PROMOTE-974's demotion and unchanged-file clauses (the latter now two bullets, without the redundant `must`). ARCH-VIEWER-007 is exempt from `file-spread`: its twelve directories are all the viewer, under `app/`
+- A `ROADMAP.md` item that quoted `| req: ID` in its own text was read as a link to a requirement named `ID`, and reported as an id that does not exist and an item with no bar. It is reworded. The item asking to confirm the version-bar count is done and leaves
+- `docs/case-studies.md`, `docs/stability.md`, `plugin/README.md` and `plugin/apm.yml` join the root `.reqmapignore`, beside the other prose pages and manifests
+- The plan drops the item and the bar that waited for green runs in one consumer repository, and two engine comments (`gate.py`, `scan.py`) stop naming it
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19`, for tag comments only; 18,136 physical lines in 76 files (the README says so). The core stays at 6,688 logical lines
+
 ## plugin `v8.24.5` — 2026-10-18
 
 **`clarify` asks for a split only where `lint` warns, calls a clause-against-case count a guess, retires `number-without-unit`, and says what `sync` tracks (ADR-0075).**

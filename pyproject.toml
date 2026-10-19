@@ -1,10 +1,11 @@
+# implements: REQ-SURFACE-1095
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "reqmap"
-version = "8.24.5"
+version = "8.24.6"
 description = "Drift gate between a written requirement and the code that implements it."
 requires-python = ">=3.9"
 readme = "README.md"

@@ -61,6 +61,7 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
     def test_an_untagged_file_is_a_draft_suggestion(self):
         # verifies: REQ-WATCH-1092#CASE-1
         # verifies: REQ-WATCH-1092#CASE-6
+        # verifies: ARCH-ADOPT-075#CASE-1
         path = self._repo()
         os.makedirs(os.path.join(path, "src"))
         with open(os.path.join(path, "src", "login.py"), "w",
@@ -131,7 +132,7 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
         self.assertIn("init", done.stderr)
 
     def test_a_dash_ref_is_not_a_git_option(self):
-        # verifies: REQ-WATCH-1092#CASE-7
+        # verifies: REQ-WATCH-1092#CASE-4
         path = self._repo()
         before = set(os.listdir(path))
         done = _run(path, "init", "--watch", "--output=pwned x")
@@ -157,7 +158,7 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
         self.assertEqual(["src/ok.py"], [item["path"] for item in report["files"]])
 
     def test_an_ignored_path_is_not_suggested(self):
-        # verifies: REQ-WATCH-1092#CASE-8
+        # verifies: REQ-WATCH-1092#CASE-7
         path = self._repo()
         vendor = os.path.join(path, "vendor")
         os.makedirs(vendor)
@@ -176,8 +177,10 @@ class Watch(unittest.TestCase):  # tested-by: REQ-WATCH-1092 @unit
 
 
 class Propose(unittest.TestCase):  # tested-by: REQ-PROPOSE-1093 @unit
+    # tested-by: ARCH-ADOPT-075 @integration
     def test_propose_prints_a_draft_and_writes_nothing(self):
         # verifies: REQ-PROPOSE-1093#CASE-1
+        # verifies: ARCH-ADOPT-075#CASE-1
         path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, path, True)
         done = _run(path, "init", "--propose", "Login rejects a blank email.",
@@ -209,14 +212,34 @@ class Propose(unittest.TestCase):  # tested-by: REQ-PROPOSE-1093 @unit
 
 
 class OutsideRepo(unittest.TestCase):  # tested-by: REQ-EXTREPO-1094 @unit
-    def test_a_copied_hello_drift_still_shows_drift(self):
-        # verifies: REQ-EXTREPO-1094#CASE-1
+    def _copy(self):
         src = os.path.join(_root(), "examples", "hello-drift")
         path = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, path, True)
         dest = os.path.join(path, "hello-drift")
         shutil.copytree(src, dest)
+        return path, dest
+
+    def test_a_copied_hello_drift_still_shows_drift(self):
+        # verifies: REQ-EXTREPO-1094#CASE-1
+        # verifies: ARCH-ADOPT-075#CASE-2
+        _, dest = self._copy()
         done = _run(dest, "gate")
+        self.assertEqual(0, done.returncode, done.stderr)
+        self.assertIn("RM018", done.stdout)
+        self.assertIn("HELLO-GREET-001", done.stdout)
+
+    def test_strict_fails_the_copy_on_its_drift(self):
+        # verifies: REQ-EXTREPO-1094#CASE-2
+        _, dest = self._copy()
+        done = _run(dest, "gate", "--strict")
+        self.assertEqual(1, done.returncode, done.stdout)
+        self.assertIn("HELLO-GREET-001", done.stdout)
+
+    def test_root_reaches_the_copy_from_another_directory(self):
+        # verifies: REQ-EXTREPO-1094#CASE-3
+        parent, dest = self._copy()
+        done = _run(parent, "gate", "--root", dest)
         self.assertEqual(0, done.returncode, done.stderr)
         self.assertIn("RM018", done.stdout)
         self.assertIn("HELLO-GREET-001", done.stdout)
@@ -225,17 +248,25 @@ class OutsideRepo(unittest.TestCase):  # tested-by: REQ-EXTREPO-1094 @unit
 class Surface(unittest.TestCase):  # tested-by: REQ-SURFACE-1095 @unit
     def test_the_verbs_are_the_six(self):
         # verifies: REQ-SURFACE-1095#CASE-1
+        # verifies: ARCH-ADOPT-075#CASE-3
         self.assertEqual(
             {"init", "gate", "sync", "clarify", "ask", "mcp"},
             set(R.COMMANDS))
 
-    def test_the_package_metadata_names_reqmap(self):
-        # verifies: REQ-SURFACE-1095#CASE-2
+    def _pyproject(self):
         with open(os.path.join(_root(), "pyproject.toml"),
                   encoding="utf-8") as handle:
-            text = handle.read()
+            return handle.read()
+
+    def test_the_package_metadata_names_reqmap(self):
+        # verifies: REQ-SURFACE-1095#CASE-2
+        # verifies: ARCH-ADOPT-075#CASE-3
+        text = self._pyproject()
         self.assertIn('name = "reqmap"', text)
         self.assertIn('requires-python = ">=3.9"', text)
-        self.assertIn("Apache-2.0", text)
         self.assertIn("reqmap:_run_cli", text)
         self.assertTrue(callable(R._run_cli))
+
+    def test_the_package_licence_is_apache(self):
+        # verifies: REQ-SURFACE-1095#CASE-3
+        self.assertIn('license = {text = "Apache-2.0"}', self._pyproject())

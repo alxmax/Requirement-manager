@@ -15,7 +15,7 @@ from .similar import _threshold_arg
 
 
 def _add_workspace_flags(ap):
-    # implements: ARCH-CMDREGISTRY-033
+    # implements: ARCH-CMDREGISTRY-033  # implements: REQ-EXTREPO-1094
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
     ap.add_argument("--code", default=None)

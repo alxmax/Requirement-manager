@@ -7,6 +7,7 @@ owner: Alex
 milestone: v1.04
 depends_on: [ARCH-MAP-007]
 satisfies: [SYS-VISUAL-106]
+lint_exempt: [file-spread]
 ---
 
 # Self-contained HTML map viewer
@@ -1008,7 +1009,7 @@ CASE-5 — errors and warnings are listed on the Health tab
 
 ---
 id: REQ-VIEWER-1090
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -1195,7 +1196,7 @@ CASE-4 — an ISO week that spans New Year is one week
 
 ---
 id: REQ-VIEWER-1101
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -1215,7 +1216,7 @@ Every bullet below is binding.
 - The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page
   of every open question.
 - The page has one tab per kind of question, in the Problems tab bar's form, each with
-  its count: All; Must fix, present only while a `structure` question exists; Asked by
+  its count: All; `Must fix`, present only while a `structure` question exists; Asked by
   a person (a Verify-intent bullet not starting `Observed`); Observed in code (one
   starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause
   without case and Over-scoped; and Optional, every `wording` question.
@@ -1233,51 +1234,43 @@ Every bullet below is binding.
 - The Problems inbox has no Questions tab and lists no question row.
 
 ## Cases
-CASE-1 — a person's question is on its own tab
-  Given  a requirement whose Verify intent holds one question a person wrote
-  When   the Asked by a person tab is rendered
-  Then   it lists that requirement with the question's text, and no observed question
+CASE-1 — a person's question and an observed one land on their own tabs
+  Given  a requirement whose Verify intent holds one question a person wrote, and another
+         whose Verify intent holds a bullet starting `Observed at`
+  When   the Questions page is computed and its tabs are rendered
+  Then   Asked by a person lists only the first, with the question's text; Observed in
+         code lists only the second
 
-CASE-2 — an Observed bullet is listed as code
-  Given  a requirement whose Verify intent holds a bullet starting `Observed at`
+CASE-2 — a placeholder and a deprecated requirement ask nothing
+  Given  a requirement whose Verify intent holds only the authored placeholder, and a
+         deprecated requirement holding a question and a `clarify` question
   When   the Questions page is computed
-  Then   it is listed on the Observed in code tab and not on Asked by a person
+  Then   neither appears on any tab, and the deprecated one adds nothing to the rail's count
 
-CASE-3 — the placeholder is still not a question
-  Given  a requirement whose Verify intent holds only the authored placeholder
-  When   the Questions page is computed
-  Then   that requirement appears on no tab
-
-CASE-9 — a deprecated requirement asks nothing
-  Given  a deprecated requirement whose Verify intent holds a question and whose map node
-         carries a `clarify` question
-  When   the Questions page is computed
-  Then   that requirement appears on no tab and adds nothing to the rail's count
-
-CASE-4 — clarify questions are listed by basis, Optional on its own tab
+CASE-3 — clarify questions are listed by basis, Optional on its own tab
   Given  a requirement whose map node carries a `count`, a `wording` and a `structure`
          question
   When   the page's questions are computed and the Optional tab is rendered
   Then   they are kept in the order structure, count, wording, and the Optional tab
          shows the `wording` one marked grey and not the `structure` one
 
-CASE-5 — the rail counts the All tab, which leaves Optional out
+CASE-4 — the rail counts the All tab, which leaves Optional out
   Given  one person's question, one observed question, and one `structure`, one
          `count` and one `wording` `clarify` question
   When   the rail is rendered
   Then   the Questions entry shows 4
 
-CASE-6 — Problems no longer holds questions
+CASE-5 — Problems no longer holds questions
   Given  a registry holding questions of every origin
   When   the Problems inbox is rendered
   Then   it offers no Questions tab and holds no question row
 
-CASE-7 — the page sits below Commands in the rail
+CASE-6 — the page sits below Commands in the rail
   Given  the rail rendered over any registry
   When   its Workspace entries are read in order
   Then   Questions comes after Commands
 
-CASE-8 — All leaves Optional out, and a tab names each kind
+CASE-7 — All leaves Optional out, and a tab names each kind
   Given  questions of every origin, with a `structure`, a `count` and a `wording`
          `clarify` question
   When   the page first opens

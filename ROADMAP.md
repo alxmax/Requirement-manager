@@ -13,7 +13,6 @@ Cadence: one release a week, not one per merge.
 
 ### Adoption
 
-- [ ] Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63) | req: ARCH-SELFGATE-039
 - [ ] An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to | req: SYS-SSOT-001
 
 ### Version 8.25 (19 to 23 October)
@@ -29,9 +28,8 @@ Cadence: one release a week, not one per merge.
 
 ### Planning and releasing
 
-- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose `| req: ID` matches bars on the cut milestone | req: ARCH-RELEASE-072
+- [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose requirement id matches a bar on the cut milestone | req: ARCH-RELEASE-072
 - [ ] `gate --strict` fails a stale plan (`REQ-PLANSTALE-1013`); bare `gate` stays warn-only | req: ARCH-RELEASE-072
-- [ ] Read and confirm the version-bar count: a plan bar with no `req:` whose title opens with its own milestone | req: REQ-PLANVERSIONBAR-1091
 
 ## Later
 

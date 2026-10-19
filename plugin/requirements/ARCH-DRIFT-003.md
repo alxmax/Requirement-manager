@@ -249,7 +249,7 @@ CASE-5 — a forward schema fails open
 
 ---
 id: REQ-DRIFT-1103
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -302,7 +302,7 @@ CASE-4 — a valid baseline still catches member drift
 
 ---
 id: REQ-DRIFT-1104
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -111,6 +111,12 @@ docs/internals.md
 docs/planning.md
 docs/planning-contract.md
 docs/requirements.md
+docs/case-studies.md
+docs/stability.md
+plugin/README.md
+# The APM manifest: package metadata whose version `check_versions.py` keeps in step,
+# the same class as plugin.json. Not a capability implementation.
+plugin/apm.yml
 # ROADMAP.md is INPUT the engine reads (`_roadmap_signals`, ARCH-ROADMAP-038), not a
 # capability and not an artifact derived from one. A `generated-from:` tag would be
 # backwards: the drift gate would call the plan stale whenever the requirement that

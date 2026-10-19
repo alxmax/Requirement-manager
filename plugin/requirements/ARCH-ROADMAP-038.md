@@ -630,7 +630,7 @@ CASE-4 — a bar's `roadmap:` schedules its item
 
 ---
 id: REQ-PLANVERSIONBAR-1091
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

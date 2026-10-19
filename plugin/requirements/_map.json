@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-18",
+  "engine_version": "2026-10-19",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -321,29 +321,40 @@
     {
       "id": "ARCH-ADOPT-075",
       "layer": "feature",
-      "level": null,
-      "status": "draft",
+      "level": "architecture",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Adoption before the whole tree is tagged",
       "intent": "A team that has to tag every file before the tool says anything useful does not start. The first run has to be useful on the files a change already touched, and a draft is not a contract until a person has read it.",
       "contract": [
         "`init --watch REF` reports code files changed since REF that no requirement claims, and the commit subjects since REF, and it writes nothing. [[REQ-WATCH-1092]]",
-        "`init --propose` prints one requirement draft. It is a command-line flag, not an MCP tool. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]",
+        "`init --propose`, a command-line flag and not an MCP tool, prints one requirement draft that only a person sets to `status: confirmed`. [[REQ-PROPOSE-1093]]",
         "`gate` run on a copy of a repository outside this one still reports that copy's own drift. [[REQ-EXTREPO-1094]]",
         "The CLI stays six verbs, and a checkout can install that same engine with `pip install .`. [[REQ-SURFACE-1095]]"
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a draft is not a confirmed contract\n  Given  `init --watch` or `init --propose`\n  When   either command finishes\n  Then   it has written no requirement file and it has not set `status: confirmed`\n\n--------------------",
+      "accept": "CASE-1 — a draft is not a confirmed contract\n  Given  `init --watch` or `init --propose`\n  When   either command finishes\n  Then   it has written no requirement file and it has not set `status: confirmed`\n\nCASE-2 — a tree outside this repository is gated on its own drift\n  Given  a copy of `examples/hello-drift` outside this checkout\n  When   `gate` runs there\n  Then   it reports that copy's drift and exits 0\n\nCASE-3 — the surface is six verbs and one pip package\n  Given  the command registry and `pyproject.toml`\n  When   both are read\n  Then   the verbs are the six, and the package's console script is this engine's CLI\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
       "depends_on": [],
       "used_by": [],
-      "satisfies": [],
-      "satisfied_by": [],
+      "satisfies": [
+        "SYS-SHIP-108"
+      ],
+      "satisfied_by": [
+        "REQ-WATCH-1092",
+        "REQ-PROPOSE-1093",
+        "REQ-EXTREPO-1094",
+        "REQ-SURFACE-1095"
+      ],
       "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_adopt.py:180"
+        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/watch.py:264"
@@ -352,23 +363,16 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        },
-        {
-          "signal": "untested",
-          "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
-        }
-      ],
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
       "clarify": []
     },
     {
       "id": "REQ-WATCH-1092",
       "layer": "feature",
-      "level": null,
-      "status": "draft",
+      "level": "code",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Watch the files a change already touched",
       "intent": "Tagging the whole tree is the adoption wall. The first question is which of the files in this change no requirement claims yet, and the answer has to be safe to run in CI.",
@@ -385,13 +389,15 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an untagged changed file is a draft suggestion\n  Given  a commit that adds a code file with no `implements:` tag, and a `.txt` file in the same commit\n  When   `init --watch` is run against the parent commit\n  Then   the code file is a suggestion with `status` `draft` and `needs_confirmation` true, the `.txt` file is absent, and no requirement file was written\n\nCASE-2 — a file that already has an implements tag is skipped\n  Given  a code file changed since REF whose text contains an `implements:` tag\n  When   `init --watch REF` runs\n  Then   that path is not among the suggestions\n\nCASE-3 — a subject that starts with Merge is omitted\n  Given  one commit subject that starts with `Merge ` and one that does not, both since REF\n  When   `init --watch REF` runs\n  Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`\n\nCASE-4 — a ref git cannot read exits 0\n  Given  a git repository and a ref that does not exist\n  When   `init --watch` is given that ref\n  Then   the process exits 0 and the report's `error` says git could not read that ref\n\nCASE-5 — gate does not own --watch\n  Given  `--watch` passed to `gate`\n  When   the command runs\n  Then   it exits 2 and the message names `init`\n\nCASE-6 — the caps say when a suggestion was left out\n  Given  fewer changed code files than 40 and fewer commit subjects than 40\n  When   `init --watch` runs\n  Then   `truncated` is false\n\nCASE-7 — a ref that starts with a dash is not a git option\n  Given  `--watch` whose value starts with `-` and names a file\n  When   `init --watch` runs\n  Then   the process exits 0, `ok` is false, the error says git could not read that ref, and that file was not created\n\nCASE-8 — an ignored path is not a suggestion\n  Given  `.reqmapignore` matches `vendor/**` and that tree changed\n  When   `init --watch` runs\n  Then   no path under `vendor/` is a suggestion\n\n--------------------",
+      "accept": "CASE-1 — an untagged changed file is a draft suggestion\n  Given  a commit that adds a code file with no `implements:` tag, and a `.txt` file in the same commit\n  When   `init --watch` is run against the parent commit\n  Then   the code file is a suggestion with `status` `draft` and `needs_confirmation` true, the `.txt` file is absent, and no requirement file was written\n\nCASE-2 — a file that already has an implements tag is skipped\n  Given  a code file changed since REF whose text contains an `implements:` tag\n  When   `init --watch REF` runs\n  Then   that path is not among the suggestions\n\nCASE-3 — a subject that starts with Merge is omitted\n  Given  one commit subject that starts with `Merge ` and one that does not, both since REF\n  When   `init --watch REF` runs\n  Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`\n\nCASE-4 — a ref git cannot read exits 0, and a ref that starts with a dash is one\n  Given  a git repository, a ref that does not exist, and a `--watch` value that starts\n         with `-` and names a file\n  When   `init --watch` is given each\n  Then   each run exits 0, `ok` is false, the report's `error` says git could not read that\n         ref, and the named file was not created\n\nCASE-5 — gate does not own --watch\n  Given  `--watch` passed to `gate`\n  When   the command runs\n  Then   it exits 2 and the message names `init`\n\nCASE-6 — the caps say when a suggestion was left out\n  Given  fewer changed code files than 40 and fewer commit subjects than 40\n  When   `init --watch` runs\n  Then   `truncated` is false\n\nCASE-7 — an ignored path is not a suggestion\n  Given  `.reqmapignore` matches `vendor/**` and that tree changed\n  When   `init --watch` runs\n  Then   no path under `vendor/` is a suggestion\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
       "depends_on": [],
       "used_by": [],
-      "satisfies": [],
+      "satisfies": [
+        "ARCH-ADOPT-075"
+      ],
       "satisfied_by": [],
       "members": [
         {
@@ -462,21 +468,26 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
+      "risks": [],
+      "clauses": 7,
+      "covered": 7,
+      "clarify": [
         {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
-      ],
-      "clauses": 8,
-      "covered": 8,
-      "clarify": []
+      ]
     },
     {
       "id": "REQ-PROPOSE-1093",
       "layer": "feature",
-      "level": null,
-      "status": "draft",
+      "level": "code",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The agent proposes a draft and a person confirms it",
       "intent": "The gate checks a contract. It does not write one. An assistant that just implemented something new can propose the draft, and the status stays `draft` until a person reads it.",
@@ -495,7 +506,9 @@
       "desc": "",
       "depends_on": [],
       "used_by": [],
-      "satisfies": [],
+      "satisfies": [
+        "ARCH-ADOPT-075"
+      ],
       "satisfied_by": [],
       "members": [
         {
@@ -504,7 +517,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:178"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:179"
         },
         {
           "role": "implements",
@@ -530,12 +543,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -553,59 +561,52 @@
     {
       "id": "REQ-EXTREPO-1094",
       "layer": "feature",
-      "level": null,
-      "status": "draft",
+      "level": "code",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The gate runs on a repository that is not this one",
       "intent": "Dogfooding this repository does not show that the engine works on someone else's tree. A copy of the hello-drift example, placed outside this checkout, is the smallest such tree.",
       "contract": [
-        "Running this engine's `gate` with its working directory set to a copy of `examples/hello-drift` reports `RM018` for `HELLO-GREET-001` and exits 0."
+        "Running this engine's `gate` with its working directory set to a copy of `examples/hello-drift` reports `RM018` for `HELLO-GREET-001` and exits 0.",
+        "`gate --strict` on that copy exits 1.",
+        "`gate --root` naming that copy, from another working directory, gives the same report."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a copied hello-drift still shows drift\n  Given  a temp directory that is a copy of `examples/hello-drift` and not this repository\n  When   `gate` runs with that directory as its working directory\n  Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0\n\n--------------------",
+      "accept": "CASE-1 — a copied hello-drift still shows drift\n  Given  a temp directory that is a copy of `examples/hello-drift` and not this repository\n  When   `gate` runs with that directory as its working directory\n  Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0\n\nCASE-2 — the same drift fails the copy under --strict\n  Given  the same copy\n  When   `gate --strict` runs with that directory as its working directory\n  Then   the process exits 1 and the output names `HELLO-GREET-001`\n\nCASE-3 — --root reaches the copy from another directory\n  Given  the same copy, and a working directory that is not it\n  When   `gate --root` names the copy\n  Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
       "depends_on": [],
       "used_by": [],
-      "satisfies": [],
+      "satisfies": [
+        "ARCH-ADOPT-075"
+      ],
       "satisfied_by": [],
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:211"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:214"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:18"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 1,
-      "covered": 1,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ]
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "REQ-SURFACE-1095",
       "layer": "feature",
-      "level": null,
-      "status": "draft",
+      "level": "code",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The six verbs stay, and pip installs the same engine",
       "intent": "Adding a verb breaks every document and every caller that lists them. A new flag on a verb that already exists does not. The copy-two-files install stays; pip is a second way to put that same engine on `PATH`.",
@@ -617,41 +618,37 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, declares Apache-2.0, and points the console script at `reqmap:_run_cli`",
+      "accept": "CASE-1 — the verb set is the six\n  Given  the command registry\n  When   its keys are read\n  Then   they are exactly `init`, `gate`, `sync`, `clarify`, `ask` and `mcp`\n\nCASE-2 — the package metadata names reqmap\n  Given  `pyproject.toml` at the repository root\n  When   it is read\n  Then   it names `reqmap`, requires Python `>=3.9`, and points the console script at `reqmap:_run_cli`\n\nCASE-3 — the package licence is Apache-2.0\n  Given  `pyproject.toml` at the repository root\n  When   its licence is read\n  Then   it is Apache-2.0",
       "input": "",
       "output": "",
       "desc": "",
       "depends_on": [],
       "used_by": [],
-      "satisfies": [],
+      "satisfies": [
+        "ARCH-ADOPT-075"
+      ],
       "satisfied_by": [],
       "members": [
         {
+          "role": "implements",
+          "loc": "pyproject.toml:1"
+        },
+        {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_adopt.py:225"
+          "loc": "plugin/scripts/test_reqmap_adopt.py:248"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/commands.py:16"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 2,
-      "covered": 2,
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
       "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "1 clause(s) have no case: there are 3 clauses and 2 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
-        },
         {
           "rule": "no-failure-case",
           "severity": "advisory",
@@ -2799,7 +2796,7 @@
         "`clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]",
         "`sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]",
         "The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]",
-        "`clarify` asks nothing of a whole word it only contains, a clause that hands its cases to another requirement, or a clause quantified over \"all\", \"every\" or \"any\", and asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]"
+        "`clarify` raises no question from a word found only inside another word, from a clause that hands its cases to another requirement, or from a clause quantified over \"all\", \"every\", \"any\"; it asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]"
       ],
       "verify": [],
       "notes": [],
@@ -3134,7 +3131,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a hedge is a whole word outside code\n  Given  clauses reading \"how many criteria\", \"the smaller set\" and \"words such as\n         `appropriate`\", and one reading \"keeps many entries\"\n  When   the detectors run\n  Then   only the last raises a vague-term question\n\nCASE-2 — a clause that hands its cases on is not counted\n  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and\n         one case, and another with two clauses of its own and one case\n  When   the detectors run\n  Then   the first raises neither a clause-without-case nor an over-scoped question, and\n         the second still raises clause-without-case\n\nCASE-3 — all, every and any ask nothing\n  Given  a clause reading \"`gate` reads every file, all tags and any requirement.\"\n  When   the detectors run\n  Then   no question is raised\n\nCASE-4 — a split is asked only where lint warns\n  Given  a requirement with eight clauses and four cases, and one with eleven clauses and\n         eight cases\n  When   the detectors run and `lint` runs\n  Then   only the second raises an over-scoped question, and `lint` warns `over-scoped` on\n         it too",
+      "accept": "CASE-1 — a hedge is a whole word outside code\n  Given  clauses reading \"how many criteria\", \"the smaller set\" and \"words such as\n         `appropriate`\", and one reading \"keeps many entries\"\n  When   the detectors run\n  Then   only the last raises a vague-term question\n\nCASE-2 — a clause that hands its cases on is not counted\n  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and\n         one case, and another with two clauses of its own and one case\n  When   the detectors run\n  Then   the first raises neither a clause-without-case nor an over-scoped question, and\n         the second still raises clause-without-case\n\nCASE-3 — all, every and any ask nothing\n  Given  a clause reading \"`gate` reads every file, all tags and any requirement.\"\n  When   the detectors run\n  Then   no question is raised\n\nCASE-4 — a split is asked only where lint warns\n  Given  requirement A with eight clauses, four cases; requirement B with eleven clauses,\n         eight cases\n  When   the detectors run and `lint` runs\n  Then   only B raises an over-scoped question, and `lint` warns `over-scoped` on B too",
       "input": "",
       "output": "",
       "desc": "",
@@ -3711,7 +3708,9 @@
       "contract": [
         "`load_config(reqs_dir)` returns the parsed object from `requirements/_config.json`, or `{}` when the file is absent, unreadable, not JSON, or not a JSON object.",
         "`apply_config(cfg)` sets each key named in `CONFIG_KEYS` on the module and returns the list of names it applied.",
-        "A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple. A fan-out band that is not `[low, high]`, with `high` a whole number, `low` one or null and no more than `high`, is reported on stderr and skipped, and the other entries still apply.",
+        "A numeric constant accepts a number of the same kind.",
+        "A dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.",
+        "A fan-out band is `[low, high]`: `high` a whole number, `low` one or null, `low` no more than `high`. Any other band is reported on stderr and skipped; the other entries still apply.",
         "`extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.",
         "A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.",
         "`main` collects the diagnostics of `load_config` and `apply_config` in one `problems` list before scanning, and prints each on stderr.",
@@ -3766,7 +3765,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "4 clause(s) have no case: there are 10 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
@@ -5928,7 +5927,7 @@
       "id": "REQ-DRIFT-1103",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A baseline that exists and cannot be used is named",
       "intent": "Reading a baseline fails open, so that a repository with none still gates. The same rule hid the other case: a baseline that is there and unusable reads as empty, and the drift signal it carries is off with nothing saying so. A `null` where a hash belongs was enough to turn an edited contract into a pass under `--strict`. See [ADR-0074](../../docs/adr/0074-a-baseline-is-checked-and-a-waiver-is-kept.md).",
@@ -5971,12 +5970,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "clarify": []
@@ -5985,7 +5979,7 @@
       "id": "REQ-DRIFT-1104",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A waiver is not recorded over a log this engine cannot keep",
       "intent": "Reading the drift log fails open, which is right for a gate. Writing it back from what that read returned is not: a log this engine does not understand reads as empty, and the next waiver rewrites the file with only itself in it, in an older schema. Every waiver already on record, and the reason given for it, is gone.",
@@ -6032,12 +6026,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -6711,7 +6700,7 @@
       "id": "REQ-EXTRACT-1099",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A code draft asks about the lines the scan found",
       "intent": "A draft used to ask every file the same sentence: \"anything that looks like an accident (swallowed error, magic constant, dead branch), intended, or a bug to fix?\". With a hundred drafts, `_findings.md` held a hundred copies of it and named no line, while the scan had already seen the `TODO`, the `noqa` and the empty `except` and kept only a risk score. A question that names its line can be answered; one that names nothing is skipped.",
@@ -6776,12 +6765,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -9482,7 +9466,7 @@
       "id": "REQ-LINTCHECKS-1089",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Decision questions the person answering can read",
       "intent": "A question in `## Verify intent` is answered by a person who may never have opened the code. Six warnings catch a decision question that person would struggle to read.",
@@ -9551,12 +9535,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 7,
       "covered": 7,
       "clarify": [
@@ -10945,7 +10924,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `ask --search=\"a b\" --top=3`, each flag with its value as one argument\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release=v1.2.0`\n\nCASE-6 — the tool set is frozen\n  Given  the tool table\n  When   its names are read\n  Then   they are exactly the fourteen of 2026-09-21 less `reqmap_design`, from `reqmap_gate`\n         to `reqmap_release`\n\nCASE-7 — a value that looks like an option stays a value\n  Given  `--apply` given as a `since`, a `query` and an `accept_drift`, and as a version and\n         as an id, and `v1.2.0 --apply` as a version\n  When   the arguments are built\n  Then   the first three each become `--flag=--apply`, one argument, and the rest are -32602\n         with nothing run\n\n\n--------------------",
+      "accept": "CASE-1 — the tools name only what the CLI has\n  Given  the tool table and the command registry\n  When   every tool's verb and flags are compared with the registry\n  Then   each verb is registered and each flag is one of that verb's flags\n\nCASE-2 — writing tools need --allow-writes\n  Given  a server started without `--allow-writes`, and one started with it\n  When   each lists its tools and calls `reqmap_sync`\n  Then   the first lists none of `reqmap_sync`, `reqmap_new`, `reqmap_release` and refuses the call with -32602; the second lists all three\n\nCASE-3 — arguments are checked and passed one by one\n  Given  `reqmap_search` called with no query, with `top` as text, and with `query` `a b` and `top` 3\n  When   each call is made\n  Then   the first two are -32602, and the third runs `ask --search=\"a b\" --top=3`, each flag with its value as one argument\n\nCASE-4 — a FAIL verdict is an answer, a failed command is an error\n  Given  `reqmap_gate` and `reqmap_show` both exiting 1\n  When   each is called\n  Then   the gate result has `isError` false and the show result has it true, both naming exit code 1\n\nCASE-5 — a release plan passes --release with or without a version\n  Given  `reqmap_release_plan` called with no version and with `v1.2.0`\n  When   the arguments are built\n  Then   they are `sync --json --release` and `sync --json --release=v1.2.0`\n\nCASE-6 — the tool set is frozen\n  Given  the tool table\n  When   its names are read\n  Then   they are exactly the fourteen of 2026-09-21 less `reqmap_design`, from `reqmap_gate`\n         to `reqmap_release`\n\nCASE-7 — a value that looks like an option stays a value\n  Given  `--apply` passed as a `since`, a `query`, an `accept_drift`, a version, an id; then\n         `v1.2.0 --apply` passed as a version\n  When   the arguments are built\n  Then   the first three each become `--flag=--apply`, one argument; the rest are -32602\n         with nothing run\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -13308,12 +13287,13 @@
       "title": "An edited contract loses its confirmation",
       "intent": "A `confirmed` status is a claim that a human read THIS text. Once the text changes, the claim is about something that no longer exists. Before this, `sync` refused to advance the baseline and told the caller to pass `--accept-drift`, which made accepting the edit the easy path and re-reading it the hard one. Now the safe outcome is the default.",
       "contract": [
-        "When `sync` or `init` updates the lock and finds a `confirmed` or `implemented` requirement whose binding hash differs from the committed one, it writes `status: draft` into that requirement. Neither takes a waiver the caller did not ask for; only `sync --accept-drift` does.",
+        "A `sync` or `init` that updates the lock writes `status: draft` into every `confirmed` or `implemented` requirement whose binding hash differs from the committed one. Neither takes a waiver the caller did not ask for; only `sync --accept-drift` does.",
         "**A brand-new requirement is not drift.** A requirement absent from the lock has no previous text to have changed, so it is never demoted.",
         "The run **names every demoted requirement**, with its previous status, and states that they no longer gate.",
         "After demoting, the lock and the member lock advance in the same run. The next run is clean, so the demotion happens once, not on every sync.",
         "`--accept-drift` skips the demotion entirely: the status stays and the baseline advances.",
-        "**An unchanged file is not an edit.** A drifted requirement whose file is identical to its copy in the commit that last wrote the lock keeps its status: its hash moved because a newer engine hashes differently. That holds only if the engine changed, which the file does not show: the map committed beside the lock records the engine that wrote it, and must name another engine than the one running. The run says so, and the waiver is recorded in the drift log with that commit. Without git, a lock never committed, a file git does not track, or a map that is missing, unreadable or names this same engine, the requirement is demoted as before.",
+        "**An unchanged file is not an edit.** A drifted requirement whose file is identical to its copy in the commit that last wrote the lock keeps its status when the map committed beside that lock names another engine than the one running: its hash moved because a newer engine hashes differently. The run says so, and records the waiver in the drift log with that commit.",
+        "Without git, with a lock never committed, a file git does not track, or a map that is missing, unreadable or names this same engine, the requirement is demoted as before.",
         "The in-memory status is updated too, so the same run's own summary counts the requirement as a draft rather than reporting a status it has just changed."
       ],
       "verify": [],
@@ -13364,7 +13344,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
@@ -16144,7 +16124,7 @@
       "id": "REQ-PLANVERSIONBAR-1091",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A bar that is a version, not work, is counted",
       "intent": "Two consumers planned one bar per release, titled `vX.Y.Z · theme`, with no `req:`. The version then appeared twice, as a milestone and as a bar, the work had no bar at all, and the plan no longer read as shipped / work / release. The view was fine; the plan was shaped wrong, and nothing said so.",
@@ -16186,12 +16166,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -22225,7 +22200,7 @@
       "id": "REQ-VIEWER-1090",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A rail reading opens Problems on its own tab",
       "intent": "The rail's two rings say how the repo is doing. One click on a ring should land on the rows behind it, not on a generic list the reader has to narrow again.",
@@ -22259,12 +22234,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -22479,13 +22449,13 @@
       "id": "REQ-VIEWER-1101",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Questions have a page of their own",
       "intent": "A question has three sources: the code, read by `draft`; a person, writing in Verify intent; and `clarify`, reading the requirement's own text. The Problems inbox showed only the second, and adding the third would have put five hundred advisory rows beside three health rows. A page of its own keeps what is broken apart from what is unanswered. See [ADR-0070](../../docs/adr/0070-questions-get-a-page-of-their-own.md).",
       "contract": [
         "The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page of every open question.",
-        "The page has one tab per kind of question, in the Problems tab bar's form, each with its count: All; Must fix, present only while a `structure` question exists; Asked by a person (a Verify-intent bullet not starting `Observed`); Observed in code (one starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause without case and Over-scoped; and Optional, every `wording` question.",
+        "The page has one tab per kind of question, in the Problems tab bar's form, each with its count: All; `Must fix`, present only while a `structure` question exists; Asked by a person (a Verify-intent bullet not starting `Observed`); Observed in code (one starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause without case and Over-scoped; and Optional, every `wording` question.",
         "All lists every question except the Optional ones, and opens first.",
         "Within a requirement, `clarify` questions are listed by basis, `structure` then `count` then `wording`, each with its rule, location, quoted clause and suggestion.",
         "Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`, `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.",
@@ -22498,7 +22468,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a person's question is on its own tab\n  Given  a requirement whose Verify intent holds one question a person wrote\n  When   the Asked by a person tab is rendered\n  Then   it lists that requirement with the question's text, and no observed question\n\nCASE-2 — an Observed bullet is listed as code\n  Given  a requirement whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed\n  Then   it is listed on the Observed in code tab and not on Asked by a person\n\nCASE-3 — the placeholder is still not a question\n  Given  a requirement whose Verify intent holds only the authored placeholder\n  When   the Questions page is computed\n  Then   that requirement appears on no tab\n\nCASE-9 — a deprecated requirement asks nothing\n  Given  a deprecated requirement whose Verify intent holds a question and whose map node\n         carries a `clarify` question\n  When   the Questions page is computed\n  Then   that requirement appears on no tab and adds nothing to the rail's count\n\nCASE-4 — clarify questions are listed by basis, Optional on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Optional tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Optional tab\n         shows the `wording` one marked grey and not the `structure` one\n\nCASE-5 — the rail counts the All tab, which leaves Optional out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-6 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-7 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-8 — All leaves Optional out, and a tab names each kind\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and not the\n         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,\n         Clause without case and Optional, and says a section is missing",
+      "accept": "CASE-1 — a person's question and an observed one land on their own tabs\n  Given  a requirement whose Verify intent holds one question a person wrote, and another\n         whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed and its tabs are rendered\n  Then   Asked by a person lists only the first, with the question's text; Observed in\n         code lists only the second\n\nCASE-2 — a placeholder and a deprecated requirement ask nothing\n  Given  a requirement whose Verify intent holds only the authored placeholder, and a\n         deprecated requirement holding a question and a `clarify` question\n  When   the Questions page is computed\n  Then   neither appears on any tab, and the deprecated one adds nothing to the rail's count\n\nCASE-3 — clarify questions are listed by basis, Optional on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Optional tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Optional tab\n         shows the `wording` one marked grey and not the `structure` one\n\nCASE-4 — the rail counts the All tab, which leaves Optional out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-5 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-6 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-7 — All leaves Optional out, and a tab names each kind\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and not the\n         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,\n         Clause without case and Optional, and says a section is missing",
       "input": "",
       "output": "",
       "desc": "",
@@ -22529,14 +22499,9 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 9,
-      "covered": 9,
+      "risks": [],
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -22544,7 +22509,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 10 clauses and 9 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "question": "3 clause(s) have no case: there are 10 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
           "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
         }
       ]
@@ -23435,6 +23400,7 @@
         "SYS-SSOT-001"
       ],
       "satisfied_by": [
+        "ARCH-ADOPT-075",
         "ARCH-CMDREGISTRY-033",
         "ARCH-INIT-012",
         "ARCH-MCP-073",
@@ -24111,6 +24077,26 @@
     [
       "REQ-DANGLINGVERIFY-1009",
       "ARCH-ACVERIFY-019"
+    ],
+    [
+      "ARCH-ADOPT-075",
+      "SYS-SHIP-108"
+    ],
+    [
+      "REQ-WATCH-1092",
+      "ARCH-ADOPT-075"
+    ],
+    [
+      "REQ-PROPOSE-1093",
+      "ARCH-ADOPT-075"
+    ],
+    [
+      "REQ-EXTREPO-1094",
+      "ARCH-ADOPT-075"
+    ],
+    [
+      "REQ-SURFACE-1095",
+      "ARCH-ADOPT-075"
     ],
     [
       "ARCH-ATOMICITY-049",
@@ -25376,16 +25362,6 @@
   "todos": [],
   "roadmap": [
     {
-      "name": "Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63)",
-      "horizon": "now",
-      "req": "ARCH-SELFGATE-039",
-      "unpark": null,
-      "done": false,
-      "category": "Adoption",
-      "context": "",
-      "section_date": null
-    },
-    {
       "name": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
       "horizon": "now",
       "req": "SYS-SSOT-001",
@@ -25456,9 +25432,9 @@
       "section_date": null
     },
     {
-      "name": "`sync --release --apply` ticks the `ROADMAP.md` items whose `",
+      "name": "`sync --release --apply` ticks the `ROADMAP.md` items whose requirement id matches a bar on the cut milestone",
       "horizon": "next",
-      "req": "ID",
+      "req": "ARCH-RELEASE-072",
       "unpark": null,
       "done": false,
       "category": "Planning and releasing",
@@ -25469,16 +25445,6 @@
       "name": "`gate --strict` fails a stale plan (`REQ-PLANSTALE-1013`); bare `gate` stays warn-only",
       "horizon": "next",
       "req": "ARCH-RELEASE-072",
-      "unpark": null,
-      "done": false,
-      "category": "Planning and releasing",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "Read and confirm the version-bar count: a plan bar with no `req:` whose title opens with its own milestone",
-      "horizon": "next",
-      "req": "REQ-PLANVERSIONBAR-1091",
       "unpark": null,
       "done": false,
       "category": "Planning and releasing",
@@ -27138,9 +27104,9 @@
     },
     {
       "month": "2026-10",
-      "count": 26,
+      "count": 27,
       "first": "2026-10-01",
-      "last": "2026-10-18",
+      "last": "2026-10-19",
       "versions": [
         "v8.13.0",
         "v8.14.0",
@@ -27167,11 +27133,20 @@
         "v8.24.2",
         "v8.24.3",
         "v8.24.4",
-        "v8.24.5"
+        "v8.24.5",
+        "v8.24.6"
       ],
       "landmark": "v8.24.0",
       "headline": "Questions get a page of their own, and a code draft asks about the lines it found (ADR-0070)",
       "entries": [
+        {
+          "version": "v8.24.6",
+          "date": "2026-10-19",
+          "headline": "Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone",
+          "body": "**Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**\n\n- Confirmed after reading each contract against its code and tests: ARCH-ADOPT-075, REQ-WATCH-1092, REQ-PROPOSE-1093, REQ-EXTREPO-1094, REQ-SURFACE-1095, REQ-DRIFT-1103, REQ-DRIFT-1104, REQ-EXTRACT-1099, REQ-LINTCHECKS-1089, REQ-PLANVERSIONBAR-1091, REQ-VIEWER-1090 and REQ-VIEWER-1101. `gate --risk` now lists no unreviewed requirement\n- ARCH-ADOPT-075 and its four children declared no `level:` and no `satisfies:`. They now sit under SYS-SHIP-108, as one architecture requirement and four code ones\n- REQ-EXTREPO-1094 and REQ-SURFACE-1095 had no `implements:` member, which RM006 makes an error once they are confirmed. `--root`'s default in `cliflags.py`, the registry in `commands.py` and `pyproject.toml` now carry them. REQ-EXTREPO-1094 gains CASE-2 (`gate --strict` on the copy exits 1) and CASE-3 (`gate --root` reaches it from another directory); REQ-SURFACE-1095 moves the licence into CASE-3; ARCH-ADOPT-075 gains CASE-2, CASE-3 and an `@integration` test link\n- Confirming brought two requirements under `ac-count-high` for the first time. REQ-WATCH-1092 merges CASE-4 and CASE-7, two cases of one clause (a ref git cannot read). REQ-VIEWER-1101 merges a person's and an observed question (CASE-1 and 2) and the placeholder and a deprecated requirement (CASE-3 and 9), and is renumbered to seven\n- Eight readability warnings on confirmed text are reworded, with no change in behaviour: ARCH-CLARIFY-062's REQ-CLARIFY-1102 bullet and CASE-4, REQ-CONFIG-949's numeric and band clause (now three bullets), REQ-MCPTOOLS-1028 CASE-7, and REQ-PROMOTE-974's demotion and unchanged-file clauses (the latter now two bullets, without the redundant `must`). ARCH-VIEWER-007 is exempt from `file-spread`: its twelve directories are all the viewer, under `app/`\n- A `ROADMAP.md` item that quoted `| req: ID` in its own text was read as a link to a requirement named `ID`, and reported as an id that does not exist and an item with no bar. It is reworded. The item asking to confirm the version-bar count is done and leaves\n- `docs/case-studies.md`, `docs/stability.md`, `plugin/README.md` and `plugin/apm.yml` join the root `.reqmapignore`, beside the other prose pages and manifests\n- The plan drops the item and the bar that waited for green runs in one consumer repository, and two engine comments (`gate.py`, `scan.py`) stop naming it\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19`, for tag comments only; 18,136 physical lines in 76 files (the README says so). The core stays at 6,688 logical lines",
+          "first_commit": "2026-10-19",
+          "last_commit": "2026-10-19"
+        },
         {
           "version": "v8.24.5",
           "date": "2026-10-18",
@@ -27694,114 +27669,31 @@
     }
   },
   "health": {
-    "score": 96,
+    "score": 100,
     "total": 326,
     "scored": 304,
-    "healthy": 292,
-    "exempt": 0,
+    "healthy": 304,
+    "exempt": 1,
     "deprecated": 22,
-    "confirmed": 292,
-    "implemented": 293,
-    "tested": 294,
-    "drafts": 12,
+    "confirmed": 304,
+    "implemented": 295,
+    "tested": 295,
+    "drafts": 0,
     "orphans": 0,
-    "untested": 1,
+    "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 292,
-    "unhealthy": [
+    "unhealthy": [],
+    "exempt_ids": [
       {
-        "id": "ARCH-ADOPT-075",
-        "status": "draft",
-        "why": [
-          "not confirmed",
-          "not tested"
-        ]
-      },
-      {
-        "id": "REQ-DRIFT-1103",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-DRIFT-1104",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-EXTRACT-1099",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-EXTREPO-1094",
-        "status": "draft",
-        "why": [
-          "not confirmed",
-          "not implemented"
-        ]
-      },
-      {
-        "id": "REQ-LINTCHECKS-1089",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-PLANVERSIONBAR-1091",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-PROPOSE-1093",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SURFACE-1095",
-        "status": "draft",
-        "why": [
-          "not confirmed",
-          "not implemented"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1090",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1101",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-WATCH-1092",
-        "status": "draft",
-        "why": [
-          "not confirmed"
+        "id": "ARCH-VIEWER-007",
+        "keys": [
+          "lint_exempt"
         ]
       }
-    ],
-    "exempt_ids": []
+    ]
   },
   "planning": {
     "milestones": {
@@ -27821,14 +27713,6 @@
         "lane": "Feature",
         "req": "ARCH-MCP-073",
         "progress": 100
-      },
-      {
-        "title": "Consilium-py stays green on `check@v8`. Done when: at least 5 green runs on `main` since the re-vendoring (2026-09-21, Consilium-py #63)",
-        "start": "2026-09-21",
-        "end": "2026-10-09",
-        "lane": "Feature",
-        "req": "ARCH-SELFGATE-039",
-        "progress": 40
       },
       {
         "title": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",

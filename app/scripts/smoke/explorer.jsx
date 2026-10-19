@@ -300,16 +300,16 @@ const mergeChecks = [
     asked.person.length === 1 && asked.person[0].id === "Q-ASKED-001"
       && pageHtml("person").includes("stale tested-by range")
       && !pageHtml("person").includes("src/x.py:6")],
-  // verifies: REQ-VIEWER-1101#CASE-2
+  // verifies: REQ-VIEWER-1101#CASE-1
   ["questions: an Observed bullet is listed as code, never as a person's",
     asked.code.length === 1 && asked.code[0].id === "Q-SEEN-003"
       && !asked.person.some((r) => r.id === "Q-SEEN-003")
       && pageHtml("code").includes("src/x.py:6")
       && !pageHtml("code").includes("stale tested-by range")],
-  // verifies: REQ-VIEWER-1101#CASE-3
+  // verifies: REQ-VIEWER-1101#CASE-2
   ["questions: the placeholder verify bullet is still not a question",
     !Object.values(asked).flat().some((r) => r.id === "Q-QUIET-002")],
-  // verifies: REQ-VIEWER-1101#CASE-4
+  // verifies: REQ-VIEWER-1101#CASE-3
   ["questions: clarify questions are listed by basis, Optional on its tab",
     asked.clarify.length === 1
       && asked.clarify[0].questions.map((q) => q.basis).join()
@@ -317,17 +317,17 @@ const mergeChecks = [
       && pageHtml("optional").includes("the vague-term question")
       && pageHtml("optional").includes("basis-wording")
       && !pageHtml("optional").includes("the no-cases question")],
-  // verifies: REQ-VIEWER-1101#CASE-5
+  // verifies: REQ-VIEWER-1101#CASE-4
   ["questions: the rail counts the All tab, which leaves Optional out",
     questionCount(asked) === 4 && railHtml.includes(">4<")],
-  // verifies: REQ-VIEWER-1101#CASE-6
+  // verifies: REQ-VIEWER-1101#CASE-5
   ["questions: Problems has no Questions tab and lists no question row",
     !problemsHtml.includes(">Questions<")
       && !merged.some((p) => p.sev === "QUESTION")],
-  // verifies: REQ-VIEWER-1101#CASE-7
+  // verifies: REQ-VIEWER-1101#CASE-6
   ["questions: the page sits in the rail below Commands",
     navAt("Questions") > navAt("Commands") && navAt("Commands") > 0],
-  // verifies: REQ-VIEWER-1101#CASE-8
+  // verifies: REQ-VIEWER-1101#CASE-7
   ["questions: All leaves Optional out, and a tab names each kind",
     firstOpen.includes("the no-cases question")
       && firstOpen.includes("basis-structure")
@@ -338,7 +338,7 @@ const mergeChecks = [
         "Clause without case", "Optional"].every(
         (l) => firstOpen.includes(`>${l}<span`))
       && firstOpen.includes("1 must fix — a section is missing")],
-  // verifies: REQ-VIEWER-1101#CASE-9
+  // verifies: REQ-VIEWER-1101#CASE-2
   ["questions: a deprecated requirement asks nothing",
     !Object.values(asked).flat().some((r) => r.id === "Q-OLD-005")
       && !firstOpen.includes("Q-OLD-005")],

@@ -410,7 +410,7 @@ CASE-7 — an existing tag is left alone
 
 ---
 id: REQ-EXTRACT-1099
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

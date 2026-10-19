@@ -189,10 +189,10 @@ CASE-6 — the tool set is frozen
          to `reqmap_release`
 
 CASE-7 — a value that looks like an option stays a value
-  Given  `--apply` given as a `since`, a `query` and an `accept_drift`, and as a version and
-         as an id, and `v1.2.0 --apply` as a version
+  Given  `--apply` passed as a `since`, a `query`, an `accept_drift`, a version, an id; then
+         `v1.2.0 --apply` passed as a version
   When   the arguments are built
-  Then   the first three each become `--flag=--apply`, one argument, and the rest are -32602
+  Then   the first three each become `--flag=--apply`, one argument; the rest are -32602
          with nothing run
 
 

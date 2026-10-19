@@ -13,6 +13,7 @@ command (data only).
 # markdown command table from this registry — do NOT add behaviour here.
 # ---------------------------------------------------------------------------
 # implements: ARCH-CMDREGISTRY-033  # implements: REQ-NEWGONE-1034
+# implements: REQ-SURFACE-1095
 COMMANDS = {
     "init": {
         "summary": (
