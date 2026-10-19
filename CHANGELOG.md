@@ -30,6 +30,13 @@
 - A Python file that does not parse, and a file in a language with no parser, returned no parsed signal exactly as a clean file did. Its draft's Context now says that swallowed errors, unnamed numbers and dead code were not looked for; the generic question stays open. REQ-EXTRACT-1099
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.4`; 18,928 physical lines in 78 files (the README says so). The core stays at 6,741 logical lines; `draftquestions.py` loads only when `init` drafts code
 
+**`clarify` says what its counts measure and nothing more.**
+
+- `clause-without-case` named a number of clauses with no case, from the difference of two counts; in ADR-0075's sample that number matched the real gap in 4 of 7 real questions, because one case often proves two clauses. It now reads "There are 5 clauses and 2 cases. Does each clause have a case that proves it?" and says the check compares counts, not coverage. REQ-CLARIFY-956
+- `case-monoculture` said "Every case starts from the same kind of input" while it fires at 75%. It now reads "3 of 4 Given lines open on the same word", and its suggestion says a repeated word need not be a repeated kind of input. REQ-CLARIFY-956
+- The skill's `references/assistant-steps.md` quotes the new wording
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.5`; 18,927 physical lines in 78 files (the README says so). The core drops to 6,740 logical lines
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

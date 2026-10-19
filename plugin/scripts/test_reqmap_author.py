@@ -2551,6 +2551,8 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         cases = tuple(
             "CASE-{n} \u2014 c{n}\n  Given  a query that is {w}\n  When   it runs\n  Then   it answers"
             .format(n=n, w=w) for n, w in enumerate(("matching", "unmatched", "empty"), 1))
+        cases += ("CASE-4 — c4\n  Given  a requirement id\n  When   it runs\n"
+                  "  Then   it answers",)
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-Q-001.md"),
                    _spec("AREA-Q-001", ["`search` ranks by wording."], cases=cases))
@@ -2561,7 +2563,8 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
             qs = R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
         mono = [q for q in qs if q["rule"] == "case-monoculture"]
         self.assertTrue(mono, _rules(qs))
-        self.assertIn("query", mono[0]["question"])
+        self.assertIn('3 of 4 Given lines open on the same word ("query")', mono[0]["question"])
+        self.assertNotIn("Every case", mono[0]["question"])
 
     def test_the_corpus_own_subject_is_not_that_signal(self):  # verifies: REQ-CLARIFY-956#CASE-5
         """A corpus of requirements about requirements starts every case the same way; that
@@ -3379,14 +3382,14 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
     def test_five_clauses_two_cases_raise_one_question_not_three(self):  # verifies: REQ-CLARIFY-956#CASE-3
         qs = self._questions(5, 2)
         self.assertEqual(len(qs), 1)
-        self.assertIn("3 clause(s) have no case", qs[0]["question"])
-        self.assertIn("5 clauses and 2 cases", qs[0]["question"])
+        self.assertIn("There are 5 clauses and 2 cases", qs[0]["question"])
+        self.assertNotIn("have no case", qs[0]["question"])   # a count is not coverage
 
     def test_the_question_does_not_accuse_a_clause(self):
         qs = self._questions(4, 3)
         self.assertEqual(qs[0]["where"], "Cases")
         self.assertEqual(qs[0]["quote"], "")          # no clause is quoted as the culprit
-        self.assertIn("cannot say WHICH", qs[0]["question"])
+        self.assertIn("one case may prove two clauses", qs[0]["question"])
 
     def test_a_case_per_clause_raises_nothing(self):
         self.assertEqual(self._questions(3, 3), [])

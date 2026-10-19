@@ -222,8 +222,8 @@
       "reason": null
     },
     "REQ-CLARIFY-956": {
-      "hash": "5a881f4f53d3",
-      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+      "hash": "2b7e53b0acd6",
+      "reason": null
     },
     "REQ-CLARIFY-975": {
       "hash": "68801ba55936",

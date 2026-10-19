@@ -66,15 +66,17 @@ Every bullet below is binding.
 - A number in a clause raises no question: whether it needs a unit is the reader's call.
 - A clause that opens with "It" or "The system" as its subject raises a question asking which
   component acts; "the system" later in a clause names a thing, not the actor, and raises none.
-- A requirement with more clauses than cases raises ONE question naming how many are
-  uncovered, and saying that a count cannot tell which. It never accuses a clause by
+- A requirement with more clauses than cases raises ONE question naming both counts and
+  asking whether each clause has a case that proves it. It never states how many clauses
+  are uncovered, since one case may prove two clauses, and it never accuses a clause by
   position: it compares two numbers and never reads a case, so pointing at the tail
   clauses was a guess — wrong whenever an early clause is the uncovered one, such as a
   clause that delegates its cases to another requirement. A requirement whose cases never
   mention a failure path raises a question about that, unless it is a stakeholder need
   (`layer: need`), which is one story with one Scenario.
 - A requirement whose cases nearly all start from the same kind of input raises one question
-  about the kind that is missing, unless that kind is the corpus's own subject.
+  about the kind that is missing, unless that kind is the corpus's own subject. The question
+  says how many of the Given lines open on that word, never that every case does.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every
   other question is advisory.
 - A deprecated requirement raises no question at all: it is retired, so nothing in it
@@ -96,7 +98,8 @@ CASE-3 — a clause-against-case gap and a happy-path-only acceptance are questi
   Given  a requirement with five clauses and two cases, none mentioning invalid, missing
          or failing input
   When   the detectors run
-  Then   one question says 3 clauses have no case without naming which, and one asks
+  Then   one question names 5 clauses and 2 cases and asks whether each clause is proven,
+         without claiming a number of uncovered clauses or naming one, and one asks
          what happens on the failure path; the same happy path at `layer: need` is not
          asked about the failure path
 
@@ -106,10 +109,12 @@ CASE-4 — no clause or no case is blocking
   Then   each raises a question of severity blocking
 
 CASE-5 — cases that all start from one kind of input are questioned, unless it is the domain
-  Given  a requirement whose every case opens on the same noun, once in a corpus where that
-         noun is rare and once in a corpus where nearly every case starts from it
+  Given  a requirement whose cases open on the same noun three times in four, once in a
+         corpus where that noun is rare and once in a corpus where nearly every case starts
+         from it
   When   the detectors run
-  Then   the first names that noun and asks which other kind a caller would supply, and
+  Then   the first says 3 of 4 Given lines open on that noun and asks about the other kinds
+         of input a caller can supply, and
          the second raises no such question, because the noun is the domain
 
 CASE-6 — an unnamed actor is questioned, a noun is not

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19.4",
+  "engine_version": "2026-10-19.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -262,8 +262,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -478,8 +478,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -553,8 +553,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -798,8 +798,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -1090,8 +1090,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"corpus\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -1367,8 +1367,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -1376,8 +1376,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"corpus\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -1595,8 +1595,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -1675,8 +1675,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "5 clause(s) have no case: there are 9 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -1852,8 +1852,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -1914,8 +1914,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 clause(s) have no case: there are 7 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -2285,7 +2285,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3641"
+          "loc": "plugin/scripts/test_reqmap_author.py:3644"
         },
         {
           "role": "implements",
@@ -2334,7 +2334,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3641"
+          "loc": "plugin/scripts/test_reqmap_author.py:3644"
         },
         {
           "role": "implements",
@@ -2354,8 +2354,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -2392,7 +2392,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3641"
+          "loc": "plugin/scripts/test_reqmap_author.py:3644"
         },
         {
           "role": "implements",
@@ -2781,8 +2781,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -2891,8 +2891,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -3163,8 +3163,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"description\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"description\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -3272,15 +3272,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3184"
+          "loc": "plugin/scripts/test_reqmap_author.py:3187"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3302"
+          "loc": "plugin/scripts/test_reqmap_author.py:3305"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3357"
+          "loc": "plugin/scripts/test_reqmap_author.py:3360"
         },
         {
           "role": "implements",
@@ -3296,15 +3296,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:210"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:208"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:236"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:235"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:302"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
         }
       ],
       "test_exempt": null,
@@ -3327,15 +3327,15 @@
         "A clause carrying a hedge word with no measurable threshold raises one question naming that word.",
         "A number in a clause raises no question: whether it needs a unit is the reader's call.",
         "A clause that opens with \"It\" or \"The system\" as its subject raises a question asking which component acts; \"the system\" later in a clause names a thing, not the actor, and raises none.",
-        "A requirement with more clauses than cases raises ONE question naming how many are uncovered, and saying that a count cannot tell which. It never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that, unless it is a stakeholder need (`layer: need`), which is one story with one Scenario.",
-        "A requirement whose cases nearly all start from the same kind of input raises one question about the kind that is missing, unless that kind is the corpus's own subject.",
+        "A requirement with more clauses than cases raises ONE question naming both counts and asking whether each clause has a case that proves it. It never states how many clauses are uncovered, since one case may prove two clauses, and it never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that, unless it is a stakeholder need (`layer: need`), which is one story with one Scenario.",
+        "A requirement whose cases nearly all start from the same kind of input raises one question about the kind that is missing, unless that kind is the corpus's own subject. The question says how many of the Given lines open on that word, never that every case does.",
         "A requirement with no clause, or with no labelled case, raises a blocking question; every other question is advisory.",
         "A deprecated requirement raises no question at all: it is retired, so nothing in it waits for an answer."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a number is not questioned\n  Given  one clause reading \"retries 3 times\", one reading \"turns amber below 60\" and one\n         reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   none of them raises a question\n\nCASE-3 — a clause-against-case gap and a happy-path-only acceptance are questioned\n  Given  a requirement with five clauses and two cases, none mentioning invalid, missing\n         or failing input\n  When   the detectors run\n  Then   one question says 3 clauses have no case without naming which, and one asks\n         what happens on the failure path; the same happy path at `layer: need` is not\n         asked about the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned, unless it is the domain\n  Given  a requirement whose every case opens on the same noun, once in a corpus where that\n         noun is rare and once in a corpus where nearly every case starts from it\n  When   the detectors run\n  Then   the first names that noun and asks which other kind a caller would supply, and\n         the second raises no such question, because the noun is the domain\n\nCASE-6 — an unnamed actor is questioned, a noun is not\n  Given  a clause reading \"It scans all files when the input is missing.\", and one reading\n         \"Every draft declares `satisfies:` the system placeholder.\"\n  When   the detectors run\n  Then   only the first raises a question asking which command or component performs it\n\nCASE-7 — a deprecated requirement asks nothing\n  Given  a deprecated requirement with no labelled case and a clause reading \"quickly\"\n  When   the detectors run\n  Then   no question is raised, blocking or advisory",
+      "accept": "CASE-1 — a hedge word is questioned by name\n  Given  a clause reading \"the gate reports errors quickly\"\n  When   the detectors run\n  Then   one question names \"quickly\" and asks for the measurable threshold\n\nCASE-2 — a number is not questioned\n  Given  one clause reading \"retries 3 times\", one reading \"turns amber below 60\" and one\n         reading \"prints the list and exits 2\"\n  When   the detectors run\n  Then   none of them raises a question\n\nCASE-3 — a clause-against-case gap and a happy-path-only acceptance are questioned\n  Given  a requirement with five clauses and two cases, none mentioning invalid, missing\n         or failing input\n  When   the detectors run\n  Then   one question names 5 clauses and 2 cases and asks whether each clause is proven,\n         without claiming a number of uncovered clauses or naming one, and one asks\n         what happens on the failure path; the same happy path at `layer: need` is not\n         asked about the failure path\n\nCASE-4 — no clause or no case is blocking\n  Given  a requirement with an empty Description, and one with no labelled case\n  When   the detectors run on each\n  Then   each raises a question of severity blocking\n\nCASE-5 — cases that all start from one kind of input are questioned, unless it is the domain\n  Given  a requirement whose cases open on the same noun three times in four, once in a\n         corpus where that noun is rare and once in a corpus where nearly every case starts\n         from it\n  When   the detectors run\n  Then   the first says 3 of 4 Given lines open on that noun and asks about the other kinds\n         of input a caller can supply, and\n         the second raises no such question, because the noun is the domain\n\nCASE-6 — an unnamed actor is questioned, a noun is not\n  Given  a clause reading \"It scans all files when the input is missing.\", and one reading\n         \"Every draft declares `satisfies:` the system placeholder.\"\n  When   the detectors run\n  Then   only the first raises a question asking which command or component performs it\n\nCASE-7 — a deprecated requirement asks nothing\n  Given  a deprecated requirement with no labelled case and a clause reading \"quickly\"\n  When   the detectors run\n  Then   no question is raised, blocking or advisory",
       "input": "",
       "output": "",
       "desc": "",
@@ -3352,7 +3352,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3357"
+          "loc": "plugin/scripts/test_reqmap_author.py:3360"
         },
         {
           "role": "implements",
@@ -3368,11 +3368,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:210"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:208"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:236"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:235"
         }
       ],
       "test_exempt": null,
@@ -3417,7 +3417,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:302"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
         }
       ],
       "test_exempt": null,
@@ -3460,7 +3460,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3184"
+          "loc": "plugin/scripts/test_reqmap_author.py:3187"
         },
         {
           "role": "implements",
@@ -3521,7 +3521,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3302"
+          "loc": "plugin/scripts/test_reqmap_author.py:3305"
         },
         {
           "role": "implements",
@@ -3587,11 +3587,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:237"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:236"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:289"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:288"
         }
       ],
       "test_exempt": null,
@@ -3793,8 +3793,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 10 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -3848,8 +3848,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -3929,8 +3929,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4001,8 +4001,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4201,8 +4201,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 clause(s) have no case: there are 10 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 10 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4326,8 +4326,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -4474,8 +4474,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 10 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4665,8 +4665,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4807,8 +4807,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "6 clause(s) have no case: there are 11 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 11 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -4881,11 +4881,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2842"
+          "loc": "plugin/scripts/test_reqmap_author.py:2845"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3450"
+          "loc": "plugin/scripts/test_reqmap_author.py:3453"
         },
         {
           "role": "tested-by",
@@ -5111,7 +5111,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2842"
+          "loc": "plugin/scripts/test_reqmap_author.py:2845"
         },
         {
           "role": "implements",
@@ -5131,8 +5131,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5170,7 +5170,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3450"
+          "loc": "plugin/scripts/test_reqmap_author.py:3453"
         },
         {
           "role": "implements",
@@ -5246,8 +5246,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5414,8 +5414,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "no-failure-case",
@@ -5508,8 +5508,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -5581,8 +5581,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5716,8 +5716,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 6 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5792,8 +5792,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5853,8 +5853,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"repo\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 4 Given lines open on the same word (\"repo\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -6029,8 +6029,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"committed\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 5 Given lines open on the same word (\"committed\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -6154,8 +6154,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 7 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -6163,8 +6163,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"large\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"large\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -6287,8 +6287,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -6343,7 +6343,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3052"
+          "loc": "plugin/scripts/test_reqmap_author.py:3055"
         },
         {
           "role": "tested-by",
@@ -6618,8 +6618,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -6652,7 +6652,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3052"
+          "loc": "plugin/scripts/test_reqmap_author.py:3055"
         },
         {
           "role": "implements",
@@ -6704,7 +6704,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3052"
+          "loc": "plugin/scripts/test_reqmap_author.py:3055"
         },
         {
           "role": "implements",
@@ -6851,8 +6851,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -6860,8 +6860,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"drifted\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"drifted\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -7097,8 +7097,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -7329,8 +7329,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 7 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -7373,7 +7373,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3771"
+          "loc": "plugin/scripts/test_reqmap_author.py:3774"
         },
         {
           "role": "implements",
@@ -7610,8 +7610,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 9 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -7952,8 +7952,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 7 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -8082,8 +8082,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -8344,8 +8344,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 7 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -8353,8 +8353,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"layer\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 5 Given lines open on the same word (\"layer\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -8425,8 +8425,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -8434,8 +8434,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"corpus\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -8578,8 +8578,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 8 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -8587,8 +8587,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 5 Given lines open on the same word (\"corpus\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -8958,7 +8958,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4658"
+          "loc": "plugin/scripts/test_reqmap_author.py:4661"
         },
         {
           "role": "implements",
@@ -9109,8 +9109,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -9212,8 +9212,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"corpus\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"corpus\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -9268,8 +9268,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -9335,8 +9335,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -9435,8 +9435,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -9683,8 +9683,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -9985,8 +9985,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -10047,8 +10047,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"contract\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"contract\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -10109,8 +10109,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"contract\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"contract\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -10197,8 +10197,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 9 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -10532,8 +10532,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -10647,8 +10647,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 clause(s) have no case: there are 11 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 11 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -10773,8 +10773,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "no-failure-case",
@@ -10857,8 +10857,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -10960,8 +10960,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -11020,8 +11020,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"todo.md\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"todo.md\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -11680,8 +11680,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -12015,8 +12015,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -12479,8 +12479,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 9 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -12542,8 +12542,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -12895,8 +12895,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -13029,8 +13029,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 clause(s) have no case: there are 9 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -13211,8 +13211,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -13530,8 +13530,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"command\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"command\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -13585,8 +13585,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -13779,7 +13779,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2902"
+          "loc": "plugin/scripts/test_reqmap_author.py:2905"
         },
         {
           "role": "tested-by",
@@ -13869,8 +13869,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "no-failure-case",
@@ -13917,7 +13917,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2902"
+          "loc": "plugin/scripts/test_reqmap_author.py:2905"
         },
         {
           "role": "implements",
@@ -13949,8 +13949,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -14288,8 +14288,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -14297,8 +14297,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"paths\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"paths\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -14667,8 +14667,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 7 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -14732,7 +14732,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4210"
+          "loc": "plugin/scripts/test_reqmap_author.py:4213"
         },
         {
           "role": "implements",
@@ -14788,8 +14788,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"repository\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"repository\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -14823,7 +14823,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3879"
+          "loc": "plugin/scripts/test_reqmap_author.py:3882"
         },
         {
           "role": "implements",
@@ -14876,7 +14876,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3932"
+          "loc": "plugin/scripts/test_reqmap_author.py:3935"
         },
         {
           "role": "implements",
@@ -14896,8 +14896,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -14931,7 +14931,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3966"
+          "loc": "plugin/scripts/test_reqmap_author.py:3969"
         },
         {
           "role": "implements",
@@ -14976,8 +14976,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"version\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"version\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -15009,7 +15009,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3996"
+          "loc": "plugin/scripts/test_reqmap_author.py:3999"
         },
         {
           "role": "implements",
@@ -15033,8 +15033,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"declared\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"declared\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -15071,7 +15071,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4018"
+          "loc": "plugin/scripts/test_reqmap_author.py:4021"
         },
         {
           "role": "implements",
@@ -15153,7 +15153,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4130"
+          "loc": "plugin/scripts/test_reqmap_author.py:4133"
         },
         {
           "role": "implements",
@@ -15212,7 +15212,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4018"
+          "loc": "plugin/scripts/test_reqmap_author.py:4021"
         },
         {
           "role": "implements",
@@ -15266,7 +15266,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4251"
+          "loc": "plugin/scripts/test_reqmap_author.py:4254"
         },
         {
           "role": "implements",
@@ -15337,7 +15337,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4366"
+          "loc": "plugin/scripts/test_reqmap_author.py:4369"
         },
         {
           "role": "implements",
@@ -15469,8 +15469,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -15518,11 +15518,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2634"
+          "loc": "plugin/scripts/test_reqmap_author.py:2637"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3395"
+          "loc": "plugin/scripts/test_reqmap_author.py:3398"
         },
         {
           "role": "tested-by",
@@ -15601,7 +15601,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2634"
+          "loc": "plugin/scripts/test_reqmap_author.py:2637"
         },
         {
           "role": "implements",
@@ -15625,8 +15625,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -15670,7 +15670,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2634"
+          "loc": "plugin/scripts/test_reqmap_author.py:2637"
         },
         {
           "role": "implements",
@@ -15726,8 +15726,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 6 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -15762,11 +15762,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2634"
+          "loc": "plugin/scripts/test_reqmap_author.py:2637"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3395"
+          "loc": "plugin/scripts/test_reqmap_author.py:3398"
         },
         {
           "role": "implements",
@@ -15798,8 +15798,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -15844,7 +15844,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2634"
+          "loc": "plugin/scripts/test_reqmap_author.py:2637"
         },
         {
           "role": "implements",
@@ -15892,8 +15892,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 7 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -16026,8 +16026,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 9 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -16260,8 +16260,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 9 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -16329,8 +16329,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -16338,8 +16338,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"todo.md\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 5 Given lines open on the same word (\"todo.md\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -16697,7 +16697,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4366"
+          "loc": "plugin/scripts/test_reqmap_author.py:4369"
         },
         {
           "role": "implements",
@@ -16945,8 +16945,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -17029,8 +17029,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -17397,8 +17397,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -17529,8 +17529,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"tagged\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"tagged\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -17715,8 +17715,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"query\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"query\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -17793,8 +17793,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 7 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -17868,8 +17868,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -17877,8 +17877,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"query\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "6 of 6 Given lines open on the same word (\"query\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -17936,8 +17936,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"query\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 4 Given lines open on the same word (\"query\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -18196,8 +18196,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -18459,8 +18459,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "no-failure-case",
@@ -18526,8 +18526,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\".githooks\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\".githooks\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -18671,8 +18671,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -18734,8 +18734,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 8 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -19263,8 +19263,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -19482,8 +19482,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -19590,7 +19590,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4422"
+          "loc": "plugin/scripts/test_reqmap_author.py:4425"
         },
         {
           "role": "implements",
@@ -19701,7 +19701,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4425"
+          "loc": "plugin/scripts/test_reqmap_author.py:4428"
         },
         {
           "role": "implements",
@@ -19887,8 +19887,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -19946,8 +19946,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"vendored\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"vendored\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -20450,8 +20450,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -20717,8 +20717,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -20845,8 +20845,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -21332,8 +21332,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -21459,8 +21459,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ],
       "i18n": {
@@ -21942,8 +21942,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -21951,8 +21951,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"clause\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 4 Given lines open on the same word (\"clause\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -22015,8 +22015,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -22232,8 +22232,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "2 clause(s) have no case: there are 5 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -22241,8 +22241,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"map\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"map\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -22302,8 +22302,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"roadmapview\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"roadmapview\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -22376,8 +22376,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 7 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -22453,8 +22453,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 clause(s) have no case: there are 10 clauses and 6 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 10 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -22779,8 +22779,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"shell\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"shell\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -22886,8 +22886,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 4 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -22895,8 +22895,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"version\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"version\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -22957,8 +22957,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"v3.2.0\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "4 of 4 Given lines open on the same word (\"v3.2.0\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -23026,8 +23026,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 clause(s) have no case: there are 10 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -23171,8 +23171,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -23236,8 +23236,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
           "rule": "case-monoculture",
@@ -23245,8 +23245,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"node\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "5 of 5 Given lines open on the same word (\"node\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -23427,8 +23427,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "Every case starts from the same kind of input (\"tested-by\"). What is the other kind a caller would supply?",
-          "suggest": "Add one case written from the caller's side, not the implementation's."
+          "question": "3 of 3 Given lines open on the same word (\"tested-by\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ],
       "i18n": {
@@ -23551,8 +23551,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "1 clause(s) have no case: there are 8 clauses and 7 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
-          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },

@@ -191,19 +191,17 @@ def _clause_case_gap_question(clauses, n_cases):
     reader to rewrite a clause that already had its case."""
     if not (clauses and n_cases and len(clauses) > n_cases):
         return []
-    gap = len(clauses) - n_cases
+    # the difference is not a number of uncovered clauses: in a sample only
+    # 4 of 7 real gaps matched it (ADR-0075)
     return [_clarify_item(
         "clause-without-case", "advisory", "Cases", "",
-        "{} clause(s) have no case: there are {} clauses and {} cases. "
-        "This check "
-        "counts, it does not read, so it cannot say WHICH — that is "
-        "the part only "
-        "you can do.".format(gap, len(clauses), n_cases),
-        "Walk the clauses and find the one no case proves. Add a case "
-        "for it, fold "
-        "it into an existing case, or move it out of the binding list "
-        "if another "
-        "requirement already carries its cases.")]
+        "There are {} clauses and {} cases. Does each clause have a case "
+        "that proves it? This check compares counts, not coverage: one "
+        "case may prove two clauses, so it cannot say which clause, if "
+        "any, is unproven.".format(len(clauses), n_cases),
+        "Read the clauses against the cases. If an obligation is "
+        "unproven, add or extend a case, or move the clause to the "
+        "requirement that already carries its cases.")]
 
 
 def _monoculture_question(body, reqs, domain):
@@ -224,11 +222,12 @@ def _monoculture_question(body, reqs, domain):
     if share >= CLARIFY_MONOCULTURE_SHARE and common not in domain:
         return [_clarify_item(
             "case-monoculture", "advisory", "Cases", "",
-            'Every case starts from the same kind of input ("{}"). '
-            'What is the '
-            'other kind a caller would supply?'.format(common),
-            "Add one case written from the caller's side, not the "
-            "implementation's.")]
+            '{} of {} Given lines open on the same word ("{}"). Do the '
+            'cases cover the other kinds of input a caller can supply?'
+            .format(counts[common], len(heads), common),
+            "Read the Givens in context: a repeated word need not be a "
+            "repeated kind of input. Add a case from the caller's side "
+            "only if a kind is missing.")]
     return []
 
 
