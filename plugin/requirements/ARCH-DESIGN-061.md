@@ -183,7 +183,8 @@ Every bullet below is binding.
 - `design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
 - `design --json` emits `{"files": N, "unparsed": [...], "findings": [...]}` with every candidate record and nothing on stdout besides the JSON.
 - With no candidate, `design` prints one line saying so and the file count.
-- A Python file that does not parse yields no candidate, standards included, and no error. It is not clean either: it is left out of `files` and of the score, `design` names it on one line, and the summary record carries it under `unparsed`, a key present only when such a file exists.
+- A Python file that does not parse yields no candidate, standards included, and no error.
+- Such a file is not clean either. It is left out of `files` and of the score, `design` names it on one line, and the summary record lists it under `unparsed`, a key present only when one exists.
 - `design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries.
 
 ## Cases

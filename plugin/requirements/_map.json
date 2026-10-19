@@ -5520,7 +5520,8 @@
         "`design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.",
         "`design --json` emits `{\"files\": N, \"unparsed\": [...], \"findings\": [...]}` with every candidate record and nothing on stdout besides the JSON.",
         "With no candidate, `design` prints one line saying so and the file count.",
-        "A Python file that does not parse yields no candidate, standards included, and no error. It is not clean either: it is left out of `files` and of the score, `design` names it on one line, and the summary record carries it under `unparsed`, a key present only when such a file exists.",
+        "A Python file that does not parse yields no candidate, standards included, and no error.",
+        "Such a file is not clean either. It is left out of `files` and of the score, `design` names it on one line, and the summary record lists it under `unparsed`, a key present only when one exists.",
         "`design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries."
       ],
       "verify": [],
@@ -5567,7 +5568,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 7 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]

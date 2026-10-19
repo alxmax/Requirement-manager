@@ -274,7 +274,7 @@
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
     "REQ-DESIGN-952": {
-      "hash": "35f486095864",
+      "hash": "23c36f22ca3b",
       "reason": null
     },
     "REQ-DESIGN-953": {
