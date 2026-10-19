@@ -19,6 +19,11 @@
 - A bad entry is an `INPUT:config` warning, an error under `--strict`. With none of the keys set nothing changes, and `customtrace.py` is never imported
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.2`; 18,888 physical lines in 78 files (the README says so). The core rises to 6,741 logical lines (ADR-0077)
 
+**`clarify`'s `vague-term` stops asking about words that count or size (ADR-0078).**
+
+- "several", "many", "various", "small" and "large" raise no question. They were 23 of the rule's 27 questions on this corpus, and 1 of 20 sampled questions was real, on "best-effort". `clarify` asks 160 questions here instead of 183. REQ-CLARIFY-1102
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.3`; the core stays at 6,741 logical lines
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

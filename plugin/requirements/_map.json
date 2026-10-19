@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19.2",
+  "engine_version": "2026-10-19.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -864,17 +864,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A short clause may carry several independent obligations and still pass the check.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "statement-size măsoară lungimea, nu atomicitatea",
@@ -1680,15 +1670,6 @@
       "covered": 4,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "Findings with the same `id` and `clause` are one finding over several runs.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "wording",
@@ -2304,7 +2285,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3606"
+          "loc": "plugin/scripts/test_reqmap_author.py:3613"
         },
         {
           "role": "implements",
@@ -2353,7 +2334,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3606"
+          "loc": "plugin/scripts/test_reqmap_author.py:3613"
         },
         {
           "role": "implements",
@@ -2411,7 +2392,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3606"
+          "loc": "plugin/scripts/test_reqmap_author.py:3613"
         },
         {
           "role": "implements",
@@ -3291,15 +3272,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3149"
+          "loc": "plugin/scripts/test_reqmap_author.py:3156"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3267"
+          "loc": "plugin/scripts/test_reqmap_author.py:3274"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3322"
+          "loc": "plugin/scripts/test_reqmap_author.py:3329"
         },
         {
           "role": "implements",
@@ -3371,7 +3352,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3322"
+          "loc": "plugin/scripts/test_reqmap_author.py:3329"
         },
         {
           "role": "implements",
@@ -3445,17 +3426,7 @@
       "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "`clarify` with no id reports only the blocking questions across the corpus, so a large corpus answers \"what is unimplementable right now\".",
-          "question": "What is the measurable threshold behind \"large\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-CLARIFY-975",
@@ -3489,7 +3460,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3149"
+          "loc": "plugin/scripts/test_reqmap_author.py:3156"
         },
         {
           "role": "implements",
@@ -3550,7 +3521,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3267"
+          "loc": "plugin/scripts/test_reqmap_author.py:3274"
         },
         {
           "role": "implements",
@@ -3586,7 +3557,8 @@
       "title": "What clarify does not mistake for a question",
       "intent": "Reading `clarify`'s questions one by one showed most of three rules were not questions: a unit asked of a date or an exit code, a hedge found inside \"smaller\" or \"how many\", and a missing case counted on a bullet that only points at the child carrying its cases. Each was a property of the rule, so the fix belongs in the rule, not in 82 edits to requirements that were already right. See [ADR-0071](../../docs/adr/0071-clarify-reads-values-and-delegation.md).",
       "contract": [
-        "A hedge counts only as a whole word outside a code span, and \"how many\" asks for a count rather than hedging one.",
+        "A hedge counts only as a whole word outside a code span.",
+        "A word that counts or sizes (`several`, `many`, `various`, `small`, `large`) raises no question: in a requirement it nearly always means \"more than one\" or is sized in the same clause.",
         "A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that requirement, so neither the clause-against-case count nor the over-scoped count holds it.",
         "A clause quantified over \"all\", \"every\" or \"any\" raises no question: in a requirement the words nearly always range over a finite set the engine already owns.",
         "A requirement is over-scoped only on `lint`'s own measure: more than `LINT_CONTRACT_MAX` clauses of its own and more than `LINT_AC_MAX` cases, so `clarify` never asks for a split that `lint` does not warn about."
@@ -3594,7 +3566,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a hedge is a whole word outside code\n  Given  clauses reading \"how many criteria\", \"the smaller set\" and \"words such as\n         `appropriate`\", and one reading \"keeps many entries\"\n  When   the detectors run\n  Then   only the last raises a vague-term question\n\nCASE-2 — a clause that hands its cases on is not counted\n  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and\n         one case, and another with two clauses of its own and one case\n  When   the detectors run\n  Then   the first raises neither a clause-without-case nor an over-scoped question, and\n         the second still raises clause-without-case\n\nCASE-3 — all, every and any ask nothing\n  Given  a clause reading \"`gate` reads every file, all tags and any requirement.\"\n  When   the detectors run\n  Then   no question is raised\n\nCASE-4 — a split is asked only where lint warns\n  Given  requirement A with eight clauses, four cases; requirement B with eleven clauses,\n         eight cases\n  When   the detectors run and `lint` runs\n  Then   only B raises an over-scoped question, and `lint` warns `over-scoped` on B too",
+      "accept": "CASE-1 — a hedge is a whole word outside code\n  Given  clauses reading \"the fastest path\" and \"words such as `appropriate`\", and one\n         reading \"replies quickly\"\n  When   the detectors run\n  Then   only the last raises a vague-term question\n\nCASE-2 — a clause that hands its cases on is not counted\n  Given  a requirement with nine clauses ending in `[[ID]]`, one clause of its own and\n         one case, and another with two clauses of its own and one case\n  When   the detectors run\n  Then   the first raises neither a clause-without-case nor an over-scoped question, and\n         the second still raises clause-without-case\n\nCASE-3 — all, every and any ask nothing\n  Given  a clause reading \"`gate` reads every file, all tags and any requirement.\"\n  When   the detectors run\n  Then   no question is raised\n\nCASE-4 — a split is asked only where lint warns\n  Given  requirement A with eight clauses, four cases; requirement B with eleven clauses,\n         eight cases\n  When   the detectors run and `lint` runs\n  Then   only B raises an over-scoped question, and `lint` warns `over-scoped` on B too\n\nCASE-5 — counting and sizing words ask nothing\n  Given  clauses reading \"binds several requirements\", \"may hold many requirements\", \"keeps\n         one small record\", \"for a large corpus\" and \"reads various formats\"\n  When   the detectors run\n  Then   none raises a vague-term question",
       "input": "",
       "output": "",
       "desc": "",
@@ -3626,8 +3598,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 5,
+      "covered": 5,
       "clarify": []
     },
     {
@@ -4909,11 +4881,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2807"
+          "loc": "plugin/scripts/test_reqmap_author.py:2814"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3415"
+          "loc": "plugin/scripts/test_reqmap_author.py:3422"
         },
         {
           "role": "tested-by",
@@ -5139,7 +5111,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2807"
+          "loc": "plugin/scripts/test_reqmap_author.py:2814"
         },
         {
           "role": "implements",
@@ -5198,7 +5170,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3415"
+          "loc": "plugin/scripts/test_reqmap_author.py:3422"
         },
         {
           "role": "implements",
@@ -5876,15 +5848,6 @@
       "covered": 4,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "`_assemble_map_data` is the only caller that asks for the candidates, so `_map.json` carries them and `health --json` keeps the small score-only record a CI badge reads.",
-          "question": "What is the measurable threshold behind \"small\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "case-monoculture",
           "severity": "advisory",
           "basis": "wording",
@@ -6380,7 +6343,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3017"
+          "loc": "plugin/scripts/test_reqmap_author.py:3024"
         },
         {
           "role": "tested-by",
@@ -6689,7 +6652,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3017"
+          "loc": "plugin/scripts/test_reqmap_author.py:3024"
         },
         {
           "role": "implements",
@@ -6741,7 +6704,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3017"
+          "loc": "plugin/scripts/test_reqmap_author.py:3024"
         },
         {
           "role": "implements",
@@ -7406,7 +7369,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3736"
+          "loc": "plugin/scripts/test_reqmap_author.py:3743"
         },
         {
           "role": "implements",
@@ -8681,17 +8644,7 @@
       "risks": [],
       "clauses": 3,
       "covered": 3,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "The map requests rows; `health --json` does not, so a badge payload stays one small object.",
-          "question": "What is the measurable threshold behind \"small\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "ARCH-IMPLEMENT-063",
@@ -9015,7 +8968,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4623"
+          "loc": "plugin/scripts/test_reqmap_author.py:4630"
         },
         {
           "role": "implements",
@@ -9386,15 +9339,6 @@
       "clauses": 3,
       "covered": 3,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A file holding several requirements has only the addressed block edited; every sibling block is returned unchanged.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -9893,26 +9837,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`statement-too-long` and `stacked-conditions` warn on a normative line that runs too long or stacks too many conditions; `anonymous-subject` warns on a Contract clause opening with a bare \"It\". [[REQ-LINTCHECKS-865]] details the behaviour.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "`ac-count-low`/`ac-count-high`/`over-scoped` warn on too few or too many acceptance criteria or contract scope units; `file-spread` warns on an implementation scattered across too many directories. [[REQ-LINTCHECKS-866]] details the behaviour.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-LINTCHECKS-865",
@@ -11915,17 +11840,7 @@
       "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-MEMBERDRIFT-879",
@@ -11986,17 +11901,7 @@
       "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "Member hashes are recorded only for files dedicated to ONE requirement (an `implements:`/`generated-from:` member of exactly one id); a file shared by several requirements is excluded, because a change there cannot be attributed without noise.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Sidecar-ul de hash de membri",
@@ -12434,17 +12339,7 @@
       "risks": [],
       "clauses": 4,
       "covered": 4,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 8",
-          "quote": "`next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-NEXT-883",
@@ -13262,17 +13157,7 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "One file may hold many requirements: a block starts at a `---` line immediately followed by `id:`, and only block 0 may take its id from the filename. [[REQ-MODULEFILE-056]]",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-PARSE-890",
@@ -13904,7 +13789,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2867"
+          "loc": "plugin/scripts/test_reqmap_author.py:2874"
         },
         {
           "role": "tested-by",
@@ -13989,15 +13874,6 @@
       "covered": 4,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 5",
-          "quote": "In a module file holding several requirements, it edits the block of the requirement it was given, not the first block in the file.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "wording",
@@ -14051,7 +13927,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2867"
+          "loc": "plugin/scripts/test_reqmap_author.py:2874"
         },
         {
           "role": "implements",
@@ -14866,7 +14742,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4175"
+          "loc": "plugin/scripts/test_reqmap_author.py:4182"
         },
         {
           "role": "implements",
@@ -14957,7 +14833,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3844"
+          "loc": "plugin/scripts/test_reqmap_author.py:3851"
         },
         {
           "role": "implements",
@@ -15010,7 +14886,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3897"
+          "loc": "plugin/scripts/test_reqmap_author.py:3904"
         },
         {
           "role": "implements",
@@ -15065,7 +14941,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3931"
+          "loc": "plugin/scripts/test_reqmap_author.py:3938"
         },
         {
           "role": "implements",
@@ -15143,7 +15019,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3961"
+          "loc": "plugin/scripts/test_reqmap_author.py:3968"
         },
         {
           "role": "implements",
@@ -15205,7 +15081,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3983"
+          "loc": "plugin/scripts/test_reqmap_author.py:3990"
         },
         {
           "role": "implements",
@@ -15287,7 +15163,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4095"
+          "loc": "plugin/scripts/test_reqmap_author.py:4102"
         },
         {
           "role": "implements",
@@ -15346,7 +15222,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3983"
+          "loc": "plugin/scripts/test_reqmap_author.py:3990"
         },
         {
           "role": "implements",
@@ -15400,7 +15276,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4216"
+          "loc": "plugin/scripts/test_reqmap_author.py:4223"
         },
         {
           "role": "implements",
@@ -15471,7 +15347,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4331"
+          "loc": "plugin/scripts/test_reqmap_author.py:4338"
         },
         {
           "role": "implements",
@@ -15652,11 +15528,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2599"
+          "loc": "plugin/scripts/test_reqmap_author.py:2606"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3360"
+          "loc": "plugin/scripts/test_reqmap_author.py:3367"
         },
         {
           "role": "tested-by",
@@ -15735,7 +15611,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2599"
+          "loc": "plugin/scripts/test_reqmap_author.py:2606"
         },
         {
           "role": "implements",
@@ -15804,7 +15680,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2599"
+          "loc": "plugin/scripts/test_reqmap_author.py:2606"
         },
         {
           "role": "implements",
@@ -15896,11 +15772,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2599"
+          "loc": "plugin/scripts/test_reqmap_author.py:2606"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3360"
+          "loc": "plugin/scripts/test_reqmap_author.py:3367"
         },
         {
           "role": "implements",
@@ -15978,7 +15854,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2599"
+          "loc": "plugin/scripts/test_reqmap_author.py:2606"
         },
         {
           "role": "implements",
@@ -16020,15 +15896,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "`retire` accepts one id or many, and reports the aggregated blast radius before writing.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "clause-without-case",
           "severity": "advisory",
@@ -16840,7 +16707,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4331"
+          "loc": "plugin/scripts/test_reqmap_author.py:4338"
         },
         {
           "role": "implements",
@@ -17384,17 +17251,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 2",
-          "quote": "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-SCAN-908",
@@ -17545,24 +17402,6 @@
       "covered": 7,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "A whole-system doc generated from many requirements (`generated-from: A, B, C`) is therefore a member of each, and drifts when ANY of them changes.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "wording",
@@ -17629,17 +17468,7 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "In a `.py` file, string-literal content — including a docstring spanning many lines — is blanked before the search, and comment text is not.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "ARCH-SCANCACHE-023",
@@ -19052,17 +18881,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 6",
-          "quote": "`show` prints the title and the intent. A WHY spanning several `>` lines is gathered whole, never truncated to its first line.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ],
+      "clarify": [],
       "i18n": {
         "ro": {
           "title": "Un antet pe un singur ecran, intent și contract",
@@ -19449,15 +19268,6 @@
       "covered": 7,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 4",
-          "quote": "`dupes` drops a small stopword set and pure numbers from those tokens.",
-          "question": "What is the measurable threshold behind \"small\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "wording",
@@ -19790,7 +19600,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4387"
+          "loc": "plugin/scripts/test_reqmap_author.py:4394"
         },
         {
           "role": "implements",
@@ -19901,7 +19711,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4390"
+          "loc": "plugin/scripts/test_reqmap_author.py:4397"
         },
         {
           "role": "implements",
@@ -22648,15 +22458,6 @@
       "covered": 6,
       "clarify": [
         {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 9",
-          "quote": "A title that does not fit inside its bar in that many lines, or holds a word wider than the bar, runs whole on one line beside the bar, on the chart's opaque surface; the bar keeps the width of its dates.",
-          "question": "What is the measurable threshold behind \"many\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
-        {
           "rule": "clause-without-case",
           "severity": "advisory",
           "basis": "wording",
@@ -22805,17 +22606,7 @@
       "risks": [],
       "clauses": 7,
       "covered": 7,
-      "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 1",
-          "quote": "The Plan draws shipped work on the Shipped band. Patch releases of the same minor version — `v7.21.0`, `v7.21.1`, `v7.21.10` — released in one ISO week share one block labelled `vX.Y.x`, from the earliest to the latest of their changelog dates, and a series over several weeks is split by [[REQ-HISTORYWEEK-1098]]. A release that is the only one of its minor version in the export keeps its own version and its first-to-last commit span, and the changelog date stands in when a commit date is absent.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-VIEWER-1082",
@@ -23170,15 +22961,6 @@
       "clauses": 4,
       "covered": 4,
       "clarify": [
-        {
-          "rule": "vague-term",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "clause 3",
-          "quote": "A series that fits in one week keeps the label `vX.Y.x`; one that runs over several is labelled from its lowest version to its highest in each week, and a lone release in a week keeps its own version.",
-          "question": "What is the measurable threshold behind \"several\"?",
-          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
-        },
         {
           "rule": "case-monoculture",
           "severity": "advisory",

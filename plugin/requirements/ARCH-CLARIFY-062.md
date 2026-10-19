@@ -143,6 +143,12 @@ CASE-7 — a deprecated requirement asks nothing
   questions it asked on this corpus was real ("at line 1", "a score of 2", "4 Mermaid code
   blocks").
 
+**Narrowed 2026-10-19**
+- `vague-term` no longer asks about "several", "many", "various", "small" or "large"
+  ([ADR-0078](../../docs/adr/0078-clarify-vague-term-drops-quantity-words.md)): they were 23
+  of its 27 questions here, and 1 of 20 sampled questions was real, on "best-effort".
+  [[REQ-CLARIFY-1102]] states that the words ask nothing.
+
 ---
 id: REQ-CLARIFY-957
 status: confirmed
@@ -348,8 +354,10 @@ satisfies: [ARCH-CLARIFY-062]
 > [ADR-0071](../../docs/adr/0071-clarify-reads-values-and-delegation.md).
 
 Every bullet below is binding.
-- A hedge counts only as a whole word outside a code span, and "how many" asks for a count
-  rather than hedging one.
+- A hedge counts only as a whole word outside a code span.
+- A word that counts or sizes (`several`, `many`, `various`, `small`, `large`) raises no
+  question: in a requirement it nearly always means "more than one" or is sized in the same
+  clause.
 - A clause that ends by naming another requirement (`… [[ID]]`) hands its cases to that
   requirement, so neither the clause-against-case count nor the over-scoped count holds it.
 - A clause quantified over "all", "every" or "any" raises no question: in a requirement the
@@ -360,8 +368,8 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — a hedge is a whole word outside code
-  Given  clauses reading "how many criteria", "the smaller set" and "words such as
-         `appropriate`", and one reading "keeps many entries"
+  Given  clauses reading "the fastest path" and "words such as `appropriate`", and one
+         reading "replies quickly"
   When   the detectors run
   Then   only the last raises a vague-term question
 
@@ -382,3 +390,9 @@ CASE-4 — a split is asked only where lint warns
          eight cases
   When   the detectors run and `lint` runs
   Then   only B raises an over-scoped question, and `lint` warns `over-scoped` on B too
+
+CASE-5 — counting and sizing words ask nothing
+  Given  clauses reading "binds several requirements", "may hold many requirements", "keeps
+         one small record", "for a large corpus" and "reads various formats"
+  When   the detectors run
+  Then   none raises a vague-term question

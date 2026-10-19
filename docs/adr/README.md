@@ -88,6 +88,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0075](0075-clarify-retires-number-without-unit.md) | `clarify` retires `number-without-unit`, and a clause-against-case count is a guess | Accepted |
 | [0076](0076-an-audit-is-a-recorded-session.md) | An audit is a recorded session: a fixed plan, one file of findings, a report with intervals | Accepted |
 | [0077](0077-a-repository-describes-its-own-trace-tags.md) | A repository describes its own trace tags, test files and requirement sources | Accepted |
+| [0078](0078-clarify-vague-term-drops-quantity-words.md) | `clarify`'s `vague-term` drops the words that count or size | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

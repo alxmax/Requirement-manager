@@ -2458,11 +2458,18 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         self.assertNotIn("no-failure-case", _rules(sad))
 
     def test_hedge_is_a_whole_word_outside_code(self):  # verifies: REQ-CLARIFY-1102#CASE-1
-        for clause in ("`show` states how many criteria are tagged.",
-                       "`dupes` keeps the smaller set.",
+        for clause in ("`map` takes the fastest path.",
                        "`lint` flags words such as `appropriate`."):
             self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
-        self.assertIn("vague-term", _rules(self._qs(["`gate` keeps many entries."])))
+        self.assertIn("vague-term", _rules(self._qs(["`gate` replies quickly."])))
+
+    def test_counting_and_sizing_words_ask_nothing(self):  # verifies: REQ-CLARIFY-1102#CASE-5
+        for clause in ("A tag binds several requirements.",
+                       "One file may hold many requirements.",
+                       "`health --json` keeps one small record.",
+                       "`clarify` answers for a large corpus.",
+                       "`init` reads various formats."):
+            self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
 
     def test_a_delegating_clause_is_not_counted(self):  # verifies: REQ-CLARIFY-1102#CASE-2
         handed = ["`map` does thing {}. [[REQ-A-{:03d}]]".format(i, i) for i in range(1, 10)]

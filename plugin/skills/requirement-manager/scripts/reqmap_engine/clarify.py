@@ -37,15 +37,15 @@ CLARIFY_HEDGES = (
     "efficient", "efficiently", "robust", "user-friendly", "intuitive",
     "quickly", "fast", "slow", "soon", "as needed", "if necessary",
     "where possible", "and/or", "etc.", "and so on", "optimal",
-    "best-effort", "gracefully", "large", "small", "many", "several",
-    "various",
+    "best-effort", "gracefully",
 )
-# A hedge counts only as a whole word outside a code span, so "smaller" is not
-# "small", a quoted `appropriate` is an example, and "how many" asks for a
-# count rather than hedging one. A code span leaves group 1 empty.
+# "several", "many", "various", "small" and "large" ask nothing: 23 of this
+# corpus's 27 vague-term questions, none real in a sample (ADR-0078).
+# A hedge counts only as a whole word outside a code span, so "fastest" is not
+# "fast" and a quoted `appropriate` is an example. A code span leaves group 1
+# empty.
 _CLARIFY_HEDGE_RE = re.compile(r"`[^`]*`|(?<![\w-])(" + "|".join(
-    r"(?<!how )many" if w == "many" else re.escape(w)
-    for w in CLARIFY_HEDGES) + r")(?![\w-])")
+    re.escape(w) for w in CLARIFY_HEDGES) + r")(?![\w-])")
 # A case mentioning any of these is exercising a failure path. Absence of ALL
 # of them across every case is the signal -- a requirement whose acceptance
 # is pure happy path.
