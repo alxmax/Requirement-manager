@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19.1",
+  "engine_version": "2026-10-19.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2071,11 +2071,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:333"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:337"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:343"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:351"
         }
       ],
       "test_exempt": null,
@@ -2261,7 +2261,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:333"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:337"
         }
       ],
       "test_exempt": null,
@@ -2308,7 +2308,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:343"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:351"
         }
       ],
       "test_exempt": null,
@@ -3231,7 +3231,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:119"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:121"
         },
         {
           "role": "implements",
@@ -3323,7 +3323,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:302"
         }
       ],
       "test_exempt": null,
@@ -3436,7 +3436,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:302"
         }
       ],
       "test_exempt": null,
@@ -3619,7 +3619,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:288"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:289"
         }
       ],
       "test_exempt": null,
@@ -4111,6 +4111,7 @@
         "ARCH-PARSE-001"
       ],
       "used_by": [
+        "ARCH-CUSTOMTRACE-077",
         "ARCH-DESIGN-061",
         "ARCH-DOCCLAIMS-071"
       ],
@@ -4135,11 +4136,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:262"
+          "loc": "plugin/scripts/reqmap_engine/config.py:268"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:290"
+          "loc": "plugin/scripts/reqmap_engine/config.py:296"
         }
       ],
       "test_exempt": null,
@@ -4204,15 +4205,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:262"
+          "loc": "plugin/scripts/reqmap_engine/config.py:268"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:279"
+          "loc": "plugin/scripts/reqmap_engine/config.py:285"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:290"
+          "loc": "plugin/scripts/reqmap_engine/config.py:296"
         }
       ],
       "test_exempt": null,
@@ -4278,7 +4279,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:237"
+          "loc": "plugin/scripts/reqmap_engine/text.py:239"
         }
       ],
       "test_exempt": null,
@@ -4337,7 +4338,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:237"
+          "loc": "plugin/scripts/reqmap_engine/text.py:239"
         }
       ],
       "test_exempt": null,
@@ -4418,11 +4419,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:153"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:163"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:181"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:191"
         }
       ],
       "test_exempt": null,
@@ -4485,7 +4486,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:182"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:192"
         }
       ],
       "test_exempt": null,
@@ -4547,15 +4548,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:153"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:163"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:170"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:180"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:183"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:193"
         }
       ],
       "test_exempt": null,
@@ -4565,6 +4566,279 @@
       "clauses": 5,
       "covered": 5,
       "clarify": []
+    },
+    {
+      "id": "ARCH-CUSTOMTRACE-077",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "confirmed",
+      "area": "ARCH",
+      "title": "A repository describes its own trace convention",
+      "intent": "A repository that already traces its code has its own tags, its own test-file names and its own requirement files, often plain text or HTML in several folders. The tool reads that convention from the config instead of asking the repository to rewrite itself. See [ADR-0077](../../docs/adr/0077-a-repository-describes-its-own-trace-tags.md).",
+      "contract": [
+        "`TRACE_TAGS` adds tag forms, each a pattern whose first group is the id, and a role. [[REQ-CUSTOMTRACE-1110]]",
+        "`TEST_FILE_PATTERNS` adds globs that make a file a test file. [[REQ-CUSTOMTRACE-1112]]",
+        "`REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, in folders of the repository's choosing. [[REQ-CUSTOMTRACE-1113]]"
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a repository in its own convention is read\n  Given  a config with a `TRACE_TAGS` form, a `TEST_FILE_PATTERNS` glob and two\n         `REQUIREMENT_SOURCES`, and a repository written only in that convention\n  When   `gate` runs\n  Then   each traced requirement has its code and its test, and a tag to no requirement is RM001\n\nCASE-2 — no config, no change\n  Given  a repository with requirements, code and tests and no `_config.json`\n  When   `sync` and `gate --full` run\n  Then   their output and the map are the same as before this change\n\nCASE-3 — a bad entry is named and skipped\n  Given  a `TRACE_TAGS` pattern with no capture group\n  When   `gate` and then `gate --strict` run\n  Then   it is an `INPUT:config` warning, then an error, and the other keys still apply\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [
+        "ARCH-CONFIG-060",
+        "ARCH-SCAN-002"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-READ-103"
+      ],
+      "satisfied_by": [
+        "REQ-CUSTOMTRACE-1110",
+        "REQ-CUSTOMTRACE-1112",
+        "REQ-CUSTOMTRACE-1113"
+      ],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_customtrace.py:187"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:167"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:328"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:9"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v8.25",
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
+    },
+    {
+      "id": "REQ-CUSTOMTRACE-1110",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Extra tag forms",
+      "intent": "The tag is whatever the repository already writes; the tool only needs to know where the id is and what the tag means.",
+      "contract": [
+        "Each `TRACE_TAGS` entry is `{\"pattern\": <regex>, \"role\": <role>}`; the pattern's first group is the id.",
+        "`role` is `implements`, `tested-by` or `auto`; `auto` is `tested-by` in a test file and `implements` anywhere else.",
+        "A configured form is read wherever a built-in tag is read: membership, dangling tags and the untagged-file report.",
+        "The built-in `implements:`, `tested-by:` and `verifies:` forms always stay.",
+        "A pattern that does not compile, has no group, or names another role is an `INPUT:config` warning, and that entry is skipped."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a configured form is a member\n  Given  a form `\\\\trace\\{([A-Z0-9_]+)\\}` with role `implements` and a code file holding `/// \\trace{AB_CD12}`\n  When   the file is scanned\n  Then   it is an `implements` member of `AB_CD12`\n\nCASE-2 — auto follows the file\n  Given  the same form with role `auto`, in a code file and in a test file\n  When   both are scanned\n  Then   the code file implements `AB_CD12` and the test file is its `tested-by`\n\nCASE-3 — a configured tag to no requirement is dangling\n  Given  `/// \\trace{AB_ZZ99}` and no requirement `AB_ZZ99`\n  When   `gate` runs\n  Then   it reports RM001 for `AB_ZZ99`\n\nCASE-4 — a bad form is skipped\n  Given  one entry with no capture group and one with role `owns`\n  When   the config is applied\n  Then   both are `INPUT:config` warnings and the built-in forms still work\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CUSTOMTRACE-077"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_customtrace.py:73"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:34"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:98"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:114"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:113"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:290"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-CUSTOMTRACE-1112",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Test files by the repository's own naming",
+      "intent": "A team names its test files its own way; the tool should know them as tests.",
+      "contract": [
+        "A file matching a `TEST_FILE_PATTERNS` glob is a test file, whether the path is relative or absolute.",
+        "The built-in convention still applies; the globs only add.",
+        "Being a test file decides an `auto` tag's role."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a glob makes a test file\n  Given  `TEST_FILE_PATTERNS` `[\"**/*Test.cpp\"]` and `src/BrakeLightTest.cpp`\n  When   the file is classified\n  Then   it is a test file\n\nCASE-2 — the convention still holds\n  Given  the same config and `tests/brake_light.cpp`\n  When   the file is classified\n  Then   it is a test file\n\nCASE-3 — without the glob it is code\n  Given  no `TEST_FILE_PATTERNS` and `src/BrakeLightTest.cpp`\n  When   the file is classified\n  Then   it is not a test file, as before\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CUSTOMTRACE-077"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_customtrace.py:114"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:119"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:342"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
+    },
+    {
+      "id": "REQ-CUSTOMTRACE-1113",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Requirements kept as text, HTML or Markdown, in any folders",
+      "intent": "Requirements live where the team keeps them, often as plain text or HTML, one folder per module. The tool cuts them into requirements with one pattern: the line a requirement starts on.",
+      "contract": [
+        "Each `REQUIREMENT_SOURCES` entry names a `glob` of files, relative to the code root, searched recursively.",
+        "`format` is `text`, `html` or `md`; `md` files are read as requirement files of this tool.",
+        "For `text` and `html`, `start` is the regex of the line a requirement starts on; its first group is the id.",
+        "A requirement runs from its start line to the next start line or the end of the file; each sentence is one clause.",
+        "HTML is read as text first: a block ends a line, and a table row reads as one line.",
+        "`status` (`confirmed` by default, or `draft`) and `owner` (`external` by default) apply to every requirement of the source.",
+        "A requirement read from text or HTML gets no finding about this tool's Markdown format: sections, cases, readability.",
+        "`clarify` asks no case of a requirement read from text or HTML.",
+        "A source file is not reported as untagged code.",
+        "A source that matches no file, and a duplicate id, are `INPUT:requirements` errors, as for `requirements/`.",
+        "The lock, the map and every generated file stay in `requirements/`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — text in two module folders is read\n  Given  a text source on `modules/*/reqs/**/*.txt` with `start` `^([A-Z][A-Z0-9_]+):`, and requirements in `modules/brake/reqs/` and `modules/door/reqs/sub/`\n  When   the workspace loads\n  Then   every requirement is found, with its own file and one clause per sentence\n\nCASE-2 — an HTML table row is one requirement\n  Given  an HTML source whose table row holds an id cell and a text cell\n  When   the workspace loads\n  Then   the row is one requirement with that id and that text\n\nCASE-3 — a text requirement is not held to the Markdown format\n  Given  a confirmed requirement read from text, with code and a test\n  When   `gate --full` runs\n  Then   it reports no missing section, no missing case and no readability finding for it\n\nCASE-4 — a source that matches nothing is named\n  Given  a source on `nowhere/**/*.txt`\n  When   `gate` runs\n  Then   it is an `INPUT:requirements` error naming the glob\n\nCASE-5 — the generated files stay put, and a source is not untagged code\n  Given  an HTML source and a code tree\n  When   `sync` and `gate --risk` run\n  Then   `_reqlock.json` and `_map.json` are written in `requirements/` only, and the HTML file is not listed as untagged",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CUSTOMTRACE-077"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_customtrace.py:133"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:53"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:130"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:144"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:164"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/customtrace.py:201"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/lint.py:37"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:118"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rules.py:271"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:152"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "6 clause(s) have no case: there are 11 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-DECOMPOSE-050",
@@ -4679,15 +4953,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:81"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:83"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:110"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:112"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:150"
         },
         {
           "role": "implements",
@@ -5839,7 +6113,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:114"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:124"
         },
         {
           "role": "implements",
@@ -5901,7 +6175,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:114"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:124"
         }
       ],
       "test_exempt": null,
@@ -6779,11 +7053,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:387"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:395"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:402"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:410"
         }
       ],
       "test_exempt": null,
@@ -7144,11 +7418,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:387"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:395"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:402"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:410"
         }
       ],
       "test_exempt": null,
@@ -7305,7 +7579,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:63"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:65"
         }
       ],
       "test_exempt": null,
@@ -7476,7 +7750,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:208"
+          "loc": "plugin/scripts/reqmap_engine/text.py:210"
         }
       ],
       "test_exempt": null,
@@ -7548,11 +7822,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:198"
+          "loc": "plugin/scripts/reqmap_engine/text.py:200"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:208"
+          "loc": "plugin/scripts/reqmap_engine/text.py:210"
         }
       ],
       "test_exempt": null,
@@ -9288,19 +9562,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:62"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:81"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:83"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:110"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:112"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:148"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:150"
         },
         {
           "role": "implements",
@@ -9367,15 +9641,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:82"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:84"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:111"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:149"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:151"
         },
         {
           "role": "implements",
@@ -9554,7 +9828,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lint.py:62"
+          "loc": "plugin/scripts/reqmap_engine/lint.py:64"
         },
         {
           "role": "implements",
@@ -10214,31 +10488,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:32"
+          "loc": "plugin/scripts/reqmap_engine/text.py:34"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:41"
+          "loc": "plugin/scripts/reqmap_engine/text.py:43"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:69"
+          "loc": "plugin/scripts/reqmap_engine/text.py:71"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:89"
+          "loc": "plugin/scripts/reqmap_engine/text.py:91"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:100"
+          "loc": "plugin/scripts/reqmap_engine/text.py:102"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:107"
+          "loc": "plugin/scripts/reqmap_engine/text.py:109"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:127"
+          "loc": "plugin/scripts/reqmap_engine/text.py:129"
         }
       ],
       "test_exempt": null,
@@ -10496,11 +10770,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:107"
+          "loc": "plugin/scripts/reqmap_engine/text.py:109"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:128"
+          "loc": "plugin/scripts/reqmap_engine/text.py:130"
         }
       ],
       "test_exempt": null,
@@ -10564,11 +10838,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:41"
+          "loc": "plugin/scripts/reqmap_engine/text.py:43"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:69"
+          "loc": "plugin/scripts/reqmap_engine/text.py:71"
         }
       ],
       "test_exempt": null,
@@ -12111,7 +12385,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:181"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:191"
         },
         {
           "role": "implements",
@@ -12363,7 +12637,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:183"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:193"
         },
         {
           "role": "implements",
@@ -12499,7 +12773,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:182"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:192"
         },
         {
           "role": "implements",
@@ -12788,7 +13062,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:206"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:218"
         },
         {
           "role": "implements",
@@ -12854,7 +13128,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:206"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:218"
         }
       ],
       "test_exempt": null,
@@ -13244,7 +13518,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:127"
+          "loc": "plugin/scripts/reqmap_engine/text.py:129"
         }
       ],
       "test_exempt": null,
@@ -14074,7 +14348,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:298"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:302"
         }
       ],
       "test_exempt": null,
@@ -14132,7 +14406,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:298"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:302"
         }
       ],
       "test_exempt": null,
@@ -16728,11 +17002,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:97"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:98"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:163"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:167"
         }
       ],
       "test_exempt": null,
@@ -16798,7 +17072,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:163"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:167"
         }
       ],
       "test_exempt": null,
@@ -16990,6 +17264,7 @@
         "ARCH-CANDIDATES-009",
         "ARCH-CHECK-006",
         "ARCH-COVERAGE-029",
+        "ARCH-CUSTOMTRACE-077",
         "ARCH-DESIGN-061",
         "ARCH-DOCBUNDLE-026",
         "ARCH-EXTRACT-008",
@@ -18768,7 +19043,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/text.py:70"
+          "loc": "plugin/scripts/reqmap_engine/text.py:72"
         }
       ],
       "test_exempt": null,
@@ -20133,11 +20408,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:62"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:87"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:88"
         }
       ],
       "test_exempt": null,
@@ -20185,7 +20460,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:62"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
         }
       ],
       "test_exempt": null,
@@ -20243,7 +20518,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:64"
         }
       ],
       "test_exempt": null,
@@ -20305,11 +20580,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:63"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/workspace.py:87"
+          "loc": "plugin/scripts/reqmap_engine/workspace.py:88"
         }
       ],
       "test_exempt": null,
@@ -20484,7 +20759,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:285"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:286"
         },
         {
           "role": "implements",
@@ -20558,7 +20833,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:285"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:286"
         }
       ],
       "test_exempt": null,
@@ -21165,7 +21440,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:230"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:242"
         },
         {
           "role": "implements",
@@ -21229,7 +21504,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:230"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:242"
         },
         {
           "role": "implements",
@@ -23768,6 +24043,7 @@
       ],
       "satisfied_by": [
         "ARCH-CANDIDATES-009",
+        "ARCH-CUSTOMTRACE-077",
         "ARCH-DESIGN-061",
         "ARCH-EXTRACT-008",
         "ARCH-PARSE-001",
@@ -24126,6 +24402,14 @@
     [
       "ARCH-COVERAGE-029",
       "ARCH-NEXT-013"
+    ],
+    [
+      "ARCH-CUSTOMTRACE-077",
+      "ARCH-CONFIG-060"
+    ],
+    [
+      "ARCH-CUSTOMTRACE-077",
+      "ARCH-SCAN-002"
     ],
     [
       "ARCH-DECOMPOSE-050",
@@ -24780,6 +25064,22 @@
     [
       "REQ-UNTAGGEDSET-1007",
       "ARCH-COVERAGE-029"
+    ],
+    [
+      "ARCH-CUSTOMTRACE-077",
+      "SYS-READ-103"
+    ],
+    [
+      "REQ-CUSTOMTRACE-1110",
+      "ARCH-CUSTOMTRACE-077"
+    ],
+    [
+      "REQ-CUSTOMTRACE-1112",
+      "ARCH-CUSTOMTRACE-077"
+    ],
+    [
+      "REQ-CUSTOMTRACE-1113",
+      "ARCH-CUSTOMTRACE-077"
     ],
     [
       "ARCH-DECOMPOSE-050",
@@ -26002,6 +26302,16 @@
       "name": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file",
       "horizon": "now",
       "req": "ARCH-SELFGATE-039",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded",
+      "horizon": "now",
+      "req": "ARCH-CUSTOMTRACE-077",
       "unpark": null,
       "done": false,
       "category": "Version 8.25 (19 to 23 October)",
@@ -28178,8 +28488,8 @@
     }
   ],
   "design": {
-    "files": 131,
-    "clean_files": 124,
+    "files": 132,
+    "clean_files": 125,
     "score": 95,
     "candidates": {
       "encapsulation": 3,
@@ -28233,9 +28543,9 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 289,
+        "line": 295,
         "name": "apply_config",
-        "detail": "`apply_config` is 82 lines (over 80)"
+        "detail": "`apply_config` is 91 lines (over 80)"
       },
       {
         "pillar": "abstraction",
@@ -28263,14 +28573,14 @@
   },
   "health": {
     "score": 100,
-    "total": 332,
-    "scored": 310,
-    "healthy": 310,
+    "total": 336,
+    "scored": 314,
+    "healthy": 314,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 310,
-    "implemented": 301,
-    "tested": 301,
+    "confirmed": 314,
+    "implemented": 305,
+    "tested": 305,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
@@ -28437,6 +28747,15 @@
         "milestone": "v8.25.0",
         "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file",
         "req": "ARCH-SELFGATE-039"
+      },
+      {
+        "title": "A repository describes its own trace convention",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded",
+        "req": "ARCH-CUSTOMTRACE-077"
       }
     ],
     "cadence": {

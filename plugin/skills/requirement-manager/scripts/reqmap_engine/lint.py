@@ -33,6 +33,8 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):
     when it is zero, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are
     silently skipped and not counted against the requirement."""
+    if r["meta"].get("source") in ("text", "html"):
+        return []   # implements: REQ-CUSTOMTRACE-1113 — not written in this format
     exempt = set(_as_list(r["meta"].get("lint_exempt")))
     body = r["body"]
     findings = []

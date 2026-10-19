@@ -3,6 +3,7 @@ the source-repo predicate and the test-link probe.
 """
 import os, re
 
+from . import config as cfg
 from .locks import load_lock
 from .mapcmd import _assemble_map_data
 from .model import Requirement, _as_list, _satisfied_by
@@ -147,8 +148,11 @@ class Workspace(object):  # implements: ARCH-RULES-059
         takes before dispatching to any command."""
         members, ac_cover, level_cover = scan_all(code_root, reqs_dir,
                                                    cache=cache)
-        return cls(load_requirements(reqs_dir), members, reqs_dir, code_root,
-                   ac_cover, level_cover)
+        reqs = load_requirements(reqs_dir)
+        if cfg.REQUIREMENT_SOURCES:  # implements: REQ-CUSTOMTRACE-1113
+            from .customtrace import load_sources
+            load_sources(reqs, code_root)
+        return cls(reqs, members, reqs_dir, code_root, ac_cover, level_cover)
 
     def levels(self):
         """The per-requirement test levels, walking for them only if the cached

@@ -286,7 +286,11 @@ def _scan_file_tags(fp, lines=None):
         if prose:
             s = _BACKTICK_RE.sub("", s)
         seen = set()
-        for role, cap in _findall_tags(s):
+        found = _findall_tags(s)
+        if cfg.TRACE_TAGS:  # implements: REQ-CUSTOMTRACE-1110
+            from .customtrace import custom_tags
+            found += custom_tags(fp, s)
+        for role, cap in found:
             key = (role, cap)
             if key not in seen:
                 seen.add(key)
@@ -335,6 +339,10 @@ def _is_test_path(rel):
     `*_test.go`, `*.spec.ts`)."""
     parts = rel.replace(os.sep, "/").split("/")
     base = parts[-1]
+    if cfg.TEST_FILE_PATTERNS:  # implements: REQ-CUSTOMTRACE-1112
+        from .customtrace import matches_test_glob
+        if matches_test_glob(rel):
+            return True
     return (any(p in _TEST_DIR_NAMES for p in parts[:-1])
             or base.startswith("test_") or base.endswith(_TEST_FILE_SUFFIXES))
 

@@ -267,7 +267,8 @@ def _dangling_verifies_rule(ctx):
 @gate_rule("RM014", "warn")
 def _confirmed_sections_rule(ctx):  # implements: REQ-CHECK-1040
     for rid, r in ctx.reqs.items():
-        if r["meta"].get("status") != "confirmed":
+        if r["meta"].get("status") != "confirmed" or r["meta"].get(
+                "source") in ("text", "html"):  # implements: REQ-CUSTOMTRACE-1113
             continue
         if not _has_any(r["body"], CONTRACT_LABELS):
             yield rid, (

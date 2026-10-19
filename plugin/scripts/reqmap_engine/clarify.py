@@ -259,7 +259,8 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
             "Description carries no clause.",
             "Write one statement per obligation, present tense, "
             "naming the subject."))
-    if n_cases == 0:
+    # a requirement kept as text has no cases to ask for (REQ-CUSTOMTRACE-1113)
+    if n_cases == 0 and r["meta"].get("source") not in ("text", "html"):
         out.append(_clarify_item(
             "no-cases", "blocking", "Cases", "",
             "What observable behaviour proves this requirement holds? "

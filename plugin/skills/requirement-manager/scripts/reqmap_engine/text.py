@@ -26,6 +26,8 @@ def _req_file(reqs, rid):
     that is the only thing worth printing at a reader."""
     r = reqs.get(rid) or {}
     p = r.get("path")
+    if p and r["meta"].get("source") in ("text", "html"):  # REQ-CUSTOMTRACE-1113
+        return os.path.relpath(p).replace(os.sep, "/")
     return "requirements/" + (os.path.basename(p) if p else str(rid) + ".md")
 
 

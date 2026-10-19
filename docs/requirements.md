@@ -89,6 +89,41 @@ architecture requirement keeps its own detailed design in one document instead
 of scattering it across dozens of files. A file with one block is read exactly
 as before.
 
+## Your own convention (ADR-0077)
+
+A repository that already traces its code does not have to rewrite it. Three optional keys
+in `requirements/_config.json` describe the convention it already uses; with none set,
+nothing changes.
+
+```json
+{
+  "TRACE_TAGS": [{"pattern": "\\\\trace\\{([A-Z0-9_]+)\\}", "role": "auto"}],
+  "TEST_FILE_PATTERNS": ["**/*Test.cpp"],
+  "REQUIREMENT_SOURCES": [
+    {"glob": "modules/*/reqs/**/*.txt", "format": "text", "start": "^([A-Z][A-Z0-9_]+):"},
+    {"glob": "specs/*.html", "format": "html", "start": "^\\s*([A-Z][A-Z0-9_]+)\\s",
+     "status": "confirmed", "owner": "spec team"}
+  ]
+}
+```
+
+- **`TRACE_TAGS`** — extra tag forms. The pattern's first group is the requirement id. `role` is
+  `implements`, `tested-by`, or `auto`: tested-by in a test file, implements anywhere else, so one
+  form serves code and tests. The example reads `/// \trace{AB_CD12}`. In JSON a literal
+  backslash is written `\\\\`.
+- **`TEST_FILE_PATTERNS`** — globs that also make a file a test file, beside the built-in
+  convention (`tests/`, `test_*.py`, `*_test.go`, …).
+- **`REQUIREMENT_SOURCES`** — files that hold requirements, as `text`, `html` or `md`. For text
+  and HTML, `start` matches the line a requirement starts on (its first group is the id); the
+  requirement runs to the next such line, and each sentence is one clause. HTML is read as text
+  first, so a table row with an id cell and a text cell is one requirement. `status` (default
+  `confirmed`) and `owner` (default `external`) apply to the whole source.
+
+A requirement read from text or HTML is not held to the Markdown format above: no section, case
+or readability check. Every link check still applies: a tag to no requirement, a requirement with
+no code or no test, and a changed text (drift). A bad entry is an `INPUT:config` warning (an error
+under `--strict`), and a source that matches no file is an `INPUT:requirements` error.
+
 ## Glossary (the jargon, in plain words)
 
 - **Capability / requirement** — one thing your app does, described in one file.
