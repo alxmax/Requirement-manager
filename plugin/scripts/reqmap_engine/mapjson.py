@@ -111,7 +111,9 @@ def _build_json_text(data, compact=None):
         payload["health"] = data["health"]
     if data.get("planning"):
         payload["planning"] = data["planning"]
-    compact = cfg.MAP_PROFILE == "compact" if compact is None else compact
+    if data.get("audit"):                       # implements: REQ-AUDITRUN-1108
+        payload["audit"] = data["audit"]
+    compact =cfg.MAP_PROFILE == "compact" if compact is None else compact
     return _utf8_safe(json.dumps(
         payload, indent=None if compact else 2, ensure_ascii=False,
         separators=(",", ":") if compact else None))

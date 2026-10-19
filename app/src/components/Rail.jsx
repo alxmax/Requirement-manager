@@ -1,7 +1,7 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1082
 import {
-  REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN,
+  REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN, AUDIT,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
@@ -14,6 +14,8 @@ const NAV = [
   { key: "roadmap", label: "Roadmap", icon: "list-checks" },
   { key: "commands", label: "Commands", icon: "terminal" },
   { key: "questions", label: "Questions", icon: "circle-help" },
+  // only while an audit runs  implements: REQ-AUDITRUN-1108
+  { key: "audit", label: "Audit", icon: "scan-line", when: () => !!AUDIT },
 ];
 
 function Gauge({ pct, tone, size = 28 }) {
@@ -61,13 +63,14 @@ function RailNav({ view, setView, problems }) {
     roadmap: todoCount,
     commands: CLI.length || null,
     questions: asked,
+    audit: AUDIT ? AUDIT.plan.ranked + AUDIT.plan.random : null,
   };
   return (
     <>
       <div className="rail-section" style={{ paddingTop: 2 }}>
         {t("Workspace")}
       </div>
-      {NAV.map((n) => (
+      {NAV.filter((n) => !n.when || n.when()).map((n) => (
         <div key={n.key}
              className={"nav-item" + (view === n.key ? " active" : "")}
              onClick={() => setView(n.key)}>

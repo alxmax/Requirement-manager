@@ -67,7 +67,9 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,694 by ADR-0074: baselines are checked, and a waiver is refused over
 # a drift log the engine cannot keep.
 # Lowered to 6,688 by ADR-0075, which retires `number-without-unit`.
-CORE_LOGICAL_BUDGET = 6688
+# Raised to 6,706 by ADR-0076: the audit session's flags, its dispatch, the
+# INPUT:audit findings and the map's audit block. auditrun.py stays lazy.
+CORE_LOGICAL_BUDGET = 6706
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

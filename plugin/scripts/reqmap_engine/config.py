@@ -158,6 +158,12 @@ LINT_QUESTION_CONTEXT_LABELS = ["Context"]
 LINT_QUESTION_RECOMMENDED_MARKS = ["(recommended)"]
 LINT_QUESTION_SOURCE_LABELS = ["Recommendation source"]
 LINT_QUESTION_DEFER_WORDS = ["decide", "decides", "to be decided"]
+# implements: REQ-AUDITRUN-1107 - an audit's decision bands (ADR-0076). They are
+# copied into the plan when it is written, so changing them later moves nothing.
+AUDIT_BANDS = {"precision_lower_bound": 0.5, "findings_per_10": 1,
+               "stop_after": 20}
+# a rate built on fewer cases than this is printed and not judged
+AUDIT_MIN_POSITIVES = 5
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
 
 
@@ -235,7 +241,7 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN",
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
-               "DESIGN_LINE_MAX")
+               "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
 # declared here and a value outside them is reported rather than applied.

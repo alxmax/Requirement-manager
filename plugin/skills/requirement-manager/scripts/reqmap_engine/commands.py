@@ -321,6 +321,28 @@ COMMANDS = {
              ],
              "type": "bool",
              "help": "With --retire or --release: emit the plan as JSON."},
+            {"name": "audit_plan", "flag": "--audit-plan",
+             "consumer": "plugin/skills/requirement-manager/references/audit.md",
+             "type": "bool",
+             "help": "Write an audit plan to requirements/_audit.json instead "
+                     "of syncing: a ranked set and a seeded random set of "
+                     "confirmed requirements, and the decision bands. Written "
+                     "once; an existing file is never replaced (ADR-0076)."},
+            {"name": "ranked", "flag": "--ranked",
+             "consumer": "plugin/skills/requirement-manager/references/audit.md",
+             "type": "int",
+             "help": "With --audit-plan: how many requirements to rank by "
+                     "risk (default 25)."},
+            {"name": "audit_random", "flag": "--random",
+             "consumer": "plugin/skills/requirement-manager/references/audit.md",
+             "type": "int",
+             "help": "With --audit-plan: how many to draw at random from the "
+                     "rest (default 25)."},
+            {"name": "seed", "flag": "--seed",
+             "consumer": "plugin/skills/requirement-manager/references/audit.md",
+             "type": "int",
+             "help": "With --audit-plan: the seed of the random draw "
+                     "(default: today as YYYYMMDD)."},
         ],
     },
     "clarify": {

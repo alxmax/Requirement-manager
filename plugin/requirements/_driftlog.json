@@ -13,6 +13,10 @@
       "hash": "23fd3d396c67",
       "reason": "ARCH-AUDIT-065 gains the obligation sentence for its new member REQ-RELEVEL-997 (relevel.py had shipped in v7.2.0 with no requirement, RM024); ARCH-SELFGATE-039's CASE-1/CASE-2 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
     },
+    "ARCH-AUDITRUN-076": {
+      "hash": "9b895310a4a7",
+      "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
+    },
     "ARCH-CANDIDATES-009": {
       "hash": "fe6645d2ba41",
       "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
@@ -168,6 +172,22 @@
     "REQ-AUDIT-973": {
       "hash": "4a1331189f6f",
       "reason": "design review, site generator and i18n detector removed (ADR-0047): audit, registry, MCP, translate and self-check contracts follow"
+    },
+    "REQ-AUDITRUN-1105": {
+      "hash": "de63ca5eebde",
+      "reason": "ARCH-AUDITRUN-076 confirmed by its owner on 2026-10-19; text aligned with the implementation (eligibility, settled ok findings, review shape)"
+    },
+    "REQ-AUDITRUN-1106": {
+      "hash": "85f3619f6b62",
+      "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
+    },
+    "REQ-AUDITRUN-1108": {
+      "hash": "ee2c1db6d73f",
+      "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
+    },
+    "REQ-AUDITRUN-1109": {
+      "hash": "d1f8dd693b28",
+      "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
     "REQ-CHECK-1036": {
       "hash": "bfd8e3e1acfc",
