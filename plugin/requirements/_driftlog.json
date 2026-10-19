@@ -625,6 +625,10 @@
       "hash": "9e5be4fbe62c",
       "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
+    "REQ-VIEWER-1114": {
+      "hash": "d2e43f99cec6",
+      "reason": null
+    },
     "REQ-VIEWER-940": {
       "hash": "77e9d38ebfb9",
       "reason": null

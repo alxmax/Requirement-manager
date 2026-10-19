@@ -1302,7 +1302,10 @@ Every bullet below is binding.
   list shows them on the current tab, a decision question with its options on their own
   lines.
 - Below the questions the panel shows the requirement's Description clauses and its Cases.
-- A button in the panel opens the requirement, and another closes the panel.
+- A button in the panel opens the requirement, and another closes the panel. Both come
+  before the questions, so a long requirement never pushes them out of sight.
+- Below 820px the panel is a sheet fixed to the bottom of the screen, so a row chosen
+  far down a long list still shows its panel.
 
 ## Cases
 CASE-1 — choosing a question shows it beside the list
@@ -1319,5 +1322,6 @@ CASE-2 — nothing chosen, no panel
 
 CASE-3 — the panel opens the requirement only when asked
   Given  the panel for a chosen requirement
-  When   its open button is used
-  Then   the requirement opens; choosing a row never opens it
+  When   its open button is used, and the panel's layout is read
+  Then   the requirement opens, choosing a row never opens it, the buttons precede the
+         questions, and the narrow layout pins the panel to the bottom of the screen

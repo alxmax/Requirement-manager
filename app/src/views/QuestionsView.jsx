@@ -160,6 +160,13 @@ export function QuestionPanel({ id, tab, keep, qs, openSpec, close, t }) {
         <Pill kind={statusKind(r.status)}>{r.status}</Pill>
       </div>
       <h3>{r.title}</h3>
+      {/* first, so a long requirement never pushes them out of sight */}
+      <div className="q-panel-actions">
+        <button className="btn btn-secondary" onClick={() => openSpec(r.id)}>
+          {t("Open requirement")} <Icon name="arrow-right" size={13} />
+        </button>
+        <button className="btn btn-ghost" onClick={close}>{t("Close")}</button>
+      </div>
       {asked.length > 0 && (
         <ul className="finding-qs q-asked" {...reqLinkProps(openSpec)}>
           {asked.map(md(mdQuestion))}
@@ -174,12 +181,6 @@ export function QuestionPanel({ id, tab, keep, qs, openSpec, close, t }) {
             {r.gwt.split("\n").map((ln, i) => <div key={i}>{ln}</div>)}
           </div>
         : <ul {...reqLinkProps(openSpec)}>{(r.acc || []).map(md(mdInline))}</ul>}
-      <div className="q-panel-actions">
-        <button className="btn btn-secondary" onClick={() => openSpec(r.id)}>
-          {t("Open requirement")} <Icon name="arrow-right" size={13} />
-        </button>
-        <button className="btn btn-ghost" onClick={close}>{t("Close")}</button>
-      </div>
     </aside>
   );
 }

@@ -396,10 +396,13 @@ h1 .i18n-badge { font-size: 12px; }
 .q-panel h3 { margin: 6px 0 10px; font: var(--text-body); font-weight: 600; color: var(--fg); }
 .q-panel .eyebrow { margin-top: 14px; }
 .q-panel ul { padding-left: 20px; }
-.q-panel-actions { display: flex; gap: 8px; margin-top: 16px; }
+.q-panel-actions { display: flex; gap: 8px; margin-bottom: 4px; }
+/* Narrow: below a long list the panel would never be seen, so it is a sheet
+   pinned to the bottom of the screen, whatever the scroll. */
 @media (max-width: 820px) {
   .q-split { grid-template-columns: minmax(0, 1fr); }
-  .q-panel { position: static; margin: 0 16px 48px; max-height: none; }
+  .q-split .problems { padding-bottom: 62vh; }
+  .q-panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; margin: 0; max-height: 58vh; border-radius: var(--radius-2) var(--radius-2) 0 0; box-shadow: var(--shadow-2); }
 }
 /* What a clarify question rests on (ADR-0070): a missing section, two counts
    that disagree, or a word on a list. */
