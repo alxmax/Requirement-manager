@@ -3357,6 +3357,49 @@ class ClarifyInTheMap(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # test
         self.assertEqual(basis["vague-term"], "wording")
 
 
+class ClarifyWordLists(unittest.TestCase):  # tested-by: REQ-CLARIFY-1115
+    """The word rules read lists a repository can replace, so a corpus written in
+    another language is not judged by English words."""
+
+    def setUp(self):
+        self.saved = {k: list(getattr(R.config, k))
+                      for k in ("CLARIFY_HEDGES", "CLARIFY_FAILURE_WORDS")}
+
+    def tearDown(self):
+        R.config.apply_config(self.saved, out=io.StringIO())
+
+    def _rules_for(self, clause, case):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-L-001.md"), _spec(
+                "AREA-L-001", [clause], ("CASE-1 — c\n  Given " + case
+                                         + "\n  When y\n  Then z",)))
+            reqs = R.load_requirements(d)
+            return _rules(R._clarify_questions("AREA-L-001", reqs["AREA-L-001"], reqs))
+
+    def test_a_configured_failure_word_answers_the_failure_question(self):  # verifies: REQ-CLARIFY-1115#CASE-1
+        clause, case = "`portal` primește cererea.", "o cerere refuzată de server"
+        self.assertIn("no-failure-case", self._rules_for(clause, case))
+        R.config.apply_config({"CLARIFY_FAILURE_WORDS": ["refuz", "lipsă"]}, out=io.StringIO())
+        self.assertNotIn("no-failure-case", self._rules_for(clause, case))
+
+    def test_configured_hedges_replace_the_english_list(self):  # verifies: REQ-CLARIFY-1115#CASE-2
+        R.config.apply_config({"CLARIFY_HEDGES": ["aproximativ"]}, out=io.StringIO())
+        self.assertIn("vague-term", self._rules_for(
+            "`portal` răspunde aproximativ imediat.", "o cerere refuzată"))
+        self.assertNotIn("vague-term", self._rules_for(
+            "`gate` replies quickly.", "an invalid tag"))
+
+    def test_a_given_head_keeps_its_diacritics(self):  # verifies: REQ-CLARIFY-1115#CASE-3
+        self.assertEqual("șablon", R.clarify._given_head("un șablon global"))
+        self.assertEqual("ţară", R.clarify._given_head("o ţară nouă"))
+
+    def test_a_list_of_the_wrong_type_is_refused(self):  # verifies: REQ-CLARIFY-1115#CASE-4
+        out = io.StringIO()
+        R.config.apply_config({"CLARIFY_FAILURE_WORDS": "refuz"}, out=out)
+        self.assertIn("CLARIFY_FAILURE_WORDS", out.getvalue())
+        self.assertEqual(self.saved["CLARIFY_FAILURE_WORDS"], R.config.CLARIFY_FAILURE_WORDS)
+
+
 class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956
     """The counter compares two numbers and never reads a case, so it may not
     accuse a clause by position — it says how many are uncovered, not which."""

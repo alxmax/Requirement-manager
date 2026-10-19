@@ -26,8 +26,8 @@
       "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
-      "hash": "408d65933df0",
-      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+      "hash": "21b462b80dad",
+      "reason": null
     },
     "ARCH-CMDREGISTRY-033": {
       "hash": "93c7a2a3ece7",

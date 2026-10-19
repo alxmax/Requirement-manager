@@ -26,6 +26,7 @@ Every bullet below is binding.
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 - The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
 - `clarify` raises no question from a word found only inside another word, from a clause that hands its cases to another requirement, or from a clause quantified over "all", "every", "any"; it asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]
+- The words `clarify`'s word rules read are a repository's to replace, so a corpus written in another language is not judged by English words. [[REQ-CLARIFY-1115]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -401,3 +402,52 @@ CASE-5 — counting and sizing words ask nothing
          one small record", "for a large corpus" and "reads various formats"
   When   the detectors run
   Then   none raises a vague-term question
+
+---
+id: REQ-CLARIFY-1115
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CLARIFY-062]
+---
+
+# A corpus in another language sets its own words
+
+## Description
+> `vague-term` and `no-failure-case` read lists of English words. On a corpus written in
+> another language the first fires only on English tokens (an enum value, a borrowed
+> term) and the second never sees the failure words its cases do use, so it asks about a
+> failure path the cases already prove. See
+> [ADR-0079](../../docs/adr/0079-clarify-word-lists-are-per-repository.md).
+
+Every bullet below is binding.
+- The hedge words `vague-term` reads are `CLARIFY_HEDGES`, and the words that mark a
+  case as a failure path are `CLARIFY_FAILURE_WORDS`. Both are `_config.json` keys.
+- A list set in `_config.json` replaces the default list rather than adding to it, and
+  is compared without regard to case.
+- A value that is not a list of strings is reported and the default list stays.
+- The kind of input a Given starts from is read in any script, so a word with a
+  diacritic is read whole.
+
+## Cases
+CASE-1 — a configured failure word answers the failure question
+  Given  a requirement whose only case reads "o cerere refuzată de server", once with
+         the default list and once with `CLARIFY_FAILURE_WORDS` set to "refuz" and "lipsă"
+  When   the detectors run
+  Then   the first raises `no-failure-case` and the second does not
+
+CASE-2 — configured hedges replace the English list
+  Given  `CLARIFY_HEDGES` set to "aproximativ"
+  When   the detectors read "răspunde aproximativ imediat" and "replies quickly"
+  Then   only the first raises a vague-term question
+
+CASE-3 — a Given head keeps its diacritics
+  Given  Given lines opening "un șablon global" and "o ţară nouă"
+  When   their head word is read
+  Then   it is "șablon" and "ţară", not "ablon" and "ară"
+
+CASE-4 — a list of the wrong type is refused
+  Given  `CLARIFY_FAILURE_WORDS` set to a single string instead of a list
+  When   the config is applied
+  Then   the key is reported and the default list stays in force

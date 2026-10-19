@@ -32,29 +32,20 @@ def blocking_question_rules(reqs):  # implements: REQ-CLARIFY-975
 # is the moment BEFORE code exists -- an author writes "the gate reports
 # errors quickly", nobody asks what quickly means, and the ambiguity is
 # discovered by the reader of the failing test three weeks later.
-CLARIFY_HEDGES = (
-    "appropriate", "appropriately", "properly", "reasonable", "reasonably",
-    "efficient", "efficiently", "robust", "user-friendly", "intuitive",
-    "quickly", "fast", "slow", "soon", "as needed", "if necessary",
-    "where possible", "and/or", "etc.", "and so on", "optimal",
-    "best-effort", "gracefully",
-)
+# The hedge and failure words are `cfg.CLARIFY_HEDGES` and
+# `cfg.CLARIFY_FAILURE_WORDS`, which a repository replaces (ADR-0079).
 # "several", "many", "various", "small" and "large" ask nothing: 23 of this
 # corpus's 27 vague-term questions, none real in a sample (ADR-0078).
 # A hedge counts only as a whole word outside a code span, so "fastest" is not
 # "fast" and a quoted `appropriate` is an example. A code span leaves group 1
-# empty.
-_CLARIFY_HEDGE_RE = re.compile(r"`[^`]*`|(?<![\w-])(" + "|".join(
-    re.escape(w) for w in CLARIFY_HEDGES) + r")(?![\w-])")
-# A case mentioning any of these is exercising a failure path. Absence of ALL
-# of them across every case is the signal -- a requirement whose acceptance
-# is pure happy path.
-CLARIFY_FAILURE_WORDS = (
-    "invalid", "missing", "empty", "absent", "error", "fails", "failure",
-    "refuse", "refuses", "reject", "rejects", "corrupt", "malformed",
-    "unreadable", "not found", "timeout", "conflict", "duplicate", "unknown",
-    "no ", "none", "cannot", "without",
-)
+# empty. Built per call, since a config can change the list; `re` caches the
+# compiled pattern itself.
+
+
+def _hedge_re():
+    # implements: REQ-CLARIFY-1102  # implements: REQ-CLARIFY-1115
+    words = "|".join(map(re.escape, cfg.CLARIFY_HEDGES)) or "(?!)"
+    return re.compile(r"`[^`]*`|(?<![\w-])(" + words + r")(?![\w-])", re.I)
 # A clause that ends by naming another requirement (`... [[REQ-X-001]]`, or
 # `[[REQ-X-001]] details the behaviour.`) hands its cases to that requirement.
 _CLARIFY_DELEGATES_RE = re.compile(
@@ -85,8 +76,10 @@ _CLARIFY_ARTICLES = frozenset((
 def _given_head(text):
     """The kind of thing a Given starts from: its first word that is not
     an article or a leading adjective. Crude on purpose -- it only has
-    to be stable across cases."""
-    for w in re.findall(r"[A-Za-z_`][\w`.-]*", text.lower()):
+    to be stable across cases. A letter is any script's letter, so
+    "șablon" is not read as "ablon"."""
+    # implements: REQ-CLARIFY-1115
+    for w in re.findall(r"[^\W\d][\w`.-]*|`[\w`.-]*", text.lower()):
         w = w.strip("`")
         if len(w) < 3 or w in _CLARIFY_ARTICLES:
             continue
@@ -158,7 +151,7 @@ def _clause_questions(clauses):
         low = c.lower()
         where = "clause {}".format(i)
         # one hedge per clause is enough to start the conversation
-        h = next((x for x in _CLARIFY_HEDGE_RE.finditer(low) if x.group(1)),
+        h = next((x for x in _hedge_re().finditer(low) if x.group(1)),
                  None)
         if h:
             out.append(_clarify_item(
@@ -274,7 +267,8 @@ def _clarify_questions(rid, r, reqs=None, domain=None):
 
     # a need is one story with one Scenario, so it has no failure path to name
     if (n_cases and r["meta"].get("layer") != "need"
-            and not any(w in cases_low for w in CLARIFY_FAILURE_WORDS)):
+            and not any(w.lower() in cases_low
+                     for w in cfg.CLARIFY_FAILURE_WORDS)):
         out.append(_clarify_item(
             "no-failure-case", "advisory", "Cases", "",
             "What happens on the failure path -- missing input, "
