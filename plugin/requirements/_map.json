@@ -3598,7 +3598,7 @@
       "id": "REQ-CLARIFY-1115",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A corpus in another language sets its own words",
       "intent": "`vague-term` and `no-failure-case` read lists of English words. On a corpus written in another language the first fires only on English tokens (an enum value, a borrowed term) and the second never sees the failure words its cases do use, so it asks about a failure path the cases already prove. See [ADR-0079](../../docs/adr/0079-clarify-word-lists-are-per-repository.md).",
@@ -3642,12 +3642,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "clarify": []
@@ -28363,30 +28358,20 @@
     "score": 100,
     "total": 338,
     "scored": 316,
-    "healthy": 315,
+    "healthy": 316,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 315,
+    "confirmed": 316,
     "implemented": 307,
     "tested": 307,
-    "drafts": 1,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 315,
-    "unhealthy": [
-      {
-        "id": "REQ-CLARIFY-1115",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      }
-    ],
+    "unhealthy": [],
     "exempt_ids": [
       {
         "id": "ARCH-VIEWER-007",

@@ -405,7 +405,7 @@ CASE-5 — counting and sizing words ask nothing
 
 ---
 id: REQ-CLARIFY-1115
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
