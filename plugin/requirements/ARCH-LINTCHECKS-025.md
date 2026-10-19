@@ -399,7 +399,7 @@ CASE-3 — redundant-modal reports each distinct term once
 
 ---
 id: REQ-LINTCHECKS-1089
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -1,6 +1,6 @@
 ---
-generated: 2026-10-18
-engine: 2026-10-18
+generated: 2026-10-19
+engine: 2026-10-19
 nodes: 326
 edges: 121
 design pass-rate: 95% (121/128 source files without a design candidate)
@@ -423,28 +423,10 @@ graph LR
   f_plugin_scripts_reqmap_engine_scan_py_226_339["plugin/scripts/reqmap_engine/scan.py:226-339"]
   ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_engine_scan_py_226_339
   ARCH_ADOPT_075["Adoption before the whole tree is tagged<br><small>ARCH-ADOPT-075</small>"]
+  f_plugin_scripts_test_reqmap_adopt_py_180["plugin/scripts/test_reqmap_adopt.py:180"]
+  ARCH_ADOPT_075 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_180
   f_plugin_scripts_reqmap_engine_watch_py_264["plugin/scripts/reqmap_engine/watch.py:264"]
   ARCH_ADOPT_075 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_264
-  REQ_WATCH_1092["Watch the files a change already touched<br><small>REQ-WATCH-1092</small>"]
-  f_plugin_scripts_reqmap_py_330["plugin/scripts/reqmap.py:330"]
-  REQ_WATCH_1092 -->|implements| f_plugin_scripts_reqmap_py_330
-  f_plugin_scripts_test_reqmap_adopt_py_51["plugin/scripts/test_reqmap_adopt.py:51"]
-  REQ_WATCH_1092 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_51
-  f_plugin_scripts_reqmap_engine_watch_py_24_265["plugin/scripts/reqmap_engine/watch.py:24-265"]
-  REQ_WATCH_1092 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_24_265
-  REQ_PROPOSE_1093["The agent proposes a draft and a person confirms it<br><small>REQ-PROPOSE-1093</small>"]
-  f_plugin_scripts_reqmap_py_330["plugin/scripts/reqmap.py:330"]
-  REQ_PROPOSE_1093 -->|implements| f_plugin_scripts_reqmap_py_330
-  f_plugin_scripts_test_reqmap_adopt_py_178["plugin/scripts/test_reqmap_adopt.py:178"]
-  REQ_PROPOSE_1093 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_178
-  f_plugin_scripts_reqmap_engine_watch_py_24_265["plugin/scripts/reqmap_engine/watch.py:24-265"]
-  REQ_PROPOSE_1093 -->|implements| f_plugin_scripts_reqmap_engine_watch_py_24_265
-  REQ_EXTREPO_1094["The gate runs on a repository that is not this one<br><small>REQ-EXTREPO-1094</small>"]
-  f_plugin_scripts_test_reqmap_adopt_py_211["plugin/scripts/test_reqmap_adopt.py:211"]
-  REQ_EXTREPO_1094 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_211
-  REQ_SURFACE_1095["The six verbs stay, and pip installs the same engine<br><small>REQ-SURFACE-1095</small>"]
-  f_plugin_scripts_test_reqmap_adopt_py_225["plugin/scripts/test_reqmap_adopt.py:225"]
-  REQ_SURFACE_1095 -->|tested-by| f_plugin_scripts_test_reqmap_adopt_py_225
   ARCH_ATOMICITY_049["Statement atomicity<br><small>ARCH-ATOMICITY-049</small>"]
   f_plugin_scripts_test_reqmap_author_py_1680_2156["plugin/scripts/test_reqmap_author.py:1680-2156"]
   ARCH_ATOMICITY_049 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1680_2156
@@ -1138,49 +1120,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_REQ["REQ"]
-    REQ_WATCH_1092["Watch the files a change already touched<br><small>REQ-WATCH-1092</small><br>unreviewed"]
-    REQ_PROPOSE_1093["The agent proposes a draft and a person confirms it<br><small>REQ-PROPOSE-1093</small><br>unreviewed"]
-    REQ_EXTREPO_1094["The gate runs on a repository that is not this one<br><small>REQ-EXTREPO-1094</small><br>unreviewed"]
-    REQ_SURFACE_1095["The six verbs stay, and pip installs the same engine<br><small>REQ-SURFACE-1095</small><br>unreviewed"]
-    REQ_DRIFT_1103["A baseline that exists and cannot be used is named<br><small>REQ-DRIFT-1103</small><br>unreviewed"]
-    REQ_DRIFT_1104["A waiver is not recorded over a log this engine cannot keep<br><small>REQ-DRIFT-1104</small><br>unreviewed"]
-    REQ_EXTRACT_1099["A code draft asks about the lines the scan found<br><small>REQ-EXTRACT-1099</small><br>unreviewed"]
-    REQ_LINTCHECKS_1089["Decision questions the person answering can read<br><small>REQ-LINTCHECKS-1089</small><br>unreviewed"]
-    REQ_PLANVERSIONBAR_1091["A bar that is a version, not work, is counted<br><small>REQ-PLANVERSIONBAR-1091</small><br>unreviewed"]
-    REQ_VIEWER_1090["A rail reading opens Problems on its own tab<br><small>REQ-VIEWER-1090</small><br>unreviewed"]
-    REQ_VIEWER_1101["Questions have a page of their own<br><small>REQ-VIEWER-1101</small><br>unreviewed"]
-  end
-  subgraph sg_misc["misc"]
-    ARCH_ADOPT_075["Adoption before the whole tree is tagged<br><small>ARCH-ADOPT-075</small><br>unreviewed, untested"]
-  end
-  style ARCH_ADOPT_075 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_WATCH_1092 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROPOSE_1093 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTREPO_1094 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SURFACE_1095 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_1103 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_1104 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_1099 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_1089 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PLANVERSIONBAR_1091 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1090 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1101 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| ARCH-ADOPT-075 | draft | 1 | 0 | unreviewed, untested | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |
-| REQ-WATCH-1092 | draft | 16 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROPOSE-1093 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTREPO-1094 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SURFACE-1095 | draft | 1 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-1103 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-1104 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-1099 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-1089 | draft | 9 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PLANVERSIONBAR-1091 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1090 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1101 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

@@ -147,10 +147,9 @@ satisfies: [ARCH-PROMOTE-011]
 > the easy path and re-reading it the hard one. Now the safe outcome is the default.
 
 Every bullet below is binding.
-- When `sync` or `init` updates the lock and finds a `confirmed` or `implemented`
-  requirement whose binding hash differs from the committed one, it writes `status: draft`
-  into that requirement. Neither takes a waiver the caller did not ask for; only
-  `sync --accept-drift` does.
+- A `sync` or `init` that updates the lock writes `status: draft` into every `confirmed`
+  or `implemented` requirement whose binding hash differs from the committed one. Neither
+  takes a waiver the caller did not ask for; only `sync --accept-drift` does.
 - **A brand-new requirement is not drift.** A requirement absent from the lock has no
   previous text to have changed, so it is never demoted.
 - The run **names every demoted requirement**, with its previous status, and states that
@@ -160,13 +159,12 @@ Every bullet below is binding.
 - `--accept-drift` skips the demotion entirely: the status stays and the baseline
   advances.
 - **An unchanged file is not an edit.** A drifted requirement whose file is identical to its
-  copy in the commit that last wrote the lock keeps its status: its hash moved because a
-  newer engine hashes differently. That holds only if the engine changed, which the file
-  does not show: the map committed beside the lock records the engine that wrote it, and
-  must name another engine than the one running. The run says so, and the waiver is
-  recorded in the drift log with that commit. Without git, a lock never committed, a file
-  git does not track, or a map that is missing, unreadable or names this same engine, the
-  requirement is demoted as before.
+  copy in the commit that last wrote the lock keeps its status when the map committed beside
+  that lock names another engine than the one running: its hash moved because a newer
+  engine hashes differently. The run says so, and records the waiver in the drift log with
+  that commit.
+- Without git, with a lock never committed, a file git does not track, or a map that is
+  missing, unreadable or names this same engine, the requirement is demoted as before.
 - The in-memory status is updated too, so the same run's own summary counts the
   requirement as a draft rather than reporting a status it has just changed.
 

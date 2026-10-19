@@ -25,7 +25,7 @@ Every bullet below is binding.
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
 - `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 - The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]
-- `clarify` asks nothing of a whole word it only contains, a clause that hands its cases to another requirement, or a clause quantified over "all", "every" or "any", and asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]
+- `clarify` raises no question from a word found only inside another word, from a clause that hands its cases to another requirement, or from a clause quantified over "all", "every", "any"; it asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -378,8 +378,7 @@ CASE-3 — all, every and any ask nothing
   Then   no question is raised
 
 CASE-4 — a split is asked only where lint warns
-  Given  a requirement with eight clauses and four cases, and one with eleven clauses and
+  Given  requirement A with eight clauses, four cases; requirement B with eleven clauses,
          eight cases
   When   the detectors run and `lint` runs
-  Then   only the second raises an over-scoped question, and `lint` warns `over-scoped` on
-         it too
+  Then   only B raises an over-scoped question, and `lint` warns `over-scoped` on B too

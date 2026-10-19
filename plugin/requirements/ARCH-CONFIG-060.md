@@ -64,7 +64,9 @@ satisfies: [ARCH-CONFIG-060]
 Every bullet below is binding.
 - `load_config(reqs_dir)` returns the parsed object from `requirements/_config.json`, or `{}` when the file is absent, unreadable, not JSON, or not a JSON object.
 - `apply_config(cfg)` sets each key named in `CONFIG_KEYS` on the module and returns the list of names it applied.
-- A numeric constant accepts a number of the same kind; a dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple. A fan-out band that is not `[low, high]`, with `high` a whole number, `low` one or null and no more than `high`, is reported on stderr and skipped, and the other entries still apply.
+- A numeric constant accepts a number of the same kind.
+- A dictionary constant such as `LINT_FANOUT_BANDS` is merged key by key, a JSON list becoming a tuple.
+- A fan-out band is `[low, high]`: `high` a whole number, `low` one or null, `low` no more than `high`. Any other band is reported on stderr and skipped; the other entries still apply.
 - `extra_code_exts`, a list of extensions with or without the leading dot, is appended to `CODE_EXTS`, so every scan site sees the new file types.
 - A key not in `CONFIG_KEYS`, or a value of the wrong type, is reported on stderr as `config: ignoring ...` and skipped; every other key still applies.
 - `main` collects the diagnostics of `load_config` and `apply_config` in one `problems` list before scanning, and prints each on stderr.

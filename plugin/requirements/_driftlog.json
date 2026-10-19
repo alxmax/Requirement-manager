@@ -5,6 +5,10 @@
       "hash": "bb4111bf675e",
       "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
+    "ARCH-ADOPT-075": {
+      "hash": "0607f963642d",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+    },
     "ARCH-AUDIT-065": {
       "hash": "23fd3d396c67",
       "reason": "ARCH-AUDIT-065 gains the obligation sentence for its new member REQ-RELEVEL-997 (relevel.py had shipped in v7.2.0 with no requirement, RM024); ARCH-SELFGATE-039's CASE-1/CASE-2 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
@@ -18,8 +22,8 @@
       "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
     },
     "ARCH-CLARIFY-062": {
-      "hash": "4224c55dad1b",
-      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+      "hash": "408d65933df0",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "ARCH-CMDREGISTRY-033": {
       "hash": "93c7a2a3ece7",
@@ -190,8 +194,8 @@
       "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
     },
     "REQ-CLARIFY-1102": {
-      "hash": "1372e6e35029",
-      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+      "hash": "438e5e2cc46c",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "REQ-CLARIFY-956": {
       "hash": "5a881f4f53d3",
@@ -210,8 +214,8 @@
       "reason": "Shared assistant workflow and discoverable adapters"
     },
     "REQ-CONFIG-949": {
-      "hash": "74ff030aeb44",
-      "reason": null
+      "hash": "441a90cd9477",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",
@@ -244,6 +248,10 @@
     "REQ-EXTRACT-981": {
       "hash": "ca22b80b0a14",
       "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
+    },
+    "REQ-EXTREPO-1094": {
+      "hash": "9e46c0fdfc6b",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "REQ-FINDINGS-853": {
       "hash": "b687863b90c7",
@@ -330,8 +338,8 @@
       "reason": null
     },
     "REQ-MCPTOOLS-1028": {
-      "hash": "35ea796c139e",
-      "reason": null
+      "hash": "f18d400d4a3f",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "REQ-MODULEFILE-056": {
       "hash": "f5c9407f0cfe",
@@ -394,8 +402,8 @@
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
     },
     "REQ-PROMOTE-974": {
-      "hash": "a50e9c5df96c",
-      "reason": null
+      "hash": "865b34bad038",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "REQ-PROSE-900": {
       "hash": "880304bce879",
@@ -485,6 +493,10 @@
       "hash": "0cf310579c78",
       "reason": "Bare sync leaves a page with no engine region alone"
     },
+    "REQ-SURFACE-1095": {
+      "hash": "a0c49b5950a6",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+    },
     "REQ-TESTLINK-932": {
       "hash": "c69a8b33555e",
       "reason": null
@@ -533,6 +545,10 @@
       "hash": "13513264942c",
       "reason": null
     },
+    "REQ-VIEWER-1101": {
+      "hash": "9e5be4fbe62c",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+    },
     "REQ-VIEWER-940": {
       "hash": "77e9d38ebfb9",
       "reason": null
@@ -560,6 +576,10 @@
     "REQ-VIEWER-999": {
       "hash": "6488ed81b2f7",
       "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
+    },
+    "REQ-WATCH-1092": {
+      "hash": "3324bb4fecc9",
+      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
     "SYS-GATE-102": {
       "hash": "09266141a146",

@@ -159,7 +159,7 @@ def _unchanged_since_lock(reqs, reqs_dir, rids):  # implements: REQ-PROMOTE-974
     Such a file cannot have been edited since it was baselined, so a hash that
     moved moved because the HASHING did: a newer engine computes the binding
     hash differently. Demoting it would strip every confirmation a consumer
-    holds on the first sync after an upgrade (Consilium-py, 2026-09-21: 17 of
+    holds on the first sync after an upgrade (one consumer, 2026-09-21: 17 of
     17). That holds only if the engine changed, and the file being unchanged
     does not show it: a lock committed with a contract edit it never took up
     leaves the same picture. The map committed beside that lock records the

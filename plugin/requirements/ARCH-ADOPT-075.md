@@ -1,8 +1,10 @@
 ---
 id: ARCH-ADOPT-075
-status: draft
+status: confirmed
+level: architecture
 layer: feature
 owner: Alex
+satisfies: [SYS-SHIP-108]
 ---
 
 # Adoption before the whole tree is tagged
@@ -14,7 +16,7 @@ owner: Alex
 
 Every bullet below is binding.
 - `init --watch REF` reports code files changed since REF that no requirement claims, and the commit subjects since REF, and it writes nothing. [[REQ-WATCH-1092]]
-- `init --propose` prints one requirement draft. It is a command-line flag, not an MCP tool. A person sets `status: confirmed`. [[REQ-PROPOSE-1093]]
+- `init --propose`, a command-line flag and not an MCP tool, prints one requirement draft that only a person sets to `status: confirmed`. [[REQ-PROPOSE-1093]]
 - `gate` run on a copy of a repository outside this one still reports that copy's own drift. [[REQ-EXTREPO-1094]]
 - The CLI stays six verbs, and a checkout can install that same engine with `pip install .`. [[REQ-SURFACE-1095]]
 
@@ -24,14 +26,26 @@ CASE-1 — a draft is not a confirmed contract
   When   either command finishes
   Then   it has written no requirement file and it has not set `status: confirmed`
 
+CASE-2 — a tree outside this repository is gated on its own drift
+  Given  a copy of `examples/hello-drift` outside this checkout
+  When   `gate` runs there
+  Then   it reports that copy's drift and exits 0
+
+CASE-3 — the surface is six verbs and one pip package
+  Given  the command registry and `pyproject.toml`
+  When   both are read
+  Then   the verbs are the six, and the package's console script is this engine's CLI
+
 --------------------
 
 
 ---
 id: REQ-WATCH-1092
-status: draft
+status: confirmed
+level: code
 layer: feature
 owner: Alex
+satisfies: [ARCH-ADOPT-075]
 ---
 
 # Watch the files a change already touched
@@ -66,10 +80,12 @@ CASE-3 — a subject that starts with Merge is omitted
   When   `init --watch REF` runs
   Then   only the second subject is listed, with `status` `draft`, and `issues` is `not read`
 
-CASE-4 — a ref git cannot read exits 0
-  Given  a git repository and a ref that does not exist
-  When   `init --watch` is given that ref
-  Then   the process exits 0 and the report's `error` says git could not read that ref
+CASE-4 — a ref git cannot read exits 0, and a ref that starts with a dash is one
+  Given  a git repository, a ref that does not exist, and a `--watch` value that starts
+         with `-` and names a file
+  When   `init --watch` is given each
+  Then   each run exits 0, `ok` is false, the report's `error` says git could not read that
+         ref, and the named file was not created
 
 CASE-5 — gate does not own --watch
   Given  `--watch` passed to `gate`
@@ -81,12 +97,7 @@ CASE-6 — the caps say when a suggestion was left out
   When   `init --watch` runs
   Then   `truncated` is false
 
-CASE-7 — a ref that starts with a dash is not a git option
-  Given  `--watch` whose value starts with `-` and names a file
-  When   `init --watch` runs
-  Then   the process exits 0, `ok` is false, the error says git could not read that ref, and that file was not created
-
-CASE-8 — an ignored path is not a suggestion
+CASE-7 — an ignored path is not a suggestion
   Given  `.reqmapignore` matches `vendor/**` and that tree changed
   When   `init --watch` runs
   Then   no path under `vendor/` is a suggestion
@@ -96,9 +107,11 @@ CASE-8 — an ignored path is not a suggestion
 
 ---
 id: REQ-PROPOSE-1093
-status: draft
+status: confirmed
+level: code
 layer: feature
 owner: Alex
+satisfies: [ARCH-ADOPT-075]
 ---
 
 # The agent proposes a draft and a person confirms it
@@ -134,9 +147,11 @@ CASE-3 — watch and propose together are refused
 
 ---
 id: REQ-EXTREPO-1094
-status: draft
+status: confirmed
+level: code
 layer: feature
 owner: Alex
+satisfies: [ARCH-ADOPT-075]
 ---
 
 # The gate runs on a repository that is not this one
@@ -147,6 +162,8 @@ owner: Alex
 
 Every bullet below is binding.
 - Running this engine's `gate` with its working directory set to a copy of `examples/hello-drift` reports `RM018` for `HELLO-GREET-001` and exits 0.
+- `gate --strict` on that copy exits 1.
+- `gate --root` naming that copy, from another working directory, gives the same report.
 
 ## Cases
 CASE-1 — a copied hello-drift still shows drift
@@ -154,14 +171,26 @@ CASE-1 — a copied hello-drift still shows drift
   When   `gate` runs with that directory as its working directory
   Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0
 
+CASE-2 — the same drift fails the copy under --strict
+  Given  the same copy
+  When   `gate --strict` runs with that directory as its working directory
+  Then   the process exits 1 and the output names `HELLO-GREET-001`
+
+CASE-3 — --root reaches the copy from another directory
+  Given  the same copy, and a working directory that is not it
+  When   `gate --root` names the copy
+  Then   the output names `RM018` and `HELLO-GREET-001`, and the process exits 0
+
 --------------------
 
 
 ---
 id: REQ-SURFACE-1095
-status: draft
+status: confirmed
+level: code
 layer: feature
 owner: Alex
+satisfies: [ARCH-ADOPT-075]
 ---
 
 # The six verbs stay, and pip installs the same engine
@@ -185,4 +214,9 @@ CASE-1 — the verb set is the six
 CASE-2 — the package metadata names reqmap
   Given  `pyproject.toml` at the repository root
   When   it is read
-  Then   it names `reqmap`, requires Python `>=3.9`, declares Apache-2.0, and points the console script at `reqmap:_run_cli`
+  Then   it names `reqmap`, requires Python `>=3.9`, and points the console script at `reqmap:_run_cli`
+
+CASE-3 — the package licence is Apache-2.0
+  Given  `pyproject.toml` at the repository root
+  When   its licence is read
+  Then   it is Apache-2.0

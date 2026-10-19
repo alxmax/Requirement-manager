@@ -86,7 +86,7 @@ def _with_engine_package(pats):
     (`init` seeds exactly that), and since v7 the engine is the CLI plus the
     package beside it. A `.reqmapignore` written before v7 names only the file,
     so re-vendoring a v7+ engine turned every self-tag in the package into a
-    dangling-tag ERROR (Consilium-py, 2026-09-21: 100+ RM001). A repo that hosts
+    dangling-tag ERROR (one consumer, 2026-09-21: 100+ RM001). A repo that hosts
     its own engine does not ignore reqmap.py, so it is unaffected."""
     extra = [p[:-len("reqmap.py")] + "reqmap_engine/**" for p in pats
              if p == "reqmap.py" or p.endswith("/reqmap.py")]
