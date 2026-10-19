@@ -2,12 +2,13 @@
 import json
 
 from . import MAP_ENGINE_VERSION
+from .auditrun import review_context
 from .lintrules import _count_ac
 from .sections import ACCEPTANCE_LABELS, CONTRACT_LABELS, _from_any
 from .text import _bullets, _first_quote, _title
 
 
-def cmd_review(reqs, one_id=None):
+def cmd_review(reqs, one_id=None, reqs_dir=None):
     # implements: ARCH-REVIEW-022  # implements: REQ-REVIEW-906
     """Emit a DETERMINISTIC, read-only review PLAN as JSON for an
     out-of-band AI quality pass. The engine never calls an LLM and writes
@@ -23,6 +24,8 @@ def cmd_review(reqs, one_id=None):
         return 1
     ids = [one_id] if one_id else sorted(reqs)
     items = []
+    # implements: REQ-AUDITRUN-1109 — while an audit runs, the method too
+    audit = review_context(reqs_dir) if reqs_dir else None
     for rid in ids:
         r = reqs.get(rid)
         if not r:
@@ -53,6 +56,8 @@ def cmd_review(reqs, one_id=None):
                 "more_contract_than_acceptance": len(contract) > ac_n,
             },
         })
+        if audit:
+            items[-1]["in_plan"] = audit[1](rid)
     plan = {
         "engine_version": MAP_ENGINE_VERSION,
         "advisory": ("DETERMINISTIC read-only review plan. AI findings "
@@ -77,5 +82,7 @@ def cmd_review(reqs, one_id=None):
                               "requirements_in_plan": len(items)},
         "requirements": items,
     }
+    if audit:
+        plan["audit"] = audit[0]
     print(json.dumps(plan, indent=2, ensure_ascii=False))
     return 0

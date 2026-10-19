@@ -62,6 +62,17 @@ verdict as text output,
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
 | `--release [vX.Y.Z]` | Cut the next version planned in `_planning.json` — the lowest milestone above the version already declared — or the one named. Prints the plan and writes nothing without `--apply`; with it, bumps the version files, writes the dated CHANGELOG entry and drops the milestone and its bars from the plan. Exit 2 when nothing is planned, the version is not above the baseline, or the gate has errors. `--json` is what a release workflow reads. |
 | `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
+| `--audit-plan` | Start an audit session (ADR-0076): write `requirements/_audit.json` with a ranked set (`--ranked N`, default 25) and a seeded random set (`--random N`, `--seed S`; default 25 and today as `YYYYMMDD`) of confirmed requirements that carry code, and the decision bands from `AUDIT_BANDS`. Written once: an existing file is never replaced, and the run exits 1. |
+
+**An audit session.** After the plan, each review run adds findings to `_audit.json`
+(`id`, `run`, `label` of `bug` / `not-implemented` / `false-coverage` / `ok`, `clause`,
+`note`) and a person adds one decision per finding (`id`, `clause`, `counter`, `by`). The
+engine only reads the file: a malformed entry is an `INPUT:audit` warning (an error under
+`--strict`). `gate --audit` gains an audit section with every rate as k/n and its Wilson 95%
+interval, and the band the result falls in; `sync` copies it into the map, where the viewer
+shows an Audit view. `ask --review` carries the review prompt and each requirement's place in
+the plan. The MCP server gains no tool and stays read-only. The method for an assistant is in
+the skill's `references/audit.md`.
 
 Confirming a requirement is **not** a command — it is a human's answer. Edit
 `status: confirmed` in the frontmatter once someone has actually read it. The gate

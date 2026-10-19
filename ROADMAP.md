@@ -23,6 +23,13 @@ Cadence: one release a week, not one per merge.
 - [ ] The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays | req: ARCH-RELEASE-072
 - [ ] The `clause-without-case` questions are read family by family, as the guesses they are (ADR-0075: 7 of 20 real). Done when: ARCH-VIEWER-007's nine are read, and the next four families by count too: add the cases that are really missing with their tests, and leave a clause a case already proves as it is | req: ARCH-CLARIFY-062
 - [ ] Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped | req: REQ-DRIFT-1103
+- [ ] An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged | req: ARCH-AUDITRUN-076
+- [ ] `clarify` knows failure words beyond its own list. Done when: a case naming a sensor fault is not asked `no-failure-case` (`CLARIFY_FAILURE_WORDS`, `clarify.py:52`, lacks "fault"), and a repository can add words through `_config.json` | req: ARCH-CLARIFY-062
+- [ ] The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it) | req: ARCH-MAP-007
+- [ ] `sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements | req: ARCH-PROMOTE-011
+- [ ] The MCP docs count the tools a client sees. Done when: `docs/integrations.md` and `docs/commands.md` say eleven read-only tools and two writing ones behind `--allow-writes`, and the skill's `references/mcp.md` no longer names `reqmap_new` nor says approval is never asked outside Claude Code | req: ARCH-MCP-073
+- [ ] The map viewer makes no network request. Done when: `_map_viewer.html` carries its fonts or falls back to system fonts, with no `fonts.googleapis.com` link | req: ARCH-VIEWER-007
+- [ ] The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file | req: ARCH-SELFGATE-039
 
 ## Next
 

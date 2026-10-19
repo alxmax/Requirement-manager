@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+**An audit is a recorded session: a fixed plan, one file of findings, and a report that gives every rate as k/n with its interval (ADR-0076).**
+
+- `sync --audit-plan` (`--ranked N`, `--random N`, `--seed S`) writes `requirements/_audit.json` once: the ranked set (untested cases, then `clarify` questions, then linked files), a seeded random set of the rest, and the decision bands from `AUDIT_BANDS`. Only confirmed requirements that carry code are planned; an existing file is never replaced. REQ-AUDITRUN-1105
+- Findings and decisions are edits to that file, as confirming a requirement is. A malformed entry, an id outside the plan or a second decision for one finding is an `INPUT:audit` warning in the bare gate, an error under `--strict`; the engine never rewrites the file. An `ok` nobody contradicts needs no decision. REQ-AUDITRUN-1106
+- `gate --audit` gains an audit section, in text and `--json` (`audit_session`): each counter, Copilot precision, the miss rate on the random set and the agreement between runs, each as k/n with a Wilson 95% interval, and the band. A finding whose runs disagree counts as unresolved; a rate on fewer than `AUDIT_MIN_POSITIVES` cases is printed and not judged. The exit code stays the gate's. REQ-AUDITRUN-1107
+- `sync` copies the section into `_map.json` under `audit`, and the viewer gains an Audit view: the plan and its seed, each requirement's state, runs and decisions, the counters and the rates. No MCP tool is added and none writes. REQ-AUDITRUN-1108
+- `ask --review` (and `reqmap_review`) carries the review prompt and each requirement's place in the plan while a session is open; the skill's `references/audit.md` holds the method for an assistant. REQ-AUDITRUN-1109
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.1`; 18,617 physical lines in 77 files (the README says so). The core rises to 6,706 logical lines (ADR-0076); `auditrun.py` loads only while an audit runs
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

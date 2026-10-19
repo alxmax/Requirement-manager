@@ -220,6 +220,22 @@
           "json": {
             "type": "boolean",
             "description": "With --retire or --release: emit the plan as JSON."
+          },
+          "audit_plan": {
+            "type": "boolean",
+            "description": "Write an audit plan to requirements/_audit.json instead of syncing: a ranked set and a seeded random set of confirmed requirements, and the decision bands. Written once; an existing file is never replaced (ADR-0076)."
+          },
+          "ranked": {
+            "type": "integer",
+            "description": "With --audit-plan: how many requirements to rank by risk (default 25)."
+          },
+          "audit_random": {
+            "type": "integer",
+            "description": "With --audit-plan: how many to draw at random from the rest (default 25)."
+          },
+          "seed": {
+            "type": "integer",
+            "description": "With --audit-plan: the seed of the random draw (default: today as YYYYMMDD)."
           }
         },
         "required": []

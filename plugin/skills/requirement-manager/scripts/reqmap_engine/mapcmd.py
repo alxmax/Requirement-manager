@@ -113,6 +113,10 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
     planning = load_targets(reqs_dir)
     if planning:
         data["planning"] = planning
+    if os.path.isfile(os.path.join(reqs_dir, "_audit.json")):
+        # implements: REQ-AUDITRUN-1108 — only while an audit runs
+        from .auditrun import map_block
+        data["audit"] = map_block(reqs_dir)
     _attach_translations(data, reqs, reqs_dir)
     return data
 

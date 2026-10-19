@@ -1,5 +1,5 @@
 """`gate --audit`: the corpus-shape report."""
-import contextlib, io, json
+import contextlib, io, json, os
 
 from . import MAP_ENGINE_VERSION, config as cfg
 from .audittail import _roadmap_lag_lines, _version_lines
@@ -14,6 +14,16 @@ from .similar import (
 )
 from .targets import load_targets
 from .workspace import GateContext
+
+
+def _session(reqs_dir):
+    # implements: REQ-AUDITRUN-1107
+    """The audit session's report, or None when no session is open. Loaded
+    only when `_audit.json` exists."""
+    if not reqs_dir or not os.path.isfile(os.path.join(reqs_dir, "_audit.json")):
+        return None
+    from .auditrun import session_report
+    return session_report(reqs_dir)
 
 
 # ---------- health (corpus coherence snapshot) ----------
@@ -121,6 +131,9 @@ def _json_audit_report(ws, signals, strict):
     roadmap += _version_bars(ws.reqs_dir)
     if roadmap:
         out["roadmap"] = roadmap
+    session = _session(ws.reqs_dir)
+    if session is not None:
+        out["audit_session"] = session
     errs, warns = run_gate_rules(
         GateContext(ws, full_members=members, update_lock=False),
         strict=strict)
@@ -254,6 +267,29 @@ def _print_audit_corpus_shape(shape):
     print("")
 
 
+def _print_audit_session(reqs_dir):
+    # implements: REQ-AUDITRUN-1107
+    """Print the audit session block when one is open."""
+    session = _session(reqs_dir)
+    if session is None:
+        return
+    from .auditrun import report_lines
+    print("-" * 72)
+    if "plan" not in session:
+        print("Audit session - the file cannot be used")
+        print("-" * 72)
+        for m in session["problems"]:
+            print("  ! INPUT:audit " + m)
+        print("")
+        return
+    lines = report_lines(session)
+    print(lines[0])
+    print("-" * 72)
+    for text in lines[1:]:
+        print(text)
+    print("")
+
+
 def cmd_audit(ws, strict=False, as_json=False):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
     """Run every pass that discovers a problem, and print one report.
@@ -320,4 +356,5 @@ def cmd_audit(ws, strict=False, as_json=False):
     _print_audit_exemptions(exemptions)
     _print_audit_corpus_shape(shape)
     _print_audit_roadmap(reqs, code_root, reqs_dir)
+    _print_audit_session(reqs_dir)
     return gate_rc

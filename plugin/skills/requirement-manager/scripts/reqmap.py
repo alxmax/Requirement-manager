@@ -130,9 +130,13 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     # something is broken (ADR-0049); `--full` runs the whole registry and
     # prints every readability warning, as `gate` did before v8.4.0.
     quiet = not getattr(a, "full", False)
-    result = GateResult(Finding("INPUT:config", "error" if a.strict else
-                                "warn", None, msg)
-                        for msg in getattr(a, "config_problems", ()))
+    inputs = [("INPUT:config", m) for m in getattr(a, "config_problems", ())]
+    if os.path.isfile(os.path.join(reqs_dir, "_audit.json")):
+        # implements: REQ-AUDITRUN-1106 — loaded only while an audit runs
+        from reqmap_engine.auditrun import input_problems
+        inputs += [("INPUT:audit", m) for m in input_problems(reqs_dir)]
+    result = GateResult(Finding(rule, "error" if a.strict else "warn", None,
+                                msg) for rule, msg in inputs)
     if not a.as_json:
         print("".join("{} {} {}\n".format(
             "ERROR" if f["severity"] == "error" else "WARN ", f["rule"], f)
@@ -195,7 +199,7 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
         # No id plans the whole corpus: what cmd_review and the review skill
         # always said.
         from reqmap_engine.review import cmd_review
-        return cmd_review(reqs, a.mode_review or None)
+        return cmd_review(reqs, a.mode_review or None, reqs_dir)
     if a.mode_dupes:
         return cmd_similar(reqs,
                            a.threshold if a.threshold is not None
@@ -218,6 +222,9 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         from reqmap_engine.release import cmd_release
         return cmd_release(ws, code_root, reqs_dir, version=a.mode_release,
                            apply_it=a.do_apply, as_json=a.as_json)
+    if a.audit_plan:  # implements: REQ-AUDITRUN-1105
+        from reqmap_engine.auditrun import cmd_audit_plan
+        return cmd_audit_plan(ws, a.ranked, a.audit_random, a.seed)
     # Before the gate, not after: the generated integration artifacts are
     # derived from the command registry, and RM028 reports them stale.
     # Regenerating them downstream of a check that fails ON them can never
@@ -436,7 +443,7 @@ _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
                  "plandrift", "planschema", "release",
                  "testgaps", "init", "levelshape", "watch", "todoparse",
-                 "draftquestions")
+                 "draftquestions", "auditrun")
 
 
 def __getattr__(name):

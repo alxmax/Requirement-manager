@@ -79,6 +79,11 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--release", dest="mode_release", metavar="VERSION",
                     nargs="?", const=True,
                     default=None)
+    # implements: REQ-AUDITRUN-1105
+    ap.add_argument("--audit-plan", dest="audit_plan", action="store_true")
+    ap.add_argument("--ranked", type=int, default=None)
+    ap.add_argument("--random", dest="audit_random", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=None)
 
 
 # The flags every verb accepts: where the workspace is, and whether to

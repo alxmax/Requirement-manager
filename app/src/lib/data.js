@@ -46,6 +46,11 @@ export let ROADMAP = [];
  * CHANGELOG.md. Facts, not plan — the Gantt draws it left of the today line.
  * implements: REQ-HISTORY-1081 */
 export let HISTORY = [];
+/* The audit session `sync` copies from requirements/_audit.json: the plan,
+ * each requirement's runs and decisions, the counters and the rates. Null when
+ * no audit runs, and then the rail lists no Audit entry.
+ * implements: REQ-AUDITRUN-1108 */
+export let AUDIT = null;
 /* The branch git was on when the map was written, when it could say.
  * Absent is not a wrong answer — a detached HEAD or no work tree both
  * read as unknown, and the band keeps its former label.
@@ -86,6 +91,8 @@ export function adoptMapExport(data) {
   const health = data.health, design = data.design;
   HEALTH = (health && typeof health.score === "number") ? health : null;
   DESIGN = (design && typeof design.score === "number") ? design : null;
+  AUDIT = (data.audit && typeof data.audit === "object" && data.audit.plan)
+    ? data.audit : null;
   const planning = data.planning || data.targets;
   TARGETS = (planning && typeof planning === "object") ? planning : null;
 }

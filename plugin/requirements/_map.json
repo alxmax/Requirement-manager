@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19",
+  "engine_version": "2026-10-19.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -402,7 +402,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:330"
+          "loc": "plugin/scripts/reqmap.py:337"
         },
         {
           "role": "tested-by",
@@ -513,7 +513,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:330"
+          "loc": "plugin/scripts/reqmap.py:337"
         },
         {
           "role": "tested-by",
@@ -916,7 +916,9 @@
         "ARCH-SIMILAR-016",
         "ARCH-COVERAGE-029"
       ],
-      "used_by": [],
+      "used_by": [
+        "ARCH-AUDITRUN-076"
+      ],
       "satisfies": [
         "SYS-REPORT-105"
       ],
@@ -942,39 +944,39 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:21"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:31"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:40"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:50"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:48"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:93"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:103"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:134"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:177"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:190"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:188"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:215"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:258"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:294"
         },
         {
           "role": "implements",
@@ -1143,35 +1145,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:21"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:31"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:48"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:93"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:103"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:134"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:177"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:190"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:188"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:215"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:258"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:294"
         }
       ],
       "test_exempt": null,
@@ -1319,7 +1321,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:269"
+          "loc": "plugin/scripts/reqmap.py:276"
         },
         {
           "role": "tested-by",
@@ -1474,6 +1476,467 @@
       "clauses": 6,
       "covered": 6,
       "clarify": []
+    },
+    {
+      "id": "ARCH-AUDITRUN-076",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "confirmed",
+      "area": "ARCH",
+      "title": "An audit is a recorded session",
+      "intent": "`gate --audit` says what the engine can find. Auditing a repository that is already traced asks something else: of what a reviewer looked at, what was really wrong, and how sure we are. That takes a plan fixed before anyone looks, a record of every review and decision, and figures that carry their denominator. See [ADR-0076](../../docs/adr/0076-an-audit-is-a-recorded-session.md).",
+      "contract": [
+        "`sync --audit-plan` writes the audit plan once, ranked and seeded, before the first review. [[REQ-AUDITRUN-1105]]",
+        "Findings and decisions live in `requirements/_audit.json`, which a person edits and the engine only validates. [[REQ-AUDITRUN-1106]]",
+        "`gate --audit` reports every audit rate as k/n with its interval, and the band the result falls in. [[REQ-AUDITRUN-1107]]",
+        "The map shows the audit in a view of its own, and the MCP server stays read-only. [[REQ-AUDITRUN-1108]]",
+        "The review dossier an assistant reads carries the review prompt and the plan. [[REQ-AUDITRUN-1109]]"
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a whole session runs on the existing verbs\n  Given  a repository with requirements, code and tests, and no `_audit.json`\n  When   `sync --audit-plan` runs, two findings and their decisions are added to the file, and\n         `gate --audit --json` runs\n  Then   the report counts both findings, and the command registry still has six verbs\n\nCASE-2 — the MCP tool set does not change\n  Given  the server started without `--allow-writes`\n  When   its tools are listed while an audit is in progress\n  Then   they are the same 11 read-only tools as without an audit\n\nCASE-3 — the map shows the session\n  Given  a session with a plan and one decision\n  When   `sync` runs\n  Then   `_map.json` carries an `audit` block whose counters include that decision\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [
+        "ARCH-AUDIT-065",
+        "ARCH-MCP-073",
+        "ARCH-VIEWER-007"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-REPORT-105"
+      ],
+      "satisfied_by": [
+        "REQ-AUDITRUN-1105",
+        "REQ-AUDITRUN-1106",
+        "REQ-AUDITRUN-1107",
+        "REQ-AUDITRUN-1108",
+        "REQ-AUDITRUN-1109"
+      ],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:319"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:11"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v8.25",
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
+    },
+    {
+      "id": "REQ-AUDITRUN-1105",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The plan is fixed before the first review",
+      "intent": "A plan that can change after the first results is not a plan. Writing it to a committed file before anyone reviews makes any later change visible in git.",
+      "contract": [
+        "`sync --audit-plan` writes `requirements/_audit.json` with the date, the seed, the ordering key, the ranked ids, the random ids, and the bands from `AUDIT_BANDS`.",
+        "`--ranked N` and `--random N` set the two sizes (default 25 each); `--seed S` sets the seed, and without it the seed is the date as `YYYYMMDD`, printed.",
+        "The ranked set is the first N requirements ordered by untested cases, then `clarify` questions, then linked files, all descending, ties by id ascending.",
+        "The random set is drawn with `random.Random(seed)` from the requirements not ranked, sorted by id before the draw, so one seed always gives one set.",
+        "When `_audit.json` already holds a plan, `--audit-plan` writes nothing and exits 1, naming the file.",
+        "Only requirements with `status: confirmed` that carry code are eligible: a `layer: need` or `aggregate` has none to compare a clause with."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the plan is written with its seed\n  Given  a corpus of 60 confirmed requirements and no `_audit.json`\n  When   `sync --audit-plan --ranked 5 --random 5 --seed 7` runs\n  Then   `_audit.json` holds 5 ranked ids, 5 random ids, seed 7, the date and the bands\n\nCASE-2 — one seed gives one set\n  Given  the same corpus, planned twice in two copies with seed 7\n  When   the two plans are compared\n  Then   the ranked and the random ids are identical\n\nCASE-3 — the ranked set follows the ordering key\n  Given  requirement A with 3 untested cases, B with 1 and 4 `clarify` questions, C with 1 and none\n  When   `--ranked 3` plans\n  Then   the ranked order is A, B, C\n\nCASE-4 — an existing plan is not replaced\n  Given  an `_audit.json` that already holds a plan\n  When   `sync --audit-plan` runs again\n  Then   it exits 1, names the file, and the file is byte-identical\n\nCASE-5 — a draft is never sampled\n  Given  a corpus with draft and confirmed requirements\n  When   the plan is written\n  Then   no draft id is in either set\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-AUDITRUN-076"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:225"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:79"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:47"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:56"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:73"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:89"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:82"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 6 clauses and 5 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUDITRUN-1106",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Findings and decisions are recorded in one file",
+      "intent": "A finding that lives in a chat transcript cannot be counted, and a decision made in a meeting cannot be checked. Like confirming a requirement, deciding a finding is an edit a person makes, not a command.",
+      "contract": [
+        "A finding has `id`, `run`, `label`, `clause` and `note`.",
+        "`run` is a whole number from 1; `label` is one of `bug`, `not-implemented`, `false-coverage`, `ok`.",
+        "`clause` is a clause number, or null for the whole requirement.",
+        "Findings with the same `id` and `clause` are one finding over several runs.",
+        "A decision names one finding by `id` and `clause`, who decided as `by`, and exactly one counter: `B`, `F_copilot`, `G`, `A`, `F_tool`, `M`, `U`.",
+        "An `ok` nobody contradicts needs no decision and counts as `ok`.",
+        "A person who finds a bug behind an `ok` decides `M`.",
+        "An entry with a missing field, an unknown label or counter, an id outside the plan, or a second decision for one finding is reported as an `INPUT:audit` warning naming the entry; `--strict` makes it an error.",
+        "The engine never writes findings or decisions, and never rewrites `_audit.json` after the plan."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a valid record is read\n  Given  a plan, two findings for one id in runs 1 and 2, and one decision `B`\n  When   `gate --audit --json` runs\n  Then   the audit section counts one `B` and no `INPUT:audit` warning appears\n\nCASE-2 — a malformed entry is named, not fixed\n  Given  a finding with label `maybe` and a decision with counter `X`\n  When   `gate` runs, then `gate --strict` runs\n  Then   both entries are named as `INPUT:audit` warnings, the second run exits 1, and the file is unchanged\n\nCASE-3 — an id outside the plan is refused\n  Given  a finding for a requirement in neither set\n  When   `gate --audit` runs\n  Then   the entry is named as an `INPUT:audit` warning and is not counted\n\nCASE-4 — one finding, one counter\n  Given  two decisions for the same finding\n  When   `gate --audit` runs\n  Then   the second is named as an `INPUT:audit` warning and only the first is counted\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-AUDITRUN-076"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:135"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:139"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:116"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:144"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:167"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:189"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:212"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "vague-term",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "clause 4",
+          "quote": "Findings with the same `id` and `clause` are one finding over several runs.",
+          "question": "What is the measurable threshold behind \"several\"?",
+          "suggest": "Replace it with a number and a unit, or with the observable condition it stands for."
+        },
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "5 clause(s) have no case: there are 9 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUDITRUN-1107",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The report gives every rate as k/n with its interval",
+      "intent": "Twelve bugs means nothing without the number of requirements reviewed, and three of four means little without how wide that could be. The report states the denominator and the interval every time, and refuses to judge a rate built on too few cases.",
+      "contract": [
+        "`gate --audit` prints an audit section when `_audit.json` exists, in text and in `--json`, and its exit code is unchanged by it.",
+        "The section gives each counter, Copilot precision `B / (B + F_copilot)`, the miss rate `M / random reviewed`, and the agreement rate between runs, each as k/n with a Wilson 95% interval.",
+        "A finding whose runs disagree on the label counts in `U`, whatever was decided.",
+        "The section names the band the result falls in, from the plan's bands; a rate with fewer than `AUDIT_MIN_POSITIVES` positives (default 5) is printed and marked not judged.",
+        "`reqmap_audit` returns the same section, because it returns `gate --audit --json`."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a rate carries its interval\n  Given  decisions giving B = 7 and F_copilot = 13\n  When   `gate --audit --json` runs\n  Then   precision is 7/20 with a 95% interval of about 0.18 to 0.57\n\nCASE-2 — zero is an upper bound\n  Given  25 random requirements reviewed and M = 0\n  When   the report runs\n  Then   the miss rate is 0/25 with an upper bound of about 0.13\n\nCASE-3 — too few positives are not judged\n  Given  B + F_copilot = 4\n  When   the report runs\n  Then   precision is printed and marked not judged, and no band is named for it\n\nCASE-4 — runs that disagree are unresolved\n  Given  one finding labelled `bug` in run 1 and `ok` in run 2, decided `B`\n  When   the report runs\n  Then   it counts in `U`, not in `B`\n\nCASE-5 — the exit code is the gate's\n  Given  a clean gate and an audit whose band is `stop`\n  When   `gate --audit` runs\n  Then   it exits 0\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-AUDITRUN-076"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:187"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:20"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/audit.py:271"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:223"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:235"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:244"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:263"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:302"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:339"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:348"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:367"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:161"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
+    },
+    {
+      "id": "REQ-AUDITRUN-1108",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The map shows the audit, and the server stays read-only",
+      "intent": "The report is for the terminal; the map is what a team opens. Writing the map stays with `sync`, run by a person or by the assistant in the terminal when told to, so \"the server does not write\" stays true while an audit runs.",
+      "contract": [
+        "`sync` copies the audit section into `_map.json` under `audit` when `_audit.json` exists, and omits the key otherwise.",
+        "The viewer's Workspace rail lists Audit only when the map carries an `audit` block.",
+        "The Audit view shows: the plan with its seed; each requirement's runs and decisions; the counters; every rate as k/n with its interval.",
+        "The view marks each requirement as not reviewed, reviewed once, reviewed twice, or decided, which is every finding in a counter or settled as `ok`.",
+        "No MCP tool is added, and no tool writes `_audit.json` or `_map.html`."
+      ],
+      "verify": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the audit block is one obligation written in two places: the engine builds it into the map and the viewer draws it, so its members span the engine package and three viewer directories by design.",
+        "-------------------"
+      ],
+      "current_impl": [],
+      "accept": "CASE-1 — the map carries the audit\n  Given  an `_audit.json` with a plan and two decisions\n  When   `sync` runs\n  Then   `_map.json` has an `audit` block with both decisions and the plan's seed\n\nCASE-2 — no audit, no key\n  Given  no `_audit.json`\n  When   `sync` runs\n  Then   `_map.json` has no `audit` key and the rail lists no Audit entry\n\nCASE-3 — the view shows progress and rates\n  Given  a map whose audit has 4 planned ids: one decided, one reviewed twice, one once, one not at all\n  When   the Audit view is rendered\n  Then   each id shows its state, and every rate is shown as k/n with its interval\n\nCASE-4 — the server does not write during an audit\n  Given  an audit in progress and a server started without `--allow-writes`\n  When   every tool is called once\n  Then   `_audit.json`, `_map.json` and `_map.html` are byte-identical afterwards",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-AUDITRUN-076"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/audit.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/components/Rail.jsx:17"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/data.js:52"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/AuditView.jsx:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/AuditView.jsx:38"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:239"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:277"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:376"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:117"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:114"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "1 clause(s) have no case: there are 5 clauses and 4 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUDITRUN-1109",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The review dossier carries the method",
+      "intent": "An assistant that reads the dossier but not the method will review in its own way. Putting the prompt and the plan beside the dossier means every run starts from the same instruction.",
+      "contract": [
+        "While a session is open, `ask --review` adds a top-level `audit` holding the review prompt and the four labels.",
+        "Each requirement in its output gains `in_plan`: `ranked`, `random` or `no`.",
+        "`reqmap_review` returns the same, because it runs `ask --review`.",
+        "For each clause, the prompt asks for the code line that does it and the test that proves it.",
+        "The prompt asks for one label per finding, from the four.",
+        "The skill ships `references/audit.md` with the same prompt and the rules: never edit a requirement or its status, one requirement per conversation, two runs each.",
+        "Without `_audit.json` the dossier is unchanged."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the dossier carries the prompt\n  Given  a plan whose ranked set holds REQ-A\n  When   `ask --review REQ-A --json` runs\n  Then   the requirement's `in_plan` is `ranked`, and `audit.prompt` names the four labels\n\nCASE-2 — a requirement outside the plan says so\n  Given  the same plan and REQ-Z in neither set\n  When   `ask --review REQ-Z --json` runs\n  Then   its `in_plan` is `no`\n\nCASE-3 — no audit, no change\n  Given  no `_audit.json`\n  When   `ask --review REQ-A --json` runs\n  Then   the output has no `audit` key and the requirement no `in_plan`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-AUDITRUN-076"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_auditrun.py:289"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/auditrun.py:382"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/review.py:27"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "4 clause(s) have no case: there are 7 clauses and 3 cases. This check counts, it does not read, so it cannot say WHICH — that is the part only you can do.",
+          "suggest": "Walk the clauses and find the one no case proves. Add a case for it, fold it into an existing case, or move it out of the binding list if another requirement already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-CANDIDATES-009",
@@ -3458,11 +3921,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:167"
+          "loc": "plugin/scripts/reqmap.py:171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:177"
+          "loc": "plugin/scripts/reqmap.py:181"
         },
         {
           "role": "tested-by",
@@ -3474,11 +3937,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:95"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:100"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/cliflags.py:109"
+          "loc": "plugin/scripts/reqmap_engine/cliflags.py:114"
         }
       ],
       "test_exempt": null,
@@ -3660,7 +4123,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:310"
+          "loc": "plugin/scripts/reqmap.py:317"
         },
         {
           "role": "tested-by",
@@ -3672,11 +4135,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:256"
+          "loc": "plugin/scripts/reqmap_engine/config.py:262"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:284"
+          "loc": "plugin/scripts/reqmap_engine/config.py:290"
         }
       ],
       "test_exempt": null,
@@ -3741,15 +4204,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:256"
+          "loc": "plugin/scripts/reqmap_engine/config.py:262"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:273"
+          "loc": "plugin/scripts/reqmap_engine/config.py:279"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:284"
+          "loc": "plugin/scripts/reqmap_engine/config.py:290"
         }
       ],
       "test_exempt": null,
@@ -5313,7 +5776,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:129"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:133"
         }
       ],
       "test_exempt": null,
@@ -7009,7 +7472,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:224"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:228"
         },
         {
           "role": "implements",
@@ -7246,7 +7709,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:200"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:204"
         }
       ],
       "test_exempt": null,
@@ -9699,19 +10162,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:128"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:174"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:200"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:204"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:246"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:250"
         },
         {
           "role": "implements",
@@ -9731,7 +10194,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:121"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:123"
         },
         {
           "role": "implements",
@@ -9864,7 +10327,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:121"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:123"
         }
       ],
       "test_exempt": null,
@@ -9954,19 +10417,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:128"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:132"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:174"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:201"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:205"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:246"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:250"
         },
         {
           "role": "implements",
@@ -10799,7 +11262,9 @@
         "ARCH-CMDREGISTRY-033",
         "ARCH-INIT-012"
       ],
-      "used_by": [],
+      "used_by": [
+        "ARCH-AUDITRUN-076"
+      ],
       "satisfies": [
         "SYS-SHIP-108"
       ],
@@ -12892,11 +13357,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:376"
+          "loc": "plugin/scripts/reqmap.py:383"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:397"
+          "loc": "plugin/scripts/reqmap.py:404"
         },
         {
           "role": "tested-by",
@@ -12951,7 +13416,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:397"
+          "loc": "plugin/scripts/reqmap.py:404"
         },
         {
           "role": "tested-by",
@@ -13863,7 +14328,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:286"
+          "loc": "plugin/scripts/reqmap.py:293"
         },
         {
           "role": "tested-by",
@@ -15344,7 +15809,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/review.py:11"
+          "loc": "plugin/scripts/reqmap_engine/review.py:12"
         },
         {
           "role": "implements",
@@ -15410,7 +15875,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/review.py:11"
+          "loc": "plugin/scripts/reqmap_engine/review.py:12"
         },
         {
           "role": "implements",
@@ -15907,7 +16372,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:52"
+          "loc": "app/src/lib/data.js:57"
         },
         {
           "role": "tested-by",
@@ -16156,7 +16621,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:40"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:50"
         },
         {
           "role": "implements",
@@ -18980,7 +19445,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:257"
+          "loc": "plugin/scripts/reqmap.py:264"
         },
         {
           "role": "tested-by",
@@ -19046,7 +19511,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:246"
+          "loc": "plugin/scripts/reqmap.py:253"
         },
         {
           "role": "tested-by",
@@ -19066,7 +19531,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:239"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:243"
         },
         {
           "role": "implements",
@@ -20988,6 +21453,7 @@
         "ARCH-MAP-007"
       ],
       "used_by": [
+        "ARCH-AUDITRUN-076",
         "ARCH-SITE-026",
         "ARCH-TRANSLATE-044"
       ],
@@ -21120,6 +21586,10 @@
         {
           "role": "implements",
           "loc": "app/src/styles/colors_and_type.css:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/AuditView.jsx:1"
         },
         {
           "role": "implements",
@@ -21618,7 +22088,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:64"
+          "loc": "app/src/lib/data.js:69"
         },
         {
           "role": "implements",
@@ -22109,7 +22579,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/App.jsx:44"
+          "loc": "app/src/App.jsx:45"
         },
         {
           "role": "implements",
@@ -22228,7 +22698,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/App.jsx:52"
+          "loc": "app/src/App.jsx:53"
         }
       ],
       "test_exempt": null,
@@ -23349,6 +23819,7 @@
       ],
       "satisfied_by": [
         "ARCH-AUDIT-065",
+        "ARCH-AUDITRUN-076",
         "ARCH-COVERAGE-029",
         "ARCH-FINDINGS-010",
         "ARCH-HEALTH-017",
@@ -23603,6 +24074,18 @@
     [
       "ARCH-AUDIT-065",
       "ARCH-COVERAGE-029"
+    ],
+    [
+      "ARCH-AUDITRUN-076",
+      "ARCH-AUDIT-065"
+    ],
+    [
+      "ARCH-AUDITRUN-076",
+      "ARCH-MCP-073"
+    ],
+    [
+      "ARCH-AUDITRUN-076",
+      "ARCH-VIEWER-007"
     ],
     [
       "ARCH-CANDIDATES-009",
@@ -24133,6 +24616,30 @@
     [
       "REQ-RELEVEL-997",
       "ARCH-AUDIT-065"
+    ],
+    [
+      "ARCH-AUDITRUN-076",
+      "SYS-REPORT-105"
+    ],
+    [
+      "REQ-AUDITRUN-1105",
+      "ARCH-AUDITRUN-076"
+    ],
+    [
+      "REQ-AUDITRUN-1106",
+      "ARCH-AUDITRUN-076"
+    ],
+    [
+      "REQ-AUDITRUN-1107",
+      "ARCH-AUDITRUN-076"
+    ],
+    [
+      "REQ-AUDITRUN-1108",
+      "ARCH-AUDITRUN-076"
+    ],
+    [
+      "REQ-AUDITRUN-1109",
+      "ARCH-AUDITRUN-076"
     ],
     [
       "ARCH-CANDIDATES-009",
@@ -25425,6 +25932,76 @@
       "name": "Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped",
       "horizon": "now",
       "req": "REQ-DRIFT-1103",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged",
+      "horizon": "now",
+      "req": "ARCH-AUDITRUN-076",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`clarify` knows failure words beyond its own list. Done when: a case naming a sensor fault is not asked `no-failure-case` (`CLARIFY_FAILURE_WORDS`, `clarify.py:52`, lacks \"fault\"), and a repository can add words through `_config.json`",
+      "horizon": "now",
+      "req": "ARCH-CLARIFY-062",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it)",
+      "horizon": "now",
+      "req": "ARCH-MAP-007",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements",
+      "horizon": "now",
+      "req": "ARCH-PROMOTE-011",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The MCP docs count the tools a client sees. Done when: `docs/integrations.md` and `docs/commands.md` say eleven read-only tools and two writing ones behind `--allow-writes`, and the skill's `references/mcp.md` no longer names `reqmap_new` nor says approval is never asked outside Claude Code",
+      "horizon": "now",
+      "req": "ARCH-MCP-073",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The map viewer makes no network request. Done when: `_map_viewer.html` carries its fonts or falls back to system fonts, with no `fonts.googleapis.com` link",
+      "horizon": "now",
+      "req": "ARCH-VIEWER-007",
+      "unpark": null,
+      "done": false,
+      "category": "Version 8.25 (19 to 23 October)",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file",
+      "horizon": "now",
+      "req": "ARCH-SELFGATE-039",
       "unpark": null,
       "done": false,
       "category": "Version 8.25 (19 to 23 October)",
@@ -27544,6 +28121,22 @@
         {
           "flag": "--json",
           "help": "With --retire or --release: emit the plan as JSON."
+        },
+        {
+          "flag": "--audit-plan",
+          "help": "Write an audit plan to requirements/_audit.json instead of syncing: a ranked set and a seeded random set of confirmed requirements, and the decision bands. Written once; an existing file is never replaced (ADR-0076)."
+        },
+        {
+          "flag": "--ranked",
+          "help": "With --audit-plan: how many requirements to rank by risk (default 25)."
+        },
+        {
+          "flag": "--random",
+          "help": "With --audit-plan: how many to draw at random from the rest (default 25)."
+        },
+        {
+          "flag": "--seed",
+          "help": "With --audit-plan: the seed of the random draw (default: today as YYYYMMDD)."
         }
       ]
     },
@@ -27585,8 +28178,8 @@
     }
   ],
   "design": {
-    "files": 128,
-    "clean_files": 121,
+    "files": 131,
+    "clean_files": 124,
     "score": 95,
     "candidates": {
       "encapsulation": 3,
@@ -27632,7 +28225,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap.py",
-        "line": 280,
+        "line": 287,
         "name": "main",
         "detail": "`main` is 95 lines (over 80)"
       },
@@ -27640,7 +28233,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 283,
+        "line": 289,
         "name": "apply_config",
         "detail": "`apply_config` is 82 lines (over 80)"
       },
@@ -27670,14 +28263,14 @@
   },
   "health": {
     "score": 100,
-    "total": 326,
-    "scored": 304,
-    "healthy": 304,
-    "exempt": 1,
+    "total": 332,
+    "scored": 310,
+    "healthy": 310,
+    "exempt": 2,
     "deprecated": 22,
-    "confirmed": 304,
-    "implemented": 295,
-    "tested": 295,
+    "confirmed": 310,
+    "implemented": 301,
+    "tested": 301,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
@@ -27689,6 +28282,12 @@
     "exempt_ids": [
       {
         "id": "ARCH-VIEWER-007",
+        "keys": [
+          "lint_exempt"
+        ]
+      },
+      {
+        "id": "REQ-AUDITRUN-1108",
         "keys": [
           "lint_exempt"
         ]
@@ -27775,6 +28374,69 @@
         "milestone": "v8.25.0",
         "roadmap": "Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped",
         "req": "REQ-DRIFT-1103"
+      },
+      {
+        "title": "Audit session",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged",
+        "req": "ARCH-AUDITRUN-076"
+      },
+      {
+        "title": "clarify knows failure words beyond its list",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "`clarify` knows failure words beyond its own list. Done when: a case naming a sensor fault is not asked `no-failure-case` (`CLARIFY_FAILURE_WORDS`, `clarify.py:52`, lacks \"fault\"), and a repository can add words through `_config.json`",
+        "req": "ARCH-CLARIFY-062"
+      },
+      {
+        "title": "Release history reads the same on a branch and its merge",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it)",
+        "req": "ARCH-MAP-007"
+      },
+      {
+        "title": "accept-drift does not report what it just accepted",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements",
+        "req": "ARCH-PROMOTE-011"
+      },
+      {
+        "title": "MCP docs count the tools a client sees",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "The MCP docs count the tools a client sees. Done when: `docs/integrations.md` and `docs/commands.md` say eleven read-only tools and two writing ones behind `--allow-writes`, and the skill's `references/mcp.md` no longer names `reqmap_new` nor says approval is never asked outside Claude Code",
+        "req": "ARCH-MCP-073"
+      },
+      {
+        "title": "The viewer makes no network request",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "The map viewer makes no network request. Done when: `_map_viewer.html` carries its fonts or falls back to system fonts, with no `fonts.googleapis.com` link",
+        "req": "ARCH-VIEWER-007"
+      },
+      {
+        "title": "The skill's engine copy has a requirement",
+        "start": "2026-10-19",
+        "end": "2026-10-19",
+        "lane": "Feature",
+        "milestone": "v8.25.0",
+        "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file",
+        "req": "ARCH-SELFGATE-039"
       }
     ],
     "cadence": {
