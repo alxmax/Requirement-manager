@@ -1281,7 +1281,7 @@ CASE-7 — All leaves Optional out, and a tab names each kind
 
 ---
 id: REQ-VIEWER-1114
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

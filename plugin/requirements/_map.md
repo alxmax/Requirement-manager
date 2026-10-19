@@ -1,6 +1,6 @@
 ---
 generated: 2026-10-19
-engine: 2026-10-19.5
+engine: 2026-10-19.6
 nodes: 337
 edges: 126
 design pass-rate: 94% (124/132 source files without a design candidate)
@@ -502,8 +502,8 @@ graph LR
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_85["plugin/scripts/reqmap.py:85"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_85
-  f_plugin_scripts_test_reqmap_report_py_1956_6240["plugin/scripts/test_reqmap_report.py:1956-6240"]
-  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1956_6240
+  f_plugin_scripts_test_reqmap_report_py_1956_6259["plugin/scripts/test_reqmap_report.py:1956-6259"]
+  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1956_6259
   f_plugin_scripts_reqmap_engine_cliflags_py_18_54["plugin/scripts/reqmap_engine/cliflags.py:18-54"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_cliflags_py_18_54
   f_plugin_scripts_reqmap_engine_commands_py_15["plugin/scripts/reqmap_engine/commands.py:15"]
@@ -550,12 +550,12 @@ graph LR
   f_plugin_scripts_reqmap_engine_lintrules_py_18["plugin/scripts/reqmap_engine/lintrules.py:18"]
   ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_engine_lintrules_py_18
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_scripts_test_reqmap_report_py_5708_6070["plugin/scripts/test_reqmap_report.py:5708-6070"]
-  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5708_6070
+  f_plugin_scripts_test_reqmap_report_py_5708_6089["plugin/scripts/test_reqmap_report.py:5708-6089"]
+  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5708_6089
   f_plugin_scripts_reqmap_engine_design_py_58["plugin/scripts/reqmap_engine/design.py:58"]
   ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_engine_design_py_58
-  f_plugin_scripts_reqmap_engine_design_report_py_16_86["plugin/scripts/reqmap_engine/design_report.py:16-86"]
-  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_engine_design_report_py_16_86
+  f_plugin_scripts_reqmap_engine_design_report_py_16_94["plugin/scripts/reqmap_engine/design_report.py:16-94"]
+  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_engine_design_report_py_16_94
   ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
   f_plugin_scripts_test_reqmap_gate_py_270["plugin/scripts/test_reqmap_gate.py:270"]
   ARCH_DOCBUNDLE_026 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_270
@@ -1148,17 +1148,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_REQ["REQ"]
-    REQ_DESIGN_952["The 'design' report<br><small>REQ-DESIGN-952</small><br>unverified-intent"]
-    REQ_VIEWER_1114["Choosing a question shows it beside the list<br><small>REQ-VIEWER-1114</small><br>unreviewed"]
-  end
-  style REQ_DESIGN_952 fill:#fff9c4,stroke:#aa0,color:#550
-  style REQ_VIEWER_1114 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-DESIGN-952 | confirmed | 4 | 0 | unverified-intent | Has open `## Verify intent` question(s): run `reqmap.py sync`, resolve each in `requirements/_findings.md`, then fold the answer into the Contract or delete the bullet. |
-| REQ-VIEWER-1114 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

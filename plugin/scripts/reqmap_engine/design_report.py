@@ -17,13 +17,14 @@ def _design_file(rel, src):
     # implements: REQ-DESIGN-953  # implements: REQ-DESIGN-955
     """All findings for one source file, in source order: Python through
     `ast`, a brace language through masked text, anything else the writing
-    standards only. A Python file that does not parse yields nothing."""
+    standards only. None for a Python file that does not parse: the
+    review did not read it, so it is neither clean nor a finding."""
     low = rel.lower()
     try:
         if low.endswith(".py"):
             out = _python_findings(rel, src)
             if out is None:
-                return []
+                return None
         elif low.endswith(DESIGN_BRACE_EXTS):
             out = _design_brace(rel, src)
         else:
@@ -38,9 +39,10 @@ def _design_file(rel, src):
 
 
 def _design_findings(code_root, reqs_dir=None):  # implements: REQ-DESIGN-952
-    """(file count, findings) over every non-test program-logic file the
-    scanner would walk."""
-    n_files, findings = 0, []
+    """(file count, findings, unparsed paths) over every non-test
+    program-logic file the scanner would walk. A file that does not parse
+    is named, and left out of the count."""
+    n_files, findings, unparsed = 0, [], []
     for fp, rel in _walk_code(code_root, reqs_dir):
         if not rel.lower().endswith(DESIGN_EXTS) or _is_test_path(rel):
             continue
@@ -49,9 +51,13 @@ def _design_findings(code_root, reqs_dir=None):  # implements: REQ-DESIGN-952
                 src = f.read()
         except OSError:
             continue
+        found = _design_file(rel, src)
+        if found is None:
+            unparsed.append(rel)
+            continue
         n_files += 1
-        findings.extend(_design_file(rel, src))
-    return n_files, findings
+        findings.extend(found)
+    return n_files, findings, unparsed
 
 
 def _design_summary(code_root, reqs_dir=None, with_findings=False):
@@ -65,7 +71,7 @@ def _design_summary(code_root, reqs_dir=None, with_findings=False):
     `with_findings` adds the rows and the advice once per kind, for `map`,
     whose viewer lists them. It is off by default so `health --json`, a
     badge payload, stays one small object."""
-    files, found = _design_findings(code_root, reqs_dir)
+    files, found, unparsed = _design_findings(code_root, reqs_dir)
     if not files:
         return None
     clean = files - len({f["file"] for f in found})
@@ -74,6 +80,8 @@ def _design_summary(code_root, reqs_dir=None, with_findings=False):
         per[f["pillar"]] += 1
     out = {"files": files, "clean_files": clean,
            "score": round(100 * clean / files), "candidates": per}
+    if unparsed:     # absent otherwise, so a badge payload keeps its shape
+        out["unparsed"] = unparsed
     if with_findings:
         keys = ("pillar", "kind", "file", "line", "name", "detail")
         out["findings"] = [{k: f[k] for k in keys} for f in found]
@@ -86,11 +94,14 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):
     # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-952
     """Print (or emit as JSON) the design candidates, grouped by pillar.
     Read-only, always exit 0: advice a reader weighs, never a gate."""
-    n_files, findings = _design_findings(code_root, reqs_dir)
+    n_files, findings, unparsed = _design_findings(code_root, reqs_dir)
     if as_json:
-        print(json.dumps({"files": n_files, "findings": findings},
-                         indent=2, ensure_ascii=False))
+        print(json.dumps({"files": n_files, "unparsed": unparsed,
+                          "findings": findings}, indent=2, ensure_ascii=False))
         return 0
+    if unparsed:
+        print("{} file(s) did not parse as Python and are left out: {}\n"
+              .format(len(unparsed), ", ".join(unparsed)))
     if not findings:
         print("No design candidates in {} source file(s) at the current "
               "thresholds.".format(n_files))

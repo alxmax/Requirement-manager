@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "c45b41637c73e2b7c0196f42ebcb716d5c1e90de8769352e283286876fcd72c2",
+      "plugin/scripts/reqmap_engine/__init__.py": "83219b4d530775c7b4752d017d4f5a9e24811b0ccd71f8228d95ee5f7facd846",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -95,7 +95,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "a480da868cdbdd803024f4509b65fe08b707b5063b1564e697c88029284771e7",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "b2c4842dd1d54472705d44e7339f56dec4e4f304d371a978005a7e479b3d8d3b",
+      "scripts/check_engine_budget.py": "d91af3dfae9440b48ddbf2521b1f2cfba89791a87827810545467b3de3a48759",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
@@ -286,7 +286,7 @@
       "plugin/scripts/reqmap_engine/design_python.py#_python_chains": "a69602899f012cbd801e08f6170bb8fc832b9790e265f20e25f214679c05528e"
     },
     "REQ-DESIGN-952": {
-      "plugin/scripts/reqmap_engine/design_report.py#_design_findings": "c84daab335489e22dcb76d912a5cbd7bc924c0fc07e8b9828f100004da3a4e7e"
+      "plugin/scripts/reqmap_engine/design_report.py#_design_findings": "3fdc673422c10343fb515004a4725a624bb0fac75574addc5c4dcde9907d86c6"
     },
     "REQ-DESIGN-953": {
       "plugin/scripts/reqmap_engine/design.py#writing_standards": "145d442e4bbff3363df1b4f29d8822c97308aa2bf66196ec321cd4776b4541af"

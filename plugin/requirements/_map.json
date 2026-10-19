@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19.5",
+  "engine_version": "2026-10-19.6",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3660,7 +3660,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6240"
+          "loc": "plugin/scripts/test_reqmap_report.py:6259"
         },
         {
           "role": "implements",
@@ -3739,7 +3739,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6349"
+          "loc": "plugin/scripts/test_reqmap_report.py:6368"
         },
         {
           "role": "implements",
@@ -5297,11 +5297,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5951"
+          "loc": "plugin/scripts/test_reqmap_report.py:5970"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6070"
+          "loc": "plugin/scripts/test_reqmap_report.py:6089"
         },
         {
           "role": "implements",
@@ -5313,11 +5313,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:58"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:86"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:94"
         }
       ],
       "test_exempt": null,
@@ -5518,17 +5518,15 @@
       "contract": [
         "`design` walks `code_root` with the scanner's walk (`.reqmapignore` honoured), reads the program-logic files (`DESIGN_EXTS`) and skips test paths (`_is_test_path`).",
         "`design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.",
-        "`design --json` emits `{\"files\": N, \"findings\": [...]}` with every candidate record and nothing on stdout besides the JSON.",
+        "`design --json` emits `{\"files\": N, \"unparsed\": [...], \"findings\": [...]}` with every candidate record and nothing on stdout besides the JSON.",
         "With no candidate, `design` prints one line saying so and the file count.",
-        "A Python file that does not parse yields no candidate, standards included, and no error.",
+        "A Python file that does not parse yields no candidate, standards included, and no error. It is not clean either: it is left out of `files` and of the score, `design` names it on one line, and the summary record carries it under `unparsed`, a key present only when such a file exists.",
         "`design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries."
       ],
-      "verify": [
-        "**Should a Python file that does not parse count as clean in the design score?**\na) No: it leaves the score, and the report names it. *(recommended)*\nb) No: it counts as one file with a candidate.\nc) Yes: it stays clean, as today.\nd) Yes, but the line and file-length standards still run on it.\n*Default:* stays c). A file the review cannot read raises the score.\n*Context:* The score is the share of files with no candidate, and an unreadable file has none.\n*Recommendation source:* the draft scan's rule, where a partial scan never reads as clean.\n*For the developer:* `design_report.py:26` returns `[]` before `writing_standards`; [[REQ-EXTRACT-1099]]; `python scripts/reqmap.py ask --design`."
-      ],
+      "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — grouped report, tests skipped, exit 0\n  Given  a module and a test file both writing a global\n  When   `cmd_design` runs\n  Then   it returns 0, prints `Encapsulation (1)` with the module's line, omits the test file and ends with the advisory note\n\nCASE-2 — JSON and the clean case\n  Given  a repo with one clean module\n  When   `cmd_design` runs with and without `--json`\n  Then   the JSON reads `files 1, findings []` and the text run says no candidates were found\n\nCASE-3 — a syntax error is not a finding\n  Given  a file that does not parse\n  When   `_design_file` reads it\n  Then   it returns an empty list\n\nCASE-4 — thresholds come from the config\n  Given  `DESIGN_PARAMS_MAX` set to 2 through `apply_config`\n  When   `_design_file` reads a three-parameter function\n  Then   it reports `long-parameter-list`\n\n--------------------",
+      "accept": "CASE-1 — grouped report, tests skipped, exit 0\n  Given  a module and a test file both writing a global\n  When   `cmd_design` runs\n  Then   it returns 0, prints `Encapsulation (1)` with the module's line, omits the test file and ends with the advisory note\n\nCASE-2 — JSON and the clean case\n  Given  a repo with one clean module\n  When   `cmd_design` runs with and without `--json`\n  Then   the JSON reads `files 1, findings []` and the text run says no candidates were found\n\nCASE-3 — a syntax error is neither a finding nor clean\n  Given  a repo with one clean module and one Python file that does not parse\n  When   `cmd_design` runs with and without `--json`, and the summary is built\n  Then   the JSON reads `files 1, unparsed [bad.py], findings []`, the text names\n         `bad.py` as not parsed, the score is 100 over one file with `unparsed` set,\n         and without that file the summary carries no `unparsed` key\n\nCASE-4 — thresholds come from the config\n  Given  `DESIGN_PARAMS_MAX` set to 2 through `apply_config`\n  When   `_design_file` reads a three-parameter function\n  Then   it reports `long-parameter-list`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -5549,22 +5547,17 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:40"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:41"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:86"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:94"
         }
       ],
       "test_exempt": null,
       "milestone": "v4.2",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unverified-intent",
-          "advice": "Has open `## Verify intent` question(s): run `reqmap.py sync`, resolve each in `requirements/_findings.md`, then fold the answer into the Contract or delete the bullet."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "clarify": [
@@ -5673,11 +5666,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5951"
+          "loc": "plugin/scripts/test_reqmap_report.py:5970"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:58"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:64"
         },
         {
           "role": "implements",
@@ -5822,11 +5815,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5952"
+          "loc": "plugin/scripts/test_reqmap_report.py:5971"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/design_report.py:59"
+          "loc": "plugin/scripts/reqmap_engine/design_report.py:65"
         },
         {
           "role": "implements",
@@ -6002,7 +5995,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6070"
+          "loc": "plugin/scripts/test_reqmap_report.py:6089"
         },
         {
           "role": "implements",
@@ -8561,7 +8554,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6196"
+          "loc": "plugin/scripts/test_reqmap_report.py:6215"
         },
         {
           "role": "implements",
@@ -10424,7 +10417,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6304"
+          "loc": "plugin/scripts/test_reqmap_report.py:6323"
         },
         {
           "role": "implements",
@@ -10534,7 +10527,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6304"
+          "loc": "plugin/scripts/test_reqmap_report.py:6323"
         },
         {
           "role": "implements",
@@ -11094,7 +11087,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6304"
+          "loc": "plugin/scripts/test_reqmap_report.py:6323"
         },
         {
           "role": "implements",
@@ -20916,7 +20909,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:6333"
+          "loc": "plugin/scripts/test_reqmap_report.py:6352"
         },
         {
           "role": "implements",
@@ -22922,7 +22915,7 @@
       "id": "REQ-VIEWER-1114",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Choosing a question shows it beside the list",
       "intent": "A row on the Questions page used to open its requirement, which left the page: the reader lost the list and had to come back to it for every question. Answering a question needs the question and the text it is about, side by side, while the list stays put.",
@@ -22958,12 +22951,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -28303,40 +28291,23 @@
     }
   },
   "health": {
-    "score": 99,
+    "score": 100,
     "total": 337,
     "scored": 315,
-    "healthy": 313,
+    "healthy": 315,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 314,
+    "confirmed": 315,
     "implemented": 306,
     "tested": 306,
-    "drafts": 1,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
-    "open_intent": 1,
+    "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 314,
-    "unhealthy": [
-      {
-        "id": "REQ-DESIGN-952",
-        "status": "confirmed",
-        "why": [
-          "open question"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1114",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      }
-    ],
+    "unhealthy": [],
     "exempt_ids": [
       {
         "id": "ARCH-VIEWER-007",

@@ -181,23 +181,10 @@ satisfies: [ARCH-DESIGN-061]
 Every bullet below is binding.
 - `design` walks `code_root` with the scanner's walk (`.reqmapignore` honoured), reads the program-logic files (`DESIGN_EXTS`) and skips test paths (`_is_test_path`).
 - `design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
-- `design --json` emits `{"files": N, "findings": [...]}` with every candidate record and nothing on stdout besides the JSON.
+- `design --json` emits `{"files": N, "unparsed": [...], "findings": [...]}` with every candidate record and nothing on stdout besides the JSON.
 - With no candidate, `design` prints one line saying so and the file count.
-- A Python file that does not parse yields no candidate, standards included, and no error.
+- A Python file that does not parse yields no candidate, standards included, and no error. It is not clean either: it is left out of `files` and of the score, `design` names it on one line, and the summary record carries it under `unparsed`, a key present only when such a file exists.
 - `design` exits 0 in every case and no gate rule reads it; the thresholds are `CONFIG_KEYS` entries.
-
-## Verify intent
-<!-- audience: developer -->
-- **Should a Python file that does not parse count as clean in the design score?**
-  a) No: it leaves the score, and the report names it. *(recommended)*
-  b) No: it counts as one file with a candidate.
-  c) Yes: it stays clean, as today.
-  d) Yes, but the line and file-length standards still run on it.
-  *Default:* stays c). A file the review cannot read raises the score.
-  *Context:* The score is the share of files with no candidate, and an unreadable file has none.
-  *Recommendation source:* the draft scan's rule, where a partial scan never reads as clean.
-  *For the developer:* `design_report.py:26` returns `[]` before `writing_standards`;
-  [[REQ-EXTRACT-1099]]; `python scripts/reqmap.py ask --design`.
 
 ## Cases
 CASE-1 — grouped report, tests skipped, exit 0
@@ -210,10 +197,12 @@ CASE-2 — JSON and the clean case
   When   `cmd_design` runs with and without `--json`
   Then   the JSON reads `files 1, findings []` and the text run says no candidates were found
 
-CASE-3 — a syntax error is not a finding
-  Given  a file that does not parse
-  When   `_design_file` reads it
-  Then   it returns an empty list
+CASE-3 — a syntax error is neither a finding nor clean
+  Given  a repo with one clean module and one Python file that does not parse
+  When   `cmd_design` runs with and without `--json`, and the summary is built
+  Then   the JSON reads `files 1, unparsed [bad.py], findings []`, the text names
+         `bad.py` as not parsed, the score is 100 over one file with `unparsed` set,
+         and without that file the summary carries no `unparsed` key
 
 CASE-4 — thresholds come from the config
   Given  `DESIGN_PARAMS_MAX` set to 2 through `apply_config`

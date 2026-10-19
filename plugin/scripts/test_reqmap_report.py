@@ -5812,8 +5812,27 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
                 R.cmd_design(d)
             self.assertIn("No design candidates", buf.getvalue())
 
-    def test_syntax_error_yields_nothing(self):  # verifies: REQ-DESIGN-952#CASE-3
-        self.assertEqual(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"), [])
+    def test_syntax_error_leaves_the_score_and_is_named(self):  # verifies: REQ-DESIGN-952#CASE-3
+        self.assertIsNone(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"))
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ok.py"), "def go():\n    return 1\n")
+            _write(os.path.join(d, "bad.py"), "def (:\n    pass\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual((data["files"], data["unparsed"], data["findings"]),
+                             (1, ["bad.py"], []))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            self.assertIn("did not parse as Python and are left out: bad.py",
+                          buf.getvalue())
+            summary = R._design_summary(d)
+            self.assertEqual((summary["files"], summary["score"], summary["unparsed"]),
+                             (1, 100, ["bad.py"]))
+            os.remove(os.path.join(d, "bad.py"))
+            self.assertNotIn("unparsed", R._design_summary(d))
 
     def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
         self._set(DESIGN_PARAMS_MAX=R.config.DESIGN_PARAMS_MAX)
