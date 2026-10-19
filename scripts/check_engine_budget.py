@@ -71,7 +71,7 @@ PACKAGE = "reqmap_engine"
 # INPUT:audit findings and the map's audit block. auditrun.py stays lazy.
 # Raised to 6,741 by ADR-0077: the hooks that read a repository's own tag forms,
 # test-file globs and requirement sources. customtrace.py stays lazy.
-CORE_LOGICAL_BUDGET = 6748
+CORE_LOGICAL_BUDGET = 6750
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000

@@ -48,6 +48,12 @@
 
 - A row opened its requirement, so the reader lost the list for every question. It now opens a panel with the requirement's id, title and status, its questions as the current tab shows them (a decision question's options on their own lines), and its Description clauses and Cases. A button opens the requirement and another closes the panel; the Problems inbox still opens a requirement from its row. REQ-VIEWER-1114
 
+**`clarify`'s word lists are a repository's to set, so a corpus written in another language is not judged by English words (ADR-0079).**
+
+- `CLARIFY_HEDGES` and `CLARIFY_FAILURE_WORDS` are `_config.json` keys. A list set there replaces the default, as the `LINT_QUESTION_*` lists do, and is compared without regard to case; a value that is not a list of strings is reported and the default stays. Measured read-only on three consumer corpora written in Romanian, the English lists made `vague-term` 0 of 19 real and `no-failure-case` 5 of 20, mostly because cases proving a failure path in Romanian words or by status code were not recognised. REQ-CLARIFY-1115, a draft until it is read
+- `case-monoculture` reads a Given's head word in any script: a word with a diacritic lost its first letters. REQ-CLARIFY-1115
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.7`; 18,949 physical lines in 78 files (the README says so). The core rises to 6,750 logical lines: the two are the function that builds the hedge pattern from the configured list
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**
