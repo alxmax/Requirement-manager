@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-10-19.6",
+  "engine_version": "2026-10-19.7",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2271,7 +2271,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3644"
+          "loc": "plugin/scripts/test_reqmap_author.py:3687"
         },
         {
           "role": "implements",
@@ -2320,7 +2320,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3644"
+          "loc": "plugin/scripts/test_reqmap_author.py:3687"
         },
         {
           "role": "implements",
@@ -2378,7 +2378,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3644"
+          "loc": "plugin/scripts/test_reqmap_author.py:3687"
         },
         {
           "role": "implements",
@@ -3226,7 +3226,8 @@
         "`clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]",
         "`sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]",
         "The map carries every question `clarify` asks of each requirement, so the viewer shows them without running the engine. [[REQ-CLARIFY-1100]]",
-        "`clarify` raises no question from a word found only inside another word, from a clause that hands its cases to another requirement, or from a clause quantified over \"all\", \"every\", \"any\"; it asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]"
+        "`clarify` raises no question from a word found only inside another word, from a clause that hands its cases to another requirement, or from a clause quantified over \"all\", \"every\", \"any\"; it asks for a split only where `lint` warns over-scoped. [[REQ-CLARIFY-1102]]",
+        "The words `clarify`'s word rules read are a repository's to replace, so a corpus written in another language is not judged by English words. [[REQ-CLARIFY-1115]]"
       ],
       "verify": [],
       "notes": [],
@@ -3249,7 +3250,8 @@
         "REQ-CLARIFY-957",
         "REQ-CLARIFY-975",
         "REQ-CLARIFY-1100",
-        "REQ-CLARIFY-1102"
+        "REQ-CLARIFY-1102",
+        "REQ-CLARIFY-1115"
       ],
       "members": [
         {
@@ -3266,31 +3268,31 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3360"
+          "loc": "plugin/scripts/test_reqmap_author.py:3403"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:140"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:133"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:149"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:183"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:176"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:208"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:235"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:295"
         }
       ],
       "test_exempt": null,
@@ -3338,27 +3340,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3360"
+          "loc": "plugin/scripts/test_reqmap_author.py:3403"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:140"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:133"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:149"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:183"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:176"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:208"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:235"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:228"
         }
       ],
       "test_exempt": null,
@@ -3403,7 +3405,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:301"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:295"
         }
       ],
       "test_exempt": null,
@@ -3511,11 +3513,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:130"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:141"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:134"
         },
         {
           "role": "implements",
@@ -3569,15 +3571,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:150"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:46"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:236"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:143"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/clarify.py:288"
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:229"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:282"
         }
       ],
       "test_exempt": null,
@@ -3586,6 +3592,59 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
+      "clarify": []
+    },
+    {
+      "id": "REQ-CLARIFY-1115",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A corpus in another language sets its own words",
+      "intent": "`vague-term` and `no-failure-case` read lists of English words. On a corpus written in another language the first fires only on English tokens (an enum value, a borrowed term) and the second never sees the failure words its cases do use, so it asks about a failure path the cases already prove. See [ADR-0079](../../docs/adr/0079-clarify-word-lists-are-per-repository.md).",
+      "contract": [
+        "The hedge words `vague-term` reads are `CLARIFY_HEDGES`, and the words that mark a case as a failure path are `CLARIFY_FAILURE_WORDS`. Both are `_config.json` keys.",
+        "A list set in `_config.json` replaces the default list rather than adding to it, and is compared without regard to case.",
+        "A value that is not a list of strings is reported and the default list stays.",
+        "The kind of input a Given starts from is read in any script, so a word with a diacritic is read whole."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a configured failure word answers the failure question\n  Given  a requirement whose only case reads \"o cerere refuzată de server\", once with\n         the default list and once with `CLARIFY_FAILURE_WORDS` set to \"refuz\" and \"lipsă\"\n  When   the detectors run\n  Then   the first raises `no-failure-case` and the second does not\n\nCASE-2 — configured hedges replace the English list\n  Given  `CLARIFY_HEDGES` set to \"aproximativ\"\n  When   the detectors read \"răspunde aproximativ imediat\" and \"replies quickly\"\n  Then   only the first raises a vague-term question\n\nCASE-3 — a Given head keeps its diacritics\n  Given  Given lines opening \"un șablon global\" and \"o ţară nouă\"\n  When   their head word is read\n  Then   it is \"șablon\" and \"ţară\", not \"ablon\" and \"ară\"\n\nCASE-4 — a list of the wrong type is refused\n  Given  `CLARIFY_FAILURE_WORDS` set to a single string instead of a list\n  When   the config is applied\n  Then   the key is reported and the default list stays in force",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CLARIFY-062"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3360"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:46"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/clarify.py:81"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:173"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
       "clarify": []
     },
     {
@@ -4094,11 +4153,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:268"
+          "loc": "plugin/scripts/reqmap_engine/config.py:285"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:296"
+          "loc": "plugin/scripts/reqmap_engine/config.py:313"
         }
       ],
       "test_exempt": null,
@@ -4163,15 +4222,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:268"
-        },
-        {
-          "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/config.py:285"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:296"
+          "loc": "plugin/scripts/reqmap_engine/config.py:302"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:313"
         }
       ],
       "test_exempt": null,
@@ -4569,7 +4628,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:328"
+          "loc": "plugin/scripts/reqmap_engine/config.py:345"
         },
         {
           "role": "implements",
@@ -4871,7 +4930,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3453"
+          "loc": "plugin/scripts/test_reqmap_author.py:3496"
         },
         {
           "role": "tested-by",
@@ -5156,7 +5215,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3453"
+          "loc": "plugin/scripts/test_reqmap_author.py:3496"
         },
         {
           "role": "implements",
@@ -7307,7 +7366,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3774"
+          "loc": "plugin/scripts/test_reqmap_author.py:3817"
         },
         {
           "role": "implements",
@@ -8892,7 +8951,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4668"
+          "loc": "plugin/scripts/test_reqmap_author.py:4711"
         },
         {
           "role": "implements",
@@ -14648,7 +14707,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4220"
+          "loc": "plugin/scripts/test_reqmap_author.py:4263"
         },
         {
           "role": "implements",
@@ -14739,7 +14798,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3882"
+          "loc": "plugin/scripts/test_reqmap_author.py:3925"
         },
         {
           "role": "implements",
@@ -14792,7 +14851,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3935"
+          "loc": "plugin/scripts/test_reqmap_author.py:3978"
         },
         {
           "role": "implements",
@@ -14847,7 +14906,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3969"
+          "loc": "plugin/scripts/test_reqmap_author.py:4012"
         },
         {
           "role": "implements",
@@ -14906,7 +14965,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4006"
+          "loc": "plugin/scripts/test_reqmap_author.py:4049"
         },
         {
           "role": "implements",
@@ -14968,7 +15027,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4028"
+          "loc": "plugin/scripts/test_reqmap_author.py:4071"
         },
         {
           "role": "implements",
@@ -15050,7 +15109,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4140"
+          "loc": "plugin/scripts/test_reqmap_author.py:4183"
         },
         {
           "role": "implements",
@@ -15109,7 +15168,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4028"
+          "loc": "plugin/scripts/test_reqmap_author.py:4071"
         },
         {
           "role": "implements",
@@ -15163,7 +15222,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4261"
+          "loc": "plugin/scripts/test_reqmap_author.py:4304"
         },
         {
           "role": "implements",
@@ -15234,7 +15293,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4376"
+          "loc": "plugin/scripts/test_reqmap_author.py:4419"
         },
         {
           "role": "implements",
@@ -15419,7 +15478,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3398"
+          "loc": "plugin/scripts/test_reqmap_author.py:3441"
         },
         {
           "role": "tested-by",
@@ -15663,7 +15722,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3398"
+          "loc": "plugin/scripts/test_reqmap_author.py:3441"
         },
         {
           "role": "implements",
@@ -16594,7 +16653,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4376"
+          "loc": "plugin/scripts/test_reqmap_author.py:4419"
         },
         {
           "role": "implements",
@@ -19469,7 +19528,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4432"
+          "loc": "plugin/scripts/test_reqmap_author.py:4475"
         },
         {
           "role": "implements",
@@ -19580,7 +19639,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4435"
+          "loc": "plugin/scripts/test_reqmap_author.py:4478"
         },
         {
           "role": "implements",
@@ -24723,6 +24782,10 @@
       "ARCH-CLARIFY-062"
     ],
     [
+      "REQ-CLARIFY-1115",
+      "ARCH-CLARIFY-062"
+    ],
+    [
       "ARCH-CMDREGISTRY-033",
       "SYS-SHIP-108"
     ],
@@ -28264,7 +28327,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 295,
+        "line": 312,
         "name": "apply_config",
         "detail": "`apply_config` is 91 lines (over 80)"
       },
@@ -28294,14 +28357,14 @@
   },
   "health": {
     "score": 100,
-    "total": 337,
-    "scored": 315,
-    "healthy": 315,
+    "total": 338,
+    "scored": 316,
+    "healthy": 316,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 315,
-    "implemented": 306,
-    "tested": 306,
+    "confirmed": 316,
+    "implemented": 307,
+    "tested": 307,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,

@@ -1,7 +1,7 @@
 ---
 generated: 2026-10-19
-engine: 2026-10-19.6
-nodes: 337
+engine: 2026-10-19.7
+nodes: 338
 edges: 126
 design pass-rate: 94% (124/132 source files without a design candidate)
 ---
@@ -126,6 +126,7 @@ graph LR
     REQ_CLARIFY_975["An answer can raise a question the old text never had<br><small>REQ-CLARIFY-975</small>"]
     REQ_CLARIFY_1100["The map carries what clarify asks<br><small>REQ-CLARIFY-1100</small>"]
     REQ_CLARIFY_1102["What clarify does not mistake for a question<br><small>REQ-CLARIFY-1102</small>"]
+    REQ_CLARIFY_1115["A corpus in another language sets its own words<br><small>REQ-CLARIFY-1115</small>"]
     REQ_CMDREGISTRY_834["One COMMANDS dict drives argparse, schema and docs<br><small>REQ-CMDREGISTRY-834</small>"]
     REQ_CMDREGISTRY_963["The command registry as data on the map<br><small>REQ-CMDREGISTRY-963</small>"]
     REQ_CMDREGISTRY_1031["'ask' holds the questions, 'gate' the verdict<br><small>REQ-CMDREGISTRY-1031</small>"]
@@ -495,10 +496,10 @@ graph LR
   f_plugin_scripts_reqmap_engine_sections_py_131_284["plugin/scripts/reqmap_engine/sections.py:131-284"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_engine_sections_py_131_284
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2440_3360["plugin/scripts/test_reqmap_author.py:2440-3360"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2440_3360
-  f_plugin_scripts_reqmap_engine_clarify_py_140_301["plugin/scripts/reqmap_engine/clarify.py:140-301"]
-  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_140_301
+  f_plugin_scripts_test_reqmap_author_py_2440_3403["plugin/scripts/test_reqmap_author.py:2440-3403"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2440_3403
+  f_plugin_scripts_reqmap_engine_clarify_py_133_295["plugin/scripts/reqmap_engine/clarify.py:133-295"]
+  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_engine_clarify_py_133_295
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_85["plugin/scripts/reqmap.py:85"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_85
@@ -515,8 +516,8 @@ graph LR
   ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_317
   f_plugin_scripts_test_reqmap_report_py_3233_5672["plugin/scripts/test_reqmap_report.py:3233-5672"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_3233_5672
-  f_plugin_scripts_reqmap_engine_config_py_268_296["plugin/scripts/reqmap_engine/config.py:268-296"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_268_296
+  f_plugin_scripts_reqmap_engine_config_py_285_313["plugin/scripts/reqmap_engine/config.py:285-313"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_285_313
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
   f_plugin_scripts_test_reqmap_report_py_553_4011["plugin/scripts/test_reqmap_report.py:553-4011"]
   ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_553_4011
@@ -532,13 +533,13 @@ graph LR
   ARCH_CUSTOMTRACE_077["A repository describes its own trace convention<br><small>ARCH-CUSTOMTRACE-077</small>"]
   f_plugin_scripts_test_reqmap_customtrace_py_187["plugin/scripts/test_reqmap_customtrace.py:187"]
   ARCH_CUSTOMTRACE_077 -->|tested-by| f_plugin_scripts_test_reqmap_customtrace_py_187
-  f_plugin_scripts_reqmap_engine_config_py_167_328["plugin/scripts/reqmap_engine/config.py:167-328"]
-  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_config_py_167_328
+  f_plugin_scripts_reqmap_engine_config_py_167_345["plugin/scripts/reqmap_engine/config.py:167-345"]
+  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_config_py_167_345
   f_plugin_scripts_reqmap_engine_customtrace_py_9["plugin/scripts/reqmap_engine/customtrace.py:9"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_customtrace_py_9
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_scripts_test_reqmap_author_py_1786_3453["plugin/scripts/test_reqmap_author.py:1786-3453"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1786_3453
+  f_plugin_scripts_test_reqmap_author_py_1786_3496["plugin/scripts/test_reqmap_author.py:1786-3496"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1786_3496
   f_plugin_scripts_test_reqmap_report_py_5284["plugin/scripts/test_reqmap_report.py:5284"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5284
   f_plugin_scripts_reqmap_engine_decompose_py_54_114["plugin/scripts/reqmap_engine/decompose.py:54-114"]
@@ -796,8 +797,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_health_py_125_319["plugin/scripts/reqmap_engine/health.py:125-319"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_engine_health_py_125_319
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_scripts_test_reqmap_author_py_4220["plugin/scripts/test_reqmap_author.py:4220"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4220
+  f_plugin_scripts_test_reqmap_author_py_4263["plugin/scripts/test_reqmap_author.py:4263"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4263
   f_plugin_scripts_reqmap_engine_plandrift_py_362_428["plugin/scripts/reqmap_engine/plandrift.py:362-428"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_362_428
   f_plugin_scripts_reqmap_engine_release_py_1_386["plugin/scripts/reqmap_engine/release.py:1-386"]
@@ -810,8 +811,8 @@ graph LR
   f_scripts_test_pipeline_wiring_py_238["scripts/test_pipeline_wiring.py:238"]
   ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_238
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_scripts_test_reqmap_author_py_2060_3398["plugin/scripts/test_reqmap_author.py:2060-3398"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2060_3398
+  f_plugin_scripts_test_reqmap_author_py_2060_3441["plugin/scripts/test_reqmap_author.py:2060-3441"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2060_3441
   f_plugin_scripts_test_reqmap_report_py_5284["plugin/scripts/test_reqmap_report.py:5284"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_5284
   f_plugin_scripts_reqmap_engine_retire_py_12_229["plugin/scripts/reqmap_engine/retire.py:12-229"]
@@ -923,8 +924,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_scripts_reqmap_py_253["plugin/scripts/reqmap.py:253"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_253
-  f_plugin_scripts_test_reqmap_author_py_4432["plugin/scripts/test_reqmap_author.py:4432"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4432
+  f_plugin_scripts_test_reqmap_author_py_4475["plugin/scripts/test_reqmap_author.py:4475"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4475
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_319["plugin/scripts/reqmap_engine/init.py:319"]
@@ -1134,7 +1135,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>70 caps</small>"]
-  a_REQ["REQ<br><small>257 caps</small>"]
+  a_REQ["REQ<br><small>258 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

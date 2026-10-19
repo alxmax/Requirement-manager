@@ -89,6 +89,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0076](0076-an-audit-is-a-recorded-session.md) | An audit is a recorded session: a fixed plan, one file of findings, a report with intervals | Accepted |
 | [0077](0077-a-repository-describes-its-own-trace-tags.md) | A repository describes its own trace tags, test files and requirement sources | Accepted |
 | [0078](0078-clarify-vague-term-drops-quantity-words.md) | `clarify`'s `vague-term` drops the words that count or size | Accepted |
+| [0079](0079-clarify-word-lists-are-per-repository.md) | `clarify`'s word lists are per repository | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

@@ -170,6 +170,22 @@ TRACE_TAGS = []
 TEST_FILE_PATTERNS = []
 REQUIREMENT_SOURCES = []
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
+# implements: REQ-CLARIFY-1115 - the words clarify's word rules read (ADR-0079). A
+# corpus written in another language replaces them: English words judged it wrongly.
+CLARIFY_HEDGES = [
+    "appropriate", "appropriately", "properly", "reasonable", "reasonably",
+    "efficient", "efficiently", "robust", "user-friendly", "intuitive",
+    "quickly", "fast", "slow", "soon", "as needed", "if necessary",
+    "where possible", "and/or", "etc.", "and so on", "optimal",
+    "best-effort", "gracefully",
+]
+# a case naming any of these exercises a failure path
+CLARIFY_FAILURE_WORDS = [
+    "invalid", "missing", "empty", "absent", "error", "fails", "failure",
+    "refuse", "refuses", "reject", "rejects", "corrupt", "malformed",
+    "unreadable", "not found", "timeout", "conflict", "duplicate", "unknown",
+    "no ", "none", "cannot", "without",
+]
 
 
 # ---------- similar (duplicate-capability detection) ----------
@@ -236,6 +252,7 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "LINT_QUESTION_DEFAULT_LABELS", "LINT_QUESTION_CONTEXT_LABELS",
                "LINT_QUESTION_RECOMMENDED_MARKS", "LINT_QUESTION_SOURCE_LABELS",
                "LINT_QUESTION_DEFER_WORDS", "LINT_QUESTION_AUDIENCE_MARKERS",
+               "CLARIFY_HEDGES", "CLARIFY_FAILURE_WORDS",
                "SIMILAR_THRESHOLD", "ORPHAN_CODE_MIN_LOC",
                "DOC_BUNDLE_MIN_BYTES",
                "SYSTEM_HUB_FANIN", "BUS_FANIN_THRESHOLD", "SPLIT_LOC_THRESHOLD",
