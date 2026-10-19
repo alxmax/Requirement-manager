@@ -218,12 +218,12 @@
       "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
     },
     "REQ-CLARIFY-1102": {
-      "hash": "438e5e2cc46c",
-      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+      "hash": "f49ca4dad124",
+      "reason": null
     },
     "REQ-CLARIFY-956": {
-      "hash": "5a881f4f53d3",
-      "reason": "clarify: clause-without-case is a guess, number-without-unit retired, a need is not asked for a failure path (ADR-0075); 1031 counts twelve flags"
+      "hash": "2b7e53b0acd6",
+      "reason": null
     },
     "REQ-CLARIFY-975": {
       "hash": "68801ba55936",
@@ -280,6 +280,10 @@
     "REQ-DESIGN-991": {
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
+    },
+    "REQ-EXTRACT-1099": {
+      "hash": "0a516161d95d",
+      "reason": null
     },
     "REQ-EXTRACT-981": {
       "hash": "ca22b80b0a14",

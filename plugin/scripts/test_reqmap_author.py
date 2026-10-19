@@ -1654,6 +1654,34 @@ class DraftQuestions(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # teste
         self.assertIn("swallows the error", asks[0])
         self.assertIn("`app.js:2`", asks[1])
 
+    def test_a_signal_inside_a_string_is_not_observed(self):  # verifies: REQ-EXTRACT-1099#CASE-6
+        py = ('def f():\n    s = "# TODO: example"\n    t = "# noqa"\n    return s\n'
+              "x = 1  # TODO: real\n")
+        _text, asks = self._draft("strs.py", py)
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("`strs.py:5`", asks[0])
+        js = ('const text = "catch (e) {}";\nconst note = "// FIXME later";\n'
+              "// catch (e) {} is wrong\n/* catch {} */\n")
+        _text, asks = self._draft("strs.js", js)
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+        _text, asks = self._draft("real.js", '// "quoted"\ntry { go(); } catch (e) {}\n')
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("`real.js:2`", asks[0])
+        text, asks = self._draft("open.py", 's = "# TODO: x\n')
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+        self.assertIn("comment markers", text.split("## Context")[1])
+
+    def test_a_partial_scan_says_what_it_did_not_look_for(self):  # verifies: REQ-EXTRACT-1099#CASE-7
+        for name, src in (("bad.py", "def f(:\n    pass\n"),
+                          ("main.rs", "fn main() { let x = 5; }\n")):
+            text, asks = self._draft(name, src)
+            self.assertIn("TODO: anything that looks like an accident", asks[0], name)
+            self.assertIn("not looked for", text.split("## Context")[1], name)
+        text, _asks = self._draft("clean.py", "def go():\n    return 1\n")
+        self.assertNotIn("not looked for", text.split("## Context")[1])
+
 
 class DraftObservedSurface(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-851
     def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: ARCH-EXTRACT-008#CASE-6
@@ -2458,11 +2486,18 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         self.assertNotIn("no-failure-case", _rules(sad))
 
     def test_hedge_is_a_whole_word_outside_code(self):  # verifies: REQ-CLARIFY-1102#CASE-1
-        for clause in ("`show` states how many criteria are tagged.",
-                       "`dupes` keeps the smaller set.",
+        for clause in ("`map` takes the fastest path.",
                        "`lint` flags words such as `appropriate`."):
             self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
-        self.assertIn("vague-term", _rules(self._qs(["`gate` keeps many entries."])))
+        self.assertIn("vague-term", _rules(self._qs(["`gate` replies quickly."])))
+
+    def test_counting_and_sizing_words_ask_nothing(self):  # verifies: REQ-CLARIFY-1102#CASE-5
+        for clause in ("A tag binds several requirements.",
+                       "One file may hold many requirements.",
+                       "`health --json` keeps one small record.",
+                       "`clarify` answers for a large corpus.",
+                       "`init` reads various formats."):
+            self.assertNotIn("vague-term", _rules(self._qs([clause])), clause)
 
     def test_a_delegating_clause_is_not_counted(self):  # verifies: REQ-CLARIFY-1102#CASE-2
         handed = ["`map` does thing {}. [[REQ-A-{:03d}]]".format(i, i) for i in range(1, 10)]
@@ -2516,6 +2551,8 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
         cases = tuple(
             "CASE-{n} \u2014 c{n}\n  Given  a query that is {w}\n  When   it runs\n  Then   it answers"
             .format(n=n, w=w) for n, w in enumerate(("matching", "unmatched", "empty"), 1))
+        cases += ("CASE-4 — c4\n  Given  a requirement id\n  When   it runs\n"
+                  "  Then   it answers",)
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-Q-001.md"),
                    _spec("AREA-Q-001", ["`search` ranks by wording."], cases=cases))
@@ -2526,7 +2563,8 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
             qs = R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
         mono = [q for q in qs if q["rule"] == "case-monoculture"]
         self.assertTrue(mono, _rules(qs))
-        self.assertIn("query", mono[0]["question"])
+        self.assertIn('3 of 4 Given lines open on the same word ("query")', mono[0]["question"])
+        self.assertNotIn("Every case", mono[0]["question"])
 
     def test_the_corpus_own_subject_is_not_that_signal(self):  # verifies: REQ-CLARIFY-956#CASE-5
         """A corpus of requirements about requirements starts every case the same way; that
@@ -3344,14 +3382,14 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
     def test_five_clauses_two_cases_raise_one_question_not_three(self):  # verifies: REQ-CLARIFY-956#CASE-3
         qs = self._questions(5, 2)
         self.assertEqual(len(qs), 1)
-        self.assertIn("3 clause(s) have no case", qs[0]["question"])
-        self.assertIn("5 clauses and 2 cases", qs[0]["question"])
+        self.assertIn("There are 5 clauses and 2 cases", qs[0]["question"])
+        self.assertNotIn("have no case", qs[0]["question"])   # a count is not coverage
 
     def test_the_question_does_not_accuse_a_clause(self):
         qs = self._questions(4, 3)
         self.assertEqual(qs[0]["where"], "Cases")
         self.assertEqual(qs[0]["quote"], "")          # no clause is quoted as the culprit
-        self.assertIn("cannot say WHICH", qs[0]["question"])
+        self.assertIn("one case may prove two clauses", qs[0]["question"])
 
     def test_a_case_per_clause_raises_nothing(self):
         self.assertEqual(self._questions(3, 3), [])
