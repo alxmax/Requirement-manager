@@ -24,6 +24,12 @@
 - "several", "many", "various", "small" and "large" raise no question. They were 23 of the rule's 27 questions on this corpus, and 1 of 20 sampled questions was real, on "best-effort". `clarify` asks 160 questions here instead of 183. REQ-CLARIFY-1102
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.3`; the core stays at 6,741 logical lines
 
+**A code draft no longer observes a signal quoted in a string, and a partial scan says what it did not look for.**
+
+- `s = "# TODO: example"` and `t = "# noqa"` in Python, and `const text = "catch (e) {}";` in JS, each raised an `Observed at` question about a comment or handler that does not exist. A Python marker or suppression now counts only in a comment token, from `tokenize`, and none counts in a file that does not tokenize (before 3.12 an unclosed string turned the rest of its line into a comment). Elsewhere string literals are blanked before the patterns run, and comments too before an empty `catch` is looked for, so `// catch (e) {} is wrong` is prose. REQ-EXTRACT-1099
+- A Python file that does not parse, and a file in a language with no parser, returned no parsed signal exactly as a clean file did. Its draft's Context now says that swallowed errors, unnamed numbers and dead code were not looked for; the generic question stays open. REQ-EXTRACT-1099
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.4`; 18,928 physical lines in 78 files (the README says so). The core stays at 6,741 logical lines; `draftquestions.py` loads only when `init` drafts code
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

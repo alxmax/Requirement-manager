@@ -1654,6 +1654,34 @@ class DraftQuestions(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # teste
         self.assertIn("swallows the error", asks[0])
         self.assertIn("`app.js:2`", asks[1])
 
+    def test_a_signal_inside_a_string_is_not_observed(self):  # verifies: REQ-EXTRACT-1099#CASE-6
+        py = ('def f():\n    s = "# TODO: example"\n    t = "# noqa"\n    return s\n'
+              "x = 1  # TODO: real\n")
+        _text, asks = self._draft("strs.py", py)
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("`strs.py:5`", asks[0])
+        js = ('const text = "catch (e) {}";\nconst note = "// FIXME later";\n'
+              "// catch (e) {} is wrong\n/* catch {} */\n")
+        _text, asks = self._draft("strs.js", js)
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+        _text, asks = self._draft("real.js", '// "quoted"\ntry { go(); } catch (e) {}\n')
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("`real.js:2`", asks[0])
+        text, asks = self._draft("open.py", 's = "# TODO: x\n')
+        self.assertEqual(len(asks), 1, asks)
+        self.assertIn("TODO: anything that looks like an accident", asks[0])
+        self.assertIn("comment markers", text.split("## Context")[1])
+
+    def test_a_partial_scan_says_what_it_did_not_look_for(self):  # verifies: REQ-EXTRACT-1099#CASE-7
+        for name, src in (("bad.py", "def f(:\n    pass\n"),
+                          ("main.rs", "fn main() { let x = 5; }\n")):
+            text, asks = self._draft(name, src)
+            self.assertIn("TODO: anything that looks like an accident", asks[0], name)
+            self.assertIn("not looked for", text.split("## Context")[1], name)
+        text, _asks = self._draft("clean.py", "def go():\n    return 1\n")
+        self.assertNotIn("not looked for", text.split("## Context")[1])
+
 
 class DraftObservedSurface(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: REQ-EXTRACT-851
     def test_where_lists_signatures_contract_stays_todo(self):  # verifies: REQ-EXTRACT-851#CASE-4  # verifies: REQ-EXTRACT-851#CASE-5  # verifies: ARCH-EXTRACT-008#CASE-6

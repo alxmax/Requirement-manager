@@ -438,7 +438,12 @@ Every bullet below is binding.
   continues or returns nothing; a number other than -1, 0, 1 and 2 written into a
   comparison or a keyword argument inside a function; and a statement after an
   unconditional `return`, `raise`, `continue` or `break`.
-- A marker in a string literal, or in a file name such as `TODO.md`, is not a signal.
+- A marker in a string literal, or in a file name such as `TODO.md`, is not a signal. In
+  Python a marker or suppression counts only in a comment token, and none counts when the
+  file does not tokenize; in any other language string literals are blanked before the
+  patterns run, and comments too before an empty `catch` is looked for.
+- When the Python file does not parse, or no parser reads the language, Context names the
+  signals that were not looked for, so a partial scan never reads as a clean one.
 - `draft` writes at most eight questions per file, in line order, and names how many it
   left out under Context.
 - A file with no signal keeps the generic question it always had.
@@ -471,6 +476,21 @@ CASE-5 — the pattern signals apply to a language with no parser
   Given  an untagged `.js` file with an empty `catch` block and a `FIXME` comment
   When   `draft` runs
   Then   its Verify intent holds one question for each, naming `app.js:1` and `app.js:2`
+
+CASE-6 — a signal quoted in a string is not observed
+  Given  a `.py` file holding `"# TODO: example"` and `"# noqa"` in strings and one real
+         `# TODO` comment; a `.py` file whose only line opens a string it never closes;
+         and a `.js` file holding `catch (e) {}` only in strings and comments
+  When   `draft` runs
+  Then   the first asks only about the comment's line, the second keeps the generic
+         question and says comment markers were not looked for, and the third keeps the
+         generic question, while a real empty `catch` keeps its own line
+
+CASE-7 — a partial scan says what it did not look for
+  Given  a `.py` file that does not parse, a `.rs` file, and a clean `.py` file
+  When   `draft` runs
+  Then   the first two keep the generic question and their Context says what was not
+         looked for; the clean file's Context says nothing of the kind
 
 ## Context
 **Notes**

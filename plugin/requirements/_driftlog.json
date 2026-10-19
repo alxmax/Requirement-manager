@@ -281,6 +281,10 @@
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
     },
+    "REQ-EXTRACT-1099": {
+      "hash": "0a516161d95d",
+      "reason": null
+    },
     "REQ-EXTRACT-981": {
       "hash": "ca22b80b0a14",
       "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
