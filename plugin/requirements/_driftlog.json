@@ -193,6 +193,14 @@
       "hash": "d1f8dd693b28",
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
+    "REQ-CANDIDATES-826": {
+      "hash": "000ec6c8296f",
+      "reason": null
+    },
+    "REQ-CHECK-1035": {
+      "hash": "708f2939a141",
+      "reason": null
+    },
     "REQ-CHECK-1036": {
       "hash": "bfd8e3e1acfc",
       "reason": null
@@ -265,6 +273,10 @@
       "hash": "3ae7bb5d2b90",
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
+    "REQ-DESIGN-952": {
+      "hash": "23c36f22ca3b",
+      "reason": null
+    },
     "REQ-DESIGN-953": {
       "hash": "5999a2f61f1b",
       "reason": null
@@ -281,8 +293,20 @@
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
     },
+    "REQ-DOCBUNDLE-840": {
+      "hash": "4d52e6cc97b9",
+      "reason": null
+    },
+    "REQ-DRIFT-841": {
+      "hash": "9c81177c8330",
+      "reason": null
+    },
     "REQ-EXTRACT-1099": {
       "hash": "0a516161d95d",
+      "reason": null
+    },
+    "REQ-EXTRACT-851": {
+      "hash": "65d6db28abd8",
       "reason": null
     },
     "REQ-EXTRACT-981": {
@@ -366,7 +390,11 @@
       "reason": "Compact export contracts and cases"
     },
     "REQ-MAP-871": {
-      "hash": "7e73678111e9",
+      "hash": "f3c1c9325a18",
+      "reason": null
+    },
+    "REQ-MAP-873": {
+      "hash": "dbb338fc4401",
       "reason": null
     },
     "REQ-MAPDIAGRAMS-874": {
@@ -517,6 +545,10 @@
       "hash": "2093d3ab4d57",
       "reason": "REQ-SELFGATE-990 CASE-4 now covers CLAUDE.md counts; MCP tool set is thirteen (ADR-0047)"
     },
+    "REQ-SHOW-918": {
+      "hash": "b7130bc1c8dd",
+      "reason": null
+    },
     "REQ-SHOW-919": {
       "hash": "21313c69df10",
       "reason": "JSON for show/search/dupes; MCP resources"
@@ -564,6 +596,10 @@
     "REQ-UNTAGGEDSET-1007": {
       "hash": "17fc26a52451",
       "reason": "Findings from running the engine on its own repository"
+    },
+    "REQ-VERSIONALIGN-1016": {
+      "hash": "3ad81afa6549",
+      "reason": null
     },
     "REQ-VERSIONFILES-1014": {
       "hash": "ebb1422db3b0",

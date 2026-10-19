@@ -1,10 +1,13 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1101
+// implements: REQ-VIEWER-1114
 import { useState } from "react";
 import { REQUIREMENTS } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
-import { Pill, statusKind } from "../lib/ui.jsx";
+import {
+  Pill, statusKind, mdInline, mdQuestion, reqLinkProps,
+} from "../lib/ui.jsx";
 import { openQuestions, isObserved, clarifyQuestions } from "../lib/tree.js";
 import { ChipRow, ProblemRow } from "./problems/ProblemsPanels.jsx";
 
@@ -100,11 +103,31 @@ const COUNT = {
   marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11,
 };
 
-function ClarifyRow({ row, keep, openSpec }) {
+function ClarifyList({ qs }) {
+  return (
+    <ul className="finding-qs">
+      {qs.map((q, j) => (
+        <li key={j}>
+          <span className={"prob-sev basis-" + basisOf(q)}
+            style={BADGE}>{BASIS_LABEL[basisOf(q)]}</span>
+          <code>{q.rule}</code> · {q.where}
+          {q.quote && <div style={MUTED}>“{q.quote}”</div>}
+          <div>{q.question}</div>
+          <div className="prob-fix">
+            <Icon name="arrow-right" size={13} /> {q.suggest}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function ClarifyRow({ row, keep, pick, picked }) {
   const qs = row.questions.filter(keep);
   if (!qs.length) return null;
   return (
-    <div className="prob-row question-row" onClick={() => openSpec(row.id)}>
+    <div className={"prob-row question-row" + (picked ? " picked" : "")}
+      onClick={() => pick(row.id)}>
       <span className="prob-sev sev-QUESTION">clarify</span>
       <div className="prob-body">
         <div className="prob-head">
@@ -112,35 +135,67 @@ function ClarifyRow({ row, keep, openSpec }) {
           <span className="prob-title">{row.title}</span>
           <Pill kind={statusKind(row.status)}>{row.status}</Pill>
         </div>
-        <ul className="finding-qs">
-          {qs.map((q, j) => (
-            <li key={j}>
-              <span className={"prob-sev basis-" + basisOf(q)}
-                style={BADGE}>{BASIS_LABEL[basisOf(q)]}</span>
-              <code>{q.rule}</code> · {q.where}
-              {q.quote && <div style={MUTED}>“{q.quote}”</div>}
-              <div>{q.question}</div>
-              <div className="prob-fix">
-                <Icon name="arrow-right" size={13} /> {q.suggest}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <ClarifyList qs={qs} />
       </div>
     </div>
+  );
+}
+
+/** The chosen requirement's questions on this tab, beside the text they are
+ * about: its Description clauses and its Cases. Opening the requirement is
+ * a button, never the click that chose it. */
+export function QuestionPanel({ id, tab, keep, qs, openSpec, close, t }) {
+  const r = REQUIREMENTS.find((x) => x.id === id);
+  if (!r) return null;
+  const asked = (tab.verify || []).flatMap((o) =>
+    (qs[o].find((row) => row.id === id) || { questions: [] }).questions);
+  const row = qs.clarify.find((x) => x.id === id);
+  const clarify = row ? row.questions.filter(keep) : [];
+  const md = (fmt) => (c, i) => (
+    <li key={i} dangerouslySetInnerHTML={{ __html: fmt(c) }} />);
+  return (
+    <aside className="q-panel">
+      <div className="prob-head">
+        <span className="prob-id">{r.id}</span>
+        <Pill kind={statusKind(r.status)}>{r.status}</Pill>
+      </div>
+      <h3>{r.title}</h3>
+      {asked.length > 0 && (
+        <ul className="finding-qs q-asked" {...reqLinkProps(openSpec)}>
+          {asked.map(md(mdQuestion))}
+        </ul>
+      )}
+      {clarify.length > 0 && <ClarifyList qs={clarify} />}
+      <div className="eyebrow">{t("Description")}</div>
+      <ul {...reqLinkProps(openSpec)}>{(r.contract || []).map(md(mdInline))}</ul>
+      <div className="eyebrow">{t("Cases")}</div>
+      {r.gwt
+        ? <div className="gwt">
+            {r.gwt.split("\n").map((ln, i) => <div key={i}>{ln}</div>)}
+          </div>
+        : <ul {...reqLinkProps(openSpec)}>{(r.acc || []).map(md(mdInline))}</ul>}
+      <div className="q-panel-actions">
+        <button className="btn btn-secondary" onClick={() => openSpec(r.id)}>
+          {t("Open requirement")} <Icon name="arrow-right" size={13} />
+        </button>
+        <button className="btn btn-ghost" onClick={close}>{t("Close")}</button>
+      </div>
+    </aside>
   );
 }
 
 const OPTIONAL_NOTE = "A word on a list matched. Often not a real gap; read "
   + "it when you have time.";
 
-export function QuestionsView({ openSpec, initialTab = "all" }) {
+export function QuestionsView({ openSpec, initialTab = "all",
+  initialPick = null }) {
   const { t } = useI18n();
   const qs = computeQuestions();
   const tabs = questionTabs(qs);
   const [key, setKey] = useState(
     tabs.some((tab) => tab.key === initialTab) ? initialTab : "all");
   const [rule, setRule] = useState(null);
+  const [pick, setPick] = useState(initialPick);
   const tab = tabs.find((x) => x.key === key);
   const missing = (tabs.find((x) => x.key === "structure") || {}).n || 0;
   const keep = (q) => tab.keep(q) && (!rule || q.rule === rule);
@@ -173,6 +228,7 @@ export function QuestionsView({ openSpec, initialTab = "all" }) {
               </>}
         </div>
       </div>
+      <div className={pick ? "q-split" : undefined}>
       <div className="problems">
         {tab.rules && tab.n > 0 && (
           <>
@@ -184,10 +240,12 @@ export function QuestionsView({ openSpec, initialTab = "all" }) {
           </>
         )}
         {(tab.verify || []).flatMap((o) => qs[o].map((p) => (
-          <ProblemRow key={o + p.id} p={p} openSpec={openSpec} t={t} />
+          <ProblemRow key={o + p.id} p={p} openSpec={openSpec} t={t}
+            onPick={setPick} picked={pick === p.id} />
         )))}
         {qs.clarify.map((r) => (
-          <ClarifyRow key={r.id} row={r} keep={keep} openSpec={openSpec} />
+          <ClarifyRow key={r.id} row={r} keep={keep} pick={setPick}
+            picked={pick === r.id} />
         ))}
         {tab.n === 0 && (
           <div className="prob-empty">
@@ -196,6 +254,11 @@ export function QuestionsView({ openSpec, initialTab = "all" }) {
             <div><b>{t("No open questions here.")}</b></div>
           </div>
         )}
+      </div>
+      {pick && (
+        <QuestionPanel id={pick} tab={tab} keep={keep} qs={qs}
+          openSpec={openSpec} close={() => setPick(null)} t={t} />
+      )}
       </div>
     </div>
   );

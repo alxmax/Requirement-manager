@@ -12,8 +12,10 @@ import {
   ProblemsView, computeProblems,
 } from "../../src/views/ProblemsView.jsx";
 import {
-  QuestionsView, computeQuestions, questionCount,
+  QuestionsView, computeQuestions, questionCount, questionTabs, ClarifyRow,
+  QuestionPanel,
 } from "../../src/views/QuestionsView.jsx";
+import { ProblemRow } from "../../src/views/problems/ProblemsPanels.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
 import { RoadmapView } from "../../src/views/RoadmapView.jsx";
 import {
@@ -344,6 +346,71 @@ const mergeChecks = [
       && !firstOpen.includes("Q-OLD-005")],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
+
+// ---- choosing a question shows it beside the list (REQ-VIEWER-1114) --------
+// tested-by: REQ-VIEWER-1114
+// A row used to open its requirement and leave the page; it now opens a panel
+// and the requirement opens only from the panel's button.
+adoptMapExport({ nodes: [
+  adaptNode({ id: "Q-PICK-001", title: "picked", area: "Q", layer: "feature",
+    status: "confirmed", intent: "i",
+    contract: ["`gate` keeps the panel clause."],
+    acc: ["CASE-1 — the panel case"],
+    members: [{ role: "implements", loc: "a.py:1" }],
+    verify: ["**Should the panel stay open?**\n  a) Yes: it stays.\n"
+      + "  b) No: it closes."],
+    deps: [], used_by: [],
+    clarify: [CLARIFY_Q("clause-without-case", "advisory", "count")] }),
+] });
+const opened = [];
+const pickHtml = renderToString(<QuestionsView openSpec={(id) => opened.push(id)}
+  initialPick="Q-PICK-001" />);
+const plainHtml = renderToString(<QuestionsView openSpec={noop} />);
+const panel = pickHtml.slice(pickHtml.indexOf('class="q-panel"'));
+// SSR cannot click, so the handlers are called on the rendered elements.
+const findEl = (el, ok) => {
+  if (!el || typeof el !== "object") return null;
+  if (Array.isArray(el)) {
+    for (const c of el) { const f = findEl(c, ok); if (f) return f; }
+    return null;
+  }
+  if (el.props && ok(el)) return el;
+  return el.props ? findEl(el.props.children, ok) : null;
+};
+const picks = [];
+const pickQs = computeQuestions();
+const pickRow = pickQs.clarify[0];
+ClarifyRow({ row: pickRow, keep: () => true, pick: (id) => picks.push(id) })
+  .props.onClick();
+ProblemRow({ p: pickQs.person[0], openSpec: (id) => opened.push(id),
+  t: (s) => s, onPick: (id) => picks.push(id) }).props.onClick();
+const panelEl = QuestionPanel({ id: "Q-PICK-001", tab: questionTabs(pickQs)[0],
+  keep: () => true, qs: pickQs, openSpec: (id) => opened.push("open:" + id),
+  close: noop, t: (s) => s });
+const openBtn = findEl(panelEl, (e) => e.type === "button"
+  && String(e.props.className).includes("btn-secondary"));
+const beforeOpen = opened.length;
+openBtn.props.onClick();
+const pickChecks = [
+  // verifies: REQ-VIEWER-1114#CASE-1
+  ["questions: a chosen question opens a panel beside the list",
+    pickHtml.includes('class="q-split"') && pickHtml.includes(" picked")
+      && panel.includes("Should the panel stay open?")
+      && (panel.match(/class="q-opt"/g) || []).length === 2
+      && panel.includes("the clause-without-case question")
+      && panel.includes("say it")
+      && panel.includes("the panel clause") && panel.includes("the panel case")],
+  // verifies: REQ-VIEWER-1114#CASE-2
+  ["questions: nothing chosen, no panel and no marked row",
+    !plainHtml.includes("q-panel") && !plainHtml.includes(" picked")
+      && !plainHtml.includes("q-split")],
+  // verifies: REQ-VIEWER-1114#CASE-3
+  ["questions: choosing a row picks it, only the panel's button opens it",
+    panel.includes("Open requirement") && panel.includes("Close")
+      && picks.join() === "Q-PICK-001,Q-PICK-001" && beforeOpen === 0
+      && opened.join() === "open:Q-PICK-001"],
+];
+for (const [label, ok] of pickChecks) test(label, ok);
 
 // ---- a cached translation is shown, always marked (REQ-TRANSLATE-1080) -----
 // tested-by: REQ-TRANSLATE-1080

@@ -194,6 +194,11 @@ CASE-3 — a levelled tested-by member is annotated with its level
   When   `show REQ-X-001` runs with that level data
   Then   its output contains "@integration"
 
+CASE-4 — a requirement with no tagged member says so
+  Given  `REQ-X-001` with no member in code
+  When   `show REQ-X-001` runs
+  Then   its output reads "Members in code (0):" followed by "(none tagged)"
+
 
 --------------------
 

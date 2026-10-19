@@ -215,6 +215,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Observed in code": "Observate în cod",
   "Asked by a person": "Puse de un om",
   "No open questions here.": "Nicio întrebare deschisă aici.",
+  "Open requirement": "Deschide cerința",
+  "Close": "Închide",
   "Must fix": "De reparat",
   "Clause without case": "Clauză fără caz",
   "Over-scoped": "Prea largă",

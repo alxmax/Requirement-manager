@@ -135,6 +135,11 @@ CASE-4 — binding_hash is deterministic across repeated calls
   When   `binding_hash` runs on it twice, independently
   Then   both calls return the identical 12-character hash
 
+CASE-5 — a body with no normative section still hashes, and filling it drifts
+  Given  a requirement body holding only a title and a `## Context` section
+  When   `binding_hash` runs on it, then on the same body with a Description clause added
+  Then   the first is the hash of empty normative text, and the second differs from it
+
 
 --------------------
 

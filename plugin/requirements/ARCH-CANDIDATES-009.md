@@ -120,7 +120,9 @@ Every bullet below is binding.
 - `draft --plan` lists every scannable code file as a candidate, the same set `draft` walks.
   A file in a language `draft --plan` cannot parse is still a candidate, with empty facts.
 - `draft --plan` reads top-level signatures from Python via `ast` — functions, classes and the
-  public methods of each class — and from JS/TS via best-effort parsing.
+  public methods of each class. JS/TS has no parser: a pattern reads the names of
+  `function` declarations and of `const`/`let`/`var` bindings anywhere in the file, nested
+  ones included, and the leading block comment as the module doc; imports are not read.
 - An unparseable file yields empty facts. It never aborts the plan.
 
 ## Cases
@@ -149,16 +151,19 @@ CASE-5 — an unparseable file still becomes a candidate
   When   `draft --plan` runs
   Then   that file appears as a candidate with empty facts, not omitted
 
-CASE-6 — Python signatures come from ast, not text matching
-  Given  a Python file defining a class with one public and one `_private` method
-  When   `draft --plan` reads its signatures
-  Then   the public method appears in the candidate's `signatures` and the private one does not
+CASE-6 — Python signatures come from ast, JS/TS names from a pattern
+  Given  a Python file defining a class with one public and one `_private` method, and a JS
+         file opening with a block comment, exporting `function foo` with a nested
+         `function inner`, and binding `const bar`
+  When   `draft --plan` reads their facts
+  Then   the public method appears in the Python `signatures` and the private one does not;
+         the JS module doc is the comment's first line, its signatures hold `foo`, `inner`
+         and `bar`, and no import is listed
 
 CASE-7 — an unparseable file never aborts the run
   Given  a codebase containing one syntactically broken Python file among valid ones
   When   `draft --plan` runs
   Then   it completes and emits candidates for the valid files, with empty facts for the broken one
-
 
 --------------------
 

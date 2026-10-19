@@ -466,7 +466,14 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
 
 
 class RepoName(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-871
-    def test_falls_back_to_dir_name_without_git_remote(self):
+    def test_remote_url_gives_owner_and_repo(self):  # verifies: REQ-MAP-871#CASE-2
+        with mock.patch.object(R.git, "_git_remote_url",
+                               return_value="git@github.com:acme/widgets.git"), \
+                mock.patch.dict(os.environ):
+            os.environ.pop("REQMAP_REPO", None)
+            self.assertEqual(R._repo_name("."), "acme/widgets")
+
+    def test_falls_back_to_dir_name_without_git_remote(self):  # verifies: REQ-MAP-871#CASE-2
         # a bare temp dir has no remote.origin.url -> directory basename is used,
         # and the call never raises (git absent / not a checkout must be tolerated)
         with tempfile.TemporaryDirectory() as d:
@@ -479,7 +486,7 @@ class RepoName(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-
         self.assertNotEqual(a, b)
         self.assertEqual(R._strip_generated(a), R._strip_generated(b))
 
-    def test_env_override_wins_over_git(self):
+    def test_env_override_wins_over_git(self):  # verifies: REQ-MAP-871#CASE-2
         # REQMAP_REPO lets a private dev repo emit a public slug (or "" for none)
         # instead of leaking its own remote into the inlined map data
         old = os.environ.get("REQMAP_REPO")
@@ -576,6 +583,10 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
             "> A lock sidecar that exists on disk but is not git-tracked is a `WARN`.",
             "> A lock sidecar that exists on disk but is not\n> git-tracked is a `WARN`.")
         self.assertEqual(R._distinct_intent(wrapped), "")
+
+    def test_no_quote_means_empty_intent(self):  # verifies: REQ-MAP-873#CASE-4
+        body = "# T\n\n## Description\nEvery bullet below is binding.\n- `x` does y.\n"
+        self.assertEqual(R._distinct_intent(body), "")
 
     def test_req_to_code_collapses_line_range(self):  # bug: mermaid-req-to-code-line-range-untested  # verifies: REQ-MAPDIAGRAMS-877#CASE-4
         out = R._mermaid_req_to_code({"nodes": [self._node(
@@ -1228,6 +1239,10 @@ class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHO
         _, out = self._show({"REQ-X-001": self._req()}, members, "REQ-X-001")
         self.assertIn("implements", out)
         self.assertIn("src/foo.py:42", out)
+
+    def test_no_member_says_none_tagged(self):  # verifies: REQ-SHOW-918#CASE-4
+        _, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
+        self.assertIn("Members in code (0):\n  (none tagged)", out)
 
     def test_open_verify_shown_placeholder_skipped(self):  # verifies: REQ-SHOW-919#CASE-1  # verifies: ARCH-SHOW-015#CASE-6
         body = ("# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
@@ -5797,8 +5812,27 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
                 R.cmd_design(d)
             self.assertIn("No design candidates", buf.getvalue())
 
-    def test_syntax_error_yields_nothing(self):  # verifies: REQ-DESIGN-952#CASE-3
-        self.assertEqual(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"), [])
+    def test_syntax_error_leaves_the_score_and_is_named(self):  # verifies: REQ-DESIGN-952#CASE-3
+        self.assertIsNone(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"))
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ok.py"), "def go():\n    return 1\n")
+            _write(os.path.join(d, "bad.py"), "def (:\n    pass\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual((data["files"], data["unparsed"], data["findings"]),
+                             (1, ["bad.py"], []))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            self.assertIn("did not parse as Python and are left out: bad.py",
+                          buf.getvalue())
+            summary = R._design_summary(d)
+            self.assertEqual((summary["files"], summary["score"], summary["unparsed"]),
+                             (1, 100, ["bad.py"]))
+            os.remove(os.path.join(d, "bad.py"))
+            self.assertNotIn("unparsed", R._design_summary(d))
 
     def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
         self._set(DESIGN_PARAMS_MAX=R.config.DESIGN_PARAMS_MAX)

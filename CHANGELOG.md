@@ -37,6 +37,17 @@
 - The skill's `references/assistant-steps.md` quotes the new wording
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.5`; 18,927 physical lines in 78 files (the README says so). The core drops to 6,740 logical lines
 
+**The real questions a sample of `clarify` found are answered in the requirements, and the one that needs a decision is asked.**
+
+- Seven requirements gain the case their own clause already promised, each with a test: `show` with no tagged member (REQ-SHOW-918), a draft in a language with no parser (REQ-EXTRACT-851), a link outside the Description (REQ-CHECK-1035), a small or tagged docs file (REQ-DOCBUNDLE-840), a body with no quote (REQ-MAP-873), a repository with nothing to compare (REQ-VERSIONALIGN-1016) and a body with no normative section (REQ-DRIFT-841). REQ-MAP-871 and REQ-CANDIDATES-826 replace "best-effort" with the order and the patterns the code follows
+- A Python file that does not parse no longer counts as clean in the design score: it is left out of `files` and the score, `design` names it on one line, `design --json` lists it under `unparsed`, and the summary record carries `unparsed` only when such a file exists, so a badge payload keeps its shape. The question was asked in REQ-DESIGN-952's Verify intent and answered there. REQ-DESIGN-952
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.6`; 18,938 physical lines in 78 files (the README says so). The core rises to 6,748 logical lines: the eight are the unparsed list, its key and its report line in `design_report.py`, which `sync` loads for the summary
+- `clarify` asks 149 questions here instead of 160
+
+**Choosing a question on the viewer's Questions page shows it beside the list instead of leaving the page.**
+
+- A row opened its requirement, so the reader lost the list for every question. It now opens a panel with the requirement's id, title and status, its questions as the current tab shows them (a decision question's options on their own lines), and its Description clauses and Cases. A button opens the requirement and another closes the panel; the Problems inbox still opens a requirement from its row. REQ-VIEWER-1114
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**
