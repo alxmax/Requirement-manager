@@ -30,6 +30,7 @@ Cadence: one release a week, not one per merge.
 - [ ] The MCP docs count the tools a client sees. Done when: `docs/integrations.md` and `docs/commands.md` say eleven read-only tools and two writing ones behind `--allow-writes`, and the skill's `references/mcp.md` no longer names `reqmap_new` nor says approval is never asked outside Claude Code | req: ARCH-MCP-073
 - [ ] The map viewer makes no network request. Done when: `_map_viewer.html` carries its fonts or falls back to system fonts, with no `fonts.googleapis.com` link | req: ARCH-VIEWER-007
 - [ ] The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file | req: ARCH-SELFGATE-039
+- [ ] A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded | req: ARCH-CUSTOMTRACE-077
 
 ## Next
 

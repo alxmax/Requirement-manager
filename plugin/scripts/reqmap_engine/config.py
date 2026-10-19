@@ -164,6 +164,11 @@ AUDIT_BANDS = {"precision_lower_bound": 0.5, "findings_per_10": 1,
                "stop_after": 20}
 # a rate built on fewer cases than this is printed and not judged
 AUDIT_MIN_POSITIVES = 5
+# implements: ARCH-CUSTOMTRACE-077 - a repository's own trace convention (ADR-0077):
+# extra tag forms, test-file globs, requirements kept as text or HTML
+TRACE_TAGS = []
+TEST_FILE_PATTERNS = []
+REQUIREMENT_SOURCES = []
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
 
 
@@ -241,7 +246,8 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN",
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
-               "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES")
+               "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
+               "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
 # declared here and a value outside them is reported rather than applied.
@@ -318,6 +324,15 @@ def apply_config(cfg, out=None, problems=None):
                 reject("config: ignoring unknown key {!r}".format(key))
             continue
         default = g[key]
+        if key in ("TRACE_TAGS", "REQUIREMENT_SOURCES"):
+            # implements: ARCH-CUSTOMTRACE-077 — lists of objects, checked there
+            from . import customtrace
+            g[key], bad = getattr(customtrace, "validate_" + (
+                "tags" if key == "TRACE_TAGS" else "sources"))(value)
+            for message in bad:
+                reject(message)
+            applied.append(key)
+            continue
         # A string-valued key is an ENUM, never free text: every one of them
         # names a behaviour, so an unrecognised spelling is a typo that must be
         # reported. The numeric branch below would otherwise reject strings

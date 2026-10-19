@@ -41,6 +41,10 @@
       "hash": "25d7127a672c",
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
+    "ARCH-CUSTOMTRACE-077": {
+      "hash": "b0f7b54fdcc1",
+      "reason": "ARCH-CUSTOMTRACE-077 confirmed by its owner on 2026-10-19; design revised before code: REQUIREMENT_SOURCES for text and HTML, no ID_PATTERN"
+    },
     "ARCH-DECOMPOSE-050": {
       "hash": "78a106d8a915",
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
@@ -236,6 +240,18 @@
     "REQ-CONFIG-949": {
       "hash": "441a90cd9477",
       "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+    },
+    "REQ-CUSTOMTRACE-1110": {
+      "hash": "b0e094b66c4f",
+      "reason": "ARCH-CUSTOMTRACE-077 confirmed by its owner on 2026-10-19; design revised before code: REQUIREMENT_SOURCES for text and HTML, no ID_PATTERN"
+    },
+    "REQ-CUSTOMTRACE-1112": {
+      "hash": "9d81a40163c6",
+      "reason": "ARCH-CUSTOMTRACE-077 confirmed by its owner on 2026-10-19; design revised before code: REQUIREMENT_SOURCES for text and HTML, no ID_PATTERN"
+    },
+    "REQ-CUSTOMTRACE-1113": {
+      "hash": "b689b86ad200",
+      "reason": "Readability: one REQ-CUSTOMTRACE-1113 clause split in two; no change in behaviour"
     },
     "REQ-DANGLINGVERIFY-1009": {
       "hash": "330e7b7c015c",

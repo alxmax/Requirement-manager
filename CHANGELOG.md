@@ -11,6 +11,14 @@
 - `ask --review` (and `reqmap_review`) carries the review prompt and each requirement's place in the plan while a session is open; the skill's `references/audit.md` holds the method for an assistant. REQ-AUDITRUN-1109
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.1`; 18,617 physical lines in 77 files (the README says so). The core rises to 6,706 logical lines (ADR-0076); `auditrun.py` loads only while an audit runs
 
+**A repository describes its own trace convention in `_config.json` (ADR-0077).**
+
+- `TRACE_TAGS` adds tag forms: a regex whose first group is the id, and a role (`implements`, `tested-by`, or `auto`, which is tested-by in a test file and implements elsewhere). A configured tag is a member, can be dangling (RM001) and counts against the untagged-file report. The built-in forms stay. REQ-CUSTOMTRACE-1110
+- `TEST_FILE_PATTERNS` adds globs that make a file a test file, beside the built-in convention. REQ-CUSTOMTRACE-1112
+- `REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, from any folders: `start` is the regex of the line a requirement starts on, each sentence is a clause, and an HTML table row reads as one line. A text or HTML requirement is not held to the Markdown format, while every link check applies; a source file is not untagged code; a source matching no file is an `INPUT:requirements` error. REQ-CUSTOMTRACE-1113
+- A bad entry is an `INPUT:config` warning, an error under `--strict`. With none of the keys set nothing changes, and `customtrace.py` is never imported
+- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.2`; 18,888 physical lines in 78 files (the README says so). The core rises to 6,741 logical lines (ADR-0077)
+
 ## plugin `v8.24.6` — 2026-10-19
 
 **Twelve drafts are read and confirmed, the ADOPT requirements join the V, and the gate's eight readability warnings are gone.**

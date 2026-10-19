@@ -105,9 +105,19 @@ def tagged_unscanned_files(code_root, reqs_dir=None):
                 text = f.read()
         except (OSError, ValueError):
             continue
-        if TAG_RE.search(text):
+        if TAG_RE.search(text) or (cfg.TRACE_TAGS and _custom_tag(text)):
             out.append(rel)
     return sorted(out)
+
+
+def _custom_tag(text):  # implements: REQ-CUSTOMTRACE-1110
+    from .customtrace import has_custom_tag
+    return has_custom_tag(text)
+
+
+def _requirement_source(rel):  # implements: REQ-CUSTOMTRACE-1113
+    from .customtrace import is_source_path
+    return is_source_path(rel)
 
 
 def untagged_doc_bundles(code_root, members, reqs_dir=None):
@@ -189,6 +199,8 @@ def _scan_untagged(code_root, reqs_dir=None):
     for fp, rel in _walk_code(code_root, reqs_dir):
         if untaggable_by_design(rel) or rel.startswith(ignored):
             continue
+        if cfg.REQUIREMENT_SOURCES and _requirement_source(rel):
+            continue   # a requirement is not untagged code (REQ-CUSTOMTRACE-1113)
         tags = _scan_file_tags(fp)
         if tags is not None and not tags:
             untagged.append(rel)
