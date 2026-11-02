@@ -92,6 +92,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0079](0079-clarify-word-lists-are-per-repository.md) | `clarify`'s word lists are per repository | Accepted |
 | [0080](0080-known-bugs-are-listed-by-module.md) | Known bugs are listed by module | Accepted |
 | [0081](0081-what-a-first-bug-list-changed.md) | What a first bug list changed | Accepted |
+| [0082](0082-a-bug-leaves-the-list-into-a-register.md) | A bug leaves the list into a register | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

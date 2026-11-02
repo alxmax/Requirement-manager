@@ -358,9 +358,11 @@ COMMANDS = {
                      "(default: today as YYYYMMDD)."},
             {"name": "mode_bug", "flag": "--bug",
              "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
-             "help": "Add one bug to `requirements/bugs/<module>.md` instead "
-                     "of syncing, creating the file if needed. Needs --module; "
-                     "run `sync` after it to show the bug on the map."},
+             "help": "Add one bug to the module's file under "
+                     "`requirements/bugs/` instead of syncing, creating the "
+                     "file if needed. Needs --module; a title the module "
+                     "already holds needs --force. Run `sync` after it to "
+                     "show the bug on the map."},
             {"name": "module", "flag": "--module",
              "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
              "help": "With --bug: the module the bug belongs to, which names "
@@ -383,6 +385,26 @@ COMMANDS = {
             {"name": "source", "flag": "--source",
              "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
              "help": "With --bug: where the report came from."},
+            {"name": "mode_fix", "flag": "--fix",
+             "consumer": "plugin/skills/requirement-manager/references/bugs.md",
+             "type": "str",
+             "help": "Close one bug instead of syncing: move its row to the "
+                     "register, `requirements/bugs/_fixed.md`, as `FILE:REF` "
+                     "or `FILE REF`. A plain `sync` does the same for every "
+                     "`Fixes-bug: ID` trailer in the commit history."},
+            {"name": "commit", "flag": "--commit",
+             "consumer": "plugin/skills/requirement-manager/references/bugs.md",
+             "type": "str",
+             "help": "With --fix: the commit that fixed it (default: HEAD)."},
+            {"name": "bug_version", "flag": "--version",
+             "consumer": "plugin/skills/requirement-manager/references/bugs.md",
+             "type": "str",
+             "help": "With --fix: the version that fixed it (default: the "
+                     "repository's version file, when it has one)."},
+            {"name": "note", "flag": "--note",
+             "consumer": "plugin/skills/requirement-manager/references/bugs.md",
+             "type": "str",
+             "help": "With --fix: close without a fix, and say why."},
         ],
     },
     "clarify": {

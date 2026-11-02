@@ -1,6 +1,8 @@
 // tested-by: REQ-BUGS-1121
 // tested-by: REQ-BUGS-1122
 // tested-by: REQ-BUGS-1123
+// tested-by: REQ-BUGS-1126
+// tested-by: REQ-BUGS-1129
 // tested-by: REQ-MAPSTAMP-1124
 // tested-by: REQ-MAPSTAMP-1125
 /* Render smoke test, part: the Bugs tab and the file it writes. Adopts a list
@@ -12,14 +14,16 @@ import { adoptMapExport } from "../../src/lib/data.js";
 import { I18nProvider, useI18n } from "../../src/lib/i18n.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
 import {
-  appendBug, bugCommand, moduleFile, saveBug,
+  appendBug, bugCommand, bugFile, moduleFile, saveBug,
 } from "../../src/lib/bugFile.js";
+import { fixedSince, medianDays, weekly } from "../../src/lib/bugStats.js";
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
-  BugForm, BugReport, BugsPanel, moduleChoices,
+  BugForm, BugHistory, BugReport, BugsPanel, moduleChoices,
 } from "../../src/views/problems/BugsPanel.jsx";
 import { noop, test } from "./harness.jsx";
 import fixture from "./bugfile.fixture.json";
+import shapes from "./bugshape.fixture.json";
 
 const bug = (ref, module, prio, date = "") => ({
   id: `${module}:${ref}`, ref, module, prio, date, title: `Title ${ref}`,
@@ -55,6 +59,25 @@ const report = renderToString(
   <I18nProvider initialLocale="en">
     <BugReport keys={["Payments"]} scope="P1"
       groups={{ Payments: [bug("B2", "Payments", "P2"), reported] }} />
+  </I18nProvider>);
+
+const closed = { id: "Billing:B1", title: "Refund", module: "Billing", prio: "P1",
+  date: "2026-10-05", fixed: "2026-10-15", version: "1.2.3", commit: "abc1234" };
+const dismissed = { id: "Billing:B2", title: "Works as designed",
+  module: "Billing", prio: "P2", date: "2026-10-06", fixed: "2026-10-07",
+  version: "not a bug", note: "by design" };
+adoptMapExport({ forge: "https://github.com/o/r" });
+const history = renderToString(
+  <I18nProvider initialLocale="en">
+    <BugHistory open={[]} fixed={[closed, dismissed]} query="" />
+  </I18nProvider>);
+adoptMapExport({});
+const weeks = weekly([bug("B9", "Billing", "P3", "2026-10-13")],
+  [closed, dismissed]);
+const printedFixed = renderToString(
+  <I18nProvider initialLocale="en">
+    <BugReport keys={[]} groups={{}} scope=""
+      fixed={fixedSince([closed], "2026-11-01")} />
   </I18nProvider>);
 
 const rail = () => renderToString(
@@ -94,6 +117,11 @@ function fakeFolder(files) {
       return handle(name);
     },
     getDirectoryHandle: async () => folder,
+    values: async function* values() {
+      for (const name of Object.keys(files)) {
+        yield { kind: "file", name, ...handle(name) };
+      }
+    },
   };
   return folder;
 }
@@ -144,6 +172,29 @@ const bugChecks = [
   ["bugs: the viewer writes the fixture's bytes",
     fixture.every((c) => moduleFile(c.bug.module) === c.file
       && appendBug(c.text, c.bug).text === c.expected)],
+  // verifies: REQ-BUGS-1126#CASE-5
+  ["bugs: the viewer picks the fixture's file and writes its bytes",
+    shapes.every((c) => {
+      const out = appendBug(new Map(c.files).get(c.chosen) || "", c.bug,
+        c.floor, c.format);
+      return bugFile(c.files, c.module) === c.chosen
+        && out.text === c.expected && out.ref === c.ref;
+    })],
+  // verifies: REQ-BUGS-1129#CASE-3
+  ["bugs: the history shows dates, version, a linked commit and the note",
+    ["Found 05.10.2026", "Fixed 15.10.2026", "1.2.3", "by design",
+      'href="https://github.com/o/r/commit/abc1234"']
+      .every((s) => history.replace(/<!-- -->/g, "").includes(s))],
+  // verifies: REQ-BUGS-1129#CASE-4
+  ["bugs: a dismissal is no fix, and leaves the open count",
+    weeks.map((w) => `${w.week} ${w.found} ${w.fixed} ${w.open}`).join()
+      === "2026-10-05 2 0 1,2026-10-12 1 1 1"
+      && medianDays([closed, dismissed], "prio").join() === "P1,10,1"],
+  // verifies: REQ-BUGS-1129#CASE-5
+  ["bugs: the export has the month's fixes",
+    printedFixed.includes("Fixed in the last 30 days")
+      && printedFixed.includes("Refund")
+      && fixedSince([closed], "2026-12-30").length === 0],
   // verifies: REQ-BUGS-1122#CASE-5
   ["bugs: the form has six fields and suggests modules",
     (form.match(/<(input|select|textarea)\b/g) || []).length === 6

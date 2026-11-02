@@ -119,8 +119,12 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
         from .auditrun import map_block
         data["audit"] = map_block(reqs_dir)
     if cfg.bugs_declared(reqs_dir):  # implements: REQ-BUGS-1117
-        from .bugs import map_block as bugs_block
+        from .bugs import format_block, map_block as bugs_block
+        from .bugclose import fixed_block, forge_of  # implements: REQ-BUGS-1129
         data["bugs"] = bugs_block(root, reqs_dir)
+        data["bugs_fixed"] = fixed_block(reqs_dir)
+        data["forge"] = forge_of(root)
+        data["bug_format"] = format_block()
     _attach_translations(data, reqs, reqs_dir)
     return data
 

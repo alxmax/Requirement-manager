@@ -251,7 +251,7 @@
           },
           "mode_bug": {
             "type": "string",
-            "description": "Add one bug to `requirements/bugs/<module>.md` instead of syncing, creating the file if needed. Needs --module; run `sync` after it to show the bug on the map."
+            "description": "Add one bug to the module's file under `requirements/bugs/` instead of syncing, creating the file if needed. Needs --module; a title the module already holds needs --force. Run `sync` after it to show the bug on the map."
           },
           "module": {
             "type": "string",
@@ -276,6 +276,22 @@
           "source": {
             "type": "string",
             "description": "With --bug: where the report came from."
+          },
+          "mode_fix": {
+            "type": "string",
+            "description": "Close one bug instead of syncing: move its row to the register, `requirements/bugs/_fixed.md`, as `FILE:REF` or `FILE REF`. A plain `sync` does the same for every `Fixes-bug: ID` trailer in the commit history."
+          },
+          "commit": {
+            "type": "string",
+            "description": "With --fix: the commit that fixed it (default: HEAD)."
+          },
+          "bug_version": {
+            "type": "string",
+            "description": "With --fix: the version that fixed it (default: the repository's version file, when it has one)."
+          },
+          "note": {
+            "type": "string",
+            "description": "With --fix: close without a fix, and say why."
           }
         },
         "required": []

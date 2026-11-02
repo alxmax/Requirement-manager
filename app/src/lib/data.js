@@ -18,6 +18,12 @@ export let TODOS = [];
  * `BUG_SOURCES`. Empty for a repository that keeps none.
  * implements: REQ-BUGS-1121 */
 export let BUGS = [];
+/* The register: closed bugs with when, in which version and commit, and how
+ * a repository's own bug tables are shaped, for the page's writes.
+ * implements: REQ-BUGS-1129 */
+export let BUGS_FIXED = [];
+export let BUG_FORMAT = {};
+export let FORGE = null;
 // `MAP_LANGUAGE` from requirements/_config.json, `en` when absent. It
 // sets the viewer's DEFAULT locale; a reader's own choice
 // (localStorage) still wins, because a preference beats a default.
@@ -84,6 +90,9 @@ export function adoptMapExport(data) {
   }
   if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];
   BUGS = Array.isArray(data.bugs) ? data.bugs : [];
+  BUGS_FIXED = Array.isArray(data.bugs_fixed) ? data.bugs_fixed : [];
+  BUG_FORMAT = data.bug_format || {};
+  FORGE = data.forge || null;
   if ("roadmap" in data) {
     ROADMAP = Array.isArray(data.roadmap) ? data.roadmap : [];
   }

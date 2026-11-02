@@ -93,6 +93,11 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--where", default=None)
     ap.add_argument("--why", default=None)
     ap.add_argument("--source", default=None)
+    # implements: REQ-BUGS-1127
+    ap.add_argument("--fix", dest="mode_fix", metavar="ID", default=None)
+    ap.add_argument("--commit", default=None)
+    ap.add_argument("--version", dest="bug_version", default=None)
+    ap.add_argument("--note", default=None)
 
 
 # The flags every verb accepts: where the workspace is, and whether to

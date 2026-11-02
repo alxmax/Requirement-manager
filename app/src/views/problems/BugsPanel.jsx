@@ -2,9 +2,13 @@
 // implements: REQ-BUGS-1121
 // implements: REQ-BUGS-1122
 // implements: REQ-BUGS-1123
+// implements: REQ-BUGS-1129
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { BUGS, REPO, REQUIREMENTS } from "../../lib/data.js";
+import {
+  BUGS, BUGS_FIXED, FORGE, REPO, REQUIREMENTS,
+} from "../../lib/data.js";
+import { fixedSince, medianDays, weekly } from "../../lib/bugStats.js";
 import { Icon } from "../../lib/icons.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import {
@@ -19,7 +23,11 @@ const SEV = { P0: "ERROR", P1: "ERROR", P2: "WARN", P3: "REVIEW", P4: "REVIEW" }
 const COUNT = {
   marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11,
 };
-const today = () => new Date().toISOString().slice(0, 10);
+/** The reader's own day: `toISOString` alone is UTC, a day behind at night. */
+const today = () => {
+  const now = new Date();
+  return new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
 const shortDate = (d) => (d || "").split("-").reverse().join(".");
 
 /** What the form offers as a module: every module with a bug, and every
@@ -97,9 +105,66 @@ function BugFields({ b }) {
   );
 }
 
+const commitOf = (row) => (row.commit && FORGE
+  ? <a href={`${FORGE}/commit/${encodeURIComponent(row.commit)}`}
+    target="_blank" rel="noreferrer"><code>{row.commit}</code></a>
+  : row.commit ? <code>{row.commit}</code> : null);
+
+function FixedLine({ row }) {
+  const { t } = useI18n();
+  const facts = [row.date && `${t("Found")} ${shortDate(row.date)}`,
+    row.fixed && `${t("Fixed")} ${shortDate(row.fixed)}`,
+    row.version && `${t("Version")} ${row.version}`].filter(Boolean);
+  return (
+    <div className="bug-fixed-row">
+      <div><b>{row.prio} {row.id}</b> · {row.title}</div>
+      <div className="bug-fixed-facts">
+        {facts.join(" · ")} {commitOf(row)} {row.note ? `· ${row.note}` : ""}
+      </div>
+    </div>
+  );
+}
+
+/** Closed bugs and what they add up to: found against fixed by week, what was
+ * still open then, and the median time to fix. */
+export function BugHistory({ open, fixed, query }) {
+  const { t } = useI18n();
+  if (!fixed.length) {
+    return <div className="prob-empty"><b>{t("No bug has been closed yet.")}</b></div>;
+  }
+  const q = query.trim().toLowerCase();
+  const rows = fixed.filter((r) => !q
+    || `${r.id} ${r.title}`.toLowerCase().includes(q));
+  const medians = [["By module", "module"], ["By priority", "prio"]];
+  return (
+    <>
+      <table className="bug-weeks">
+        <thead><tr>
+          <th>{t("Week")}</th><th>{t("Found")}</th><th>{t("Fixed")}</th>
+          <th>{t("Still open")}</th>
+        </tr></thead>
+        <tbody>{weekly(open, fixed).map((w) => (
+          <tr key={w.week}>
+            <td>{shortDate(w.week)}</td><td>{w.found}</td><td>{w.fixed}</td>
+            <td>{w.open}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+      <div className="bug-medians">
+        <b>{t("Median days to fix")}</b>
+        {medians.map(([label, key]) => (
+          <div key={key}>{t(label)}: {medianDays(fixed, key)
+            .map(([name, days]) => `${name} ${days}`).join(" · ")}</div>
+        ))}
+      </div>
+      {[...rows].reverse().map((r) => <FixedLine key={r.id} row={r} />)}
+    </>
+  );
+}
+
 /** The list as it goes on paper: every group open, every field out. Mounted
  * under <body> only while printing, and the print stylesheet hides the rest. */
-export function BugReport({ groups, keys, scope }) {
+export function BugReport({ groups, keys, scope, fixed = [] }) {
   const { t } = useI18n();
   const total = keys.reduce((n, k) => n + groups[k].length, 0);
   const head = [t("{n} bugs", { n: total }), today(), scope];
@@ -122,6 +187,12 @@ export function BugReport({ groups, keys, scope }) {
           ))}
         </section>
       ))}
+      {fixed.length > 0 && (
+        <section>
+          <h2>{t("Fixed in the last 30 days")}</h2>
+          {fixed.map((r) => <FixedLine key={r.id} row={r} />)}
+        </section>
+      )}
     </div>
   );
 }
@@ -181,6 +252,7 @@ export function BugsPanel({ added, setAdded }) {
   const [error, setError] = useState(null);
   const [command, setCommand] = useState(null);
   const [printing, setPrinting] = useState(false);
+  const [view, setView] = useState("open");
   useEffect(() => {
     if (!printing) return undefined;
     const done = () => setPrinting(false);
@@ -231,9 +303,25 @@ export function BugsPanel({ added, setAdded }) {
           {t("Export PDF")}
         </button>
       </div>
-      {adding && <BugForm modules={modules} add={add} error={error}
+      {BUGS_FIXED.length > 0 && (
+        <div className="bug-views">
+          {["open", "fixed"].map((v) => (
+            <button key={v} aria-pressed={view === v}
+              className={"btn " + (view === v ? "btn-secondary" : "btn-ghost")}
+              onClick={() => setView(v)}>
+              {t(v === "open" ? "Open" : "Fixed")}
+              <span style={COUNT}>
+                {v === "open" ? all.length : BUGS_FIXED.length}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {view === "fixed" && <BugHistory open={all} fixed={BUGS_FIXED}
+        query={query} />}
+      {view === "open" && adding && <BugForm modules={modules} add={add} error={error}
         close={() => setAdding(false)} />}
-      {command && (
+      {view === "open" && command && (
         <div className="bug-form">
           <div className="bug-wide">
             {t("This browser cannot write to the repository. Run this "
@@ -242,20 +330,21 @@ export function BugsPanel({ added, setAdded }) {
           <code className="bug-wide bug-command">{command}</code>
         </div>
       )}
-      <ChipRow counts={counts} total={found.length} value={prio}
-        setValue={setPrio} label={(k) => k} />
-      {keys.map((k) => (
+      {view === "open" && <ChipRow counts={counts} total={found.length}
+        value={prio} setValue={setPrio} label={(k) => k} />}
+      {view === "open" && keys.map((k) => (
         <BugGroup key={k} label={k} rows={groups[k]}
           defaultOpen={keys.length === 1 || Boolean(q) || Boolean(prio)}
           pick={pick} setPick={setPick} />
       ))}
-      {keys.length === 0 && (
+      {view === "open" && keys.length === 0 && (
         <div className="prob-empty">
           <b>{t(all.length ? "No bugs found." : "No known bugs yet.")}</b>
         </div>
       )}
       {printing && createPortal(
         <BugReport groups={groups} keys={keys}
+          fixed={fixedSince(BUGS_FIXED, today())}
           scope={[prio, query.trim()].filter(Boolean).join(" · ")} />,
         document.body)}
     </>

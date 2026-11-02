@@ -25,6 +25,10 @@ Every bullet below is binding.
 - The Problems page has a Bugs tab that groups by module and shows each bug's date. [[REQ-BUGS-1121]]
 - The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]
 - The tab exports the list it shows, for a reader who does not open the map. [[REQ-BUGS-1123]]
+- `sync --bug` writes in the shape of the file it lands in, and never gives a number twice. [[REQ-BUGS-1126]]
+- `sync --fix` moves a row to a register with its dates, version and commit. [[REQ-BUGS-1127]]
+- `sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]
+- The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]
 
 ## Cases
 CASE-1 — a bug goes from the command line to the map
@@ -225,6 +229,21 @@ CASE-4 — bugs stay out of the locks
   When   a bug is added and `sync` runs
   Then   `_reqlock.json` is byte-identical
 
+CASE-5 — a Unicode line break inside a cell
+  Given  a title holding U+2028
+  When   the file is read
+  Then   the row and every row after it are read
+
+CASE-6 — a byte order mark
+  Given  a file that starts with one
+  When   it is read
+  Then   its heading still names the module
+
+CASE-7 — one id in two files
+  Given  two declared files with one stem
+  When   they are read
+  Then   `INPUT:bugs` names both
+
 --------------------
 
 
@@ -244,9 +263,9 @@ satisfies: [ARCH-BUGS-078]
 > it runs instead of syncing, so one call changes one file.
 
 Every bullet below is binding.
-- `sync --bug TITLE --module M` appends a row to `requirements/bugs/<M>.md`, creating the folder and the file with its heading, and prints the id and the file.
-- The file name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.
-- The id is the next `B<n>` in that file, one past the highest there.
+- `sync --bug TITLE --module M` adds a row to the module's file under `requirements/bugs/`, creating the folder and the file with its heading, and prints the id and the file.
+- A new file's name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.
+- The id is the next `B<n>`, one past the highest in that file and in the register.
 - `--prio` defaults to `P2`, `--date` to today, and `--where`, `--why` and `--source` fill their columns.
 - `--prio P2*` writes the `*`, so a priority an assistant chose reads back as an estimate until a person edits the row.
 - A `|` in a value is escaped and a line break becomes a space, so the row stays one row.
@@ -288,6 +307,11 @@ CASE-7 — an estimate stays an estimate
   Given  a bug added with `--prio P2*`
   When   it is read back
   Then   its priority is `P2` and it is marked estimated
+
+CASE-8 — a file that cannot be read
+  Given  a file in the bugs folder that is not UTF-8
+  When   `sync --bug` runs
+  Then   it exits 2 and writes nothing
 
 --------------------
 
@@ -476,3 +500,232 @@ CASE-3 — nothing to export
   Given  an empty list
   When   the panel renders
   Then   the button is disabled
+
+--------------------
+
+
+---
+id: REQ-BUGS-1126
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# `sync --bug` writes in the file's own shape
+
+## Description
+> A repository that numbers its files, or names its columns in its own language, ended up with
+> a second file beside the first. A row belongs where a person would have put it.
+
+Every bullet below is binding.
+- The row goes to the file in `requirements/bugs/` whose heading or stem, without an `NN_` prefix, names the module, compared by `module_key`. The register is never that file.
+- A new module's file takes the next `NN_` when the existing files are numbered.
+- The row uses the columns of the table it joins, and the `BUG_COLUMNS` names count.
+- The row joins the table under the `##` section naming its priority, such as `P2` or `P3-P4`, else the file's first bug table. A section `BUG_SKIP_SECTIONS` matches is never used.
+- A title that reads like one already in that module prints the candidates and exits 2, writing nothing, unless `--force` is given.
+- `bugFile` and `appendBug` in `app/src/lib/bugFile.js` choose the same file and write the same bytes, pinned by one fixture, and `_map.json` carries `bug_format` when a repository's format is not the default.
+
+## Cases
+CASE-1 — an existing numbered file with its own columns
+  Given  `04_Billing.md` with a localized header and a table under `## P2`
+  When   `sync --bug "x" --module Billing --prio P2` runs
+  Then   the row is in that table, in those columns, and no `Billing.md` exists
+
+CASE-2 — a new module in a numbered folder
+  Given  `04_Billing.md`
+  When   `sync --bug` names a module with no file
+  Then   the file is `05_<module>.md`
+
+CASE-3 — a section that does not match
+  Given  sections for `P0-P1` and `P2`
+  When   a `P4` bug is added
+  Then   it joins the first table
+
+CASE-4 — a likely duplicate
+  Given  a module holding a bug with nearly the same title
+  When   `sync --bug` runs without and then with `--force`
+  Then   the first exits 2 and writes nothing, and the second adds the row
+
+CASE-5 — the engine and the viewer agree
+  Given  the shared fixture of texts, formats and file lists
+  When   each side runs
+  Then   each returns the fixture's expected text and file
+
+--------------------
+
+
+---
+id: REQ-BUGS-1127
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# `sync --fix` closes one bug
+
+## Description
+> A row deleted by hand took its dates with it. The register keeps what the list no longer
+> needs: when a bug was found, when it left, and in which version or commit.
+
+Every bullet below is binding.
+- `sync --fix ID` takes `FILE:REF` or `FILE REF`, removes the row and adds one to `requirements/bugs/_fixed.md`, instead of syncing.
+- The register row holds the id, the title, the module, the priority, the found date, today, the version and the commit.
+- The version is `--version`, else the repository's version file, else `—`. The commit is `--commit`, else the short `HEAD`, else `—`.
+- `--note TEXT` closes without a fix: the version is `not a bug`, the commit `—`, and the note is kept.
+- `BUG_REGISTER` names the register and `BUG_REGISTER_COLUMNS` its columns. A register that exists keeps its own columns.
+- The register is not read as open bugs, whatever its columns, even when `BUG_SOURCES` matches it.
+- An unknown id, a closed id, or a bug in a file only `BUG_SOURCES` names exits 2 and writes nothing.
+- A row that is not on the line it was read from, or a register that cannot be read, exits 2 and writes nothing.
+
+## Cases
+CASE-1 — a fix moves the row
+  Given  an open bug and a version file
+  When   `sync --fix` runs
+  Then   `ask --bugs` no longer lists it and the register row has every field
+
+CASE-2 — a number is never given twice
+  Given  the highest bug closed
+  When   `sync --bug` adds to that file
+  Then   the new row takes the next number
+
+CASE-3 — a dismissal
+  Given  an open bug
+  When   `sync --fix ID --note "works as designed"` runs
+  Then   the register says `not a bug` and keeps the note
+
+CASE-4 — refused closes write nothing
+  Given  an unknown id, a closed id and a bug in a declared source
+  When   `sync --fix` runs on each
+  Then   each exits 2 and every file is byte-identical
+
+CASE-5 — a repository's own register
+  Given  a register with localized columns and no module column
+  When   a bug is closed
+  Then   the row fits those columns
+
+CASE-6 — the right row or none
+  Given  a stray carriage return above the table, and a row that moved
+  When   a bug is closed
+  Then   the first closes the named row and the second is refused
+
+CASE-7 — a broken register survives
+  Given  a register that is not UTF-8
+  When   `sync --fix` runs
+  Then   it exits 2 and both files are byte-identical
+
+CASE-8 — a glob over the folder
+  Given  `BUG_SOURCES` matching the bugs folder
+  When   the list is read
+  Then   the register's rows are not listed
+
+--------------------
+
+
+---
+id: REQ-BUGS-1128
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# A commit closes the bug it names
+
+## Description
+> The commit that fixes a bug already says so, and a second step gets forgotten. `sync` reads
+> the history instead, so the register needs no lock and a team without versions loses nothing.
+
+Every bullet below is binding.
+- `sync` closes each open bug named by a `Fixes-bug: ID` trailer on the history of `HEAD`, with that commit's short SHA and date.
+- `BUG_FIX_TRAILERS` names the trailers, matched without regard to case.
+- The version is the repository's version file at that commit, else `—`.
+- A bug in the register is left alone, so a second `sync` changes nothing.
+- A trailer that names no open bug, or a bug in a `BUG_SOURCES` file, prints an `INPUT:bugs` line from `sync` and does not reach the gate.
+- With no git, or no such commit, `sync` does what it did.
+
+## Cases
+CASE-1 — a commit closes a bug
+  Given  an open bug and a commit whose message has `Fixes-bug: ID`
+  When   `sync` runs
+  Then   the register holds that commit's SHA and date
+
+CASE-2 — a second sync changes nothing
+  Given  that bug closed
+  When   `sync` runs again
+  Then   the bug files are byte-identical
+
+CASE-3 — the version at that commit
+  Given  a version file changed after the fix
+  When   `sync` closes the bug
+  Then   the register holds the version at the fix
+
+CASE-4 — a trailer that names nothing
+  Given  a trailer naming an unknown bug
+  When   `sync` runs
+  Then   it prints that line, exits 0, and the gate has no finding for it
+
+CASE-5 — no git
+  Given  a directory that is not a repository
+  When   `sync` runs
+  Then   it exits 0 and the bug file is unchanged
+
+CASE-6 — a repository's own trailer
+  Given  `BUG_FIX_TRAILERS` naming another word
+  When   a commit uses it in lower case
+  Then   the bug closes
+
+--------------------
+
+
+---
+id: REQ-BUGS-1129
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# The map shows what was fixed
+
+## Description
+> The dates a closed bug keeps add up to a trend, with no new input from anyone.
+
+Every bullet below is binding.
+- `_map.json` carries the register under `bugs_fixed`, and has no such key when it is empty.
+- A row's commit links to the forge when the remote is GitHub. The forge reaches `_map.html` only, because it differs between a clone and a fork.
+- When the register holds a row, the Bugs tab has an Open / Fixed toggle. Fixed shows found, fixed, version, commit and note.
+- Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per module and per priority.
+- A `not a bug` row leaves the open count and counts in neither the fixes nor the median.
+- The export gains a section of what was fixed in the last 30 days.
+
+## Cases
+CASE-1 — the register reaches the map
+  Given  one closed bug
+  When   `sync` runs
+  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`
+
+CASE-2 — a GitHub remote
+  Given  a register row with a commit and a GitHub remote
+  When   `sync` runs
+  Then   the forge is named for the page and `_map.json` does not carry it
+
+CASE-3 — the toggle
+  Given  a map with a closed bug
+  When   the history renders
+  Then   it shows that bug's dates, version and commit
+
+CASE-4 — the numbers
+  Given  bugs found and fixed over two weeks, one dismissed
+  When   the weeks and medians are computed
+  Then   each week's counts and the median leave the dismissal out of the fixes
+
+CASE-5 — the export
+  Given  a bug fixed this month
+  When   the report renders
+  Then   it holds a section naming that bug

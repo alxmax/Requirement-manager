@@ -234,6 +234,12 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     if a.mode_bug is not None:  # implements: REQ-BUGS-1119
         from reqmap_engine.bugs import cmd_bug_add
         return cmd_bug_add(reqs_dir, a.mode_bug, a)
+    if a.mode_fix is not None:  # implements: REQ-BUGS-1127
+        from reqmap_engine.bugclose import cmd_bug_fix
+        return cmd_bug_fix(code_root, reqs_dir, a.mode_fix, a)
+    if cfg.bugs_declared(reqs_dir):  # implements: REQ-BUGS-1128
+        from reqmap_engine.bugclose import close_from_commits
+        close_from_commits(code_root, reqs_dir)
     # Before the gate, not after: the generated integration artifacts are
     # derived from the command registry, and RM028 reports them stale.
     # Regenerating them downstream of a check that fails ON them can never
@@ -452,7 +458,7 @@ _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
                  "plandrift", "planschema", "release",
                  "testgaps", "init", "levelshape", "watch", "todoparse",
-                 "draftquestions", "auditrun", "customtrace", "bugs")
+                 "draftquestions", "auditrun", "customtrace", "bugs", "bugclose")
 
 
 def __getattr__(name):
