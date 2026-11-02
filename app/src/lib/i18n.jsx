@@ -78,6 +78,9 @@ const RO = {  // implements: REQ-VIEWER-943
   "File": "Fișier",
   "Search bugs": "Caută în buguri",
   "Add bug": "Adaugă bug",
+  "Export PDF": "Exportă PDF",
+  "Known bugs": "Buguri cunoscute",
+  "{n} bugs": "{n} buguri",
   "No bugs found.": "Niciun bug găsit.",
   "No known bugs yet.": "Niciun bug cunoscut încă.",
   "This browser cannot write to the repository. Run this command, then `sync`:":
@@ -351,10 +354,9 @@ const Ctx = createContext({
  * loadData, so the module-level LANGUAGE is still its default at the
  * moment the initial locale is chosen. The single-file viewer — the
  * artifact consumers actually open — always has the blob at mount time.
- * `both` opens in English with the toggle offered; `ro` opens in
- * Romanian. */
+ * `ro` opens in Romanian; anything else opens in English. */
 function engineDefault() {
-  // implements: REQ-TRANSLATE-996
+  // implements: REQ-MAPSTAMP-1125
   try {
     const d = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
     return d && d.language === "ro" ? "ro" : "en";
@@ -363,11 +365,16 @@ function engineDefault() {
 
 export function I18nProvider({ children, initialLocale }) {
   // implements: REQ-VIEWER-943
-  const [locale, setLocale] = useState(
+  const [locale, choose] = useState(
     () => initialLocale || readStored() || engineDefault());
-  useEffect(() => {
-    try { window.localStorage.setItem(STORAGE_KEY, locale); }
+  // Only a reader's choice is remembered: storing the first open would turn
+  // the repository's default into a preference.  implements: REQ-MAPSTAMP-1125
+  const setLocale = (next) => {
+    choose(next);
+    try { window.localStorage.setItem(STORAGE_KEY, next); }
     catch { /* not fatal */ }
+  };
+  useEffect(() => {
     // Keep the document language honest for screen readers and hyphenation.
     try { document.documentElement.lang = locale; } catch { /* SSR */ }
   }, [locale]);

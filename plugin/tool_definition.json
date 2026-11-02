@@ -151,11 +151,11 @@
           },
           "module": {
             "type": "string",
-            "description": "With --bugs: only modules whose name contains this."
+            "description": "With --bugs: only modules whose name contains this, ignoring case, diacritics and punctuation."
           },
           "prio": {
             "type": "string",
-            "description": "With --bugs: only this priority, P0 to P4."
+            "description": "With --bugs: only these priorities, as P1 or P0,P1."
           },
           "mode_i18n": {
             "type": "boolean",

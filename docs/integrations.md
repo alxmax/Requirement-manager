@@ -158,3 +158,9 @@ The `excalidraw-diagram` skill used to ship alongside this plugin. It now lives 
 It shared this repository and nothing else — no imports in either direction — so a change
 to either one took the other's CI with it, and anyone who wanted diagrams had to install a
 requirements engine to get them.
+
+## Extending a vendored engine
+
+Extend through `requirements/_config.json`. `sync_reqmap.sh` replaces `reqmap.py` and
+`reqmap_engine/` whole, so a file added there or a line changed there is gone on the next
+refresh. If a key cannot do what you need, open an issue.

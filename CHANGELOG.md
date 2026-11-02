@@ -12,7 +12,14 @@
 - The skill's `references/bugs.md` makes an assistant the usual way to add a bug: check the list, check the code, add it with `--prio P2*`. The `*` marks an estimate until a person edits the row. REQ-BUGS-1119
 - Problems gains a Bugs tab (Buguri in Romanian): bugs grouped by module, with the date under the priority, priority chips and a search. REQ-BUGS-1121
 - The tab adds a bug. With the File System Access API the row goes into the module's file in a folder the reader picks; elsewhere the form prints the `sync --bug` command. REQ-BUGS-1122
-- Engine change: `MAP_ENGINE_VERSION` is `2026-11-02`; 19,313 physical lines in 79 files (the README says so). The core rises to 6,779 logical lines, and `bugs.py` stays lazy
+- `Export PDF` in the tab prints the filtered list with every group open and every field out, through the browser's print dialog. REQ-BUGS-1123
+- `BUG_SKIP_SECTIONS` is a regex on `##` headings whose tables are not open bugs (ADR-0081). REQ-BUGS-1116
+- Spellings of a module that differ only in case, diacritics or punctuation are one group, under the first one read. REQ-BUGS-1117
+- `ask --bugs --prio` takes a list (`P0,P1`), `--module` ignores diacritics and punctuation, and the text output ends with a total. A bug carries the line of its row, and selecting text in an open row no longer closes it. REQ-BUGS-1116, REQ-BUGS-1120, REQ-BUGS-1121
+- `MAP_LANGUAGE` in `_config.json` (`en`, `ro`) sets the language the map opens in. `LANGUAGE`, retired in ADR-0047, stays ignored, and the viewer now stores a language only when a reader changes it. REQ-MAPSTAMP-1125
+- The rail's footer shows the engine version, the branch and the time `_map.html` was written, so an old map in a second checkout can be told from a new one. `_map.json` carries neither of the last two. REQ-MAPSTAMP-1124
+- `docs/integrations.md` says a vendored engine is extended through `_config.json`, because a refresh replaces it whole
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-02.1`. The core rises to 6,788 logical lines, and `bugs.py` stays lazy
 
 **An audit is a recorded session: a fixed plan, one file of findings, and a report that gives every rate as k/n with its interval (ADR-0076).**
 

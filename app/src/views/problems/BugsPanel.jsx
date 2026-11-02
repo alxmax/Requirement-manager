@@ -1,8 +1,10 @@
 // implements: ARCH-BUGS-078
 // implements: REQ-BUGS-1121
 // implements: REQ-BUGS-1122
-import { useMemo, useState } from "react";
-import { BUGS, REQUIREMENTS } from "../../lib/data.js";
+// implements: REQ-BUGS-1123
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { BUGS, REPO, REQUIREMENTS } from "../../lib/data.js";
 import { Icon } from "../../lib/icons.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import {
@@ -78,6 +80,52 @@ export function BugForm({ modules, add, close, error }) {
   );
 }
 
+const inOrder = (rows) => [...rows].sort((a, b) => a.prio.localeCompare(b.prio));
+const located = (b) => b.file + (b.line ? `:${b.line}` : "");
+const prioMix = (rows) => PRIOS.filter((p) => rows.some((b) => b.prio === p))
+  .map((p) => [p, rows.filter((b) => b.prio === p).length]);
+
+function BugFields({ b }) {
+  const { t } = useI18n();
+  return (
+    <>
+      {b.why && <p><b>{t("Why it matters")}:</b> {b.why}</p>}
+      {b.where && <p><b>{t("Where")}:</b> <code>{b.where}</code></p>}
+      {b.source && <p><b>{t("Source")}:</b> {b.source}</p>}
+      {b.file && <p><b>{t("File")}:</b> <code>{located(b)}</code></p>}
+    </>
+  );
+}
+
+/** The list as it goes on paper: every group open, every field out. Mounted
+ * under <body> only while printing, and the print stylesheet hides the rest. */
+export function BugReport({ groups, keys, scope }) {
+  const { t } = useI18n();
+  const total = keys.reduce((n, k) => n + groups[k].length, 0);
+  const head = [t("{n} bugs", { n: total }), today(), scope];
+  return (
+    <div className="bug-report">
+      <h1>{REPO ? `${REPO}: ` : ""}{t("Known bugs")}</h1>
+      <p>{head.filter(Boolean).join(" · ")}</p>
+      {keys.map((k) => (
+        <section key={k}>
+          <h2>{k}</h2>
+          <p>{prioMix(groups[k]).map(([p, n]) => `${p} ${n}`).join(" · ")}</p>
+          {inOrder(groups[k]).map((b) => (
+            <div className="bug-report-row" key={b.id}>
+              <div>
+                <b>{b.prio}{b.estimated ? "*" : ""} {b.ref}</b>
+                {b.date ? ` · ${shortDate(b.date)}` : ""} · {b.title}
+              </div>
+              <BugFields b={b} />
+            </div>
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function BugRow({ b, open, toggle }) {
   const { t } = useI18n();
   return (
@@ -96,11 +144,8 @@ function BugRow({ b, open, toggle }) {
         </div>
         <div className={"bug-title" + (open ? "" : " clamped")}>{b.title}</div>
         {open && (
-          <div className="bug-more">
-            {b.why && <p><b>{t("Why it matters")}:</b> {b.why}</p>}
-            {b.where && <p><b>{t("Where")}:</b> <code>{b.where}</code></p>}
-            {b.source && <p><b>{t("Source")}:</b> {b.source}</p>}
-            {b.file && <p><b>{t("File")}:</b> <code>{b.file}</code></p>}
+          <div className="bug-more" onClick={(e) => e.stopPropagation()}>
+            <BugFields b={b} />
           </div>
         )}
       </div>
@@ -109,18 +154,15 @@ function BugRow({ b, open, toggle }) {
 }
 
 function BugGroup({ label, rows, defaultOpen, pick, setPick }) {
-  const inOrder = [...rows].sort((a, b) => a.prio.localeCompare(b.prio));
   return (
     <details className="bug-group" open={defaultOpen}>
       <summary>
         <b>{label}</b><span style={COUNT}>{rows.length}</span>
         <span className="bug-mix">
-          {PRIOS.filter((p) => rows.some((b) => b.prio === p)).map((p) => (
-            <span key={p}>{p} {rows.filter((b) => b.prio === p).length}</span>
-          ))}
+          {prioMix(rows).map(([p, n]) => <span key={p}>{p} {n}</span>)}
         </span>
       </summary>
-      {inOrder.map((b) => (
+      {inOrder(rows).map((b) => (
         <BugRow key={b.id} b={b} open={pick === b.id}
           toggle={() => setPick(pick === b.id ? null : b.id)} />
       ))}
@@ -138,6 +180,14 @@ export function BugsPanel({ added, setAdded }) {
   const [pick, setPick] = useState(null);
   const [error, setError] = useState(null);
   const [command, setCommand] = useState(null);
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    if (!printing) return undefined;
+    const done = () => setPrinting(false);
+    window.addEventListener("afterprint", done);
+    window.print();
+    return () => window.removeEventListener("afterprint", done);
+  }, [printing]);
   const all = useMemo(() => [...added, ...BUGS], [added]);
   const modules = useMemo(
     () => moduleChoices(all, REQUIREMENTS), [all]);
@@ -176,6 +226,10 @@ export function BugsPanel({ added, setAdded }) {
           onClick={() => setAdding(!adding)}>
           <Icon name="plus" size={13} /> {t("Add bug")}
         </button>
+        <button className="btn btn-ghost" disabled={keys.length === 0}
+          onClick={() => setPrinting(true)}>
+          {t("Export PDF")}
+        </button>
       </div>
       {adding && <BugForm modules={modules} add={add} error={error}
         close={() => setAdding(false)} />}
@@ -200,6 +254,10 @@ export function BugsPanel({ added, setAdded }) {
           <b>{t(all.length ? "No bugs found." : "No known bugs yet.")}</b>
         </div>
       )}
+      {printing && createPortal(
+        <BugReport groups={groups} keys={keys}
+          scope={[prio, query.trim()].filter(Boolean).join(" · ")} />,
+        document.body)}
     </>
   );
 }

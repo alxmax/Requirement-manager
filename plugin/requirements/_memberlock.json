@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "7054997c9daafe7ae6dd5768f68fb58ca8426099c384ee232e8152f17f80b34d",
+      "plugin/scripts/reqmap_engine/__init__.py": "985f9e94bf39a7b0d532af9b0b27e1ffb0d072f8cfc870a49cfe75762232416e",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -95,7 +95,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "a480da868cdbdd803024f4509b65fe08b707b5063b1564e697c88029284771e7",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "d142206d6d4d89cd319dbdd99907348405f029ae26cf58882309809bffb7fddc",
+      "scripts/check_engine_budget.py": "b85adf298ae3cdc9987b8428070e315ad379ce22d3f2033bf30d5b1fa96ab4ae",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
@@ -198,14 +198,16 @@
       "plugin/scripts/reqmap_engine/bugs.py#_column_index": "a65624974eefd4f6098473af46eeffc83bf9e14e37e2fc8540e1c5813eaf711d",
       "plugin/scripts/reqmap_engine/bugs.py#_file_heading": "9963b240753025def8f51c1f5e0b240d3c379588735ed6fae9da4e8391ed7606",
       "plugin/scripts/reqmap_engine/bugs.py#_is_separator": "4f13f0c58dfa8a79e54ebdc20f25fa42932b047bcf6034061a135812a0900fa7",
-      "plugin/scripts/reqmap_engine/bugs.py#_parse": "02f104b2bf1c1c0a559434f4016fef86224ade65b364b307adc9f90b1325b145",
-      "plugin/scripts/reqmap_engine/bugs.py#_read_file": "27e09d1ed0a9a1d822221d42348ae46b4c4a3a6bc8fc5140ae072a7470b026d7",
-      "plugin/scripts/reqmap_engine/bugs.py#_row": "3d63fbb27b741ef9b94dd8ffc0c5a37360df7508dc889869298f398d871dcf4c",
+      "plugin/scripts/reqmap_engine/bugs.py#_parse": "76750be8402834a6dd145c2977cb3bf748ffd110664bfd76277620ba25ff851e",
+      "plugin/scripts/reqmap_engine/bugs.py#_read_file": "b4dbc3ef80be6471d05185e693edb913b6ec1f06c33cb36e4f874e2a73933ad4",
+      "plugin/scripts/reqmap_engine/bugs.py#_row": "44dc2a487b2df7760d53b329dd0da4e22d720e69d6ec480a43180d459de22f02",
+      "plugin/scripts/reqmap_engine/bugs.py#_skip_pattern": "65ff5e146291b969e3f68f9e2a2ee113ce4ef4c94f425280617efb53a5fb3147",
       "plugin/scripts/reqmap_engine/bugs.py#iso_date": "64a4cccc14a88e0789fb422261401f4347702f29ea49ea414ccee2e54e315f6f"
     },
     "REQ-BUGS-1117": {
       "plugin/scripts/reqmap_engine/bugs.py#_bug_paths": "3c23d0631484b22c0d85da68485a167dc6af0a6d1d529c73d93959e8dddda878",
       "plugin/scripts/reqmap_engine/bugs.py#map_block": "8c98494b0ff2c085d068200863d5e83919b2e0ca1bb9b62017f9e9f909b6955f",
+      "plugin/scripts/reqmap_engine/bugs.py#module_key": "4eb0d28184834cf9e2a5ec6ad7e39dfba8f049f68a04f170b2025e0be03df88e",
       "plugin/scripts/reqmap_engine/config.py#bugs_declared": "591dbcade1a25b3d099a16b59aa1fead4eeaa49b35ce91ea9f101d2c857bed6e"
     },
     "REQ-BUGS-1118": {
@@ -217,7 +219,8 @@
       "plugin/scripts/reqmap_engine/bugs.py#module_file": "b07101c175889e592c710f76375f4ae9d56163adc34b9081eacdd79874a1e057"
     },
     "REQ-BUGS-1120": {
-      "plugin/scripts/reqmap_engine/bugs.py#_matches": "435183554291273d65aebc6634141951ac2c0dc7a7a4639b6e185700ff325ba6"
+      "plugin/scripts/reqmap_engine/bugs.py#_matches": "9b65175e99cccaf97da49378e24e07bc19e2f5245ff83f0ef315d77755bfb713",
+      "plugin/scripts/reqmap_engine/bugs.py#_total_line": "fb207901bc7d7f1f05c6f7d2d7911152c576f7b0de34b5a83d0eb03363d2a357"
     },
     "REQ-CHECK-1035": {
       "plugin/scripts/reqmap_engine/wikilinks.py#_dangling_wikilink_rule": "224c47cf8d7f4a929a339c65f802ecb8cad38718c8206d6ab5620a0cdc9c14ca",

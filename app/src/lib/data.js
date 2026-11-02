@@ -18,11 +18,10 @@ export let TODOS = [];
  * `BUG_SOURCES`. Empty for a repository that keeps none.
  * implements: REQ-BUGS-1121 */
 export let BUGS = [];
-// The repository's declared requirements language (`en` | `ro` |
-// `both`), emitted by the engine from requirements/_config.json. It
+// `MAP_LANGUAGE` from requirements/_config.json, `en` when absent. It
 // sets the viewer's DEFAULT locale; a reader's own choice
 // (localStorage) still wins, because a preference beats a default.
-// implements: REQ-TRANSLATE-996
+// implements: REQ-MAPSTAMP-1125
 export let LANGUAGE = "en";
 // The CLI as data, straight off _map.json (generated from the engine's command
 // registry). Empty when a map produced before v4.0.0 carries none.
@@ -60,6 +59,11 @@ export let AUDIT = null;
  * read as unknown, and the band keeps its former label.
  * implements: REQ-PLANBRANCH-1011 */
 export let BRANCH = null;
+/* Which build this page is: `_map.html` carries the time, and any map the
+ * engine version. Nothing renders for a map with neither.
+ * implements: REQ-MAPSTAMP-1124 */
+export let ENGINE_VERSION = null;
+export let GENERATED_AT = null;
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -90,6 +94,8 @@ export function adoptMapExport(data) {
     BRANCH = (typeof data.branch === "string" && data.branch)
       ? data.branch : null;
   }
+  ENGINE_VERSION = data.engine_version || null;
+  GENERATED_AT = data.generated_at || null;
   if ("commands" in data) {
     COMMANDS = Array.isArray(data.commands) ? data.commands : [];
   }

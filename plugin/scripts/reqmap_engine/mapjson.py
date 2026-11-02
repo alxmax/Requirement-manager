@@ -1,5 +1,6 @@
 """_map.json: the JSON registry graph and `--since` file keys."""
 import json, os
+from datetime import datetime
 
 from . import MAP_ENGINE_VERSION, config as cfg
 from .git import _git, _git_root
@@ -80,11 +81,13 @@ def _utf8_safe(text):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
             "\uFFFD" if 0xD800 <= ord(c) <= 0xDFFF else c for c in text)
 
 
-def _build_json_text(data, compact=None):
+def _build_json_text(data, compact=None, stamped=False):
     # implements: ARCH-MAP-007  # implements: REQ-MAP-870
     """The registry graph as a JSON string:
     {engine_version, repo, nodes, edges, upstream_edges, todos, roadmap,
-    commands [, design][, health]}.
+    commands [, design][, health]}. `stamped` adds what says which build this
+    is, for `_map.html` only: in the committed `_map.json` a clock and a branch
+    name would rewrite a line on every run.
     json.dumps neutralizes any hostile id/title/body by construction —
     there is no markup context to break out of — so no extra escaping is
     needed."""
@@ -115,6 +118,12 @@ def _build_json_text(data, compact=None):
         payload["audit"] = data["audit"]
     if data.get("bugs"):                        # implements: REQ-BUGS-1117
         payload["bugs"] = data["bugs"]
+    if cfg.MAP_LANGUAGE != "en":                # implements: REQ-MAPSTAMP-1125
+        payload["language"] = cfg.MAP_LANGUAGE
+    if stamped:                                 # implements: REQ-MAPSTAMP-1124
+        payload["generated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        if data.get("branch"):
+            payload["branch"] = data["branch"]
     compact =cfg.MAP_PROFILE == "compact" if compact is None else compact
     return _utf8_safe(json.dumps(
         payload, indent=None if compact else 2, ensure_ascii=False,

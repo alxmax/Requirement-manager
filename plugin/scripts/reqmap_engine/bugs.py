@@ -10,6 +10,7 @@ import glob
 import json
 import os
 import re
+import unicodedata
 
 from . import config as cfg
 
@@ -102,20 +103,27 @@ def _row(cells, index, ctx, line_no, problems):
            "prio": "P" + prio.group(1),
            "estimated": "*" in cell("prio") or cell("id").endswith("*"),
            "date": date or ctx["date"], "where": cell("where"),
-           "why": cell("why"), "source": cell("source"), "file": ctx["file"]}
+           "why": cell("why"), "source": cell("source"), "file": ctx["file"],
+           "line": line_no}
     return bug
 
 
 def _parse(text, ctx, problems):
     # implements: REQ-BUGS-1116
     """The bugs of every bug table in `text`. A table with other columns is
-    somebody else's: a contents page, a list of questions."""
+    somebody else's: a contents page, a list of questions. So is every table
+    under a `##` heading `BUG_SKIP_SECTIONS` matches."""
     bugs, seen = [], set()
     lines = text.splitlines()
-    index = None
+    index, skip, skipped = None, ctx.get("skip"), False
     for n, line in enumerate(lines):
+        section = re.match(r"##\s+(.+)", line)
+        if section:
+            skipped = bool(skip and skip.search(section.group(1)))
         if not line.startswith("|"):
             index = None
+        elif skipped:
+            continue
         elif index is None:
             if n + 1 < len(lines) and _is_separator(lines[n + 1]):
                 index = _column_index(_cells(line)) or False
@@ -130,7 +138,7 @@ def _parse(text, ctx, problems):
     return bugs
 
 
-def _read_file(path, root, problems):
+def _read_file(path, root, problems, skip=None):
     # implements: REQ-BUGS-1116
     """The bugs of one file. Fail-open: an unreadable file is one problem."""
     rel = os.path.relpath(path, root).replace(os.sep, "/")
@@ -143,7 +151,7 @@ def _read_file(path, root, problems):
     stem = os.path.splitext(os.path.basename(path))[0]
     module, date = _file_heading(text, stem)
     return _parse(text, {"file": rel, "stem": stem, "module": module,
-                         "date": date}, problems)
+                         "date": date, "skip": skip}, problems)
 
 
 def _bug_paths(root, reqs_dir, problems):
@@ -161,13 +169,37 @@ def _bug_paths(root, reqs_dir, problems):
     return paths
 
 
+def _skip_pattern(problems):
+    # implements: REQ-BUGS-1116
+    """`BUG_SKIP_SECTIONS` compiled, or None. A bad one is one problem line,
+    and every table is then read."""
+    try:
+        return re.compile(cfg.BUG_SKIP_SECTIONS) if cfg.BUG_SKIP_SECTIONS else None
+    except re.error as exc:
+        problems.append("BUG_SKIP_SECTIONS: {}".format(exc))
+        return None
+
+
+def module_key(name):
+    # implements: REQ-BUGS-1117
+    """What two spellings of one module share: its words, without case,
+    diacritics or punctuation."""
+    text = unicodedata.normalize("NFKD", name)
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return " ".join(re.findall(r"[^\W_]+", text.casefold())) or name
+
+
 def load_bugs(root, reqs_dir):
     # implements: ARCH-BUGS-078  # implements: REQ-BUGS-1117
-    """(bugs, problems): every known bug of this repository, by file."""
-    problems, bugs = [], []
+    """(bugs, problems): every known bug of this repository, by file. Spellings
+    of one module become the first one read, so every surface shows one group."""
+    problems, bugs, spelling = [], [], {}
     root = root or "."
+    skip = _skip_pattern(problems)
     for path in _bug_paths(root, reqs_dir, problems):
-        bugs += _read_file(path, root, problems)
+        bugs += _read_file(path, root, problems, skip)
+    for bug in bugs:
+        bug["module"] = spelling.setdefault(module_key(bug["module"]), bug["module"])
     return bugs, problems
 
 
@@ -256,10 +288,18 @@ def cmd_bug_add(reqs_dir, title, a):
     return 0
 
 
-def _matches(bug, module, prio):
+def _matches(bug, module, prios):
     # implements: REQ-BUGS-1120
-    return ((not module or module.lower() in bug["module"].lower())
-            and (not prio or bug["prio"] == prio.upper()))
+    return ((not module or module_key(module) in module_key(bug["module"]))
+            and (not prios or bug["prio"] in prios))
+
+
+def _total_line(bugs):
+    # implements: REQ-BUGS-1120
+    found = sorted(b["prio"] for b in bugs)
+    mix = ["{} {}".format(p, found.count(p)) for p in sorted(set(found))]
+    return "{} bug{}: {}".format(len(bugs), "" if len(bugs) == 1 else "s",
+                                 ", ".join(mix))
 
 
 def cmd_bugs(root, reqs_dir, module=None, prio=None, as_json=False):
@@ -267,7 +307,8 @@ def cmd_bugs(root, reqs_dir, module=None, prio=None, as_json=False):
     """`ask --bugs`: the known bugs by module, highest priority first.
     Read-only, exit 0."""
     bugs, problems = load_bugs(root, reqs_dir)
-    shown = [b for b in bugs if _matches(b, module, prio)]
+    prios = [p.strip().upper() for p in (prio or "").split(",") if p.strip()]
+    shown = [b for b in bugs if _matches(b, module, prios)]
     if as_json:
         print(json.dumps({"bugs": shown, "problems": problems},
                          ensure_ascii=False, indent=2))
@@ -283,6 +324,8 @@ def cmd_bugs(root, reqs_dir, module=None, prio=None, as_json=False):
             print("  {}  {:<6} {:<10}  {}".format(
                 b["prio"] + ("*" if b["estimated"] else " "), b["ref"],
                 b["date"], b["title"]))
+    if shown:
+        print(_total_line(shown))
     for line in problems:
         print("! INPUT:bugs " + line)
     return 0

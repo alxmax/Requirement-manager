@@ -145,6 +145,7 @@ row. By hand, use the **Bugs** tab under Problems in the map, or:
 ```bash
 python scripts/reqmap.py sync --bug "Refund is applied twice" --module Payments --prio P1
 python scripts/reqmap.py ask --bugs --module pay
+python scripts/reqmap.py ask --bugs --prio P0,P1 --json   # for a script's own report
 ```
 
 Run `sync` afterwards to put it on the map. A repository that already keeps bugs in its own
@@ -154,14 +155,36 @@ written, and the map stays stale until `sync` runs after one of them changes:
 ```json
 {
   "BUG_SOURCES": ["docs/known-issues/*.md"],
-  "BUG_COLUMNS": {"title": ["Issue"], "prio": ["Severity"]}
+  "BUG_COLUMNS": {"title": ["Issue"], "prio": ["Severity"]},
+  "BUG_SKIP_SECTIONS": "(?i)fixed|resolved",
+  "MAP_LANGUAGE": "ro"
 }
 ```
 
-The heading gives the module: `# Known issues — Billing (15.03.2026)` is module `Billing`,
-and its date applies to any row with none. A table with no id, title and priority column is
-skipped. A row that cannot be read is an `INPUT:bugs` warning. An open bug never fails the
-gate, whatever its priority, and bugs never reach the drift lock.
+A table with no id, title and priority column is skipped, and so is every table under a `##`
+heading `BUG_SKIP_SECTIONS` matches, down to the next `##`. Without it, a "recently fixed"
+table with the bug columns reads as open bugs. `MAP_LANGUAGE` (`en` or `ro`) is the language
+the map opens in until a reader picks one, for the page's own labels. A row that cannot be
+read is an `INPUT:bugs` warning. An open bug never fails the gate, whatever its priority, and
+bugs never reach the drift lock.
+
+The first `#` heading gives the module, and any date in brackets at its end applies to rows
+with none:
+
+| Heading | Module | Date |
+|---|---|---|
+| `# Known issues — Billing (15.03.2026)` | `Billing` | 2026-03-15 |
+| `# Known issues — Stock - Orders` | `Orders`: the last dash with spaces around it wins | none |
+| `# Known issues — Stock-Orders` | `Stock-Orders` | none |
+| `# Billing` | `Billing` | none |
+| no heading, in `billing-notes.md` | `billing-notes` | none |
+
+Spellings that differ only in case, diacritics or punctuation are one module, shown as the
+first one read. A bug's id is `<file stem>:<row id>`, so renaming a file changes the ids of
+its bugs.
+
+**Export PDF** in the Bugs tab opens the browser's print dialog on the list as filtered, with
+every group open; choose "Save as PDF" there.
 
 ## Glossary (the jargon, in plain words)
 
