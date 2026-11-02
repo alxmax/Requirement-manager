@@ -8,7 +8,9 @@ import { createPortal } from "react-dom";
 import {
   BUGS, BUGS_FIXED, FORGE, REPO, REQUIREMENTS,
 } from "../../lib/data.js";
-import { fixedSince, medianDays, weekly } from "../../lib/bugStats.js";
+import {
+  fixedIn, fixedSince, medianDays, pageOf, weekly, weekOf,
+} from "../../lib/bugStats.js";
 import { Icon } from "../../lib/icons.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import {
@@ -16,6 +18,7 @@ import {
 } from "../../lib/bugFile.js";
 import { ChipRow } from "./ProblemsPanels.jsx";
 
+const PAGE_SIZE = 25;
 const PRIOS = ["P0", "P1", "P2", "P3", "P4"];
 const PRIO_NAME = { P0: "critical", P1: "high", P2: "medium", P3: "low",
   P4: "minor" };
@@ -125,17 +128,39 @@ function FixedLine({ row }) {
   );
 }
 
+/** Previous and next under a list; nothing when it fits on one page. */
+function Pager({ at, setPage }) {
+  const { t } = useI18n();
+  if (at.pages < 2) return null;
+  return (
+    <div className="bug-pager">
+      <button className="btn btn-ghost" disabled={at.page === 0}
+        onClick={() => setPage(at.page - 1)}>{t("Previous page")}</button>
+      <span>{t("Page {n} of {m}", { n: at.page + 1, m: at.pages })}</span>
+      <button className="btn btn-ghost" disabled={at.page === at.pages - 1}
+        onClick={() => setPage(at.page + 1)}>{t("Next page")}</button>
+    </div>
+  );
+}
+
 /** Closed bugs and what they add up to: found against fixed by week, what was
- * still open then, and the median time to fix. */
+ * still open then, and the median time to fix. The rows themselves wait for a
+ * week or a search: a long register is not a list anyone reads top to bottom. */
 export function BugHistory({ open, fixed, query }) {
   const { t } = useI18n();
+  const [week, setWeek] = useState(null);
+  const [page, setPage] = useState(0);
   if (!fixed.length) {
     return <div className="prob-empty"><b>{t("No bug has been closed yet.")}</b></div>;
   }
   const q = query.trim().toLowerCase();
-  const rows = fixed.filter((r) => !q
-    || `${r.id} ${r.title}`.toLowerCase().includes(q));
-  const medians = [["By module", "module"], ["By priority", "prio"]];
+  const closing = new Set(fixed.filter((r) => r.fixed)
+    .map((r) => weekOf(r.fixed)));
+  const pick = (w) => { setWeek(week === w ? null : w); setPage(0); };
+  const chosen = q ? fixed.filter(
+    (r) => `${r.id} ${r.title}`.toLowerCase().includes(q))
+    : week ? fixedIn(fixed, week) : [];
+  const at = pageOf([...chosen].reverse(), page, PAGE_SIZE);
   return (
     <>
       <table className="bug-weeks">
@@ -145,19 +170,30 @@ export function BugHistory({ open, fixed, query }) {
         </tr></thead>
         <tbody>{weekly(open, fixed).map((w) => (
           <tr key={w.week}>
-            <td>{shortDate(w.week)}</td><td>{w.found}</td><td>{w.fixed}</td>
+            <td>
+              <button className="bug-week" aria-pressed={week === w.week}
+                disabled={!closing.has(w.week)} onClick={() => pick(w.week)}>
+                {shortDate(w.week)}
+              </button>
+            </td>
+            <td>{w.found}</td><td>{w.fixed}</td>
             <td>{w.open}</td>
           </tr>
         ))}</tbody>
       </table>
       <div className="bug-medians">
         <b>{t("Median days to fix")}</b>
-        {medians.map(([label, key]) => (
-          <div key={key}>{t(label)}: {medianDays(fixed, key)
-            .map(([name, days]) => `${name} ${days}`).join(" · ")}</div>
-        ))}
+        <div>{t("By priority")}: {medianDays(fixed, "prio")
+          .map(([name, days]) => `${name} ${days}`).join(" · ")}</div>
       </div>
-      {[...rows].reverse().map((r) => <FixedLine key={r.id} row={r} />)}
+      {at.rows.map((r) => <FixedLine key={r.id} row={r} />)}
+      {!q && !week && (
+        <div className="bug-medians">{t("Pick a week to see its bugs.")}</div>
+      )}
+      {q && !chosen.length && (
+        <div className="prob-empty"><b>{t("No bugs found.")}</b></div>
+      )}
+      <Pager at={at} setPage={setPage} />
     </>
   );
 }
@@ -225,6 +261,8 @@ function BugRow({ b, open, toggle }) {
 }
 
 function BugGroup({ label, rows, defaultOpen, pick, setPick }) {
+  const [page, setPage] = useState(0);
+  const at = pageOf(inOrder(rows), page, PAGE_SIZE);
   return (
     <details className="bug-group" open={defaultOpen}>
       <summary>
@@ -233,10 +271,11 @@ function BugGroup({ label, rows, defaultOpen, pick, setPick }) {
           {prioMix(rows).map(([p, n]) => <span key={p}>{p} {n}</span>)}
         </span>
       </summary>
-      {inOrder(rows).map((b) => (
+      {at.rows.map((b) => (
         <BugRow key={b.id} b={b} open={pick === b.id}
           toggle={() => setPick(pick === b.id ? null : b.id)} />
       ))}
+      <Pager at={at} setPage={setPage} />
     </details>
   );
 }

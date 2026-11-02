@@ -7,7 +7,8 @@
 - `sync --fix ID` moves a row to `requirements/bugs/_fixed.md` with its found and fixed dates, version and commit. `--note` closes without a fix. REQ-BUGS-1127
 - A `Fixes-bug: ID` commit trailer closes the bug on the next `sync`, with that commit's SHA, date and version. `BUG_FIX_TRAILERS` renames it. REQ-BUGS-1128
 - `sync --bug` and the page write into the module's existing file, in its columns, under its priority's section, and a number is never given twice. A title the module already holds needs `--force`. REQ-BUGS-1126
-- `_map.json` gains `bugs_fixed` and, for a repository's own format, `bug_format`. The Bugs tab gains a Fixed view with found against fixed by week and the median days to fix, and the export a section of the last 30 days. REQ-BUGS-1129
+- `_map.json` gains `bugs_fixed` and, for a repository's own format, `bug_format`. The Bugs tab gains a Fixed view with found against fixed by week and the median days to fix by priority, and the export a section of the last 30 days. REQ-BUGS-1129
+- Fixed lists its rows only for a chosen week or a search, and the tab's lists come in pages of 25. REQ-BUGS-1129
 
 **Known bugs are listed by module, on the map and from the command line (ADR-0080).**
 

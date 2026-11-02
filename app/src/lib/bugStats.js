@@ -57,6 +57,18 @@ export function medianDays(fixed, key) {
     .map((name) => [name, median(groups[name]), groups[name].length]);
 }
 
+/** The rows closed in the week starting `week`. */
+export const fixedIn = (fixed, week) => fixed.filter(
+  (b) => b.fixed && weekOf(b.fixed) === week);
+
+/** One page of `items`. A page past the end, left by a shorter list, is the
+ * last one. */
+export function pageOf(items, page, size) {
+  const pages = Math.max(1, Math.ceil(items.length / size));
+  const at = Math.min(page, pages - 1);
+  return { rows: items.slice(at * size, (at + 1) * size), page: at, pages };
+}
+
 /** The rows closed in the last `days` days up to `today`. */
 export const fixedSince = (fixed, today, days = 30) => fixed.filter(
   (b) => b.fixed && stamp(today) - stamp(b.fixed) <= days * DAY);

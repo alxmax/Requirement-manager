@@ -700,8 +700,10 @@ Every bullet below is binding.
 - `_map.json` carries the register under `bugs_fixed`, and has no such key when it is empty.
 - A row's commit links to the forge when the remote is GitHub. The forge reaches `_map.html` only, because it differs between a clone and a fork.
 - When the register holds a row, the Bugs tab has an Open / Fixed toggle. Fixed shows found, fixed, version, commit and note.
-- Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per module and per priority.
+- Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per priority.
 - A `not a bug` row leaves the open count and counts in neither the fixes nor the median.
+- Fixed lists its rows only for a chosen week or a search.
+- The Bugs tab shows 25 rows of a list at a time, with pages. The export prints every row.
 - The export gains a section of what was fixed in the last 30 days.
 
 ## Cases
@@ -729,3 +731,13 @@ CASE-5 — the export
   Given  a bug fixed this month
   When   the report renders
   Then   it holds a section naming that bug
+
+CASE-6 — the rows wait for a choice
+  Given  a register with rows
+  When   Fixed renders with no week chosen and no search
+  Then   it shows no row and asks for a week, and a chosen week holds the rows closed in it
+
+CASE-7 — a long list
+  Given  30 open bugs in one module
+  When   the tab renders
+  Then   it shows 25 rows and says page 1 of 2, and a page past the end is the last page
