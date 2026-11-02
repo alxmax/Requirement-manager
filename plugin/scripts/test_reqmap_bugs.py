@@ -140,6 +140,44 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
                           second["estimated"]))
 
 
+    def test_a_named_section_is_not_read(self):
+        # verifies: REQ-BUGS-1116#CASE-7
+        _bug_file(self.d, "f.md", "# Bugs — Core\n\n## Open\n\n" + HEAD
+                  + "| B1 | Live | P1 | | | | |\n\n## Recently fixed\n\n"
+                  + "### Last week\n\n" + HEAD + "| B2 | Done | P2 | | | | |\n")
+        reqs = os.path.join(self.d, "requirements")
+        self.assertEqual(2, len(B.load_bugs(self.d, reqs)[0]))
+        with mock.patch.object(R.config, "BUG_SKIP_SECTIONS", "(?i)fixed"):
+            bugs, problems = B.load_bugs(self.d, reqs)
+        self.assertEqual((["Live"], []), ([b["title"] for b in bugs], problems))
+
+    def test_a_bad_pattern_loses_nothing(self):
+        # verifies: REQ-BUGS-1116#CASE-8
+        _bug_file(self.d, "g.md", "# Bugs — Core\n\n## Fixed\n\n" + HEAD
+                  + "| B1 | Kept | P1 | | | | |\n")
+        with mock.patch.object(R.config, "BUG_SKIP_SECTIONS", "("):
+            bugs, problems = B.load_bugs(
+                self.d, os.path.join(self.d, "requirements"))
+        self.assertEqual(1, len(bugs))
+        self.assertIn("BUG_SKIP_SECTIONS", problems[0])
+
+    def test_the_last_spaced_dash_ends_the_module_name(self):
+        # verifies: REQ-BUGS-1116#CASE-9
+        dash = _bug_file(self.d, "h.md", "# Known — Stock - Orders\n\n" + HEAD
+                         + "| B1 | One | P2 | | | | |\n")
+        joined = _bug_file(self.d, "i.md", "# Known — Stock-Orders\n\n" + HEAD
+                           + "| B1 | Two | P2 | | | | |\n")
+        self.assertEqual("Orders", _read(self.d, dash)[0]["module"])
+        self.assertEqual("Stock-Orders", _read(self.d, joined)[0]["module"])
+
+    def test_a_row_says_where_it_came_from(self):
+        # verifies: REQ-BUGS-1116#CASE-10
+        path = _bug_file(self.d, "j.md", "# J\n\n" + HEAD
+                         + "| B1 | One | P2 | | | | |\n")
+        got = _read(self.d, path)[0]
+        self.assertEqual(("requirements/bugs/j.md", 5), (got["file"], got["line"]))
+
+
 class BugsOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1117 @integration
     def test_the_folder_reaches_the_map(self):
         # verifies: REQ-BUGS-1117#CASE-1
@@ -197,6 +235,18 @@ class BugsOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1117 @integration
         with open(path, "a", encoding="utf-8") as f:
             f.write("| B2 | Another | P2 | | | | |\n")
         self.assertNotEqual(0, _run(d, "gate", "--full").returncode)
+
+    def test_spellings_of_one_module_are_one_group(self):
+        # verifies: REQ-BUGS-1117#CASE-6
+        d = _repo(self)
+        for name, module in (("a.md", "Café, API"), ("b.md", "cafe api"),
+                             ("c.md", "Search")):
+            _bug_file(d, name, "# Bugs — " + module + "\n\n" + HEAD
+                      + "| B1 | T | P2 | | | | |\n")
+        bugs = B.load_bugs(d, os.path.join(d, "requirements"))[0]
+        self.assertEqual(["Café, API", "Café, API", "Search"],
+                         [b["module"] for b in bugs])
+        self.assertEqual(["a:B1", "b:B1", "c:B1"], [b["id"] for b in bugs])
 
     def test_a_bug_from_the_command_line_reaches_the_map(self):
         # verifies: ARCH-BUGS-078#CASE-1
@@ -356,11 +406,82 @@ class ListBugs(unittest.TestCase):  # tested-by: REQ-BUGS-1120 @integration
         doc = json.loads(_run(d, "ask", "--bugs", "--json").stdout)
         self.assertEqual((1, 1), (len(doc["bugs"]), len(doc["problems"])))
 
+    def test_a_list_of_priorities_and_a_total(self):
+        # verifies: REQ-BUGS-1120#CASE-5
+        d = self._two_modules()
+        out = _run(d, "ask", "--bugs", "--prio", "p1,P3").stdout
+        self.assertIn("Lost", out)
+        self.assertIn("Empty", out)
+        self.assertNotIn("Slow", out)
+        self.assertIn("2 bugs: P1 1, P3 1", out)
+        doc = json.loads(_run(d, "ask", "--bugs", "--json", "--prio", "P1,P2",
+                              "--module", "PAY").stdout)
+        self.assertEqual(2, len(doc["bugs"]))
+
     def test_no_bugs_is_an_answer(self):
         # verifies: REQ-BUGS-1120#CASE-4
         done = _run(_repo(self), "ask", "--bugs")
         self.assertEqual(0, done.returncode)
         self.assertIn("no known bugs", done.stdout)
+
+
+class MapStamp(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1124 @integration
+    def _html(self, d):
+        with open(os.path.join(d, "requirements", "_map.html"),
+                  encoding="utf-8") as f:
+            return f.read()
+
+    def _template(self):
+        tpl = os.path.join(os.path.dirname(ENGINE), "_map_viewer.html")
+        self.assertTrue(os.path.exists(tpl), "the vendored viewer is missing")
+
+    def test_the_page_says_which_build_it_is(self):
+        # verifies: REQ-MAPSTAMP-1124#CASE-1
+        # verifies: ARCH-MAPSTAMP-079#CASE-1
+        self._template()
+        d = _repo(self)
+        for args in (("init", "-q"), ("checkout", "-q", "-b", "side"), ("add", "."),
+                     ("-c", "user.name=t", "-c", "user.email=t@t", "commit",
+                      "-q", "-m", "x")):
+            subprocess.run(["git", *args], cwd=d, check=True)
+        self.assertEqual(0, _run(d, "sync").returncode)
+        html = self._html(d)
+        self.assertIn('"branch":"side"', html)
+        self.assertIn('"generated_at":"', html)
+        self.assertIn('"engine_version":"' + R.MAP_ENGINE_VERSION, html)
+
+    def test_the_committed_map_stays_quiet(self):
+        # verifies: REQ-MAPSTAMP-1124#CASE-2
+        d = _repo(self)
+        self.assertEqual(0, _run(d, "sync").returncode)
+        doc = _map(d)
+        self.assertNotIn("generated_at", doc)
+        self.assertNotIn("branch", doc)
+
+
+class MapLanguage(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1125 @integration
+    def test_the_language_reaches_the_map(self):
+        # verifies: REQ-MAPSTAMP-1125#CASE-1
+        d = _repo(self)
+        _write(os.path.join(d, "requirements", "_config.json"),
+               json.dumps({"MAP_LANGUAGE": "ro"}))
+        self.assertEqual(0, _run(d, "sync").returncode)
+        self.assertEqual("ro", _map(d)["language"])
+
+    def test_the_default_adds_no_key(self):
+        # verifies: REQ-MAPSTAMP-1125#CASE-2
+        d = _repo(self)
+        self.assertEqual(0, _run(d, "sync").returncode)
+        self.assertNotIn("language", _map(d))
+
+    def test_a_value_outside_the_list_is_reported(self):
+        # verifies: REQ-MAPSTAMP-1125#CASE-3
+        d = _repo(self)
+        _write(os.path.join(d, "requirements", "_config.json"),
+               json.dumps({"MAP_LANGUAGE": "fr"}))
+        done = _run(d, "sync")
+        self.assertIn("MAP_LANGUAGE", done.stderr)
+        self.assertNotIn("language", _map(d))
 
 
 if __name__ == "__main__":

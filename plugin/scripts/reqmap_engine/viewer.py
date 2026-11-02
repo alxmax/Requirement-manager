@@ -31,7 +31,7 @@ def _inject_viewer(template_text, data):
     All three are valid JS string escapes (backslash ignored for `/`,
     `!`, `-`)."""
     blob = (
-        _build_json_text(data, compact=True)
+        _build_json_text(data, compact=True, stamped=True)
         .replace("</", "<\\/")
         .replace("<!--", "<\\!--")
         .replace("-->", "-\\->")

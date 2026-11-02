@@ -1,7 +1,9 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1082
+// implements: REQ-MAPSTAMP-1124
 import {
   REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN, AUDIT,
+  BRANCH, ENGINE_VERSION, GENERATED_AT,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
@@ -199,9 +201,13 @@ const FOOTER_LINK = {
   fontFamily: "var(--font-mono)", opacity: 0.7,
 };
 
+const STAMP = { ...FOOTER_LINK, marginTop: 4, overflowWrap: "anywhere" };
+
 export function Rail({
   view, setView, focus, setFocus, problems, openProblems,
 }) {
+  const stamp = [ENGINE_VERSION && `engine ${ENGINE_VERSION}`, BRANCH,
+    GENERATED_AT].filter(Boolean);
   return (
     <nav className="rail">
       <RailNav view={view} setView={setView} problems={problems} />
@@ -213,6 +219,9 @@ export function Rail({
           style={FOOTER_LINK}>
           by requirement-manager
         </a>
+        {stamp.length > 0 && (
+          <div className="map-stamp" style={STAMP}>{stamp.join(" · ")}</div>
+        )}
       </div>
     </nav>
   );

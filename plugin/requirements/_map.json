@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-02",
+  "engine_version": "2026-11-02.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1804,11 +1804,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/components/Rail.jsx:17"
+          "loc": "app/src/components/Rail.jsx:19"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:56"
+          "loc": "app/src/lib/data.js:55"
         },
         {
           "role": "implements",
@@ -1836,7 +1836,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:114"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:117"
         }
       ],
       "test_exempt": null,
@@ -1934,7 +1934,8 @@
         "`sync --bug` adds one row to the module's file and does nothing else. [[REQ-BUGS-1119]]",
         "`ask --bugs` lists the known bugs by module, without a verdict. [[REQ-BUGS-1120]]",
         "The Problems page has a Bugs tab that groups by module and shows each bug's date. [[REQ-BUGS-1121]]",
-        "The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]"
+        "The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]",
+        "The tab exports the list it shows, for a reader who does not open the map. [[REQ-BUGS-1123]]"
       ],
       "verify": [],
       "notes": [],
@@ -1959,7 +1960,8 @@
         "REQ-BUGS-1119",
         "REQ-BUGS-1120",
         "REQ-BUGS-1121",
-        "REQ-BUGS-1122"
+        "REQ-BUGS-1122",
+        "REQ-BUGS-1123"
       ],
       "members": [
         {
@@ -1972,15 +1974,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:165"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:193"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:224"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:256"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:266"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:306"
         }
       ],
       "test_exempt": null,
@@ -2022,16 +2024,18 @@
         "The canonical columns are `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters` and `Source`, compared without regard to case.",
         "A table is a bug table when it has an id, a title and a priority column. Any other table in the file is skipped without a word.",
         "`BUG_COLUMNS` in `_config.json` adds a repository's own column names beside the canonical ones.",
-        "The first `#` heading gives the module: the text after its last ` — `, without a trailing `(date)`. A file with no heading uses its own name.",
+        "The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.",
         "A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.",
         "A priority is the first `P0` to `P4` in its cell. `*` in the priority or id cell marks it estimated.",
-        "A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`.",
+        "A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`. Renaming the file changes the id.",
+        "`BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read.",
+        "A bug records its file and the line of its row.",
         "A row with no id, title or priority, an unreal date, a repeated id or an unreadable file is a problem line, and the rows around it are still read."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column\n  When   the file is read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — the heading gives the module and the date\n  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column\n  When   the file is read\n  Then   each bug has module `Billing` and date `2026-03-15`\n\nCASE-4 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-5 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-6 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\n--------------------",
+      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column\n  When   the file is read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — the heading gives the module and the date\n  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column\n  When   the file is read\n  Then   each bug has module `Billing` and date `2026-03-15`\n\nCASE-4 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-5 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-6 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\nCASE-7 — a named section is not read\n  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`\n  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty\n  Then   the first load holds only the open bug, and the second holds both\n\nCASE-8 — a bad pattern loses nothing\n  Given  `BUG_SKIP_SECTIONS` set to `(`\n  When   the bugs load\n  Then   the rows are read and one problem line names the key\n\nCASE-9 — a spaced dash ends the module name\n  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`\n  When   each file is read\n  Then   the modules are `Orders` and `Stock-Orders`\n\nCASE-10 — a row says where it came from\n  Given  a bug on line 5 of a file\n  When   the file is read\n  Then   the bug carries that file and line\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2048,35 +2052,39 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:26"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:33"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:34"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:39"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:40"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:56"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:71"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:72"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:85"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:86"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:110"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:112"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:134"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:142"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:173"
         }
       ],
       "test_exempt": null,
@@ -2088,19 +2096,9 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 6,
-      "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clauses": 10,
+      "covered": 10,
+      "clarify": []
     },
     {
       "id": "REQ-BUGS-1117",
@@ -2115,12 +2113,13 @@
         "`_map.json` carries the bugs under `bugs` when there are any. With no folder and no `BUG_SOURCES`, `bugs.py` is not imported and the key is absent.",
         "The engine never writes to a file `BUG_SOURCES` names.",
         "A `BUG_SOURCES` pattern that matches no file is a problem line.",
-        "A changed bug file makes the committed map stale, as a changed requirement does."
+        "A changed bug file makes the committed map stale, as a changed requirement does.",
+        "Modules that differ only in case, diacritics or punctuation are one module, under the spelling read first. A bug's id does not change."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the folder reaches the map\n  Given  a repository with one file in `requirements/bugs/`\n  When   `sync` runs\n  Then   `_map.json` carries its bugs and `gate --full` reports the map fresh\n\nCASE-2 — no list, no key and no module\n  Given  a repository with no bug folder and no `BUG_SOURCES`\n  When   the map is assembled\n  Then   the map has no `bugs` key and `reqmap_engine.bugs` is not imported\n\nCASE-3 — a declared source is read and not written\n  Given  `BUG_SOURCES` naming a document\n  When   `sync` runs\n  Then   its bugs are on the map and the document is byte-identical\n\nCASE-4 — a pattern that matches nothing is named\n  Given  `BUG_SOURCES` naming a path that does not exist\n  When   the bugs are loaded\n  Then   the problem lines quote that pattern\n\nCASE-5 — a changed bug file makes the map stale\n  Given  a synced repository\n  When   a row is added to a bug file and `gate --full` runs\n  Then   it reports the map stale\n\n--------------------",
+      "accept": "CASE-1 — the folder reaches the map\n  Given  a repository with one file in `requirements/bugs/`\n  When   `sync` runs\n  Then   `_map.json` carries its bugs and `gate --full` reports the map fresh\n\nCASE-2 — no list, no key and no module\n  Given  a repository with no bug folder and no `BUG_SOURCES`\n  When   the map is assembled\n  Then   the map has no `bugs` key and `reqmap_engine.bugs` is not imported\n\nCASE-3 — a declared source is read and not written\n  Given  `BUG_SOURCES` naming a document\n  When   `sync` runs\n  Then   its bugs are on the map and the document is byte-identical\n\nCASE-4 — a pattern that matches nothing is named\n  Given  `BUG_SOURCES` naming a path that does not exist\n  When   the bugs are loaded\n  Then   the problem lines quote that pattern\n\nCASE-5 — a changed bug file makes the map stale\n  Given  a synced repository\n  When   a row is added to a bug file and `gate --full` runs\n  Then   it reports the map stale\n\nCASE-6 — two spellings are one module\n  Given  files headed `Café, API`, `cafe api` and `Search`\n  When   the bugs are loaded\n  Then   the first two carry the module `Café, API`, with their own ids\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2133,23 +2132,27 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_bugs.py:143"
+          "loc": "plugin/scripts/test_reqmap_bugs.py:181"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:150"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:165"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:184"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:175"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:193"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:309"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:207"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:314"
         },
         {
           "role": "implements",
@@ -2157,7 +2160,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:116"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:119"
         }
       ],
       "test_exempt": null,
@@ -2169,8 +2172,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 6,
+      "covered": 6,
       "clarify": []
     },
     {
@@ -2206,11 +2209,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_bugs.py:218"
+          "loc": "plugin/scripts/test_reqmap_bugs.py:268"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:181"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:213"
         }
       ],
       "test_exempt": null,
@@ -2264,23 +2267,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_bugs.py:257"
+          "loc": "plugin/scripts/test_reqmap_bugs.py:307"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:187"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:192"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:200"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:219"
         },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/bugs.py:224"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:232"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:256"
         },
         {
           "role": "implements",
@@ -2319,15 +2322,15 @@
       "title": "`ask --bugs` lists them by module",
       "intent": "The same list the page shows, for a terminal or an assistant, read-only like every `ask`.",
       "contract": [
-        "`ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first.",
-        "`--module TEXT` keeps modules whose name contains the text, ignoring case, and `--prio P1` keeps that priority.",
+        "`ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first, and last a total with the count per priority.",
+        "`--module TEXT` keeps modules whose name contains the text, ignoring case, diacritics and punctuation, and `--prio` keeps one priority or a comma-separated list.",
         "`--json` prints `{bugs, problems}`.",
         "It writes nothing and exits 0, with or without bugs."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — bugs print by module\n  Given  two modules with a P2 and a P1 in one of them\n  When   `ask --bugs` runs\n  Then   each module prints once, the P1 above the P2, and it exits 0\n\nCASE-2 — the filters narrow the list\n  Given  the same repository\n  When   `ask --bugs --module pay --prio P1` runs\n  Then   only that bug prints\n\nCASE-3 — JSON carries the problems\n  Given  a file with one good row and one bad row\n  When   `ask --bugs --json` runs\n  Then   the document holds one bug and one problem\n\nCASE-4 — no bugs is an answer\n  Given  a repository with no bug list\n  When   `ask --bugs` runs\n  Then   it prints that there are none and exits 0\n\n--------------------",
+      "accept": "CASE-1 — bugs print by module\n  Given  two modules with a P2 and a P1 in one of them\n  When   `ask --bugs` runs\n  Then   each module prints once, the P1 above the P2, and it exits 0\n\nCASE-2 — the filters narrow the list\n  Given  the same repository\n  When   `ask --bugs --module pay --prio P1` runs\n  Then   only that bug prints\n\nCASE-3 — JSON carries the problems\n  Given  a file with one good row and one bad row\n  When   `ask --bugs --json` runs\n  Then   the document holds one bug and one problem\n\nCASE-4 — no bugs is an answer\n  Given  a repository with no bug list\n  When   `ask --bugs` runs\n  Then   it prints that there are none and exits 0\n\nCASE-5 — a list of priorities, and a total\n  Given  bugs at P1, P2 and P3\n  When   `ask --bugs --prio p1,P3` runs\n  Then   the P2 is left out and the last line reads `2 bugs: P1 1, P3 1`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2344,15 +2347,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_bugs.py:327"
+          "loc": "plugin/scripts/test_reqmap_bugs.py:377"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:260"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:292"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/bugs.py:266"
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:298"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/bugs.py:306"
         },
         {
           "role": "implements",
@@ -2368,8 +2375,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 5,
+      "covered": 5,
       "clarify": [
         {
           "rule": "ambiguous-actor",
@@ -2394,7 +2401,7 @@
         "Problems has a tab labelled `Bugs` in English and `Buguri` in Romanian, always present, with the number of known bugs.",
         "Bugs group by module, in collapsible groups showing the group's total and its count per priority. There is no other grouping.",
         "A row shows its priority, its date under the priority, its id and its title.",
-        "Opening a row shows why it matters, where, the source and the file.",
+        "Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.",
         "Priority chips and a text search narrow the list, and a narrowed list opens its groups.",
         "Every label goes through `t()`."
       ],
@@ -2484,7 +2491,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a saved row keeps what the file already holds\n  Given  a folder handle whose module file changed after the map was built\n  When   `saveBug` runs\n  Then   the file holds the newer rows and the new one, with the next id\n\nCASE-2 — the wrong folder is refused\n  Given  a picked folder with no `_map.json`\n  When   `saveBug` runs\n  Then   it throws the message naming the folder, and no file is written\n\nCASE-3 — no API, a command\n  Given  a bug with a quote in its title\n  When   `bugCommand` runs\n  Then   the command is `sync --bug` with the quote escaped and each value flagged\n\nCASE-4 — a new repository has suggestions\n  Given  no bugs and one architecture requirement\n  When   `moduleChoices` runs\n  Then   it returns that requirement's title\n\nCASE-5 — the form renders its fields\n  Given  the form open\n  When   it renders\n  Then   it has six fields, and the module field names its suggestions",
+      "accept": "CASE-1 — a saved row keeps what the file already holds\n  Given  a folder handle whose module file changed after the map was built\n  When   `saveBug` runs\n  Then   the file holds the newer rows and the new one, with the next id\n\nCASE-2 — the wrong folder is refused\n  Given  a picked folder with no `_map.json`\n  When   `saveBug` runs\n  Then   it throws the message naming the folder, and no file is written\n\nCASE-3 — no API, a command\n  Given  a bug with a quote in its title\n  When   `bugCommand` runs\n  Then   the command is `sync --bug` with the quote escaped and each value flagged\n\nCASE-4 — a new repository has suggestions\n  Given  no bugs and one architecture requirement\n  When   `moduleChoices` runs\n  Then   it returns that requirement's title\n\nCASE-5 — the form renders its fields\n  Given  the form open\n  When   it renders\n  Then   it has six fields, and the module field names its suggestions\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2527,6 +2534,70 @@
           "where": "Cases",
           "quote": "",
           "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1123",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The tab exports what it shows",
+      "intent": "A team sends the list to people who do not open the map. The browser's own \"Save as PDF\" does that with no dependency, so the page only has to lay the list out for paper.",
+      "contract": [
+        "`Export PDF` opens the browser's print dialog on the list as filtered, with every group open, and is disabled when the list is empty.",
+        "The page holds the repository's name, the total and the filter in force, then for each module a line with its count per priority and its bugs, highest priority first.",
+        "Each bug shows its priority, date, id, title, why it matters, where, the source and the file with its line.",
+        "Printing with the browser's own command, without the button, is unchanged."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the report holds every field of what is shown\n  Given  a filtered list of two bugs in one module, one with why, where and source\n  When   the report renders\n  Then   it holds that module's count per priority and each field, with nothing left closed\n\nCASE-2 — the report states its filter\n  Given  a report narrowed to P1\n  When   it renders\n  Then   its header names P1 and the total shown\n\nCASE-3 — nothing to export\n  Given  an empty list\n  When   the panel renders\n  Then   the button is disabled",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/styles/app.css:491"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:4"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -3229,7 +3300,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:9"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:10"
         },
         {
           "role": "implements",
@@ -4248,7 +4319,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:179"
+          "loc": "plugin/scripts/reqmap_engine/config.py:183"
         }
       ],
       "test_exempt": null,
@@ -4766,11 +4837,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:292"
+          "loc": "plugin/scripts/reqmap_engine/config.py:297"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:326"
+          "loc": "plugin/scripts/reqmap_engine/config.py:331"
         }
       ],
       "test_exempt": null,
@@ -4835,15 +4906,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:292"
+          "loc": "plugin/scripts/reqmap_engine/config.py:297"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:315"
+          "loc": "plugin/scripts/reqmap_engine/config.py:320"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:326"
+          "loc": "plugin/scripts/reqmap_engine/config.py:331"
         }
       ],
       "test_exempt": null,
@@ -5241,7 +5312,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:358"
+          "loc": "plugin/scripts/reqmap_engine/config.py:363"
         },
         {
           "role": "implements",
@@ -6355,7 +6426,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:108"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:111"
         },
         {
           "role": "implements",
@@ -9107,7 +9178,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:110"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:113"
         }
       ],
       "test_exempt": null,
@@ -10982,15 +11053,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:60"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:84"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:125"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:134"
         },
         {
           "role": "implements",
@@ -11115,15 +11186,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:60"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:84"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:85"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:125"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:134"
         }
       ],
       "test_exempt": null,
@@ -11533,7 +11604,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:103"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:106"
         }
       ],
       "test_exempt": null,
@@ -12011,6 +12082,200 @@
           "acceptance": "CASE-1 — diagrama Risk omite o cerință fără semnal de risc\n  Given  o cerință `confirmed` cu membri și puțini dependenți, alături de o cerință `confirmed` cu zero membri\n  When   se randează diagrama Risk\n  Then   doar cerința cu zero membri apare\n\nCASE-2 — fiecare nod Risk poartă o recomandare\n  Given  o cerință `draft` arătată în diagrama Risk\n  When   se randează diagrama\n  Then   cutia sa poartă un string de recomandare scriptată, nu doar eticheta de risc\n\nCASE-3 — întrebarea verify-intent a unui draft nu îl semnalează dublu\n  Given  o cerință `draft` purtând atât o întrebare deschisă verify-intent cât și semnalul `unreviewed`\n  When   se randează diagrama Risk\n  Then   arată semnalul `unreviewed` o singură dată și suprimă steag-ul separat verify-intent"
         }
       }
+    },
+    {
+      "id": "ARCH-MAPSTAMP-079",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "draft",
+      "area": "ARCH",
+      "title": "A map says which build it is and how it opens",
+      "intent": "`_map.html` is regenerated and gitignored, so a second checkout can hold an old one that looks like a missing feature. And a repository written in another language opened every map in English. See [ADR-0081](../../docs/adr/0081-what-a-first-bug-list-changed.md).",
+      "contract": [
+        "The page shows the engine version, the branch and the time it was written. [[REQ-MAPSTAMP-1124]]",
+        "`MAP_LANGUAGE` sets the language the page opens in. [[REQ-MAPSTAMP-1125]]"
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — an old map can be told from a new one\n  Given  a repository on a named branch\n  When   `sync` writes `_map.html`\n  Then   the page carries the engine version, that branch and the time\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [
+        "ARCH-VIEWER-007"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-VISUAL-106"
+      ],
+      "satisfied_by": [
+        "REQ-MAPSTAMP-1124",
+        "REQ-MAPSTAMP-1125"
+      ],
+      "members": [],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 1,
+      "covered": 1,
+      "clarify": [
+        {
+          "rule": "no-failure-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
+          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
+        }
+      ]
+    },
+    {
+      "id": "REQ-MAPSTAMP-1124",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The page shows which build it is",
+      "intent": "The clock and the branch stay out of `_map.json`: that file is committed, and either would rewrite a line on every run. `_map.html` is gitignored, so it can carry both.",
+      "contract": [
+        "`_map.html` carries `generated_at` and, when git can answer, `branch`. `_map.json` carries neither.",
+        "The rail's footer shows the engine version, the branch and the time, leaving out what the map does not carry."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the page carries the stamp\n  Given  a repository on the branch `side`\n  When   `sync` runs\n  Then   `_map.html` holds that branch, a time and the engine version\n\nCASE-2 — the committed map stays quiet\n  Given  the same repository\n  When   `sync` runs\n  Then   `_map.json` has no `generated_at` and no `branch`\n\nCASE-3 — the footer shows what it was given\n  Given  a map with an engine version and a branch, and one with neither\n  When   the rail renders\n  Then   the first footer shows both, and the second shows no stamp\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MAPSTAMP-079"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:4"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/components/Rail.jsx:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/data.js:64"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_bugs.py:428"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:123"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
+    },
+    {
+      "id": "REQ-MAPSTAMP-1125",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "`MAP_LANGUAGE` sets the language the page opens in",
+      "intent": "A reader's own choice beats a repository's default, so the choice is remembered only when a reader makes one. Remembering every first open would freeze the default for that browser.",
+      "contract": [
+        "`MAP_LANGUAGE` in `_config.json` is `en` or `ro`, and any other value is reported and ignored. `_map.json` carries `language` only when it is not `en`.",
+        "The page opens in that language unless the reader has chosen one.",
+        "The language is stored when the reader changes it, not when the page opens.",
+        "The retired key `LANGUAGE` stays ignored."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the language reaches the map\n  Given  `MAP_LANGUAGE` set to `ro`\n  When   `sync` runs\n  Then   `_map.json` carries `language: ro`\n\nCASE-2 — the default adds no key\n  Given  no `MAP_LANGUAGE`\n  When   `sync` runs\n  Then   `_map.json` has no `language`\n\nCASE-3 — another value is reported\n  Given  `MAP_LANGUAGE` set to `fr`\n  When   `sync` runs\n  Then   stderr names the key and `_map.json` has no `language`\n\nCASE-4 — the page opens in the map's language and remembers nothing\n  Given  a map with `language: ro` and no stored choice\n  When   the page renders\n  Then   its labels are Romanian, and storage is written only after the reader changes language",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MAPSTAMP-079"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:5"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/data.js:24"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:359"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:371"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_bugs.py:462"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/config.py:180"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:121"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "case-monoculture",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "3 of 4 Given lines open on the same word (\"map_language\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
     },
     {
       "id": "ARCH-MCP-073",
@@ -16978,7 +17243,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapjson.py:100"
+          "loc": "plugin/scripts/reqmap_engine/mapjson.py:103"
         }
       ],
       "test_exempt": null,
@@ -17073,7 +17338,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:61"
+          "loc": "app/src/lib/data.js:60"
         },
         {
           "role": "tested-by",
@@ -21571,7 +21836,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:322"
+          "loc": "app/src/lib/i18n.jsx:325"
         },
         {
           "role": "implements",
@@ -21674,14 +21939,6 @@
         {
           "role": "tested-by",
           "loc": "app/scripts/smoke/views.jsx:70"
-        },
-        {
-          "role": "implements",
-          "loc": "app/src/lib/data.js:25"
-        },
-        {
-          "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:357"
         }
       ],
       "test_exempt": null,
@@ -22083,6 +22340,7 @@
       "used_by": [
         "ARCH-AUDITRUN-076",
         "ARCH-BUGS-078",
+        "ARCH-MAPSTAMP-079",
         "ARCH-SITE-026",
         "ARCH-TRANSLATE-044"
       ],
@@ -22419,11 +22677,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:311"
+          "loc": "app/src/lib/i18n.jsx:314"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:365"
+          "loc": "app/src/lib/i18n.jsx:367"
         }
       ],
       "test_exempt": null,
@@ -22609,11 +22867,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:278"
+          "loc": "app/src/lib/i18n.jsx:281"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:382"
+          "loc": "app/src/lib/i18n.jsx:389"
         },
         {
           "role": "implements",
@@ -22714,11 +22972,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:35"
+          "loc": "app/src/lib/data.js:34"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:73"
+          "loc": "app/src/lib/data.js:77"
         },
         {
           "role": "implements",
@@ -22903,7 +23161,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:47"
+          "loc": "app/src/lib/data.js:46"
         },
         {
           "role": "implements",
@@ -23114,7 +23372,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:51"
+          "loc": "app/src/lib/data.js:50"
         },
         {
           "role": "implements",
@@ -24631,6 +24889,7 @@
       "satisfied_by": [
         "ARCH-MAP-007",
         "ARCH-MAPDIAGRAMS-055",
+        "ARCH-MAPSTAMP-079",
         "ARCH-SITE-026",
         "ARCH-VIEWER-007",
         "ARCH-VIEWERFILE-074"
@@ -24950,6 +25209,10 @@
     [
       "ARCH-MAPDIAGRAMS-055",
       "ARCH-MAP-007"
+    ],
+    [
+      "ARCH-MAPSTAMP-079",
+      "ARCH-VIEWER-007"
     ],
     [
       "ARCH-MCP-073",
@@ -25351,6 +25614,10 @@
     ],
     [
       "REQ-BUGS-1122",
+      "ARCH-BUGS-078"
+    ],
+    [
+      "REQ-BUGS-1123",
       "ARCH-BUGS-078"
     ],
     [
@@ -25864,6 +26131,18 @@
     [
       "REQ-MAPDIAGRAMS-878",
       "ARCH-MAPDIAGRAMS-055"
+    ],
+    [
+      "ARCH-MAPSTAMP-079",
+      "SYS-VISUAL-106"
+    ],
+    [
+      "REQ-MAPSTAMP-1124",
+      "ARCH-MAPSTAMP-079"
+    ],
+    [
+      "REQ-MAPSTAMP-1125",
+      "ARCH-MAPSTAMP-079"
     ],
     [
       "ARCH-MCP-073",
@@ -28810,11 +29089,11 @@
         },
         {
           "flag": "--module",
-          "help": "With --bugs: only modules whose name contains this."
+          "help": "With --bugs: only modules whose name contains this, ignoring case, diacritics and punctuation."
         },
         {
           "flag": "--prio",
-          "help": "With --bugs: only this priority, P0 to P4."
+          "help": "With --bugs: only these priorities, as P1 or P0,P1."
         },
         {
           "flag": "--i18n",
@@ -28965,11 +29244,11 @@
   ],
   "design": {
     "files": 136,
-    "clean_files": 126,
-    "score": 93,
+    "clean_files": 125,
+    "score": 92,
     "candidates": {
       "encapsulation": 5,
-      "abstraction": 5,
+      "abstraction": 6,
       "inheritance": 0,
       "polymorphism": 0,
       "standards": 1
@@ -28990,6 +29269,14 @@
         "line": 147,
         "name": "QuestionPanel",
         "detail": "`QuestionPanel` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/problems/BugsPanel.jsx",
+        "line": 175,
+        "name": "BugsPanel",
+        "detail": "`BugsPanel` is 89 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
@@ -29035,15 +29322,15 @@
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "plugin/scripts/reqmap_engine/bugs.py",
-        "line": 109,
+        "line": 111,
         "name": "_parse",
-        "detail": "`_parse` nests 6 levels deep (over 4)"
+        "detail": "`_parse` nests 7 levels deep (over 4)"
       },
       {
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 325,
+        "line": 330,
         "name": "apply_config",
         "detail": "`apply_config` is 91 lines (over 80)"
       },
@@ -29072,16 +29359,16 @@
     }
   },
   "health": {
-    "score": 98,
-    "total": 346,
-    "scored": 324,
+    "score": 96,
+    "total": 350,
+    "scored": 328,
     "healthy": 316,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 316,
-    "implemented": 315,
-    "tested": 314,
-    "drafts": 8,
+    "implemented": 317,
+    "tested": 317,
+    "drafts": 12,
     "orphans": 0,
     "untested": 1,
     "open_intent": 0,
@@ -29096,6 +29383,15 @@
         "status": "draft",
         "why": [
           "not confirmed",
+          "not tested"
+        ]
+      },
+      {
+        "id": "ARCH-MAPSTAMP-079",
+        "status": "draft",
+        "why": [
+          "not confirmed",
+          "not implemented",
           "not tested"
         ]
       },
@@ -29143,6 +29439,27 @@
       },
       {
         "id": "REQ-BUGS-1122",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-BUGS-1123",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-MAPSTAMP-1124",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-MAPSTAMP-1125",
         "status": "draft",
         "why": [
           "not confirmed"

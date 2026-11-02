@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `ask --bugs` lists the known bugs by module, without a verdict. [[REQ-BUGS-1120]]
 - The Problems page has a Bugs tab that groups by module and shows each bug's date. [[REQ-BUGS-1121]]
 - The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]
+- The tab exports the list it shows, for a reader who does not open the map. [[REQ-BUGS-1123]]
 
 ## Cases
 CASE-1 — a bug goes from the command line to the map
@@ -63,10 +64,12 @@ Every bullet below is binding.
 - The canonical columns are `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters` and `Source`, compared without regard to case.
 - A table is a bug table when it has an id, a title and a priority column. Any other table in the file is skipped without a word.
 - `BUG_COLUMNS` in `_config.json` adds a repository's own column names beside the canonical ones.
-- The first `#` heading gives the module: the text after its last ` — `, without a trailing `(date)`. A file with no heading uses its own name.
+- The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.
 - A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.
 - A priority is the first `P0` to `P4` in its cell. `*` in the priority or id cell marks it estimated.
-- A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`.
+- A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`. Renaming the file changes the id.
+- `BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read.
+- A bug records its file and the line of its row.
 - A row with no id, title or priority, an unreal date, a repeated id or an unreadable file is a problem line, and the rows around it are still read.
 
 ## Cases
@@ -100,6 +103,26 @@ CASE-6 — an estimated priority is kept apart
   When   the file is read
   Then   the first is `B2`, estimated, and the second is `P2`
 
+CASE-7 — a named section is not read
+  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`
+  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty
+  Then   the first load holds only the open bug, and the second holds both
+
+CASE-8 — a bad pattern loses nothing
+  Given  `BUG_SKIP_SECTIONS` set to `(`
+  When   the bugs load
+  Then   the rows are read and one problem line names the key
+
+CASE-9 — a spaced dash ends the module name
+  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`
+  When   each file is read
+  Then   the modules are `Orders` and `Stock-Orders`
+
+CASE-10 — a row says where it came from
+  Given  a bug on line 5 of a file
+  When   the file is read
+  Then   the bug carries that file and line
+
 --------------------
 
 
@@ -124,6 +147,7 @@ Every bullet below is binding.
 - The engine never writes to a file `BUG_SOURCES` names.
 - A `BUG_SOURCES` pattern that matches no file is a problem line.
 - A changed bug file makes the committed map stale, as a changed requirement does.
+- Modules that differ only in case, diacritics or punctuation are one module, under the spelling read first. A bug's id does not change.
 
 ## Cases
 CASE-1 — the folder reaches the map
@@ -150,6 +174,11 @@ CASE-5 — a changed bug file makes the map stale
   Given  a synced repository
   When   a row is added to a bug file and `gate --full` runs
   Then   it reports the map stale
+
+CASE-6 — two spellings are one module
+  Given  files headed `Café, API`, `cafe api` and `Search`
+  When   the bugs are loaded
+  Then   the first two carry the module `Café, API`, with their own ids
 
 --------------------
 
@@ -278,8 +307,8 @@ satisfies: [ARCH-BUGS-078]
 > The same list the page shows, for a terminal or an assistant, read-only like every `ask`.
 
 Every bullet below is binding.
-- `ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first.
-- `--module TEXT` keeps modules whose name contains the text, ignoring case, and `--prio P1` keeps that priority.
+- `ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first, and last a total with the count per priority.
+- `--module TEXT` keeps modules whose name contains the text, ignoring case, diacritics and punctuation, and `--prio` keeps one priority or a comma-separated list.
 - `--json` prints `{bugs, problems}`.
 - It writes nothing and exits 0, with or without bugs.
 
@@ -304,6 +333,11 @@ CASE-4 — no bugs is an answer
   When   `ask --bugs` runs
   Then   it prints that there are none and exits 0
 
+CASE-5 — a list of priorities, and a total
+  Given  bugs at P1, P2 and P3
+  When   `ask --bugs --prio p1,P3` runs
+  Then   the P2 is left out and the last line reads `2 bugs: P1 1, P3 1`
+
 --------------------
 
 
@@ -326,7 +360,7 @@ Every bullet below is binding.
 - Problems has a tab labelled `Bugs` in English and `Buguri` in Romanian, always present, with the number of known bugs.
 - Bugs group by module, in collapsible groups showing the group's total and its count per priority. There is no other grouping.
 - A row shows its priority, its date under the priority, its id and its title.
-- Opening a row shows why it matters, where, the source and the file.
+- Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.
 - Priority chips and a text search narrow the list, and a narrowed list opens its groups.
 - Every label goes through `t()`.
 
@@ -402,3 +436,43 @@ CASE-5 — the form renders its fields
   Given  the form open
   When   it renders
   Then   it has six fields, and the module field names its suggestions
+
+--------------------
+
+
+---
+id: REQ-BUGS-1123
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# The tab exports what it shows
+
+## Description
+> A team sends the list to people who do not open the map. The browser's own "Save as PDF"
+> does that with no dependency, so the page only has to lay the list out for paper.
+
+Every bullet below is binding.
+- `Export PDF` opens the browser's print dialog on the list as filtered, with every group open, and is disabled when the list is empty.
+- The page holds the repository's name, the total and the filter in force, then for each module a line with its count per priority and its bugs, highest priority first.
+- Each bug shows its priority, date, id, title, why it matters, where, the source and the file with its line.
+- Printing with the browser's own command, without the button, is unchanged.
+
+## Cases
+CASE-1 — the report holds every field of what is shown
+  Given  a filtered list of two bugs in one module, one with why, where and source
+  When   the report renders
+  Then   it holds that module's count per priority and each field, with nothing left closed
+
+CASE-2 — the report states its filter
+  Given  a report narrowed to P1
+  When   it renders
+  Then   its header names P1 and the total shown
+
+CASE-3 — nothing to export
+  Given  an empty list
+  When   the panel renders
+  Then   the button is disabled

@@ -91,6 +91,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0078](0078-clarify-vague-term-drops-quantity-words.md) | `clarify`'s `vague-term` drops the words that count or size | Accepted |
 | [0079](0079-clarify-word-lists-are-per-repository.md) | `clarify`'s word lists are per repository | Accepted |
 | [0080](0080-known-bugs-are-listed-by-module.md) | Known bugs are listed by module | Accepted |
+| [0081](0081-what-a-first-bug-list-changed.md) | What a first bug list changed | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

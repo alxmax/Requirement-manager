@@ -227,10 +227,11 @@ COMMANDS = {
                      "names. Takes --module and --prio."},
             {"name": "module", "flag": "--module",
              "consumer": "docs/commands.md", "type": "str",
-             "help": "With --bugs: only modules whose name contains this."},
+             "help": "With --bugs: only modules whose name contains this, "
+                     "ignoring case, diacritics and punctuation."},
             {"name": "prio", "flag": "--prio",
              "consumer": "docs/commands.md", "type": "str",
-             "help": "With --bugs: only this priority, P0 to P4."},
+             "help": "With --bugs: only these priorities, as P1 or P0,P1."},
             {"name": "mode_i18n", "flag": "--i18n", "consumer": "none recorded",
              "type": "bool",
              "help": "Removed in v8.2.0 (ADR-0047): accepted and ignored, "

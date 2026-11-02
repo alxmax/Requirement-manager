@@ -171,10 +171,14 @@ TEST_FILE_PATTERNS = []
 REQUIREMENT_SOURCES = []
 # Known bugs (ADR-0080): the folder under requirements/ this repository writes
 # them to, the files it already keeps them in (globs from the code root, read
-# only), and the names those files give to each column.
+# only), the names those files give to each column, and a regex on the `##`
+# headings whose tables are not open bugs (ADR-0081).
 BUGS_DIR = "bugs"
 BUG_SOURCES = []
 BUG_COLUMNS = {"id": ["#"]}
+BUG_SKIP_SECTIONS = ""
+# implements: REQ-MAPSTAMP-1125 - the language the viewer opens in (ADR-0081)
+MAP_LANGUAGE = "en"
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
 # implements: REQ-CLARIFY-1115 - the words clarify's word rules read (ADR-0079). A
 # corpus written in another language replaces them: English words judged it wrongly.
@@ -271,13 +275,14 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
                "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES",
-               "BUG_SOURCES", "BUG_COLUMNS")
+               "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
 # declared here and a value outside them is reported rather than applied.
 # Without this, a repo that wrote `"eror"` would get the default back in silence
 # — precisely the failure the whole config mechanism exists to avoid.
-CONFIG_ENUMS = {"MAP_PROFILE": ("full", "compact"), "DRIFT_SEVERITY": ("warn", "error")}
+CONFIG_ENUMS = {"MAP_PROFILE": ("full", "compact"), "DRIFT_SEVERITY": ("warn", "error"),
+                "MAP_LANGUAGE": ("en", "ro")}
 
 # Keys a released engine once read and then dropped with what they tuned
 # (ADR-0047, ADR-0051): the design metrics, the docstring and definition-count
