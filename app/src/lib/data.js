@@ -14,6 +14,10 @@ export let REQ_BY_ID = {};
 // header falls back to a generic label.
 export let REPO = null;
 export let TODOS = [];
+/* Known bugs by module, from `requirements/bugs/` and the repository's own
+ * `BUG_SOURCES`. Empty for a repository that keeps none.
+ * implements: REQ-BUGS-1121 */
+export let BUGS = [];
 // The repository's declared requirements language (`en` | `ro` |
 // `both`), emitted by the engine from requirements/_config.json. It
 // sets the viewer's DEFAULT locale; a reader's own choice
@@ -75,6 +79,7 @@ export function adoptMapExport(data) {
       ? data.language : "en";
   }
   if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];
+  BUGS = Array.isArray(data.bugs) ? data.bugs : [];
   if ("roadmap" in data) {
     ROADMAP = Array.isArray(data.roadmap) ? data.roadmap : [];
   }

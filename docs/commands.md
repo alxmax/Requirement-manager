@@ -13,6 +13,8 @@ serves those same commands to an AI assistant. A seventh, `new`, scaffolded a bl
 requirement until v8.0.0 removed it ([ADR-0045](adr/0045-new-is-deprecated.md)): write
 `requirements/<ID>.md` yourself, or ask your assistant to.
 
+Known bugs follow the same split: `sync --bug` writes a row and `ask --bugs` reads the list ([by module](requirements.md#known-bugs-by-module-adr-0080)).
+
 `reqmap.py --help` lists the six verbs and where to start; `reqmap.py <verb> --help` lists
 that verb's own flags. Both are drawn from the command registry, as is this page's table
 of flags.
@@ -21,7 +23,7 @@ of flags.
 |---|---|
 | `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, add `requirements/_map.html` to `.gitignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. It also seeds what planning and releasing need — `ROADMAP.md`, `requirements/_planning.json`, a `CHANGELOG.md`, and on a GitHub repo `.github/workflows/reqmap-release.yml` — and prints which file the version is read from. Idempotent; never clobbers an existing file. `--wipe` hard-resets first. `--minimal` skips the planning, release, MCP and site scaffolding and keeps the rest. `--watch REF` prints draft suggestions for code files changed since REF and writes nothing. `--propose TEXT` prints one draft and writes nothing. `--propose-files` names the paths that draft is about. |
 | `gate` | **The verdict.** Bare, it is the commit/CI check (below). `--risk`, `--audit` and `--show` report on the same subject instead. Never writes anything. |
-| `ask` | **Every other read-only question**: search, overlapping contracts, the review plan. Never writes anything, and its exit code is the question's, never the verdict's. Since v8.0.0 `gate` refuses them and names `ask` ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)); every verb refuses a flag another verb owns. |
+| `ask` | **Every other read-only question**: search, overlapping contracts, the review plan, the known bugs. Never writes anything, and its exit code is the question's, never the verdict's. Since v8.0.0 `gate` refuses them and names `ask` ([ADR-0044](adr/0044-questions-leave-the-verdict-verb.md)); every verb refuses a flag another verb owns. |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md` and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
 | `mcp` | Serve the engine over the Model Context Protocol on stdio: the thirteen tools named for the question they answer, each one `reqmap.py` invocation in a fresh process, plus each requirement and the committed map as resources. Read-only unless `--allow-writes`. `init --watch` and `init --propose` stay command-line flags. See [MCP server](integrations.md#mcp-server-claude-code-vs-code-with-copilot-any-mcp-client). |
 | `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, clauses with no case, a missing failure path. Its word lists are `CLARIFY_HEDGES` and `CLARIFY_FAILURE_WORDS` in `_config.json`, which a corpus in another language replaces. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |

@@ -121,7 +121,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_ask",
-      "description": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code against the OOP pillars, --review emits the machine-readable review plan. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`. ",
+      "description": "Ask the corpus a question without running the verdict. Read-only, never writes, and its exit code is the question's, never the gate's: --search ranks requirements by relevance, --dupes ranks overlapping contracts, --design reviews the code against the OOP pillars, --review emits the machine-readable review plan, --bugs lists the known bugs by module. Exactly one mode per call. Since v8.0.0, `gate` refuses these flags and names `ask`. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -144,6 +144,18 @@
           "mode_review": {
             "type": "string",
             "description": "Emit the deterministic review plan as JSON: for one requirement, or with no id for the whole corpus."
+          },
+          "mode_bugs": {
+            "type": "boolean",
+            "description": "List the known bugs by module, highest priority first: `requirements/bugs/*.md` and any file `BUG_SOURCES` names. Takes --module and --prio."
+          },
+          "module": {
+            "type": "string",
+            "description": "With --bugs: only modules whose name contains this."
+          },
+          "prio": {
+            "type": "string",
+            "description": "With --bugs: only this priority, P0 to P4."
           },
           "mode_i18n": {
             "type": "boolean",
@@ -236,6 +248,34 @@
           "seed": {
             "type": "integer",
             "description": "With --audit-plan: the seed of the random draw (default: today as YYYYMMDD)."
+          },
+          "mode_bug": {
+            "type": "string",
+            "description": "Add one bug to `requirements/bugs/<module>.md` instead of syncing, creating the file if needed. Needs --module; run `sync` after it to show the bug on the map."
+          },
+          "module": {
+            "type": "string",
+            "description": "With --bug: the module the bug belongs to, which names its file."
+          },
+          "prio": {
+            "type": "string",
+            "description": "With --bug: P0 critical, P1 high, P2 medium (the default), P3 low or P4 minor; `*` after it marks an estimate no person has confirmed."
+          },
+          "date": {
+            "type": "string",
+            "description": "With --bug: the day it was found, YYYY-MM-DD (default: today)."
+          },
+          "where": {
+            "type": "string",
+            "description": "With --bug: where it is, usually `file:line`."
+          },
+          "why": {
+            "type": "string",
+            "description": "With --bug: why it matters."
+          },
+          "source": {
+            "type": "string",
+            "description": "With --bug: where the report came from."
           }
         },
         "required": []

@@ -175,7 +175,8 @@ COMMANDS = {
             "never writes, and its exit code is the question's, never the "
             "gate's: --search ranks requirements by relevance, --dupes ranks "
             "overlapping contracts, --design reviews the code against the OOP "
-            "pillars, --review emits the machine-readable review plan. Exactly "
+            "pillars, --review emits the machine-readable review plan, --bugs "
+            "lists the known bugs by module. Exactly "
             "one mode per call. Since v8.0.0, `gate` refuses these flags and "
             "names `ask`. "
         ),
@@ -219,6 +220,17 @@ COMMANDS = {
              "type": "str",
              "help": "Emit the deterministic review plan as JSON: for one "
                      "requirement, or with no id for the whole corpus."},
+            {"name": "mode_bugs", "flag": "--bugs",
+             "consumer": "docs/commands.md", "type": "bool",
+             "help": "List the known bugs by module, highest priority first: "
+                     "`requirements/bugs/*.md` and any file `BUG_SOURCES` "
+                     "names. Takes --module and --prio."},
+            {"name": "module", "flag": "--module",
+             "consumer": "docs/commands.md", "type": "str",
+             "help": "With --bugs: only modules whose name contains this."},
+            {"name": "prio", "flag": "--prio",
+             "consumer": "docs/commands.md", "type": "str",
+             "help": "With --bugs: only this priority, P0 to P4."},
             {"name": "mode_i18n", "flag": "--i18n", "consumer": "none recorded",
              "type": "bool",
              "help": "Removed in v8.2.0 (ADR-0047): accepted and ignored, "
@@ -343,6 +355,33 @@ COMMANDS = {
              "type": "int",
              "help": "With --audit-plan: the seed of the random draw "
                      "(default: today as YYYYMMDD)."},
+            {"name": "mode_bug", "flag": "--bug",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "Add one bug to `requirements/bugs/<module>.md` instead "
+                     "of syncing, creating the file if needed. Needs --module; "
+                     "run `sync` after it to show the bug on the map."},
+            {"name": "module", "flag": "--module",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: the module the bug belongs to, which names "
+                     "its file."},
+            {"name": "prio", "flag": "--prio",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: P0 critical, P1 high, P2 medium (the "
+                     "default), P3 low or P4 minor; `*` after it marks an "
+                     "estimate no person has confirmed."},
+            {"name": "date", "flag": "--date",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: the day it was found, YYYY-MM-DD (default: "
+                     "today)."},
+            {"name": "where", "flag": "--where",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: where it is, usually `file:line`."},
+            {"name": "why", "flag": "--why",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: why it matters."},
+            {"name": "source", "flag": "--source",
+             "consumer": "app/src/views/problems/BugsPanel.jsx", "type": "str",
+             "help": "With --bug: where the report came from."},
         ],
     },
     "clarify": {

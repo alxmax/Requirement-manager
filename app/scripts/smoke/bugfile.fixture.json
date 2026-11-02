@@ -1,0 +1,23 @@
+[
+  {
+    "file": "Payments-API.md",
+    "bug": {"module": "Payments API", "title": "Refund is applied twice",
+            "prio": "P1", "date": "2026-11-02", "where": "pay.py:12",
+            "why": "a|b\nc", "source": "ticket"},
+    "text": "",
+    "expected": "# Bugs — Payments API\n\n| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n| B1 | Refund is applied twice | P1 | 2026-11-02 | pay.py:12 | a\\|b c | ticket |\n"
+  },
+  {
+    "file": "Căutare_2.md",
+    "bug": {"module": "  Căutare_2 ", "title": "Empty", "prio": "P3",
+            "date": "2026-11-02"},
+    "text": "# Bugs — Căutare\r\n\r\n| ID | Bug | Priority | Date | Where | Why it matters | Source |\r\n|---|---|---|---|---|---|---|\r\n| B4* | Old | P2 |  |  |  |  |\r\n\r\nA note.\r\n",
+    "expected": "# Bugs — Căutare\n\n| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n| B4* | Old | P2 |  |  |  |  |\n| B5 | Empty | P3 | 2026-11-02 |  |  |  |\n\nA note.\n"
+  },
+  {
+    "file": "Notes.md",
+    "bug": {"module": "Notes", "title": "First", "prio": "P2"},
+    "text": "# Notes\n\nNo table yet.\n",
+    "expected": "# Notes\n\nNo table yet.\n\n| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n| B1 | First | P2 |  |  |  |  |\n"
+  }
+]

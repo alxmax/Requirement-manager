@@ -169,6 +169,12 @@ AUDIT_MIN_POSITIVES = 5
 TRACE_TAGS = []
 TEST_FILE_PATTERNS = []
 REQUIREMENT_SOURCES = []
+# Known bugs (ADR-0080): the folder under requirements/ this repository writes
+# them to, the files it already keeps them in (globs from the code root, read
+# only), and the names those files give to each column.
+BUGS_DIR = "bugs"
+BUG_SOURCES = []
+BUG_COLUMNS = {"id": ["#"]}
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
 # implements: REQ-CLARIFY-1115 - the words clarify's word rules read (ADR-0079). A
 # corpus written in another language replaces them: English words judged it wrongly.
@@ -264,7 +270,8 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_ISINSTANCE_CHAIN",
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
-               "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES")
+               "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES",
+               "BUG_SOURCES", "BUG_COLUMNS")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
 # declared here and a value outside them is reported rather than applied.
@@ -297,6 +304,12 @@ def load_config(reqs_dir, problems=None):
         if problems is not None:
             problems.append("invalid _config.json: {}".format(exc))
         return {}
+
+
+def bugs_declared(reqs_dir):  # implements: REQ-BUGS-1117
+    """Whether this repository keeps a bug list at all. A repository that
+    does not never loads `bugs`, and its map carries no `bugs` key."""
+    return bool(BUG_SOURCES) or os.path.isdir(os.path.join(reqs_dir, BUGS_DIR))
 
 
 def _band_ok(band):  # implements: REQ-CONFIG-949
