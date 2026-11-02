@@ -146,7 +146,34 @@ row. By hand, use the **Bugs** tab under Problems in the map, or:
 python scripts/reqmap.py sync --bug "Refund is applied twice" --module Payments --prio P1
 python scripts/reqmap.py ask --bugs --module pay
 python scripts/reqmap.py ask --bugs --prio P0,P1 --json   # for a script's own report
+python scripts/reqmap.py sync --fix "Payments B12"        # closes it, see below
 ```
+
+`sync --bug` writes in the shape already there: the module's file by its heading or its name
+without an `NN_` prefix, the columns of its table, and the `##` section naming its priority,
+such as `## Bugs P3-P4`. A new module is numbered when the files are. A title that reads like
+one the module holds needs `--force`.
+
+**A fixed bug leaves the list for a register**, `requirements/bugs/_fixed.md`, with the day it
+was found, the day it was closed, its version and its commit. A commit does it: put a trailer
+in the commit message and the next `sync` moves the row, with that commit's SHA and date and
+the version file as it was then:
+
+```text
+Stop the double refund
+
+Fixes-bug: Payments B12
+```
+
+`sync --fix ID` does the same by hand (`--commit`, `--version`), and `--note "why"` closes
+without a fix, as `not a bug`. A number is never given twice, because the next one counts the
+register. Since `sync` runs after the commit, the moved row lands in a later commit; a
+repository that wants it at merge runs `sync` in its release workflow. Reverting a fix leaves
+the bug closed, so add it again. Only files in `requirements/bugs/` are closed this way:
+`BUG_SOURCES` files are never written. `BUG_REGISTER`, `BUG_REGISTER_COLUMNS` (keys `id`,
+`title`, `module`, `prio`, `date`, `fixed`, `version`, `commit`, `note`) and
+`BUG_FIX_TRAILERS` rename all three. The map's Bugs tab shows the register under **Fixed**,
+with found against fixed by week and the median days to fix.
 
 Run `sync` afterwards to put it on the map. A repository that already keeps bugs in its own
 Markdown tables declares them in `requirements/_config.json`. They are read and never

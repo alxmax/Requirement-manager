@@ -20,6 +20,10 @@ bug is worth, so a priority an assistant chose stays marked as an estimate.
 4. **Show it.** Run `sync`, or `sync --code ..` where the repository requires it, so the bug
    reaches the map.
 
+When you fix a listed bug, put `Fixes-bug: FILE REF` in the commit message, one per line. The
+next `sync` moves the row to the register. To close one with no commit, run
+`sync --fix "FILE REF"`, with `--note "why"` when it was not a bug. Never delete the row by hand.
+
 Do not fix the bug in the same step unless you were asked to. Never write to a file
 `BUG_SOURCES` names: those belong to the repository, so add to `requirements/bugs/` instead.
 An open bug never fails the gate, so do not present one as a failed verdict.

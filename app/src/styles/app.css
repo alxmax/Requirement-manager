@@ -487,6 +487,13 @@ h1 .i18n-badge { font-size: 12px; }
 .bug-more { margin-top: 8px; font: var(--text-small); color: var(--fg-secondary); }
 .bug-more p { margin: 0 0 6px; }
 .bug-more code { overflow-wrap: anywhere; }
+.bug-views { display: flex; gap: 8px; }
+.bug-weeks { border-collapse: collapse; font: var(--text-small); color: var(--fg); }
+.bug-weeks th, .bug-weeks td { padding: 3px 14px 3px 0; text-align: left; border-bottom: 1px solid var(--border-soft); font-variant-numeric: tabular-nums; }
+.bug-weeks th { color: var(--fg-muted); font-weight: 500; }
+.bug-medians { font: var(--text-small); color: var(--fg-secondary); }
+.bug-fixed-row { padding: 8px 0; border-bottom: 1px solid var(--border-soft); font: var(--text-small); color: var(--fg); overflow-wrap: anywhere; }
+.bug-fixed-facts { color: var(--fg-muted); font-size: 12px; }
 .bug-own { font: var(--text-caption); font-size: 10.5px; color: var(--accent); }
 /* implements: REQ-BUGS-1123 */
 .bug-report { display: none; }

@@ -118,12 +118,17 @@ def _build_json_text(data, compact=None, stamped=False):
         payload["audit"] = data["audit"]
     if data.get("bugs"):                        # implements: REQ-BUGS-1117
         payload["bugs"] = data["bugs"]
+    for key in ("bugs_fixed", "bug_format"):    # implements: REQ-BUGS-1129
+        if data.get(key):
+            payload[key] = data[key]
     if cfg.MAP_LANGUAGE != "en":                # implements: REQ-MAPSTAMP-1125
         payload["language"] = cfg.MAP_LANGUAGE
     if stamped:                                 # implements: REQ-MAPSTAMP-1124
         payload["generated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
         if data.get("branch"):
             payload["branch"] = data["branch"]
+        if data.get("forge"):                   # implements: REQ-BUGS-1129
+            payload["forge"] = data["forge"]
     compact =cfg.MAP_PROFILE == "compact" if compact is None else compact
     return _utf8_safe(json.dumps(
         payload, indent=None if compact else 2, ensure_ascii=False,

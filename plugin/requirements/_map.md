@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-02
-engine: 2026-11-02.1
-nodes: 350
+engine: 2026-11-02.2
+nodes: 354
 edges: 130
-design pass-rate: 92% (125/136 source files without a design candidate)
+design pass-rate: 91% (126/138 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -117,6 +117,10 @@ graph LR
     REQ_BUGS_1121["The Bugs tab groups by module<br><small>REQ-BUGS-1121</small>"]
     REQ_BUGS_1122["The tab adds a bug to the repository<br><small>REQ-BUGS-1122</small>"]
     REQ_BUGS_1123["The tab exports what it shows<br><small>REQ-BUGS-1123</small>"]
+    REQ_BUGS_1126["'sync --bug' writes in the file's own shape<br><small>REQ-BUGS-1126</small>"]
+    REQ_BUGS_1127["'sync --fix' closes one bug<br><small>REQ-BUGS-1127</small>"]
+    REQ_BUGS_1128["A commit closes the bug it names<br><small>REQ-BUGS-1128</small>"]
+    REQ_BUGS_1129["The map shows what was fixed<br><small>REQ-BUGS-1129</small>"]
     REQ_CANDIDATES_826["The plan's JSON shape and read-only scanning<br><small>REQ-CANDIDATES-826</small>"]
     REQ_CANDIDATES_827["Fields a candidate carries<br><small>REQ-CANDIDATES-827</small>"]
     REQ_PLANTAGGED_1005["One definition of 'this file is already accounted for'<br><small>REQ-PLANTAGGED-1005</small>"]
@@ -484,8 +488,10 @@ graph LR
   ARCH_BUGS_078 -->|implements| f_app_src_lib_bugFile_js_1
   f_app_src_views_problems_BugsPanel_jsx_1["app/src/views/problems/BugsPanel.jsx:1"]
   ARCH_BUGS_078 -->|implements| f_app_src_views_problems_BugsPanel_jsx_1
-  f_plugin_scripts_reqmap_engine_bugs_py_193_306["plugin/scripts/reqmap_engine/bugs.py:193-306"]
-  ARCH_BUGS_078 -->|implements| f_plugin_scripts_reqmap_engine_bugs_py_193_306
+  f_plugin_scripts_reqmap_engine_bugclose_py_174_229["plugin/scripts/reqmap_engine/bugclose.py:174-229"]
+  ARCH_BUGS_078 -->|implements| f_plugin_scripts_reqmap_engine_bugclose_py_174_229
+  f_plugin_scripts_reqmap_engine_bugs_py_214_442["plugin/scripts/reqmap_engine/bugs.py:214-442"]
+  ARCH_BUGS_078 -->|implements| f_plugin_scripts_reqmap_engine_bugs_py_214_442
   ARCH_CANDIDATES_009["Capability candidates (extraction plan)<br><small>ARCH-CANDIDATES-009</small>"]
   f_plugin_scripts_test_reqmap_author_py_125_2350["plugin/scripts/test_reqmap_author.py:125-2350"]
   ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_125_2350
@@ -533,12 +539,12 @@ graph LR
   f_plugin_scripts_reqmap_engine_registry_py_13_48["plugin/scripts/reqmap_engine/registry.py:13-48"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_engine_registry_py_13_48
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_326["plugin/scripts/reqmap.py:326"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_326
+  f_plugin_scripts_reqmap_py_332["plugin/scripts/reqmap.py:332"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_332
   f_plugin_scripts_test_reqmap_report_py_3233_5672["plugin/scripts/test_reqmap_report.py:3233-5672"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_3233_5672
-  f_plugin_scripts_reqmap_engine_config_py_297_331["plugin/scripts/reqmap_engine/config.py:297-331"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_297_331
+  f_plugin_scripts_reqmap_engine_config_py_303_337["plugin/scripts/reqmap_engine/config.py:303-337"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_engine_config_py_303_337
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
   f_plugin_scripts_test_reqmap_report_py_553_4011["plugin/scripts/test_reqmap_report.py:553-4011"]
   ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_553_4011
@@ -554,8 +560,8 @@ graph LR
   ARCH_CUSTOMTRACE_077["A repository describes its own trace convention<br><small>ARCH-CUSTOMTRACE-077</small>"]
   f_plugin_scripts_test_reqmap_customtrace_py_187["plugin/scripts/test_reqmap_customtrace.py:187"]
   ARCH_CUSTOMTRACE_077 -->|tested-by| f_plugin_scripts_test_reqmap_customtrace_py_187
-  f_plugin_scripts_reqmap_engine_config_py_167_363["plugin/scripts/reqmap_engine/config.py:167-363"]
-  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_config_py_167_363
+  f_plugin_scripts_reqmap_engine_config_py_167_369["plugin/scripts/reqmap_engine/config.py:167-369"]
+  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_config_py_167_369
   f_plugin_scripts_reqmap_engine_customtrace_py_9["plugin/scripts/reqmap_engine/customtrace.py:9"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_scripts_reqmap_engine_customtrace_py_9
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
@@ -635,8 +641,8 @@ graph LR
   ARCH_FINDINGS_010 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_153_4057
   f_plugin_scripts_reqmap_engine_findings_py_15_151["plugin/scripts/reqmap_engine/findings.py:15-151"]
   ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_engine_findings_py_15_151
-  f_plugin_scripts_reqmap_engine_mapcmd_py_58_232["plugin/scripts/reqmap_engine/mapcmd.py:58-232"]
-  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_58_232
+  f_plugin_scripts_reqmap_engine_mapcmd_py_58_236["plugin/scripts/reqmap_engine/mapcmd.py:58-236"]
+  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_58_236
   f_plugin_scripts_reqmap_engine_text_py_210["plugin/scripts/reqmap_engine/text.py:210"]
   ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_engine_text_py_210
   ARCH_GITRUN_067["Talking to git<br><small>ARCH-GITRUN-067</small>"]
@@ -711,12 +717,12 @@ graph LR
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_acceptance_py_85
   f_plugin_scripts_reqmap_engine_git_py_63["plugin/scripts/reqmap_engine/git.py:63"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_git_py_63
-  f_plugin_scripts_reqmap_engine_mapcmd_py_26_254["plugin/scripts/reqmap_engine/mapcmd.py:26-254"]
-  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_26_254
+  f_plugin_scripts_reqmap_engine_mapcmd_py_26_258["plugin/scripts/reqmap_engine/mapcmd.py:26-258"]
+  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_26_258
   f_plugin_scripts_reqmap_engine_mapdata_py_43_117["plugin/scripts/reqmap_engine/mapdata.py:43-117"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapdata_py_43_117
-  f_plugin_scripts_reqmap_engine_mapjson_py_61_134["plugin/scripts/reqmap_engine/mapjson.py:61-134"]
-  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapjson_py_61_134
+  f_plugin_scripts_reqmap_engine_mapjson_py_61_139["plugin/scripts/reqmap_engine/mapjson.py:61-139"]
+  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapjson_py_61_139
   f_plugin_scripts_reqmap_engine_mapmd_py_42["plugin/scripts/reqmap_engine/mapmd.py:42"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_engine_mapmd_py_42
   f_plugin_scripts_reqmap_engine_model_py_282["plugin/scripts/reqmap_engine/model.py:282"]
@@ -780,8 +786,8 @@ graph LR
   f_plugin_scripts_reqmap_engine_parse_py_9_125["plugin/scripts/reqmap_engine/parse.py:9-125"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_engine_parse_py_9_125
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_392_413["plugin/scripts/reqmap.py:392-413"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_392_413
+  f_plugin_scripts_reqmap_py_398_419["plugin/scripts/reqmap.py:398-419"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_398_419
   f_plugin_scripts_test_reqmap_gate_py_2261["plugin/scripts/test_reqmap_gate.py:2261"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2261
   ARCH_PLANDRIFT_069["Plan items whose code has moved on without them<br><small>ARCH-PLANDRIFT-069</small>"]
@@ -945,16 +951,16 @@ graph LR
   f_plugin_scripts_reqmap_engine_similar_py_19_352["plugin/scripts/reqmap_engine/similar.py:19-352"]
   ARCH_SIMILAR_016 -->|implements| f_plugin_scripts_reqmap_engine_similar_py_19_352
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
-  f_plugin_scripts_reqmap_py_262["plugin/scripts/reqmap.py:262"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_262
+  f_plugin_scripts_reqmap_py_268["plugin/scripts/reqmap.py:268"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_268
   f_plugin_scripts_test_reqmap_author_py_4475["plugin/scripts/test_reqmap_author.py:4475"]
   ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_4475
   f_plugin_scripts_reqmap_engine_git_py_88_107["plugin/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_88_107
   f_plugin_scripts_reqmap_engine_init_py_319["plugin/scripts/reqmap_engine/init.py:319"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_init_py_319
-  f_plugin_scripts_reqmap_engine_mapcmd_py_247["plugin/scripts/reqmap_engine/mapcmd.py:247"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_247
+  f_plugin_scripts_reqmap_engine_mapcmd_py_251["plugin/scripts/reqmap_engine/mapcmd.py:251"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_251
   f_plugin_scripts_reqmap_engine_site_py_15_182["plugin/scripts/reqmap_engine/site.py:15-182"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_site_py_15_182
   f_plugin_scripts_reqmap_engine_site_template_py_9["plugin/scripts/reqmap_engine/site_template.py:9"]
@@ -1158,7 +1164,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>268 caps</small>"]
+  a_REQ["REQ<br><small>272 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1185,6 +1191,10 @@ graph LR
     REQ_BUGS_1121["The Bugs tab groups by module<br><small>REQ-BUGS-1121</small><br>unreviewed"]
     REQ_BUGS_1122["The tab adds a bug to the repository<br><small>REQ-BUGS-1122</small><br>unreviewed"]
     REQ_BUGS_1123["The tab exports what it shows<br><small>REQ-BUGS-1123</small><br>unreviewed"]
+    REQ_BUGS_1126["'sync --bug' writes in the file's own shape<br><small>REQ-BUGS-1126</small><br>unreviewed"]
+    REQ_BUGS_1127["'sync --fix' closes one bug<br><small>REQ-BUGS-1127</small><br>unreviewed"]
+    REQ_BUGS_1128["A commit closes the bug it names<br><small>REQ-BUGS-1128</small><br>unreviewed"]
+    REQ_BUGS_1129["The map shows what was fixed<br><small>REQ-BUGS-1129</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
   end
@@ -1197,6 +1207,10 @@ graph LR
   style REQ_BUGS_1121 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1122 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1123 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_BUGS_1126 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_BUGS_1127 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_BUGS_1128 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_BUGS_1129 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
@@ -1206,15 +1220,19 @@ graph LR
 
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
-| ARCH-BUGS-078 | draft | 5 | 0 | unreviewed, untested | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |
-| REQ-BUGS-1116 | draft | 10 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| ARCH-BUGS-078 | draft | 7 | 0 | unreviewed, untested | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |
+| REQ-BUGS-1116 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1117 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-BUGS-1118 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-BUGS-1118 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1119 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1120 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1121 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1122 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1123 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-BUGS-1126 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-BUGS-1127 | draft | 16 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-BUGS-1128 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-BUGS-1129 | draft | 10 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

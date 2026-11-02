@@ -1,0 +1,32 @@
+[
+  {
+    "module": "billing",
+    "files": [["03_Search.md", "# Bugs — Search\n"], ["04_Billing.md", "# Known bugs — Billing (02.11.2026)\n\n## Bugs P0-P1\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B1 | a | P1 |\n\n## Bugs P2\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B36 | b | P2 |\n\n## Recent fixed\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B2 | c | P2 |\n"]],
+    "chosen": "04_Billing.md",
+    "floor": 40,
+    "format": {"columns": {"id": ["#"], "title": ["Titlu"], "prio": ["Prioritate"]}, "skip": "(?i)fixed"},
+    "bug": {"module": "billing", "title": "New", "prio": "P2", "date": "2026-11-02"},
+    "ref": "B41",
+    "expected": "# Known bugs — Billing (02.11.2026)\n\n## Bugs P0-P1\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B1 | a | P1 |\n\n## Bugs P2\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B36 | b | P2 |\n| B41 | New | P2 |\n\n## Recent fixed\n\n| # | Titlu | Prioritate |\n|---|---|---|\n| B2 | c | P2 |\n"
+  },
+  {
+    "module": "Ledger API",
+    "files": [["04_Billing.md", "# Bugs — Billing\n"], ["11-Search.md", "# Search\n"]],
+    "chosen": "12_Ledger-API.md",
+    "floor": 0,
+    "format": {"columns": {"id": ["#"]}, "skip": ""},
+    "bug": {"module": "Ledger API", "title": "Off by one", "prio": "P3"},
+    "ref": "B1",
+    "expected": "# Bugs — Ledger API\n\n| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n| B1 | Off by one | P3 |  |  |  |  |\n"
+  },
+  {
+    "module": "Café, API",
+    "files": [["cafe-api.md", "| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n"]],
+    "chosen": "cafe-api.md",
+    "floor": 0,
+    "format": {"columns": {"id": ["#"]}, "skip": ""},
+    "bug": {"module": "Café, API", "title": "Row", "prio": "P4", "why": "a|b"},
+    "ref": "B1",
+    "expected": "| ID | Bug | Priority | Date | Where | Why it matters | Source |\n|---|---|---|---|---|---|---|\n| B1 | Row | P4 |  |  | a\\|b |  |\n"
+  }
+]

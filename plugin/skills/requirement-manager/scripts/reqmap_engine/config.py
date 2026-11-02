@@ -177,6 +177,11 @@ BUGS_DIR = "bugs"
 BUG_SOURCES = []
 BUG_COLUMNS = {"id": ["#"]}
 BUG_SKIP_SECTIONS = ""
+# The bug register under the bugs folder, its own column names, and the
+# commit trailers that close a bug (ADR-0082).
+BUG_REGISTER = "_fixed.md"
+BUG_REGISTER_COLUMNS = {}
+BUG_FIX_TRAILERS = ["Fixes-bug"]
 # implements: REQ-MAPSTAMP-1125 - the language the viewer opens in (ADR-0081)
 MAP_LANGUAGE = "en"
 LINT_QUESTION_AUDIENCE_MARKERS = ["audience"]
@@ -275,7 +280,8 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
                "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES",
-               "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE")
+               "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE",
+               "BUG_REGISTER", "BUG_REGISTER_COLUMNS", "BUG_FIX_TRAILERS")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
 # declared here and a value outside them is reported rather than applied.
