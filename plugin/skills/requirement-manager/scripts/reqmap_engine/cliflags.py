@@ -84,6 +84,15 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--ranked", type=int, default=None)
     ap.add_argument("--random", dest="audit_random", type=int, default=None)
     ap.add_argument("--seed", type=int, default=None)
+    # implements: REQ-BUGS-1119  # implements: REQ-BUGS-1120
+    ap.add_argument("--bug", dest="mode_bug", metavar="TITLE", default=None)
+    ap.add_argument("--bugs", dest="mode_bugs", action="store_true")
+    ap.add_argument("--module", default=None)
+    ap.add_argument("--prio", default=None)
+    ap.add_argument("--date", default=None)
+    ap.add_argument("--where", default=None)
+    ap.add_argument("--why", default=None)
+    ap.add_argument("--source", default=None)
 
 
 # The flags every verb accepts: where the workspace is, and whether to

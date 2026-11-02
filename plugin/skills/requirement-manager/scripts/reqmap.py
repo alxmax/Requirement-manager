@@ -135,6 +135,9 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         # implements: REQ-AUDITRUN-1106 — loaded only while an audit runs
         from reqmap_engine.auditrun import input_problems
         inputs += [("INPUT:audit", m) for m in input_problems(reqs_dir)]
+    if cfg.bugs_declared(reqs_dir):  # implements: REQ-BUGS-1118
+        from reqmap_engine.bugs import input_problems as bug_problems
+        inputs += [("INPUT:bugs", m) for m in bug_problems(code_root, reqs_dir)]
     result = GateResult(Finding(rule, "error" if a.strict else "warn", None,
                                 msg) for rule, msg in inputs)
     if not a.as_json:
@@ -184,6 +187,9 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
     if a.mode_i18n:
         return _removed_flag("ask --i18n")
+    if a.mode_bugs:  # implements: REQ-BUGS-1120
+        from reqmap_engine.bugs import cmd_bugs
+        return cmd_bugs(ws.code_root, reqs_dir, a.module, a.prio, a.as_json)
     if a.mode_design:
         # Imported on use: no other verb loads the design review.
         from reqmap_engine.design_report import cmd_design
@@ -206,7 +212,7 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
                            else cfg.SIMILAR_THRESHOLD,
                            members, top=a.top, as_json=a.as_json)
     print("usage: reqmap ask --search QUERY | --dupes | --design | "
-          "--review [ID]")
+          "--review [ID] | --bugs")
     return 2
 def _dispatch_sync(a, ws, code_root, reqs_dir):
     """`sync` and its write modes. Returns the exit code."""
@@ -225,6 +231,9 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     if a.audit_plan:  # implements: REQ-AUDITRUN-1105
         from reqmap_engine.auditrun import cmd_audit_plan
         return cmd_audit_plan(ws, a.ranked, a.audit_random, a.seed)
+    if a.mode_bug is not None:  # implements: REQ-BUGS-1119
+        from reqmap_engine.bugs import cmd_bug_add
+        return cmd_bug_add(reqs_dir, a.mode_bug, a)
     # Before the gate, not after: the generated integration artifacts are
     # derived from the command registry, and RM028 reports them stale.
     # Regenerating them downstream of a check that fails ON them can never
@@ -443,7 +452,7 @@ _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "design_python", "design_brace", "design_report", "usage",
                  "plandrift", "planschema", "release",
                  "testgaps", "init", "levelshape", "watch", "todoparse",
-                 "draftquestions", "auditrun", "customtrace")
+                 "draftquestions", "auditrun", "customtrace", "bugs")
 
 
 def __getattr__(name):

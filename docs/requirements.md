@@ -124,6 +124,45 @@ or readability check. Every link check still applies: a tag to no requirement, a
 no code or no test, and a changed text (drift). A bad entry is an `INPUT:config` warning (an error
 under `--strict`), and a source that matches no file is an `INPUT:requirements` error.
 
+## Known bugs, by module (ADR-0080)
+
+A repository can list its known bugs next to its requirements. Each module is one file,
+`requirements/bugs/<module>.md`:
+
+```markdown
+# Bugs — Payments
+
+| ID | Bug | Priority | Date | Where | Why it matters | Source |
+|---|---|---|---|---|---|---|
+| B1 | Refund is applied twice | P1 | 2026-11-02 | `pay.py:12` | Money leaves twice | ticket |
+```
+
+Priorities are `P0` critical, `P1` high, `P2` medium, `P3` low and `P4` minor; `*` marks an
+estimate. An assistant is the usual way to add one, because it can read the code a report is
+about; the skill tells it how, and a priority it chose keeps the `*` until a person edits the
+row. By hand, use the **Bugs** tab under Problems in the map, or:
+
+```bash
+python scripts/reqmap.py sync --bug "Refund is applied twice" --module Payments --prio P1
+python scripts/reqmap.py ask --bugs --module pay
+```
+
+Run `sync` afterwards to put it on the map. A repository that already keeps bugs in its own
+Markdown tables declares them in `requirements/_config.json`. They are read and never
+written, and the map stays stale until `sync` runs after one of them changes:
+
+```json
+{
+  "BUG_SOURCES": ["docs/known-issues/*.md"],
+  "BUG_COLUMNS": {"title": ["Issue"], "prio": ["Severity"]}
+}
+```
+
+The heading gives the module: `# Known issues — Billing (15.03.2026)` is module `Billing`,
+and its date applies to any row with none. A table with no id, title and priority column is
+skipped. A row that cannot be read is an `INPUT:bugs` warning. An open bug never fails the
+gate, whatever its priority, and bugs never reach the drift lock.
+
 ## Glossary (the jargon, in plain words)
 
 - **Capability / requirement** — one thing your app does, described in one file.

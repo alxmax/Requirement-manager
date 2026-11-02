@@ -28,6 +28,7 @@ from test_reqmap_report import *      # noqa: F401,F403
 from test_reqmap_adopt import *       # noqa: F401,F403
 from test_reqmap_auditrun import *    # noqa: F401,F403
 from test_reqmap_customtrace import * # noqa: F401,F403
+from test_reqmap_bugs import *        # noqa: F401,F403
 
 
 

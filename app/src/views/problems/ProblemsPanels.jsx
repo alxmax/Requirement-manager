@@ -10,7 +10,7 @@ const COUNT = {
 };
 
 export function ProblemTabBar({
-  filter, setFilter, counts, designCount, healthCount, gateMsg,
+  filter, setFilter, counts, designCount, healthCount, bugCount, gateMsg,
 }) {
   const { t } = useI18n();
   const Tab = ({ k, label, n }) => (
@@ -29,6 +29,7 @@ export function ProblemTabBar({
       {designCount > 0 && (
         <Tab k="DESIGN" label={t("Design")} n={designCount} />
       )}
+      <Tab k="BUGS" label={t("Bugs")} n={bugCount} />
       <div className="tab-legend">{gateMsg}</div>
     </div>
   );

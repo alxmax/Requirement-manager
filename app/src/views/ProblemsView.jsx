@@ -1,12 +1,14 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-977
 // implements: REQ-VIEWER-1084
+// implements: REQ-BUGS-1121
 import { useState } from "react";
 import {
-  REQUIREMENTS, coverageOf, DESIGN, HEALTH,
+  REQUIREMENTS, coverageOf, DESIGN, HEALTH, BUGS,
 } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
+import { BugsPanel } from "./problems/BugsPanel.jsx";
 import {
   ProblemTabBar, DesignProblemsPanel, HealthPanel, ProblemRow,
   ProblemsEmpty, onlyUnconfirmed, gateRowsForHealth,
@@ -84,13 +86,14 @@ export function computeProblems() {
 }
 
 /* Tabs that render a panel of their own instead of the problem list. */
-const PANELS = new Set(["DESIGN", "HEALTH"]);
+const PANELS = new Set(["DESIGN", "HEALTH", "BUGS"]);
 
 export function ProblemsView({
   openSpec, problems, initialFilter = "ALL",
 }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState(initialFilter);
+  const [addedBugs, setAddedBugs] = useState([]);
   const all = (problems || computeProblems()).filter((p) => p.sev !== "DESIGN");
   const counts = all.reduce((a, p) => {
     a[p.sev] = (a[p.sev] || 0) + 1;
@@ -125,6 +128,7 @@ export function ProblemsView({
     <div className="main">
       <ProblemTabBar filter={filter} setFilter={setFilter} counts={counts}
                      designCount={design.length}
+                     bugCount={BUGS.length + addedBugs.length}
                      healthCount={health
                        ? healthRows.length
                          + (health.exempt_ids || []).length
@@ -137,6 +141,8 @@ export function ProblemsView({
         {filter === "HEALTH" && health
           && <HealthPanel health={health} openSpec={openSpec}
                           gateRows={gateRows} />}
+        {filter === "BUGS"
+          && <BugsPanel added={addedBugs} setAdded={setAddedBugs} />}
         {!PANELS.has(filter) && shown.map((p, i) => (
           <ProblemRow key={i} p={p} openSpec={openSpec} t={t} />
         ))}

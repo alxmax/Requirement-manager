@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+**Known bugs are listed by module, on the map and from the command line (ADR-0080).**
+
+- `requirements/bugs/<module>.md` holds a repository's bugs: a heading that names the module, and a table of `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters`, `Source`. REQ-BUGS-1116
+- `BUG_SOURCES` in `_config.json` names files a repository already keeps, and `BUG_COLUMNS` names their columns. They are read and never written. REQ-BUGS-1117
+- `sync` carries both in `_map.json` under `bugs`. With neither, `bugs.py` is not imported and the map has no `bugs` key. REQ-BUGS-1117
+- A row that cannot be read is an `INPUT:bugs` warning, an error under `--strict`. An open bug of any priority adds no finding, and bugs reach no lock. REQ-BUGS-1118
+- `sync --bug TITLE --module M` (`--prio`, `--date`, `--where`, `--why`, `--source`) adds one row instead of syncing, and `ask --bugs` (`--module`, `--prio`, `--json`) lists them. The verbs stay six. REQ-BUGS-1119, REQ-BUGS-1120
+- The skill's `references/bugs.md` makes an assistant the usual way to add a bug: check the list, check the code, add it with `--prio P2*`. The `*` marks an estimate until a person edits the row. REQ-BUGS-1119
+- Problems gains a Bugs tab (Buguri in Romanian): bugs grouped by module, with the date under the priority, priority chips and a search. REQ-BUGS-1121
+- The tab adds a bug. With the File System Access API the row goes into the module's file in a folder the reader picks; elsewhere the form prints the `sync --bug` command. REQ-BUGS-1122
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-02`; 19,313 physical lines in 79 files (the README says so). The core rises to 6,779 logical lines, and `bugs.py` stays lazy
+
 **An audit is a recorded session: a fixed plan, one file of findings, and a report that gives every rate as k/n with its interval (ADR-0076).**
 
 - `sync --audit-plan` (`--ranked N`, `--random N`, `--seed S`) writes `requirements/_audit.json` once: the ranked set (untested cases, then `clarify` questions, then linked files), a seeded random set of the rest, and the decision bands from `AUDIT_BANDS`. Only confirmed requirements that carry code are planned; an existing file is never replaced. REQ-AUDITRUN-1105

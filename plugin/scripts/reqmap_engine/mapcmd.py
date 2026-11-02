@@ -5,6 +5,7 @@ artifact from a stale one.
 import json
 import os
 
+from . import config as cfg
 from .author import _parse_todos
 from .findings import _render_findings, cmd_findings
 from .git import _git, _git_branch, _repo_name
@@ -117,6 +118,9 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
         # implements: REQ-AUDITRUN-1108 — only while an audit runs
         from .auditrun import map_block
         data["audit"] = map_block(reqs_dir)
+    if cfg.bugs_declared(reqs_dir):  # implements: REQ-BUGS-1117
+        from .bugs import map_block as bugs_block
+        data["bugs"] = bugs_block(root, reqs_dir)
     _attach_translations(data, reqs, reqs_dir)
     return data
 
