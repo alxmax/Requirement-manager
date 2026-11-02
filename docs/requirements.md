@@ -173,7 +173,8 @@ the bug closed, so add it again. Only files in `requirements/bugs/` are closed t
 `BUG_SOURCES` files are never written. `BUG_REGISTER`, `BUG_REGISTER_COLUMNS` (keys `id`,
 `title`, `module`, `prio`, `date`, `fixed`, `version`, `commit`, `note`) and
 `BUG_FIX_TRAILERS` rename all three. The map's Bugs tab shows the register under **Fixed**,
-with found against fixed by week and the median days to fix.
+with found against fixed by week and the median days to fix by priority. Pick a week, or
+search, to list its bugs. Lists show 25 rows a page; the export prints them all.
 
 Run `sync` afterwards to put it on the map. A repository that already keeps bugs in its own
 Markdown tables declares them in `requirements/_config.json`. They are read and never

@@ -2586,7 +2586,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:498"
+          "loc": "app/src/styles/app.css:502"
         },
         {
           "role": "implements",
@@ -2900,14 +2900,16 @@
         "`_map.json` carries the register under `bugs_fixed`, and has no such key when it is empty.",
         "A row's commit links to the forge when the remote is GitHub. The forge reaches `_map.html` only, because it differs between a clone and a fork.",
         "When the register holds a row, the Bugs tab has an Open / Fixed toggle. Fixed shows found, fixed, version, commit and note.",
-        "Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per module and per priority.",
+        "Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per priority.",
         "A `not a bug` row leaves the open count and counts in neither the fixes nor the median.",
+        "Fixed lists its rows only for a chosen week or a search.",
+        "The Bugs tab shows 25 rows of a list at a time, with pages. The export prints every row.",
         "The export gains a section of what was fixed in the last 30 days."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the register reaches the map\n  Given  one closed bug\n  When   `sync` runs\n  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`\n\nCASE-2 — a GitHub remote\n  Given  a register row with a commit and a GitHub remote\n  When   `sync` runs\n  Then   the forge is named for the page and `_map.json` does not carry it\n\nCASE-3 — the toggle\n  Given  a map with a closed bug\n  When   the history renders\n  Then   it shows that bug's dates, version and commit\n\nCASE-4 — the numbers\n  Given  bugs found and fixed over two weeks, one dismissed\n  When   the weeks and medians are computed\n  Then   each week's counts and the median leave the dismissal out of the fixes\n\nCASE-5 — the export\n  Given  a bug fixed this month\n  When   the report renders\n  Then   it holds a section naming that bug",
+      "accept": "CASE-1 — the register reaches the map\n  Given  one closed bug\n  When   `sync` runs\n  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`\n\nCASE-2 — a GitHub remote\n  Given  a register row with a commit and a GitHub remote\n  When   `sync` runs\n  Then   the forge is named for the page and `_map.json` does not carry it\n\nCASE-3 — the toggle\n  Given  a map with a closed bug\n  When   the history renders\n  Then   it shows that bug's dates, version and commit\n\nCASE-4 — the numbers\n  Given  bugs found and fixed over two weeks, one dismissed\n  When   the weeks and medians are computed\n  Then   each week's counts and the median leave the dismissal out of the fixes\n\nCASE-5 — the export\n  Given  a bug fixed this month\n  When   the report renders\n  Then   it holds a section naming that bug\n\nCASE-6 — the rows wait for a choice\n  Given  a register with rows\n  When   Fixed renders with no week chosen and no search\n  Then   it shows no row and asks for a week, and a chosen week holds the rows closed in it\n\nCASE-7 — a long list\n  Given  30 open bugs in one module\n  When   the tab renders\n  Then   it shows 25 rows and says page 1 of 2, and a page past the end is the last page",
       "input": "",
       "output": "",
       "desc": "",
@@ -2968,8 +2970,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -2977,17 +2979,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        },
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
         }
       ]
     },
@@ -12624,11 +12617,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:371"
+          "loc": "app/src/lib/i18n.jsx:374"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:383"
+          "loc": "app/src/lib/i18n.jsx:386"
         },
         {
           "role": "tested-by",
@@ -22225,7 +22218,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:337"
+          "loc": "app/src/lib/i18n.jsx:340"
         },
         {
           "role": "implements",
@@ -23066,11 +23059,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:326"
+          "loc": "app/src/lib/i18n.jsx:329"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:379"
+          "loc": "app/src/lib/i18n.jsx:382"
         }
       ],
       "test_exempt": null,
@@ -23256,11 +23249,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:293"
+          "loc": "app/src/lib/i18n.jsx:296"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:401"
+          "loc": "app/src/lib/i18n.jsx:404"
         },
         {
           "role": "implements",
@@ -29695,7 +29688,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/problems/BugsPanel.jsx",
-        "line": 246,
+        "line": 285,
         "name": "BugsPanel",
         "detail": "`BugsPanel` is 107 lines (over 80)"
       },

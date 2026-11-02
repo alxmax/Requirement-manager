@@ -247,7 +247,7 @@
       "plugin/scripts/reqmap_engine/bugclose.py#fix_trailers": "08844289df417dfe5bfa1c7bed1ea2deb8ebb47fae3013dd7959f6503a2ccd89"
     },
     "REQ-BUGS-1129": {
-      "app/src/lib/bugStats.js": "2a7a99a61ae331aa8595bf786287d022794eb6ba5dc11c080b4d7081d8fc93d6",
+      "app/src/lib/bugStats.js": "59dc2fcb7f51cdb036e94495e83e8cd47fa0f0df2ba76f1cb6de00f7055e8324",
       "plugin/scripts/reqmap_engine/bugclose.py#fixed_block": "64577934453a3144938949ffa0d7516c72709ade26532a0572bd0a4516356c8e",
       "plugin/scripts/reqmap_engine/bugclose.py#forge_of": "35ba9f7973ef675ff6c68eb5491dd18e666cbb85375e2cb377ccbd24559a4b9b"
     },

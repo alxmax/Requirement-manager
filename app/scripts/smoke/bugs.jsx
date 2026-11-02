@@ -16,7 +16,9 @@ import { Rail } from "../../src/components/Rail.jsx";
 import {
   appendBug, bugCommand, bugFile, moduleFile, saveBug,
 } from "../../src/lib/bugFile.js";
-import { fixedSince, medianDays, weekly } from "../../src/lib/bugStats.js";
+import {
+  fixedIn, fixedSince, medianDays, pageOf, weekly,
+} from "../../src/lib/bugStats.js";
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
   BugForm, BugHistory, BugReport, BugsPanel, moduleChoices,
@@ -67,10 +69,15 @@ const dismissed = { id: "Billing:B2", title: "Works as designed",
   module: "Billing", prio: "P2", date: "2026-10-06", fixed: "2026-10-07",
   version: "not a bug", note: "by design" };
 adoptMapExport({ forge: "https://github.com/o/r" });
-const history = renderToString(
+const historyOf = (query) => renderToString(
   <I18nProvider initialLocale="en">
-    <BugHistory open={[]} fixed={[closed, dismissed]} query="" />
+    <BugHistory open={[]} fixed={[closed, dismissed]} query={query} />
   </I18nProvider>);
+const history = historyOf("Billing");
+const unpicked = historyOf("");
+adoptMapExport({ bugs: Array.from({ length: 30 },
+  (_, n) => bug(`B${n}`, "Payments", "P2")) });
+const longGroup = emptyPanelOf();
 adoptMapExport({});
 const weeks = weekly([bug("B9", "Billing", "P3", "2026-10-13")],
   [closed, dismissed]);
@@ -190,6 +197,16 @@ const bugChecks = [
     weeks.map((w) => `${w.week} ${w.found} ${w.fixed} ${w.open}`).join()
       === "2026-10-05 2 0 1,2026-10-12 1 1 1"
       && medianDays([closed, dismissed], "prio").join() === "P1,10,1"],
+  // verifies: REQ-BUGS-1129#CASE-6
+  ["bugs: the rows wait for a week or a search",
+    !unpicked.includes("Refund") && unpicked.includes("Pick a week")
+      && fixedIn([closed, dismissed], "2026-10-12").length === 1
+      && fixedIn([closed, dismissed], "2026-10-05").length === 1],
+  // verifies: REQ-BUGS-1129#CASE-7
+  ["bugs: a long list comes in pages",
+    (longGroup.match(/bug-row/g) || []).length === 25
+      && longGroup.replace(/<!-- -->/g, "").includes("Page 1 of 2")
+      && pageOf([1, 2, 3], 9, 2).rows.join() === "3"],
   // verifies: REQ-BUGS-1129#CASE-5
   ["bugs: the export has the month's fixes",
     printedFixed.includes("Fixed in the last 30 days")
