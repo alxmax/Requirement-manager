@@ -20,8 +20,11 @@ Claude Code:
 
 ```
 /plugin marketplace add alxmax/requirement-manager
-/plugin install requirement-manager@requirement-manager
+/plugin install requirement-manager-full@requirement-manager
 ```
+
+This is the full edition. The same marketplace's `requirement-manager` entry is the
+directory edition: the skills as Markdown, with no engine, MCP server or hook.
 
 Other assistants through [APM](https://github.com/microsoft/apm):
 `apm install alxmax/requirement-manager/plugin`. The skill carries a copy of the engine, so

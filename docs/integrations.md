@@ -22,13 +22,18 @@ python scripts/reqmap.py sync
 
 ### Claude Code plugin (most integrated)
 
-Install from the plugin marketplace — Claude Code will auto-trigger the skills,
-surface commands via the menu, and update the engine when a new version ships:
+Install the full edition from the plugin marketplace — Claude Code will auto-trigger
+the skills, surface commands via the menu, and update the engine when a new version ships:
 
 ```
 /plugin marketplace add alxmax/requirement-manager
-/plugin install requirement-manager@requirement-manager
+/plugin install requirement-manager-full@requirement-manager
 ```
+
+The marketplace lists two plugins: `requirement-manager-full` is `plugin/` (engine, MCP
+mode, hook) and `requirement-manager` is the directory edition below. An install of
+`requirement-manager` made before v8.24.7 now updates to the directory edition; install
+`requirement-manager-full` to keep the engine.
 
 On first use in any repo the skill copies `scripts/reqmap.py` into that repo and
 runs `init`. The requirement template is built into the script — nothing else to
@@ -38,7 +43,7 @@ download.
 and hooks only from Verified organizations, so the listing there is built from
 `directory-plugin/`: the two skills as Markdown, with no engine, MCP server or hook.
 It runs a repository's vendored engine when one exists and otherwise applies the
-conventions by hand. Install the marketplace above for the engine, MCP and the hook.
+conventions by hand. Install `requirement-manager-full` for the engine, MCP and the hook.
 
 ### APM (Agent Package Manager)
 

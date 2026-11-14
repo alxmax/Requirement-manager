@@ -10,12 +10,14 @@ none of them.
 - Without one, the skill applies the same conventions by hand
   (`skills/requirement-manager/references/manual-mode.md`) and says what it cannot do.
 
-The full plugin (engine, MCP server, pre-commit hook, offline map viewer) lives in
-[`plugin/`](https://github.com/alxmax/requirement-manager/tree/main/plugin) and installs from GitHub:
+This edition is the marketplace's `requirement-manager` entry. The full plugin (engine,
+MCP server, pre-commit hook, offline map viewer) lives in
+[`plugin/`](https://github.com/alxmax/requirement-manager/tree/main/plugin) and installs
+from the same marketplace as `requirement-manager-full`:
 
 ```
 /plugin marketplace add alxmax/requirement-manager
-/plugin install requirement-manager@requirement-manager
+/plugin install requirement-manager-full@requirement-manager
 ```
 
 ## Keeping it in step
@@ -24,5 +26,6 @@ These files are hand-maintained copies. `references/workflow.md`, `assistant-ste
 `triage.md`, `prose-buckets.md`, `bugs.md` and `ci.md` come from
 `plugin/skills/requirement-manager/references/`; `workflow.md` differs only in its
 opening note, the `update-engine` row and its ADR links. When the originals change,
-copy them again. The version in `.claude-plugin/plugin.json` follows `plugin/`'s.
+copy them again. The version in `.claude-plugin/plugin.json` follows `plugin/`'s, and
+`scripts/check_versions.py` fails the build when it does not.
 Only Markdown, JSON and images may live here: anything else gets the submission refused.

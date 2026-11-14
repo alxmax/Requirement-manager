@@ -1,5 +1,5 @@
 ---
-generated: 2026-11-02
+generated: 2026-11-14
 engine: 2026-11-02.2
 nodes: 354
 edges: 130
@@ -936,8 +936,8 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_perf_py_52
   f_scripts_test_check_retired_verbs_py_12["scripts/test_check_retired_verbs.py:12"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_retired_verbs_py_12
-  f_scripts_test_check_versions_py_110_117["scripts/test_check_versions.py:110-117"]
-  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_110_117
+  f_scripts_test_check_versions_py_124_131["scripts/test_check_versions.py:124-131"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_124_131
   f_scripts_test_pipeline_wiring_py_66["scripts/test_pipeline_wiring.py:66"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_pipeline_wiring_py_66
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]

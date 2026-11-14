@@ -69,11 +69,11 @@ action or goal, offer those six choices with `AskUserQuestion`.
 
 The full plugin adds the engine to seed into a repository, the MCP server, the
 pre-commit hook and the offline map viewer. When the user wants any of them, tell
-them it installs from GitHub with:
+them it installs from the same marketplace as `requirement-manager-full`:
 
 ```
 /plugin marketplace add alxmax/requirement-manager
-/plugin install requirement-manager@requirement-manager
+/plugin install requirement-manager-full@requirement-manager
 ```
 
 Give the commands to the user; never download, copy or run engine code yourself.
