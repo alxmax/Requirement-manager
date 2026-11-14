@@ -12,8 +12,10 @@ Three independent axes are checked:
   - semver  — canonical source is plugin/.claude-plugin/plugin.json `version`.
               Every occurrence in .claude-plugin/marketplace.json must equal it
               (top-level `version` + each `plugins[].version`), and so must
-              `[project].version` in pyproject.toml and `version:` in
-              plugin/apm.yml (the APM package manifest, which requires one).
+              `[project].version` in pyproject.toml, `version:` in
+              plugin/apm.yml (the APM package manifest, which requires one) and
+              `version` in directory-plugin/.claude-plugin/plugin.json (the
+              directory edition, which the marketplace's first entry installs).
   - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py is
               an ISO date with a different purpose (staleness compare); it is
               only sanity-checked for valid YYYY-MM-DD shape, with an optional
@@ -50,6 +52,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
+DIRECTORY_PLUGIN_JSON = REPO_ROOT / "directory-plugin" / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
 APM_YML = REPO_ROOT / "plugin" / "apm.yml"
@@ -159,13 +162,28 @@ def _fix_apm(canonical: str) -> None:
         print(f"fixed  apm.yml synced to {canonical!r}.")
 
 
+DIRECTORY_VERSION_RE = re.compile(r'("version"\s*:\s*")([^"]*)(")')
+
+
+def _fix_directory_plugin(canonical: str) -> None:
+    """Rewrite `version` in the directory edition's plugin.json; every other
+    byte of the file is kept."""
+    text = DIRECTORY_PLUGIN_JSON.read_text(encoding="utf-8")
+    new = DIRECTORY_VERSION_RE.sub(lambda m: m.group(1) + canonical + m.group(3),
+                                   text, count=1)
+    if new != text:
+        DIRECTORY_PLUGIN_JSON.write_text(new, encoding="utf-8")
+        print(f"fixed  directory-plugin plugin.json synced to {canonical!r}.")
+
+
 def _fix(canonical: str) -> int:
     """Propagate the canonical plugin.json version into every marketplace.json
-    occurrence, pyproject.toml and plugin/apm.yml, so a bump is one edit + one
-    command instead of hand-edits. Rewrites only when something changed;
-    preserves 2-space indent + trailing NL."""
+    occurrence, pyproject.toml, plugin/apm.yml and the directory edition's
+    plugin.json, so a bump is one edit + one command instead of hand-edits.
+    Rewrites only when something changed; preserves 2-space indent + trailing NL."""
     _fix_pyproject(canonical)
     _fix_apm(canonical)
+    _fix_directory_plugin(canonical)
     market = _load_json(MARKETPLACE_JSON)
     before = json.dumps(market, sort_keys=True)
     market["version"] = canonical
@@ -270,7 +288,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description="Assert (or --fix) version coherence across the manifests.")
     ap.add_argument("--fix", action="store_true",
-                    help="rewrite marketplace.json to match plugin.json's "
+                    help="rewrite every other manifest to match plugin.json's "
                         "version, then verify")
     a = ap.parse_args(argv)
 
@@ -298,6 +316,11 @@ def main(argv=None) -> int:
     if apm_ver != canonical:
         errors.append(f"  plugin/apm.yml version = {apm_ver!r} "
                       f"(expected {canonical!r})")
+    dir_ver = _load_json(DIRECTORY_PLUGIN_JSON).get("version")
+    occurrences.append(("directory-plugin.version", dir_ver))
+    if dir_ver != canonical:
+        errors.append(f"  directory-plugin/.claude-plugin/plugin.json version = "
+                      f"{dir_ver!r} (expected {canonical!r})")
 
     # Engine version is a separate axis — only validate it is a real ISO date.
     try:

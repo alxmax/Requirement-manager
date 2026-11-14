@@ -19,7 +19,8 @@ import check_versions as CV
 
 
 def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
-           engine="2026-06-21.4", plugins=None, action_majors=(), apm_ver=None):
+           engine="2026-06-21.4", plugins=None, action_majors=(), apm_ver=None,
+           dir_ver=None):
     """action_majors: the major each file in CV.ACTION_REF_FILES (in order) references;
     None for a file that carries no reference at all. Files past the end of the
     tuple default to "v2"."""
@@ -48,24 +49,37 @@ def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
     (d / "plugin" / "apm.yml").write_text(
         "name: requirement-manager\nversion: {}\n".format(
             apm_ver or plugin_ver or "0.0.0"), encoding="utf-8")
+    (d / "directory-plugin" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
+    (d / "directory-plugin" / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "requirement-manager",
+                    "version": dir_ver or plugin_ver or "0.0.0"}, indent=2) + "\n",
+        encoding="utf-8")
     return d
 
 
+TWO_ENTRIES = [
+    {"name": "requirement-manager", "version": "2.7.5", "source": "./directory-plugin"},
+    {"name": "requirement-manager-full", "version": "2.7.5", "source": "./plugin"},
+]
+
+
 class CheckVersions(unittest.TestCase):
-    def _run(self, d):
+    def _run(self, d, argv=()):
         saved = (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
-                 CV.APM_YML)
+                 CV.APM_YML, CV.DIRECTORY_PLUGIN_JSON)
         CV.REPO_ROOT = Path(d)
+        CV.DIRECTORY_PLUGIN_JSON = (Path(d) / "directory-plugin" / ".claude-plugin"
+                                    / "plugin.json")
         CV.PLUGIN_JSON = Path(d) / "plugin" / ".claude-plugin" / "plugin.json"
         CV.MARKETPLACE_JSON = Path(d) / ".claude-plugin" / "marketplace.json"
         CV.REQMAP_PY = Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
         CV.APM_YML = Path(d) / "plugin" / "apm.yml"
         try:
             with redirect_stdout(io.StringIO()):
-                return CV.main([])
+                return CV.main(list(argv))
         finally:
             (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
-             CV.APM_YML) = saved
+             CV.APM_YML, CV.DIRECTORY_PLUGIN_JSON) = saved
 
     def test_aligned_passes(self):
         with tempfile.TemporaryDirectory() as d:
@@ -158,6 +172,47 @@ class CheckVersions(unittest.TestCase):
                 '[project]\nname = "reqmap"\nversion = "9.9.9"\n',
                 encoding="utf-8")
             self.assertEqual(self._run(d), 1)
+
+    def test_directory_plugin_version_mismatch_fails(self):
+        """The marketplace's first entry installs the directory edition: a bump
+        that leaves its plugin.json behind ships a release that entry never sees."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugins=TWO_ENTRIES, dir_ver="9.9.9")
+            self.assertEqual(self._run(d), 1)
+
+    def test_directory_plugin_manifest_missing_exits_2(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d)
+            (Path(d) / "directory-plugin" / ".claude-plugin" / "plugin.json").unlink()
+            with self.assertRaises(SystemExit) as raised:   # _load_json's exit, as for marketplace.json
+                self._run(d)
+            self.assertEqual(raised.exception.code, 2)
+
+    def test_two_entries_aligned_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugins=TWO_ENTRIES)
+            self.assertEqual(self._run(d), 0)
+
+    def test_stale_second_entry_fails(self):
+        """Each plugins[] entry is checked, not just the first: the full edition's
+        entry left behind is the drift that would strand its installs."""
+        with tempfile.TemporaryDirectory() as d:
+            entries = [dict(TWO_ENTRIES[0]), dict(TWO_ENTRIES[1], version="2.7.4")]
+            _setup(d, plugins=entries)
+            self.assertEqual(self._run(d), 1)
+
+    def test_fix_syncs_directory_plugin_and_every_entry(self):
+        with tempfile.TemporaryDirectory() as d:
+            entries = [dict(TWO_ENTRIES[0], version="2.7.4"),
+                       dict(TWO_ENTRIES[1], version="2.7.4")]
+            _setup(d, plugins=entries, dir_ver="2.7.4")
+            self.assertEqual(self._run(d, ["--fix"]), 0)
+            dir_json = json.loads((Path(d) / "directory-plugin" / ".claude-plugin"
+                                   / "plugin.json").read_text(encoding="utf-8"))
+            self.assertEqual(dir_json, {"name": "requirement-manager", "version": "2.7.5"})
+            market = json.loads((Path(d) / ".claude-plugin" / "marketplace.json")
+                                .read_text(encoding="utf-8"))
+            self.assertEqual([p["version"] for p in market["plugins"]], ["2.7.5", "2.7.5"])
 
     def test_engine_version_revision_suffix(self):
         for engine, expected in [("2026-06-03.2", 0),   # valid same-day revision

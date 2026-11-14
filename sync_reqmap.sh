@@ -54,7 +54,8 @@ VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
 # CLAUDE_CONFIG_DIR names the one the running session actually loads plugins from.
 # Backslashes are folded to forward slashes so a Windows-style value still tests.
 CLAUDE_DIR=$(printf %s "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" | tr '\134' '/')
-CACHE_BASE="$CLAUDE_DIR/plugins/cache/requirement-manager/requirement-manager"
+# The cache dir is <marketplace>/<plugin>; the engine ships only in the full edition.
+CACHE_BASE="$CLAUDE_DIR/plugins/cache/requirement-manager/requirement-manager-full"
 PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin/.claude-plugin/plugin.json" \
   | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
 CACHE="$CACHE_BASE/$PLUGIN_VERSION"
