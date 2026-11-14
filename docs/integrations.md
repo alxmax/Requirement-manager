@@ -34,6 +34,12 @@ On first use in any repo the skill copies `scripts/reqmap.py` into that repo and
 runs `init`. The requirement template is built into the script — nothing else to
 download.
 
+**Directory edition.** The Claude plugin directory accepts local MCP servers, scripts
+and hooks only from Verified organizations, so the listing there is built from
+`directory-plugin/`: the two skills as Markdown, with no engine, MCP server or hook.
+It runs a repository's vendored engine when one exists and otherwise applies the
+conventions by hand. Install the marketplace above for the engine, MCP and the hook.
+
 ### APM (Agent Package Manager)
 
 `plugin/apm.yml` makes the two skills installable with
