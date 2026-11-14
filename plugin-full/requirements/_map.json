@@ -19991,13 +19991,17 @@
         "`scripts/check_directory_edition.py` fails on any file under `plugin/` that starts with `#!`, is not UTF-8, or holds a NUL byte.",
         "`scripts/check_directory_edition.py` fails on a `.mcp.json`, `hooks.json`, `.lsp.json` or `monitors.json`, and on a `hooks/` folder.",
         "`scripts/check_directory_edition.py` fails on a file in `.claude-plugin/` other than `plugin.json` or an image.",
+        "`scripts/check_directory_edition.py` fails on a package manager configuration file such as `package.json` or `pnpm-workspace.yaml`.",
+        "`scripts/check_directory_edition.py` fails on a file inside `output-styles/`, `.claude/skills/`, a nested `.claude-plugin/`, or JSON or YAML inside `egress/`.",
+        "`scripts/check_directory_edition.py` fails on an image whose bytes do not match its extension.",
+        "`scripts/check_directory_edition.py` fails on a text file over 100 KB, and on a path character outside letters, digits, `.`, `_`, `-`, `/` and space.",
         "Each failure names the file and the rule it breaks.",
         "The `gate-and-tests` CI job runs `scripts/check_directory_edition.py`."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a script dropped into the edition fails\n  Given  a `plugin/` tree holding `scripts/reqmap.py`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `scripts/reqmap.py` as a disallowed file type\n\nCASE-2 — a file that starts with `#!` fails whatever its name\n  Given  a `plugin/` tree holding `hooks/pre-commit.md` whose first line is `#!/bin/sh`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names that file\n\nCASE-3 — runnable configuration fails\n  Given  a `plugin/` tree holding `.mcp.json`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `.mcp.json`\n\nCASE-4 — only the manifest and images live in `.claude-plugin/`\n  Given  a `plugin/` tree whose `.claude-plugin/` holds `plugin.json`, `icon.png` and `notes.md`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `notes.md` only\n\nCASE-5 — the committed edition passes\n  Given  this repository's `plugin/`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 0",
+      "accept": "CASE-1 — a script dropped into the edition fails\n  Given  a `plugin/` tree holding `scripts/reqmap.py`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `scripts/reqmap.py` as a disallowed file type\n\nCASE-2 — a file that starts with `#!` fails whatever its name\n  Given  a `plugin/` tree holding `hooks/pre-commit.md` whose first line is `#!/bin/sh`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names that file\n\nCASE-3 — runnable configuration fails\n  Given  a `plugin/` tree holding `.mcp.json`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `.mcp.json`\n\nCASE-4 — only the manifest and images live in `.claude-plugin/`\n  Given  a `plugin/` tree whose `.claude-plugin/` holds `plugin.json`, `icon.png` and `notes.md`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names `notes.md` only\n\nCASE-5 — the committed edition passes\n  Given  this repository's `plugin/`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 0\n\nCASE-6 — package manager files and misplaced folders fail\n  Given  a `plugin/` tree holding `package.json` and `output-styles/terse.md`\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names both files\n\nCASE-7 — a disguised image, an unsafe path or an oversized text file fails\n  Given  a `plugin/` tree holding an `icon.png` with JPEG bytes, a `notes:draft.md`\n         and a `references/big.md` just over 100 KB\n  When   `scripts/check_directory_edition.py` runs\n  Then   it exits 1 and names each of those files",
       "input": "",
       "output": "",
       "desc": "",
@@ -20018,15 +20022,15 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/check_directory_edition.py:23"
+          "loc": "scripts/check_directory_edition.py:45"
         },
         {
           "role": "implements",
-          "loc": "scripts/check_directory_edition.py:49"
+          "loc": "scripts/check_directory_edition.py:87"
         },
         {
           "role": "implements",
-          "loc": "scripts/check_directory_edition.py:61"
+          "loc": "scripts/check_directory_edition.py:99"
         },
         {
           "role": "tested-by",
@@ -20037,8 +20041,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -20046,7 +20050,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
@@ -20055,7 +20059,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "4 of 5 Given lines open on the same word (\"plugin\"). Do the cases cover the other kinds of input a caller can supply?",
+          "question": "6 of 7 Given lines open on the same word (\"plugin\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]

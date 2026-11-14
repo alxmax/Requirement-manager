@@ -421,6 +421,13 @@ Every bullet below is binding.
   `monitors.json`, and on a `hooks/` folder.
 - `scripts/check_directory_edition.py` fails on a file in `.claude-plugin/` other than
   `plugin.json` or an image.
+- `scripts/check_directory_edition.py` fails on a package manager configuration file such as
+  `package.json` or `pnpm-workspace.yaml`.
+- `scripts/check_directory_edition.py` fails on a file inside `output-styles/`,
+  `.claude/skills/`, a nested `.claude-plugin/`, or JSON or YAML inside `egress/`.
+- `scripts/check_directory_edition.py` fails on an image whose bytes do not match its extension.
+- `scripts/check_directory_edition.py` fails on a text file over 100 KB, and on a path
+  character outside letters, digits, `.`, `_`, `-`, `/` and space.
 - Each failure names the file and the rule it breaks.
 - The `gate-and-tests` CI job runs `scripts/check_directory_edition.py`.
 
@@ -449,6 +456,17 @@ CASE-5 — the committed edition passes
   Given  this repository's `plugin/`
   When   `scripts/check_directory_edition.py` runs
   Then   it exits 0
+
+CASE-6 — package manager files and misplaced folders fail
+  Given  a `plugin/` tree holding `package.json` and `output-styles/terse.md`
+  When   `scripts/check_directory_edition.py` runs
+  Then   it exits 1 and names both files
+
+CASE-7 — a disguised image, an unsafe path or an oversized text file fails
+  Given  a `plugin/` tree holding an `icon.png` with JPEG bytes, a `notes:draft.md`
+         and a `references/big.md` just over 100 KB
+  When   `scripts/check_directory_edition.py` runs
+  Then   it exits 1 and names each of those files
 
 ## Context
 - The rules restate the directory's refusal `LOCAL_CODE_FILE_TYPE`; `LOCAL_CODE_MCP_SERVER`

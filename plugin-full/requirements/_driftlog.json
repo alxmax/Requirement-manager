@@ -542,8 +542,8 @@
       "reason": "plugin/ -> plugin-full/ move for the directory submission; the full edition's statements now name plugin-full/ and requirement-manager-full"
     },
     "REQ-SELFGATE-1130": {
-      "hash": "f6ce6a174608",
-      "reason": "REQ-SELFGATE-1130: split a stacked clause into two bullets"
+      "hash": "97428dd557d6",
+      "reason": "REQ-SELFGATE-1130 covers every rule in the directory refusal text, not only file types"
     },
     "REQ-SELFGATE-916": {
       "hash": "838e42afeaa5",

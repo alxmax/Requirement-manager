@@ -13,8 +13,11 @@ none of them.
 Install this edition:
 
 ```
-/plugin install requirement-manager --marketplace alxmax/Requirement-manager
+/plugin marketplace add alxmax/requirement-manager
+/plugin install requirement-manager@requirement-manager
 ```
+
+For the engine edition, install `requirement-manager-full@requirement-manager` instead.
 
 This edition is the marketplace's `requirement-manager` entry. The full plugin (engine,
 MCP server, pre-commit hook, offline map viewer) lives in

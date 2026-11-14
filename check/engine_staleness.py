@@ -118,7 +118,7 @@ def _probe(vendored_path, reference_path, mode):
         return 0
 
     message = ("vendored reqmap.py is stale ({} < action {}) - re-seed "
-               "it from the requirement-manager plugin, or pin an "
+               "it from the requirement-manager-full plugin, or pin an "
                "older check@vN, so the gate runs the "
                "checks this action expects".format(vendored, reference))
     if os.environ.get("GITHUB_ACTIONS"):

@@ -90,9 +90,10 @@ they drift.
 
 Two independent numbers, easy to conflate:
 
-- **Plugin semver** lives in three files kept in lockstep (`plugin-full/.claude-plugin/plugin.json`
-  and twice in `.claude-plugin/marketplace.json`). `python scripts/check_versions.py --fix`
-  syncs them. **Any** shipped change — engine or skill — needs a bump, or installed copies
+- **Plugin semver** lives in seven places kept in lockstep: `plugin-full/.claude-plugin/plugin.json`,
+  `plugin/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` (top level and each
+  `plugins[]` entry), `pyproject.toml` and `plugin-full/apm.yml`. `scripts/check_versions.py`
+  is the authority on the list; `python scripts/check_versions.py --fix` syncs them. **Any** shipped change — engine or skill — needs a bump, or installed copies
   never see it. A bump without a matching `` `vX.Y.Z` `` heading in `CHANGELOG.md` fails CI.
 - **`MAP_ENGINE_VERSION`** inside `reqmap.py` (`YYYY-MM-DD[.N]`) is engine-only. Bump it when
   the engine changes, so a seeded copy can tell it is behind.
