@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Keep the engine the requirement-manager skill carries equal to plugin/scripts/.
+"""Keep the engine the requirement-manager skill carries equal to plugin-full/scripts/.
 
 An APM install copies one directory, `skills/<name>/`, and nothing beside it, so
-the engine in `plugin/scripts/` would not arrive with the skill. The skill
+the engine in `plugin-full/scripts/` would not arrive with the skill. The skill
 therefore carries a copy of what a consumer seeds: `reqmap.py`, the
 `reqmap_engine/` package and `_map_viewer.html`. The layout under the skill is
 the layout under the plugin, so `REQMAP_PLUGIN_ROOT` names either directory and
 the seeding commands do not change.
 
 The copy is generated, committed, and re-derived in CI (ADR-0068, the same
-trade as ADR-0005). Never edit it by hand; edit plugin/scripts/ and run this.
+trade as ADR-0005). Never edit it by hand; edit plugin-full/scripts/ and run this.
 
     python scripts/bundle_skill_engine.py            # rewrite the copy
     python scripts/bundle_skill_engine.py --check    # exit 1 when it is stale
@@ -24,8 +24,8 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SOURCE = REPO_ROOT / "plugin" / "scripts"
-DEST = REPO_ROOT / "plugin" / "skills" / "requirement-manager" / "scripts"
+SOURCE = REPO_ROOT / "plugin-full" / "scripts"
+DEST = REPO_ROOT / "plugin-full" / "skills" / "requirement-manager" / "scripts"
 FILES = ("reqmap.py", "_map_viewer.html")
 PACKAGE = "reqmap_engine"
 
@@ -83,11 +83,11 @@ def main(argv=None) -> int:
     if a.check:
         problems = diff()
         if problems:
-            print(f"FAIL  {rel} is not the engine in plugin/scripts/:")
+            print(f"FAIL  {rel} is not the engine in plugin-full/scripts/:")
             print("\n".join(f"  {p}" for p in problems))
             print("run `python scripts/bundle_skill_engine.py` and commit it")
             return 1
-        print(f"OK  {rel} matches plugin/scripts/ ({len(wanted(SOURCE))} files)")
+        print(f"OK  {rel} matches plugin-full/scripts/ ({len(wanted(SOURCE))} files)")
         return 0
     print(f"wrote  {build()} file(s) to {rel}")
     return 0

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # implements: ARCH-SELFGATE-039
-"""Fail when the engine (plugin/scripts/reqmap.py or reqmap_engine/) changed but
+"""Fail when the engine (plugin-full/scripts/reqmap.py or reqmap_engine/) changed but
 MAP_ENGINE_VERSION did not.
 
 Why this exists: `MAP_ENGINE_VERSION` is the only thing a seeded copy of
@@ -28,8 +28,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 # The engine is the CLI module plus the package beside it; one diff covers
 # both, and the version line lives in reqmap_engine/__init__.py.
-ENGINE = "plugin/scripts/reqmap.py"
-ENGINE_PATHS = (ENGINE, "plugin/scripts/reqmap_engine")
+ENGINE = "plugin-full/scripts/reqmap.py"
+# The pre-move paths stay listed so a diff across the plugin/ -> plugin-full/
+# move pairs the engine as renames instead of a wholly new file.
+ENGINE_PATHS = (ENGINE, "plugin-full/scripts/reqmap_engine",
+                "plugin/scripts/reqmap.py", "plugin/scripts/reqmap_engine")
 # diff lines only: `+MAP_ENGINE_VERSION = "..."` / `-MAP_ENGINE_VERSION = "..."`
 ADDED_RE = re.compile(r'^\+MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)
 REMOVED_RE = re.compile(r'^-MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)

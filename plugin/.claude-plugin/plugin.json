@@ -1,7 +1,7 @@
 {
-  "name": "requirement-manager-full",
-  "description": "Full edition of requirement-manager, with the bundled stdlib Python engine (CLI and MCP mode) and the git pre-commit hook. A capability registry that sits between intent and code: one markdown file per capability as the single source of truth, a drift gate for commit/merge, a navigable requirement map (4 Mermaid diagrams + interactive HTML), and an open-findings report. The engine is plain stdlib Python, so any AI assistant that can run a shell command can drive it.",
-  "version": "8.24.7",
+  "name": "requirement-manager",
+  "description": "Directory edition of requirement-manager: the conventions and workflow as Markdown skills only. One markdown file per capability as the single source of truth, membership tags in code, and a drift review. Runs the repository's own vendored engine when it has one; otherwise applies the same rules by hand. No bundled engine, MCP server or hooks; the full engine edition installs as requirement-manager-full from the same marketplace.",
+  "version": "8.24.8",
   "author": {
     "name": "Schipor Alexandru"
   },

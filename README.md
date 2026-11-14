@@ -34,7 +34,7 @@ From a checkout of this repository:
 
 ```bash
 cd examples/hello-drift
-python ../../plugin/scripts/reqmap.py gate
+python ../../plugin-full/scripts/reqmap.py gate
 ```
 
 You should see `WARN RM018 HELLO-GREET-001: DRIFT` and then `gate: PASS`. The requirement
@@ -76,7 +76,7 @@ run, [`examples/hello-drift`](examples/hello-drift), and this is its real output
 
 ```
 $ cd examples/hello-drift
-$ python ../../plugin/scripts/reqmap.py gate
+$ python ../../plugin-full/scripts/reqmap.py gate
 WARN  RM018 HELLO-GREET-001: DRIFT — contract changed since lock; re-check 1 member(s): hello.py:1
 
 1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
@@ -112,7 +112,7 @@ the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 | [Integrations](docs/integrations.md) | plain CLI, the Claude Code plugin, APM, the MCP server, other assistants, the CI action |
 | [Planning and releasing](docs/planning.md) | `ROADMAP.md`, `_planning.json`, `CHANGELOG.md` and `sync --release` |
 | [Internals](docs/internals.md) | how this repo is laid out, and measured numbers on a 10,000-file tree |
-| [`workflow.md`](plugin/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |
+| [`workflow.md`](plugin-full/skills/requirement-manager/references/workflow.md) | the skill's authoritative contract: authoring rules, statuses, the gate |
 | [Decision records](docs/adr/README.md) | why it works the way it does — including four things considered and not built |
 | [60-second path, and what stays still](docs/stability.md) | the six verbs, the two installs, `init --watch` |
 | [Case studies](docs/case-studies.md) | none from outside this repo yet — a write-up of a real tree belongs here |

@@ -1,8 +1,8 @@
 # Contributing
 
 This repo is a Claude Code plugin whose payload is a single stdlib-only Python file,
-`plugin/scripts/reqmap.py`, plus three skills and a published GitHub Action. It dogfoods
-itself: `plugin/requirements/` describes the engine's own capabilities, and the same gate
+`plugin-full/scripts/reqmap.py`, plus three skills and a published GitHub Action. It dogfoods
+itself: `plugin-full/requirements/` describes the engine's own capabilities, and the same gate
 consumers run is what guards this repo's commits.
 
 Two rules explain most of what follows:
@@ -26,7 +26,7 @@ git config core.hooksPath .githooks     # once: runs the CI checks before each c
 
 `.githooks/pre-commit` mirrors the CI order, and `.githooks/pre-push` blocks a direct push
 to `main`. Both are this repo's own dev hooks — do not confuse them with
-`plugin/hooks/pre-commit`, which is shipped to consumer repos, so editing it changes their
+`plugin-full/hooks/pre-commit`, which is shipped to consumer repos, so editing it changes their
 behaviour and needs a version bump.
 
 Node is needed only to rebuild the viewer under `app/` (see `app/CLAUDE.md`); the engine
@@ -34,12 +34,12 @@ never touches it.
 
 ## The loop
 
-All engine commands run from `plugin/`. The `--code ..` is not optional for these — it
+All engine commands run from `plugin-full/`. The `--code ..` is not optional for these — it
 widens the scan to the repo root, which is what the committed artifacts were generated
 from:
 
 ```bash
-cd plugin
+cd plugin-full
 python -X utf8 scripts/reqmap.py gate --code ..   # link sync + drift + test links + readability + map freshness
 python -X utf8 scripts/reqmap.py sync --code ..   # rescan + advance lock + regen map
 ```
@@ -53,12 +53,12 @@ on cp1252.
 ## Tests
 
 ```bash
-python -X utf8 plugin/scripts/test_reqmap.py             # the engine suite (500+)
+python -X utf8 plugin-full/scripts/test_reqmap.py             # the engine suite (500+)
 python -X utf8 scripts/test_check_versions.py            # manifest/version coherence
 python -X utf8 scripts/test_engine_staleness.py          # the action's staleness probe
 python -X utf8 scripts/test_cross_tool.py                # seeds the engine into a tempdir: sync -> gate -> map
 cd scripts && python -X utf8 test_changelog_notes.py     # release-notes extraction
-cd plugin/skills/excalidraw-diagram/scripts && python -X utf8 -m unittest test_excalidraw
+cd plugin-full/skills/excalidraw-diagram/scripts && python -X utf8 -m unittest test_excalidraw
 ```
 
 New behaviour needs a test that fails without your change. "Verified by reading the diff"
@@ -66,7 +66,7 @@ is not a verification — the whole project is an argument against that.
 
 ## Adding or changing a capability
 
-1. Write or edit the requirement in `plugin/requirements/` (copy the shape of a recent one,
+1. Write or edit the requirement in `plugin-full/requirements/` (copy the shape of a recent one,
    e.g. `ARCH-TRACKED-042.md`). Contract clauses are binding and testable; the WHY explains
    intent, not mechanics.
 2. Tag the code that implements it:
@@ -82,7 +82,7 @@ If your change alters a **confirmed** requirement's contract, `sync --accept-dri
 you say so deliberately.
 
 The CLI's command set has one source of truth: the `COMMANDS` registry near the top of
-`reqmap.py`. `plugin/tool_definition.json` and the command table in `SKILL.universal.md`
+`reqmap.py`. `plugin-full/tool_definition.json` and the command table in `SKILL.universal.md`
 are generated from it by `gen-integration` — never hand-edit those two; the gate fails when
 they drift.
 
@@ -90,7 +90,7 @@ they drift.
 
 Two independent numbers, easy to conflate:
 
-- **Plugin semver** lives in three files kept in lockstep (`plugin/.claude-plugin/plugin.json`
+- **Plugin semver** lives in three files kept in lockstep (`plugin-full/.claude-plugin/plugin.json`
   and twice in `.claude-plugin/marketplace.json`). `python scripts/check_versions.py --fix`
   syncs them. **Any** shipped change — engine or skill — needs a bump, or installed copies
   never see it. A bump without a matching `` `vX.Y.Z` `` heading in `CHANGELOG.md` fails CI.

@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_engine_bump as CEB
 
-ENGINE_REL = Path("plugin") / "scripts" / "reqmap.py"
+ENGINE_REL = Path("plugin-full") / "scripts" / "reqmap.py"
 
 
 def _git(d, *args):

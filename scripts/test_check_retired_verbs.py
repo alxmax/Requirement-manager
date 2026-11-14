@@ -51,7 +51,7 @@ class RetiredVerbs(unittest.TestCase):
         """The line that slipped through: .githooks/pre-commit wrote its own repair
         hint as `(fix: reqmap.py map ...)`, with no backtick, quote or `python `
         in front of it, inside a file the guard already scanned."""
-        line = "#   3. map staleness (fix: reqmap.py map --root plugin --code .)"
+        line = "#   3. map staleness (fix: reqmap.py map --root plugin-full --code .)"
         self.assertEqual(scan(line), [("verb", "map")])
 
     def test_a_live_verb_is_not_a_finding(self):  # verifies: REQ-SELFGATE-1011#CASE-3

@@ -82,6 +82,18 @@
 - `case-monoculture` reads a Given's head word in any script: a word with a diacritic lost its first letters. REQ-CLARIFY-1115
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.7`; 18,949 physical lines in 78 files (the README says so). The core rises to 6,750 logical lines: the two are the function that builds the hedge pattern from the configured list
 
+## plugin `v8.24.8` — 2026-11-14
+
+**`plugin/` is now the directory edition, and the engine edition moved to `plugin-full/`.**
+
+- The plugin directory's submission reads `plugin/` and ignores `marketplace.json`, so v8.24.7 was refused again for the engine files there. The 12 Markdown and JSON files of the directory edition now live in `plugin/`.
+- The engine, its MCP mode, the pre-commit hook and the offline map viewer moved to `plugin-full/`. The engine path in this repository is now `plugin-full/scripts/reqmap.py`.
+- Marketplace installs are unaffected: `requirement-manager` is still the directory edition and `requirement-manager-full` the engine edition. Plugin-cache paths go by plugin name, so they do not move.
+- CI, the dev hooks, `sync_reqmap.sh`, `check/engine_staleness.py`, the root `.mcp.json` and `.vscode/mcp.json`, the packaging scripts and the docs follow the move. The Action still runs a consumer's own `scripts/reqmap.py`.
+- `scripts/check_directory_edition.py` fails CI when `plugin/` gains a file the directory refuses: code, a `#!` file, runnable configuration, or anything in `.claude-plugin/` but the manifest and images. REQ-SELFGATE-1130
+- `scripts/check_engine_bump.py` reads the engine across the move as renames, so the version bump is still seen.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-14`. Only the source-repo probe changed behaviour; it now looks for `plugin-full/.claude-plugin/plugin.json`.
+
 ## plugin `v8.24.7` — 2026-11-14
 
 **The marketplace lists two plugins: `requirement-manager` is now the directory edition, and the engine edition is `requirement-manager-full`.**
