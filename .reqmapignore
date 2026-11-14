@@ -13,6 +13,10 @@ plugin/scripts/_map_viewer.html
 # below: scanned, every member would be counted twice.
 plugin/skills/requirement-manager/scripts/**
 
+# The directory edition: hand-kept Markdown copies of the skills, whose example
+# tags would otherwise be read as members and dangling refs.
+directory-plugin/**
+
 plugin/skills/excalidraw-diagram/SKILL.md
 plugin/skills/excalidraw-diagram/SKILL.universal.md
 plugin/skills/excalidraw-diagram/examples/*.py

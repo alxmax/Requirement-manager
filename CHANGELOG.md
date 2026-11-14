@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+**A directory edition the Claude plugin directory can accept.**
+
+- `directory-plugin/` holds the two skills as Markdown, the manifest and the icon, and nothing that runs: the directory refuses local MCP servers, scripts and hooks from organizations that are not Verified. The skill runs a repository's vendored engine when it has one and otherwise follows `references/manual-mode.md`, which states what it cannot do. `plugin/` is unchanged.
+
 **A fixed bug leaves the list for a register (ADR-0082).**
 
 - `sync --fix ID` moves a row to `requirements/bugs/_fixed.md` with its found and fixed dates, version and commit. `--note` closes without a fix. REQ-BUGS-1127

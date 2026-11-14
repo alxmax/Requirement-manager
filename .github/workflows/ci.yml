@@ -128,7 +128,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python: ["3.9", "3.12", "3.13"]  # implements: REQ-PYFLOOR-902
-    runs-on: ${{ matrix.os }}
+        # ubuntu-latest moved to 26.04, which setup-python ships no 3.9 build for;
+        # the floor cell runs on 24.04 so the matrix still proves the floor on Linux.
+        include:
+          - os: ubuntu-latest
+            python: "3.9"
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner || matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
