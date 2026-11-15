@@ -19,7 +19,7 @@ import sys
 import tempfile
 
 ENGINE_SRC = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "plugin", "scripts", "reqmap.py"
+    os.path.dirname(os.path.abspath(__file__)), "..", "plugin-full", "scripts", "reqmap.py"
 )
 
 REQ_ID = "TEST-CROSS-001"

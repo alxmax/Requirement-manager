@@ -3,7 +3,7 @@
 [← back to the README](../README.md)
 
 
-> In **this** repo, run commands from inside `plugin/`. In **your** repo, run
+> In **this** repo, run commands from inside `plugin-full/`. In **your** repo, run
 > from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
 The CLI is **six verbs**. Five do the work, and everything else is a flag on `gate` (the

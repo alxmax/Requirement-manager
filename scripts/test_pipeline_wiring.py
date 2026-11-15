@@ -20,7 +20,7 @@ ACTION = "check/action.yml"
 PRE_COMMIT = ".githooks/pre-commit"
 PRE_PUSH = ".githooks/pre-push"
 SYNC = "sync_reqmap.sh"
-VIEWER = "plugin/scripts/_map_viewer.html"
+VIEWER = "plugin-full/scripts/_map_viewer.html"
 
 
 def _read(rel):
@@ -69,7 +69,7 @@ class SelfGate(unittest.TestCase):  # tested-by: ARCH-SELFGATE-039 @integration
         gate = steps[_find(steps, "reqmap.py gate")]
         self.assertRegex(gate, r"python -X utf8 scripts/reqmap\.py gate\b")
         self.assertRegex(_read(PRE_COMMIT),
-                         r'plugin/scripts/reqmap\.py gate\b')
+                         r'plugin-full/scripts/reqmap\.py gate\b')
         action = _read(ACTION)
         self.assertRegex(action, r'"\$\{\{ inputs\.reqmap-path \}\}" gate\b')
         self.assertIn("default: 'scripts/reqmap.py'", action)
@@ -82,7 +82,7 @@ class CiWorkflow(unittest.TestCase):  # tested-by: REQ-SELFGATE-916 @unit
         self.assertIn("pull_request:", on)
         steps = _ci_steps("gate-and-tests")
         gate = steps[_find(steps, "reqmap.py gate")]
-        self.assertIn("working-directory: plugin\n", gate)
+        self.assertIn("working-directory: plugin-full\n", gate)
         self.assertIn("scripts/reqmap.py gate --full --code ..", gate)
 
     def test_checks_precede_gate(self):  # verifies: REQ-SELFGATE-916#CASE-2
@@ -105,7 +105,7 @@ class CiWorkflow(unittest.TestCase):  # tested-by: REQ-SELFGATE-916 @unit
         self.assertNotIn("gh release view", alias)
         self.assertIn("requirement-manager/check@v[0-9]+' check/action.yml",
                       alias)
-        self.assertIn("plugin/.claude-plugin/plugin.json", alias)
+        self.assertIn("plugin-full/.claude-plugin/plugin.json", alias)
         self.assertIn('git tag -f "$ALIAS" "$TARGET"', alias)
         self.assertIn('git push --force origin "refs/tags/$ALIAS"', alias)
 
@@ -119,7 +119,7 @@ class DevHooks(unittest.TestCase):  # tested-by: REQ-SELFGATE-1070 @unit
         at = _positions(hook, ('"$PY" scripts/check_versions.py',
                                "check_engine_bump.py --staged",
                                "scripts/check_retired_verbs.py",
-                               "reqmap.py gate --full --root plugin"))
+                               "reqmap.py gate --full --root plugin-full"))
         self.assertEqual(at, sorted(at))
         steps = _ci_steps("gate-and-tests")
         ci = [_find(steps, "run: python scripts/check_versions.py"),
@@ -200,7 +200,7 @@ class SyncScript(unittest.TestCase):  # tested-by: REQ-SELFGATE-1072 @unit
     def test_cache_gets_engine(self):  # verifies: REQ-SELFGATE-1072#CASE-1
         text = _read(SYNC)
         self.assertRegex(text, r'PLUGIN_VERSION=\$\(grep -m1 \'"version"\' '
-                               r'"\$SCRIPT_DIR/plugin/\.claude-plugin/'
+                               r'"\$SCRIPT_DIR/plugin-full/\.claude-plugin/'
                                r'plugin\.json"')
         self.assertIn('CACHE="$CACHE_BASE/$PLUGIN_VERSION"', text)
         cache = text.split('if [[ -d "$CACHE" ]]; then', 1)[1]
@@ -210,8 +210,8 @@ class SyncScript(unittest.TestCase):  # tested-by: REQ-SELFGATE-1072 @unit
                      'rm -rf "$CACHE/scripts/reqmap_engine/__pycache__"',
                      'cp "$VIEWER_SRC" "$CACHE/scripts/_map_viewer.html"'):
             self.assertIn(line, cache)
-        self.assertIn('SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"', text)
-        self.assertIn('PKG_SRC="$SCRIPT_DIR/plugin/scripts/reqmap_engine"',
+        self.assertIn('SRC="$SCRIPT_DIR/plugin-full/scripts/reqmap.py"', text)
+        self.assertIn('PKG_SRC="$SCRIPT_DIR/plugin-full/scripts/reqmap_engine"',
                       text)
 
     def test_never_seeds(self):  # verifies: REQ-SELFGATE-1072#CASE-2

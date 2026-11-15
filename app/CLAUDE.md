@@ -9,7 +9,7 @@ stdlib engine — see the root `CLAUDE.md` for how `_map.html` is produced.
 npm run dev            # dev server on :5173 (strict port)
 npm run sync           # copy the engine's export into public/data.json (run `reqmap.py sync` first)
 npm run smoke          # SSR smoke test — CI's `artifacts` job runs it too; run it before vendoring
-npm run build:viewer   # REQUIRED after any app/ change: vite build + install-viewer.mjs → plugin/scripts/_map_viewer.html
+npm run build:viewer   # REQUIRED after any app/ change: vite build + install-viewer.mjs → plugin-full/scripts/_map_viewer.html
 ```
 
 `npm run build` (plain) builds the multi-file site under `dist/` — it does **not**

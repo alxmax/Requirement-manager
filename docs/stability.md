@@ -13,7 +13,7 @@ to `REQ-MCPTOOLS-1028` first.
 
 ## Two ways to install
 
-Copy `plugin/scripts/reqmap.py` and `plugin/scripts/reqmap_engine/` into the consumer
+Copy `plugin-full/scripts/reqmap.py` and `plugin-full/scripts/reqmap_engine/` into the consumer
 repository, under `scripts/`. That is the offline install: stdlib only, no package
 index, and it is what the CI action runs.
 

@@ -9,14 +9,14 @@ data; they cannot import Python). This script is the single point that asserts
 they agree, so drift fails the build instead of shipping silently.
 
 Three independent axes are checked:
-  - semver  — canonical source is plugin/.claude-plugin/plugin.json `version`.
+  - semver  — canonical source is plugin-full/.claude-plugin/plugin.json `version`.
               Every occurrence in .claude-plugin/marketplace.json must equal it
               (top-level `version` + each `plugins[].version`), and so must
               `[project].version` in pyproject.toml, `version:` in
-              plugin/apm.yml (the APM package manifest, which requires one) and
-              `version` in directory-plugin/.claude-plugin/plugin.json (the
+              plugin-full/apm.yml (the APM package manifest, which requires one) and
+              `version` in plugin/.claude-plugin/plugin.json (the
               directory edition, which the marketplace's first entry installs).
-  - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py is
+  - engine  — MAP_ENGINE_VERSION in plugin-full/scripts/reqmap_engine/__init__.py is
               an ISO date with a different purpose (staleness compare); it is
               only sanity-checked for valid YYYY-MM-DD shape, with an optional
               `.N` (N>=1) same-day revision suffix, never compared against the
@@ -51,11 +51,11 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
-DIRECTORY_PLUGIN_JSON = REPO_ROOT / "directory-plugin" / ".claude-plugin" / "plugin.json"
+PLUGIN_JSON = REPO_ROOT / "plugin-full" / ".claude-plugin" / "plugin.json"
+DIRECTORY_PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
-REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
-APM_YML = REPO_ROOT / "plugin" / "apm.yml"
+REQMAP_PY = REPO_ROOT / "plugin-full" / "scripts" / "reqmap_engine" / "__init__.py"
+APM_YML = REPO_ROOT / "plugin-full" / "apm.yml"
 # Files that quote the action's major-alias tag. action.yml is listed first: it
 # is the file the tag actually publishes, so it is reported as the canonical one
 # on a mismatch.
@@ -63,8 +63,8 @@ ACTION_REF_FILES = (
     "check/action.yml", "README.md", "CLAUDE.md",
     # The skill files are what a consumer actually reads when wiring CI — they
     # advertised `@v1` for three releases after the docs above moved to `@v2`.
-    "plugin/skills/requirement-manager/SKILL.md",
-    "plugin/skills/requirement-manager/SKILL.universal.md",
+    "plugin-full/skills/requirement-manager/SKILL.md",
+    "plugin-full/skills/requirement-manager/SKILL.universal.md",
 )
 
 # line-anchored so a docstring/comment mention before the real assignment can't
@@ -139,7 +139,7 @@ APM_VERSION_RE = re.compile(r'^(version:[ \t]*)(\S+)', re.M)
 
 
 def _apm_version() -> str:
-    """`version:` from plugin/apm.yml. Exits 2 when the file or the key is
+    """`version:` from plugin-full/apm.yml. Exits 2 when the file or the key is
     missing: the APM manifest requires one and must not drift silently."""
     try:
         m = APM_VERSION_RE.search(APM_YML.read_text(encoding="utf-8"))
@@ -153,7 +153,7 @@ def _apm_version() -> str:
 
 
 def _fix_apm(canonical: str) -> None:
-    """Rewrite `version:` in plugin/apm.yml to `canonical`; every other byte
+    """Rewrite `version:` in plugin-full/apm.yml to `canonical`; every other byte
     of the file is kept."""
     text = APM_YML.read_text(encoding="utf-8")
     new = APM_VERSION_RE.sub(lambda m: m.group(1) + canonical, text, count=1)
@@ -173,12 +173,12 @@ def _fix_directory_plugin(canonical: str) -> None:
                                    text, count=1)
     if new != text:
         DIRECTORY_PLUGIN_JSON.write_text(new, encoding="utf-8")
-        print(f"fixed  directory-plugin plugin.json synced to {canonical!r}.")
+        print(f"fixed  directory-edition plugin/.claude-plugin/plugin.json synced to {canonical!r}.")
 
 
 def _fix(canonical: str) -> int:
     """Propagate the canonical plugin.json version into every marketplace.json
-    occurrence, pyproject.toml, plugin/apm.yml and the directory edition's
+    occurrence, pyproject.toml, plugin-full/apm.yml and the directory edition's
     plugin.json, so a bump is one edit + one command instead of hand-edits.
     Rewrites only when something changed; preserves 2-space indent + trailing NL."""
     _fix_pyproject(canonical)
@@ -314,12 +314,12 @@ def main(argv=None) -> int:
     apm_ver = _apm_version()
     occurrences.append(("apm.version", apm_ver))
     if apm_ver != canonical:
-        errors.append(f"  plugin/apm.yml version = {apm_ver!r} "
+        errors.append(f"  plugin-full/apm.yml version = {apm_ver!r} "
                       f"(expected {canonical!r})")
     dir_ver = _load_json(DIRECTORY_PLUGIN_JSON).get("version")
-    occurrences.append(("directory-plugin.version", dir_ver))
+    occurrences.append(("directory-edition.version", dir_ver))
     if dir_ver != canonical:
-        errors.append(f"  directory-plugin/.claude-plugin/plugin.json version = "
+        errors.append(f"  plugin/.claude-plugin/plugin.json version = "
                       f"{dir_ver!r} (expected {canonical!r})")
 
     # Engine version is a separate axis — only validate it is a real ISO date.

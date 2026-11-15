@@ -10,8 +10,6 @@ description: >
   check the specs".
 ---
 
-<!-- implements: ARCH-REVIEW-022 -->  <!-- implements: REQ-REVIEW-906 -->
-
 # Requirement quality review (AI — advisory)
 
 This skill is the **out-of-band AI consumer** of the deterministic plan emitted by
@@ -41,6 +39,11 @@ frontmatter to silence a lint check that is intentionally violated (e.g.
    and on such an engine run the same plan as `gate --review`, a spelling removed in v8.0.0.
    The JSON carries each requirement's prose + structural `anchors`, a `coverage_summary`,
    and the three `categories` you judge.
+
+   **No engine in the repository** (no `scripts/reqmap.py`): there is no plan to get.
+   Read the `requirements/*.md` files the user names, or all of them, and judge the same
+   three categories from the prose. Say in the sidecar header that no plan was used,
+   and give coverage as the files you read out of the files that exist.
 
 2. **Judge ONLY these three categories** (do not invent others; `jargon-before-defined` is
    deliberately out of scope):

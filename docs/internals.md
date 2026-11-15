@@ -6,7 +6,7 @@
 ```
 .claude-plugin/marketplace.json             marketplace manifest (this repo is a marketplace)
 .mcp.json, .vscode/mcp.json                 MCP client configs that start this repo's own server
-plugin/                                     the plugin — self-contained
+plugin-full/                                     the plugin — self-contained
   .claude-plugin/plugin.json                plugin manifest
   tool_definition.json                      OpenAI function-calling schema for all reqmap commands
   skills/requirement-manager/
@@ -39,7 +39,7 @@ CHANGELOG.md                                one dated entry per release; read as
 ```
 
 The skill's shared workflow (authoritative for authoring rules, statuses, and the gate):
-[`plugin/skills/requirement-manager/references/workflow.md`](../plugin/skills/requirement-manager/references/workflow.md).
+[`plugin-full/skills/requirement-manager/references/workflow.md`](../plugin-full/skills/requirement-manager/references/workflow.md).
 
 
 Measured, not asserted — `python -X utf8 scripts/benchmark_scan.py` builds a synthetic

@@ -4,7 +4,7 @@
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
 #   2. engine bump    — reqmap.py / reqmap_engine/ staged without a MAP_ENGINE_VERSION change (fix: bump it)
-#   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py sync --root plugin --code .)
+#   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py sync --root plugin-full --code .)
 #   4. retired verbs  — an instruction naming a removed verb or flag
 #   5. requirement lint — unreadable/structurally broken spec (fix: rewrite it)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
@@ -35,9 +35,9 @@ if ! "$PY" -X utf8 scripts/check_retired_verbs.py; then
   echo "an instruction still names a verb the engine no longer has — fix the line or bring the verb back." >&2
   exit 1
 fi
-if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --full --root plugin --code .; then
+if ! "$PY" -X utf8 plugin-full/scripts/reqmap.py gate --full --root plugin-full --code .; then
   echo "" >&2
-  echo "reqmap: the gate failed — fix the ERRORs above, or run 'python plugin/scripts/reqmap.py" >&2
-  echo "        sync --root plugin --code .' when the committed map is merely stale." >&2
+  echo "reqmap: the gate failed — fix the ERRORs above, or run 'python plugin-full/scripts/reqmap.py" >&2
+  echo "        sync --root plugin-full --code .' when the committed map is merely stale." >&2
   exit 1
 fi

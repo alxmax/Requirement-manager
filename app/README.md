@@ -26,7 +26,7 @@ npm run build:viewer # → one self-contained file, installed into the plugin (s
 ## The self-contained viewer (`_map.html`)
 
 `npm run build:viewer` builds `viewer.html` into **one file** (JS + CSS inlined via
-`vite-plugin-singlefile`) and copies it to `plugin/scripts/_map_viewer.html`. That
+`vite-plugin-singlefile`) and copies it to `plugin-full/scripts/_map_viewer.html`. That
 file carries a `<!--REQMAP_DATA-->` marker. The stdlib engine (`reqmap.py map`) swaps
 the marker for `<script>window.__REQMAP_DATA__ = {…this repo's graph…}</script>` and
 writes `requirements/_map.html` — the **same app** as `npm run dev`, but a single file
@@ -46,7 +46,7 @@ To drive it with live registry data:
 
 ```bash
 # 1. emit the registry graph from the engine
-python ../plugin/scripts/reqmap.py export      # writes requirements/_map.json
+python ../plugin-full/scripts/reqmap.py export      # writes requirements/_map.json
 
 # 2. copy it into the app
 npm run sync                                    # → public/data.json

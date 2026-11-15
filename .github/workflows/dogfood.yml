@@ -6,7 +6,7 @@ name: dogfood
 # `./check`, the Action at this commit: the release job force-moves `@v8` onto
 # every released commit of `main`, so on `main` the two are the same code.
 # `code: ..` widens the scan to the repo root, as ci.yml's `gate --code ..` does;
-# without it every requirement whose members live outside plugin/ fails RM006.
+# without it every requirement whose members live outside plugin-full/ fails RM006.
 
 on:
   push:
@@ -32,5 +32,5 @@ jobs:
       - uses: ./check
         with:
           reqmap-path: scripts/reqmap.py
-          working-directory: plugin
+          working-directory: plugin-full
           code: ..
