@@ -17,6 +17,8 @@ bug is worth, so a priority an assistant chose stays marked as an estimate.
      fits.
    - `--prio` is `P0` critical, `P1` high, `P2` medium, `P3` low or `P4` minor.
    - Keep the `*`. Only a person removes it, by editing the row.
+   - When the bug breaks a requirement, write its id in `--source` (or `--why`), so
+     `gate --show ID` and the requirement's page list the bug.
 4. **Show it.** Run `sync`, or `sync --code ..` where the repository requires it, so the bug
    reaches the map.
 

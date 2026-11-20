@@ -11,7 +11,9 @@ import {
 } from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
-import { TranslatedProse, CovStrip, SpecMeta } from "./spec/SpecParts.jsx";
+import {
+  TranslatedProse, CovStrip, SpecMeta, BugsSection,
+} from "./spec/SpecParts.jsx";
 
 function TranslatedBadge() {
   return (
@@ -184,6 +186,7 @@ export function SpecDoc({ r, onNav, head = null, lead = null, after = null }) {
           </div>
         )}
         <RisksSection r={r} t={t} />
+        <BugsSection r={r} t={t} />
         {after}
       </div>
     </div>

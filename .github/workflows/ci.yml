@@ -83,6 +83,11 @@ jobs:
         run: python -X utf8 scripts/test_check_engine_bump.py
       - name: Engine line-budget tests
         run: python -X utf8 scripts/test_check_engine_budget.py
+      # ADR-0053: CORE and the total are measured on every pull request. ADR-0046: only a
+      # release is blocked by them, so an overrun shows here and does not fail the job.
+      - name: Engine line budget (measured, blocks only a release)
+        continue-on-error: true
+        run: python -X utf8 scripts/check_engine_budget.py | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Engine perf check tests
         run: python -X utf8 scripts/test_check_engine_perf.py
       - name: Pipeline wiring tests

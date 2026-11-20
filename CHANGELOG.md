@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+**A requirement shows the open bugs that name it (ADR-0083).**
+
+- A bug names a requirement by writing its id whole in the title, where, why or source; no new column. `_map.json` gives each bug `reqs`. REQ-BUGS-1131
+- `gate --show ID` lists the open bugs that name `ID` under `Open bugs`, highest priority first, and its `--json` carries them as `bugs`. A bug in the register is not listed. REQ-BUGS-1131
+- A requirement's page in the map lists them too (`Buguri deschise` in Romanian). REQ-BUGS-1131
+- The gate's verdict does not move: an open bug, of any priority, still adds no finding. The warning for a confirmed requirement with an open P0 or P1 was considered and not added (ADR-0083).
+- `bugreqs.py` stays lazy; the core rises to 6,814 logical lines for the two call sites in `show.py`.
+
+**A retirement that fails says so, and the map loads nothing from the network.**
+
+- `retire --delete --apply` reports `applied` only when the tags, the block and the lock entries are all gone. A member file it cannot read or write, or a block it cannot remove, fails the step with exit 1 and leaves the requirement and its lock entries in place; the message goes to stderr, so `--json` stays a document. REQ-RETIRE-1130
+- A failed step stops a batch, so the base of a consumer whose retirement failed is not retired. REQ-RETIRE-1130
+- The tag strip cuts only what the scanner reads as a tag: a tag's text in a string literal, a fenced example or a backtick span stays. A line that held only `<!-- implements: X -->` is removed instead of left as `<!-- -->`. REQ-RETIRE-1130
+- `clarify`'s default failure words gain " fault", "defect" and "degraded". " fault" carries a leading space because the match is a substring and "default" is not a failure path; on this corpus the count of `no-failure-case` questions is unchanged (16).
+- `_map_viewer.html` no longer links three Google web fonts no style used; the viewer already set system fonts only.
+- `docs/commands.md` and `docs/integrations.md` say eleven read-only MCP tools, and two writing ones behind `--allow-writes`. The skill's `references/mcp.md` no longer names `reqmap_new` nor promises that no client asks before a call.
+- CI measures the engine budget on every pull request, as ADR-0053 says it does. Only a release is blocked by it (ADR-0046).
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20`. The core stays at 6,810 logical lines.
+
 **A fixed bug leaves the list for a register (ADR-0082).**
 
 - `sync --fix ID` moves a row to `requirements/bugs/_fixed.md` with its found and fixed dates, version and commit. `--note` closes without a fix. REQ-BUGS-1127

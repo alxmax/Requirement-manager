@@ -517,6 +517,17 @@ class ViewerInject(unittest.TestCase):  # tested-by: ARCH-VIEWERFILE-074  # test
         self.assertNotIn("</script><img", out)        # NOT a raw breakout
         self.assertIn("<\\/script>", out)             # escaped form instead
 
+    def test_the_template_loads_nothing_from_the_network(self):
+        # It linked three web fonts no style used: a request on every open, and a
+        # map that looked different offline.
+        if not os.path.exists(R._viewer_template_path()):
+            self.skipTest("viewer template not vendored beside the engine")
+        with open(R._viewer_template_path(), encoding="utf-8") as f:
+            html = f.read()
+        remote = re.findall(r'<(?:link|script|img)\b[^>]*\b(?:href|src)="(?:https?:)?//[^"]*"'
+                            r'|@import\s+url\(\s*["\']?(?:https?:)?//', html)
+        self.assertEqual([], remote)
+
     def test_render_html_writes_self_contained_file(self):  # verifies: REQ-VIEWER-940#CASE-1  # verifies: REQ-VIEWER-940#CASE-2
         if not os.path.exists(R._viewer_template_path()):
             self.skipTest("viewer template not vendored beside the engine")

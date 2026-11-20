@@ -5,7 +5,8 @@ Part of the `requirement-manager` skill; [SKILL.md](../SKILL.md) links here.
 The engine is also served over the Model Context Protocol (ADR-0043). When the `reqmap_*`
 tools are available in this session (in Claude Code they appear as `mcp__reqmap__reqmap_gate`
 and so on), **ask the corpus through them instead of the terminal**: they take typed
-arguments, return JSON, are marked read-only, and need no per-command approval. Use the
+arguments, return JSON and are marked read-only, which a client may honour by not asking
+before each call (whether it does is the client's setting). Use the
 terminal for what the server does not offer. When the tools are absent, every command above
 works the same from the shell.
 
@@ -25,7 +26,7 @@ works the same from the shell.
 the committed `_map.json`. Attach a requirement as a resource when the task is "implement
 or change this requirement", so the contract is in context before any code is written.
 
-**Writing is opt-in.** `reqmap_sync`, `reqmap_new` (deprecated) and `reqmap_release` exist only when the
+**Writing is opt-in.** `reqmap_sync` and `reqmap_release` exist only when the
 user started the server with `--allow-writes`. Without them, run `sync` in the terminal as
 before; never ask the user to restart the server with writes just to save a command. Some
 decisions stay with a person whichever path runs them: flipping `status: confirmed`, the

@@ -32,7 +32,7 @@ def show_record(ws, cap_id, levels=None):
             "layer": m.get("layer", "feature"),
             "members": mem, "verify": _verify_bullets(body),
             "test_exempt": m.get("test_exempt")}
-    return {
+    rec = {
         "id": cap_id, "status": m.get("status", "draft"),
         "layer": m.get("layer", "?"),
         "priority": m.get("priority"), "milestone": m.get("milestone"),
@@ -59,6 +59,8 @@ def show_record(ws, cap_id, levels=None):
                  for s in _risk_signals(node)],
         "path": r.get("path"), "frontmatter": m, "body": body,
     }
+    from .bugreqs import attach  # implements: REQ-BUGS-1131
+    return attach(rec, ws)
 
 
 def _print_show(rec):  # implements: REQ-SHOW-917  # implements: REQ-SHOW-918
@@ -98,6 +100,8 @@ def _print_show(rec):  # implements: REQ-SHOW-917  # implements: REQ-SHOW-918
         print("\nRisk signals:")
         for s in rec["risk"]:
             print("  [{}] {}".format(s["signal"], s["advice"]))
+    from .bugreqs import print_open  # implements: REQ-BUGS-1131
+    print_open(rec.get("bugs"))
     print("\n{}".format(rec["path"]))
 
 

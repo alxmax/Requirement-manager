@@ -287,9 +287,16 @@ def cmd_retire(ws, cap_ids, delete=False, do_apply=False, force=False,
         return 1
 
     rc = 0
-    for plan in plans:
+    for n, plan in enumerate(plans):
         if _apply_one_retirement(plan, ws, single, delete, as_json):
+            # implements: REQ-RETIRE-1130
+            # The order is consumer first, so going on would retire the base
+            # of a consumer that is still there.
             rc = 1
+            if not as_json and n + 1 < len(plans):
+                print("stopped: {} later retirement(s) not attempted."
+                      .format(len(plans) - n - 1))
+            break
     if not as_json:
         print("  next: reqmap.py sync")
     return _emit_retire_result(plans, single, mode, order, as_json, rc)

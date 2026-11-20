@@ -44,7 +44,7 @@
       "end": "2026-10-21",
       "req": "ARCH-RETIRE-064",
       "milestone": "v8.25.0",
-      "roadmap": "`retire --apply` strips a tag only from the comment it was written in, checks every write and stops a batch at its first failure. Done when: a string literal holding the tag's text survives, `applied: true` is not reported after a failed block removal (`retireapply.py:41-45` sets it and returns 0 either way), and a consumer whose retirement failed leaves its base requirement alone"
+      "progress": 100
     },
     {
       "title": "Words match the engine",
@@ -56,13 +56,13 @@
       "roadmap": "The words about `sync` match what it does. Done when: `docs/commands.md:62` and `mcp.py:127` say an edited confirmed contract is demoted to draft (they say `sync` refuses), and `app/scripts/sync-data.mjs:4` points to `sync`, not to `reqmap.py export`, which no longer exists"
     },
     {
-      "title": "CI: budget on the PR, release waits for the smoke test",
+      "title": "Release waits for the smoke test",
       "lane": "Feature",
       "start": "2026-10-21",
       "end": "2026-10-22",
       "req": "ARCH-SELFGATE-039",
       "milestone": "v8.25.0",
-      "roadmap": "CI checks the engine budget on the pull request, and a release waits for the published-action smoke test. Done when: a pull request that adds one logical line over `CORE_LOGICAL_BUDGET` fails before merge (the script runs only in the `release` job, `ci.yml:375`, and the PR jobs run its test, `ci.yml:85,151`), and `release` does not go ahead while `dogfood.yml` is red"
+      "roadmap": "A release waits for the published-action smoke test. Done when: `release` does not go ahead while `dogfood.yml` is red"
     },
     {
       "title": "The plan keeps only what is open",
@@ -107,7 +107,7 @@
       "end": "2026-10-19",
       "req": "ARCH-CLARIFY-062",
       "milestone": "v8.25.0",
-      "roadmap": "`clarify` knows failure words beyond its own list. Done when: a case naming a sensor fault is not asked `no-failure-case` (`CLARIFY_FAILURE_WORDS`, `clarify.py:52`, lacks \"fault\"), and a repository can add words through `_config.json`"
+      "progress": 100
     },
     {
       "title": "Release history reads the same on a branch and its merge",
@@ -134,7 +134,7 @@
       "end": "2026-10-19",
       "req": "ARCH-MCP-073",
       "milestone": "v8.25.0",
-      "roadmap": "The MCP docs count the tools a client sees. Done when: `docs/integrations.md` and `docs/commands.md` say eleven read-only tools and two writing ones behind `--allow-writes`, and the skill's `references/mcp.md` no longer names `reqmap_new` nor says approval is never asked outside Claude Code"
+      "progress": 100
     },
     {
       "title": "The viewer makes no network request",
@@ -143,7 +143,7 @@
       "end": "2026-10-19",
       "req": "ARCH-VIEWER-007",
       "milestone": "v8.25.0",
-      "roadmap": "The map viewer makes no network request. Done when: `_map_viewer.html` carries its fonts or falls back to system fonts, with no `fonts.googleapis.com` link"
+      "progress": 100
     },
     {
       "title": "The skill's engine copy has a requirement",

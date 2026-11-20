@@ -10,6 +10,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -3399,6 +3400,12 @@ class ClarifyWordLists(unittest.TestCase):  # tested-by: REQ-CLARIFY-1115
         self.assertIn("CLARIFY_FAILURE_WORDS", out.getvalue())
         self.assertEqual(self.saved["CLARIFY_FAILURE_WORDS"], R.config.CLARIFY_FAILURE_WORDS)
 
+    def test_a_fault_is_a_failure_path_and_a_default_is_not(self):
+        clause = "`lamp` turns on at dusk."
+        self.assertNotIn("no-failure-case", self._rules_for(clause, "a sensor fault"))
+        self.assertNotIn("no-failure-case", self._rules_for(clause, "a degraded sensor"))
+        self.assertIn("no-failure-case", self._rules_for(clause, "the default threshold"))
+
 
 class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956
     """The counter compares two numbers and never reads a case, so it may not
@@ -3436,6 +3443,83 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
 
     def test_a_case_per_clause_raises_nothing(self):
         self.assertEqual(self._questions(3, 3), [])
+
+
+class RetireStopsOnFailure(unittest.TestCase):  # tested-by: REQ-RETIRE-1130
+    """`retire --delete --apply` reported `applied` over a block still in its file, dropped
+    its lock anyway, ignored a file it could not write, went on to the base of a consumer
+    whose retirement had failed, and cut a tag's text out of a string literal."""
+
+    _seed, _run, _pair = Retire._seed, Retire._run, Retire._pair
+
+    def _read(self, *parts):
+        with io.open(os.path.join(*parts), encoding="utf-8") as f:
+            return f.read()
+
+    def test_a_string_literal_keeps_the_tags_text(self):  # verifies: REQ-RETIRE-1130#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, extra_files=False)
+            _write(os.path.join(d, "t.py"),
+                   's = "{0}"  {0}\ndef f():\n    return s\n'.format(tag("AREA-R-001")))
+            code, _out = self._run(d, delete=True, do_apply=True)
+            got = self._read(d, "t.py")
+        self.assertEqual(0, code)
+        self.assertEqual('s = "{}"\ndef f():\n    return s\n'.format(tag("AREA-R-001")), got)
+
+    def test_a_failed_block_removal_is_not_applied(self):  # verifies: REQ-RETIRE-1130#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            R.save_lock(rd, {"AREA-R-001": "abc123"})
+            with mock.patch.object(R.retireapply, "_remove_requirement_block",
+                                   return_value=False), \
+                    redirect_stderr(io.StringIO()) as err:
+                code, out = self._run(d, delete=True, do_apply=True, as_json=True)
+            lock = R.load_lock(rd)
+        self.assertEqual(1, code)
+        self.assertNotEqual(True, json.loads(out).get("applied"))
+        self.assertIn("AREA-R-001", lock)
+        self.assertIn("NOT deleted", err.getvalue())
+
+    @unittest.skipIf(hasattr(os, "geteuid") and os.geteuid() == 0, "root ignores file modes")
+    def test_a_file_that_cannot_be_written_fails_the_step(self):  # verifies: REQ-RETIRE-1130#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            only = os.path.join(d, "only.py")
+            os.chmod(only, stat.S_IREAD)
+            try:
+                with redirect_stderr(io.StringIO()):
+                    code, _out = self._run(d, delete=True, do_apply=True)
+            finally:
+                os.chmod(only, stat.S_IWRITE | stat.S_IREAD)
+            spec_left = os.path.exists(os.path.join(rd, "AREA-R-001.md"))
+        self.assertEqual(1, code)
+        self.assertTrue(spec_left)
+
+    def test_a_batch_stops_at_the_first_failure(self):  # verifies: REQ-RETIRE-1130#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._pair(d)
+            with mock.patch.object(R.retireapply, "_remove_requirement_block",
+                                   return_value=False) as removal, \
+                    redirect_stderr(io.StringIO()):
+                code, out = self._run(d, rid=["AREA-R-001", "AREA-D-003"],
+                                      delete=True, do_apply=True)
+            base_left = os.path.exists(os.path.join(rd, "AREA-R-001.md"))
+        self.assertEqual(1, code)
+        self.assertEqual(1, removal.call_count)     # the consumer failed; the base was not tried
+        self.assertTrue(base_left)
+        self.assertIn("not attempted", out)
+
+    def test_an_html_comment_tag_is_still_cut(self):  # verifies: REQ-RETIRE-1130#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, extra_files=False)
+            _write(os.path.join(d, "notes.md"),
+                   "# Notes\n<!-- {}: AREA-R-001 -->\nText.\n".format(_ROLE))
+            code, _out = self._run(d, delete=True, do_apply=True)
+            got = self._read(d, "notes.md")
+            left = R.scan_members(d, d).get("AREA-R-001", [])
+        self.assertEqual(0, code)
+        self.assertEqual("# Notes\nText.\n", got)
+        self.assertEqual([], left)
 
 
 class RetireKeepsTheLineBreak(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-962

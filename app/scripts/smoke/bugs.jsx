@@ -3,6 +3,7 @@
 // tested-by: REQ-BUGS-1123
 // tested-by: REQ-BUGS-1126
 // tested-by: REQ-BUGS-1129
+// tested-by: REQ-BUGS-1131
 // tested-by: REQ-MAPSTAMP-1124
 // tested-by: REQ-MAPSTAMP-1125
 /* Render smoke test, part: the Bugs tab and the file it writes. Adopts a list
@@ -23,7 +24,8 @@ import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
   BugForm, BugHistory, BugReport, BugsPanel, moduleChoices,
 } from "../../src/views/problems/BugsPanel.jsx";
-import { noop, test } from "./harness.jsx";
+import { json, noop, specOf, test } from "./harness.jsx";
+import { bugsNaming } from "../../src/views/spec/SpecParts.jsx";
 import fixture from "./bugfile.fixture.json";
 import shapes from "./bugshape.fixture.json";
 
@@ -253,4 +255,25 @@ export async function bugFileChecks() {
   test("bugs: a folder with no _map.json is refused",
     refused.includes("requirements folder")
       && Object.keys(refusedFiles).length === 0);
+}
+
+{
+  // verifies: REQ-BUGS-1131#CASE-6
+  // A requirement's document lists the open bugs whose row names it.
+  const id = json.nodes[0].id;
+  const named = { ...bug("B9", "Core", "P0"), where: "core.py:9", reqs: [id] };
+  const other = { ...bug("B8", "Core", "P1"), reqs: [] };
+  adoptMapExport({ bugs: [other, named] });
+  const en = renderToString(
+    <I18nProvider initialLocale="en">{specOf(id)}</I18nProvider>);
+  const ro = renderToString(
+    <I18nProvider initialLocale="ro">{specOf(id)}</I18nProvider>);
+  adoptMapExport({ bugs: [] });
+  const none = renderToString(
+    <I18nProvider initialLocale="en">{specOf(id)}</I18nProvider>);
+  test("bugs: a requirement's document lists the open bugs that name it",
+    en.includes("Open bugs") && en.includes("Core:B9") && en.includes("core.py:9")
+      && !en.includes("Core:B8") && ro.includes("Buguri deschise")
+      && !none.includes("Open bugs")
+      && bugsNaming(id, [other, named]).length === 1);
 }

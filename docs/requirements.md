@@ -176,6 +176,12 @@ the bug closed, so add it again. Only files in `requirements/bugs/` are closed t
 with found against fixed by week and the median days to fix by priority. Pick a week, or
 search, to list its bugs. Lists show 25 rows a page; the export prints them all.
 
+A bug names a requirement by writing its id anywhere in the row: the title, where, why or
+source (`--source REQ-PAY-012`). `gate --show REQ-PAY-012` then lists it under **Open bugs**,
+its `--json` carries it as `bugs`, and the requirement's page in the map lists it too. The id
+must be written whole and with its case: `REQ-PAY-0120` does not name `REQ-PAY-012`. An open
+bug never changes the gate's verdict (ADR-0083).
+
 Run `sync` afterwards to put it on the map. A repository that already keeps bugs in its own
 Markdown tables declares them in `requirements/_config.json`. They are read and never
 written, and the map stays stale until `sync` runs after one of them changes:

@@ -1,10 +1,10 @@
 """`sync --retire --apply`: the writes — status, tags, blocks, locks."""
-import os, re
+import os, re, sys
 
 from .author import _set_frontmatter_status
 from .locks import load_lock, load_memberlock, save_lock, save_memberlock
 from .parse import load_requirements, split_requirement_blocks
-from .tags import _ROLE_ALT
+from .tags import _BACKTICK_RE, _ROLE_ALT, PROSE_EXTS, _visible_lines
 
 
 def _apply_one_retirement(plan, ws, single, delete, as_json):
@@ -34,19 +34,30 @@ def _apply_one_retirement(plan, ws, single, delete, as_json):
             print("  its code and tags are untouched; a deprecated "
                   "requirement is exempt from the gates.")
         return 0
+    # implements: REQ-RETIRE-1130
+    failed = []
     removed_tags = _strip_member_tags(
         code_root or os.path.dirname(reqs_dir) or ".",
-        plan["members"], cap_id)
-    block_ok = _remove_requirement_block(live[cap_id])
+        plan["members"], cap_id, failed)
+    plan["tags_removed"] = removed_tags
+    # Each step runs only when the one before it held: a lock dropped for a
+    # block still in its file, or `applied` over a failed write, reports a
+    # retirement that did not happen.
+    if failed:
+        print("\n{}: NOT deleted — could not rewrite {}; the requirement and "
+              "its lock entries are left in place.".format(
+                  cap_id, ", ".join(failed)), file=sys.stderr)
+        return 1
+    if not _remove_requirement_block(live[cap_id]):
+        print("\n{}: NOT deleted — {} tag(s) stripped, but its block could "
+              "not be removed from {}; lock entries kept.".format(
+                  cap_id, removed_tags, live[cap_id]["path"]), file=sys.stderr)
+        return 1
     _drop_lock_entries(reqs_dir, cap_id)
     plan["applied"] = True
-    plan["tags_removed"] = removed_tags
     if not as_json:
-        print("\ndeleted {}: {} tag(s) stripped, requirement {}, lock "
-              "entries dropped."
-              .format(cap_id, removed_tags,
-                      "block removed" if block_ok
-                      else "NOT removed (see above)"))
+        print("\ndeleted {}: {} tag(s) stripped, requirement block removed, "
+              "lock entries dropped.".format(cap_id, removed_tags))
         if plan["exclusive_files"]:
             print("  the files listed above now hold code nothing "
                   "points at — delete what is dead.")
@@ -67,11 +78,14 @@ def _trim_emptied_comment(line):  # implements: REQ-RETIRE-962
     return _EMPTIED_COMMENT_RE.sub(r"\1", line)
 
 
-def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
+def _strip_member_tags(code_root, mem, cap_id, failed=None):
+    # implements: REQ-RETIRE-962  # implements: REQ-RETIRE-1130
     """Remove `# implements: <id>` / `tested-by` / `verifies` tokens for one id
     from the files that carry them. Pure text: a line that carried ONLY this tag
     goes; a line that carried other tags too keeps them. Function bodies are
-    never touched."""
+    never touched. Only a token the scanner reads as a tag is cut: one inside a
+    string literal or a fenced example is text. A file that cannot be read or
+    written is appended to `failed`."""
     # `code_root`, not the requirements directory's parent: a member path is
     # relative to the scan root, and `--code ..` makes those two different
     # directories. Deriving one from the other built `plugin/plugin/scripts/...`
@@ -105,27 +119,55 @@ def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
         except OSError as e:
             print("  WARN  cannot read {} to strip its tag(s): {}".format(
                 rel, e))
+            if failed is not None:
+                failed.append(rel)
             continue
         lines = text.splitlines(keepends=True)
+        visible = dict(_visible_lines(path, lines))
+        prose = os.path.splitext(path)[1].lower() in PROSE_EXTS
         out = []
-        for line in lines:
-            if not tag_re.search(line):
+        for i, line in enumerate(lines, 1):
+            starts = _tag_starts(tag_re, line, visible.get(i), prose)
+            if not starts:
                 out.append(line)
                 continue
-            removed += len(tag_re.findall(line))
-            stripped = tag_re.sub("", line)
+            removed += len(starts)
+            stripped = tag_re.sub(
+                lambda m: "" if m.start() in starts else m.group(), line)
             # a line that was nothing but this tag (in whatever comment
             # syntax) goes
-            if re.fullmatch(r"[\s/*#<!\-]*",
+            if re.fullmatch(r"[\s/*#<!>\-]*",
                             stripped.replace("\r", "").replace("\n", "")):
                 continue
             out.append(_trim_emptied_comment(stripped))
+        if out == lines:
+            continue
         try:
             with open(path, "w", encoding="utf-8", newline="") as f:
                 f.write("".join(out))
-        except OSError:
-            continue
+        except OSError as e:
+            print("  WARN  cannot write {} to strip its tag(s): {}".format(
+                rel, e))
+            if failed is not None:
+                failed.append(rel)
     return removed
+
+
+def _tag_starts(tag_re, line, seen, prose):  # implements: REQ-RETIRE-1130
+    """Offsets in `line` of the tags the scanner reads, as a set. `seen` is the
+    line as `_visible_lines` yields it (None: a fenced or indented example, no
+    tag at all); strings are blanked in place, so offsets line up. When they do
+    not, the line is taken whole, as before: a missed tag fails the next gate,
+    a cut literal fails silently."""
+    if seen is None:
+        return set()
+    if prose:
+        seen = _BACKTICK_RE.sub(lambda m: " " * len(m.group()), seen)
+    raw = line.rstrip("\r\n")
+    all_starts = {m.start() for m in tag_re.finditer(raw)}
+    if len(seen) != len(raw):
+        return all_starts
+    return {m.start() for m in tag_re.finditer(seen)} & all_starts
 
 
 def _remove_requirement_block(r):  # implements: REQ-RETIRE-962

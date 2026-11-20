@@ -29,6 +29,7 @@ Every bullet below is binding.
 - `sync --fix` moves a row to a register with its dates, version and commit. [[REQ-BUGS-1127]]
 - `sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]
 - The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]
+- A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]
 
 ## Cases
 CASE-1 — a bug goes from the command line to the map
@@ -741,3 +742,67 @@ CASE-7 — a long list
   Given  30 open bugs in one module
   When   the tab renders
   Then   it shows 25 rows and says page 1 of 2, and a page past the end is the last page
+
+--------------------
+
+
+---
+id: REQ-BUGS-1131
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# A requirement shows the open bugs that name it
+
+## Description
+> A bug list by module answers "what is broken in Billing". The question a reader of one
+> requirement has is "is this one broken", and the answer sat in a `Source` cell nothing
+> read. A row that writes the id is the link: no new column, nothing to keep in step. See
+> [ADR-0083](../../docs/adr/0083-a-bug-names-the-requirement-it-breaks.md).
+
+Every bullet below is binding.
+- An open bug names a requirement when the requirement's id is written whole in its title,
+  where, why or source: `X-10` does not name `X-1`, and `X-1#CASE-2` or `[[X-1]]` does.
+- `_map.json` gives each bug `reqs`, the ids of the corpus it names, sorted.
+- `gate --show ID` lists the open bugs that name `ID`, highest priority first, and its
+  `--json` record carries them as `bugs`. A repository with no bug list has no `bugs` key.
+- A requirement's page in the map lists the same bugs, with priority, id, title and where.
+- A bug in the register is not open, and is not listed.
+- An open bug that names a requirement adds no finding: the gate's verdict and exit code are
+  the same with or without it.
+
+## Cases
+CASE-1 — the dossier lists the bugs that name it
+  Given  two open bugs, one whose source names the requirement
+  When   `gate --show ID` runs
+  Then   an `Open bugs (1)` section lists that bug's priority, id and title, and not the other
+
+CASE-2 — the record carries the list
+  Given  a repository with no bug list, then one with a bug that names the requirement, then
+         one with a bug that names nothing
+  When   `gate --show ID --json` runs on each
+  Then   the first record has no `bugs` key, the second lists the bug, the third an empty list
+
+CASE-3 — an id is named whole
+  Given  bugs writing `X-10 fails`, `X-1#CASE-2`, `[[X-1]]` and `x-1`
+  When   they are linked to `X-1` and `X-10`
+  Then   they name `X-10`, `X-1`, `X-1` and nothing
+
+CASE-4 — the map carries the ids, and a fixed bug leaves the dossier
+  Given  an open bug that names a requirement
+  When   `sync` runs, then `sync --fix` closes the bug
+  Then   the map's bug carries the id in `reqs`, and the dossier then lists no bug
+
+CASE-5 — the verdict does not move
+  Given  an open P0 that names a confirmed requirement
+  When   `gate --full --strict` runs
+  Then   it exits 0 and no line names the bug
+
+CASE-6 — the page lists them
+  Given  a map whose bugs name a requirement, one of them, and one that names nothing
+  When   the requirement's page renders
+  Then   it lists `Open bugs` with the bug that names it and its where, not the other, in
+         Romanian as `Buguri deschise`, and nothing when no bug names it
