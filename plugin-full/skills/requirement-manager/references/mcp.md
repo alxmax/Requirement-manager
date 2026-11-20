@@ -25,6 +25,8 @@ works the same from the shell.
 **Resources.** `reqmap://requirement/<id>` is one requirement's dossier, and `reqmap://map`
 the committed `_map.json`. Attach a requirement as a resource when the task is "implement
 or change this requirement", so the contract is in context before any code is written.
+Claude Code and Visual Studio list resources; Copilot's other clients (VS Code, the CLI,
+the cloud agent) list only tools, so there call `reqmap_show(id)` instead.
 
 **Writing is opt-in.** `reqmap_sync` and `reqmap_release` exist only when the
 user started the server with `--allow-writes`. Without them, run `sync` in the terminal as

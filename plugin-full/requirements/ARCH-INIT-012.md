@@ -21,6 +21,7 @@ satisfies: [SYS-SHIP-108]
 Every bullet below is binding.
 - `init` creates the requirements folder and a starter `.reqmapignore` when either is missing, never overwriting one that already exists. [[REQ-INIT-860]]
 - `init` drafts requirements from untagged code, writes the lock, then builds the map, in that order, and ends with a short summary pointing at the one next command. [[REQ-INIT-861]]
+- `init` prints the instructions an assistant that does not load the skill needs, and writes no instructions file. [[REQ-INIT-1132]]
 
 ## Cases
 CASE-1
@@ -232,3 +233,50 @@ CASE-5 — minimal initialization preserves existing optional files
   Given a repository with an existing roadmap
   When minimal init runs twice
   Then maps and locks exist, no optional scaffolding is added, and the roadmap is unchanged
+
+--------------------
+
+
+---
+id: REQ-INIT-1132
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-INIT-012]
+---
+
+# An assistant without the skill still learns the gate
+
+## Description
+> Copilot's chat in an IDE or on github.com reads `.github/copilot-instructions.md`, and its
+> agents read `AGENTS.md`; neither loads this skill, and a cloud agent runs no git hook. The
+> few rules that keep a repository in step have to reach that file, and it belongs to the
+> repository. See [ADR-0084](../../docs/adr/0084-init-prints-what-an-assistant-reads.md).
+
+Every bullet below is binding.
+- After a run that tracks at least one requirement, `init` prints a block of four rules under
+  one line that names `.github/copilot-instructions.md` and `AGENTS.md`.
+- The rules say to run `gate --full` before finishing, to read a requirement with
+  `gate --show` before changing its code, to tag code and tests, and that a person confirms.
+- Each command names the engine path the repository runs, relative to its root, or a bare
+  `reqmap.py` when the engine is outside it.
+- No rule reads as a membership tag, so the block can be pasted into a scanned file.
+- `init` writes neither file.
+
+## Cases
+CASE-1 — printed, not written
+  Given  a repository with one source file and no instructions file
+  When   `init` runs and its block is pasted into `.github/copilot-instructions.md`
+  Then   the output carries the four rules, `init` wrote neither file, and the next gate exits 0
+
+CASE-2 — no line is a tag
+  Given  the four rules
+  When   the tag pattern reads each one
+  Then   it finds nothing
+
+CASE-3 — the engine path is the repository's own
+  Given  an engine inside the repository under `scripts/`, then one outside it
+  When   the block is printed
+  Then   the first names `python scripts/reqmap.py gate --full`, the second
+         `python reqmap.py gate --full`

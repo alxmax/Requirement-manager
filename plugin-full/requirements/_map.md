@@ -1,7 +1,7 @@
 ---
 generated: 2026-11-20
-engine: 2026-11-20.1
-nodes: 357
+engine: 2026-11-20.2
+nodes: 358
 edges: 130
 design pass-rate: 91% (128/140 source files without a design candidate)
 ---
@@ -199,6 +199,7 @@ graph LR
     REQ_IMPLEMENT_959["Pointing at where this kind of code lives<br><small>REQ-IMPLEMENT-959</small>"]
     REQ_INIT_860["Scaffolding the requirements folder and a starter .reqmapignore<br><small>REQ-INIT-860</small>"]
     REQ_INIT_861["Running draft, lock, and map in a fixed order<br><small>REQ-INIT-861</small>"]
+    REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small>"]
     REQ_LEVEL_862["The level field, validated independently of layer<br><small>REQ-LEVEL-862</small>"]
     REQ_LEVELRETROFIT_985["Which rung, and on what evidence<br><small>REQ-LEVELRETROFIT-985</small>"]
     REQ_LEVELRETROFIT_986["Writing a rung into a file somebody else wrote<br><small>REQ-LEVELRETROFIT-986</small>"]
@@ -671,8 +672,8 @@ graph LR
   ARCH_INIT_012 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_392_623
   f_plugin_full_scripts_test_reqmap_report_py_2187_5295["plugin-full/scripts/test_reqmap_report.py:2187-5295"]
   ARCH_INIT_012 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_2187_5295
-  f_plugin_full_scripts_reqmap_engine_init_py_146_335["plugin-full/scripts/reqmap_engine/init.py:146-335"]
-  ARCH_INIT_012 -->|implements| f_plugin_full_scripts_reqmap_engine_init_py_146_335
+  f_plugin_full_scripts_reqmap_engine_init_py_147_363["plugin-full/scripts/reqmap_engine/init.py:147-363"]
+  ARCH_INIT_012 -->|implements| f_plugin_full_scripts_reqmap_engine_init_py_147_363
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
   f_plugin_full_scripts_test_reqmap_gate_py_2282_2596["plugin-full/scripts/test_reqmap_gate.py:2282-2596"]
   ARCH_LEVEL_051 -->|tested-by| f_plugin_full_scripts_test_reqmap_gate_py_2282_2596
@@ -833,8 +834,8 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_health_py_125_319["plugin-full/scripts/reqmap_engine/health.py:125-319"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_full_scripts_reqmap_engine_health_py_125_319
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_full_scripts_test_reqmap_author_py_4347["plugin-full/scripts/test_reqmap_author.py:4347"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4347
+  f_plugin_full_scripts_test_reqmap_author_py_4392["plugin-full/scripts/test_reqmap_author.py:4392"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4392
   f_plugin_full_scripts_reqmap_engine_plandrift_py_362_428["plugin-full/scripts/reqmap_engine/plandrift.py:362-428"]
   ARCH_RELEASE_072 -->|implements| f_plugin_full_scripts_reqmap_engine_plandrift_py_362_428
   f_plugin_full_scripts_reqmap_engine_release_py_1_386["plugin-full/scripts/reqmap_engine/release.py:1-386"]
@@ -964,12 +965,12 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_full_scripts_reqmap_py_268["plugin-full/scripts/reqmap.py:268"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_py_268
-  f_plugin_full_scripts_test_reqmap_author_py_4559["plugin-full/scripts/test_reqmap_author.py:4559"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4559
+  f_plugin_full_scripts_test_reqmap_author_py_4604["plugin-full/scripts/test_reqmap_author.py:4604"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4604
   f_plugin_full_scripts_reqmap_engine_git_py_88_107["plugin-full/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_git_py_88_107
-  f_plugin_full_scripts_reqmap_engine_init_py_319["plugin-full/scripts/reqmap_engine/init.py:319"]
-  ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_init_py_319
+  f_plugin_full_scripts_reqmap_engine_init_py_320["plugin-full/scripts/reqmap_engine/init.py:320"]
+  ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_init_py_320
   f_plugin_full_scripts_reqmap_engine_mapcmd_py_251["plugin-full/scripts/reqmap_engine/mapcmd.py:251"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_251
   f_plugin_full_scripts_reqmap_engine_site_py_15_182["plugin-full/scripts/reqmap_engine/site.py:15-182"]
@@ -1175,7 +1176,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>275 caps</small>"]
+  a_REQ["REQ<br><small>276 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1207,6 +1208,7 @@ graph LR
     REQ_BUGS_1128["A commit closes the bug it names<br><small>REQ-BUGS-1128</small><br>unreviewed"]
     REQ_BUGS_1129["The map shows what was fixed<br><small>REQ-BUGS-1129</small><br>unreviewed"]
     REQ_BUGS_1131["A requirement shows the open bugs that name it<br><small>REQ-BUGS-1131</small><br>unreviewed"]
+    REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
@@ -1225,6 +1227,7 @@ graph LR
   style REQ_BUGS_1128 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1129 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1131 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_INIT_1132 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
@@ -1249,6 +1252,7 @@ graph LR
 | REQ-BUGS-1128 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1129 | draft | 10 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1131 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-INIT-1132 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

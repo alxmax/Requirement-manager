@@ -91,7 +91,36 @@ decisions stay a person's whichever path runs them (confirming, the drift reason
 Why a server when the CLI already works, and why it is not declared by the plugin:
 [ADR-0043](adr/0043-the-engine-is-served-over-mcp.md).
 
-### GitHub Copilot, Gemini CLI, and others
+### GitHub Copilot
+
+Copilot reads most of what this repository ships, and where it reads it differs by surface.
+As of 2026-11-20, from GitHub's and VS Code's documentation; no row marked *not observed*
+has been run against this engine yet.
+
+| Surface | Skill | MCP server | Instructions it reads | What runs the gate |
+|---|---|---|---|---|
+| VS Code, Copilot harness (the default since 1.143) | `.claude/skills`, `.github/skills`, `.agents/skills` | workspace `.mcp.json` (`mcpServers`); tools, no resources. *Not observed* | `.github/copilot-instructions.md`; `AGENTS.md` with `chat.useAgentsMdFile` | your pre-commit hook, CI |
+| VS Code, Local harness (deprecated in 1.146, removed in February 2027) | as above | `.vscode/mcp.json` (`servers`) | as above | as above |
+| Copilot CLI | `.github/skills`, `.agents/skills`, `.claude/skills` | `.mcp.json` or `.github/mcp.json`, never `.vscode/mcp.json`. *Not observed* | `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | your pre-commit hook, CI |
+| Cloud agent (assigned an issue, opens a PR) | project skills | repository Settings, Copilot, MCP servers (`mcpServers`, with `tools`); tools only | `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | CI on its PR; no git hook is documented to run. Its workflows wait for approval unless the repository turns that off |
+| Code review | project skills | only tools marked `readOnlyHint: true`, which every read-only `reqmap_*` tool is | `.github/copilot-instructions.md`, root `AGENTS.md`, `CLAUDE.md` | CI |
+| Visual Studio | `.claude/skills`, `.github/skills` | `.mcp.json`, `.vs/mcp.json` or `.vscode/mcp.json`; resources listed | `.github/copilot-instructions.md` | your pre-commit hook, CI |
+| Chat on github.com, chat in JetBrains | (JetBrains: preview) | (JetBrains: moving to the CLI's) | `.github/copilot-instructions.md` only | CI |
+
+- **The skill.** `apm install alxmax/requirement-manager/plugin` puts it, with its engine, in
+  `.agents/skills/requirement-manager/` for Copilot (APM 0.36; older releases used
+  `.github/skills/`). The skill runs its own `scripts/reqmap.py` there.
+- **The rules.** A surface that loads no skill learns the workflow from
+  `.github/copilot-instructions.md` or `AGENTS.md`. `init` prints four lines to paste into either
+  and writes neither ([ADR-0084](adr/0084-init-prints-what-an-assistant-reads.md)).
+- **The verdict.** A cloud agent commits without your hook, so the gate that holds for it is the
+  one in CI (`uses: alxmax/requirement-manager/check@v8`, below).
+- **Not observed yet:** the directory a stdio server starts in under the Copilot harness, the CLI
+  and the cloud agent, which decides what `${CLAUDE_PROJECT_DIR:-.}` in the `.mcp.json` `init`
+  writes resolves to; and whether Copilot expands `${CLAUDE_PLUGIN_ROOT}` in a `SKILL.md`. Until
+  they are, run the server from the repository root.
+
+### Gemini CLI, Codex and others
 
 The engine is a plain Python CLI with no AI SDK dependency. Any assistant that
 can run shell commands can drive the full workflow. The plugin ships two
@@ -101,6 +130,7 @@ interoperability artifacts:
 [OpenAI function-calling schema](https://platform.openai.com/docs/guides/function-calling).
 Load this file so your assistant can discover all available commands, their
 parameters, and their descriptions without reading source code.
+No Copilot surface reads it; Copilot learns the commands from the skill or the MCP server.
 
 **`SKILL.universal.md` files** — AI-agnostic variants of each skill's instruction
 file, with all Claude Code-specific directives removed (`Skill` tool invocations,
