@@ -3,7 +3,7 @@
 /* Requirement search — the ranked relevance model, shared with the engine.
  *
  * This is a faithful JS port of the Python scoring in
- * plugin/scripts/reqmap.py
+ * plugin-full/scripts/reqmap.py
  * (`_sim_tokens` / `_sim_text` / `_tfidf` / `_cosine`, contract
  * ARCH-SIMILAR-016)
  * exactly as the `search` CLI command uses it (ARCH-SEARCH-036). The

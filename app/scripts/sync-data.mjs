@@ -1,13 +1,13 @@
 // implements: ARCH-VIEWER-007
 /* Copy the engine's registry export into the app so it ships with live data.
  *
- *   1. python ../plugin/scripts/reqmap.py export
+ *   1. python ../plugin-full/scripts/reqmap.py export
  *      (writes requirements/_map.json)
  *   2. npm run sync
  *      (this script → public/data.json)
  *
  * Resolves the engine export relative to the repo root, trying the dogfooded
- * plugin/requirements first, then a top-level requirements/. Prints a clear
+ * plugin-full/requirements first, then a top-level requirements/. Prints a clear
  * message and exits 0 (non-fatal) when no export is found — the app then
  * shows its no-map screen.
  *
@@ -24,7 +24,7 @@ const appRoot = resolve(here, "..");
 const repoRoot = resolve(appRoot, "..");
 
 const candidates = [
-  resolve(repoRoot, "plugin", "requirements", "_map.json"),
+  resolve(repoRoot, "plugin-full", "requirements", "_map.json"),
   resolve(repoRoot, "requirements", "_map.json"),
 ];
 

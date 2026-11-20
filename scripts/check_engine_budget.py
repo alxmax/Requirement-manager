@@ -18,7 +18,7 @@ measured. The budget no longer covers every file `wc -l` counts:
   spend or earn budget.
 
 The physical total, exactly
-`wc -l plugin/scripts/reqmap.py plugin/scripts/reqmap_engine/*.py | tail -1`,
+`wc -l plugin-full/scripts/reqmap.py plugin-full/scripts/reqmap_engine/*.py | tail -1`,
 is still printed, because every CHANGELOG entry quotes it. It is judged
 only against a ceiling, TOTAL_LINE_CEILING, set by the maintainer as an
 alarm: it does not say what the engine should weigh, only that crossing
@@ -45,7 +45,7 @@ import tokenize
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-ENGINE_DIR = REPO_ROOT / "plugin" / "scripts"
+ENGINE_DIR = REPO_ROOT / "plugin-full" / "scripts"
 PACKAGE = "reqmap_engine"
 # The stage reached, lowered only by the change that earns it (ADR-0046).
 # Set by ADR-0053 to the measured core, in logical lines, with no headroom;

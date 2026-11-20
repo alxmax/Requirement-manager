@@ -16,7 +16,7 @@
 - The skill's `references/mcp.md` says resources are listed by Claude Code and Visual Studio, and that elsewhere the assistant calls `reqmap_show`.
 - `docs/integrations.md` says no Copilot surface reads `tool_definition.json`; the file stays.
 - ROADMAP's licence line names Apache-2.0 and ADR-0069.
-- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.1`. `init.py` is lazy, so the core does not grow.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.2`. `init.py` is lazy, so the core does not grow.
 
 **A requirement shows the open bugs that name it (ADR-0083).**
 
@@ -116,6 +116,29 @@
 - `CLARIFY_HEDGES` and `CLARIFY_FAILURE_WORDS` are `_config.json` keys. A list set there replaces the default, as the `LINT_QUESTION_*` lists do, and is compared without regard to case; a value that is not a list of strings is reported and the default stays. Measured read-only on three consumer corpora written in Romanian, the English lists made `vague-term` 0 of 19 real and `no-failure-case` 5 of 20, mostly because cases proving a failure path in Romanian words or by status code were not recognised. REQ-CLARIFY-1115, a draft until it is read
 - `case-monoculture` reads a Given's head word in any script: a word with a diacritic lost its first letters. REQ-CLARIFY-1115
 - Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.7`; 18,949 physical lines in 78 files (the README says so). The core rises to 6,750 logical lines: the two are the function that builds the hedge pattern from the configured list
+
+## plugin `v8.24.8` — 2026-11-14
+
+**`plugin/` is now the directory edition, and the engine edition moved to `plugin-full/`.**
+
+- The plugin directory's submission reads `plugin/` and ignores `marketplace.json`, so v8.24.7 was refused again for the engine files there. The 12 Markdown and JSON files of the directory edition now live in `plugin/`.
+- The engine, its MCP mode, the pre-commit hook and the offline map viewer moved to `plugin-full/`. The engine path in this repository is now `plugin-full/scripts/reqmap.py`.
+- Marketplace installs are unaffected: `requirement-manager` is still the directory edition and `requirement-manager-full` the engine edition. Plugin-cache paths go by plugin name, so they do not move.
+- CI, the dev hooks, `sync_reqmap.sh`, `check/engine_staleness.py`, the root `.mcp.json` and `.vscode/mcp.json`, the packaging scripts and the docs follow the move. The Action still runs a consumer's own `scripts/reqmap.py`.
+- `scripts/check_directory_edition.py` fails CI when `plugin/` gains a file the directory refuses: code, a `#!` file, runnable configuration, or anything in `.claude-plugin/` but the manifest and images. REQ-SELFGATE-1130
+- `scripts/check_engine_bump.py` reads the engine across the move as renames, so the version bump is still seen.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-14`. Only the source-repo probe changed behaviour; it now looks for `plugin-full/.claude-plugin/plugin.json`.
+
+## plugin `v8.24.7` — 2026-11-14
+
+**The marketplace lists two plugins: `requirement-manager` is now the directory edition, and the engine edition is `requirement-manager-full`.**
+
+- Installs of `requirement-manager` from this marketplace now receive the directory edition (`directory-plugin/`): the two skills as Markdown, the manifest and the icon, and nothing that runs. The Claude plugin directory refuses local MCP servers, scripts and hooks from organizations that are not Verified, and it reads the plugin from this entry. The skill runs a repository's vendored engine when it has one and otherwise follows `references/manual-mode.md`, which states what it cannot do
+- The engine, its MCP mode, the pre-commit hook and the offline map viewer stay in `plugin/`, renamed `requirement-manager-full`. To keep them, install it: `/plugin install requirement-manager-full@requirement-manager`. An existing `requirement-manager` install updates to the directory edition and does not move to `requirement-manager-full` by itself
+- `sync_reqmap.sh` refreshes the engine in the `requirement-manager-full` cache directory. `plugin/README.md`, `directory-plugin/`, `docs/integrations.md` and `docs/architecture.html` name the new install line
+- `scripts/check_versions.py` also holds `directory-plugin/.claude-plugin/plugin.json` to the canonical version, `--fix` rewrites it, and its tests cover a stale directory manifest and a stale second marketplace entry
+- The GitHub Action's `@v8` alias is unaffected: the major is unchanged. No engine change; `MAP_ENGINE_VERSION` stays `2026-11-02.2`
+- This patch is cut outside the plan so the directory sees a new version. The engine changes listed under [Unreleased] are already on main, so installed copies receive them with this version; their notes stay there until the v8.25.0 milestone closes
 
 ## plugin `v8.24.6` — 2026-10-19
 

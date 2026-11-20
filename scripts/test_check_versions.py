@@ -19,7 +19,8 @@ import check_versions as CV
 
 
 def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
-           engine="2026-06-21.4", plugins=None, action_majors=(), apm_ver=None):
+           engine="2026-06-21.4", plugins=None, action_majors=(), apm_ver=None,
+           dir_ver=None):
     """action_majors: the major each file in CV.ACTION_REF_FILES (in order) references;
     None for a file that carries no reference at all. Files past the end of the
     tuple default to "v2"."""
@@ -29,43 +30,56 @@ def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
         body = "" if major is None else "uses: alxmax/requirement-manager/check@{}".format(major)
         (d / rel).parent.mkdir(parents=True, exist_ok=True)
         (d / rel).write_text(body, encoding="utf-8")
-    (d / "plugin" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
+    (d / "plugin-full" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
     (d / ".claude-plugin").mkdir(parents=True, exist_ok=True)
-    (d / "plugin" / "scripts").mkdir(parents=True, exist_ok=True)
+    (d / "plugin-full" / "scripts").mkdir(parents=True, exist_ok=True)
     plugin_obj = {} if plugin_ver is None else {"version": plugin_ver}
-    (d / "plugin" / ".claude-plugin" / "plugin.json").write_text(
+    (d / "plugin-full" / ".claude-plugin" / "plugin.json").write_text(
         json.dumps(plugin_obj), encoding="utf-8")
     if plugins is None:
-        plugins = [{"name": "requirement-manager", "version": plug_ver, "source": "./plugin"}]
+        plugins = [{"name": "requirement-manager", "version": plug_ver, "source": "./plugin-full"}]
     (d / ".claude-plugin" / "marketplace.json").write_text(
         json.dumps({"version": market_ver, "plugins": plugins}), encoding="utf-8")
-    (d / "plugin" / "scripts" / "reqmap_engine").mkdir()
-    (d / "plugin" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
+    (d / "plugin-full" / "scripts" / "reqmap_engine").mkdir()
+    (d / "plugin-full" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
         'MAP_ENGINE_VERSION = "{}"\n'.format(engine), encoding="utf-8")
     (d / "pyproject.toml").write_text(
         '[project]\nname = "reqmap"\nversion = "{}"\n'.format(
             plugin_ver or "0.0.0"), encoding="utf-8")
-    (d / "plugin" / "apm.yml").write_text(
+    (d / "plugin-full" / "apm.yml").write_text(
         "name: requirement-manager\nversion: {}\n".format(
             apm_ver or plugin_ver or "0.0.0"), encoding="utf-8")
+    (d / "plugin" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
+    (d / "plugin" / ".claude-plugin" / "plugin.json").write_text(
+        json.dumps({"name": "requirement-manager",
+                    "version": dir_ver or plugin_ver or "0.0.0"}, indent=2) + "\n",
+        encoding="utf-8")
     return d
 
 
+TWO_ENTRIES = [
+    {"name": "requirement-manager", "version": "2.7.5", "source": "./plugin"},
+    {"name": "requirement-manager-full", "version": "2.7.5", "source": "./plugin-full"},
+]
+
+
 class CheckVersions(unittest.TestCase):
-    def _run(self, d):
+    def _run(self, d, argv=()):
         saved = (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
-                 CV.APM_YML)
+                 CV.APM_YML, CV.DIRECTORY_PLUGIN_JSON)
         CV.REPO_ROOT = Path(d)
-        CV.PLUGIN_JSON = Path(d) / "plugin" / ".claude-plugin" / "plugin.json"
+        CV.DIRECTORY_PLUGIN_JSON = (Path(d) / "plugin" / ".claude-plugin"
+                                    / "plugin.json")
+        CV.PLUGIN_JSON = Path(d) / "plugin-full" / ".claude-plugin" / "plugin.json"
         CV.MARKETPLACE_JSON = Path(d) / ".claude-plugin" / "marketplace.json"
-        CV.REQMAP_PY = Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
-        CV.APM_YML = Path(d) / "plugin" / "apm.yml"
+        CV.REQMAP_PY = Path(d) / "plugin-full" / "scripts" / "reqmap_engine" / "__init__.py"
+        CV.APM_YML = Path(d) / "plugin-full" / "apm.yml"
         try:
             with redirect_stdout(io.StringIO()):
-                return CV.main([])
+                return CV.main(list(argv))
         finally:
             (CV.REPO_ROOT, CV.PLUGIN_JSON, CV.MARKETPLACE_JSON, CV.REQMAP_PY,
-             CV.APM_YML) = saved
+             CV.APM_YML, CV.DIRECTORY_PLUGIN_JSON) = saved
 
     def test_aligned_passes(self):
         with tempfile.TemporaryDirectory() as d:
@@ -83,7 +97,7 @@ class CheckVersions(unittest.TestCase):
             self.assertEqual(self._run(d), 1)
 
     def test_apm_manifest_mismatch_fails(self):
-        """APM requires a `version:` in plugin/apm.yml; a release that bumps
+        """APM requires a `version:` in plugin-full/apm.yml; a release that bumps
         plugin.json and leaves it behind must fail the build."""
         with tempfile.TemporaryDirectory() as d:
             _setup(d, apm_ver="9.9.9")
@@ -102,7 +116,7 @@ class CheckVersions(unittest.TestCase):
     def test_docstring_mention_before_assignment_is_ignored(self):  # regex anchor regression
         with tempfile.TemporaryDirectory() as d:
             _setup(d)
-            (Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
+            (Path(d) / "plugin-full" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
                 '"""example: MAP_ENGINE_VERSION = "not-a-date" """\n'
                 'MAP_ENGINE_VERSION = "2026-06-21.4"\n', encoding="utf-8")
             self.assertEqual(self._run(d), 0)   # unanchored regex matched the docstring -> 1
@@ -158,6 +172,47 @@ class CheckVersions(unittest.TestCase):
                 '[project]\nname = "reqmap"\nversion = "9.9.9"\n',
                 encoding="utf-8")
             self.assertEqual(self._run(d), 1)
+
+    def test_directory_plugin_version_mismatch_fails(self):
+        """The marketplace's first entry installs the directory edition: a bump
+        that leaves its plugin.json behind ships a release that entry never sees."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugins=TWO_ENTRIES, dir_ver="9.9.9")
+            self.assertEqual(self._run(d), 1)
+
+    def test_directory_plugin_manifest_missing_exits_2(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d)
+            (Path(d) / "plugin" / ".claude-plugin" / "plugin.json").unlink()
+            with self.assertRaises(SystemExit) as raised:   # _load_json's exit, as for marketplace.json
+                self._run(d)
+            self.assertEqual(raised.exception.code, 2)
+
+    def test_two_entries_aligned_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugins=TWO_ENTRIES)
+            self.assertEqual(self._run(d), 0)
+
+    def test_stale_second_entry_fails(self):
+        """Each plugins[] entry is checked, not just the first: the full edition's
+        entry left behind is the drift that would strand its installs."""
+        with tempfile.TemporaryDirectory() as d:
+            entries = [dict(TWO_ENTRIES[0]), dict(TWO_ENTRIES[1], version="2.7.4")]
+            _setup(d, plugins=entries)
+            self.assertEqual(self._run(d), 1)
+
+    def test_fix_syncs_directory_plugin_and_every_entry(self):
+        with tempfile.TemporaryDirectory() as d:
+            entries = [dict(TWO_ENTRIES[0], version="2.7.4"),
+                       dict(TWO_ENTRIES[1], version="2.7.4")]
+            _setup(d, plugins=entries, dir_ver="2.7.4")
+            self.assertEqual(self._run(d, ["--fix"]), 0)
+            dir_json = json.loads((Path(d) / "plugin" / ".claude-plugin"
+                                   / "plugin.json").read_text(encoding="utf-8"))
+            self.assertEqual(dir_json, {"name": "requirement-manager", "version": "2.7.5"})
+            market = json.loads((Path(d) / ".claude-plugin" / "marketplace.json")
+                                .read_text(encoding="utf-8"))
+            self.assertEqual([p["version"] for p in market["plugins"]], ["2.7.5", "2.7.5"])
 
     def test_engine_version_revision_suffix(self):
         for engine, expected in [("2026-06-03.2", 0),   # valid same-day revision
