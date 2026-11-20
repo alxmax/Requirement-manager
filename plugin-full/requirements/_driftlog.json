@@ -22,8 +22,8 @@
       "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-CHECK-006": {
-      "hash": "33fa43f5b959",
-      "reason": "REQ-CHECK-1133: sync writes the map when the gate fails"
+      "hash": "cd206331cc24",
+      "reason": "ADR-0085: drift holds on an existing corpus (REQ-MEMBERDRIFT-1134, REQ-CHECK-1135)"
     },
     "ARCH-CLARIFY-062": {
       "hash": "21b462b80dad",
@@ -98,8 +98,8 @@
       "reason": null
     },
     "ARCH-MEMBERDRIFT-027": {
-      "hash": "b308de40357d",
-      "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
+      "hash": "01c1292f7c80",
+      "reason": "ADR-0085: drift holds on an existing corpus (REQ-MEMBERDRIFT-1134, REQ-CHECK-1135)"
     },
     "ARCH-NEW-004": {
       "hash": "f55421f03e9a",

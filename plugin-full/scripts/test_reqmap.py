@@ -31,6 +31,7 @@ from test_reqmap_customtrace import * # noqa: F401,F403
 from test_reqmap_bugs import *        # noqa: F401,F403
 from test_reqmap_bugclose import *    # noqa: F401,F403
 from test_reqmap_bugreqs import *     # noqa: F401,F403
+from test_reqmap_verify import *      # noqa: F401,F403
 
 
 

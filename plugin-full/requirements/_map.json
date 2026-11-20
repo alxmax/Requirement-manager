@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-20.3",
+  "engine_version": "2026-11-20.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3430,7 +3430,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3771"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3775"
         },
         {
           "role": "implements",
@@ -3479,7 +3479,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3771"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3775"
         },
         {
           "role": "implements",
@@ -3537,7 +3537,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3771"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3775"
         },
         {
           "role": "implements",
@@ -3583,6 +3583,7 @@
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
         "`sync` writes the map whatever the gate's verdict, with the gate's errors in it, and keeps the gate's exit code. [[REQ-CHECK-1133]] details the behaviour.",
+        "A changed requirement that `sync` cannot set back to draft keeps its baseline, so its drift stays reported until it is accepted. [[REQ-CHECK-1135]] details the behaviour.",
         "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.",
         "A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour."
       ],
@@ -3641,7 +3642,8 @@
         "REQ-CHECK-833",
         "REQ-CHECK-1035",
         "REQ-CHECK-1036",
-        "REQ-CHECK-1133"
+        "REQ-CHECK-1133",
+        "REQ-CHECK-1135"
       ],
       "members": [
         {
@@ -3746,23 +3748,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:195"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:272"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:290"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:303"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:311"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:343"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:351"
         },
         {
           "role": "implements",
@@ -3770,11 +3772,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:464"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:471"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:472"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:479"
         },
         {
           "role": "implements",
@@ -4150,19 +4152,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:196"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:273"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:304"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:344"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
         }
       ],
       "test_exempt": null,
@@ -4224,19 +4226,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:196"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:273"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:304"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:344"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
         }
       ],
       "test_exempt": null,
@@ -4392,7 +4394,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a failing sync writes the map and keeps the exit code\n  Given  a corpus with a tag that names no requirement\n  When   `sync` runs\n  Then   it exits 1, `_map.json` exists, and the message says the map was written\n\nCASE-2 — the map carries the gate's lines\n  Given  the same corpus\n  When   `sync` runs\n  Then   the map's health record has one error and its line names the dangling id\n\nCASE-3 — only the map is rebuilt on failure\n  Given  the same corpus and `--findings`\n  When   `sync` runs\n  Then   `_map.json` exists and `_findings.md` does not\n\nCASE-4 — a clean map lists no gate error\n  Given  a corpus whose gate passes\n  When   `sync` runs\n  Then   it exits 0 and the map's error lines are empty\n\nCASE-5 — the page shows the dangling tag\n  Given  a map whose gate lines name one dangling tag and one requirement with no code\n  When   the Problems page renders\n  Then   the dangling id is one error row, the other is not repeated, and the banner says the\n         gate blocks the build\n\nCASE-6 — a first check with no requirement opens on Problems\n  Given  a map with no requirement whose gate lines name a dangling tag\n  When   the viewer loads it\n  Then   it opens on the Problems page and shows the dangling id, and a map with no\n         requirement and no gate error still reads as no map",
+      "accept": "CASE-1 — a failing sync writes the map and keeps the exit code\n  Given  a corpus with a tag that names no requirement\n  When   `sync` runs\n  Then   it exits 1, `_map.json` exists, and the message says the map was written\n\nCASE-2 — the map carries the gate's lines\n  Given  the same corpus\n  When   `sync` runs\n  Then   the map's health record has one error and its line names the dangling id\n\nCASE-3 — only the map is rebuilt on failure\n  Given  the same corpus and `--findings`\n  When   `sync` runs\n  Then   `_map.json` exists and `_findings.md` does not\n\nCASE-4 — a clean map lists no gate error\n  Given  a corpus whose gate passes\n  When   `sync` runs\n  Then   it exits 0 and the map's error lines are empty\n\nCASE-5 — the page shows the dangling tag\n  Given  a map whose gate lines name one dangling tag and one requirement with no code\n  When   the Problems page renders\n  Then   the dangling id is one error row, the other is not repeated, and the banner says the\n         gate blocks the build\n\nCASE-6 — a first check with no requirement opens on Problems\n  Given  a map with no requirement whose gate lines name a dangling tag\n  When   the viewer loads it\n  Then   it opens on the Problems page and shows the dangling id, and a map with no\n         requirement and no gate error still reads as no map\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -4450,6 +4452,69 @@
       "clarify": []
     },
     {
+      "id": "REQ-CHECK-1135",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A drift the engine cannot demote is kept",
+      "intent": "A confirmed requirement whose text changed is set back to draft by `sync`, so a person re-reads it. One read from a file the engine never writes, a text or HTML source, has no `status:` line to change: `sync` said so, advanced the lock anyway, and the change vanished from the next gate. See [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).",
+      "contract": [
+        "When `sync` cannot set a drifted confirmed requirement back to draft, its lock entry keeps the hash it was confirmed at, and it says so.",
+        "The gate keeps reporting that drift until `sync --accept-drift` runs, which records the reason.",
+        "A requirement `sync` can demote is handled as before."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the drift survives a plain sync\n  Given  a confirmed requirement read from a text source, baselined, then edited\n  When   `sync` runs without `--accept-drift`\n  Then   it says the baseline is kept, and the next gate reports RM018 for it\n\nCASE-2 — accepting clears it and records why\n  Given  the same requirement after that sync\n  When   `sync --accept-drift REASON` runs\n  Then   the gate reports no RM018 and `_driftlog.json` holds the reason",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CHECK-006"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:65"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:251"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 2,
+      "covered": 2,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 3 clauses and 2 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
       "id": "ARCH-CLARIFY-062",
       "layer": "feature",
       "level": "architecture",
@@ -4496,15 +4561,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3188"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3192"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3306"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3310"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3410"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3414"
         },
         {
           "role": "implements",
@@ -4576,7 +4641,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3410"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3414"
         },
         {
           "role": "implements",
@@ -4684,7 +4749,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3188"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3192"
         },
         {
           "role": "implements",
@@ -4692,7 +4757,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:255"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:263"
         },
         {
           "role": "implements",
@@ -4745,7 +4810,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3306"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3310"
         },
         {
           "role": "implements",
@@ -4860,7 +4925,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3361"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3365"
         },
         {
           "role": "implements",
@@ -6167,7 +6232,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3580"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3584"
         },
         {
           "role": "tested-by",
@@ -6452,7 +6517,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3580"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3584"
         },
         {
           "role": "implements",
@@ -7956,7 +8021,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:241"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:247"
         },
         {
           "role": "implements",
@@ -8603,7 +8668,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3901"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3905"
         },
         {
           "role": "implements",
@@ -10194,7 +10259,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4840"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4844"
         },
         {
           "role": "implements",
@@ -10240,7 +10305,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4096"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4100"
         },
         {
           "role": "implements",
@@ -13226,7 +13291,8 @@
       "contract": [
         "Member content hashes live in a separate, versioned sidecar `_memberlock.json` (`{\"_schema\": N, \"members\": {id: {relfile: sha}}}`) computed only for single-requirement member files, on line-ending-normalized bytes, and it fails open when absent, corrupt or newer-schema. [[REQ-MEMBERDRIFT-879]]",
         "The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not; a requirement whose contract also drifted is skipped, since forward drift already owns it. [[REQ-MEMBERDRIFT-880]]",
-        "The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]"
+        "The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]",
+        "A tag in the comments right above a Python definition owns that definition, so the code most repositories already tag keeps its drift. [[REQ-MEMBERDRIFT-1134]]"
       ],
       "verify": [],
       "notes": [
@@ -13254,7 +13320,8 @@
       "satisfied_by": [
         "REQ-MEMBERDRIFT-879",
         "REQ-MEMBERDRIFT-880",
-        "REQ-MEMBERDRIFT-982"
+        "REQ-MEMBERDRIFT-982",
+        "REQ-MEMBERDRIFT-1134"
       ],
       "members": [
         {
@@ -13283,15 +13350,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:350"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:357"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:362"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:369"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:408"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:415"
         },
         {
           "role": "implements",
@@ -13352,11 +13419,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:350"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:357"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:362"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:369"
         }
       ],
       "test_exempt": null,
@@ -13410,7 +13477,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:408"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:415"
         }
       ],
       "test_exempt": null,
@@ -13449,7 +13516,8 @@
       "notes": [
         "Measured on this repo before the change: 34 member files, 13 hashed, 21 dropped as shared — and the dropped set included `plugin-full/scripts/reqmap.py`, a member of 205 requirements. After: 53 requirements carry a hash over 113 keys, 99 of them per-definition, and that one file contributes 93 keys where it contributed none.",
         "The gain is 13 → 53 requirements, not 13 → 205. Most definitions in this engine carry several `implements:` tags, so they remain shared and are still dropped — correctly. A projection made before implementing said 204; it had not applied the shared-definition rule, and is corrected here rather than quietly restated.",
-        "Nesting is not descended on purpose: a tag inside a method belongs to the class a reader opens, and per-method keys would split one contract's implementation across many."
+        "Nesting is not descended on purpose: a tag inside a method belongs to the class a reader opens, and per-method keys would split one contract's implementation across many.",
+        "-------------------"
       ],
       "current_impl": [],
       "accept": "CASE-1 — one file, two owners, two keys\n  Given  a Python file whose two top-level functions carry tags for two different requirements\n  When   the member hashes are computed\n  Then   each requirement records its own `file#function` key, where the per-file scheme recorded neither\n\nCASE-2 — drift is attributed\n  Given  that fixture, baselined\n  When   only the second function changes\n  Then   member drift names the second requirement and its `file#function`, and says nothing about the first\n\nCASE-3 — a shared definition is still ambiguous\n  Given  one function carrying tags for two requirements\n  When   the member hashes are computed\n  Then   neither requirement records a key for it\n\nCASE-4 — a non-Python member is unchanged\n  Given  a `.md` or `.yml` member dedicated to one requirement\n  When   the member hashes are computed\n  Then   its key is the plain relative path, with no `#`",
@@ -13473,7 +13541,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:335"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:342"
         }
       ],
       "test_exempt": null,
@@ -13493,6 +13561,59 @@
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
+    },
+    {
+      "id": "REQ-MEMBERDRIFT-1134",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A tag above a definition owns it",
+      "intent": "Most code puts a tag on the comment line above a function, not inside it. Such a tag fell back to the whole file, and a file several requirements share was dropped from member drift: on an existing repository, a changed function was never reported. See [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).",
+      "contract": [
+        "A tag on a comment line in the unbroken block right above a top-level Python definition, or above its decorators, keys that definition, as a tag inside it does.",
+        "A blank line ends the block: a tag above it keys the whole file.",
+        "The hash still covers the definition only, from its `def` or `class` line to its end, so editing the comments above it is not a change of code."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — each definition is keyed to the tag above it\n  Given  two functions, each with a tag on the line above, one also under a comment and above a\n         decorator\n  When   member hashes are computed\n  Then   each requirement's key names its own function\n\nCASE-2 — a blank line ends the block\n  Given  a tag followed by a blank line, then a function\n  When   member hashes are computed\n  Then   that requirement's key is the file\n\nCASE-3 — a changed body is drift, a changed comment is not\n  Given  the two functions\n  When   one body changes, and then only the comment above it\n  Then   only that requirement's hash moves, and the comment edit moves none",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MEMBERDRIFT-027"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:31"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:323"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:362"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "ARCH-NEW-004",
@@ -15395,19 +15516,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:155"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:161"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:222"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:244"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:250"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:290"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:298"
         }
       ],
       "test_exempt": null,
@@ -16206,7 +16327,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4392"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4396"
         },
         {
           "role": "implements",
@@ -16297,7 +16418,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4009"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4013"
         },
         {
           "role": "implements",
@@ -16350,7 +16471,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4062"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4066"
         },
         {
           "role": "implements",
@@ -16405,7 +16526,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4141"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4145"
         },
         {
           "role": "implements",
@@ -16464,7 +16585,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4178"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4182"
         },
         {
           "role": "implements",
@@ -16526,7 +16647,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4200"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4204"
         },
         {
           "role": "implements",
@@ -16608,7 +16729,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4312"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4316"
         },
         {
           "role": "implements",
@@ -16667,7 +16788,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4200"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4204"
         },
         {
           "role": "implements",
@@ -16721,7 +16842,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4433"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4437"
         },
         {
           "role": "implements",
@@ -16792,7 +16913,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4548"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4552"
         },
         {
           "role": "implements",
@@ -16979,7 +17100,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3525"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3529"
         },
         {
           "role": "tested-by",
@@ -17223,7 +17344,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3525"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3529"
         },
         {
           "role": "implements",
@@ -17385,7 +17506,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3448"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3452"
         },
         {
           "role": "implements",
@@ -18217,7 +18338,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4548"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4552"
         },
         {
           "role": "implements",
@@ -18351,19 +18472,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:195"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:201"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:272"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:280"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:303"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:311"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:343"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:351"
         },
         {
           "role": "implements",
@@ -18517,19 +18638,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:197"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:274"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:282"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:305"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:345"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:353"
         },
         {
           "role": "implements",
@@ -21200,7 +21321,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4604"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4608"
         },
         {
           "role": "implements",
@@ -21311,7 +21432,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4607"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4611"
         },
         {
           "role": "implements",
@@ -26502,6 +26623,10 @@
       "ARCH-CHECK-006"
     ],
     [
+      "REQ-CHECK-1135",
+      "ARCH-CHECK-006"
+    ],
+    [
       "ARCH-CLARIFY-062",
       "SYS-AUTHOR-101"
     ],
@@ -26999,6 +27124,10 @@
     ],
     [
       "REQ-MEMBERDRIFT-982",
+      "ARCH-MEMBERDRIFT-027"
+    ],
+    [
+      "REQ-MEMBERDRIFT-1134",
       "ARCH-MEMBERDRIFT-027"
     ],
     [
@@ -30211,15 +30340,15 @@
   },
   "health": {
     "score": 94,
-    "total": 359,
-    "scored": 337,
+    "total": 361,
+    "scored": 339,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 326,
-    "tested": 327,
-    "drafts": 20,
+    "implemented": 328,
+    "tested": 329,
+    "drafts": 22,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30344,6 +30473,13 @@
         ]
       },
       {
+        "id": "REQ-CHECK-1135",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-INIT-1132",
         "status": "draft",
         "why": [
@@ -30359,6 +30495,13 @@
       },
       {
         "id": "REQ-MAPSTAMP-1125",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-MEMBERDRIFT-1134",
         "status": "draft",
         "why": [
           "not confirmed"

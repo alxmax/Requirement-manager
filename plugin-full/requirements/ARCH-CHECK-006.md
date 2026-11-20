@@ -25,6 +25,7 @@ Every bullet below is binding.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
 - `sync` writes the map whatever the gate's verdict, with the gate's errors in it, and keeps the gate's exit code. [[REQ-CHECK-1133]] details the behaviour.
+- A changed requirement that `sync` cannot set back to draft keeps its baseline, so its drift stays reported until it is accepted. [[REQ-CHECK-1135]] details the behaviour.
 - `gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.
 - A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour.
 
@@ -702,3 +703,41 @@ CASE-6 — a first check with no requirement opens on Problems
   When   the viewer loads it
   Then   it opens on the Problems page and shows the dangling id, and a map with no
          requirement and no gate error still reads as no map
+
+--------------------
+
+
+---
+id: REQ-CHECK-1135
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CHECK-006]
+---
+
+# A drift the engine cannot demote is kept
+
+## Description
+> A confirmed requirement whose text changed is set back to draft by `sync`, so a person
+> re-reads it. One read from a file the engine never writes, a text or HTML source, has no
+> `status:` line to change: `sync` said so, advanced the lock anyway, and the change vanished
+> from the next gate. See [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).
+
+Every bullet below is binding.
+- When `sync` cannot set a drifted confirmed requirement back to draft, its lock entry keeps
+  the hash it was confirmed at, and it says so.
+- The gate keeps reporting that drift until `sync --accept-drift` runs, which records the reason.
+- A requirement `sync` can demote is handled as before.
+
+## Cases
+CASE-1 — the drift survives a plain sync
+  Given  a confirmed requirement read from a text source, baselined, then edited
+  When   `sync` runs without `--accept-drift`
+  Then   it says the baseline is kept, and the next gate reports RM018 for it
+
+CASE-2 — accepting clears it and records why
+  Given  the same requirement after that sync
+  When   `sync --accept-drift REASON` runs
+  Then   the gate reports no RM018 and `_driftlog.json` holds the reason
+

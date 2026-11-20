@@ -3134,8 +3134,12 @@ class BaselineInputs(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-
     def test_a_valid_baseline_still_catches_member_drift(self):  # verifies: REQ-DRIFT-1103#CASE-4
         with tempfile.TemporaryDirectory() as d:
             self._baselined(d)
-            with open(os.path.join(d, "m.py"), "a", encoding="utf-8") as f:
-                f.write("x = 2\n")
+            # the body of the function the tag sits above (ADR-0085), not a line beside it
+            path = os.path.join(d, "m.py")
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(text.replace("return 1", "return 2"))
             _rc, found, _out = self._run(d, strict=True)
             self.assertIn("RM019", self._rules(found))
 

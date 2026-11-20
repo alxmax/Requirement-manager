@@ -314,22 +314,29 @@ def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
 
 def _py_def_spans(path):
     # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-982
-    """`[(first_line, last_line, name)]` for the top-level definitions of
-    a Python file, or None when it is not Python or does not parse.
-    Nesting is deliberately not descended: a tag inside a method belongs
-    to the class a reader opens, and per-method spans would split one
-    contract's implementation across several keys."""
+    """`[(lead_line, first_line, last_line, name)]` for the top-level
+    definitions of a Python file, or None when it is not Python or does not
+    parse. Nesting is deliberately not descended: a tag inside a method
+    belongs to the class a reader opens. `lead_line` starts the comments
+    right above the definition and its decorators, where most code puts a
+    tag; the hash covers `first_line..last_line` only."""
+    # implements: REQ-MEMBERDRIFT-1134
     if not path.lower().endswith(".py"):
         return None
     try:
         with open(path, encoding="utf-8", errors="ignore") as f:
-            tree = ast.parse(f.read())
+            text = f.read()
+        tree = ast.parse(text)
     except (OSError, SyntaxError, ValueError):
         return None
-    return [(n.lineno, getattr(n, "end_lineno", n.lineno), n.name)
-            for n in tree.body
-            if isinstance(
-                n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+    lines, out = text.splitlines(), []
+    for n in tree.body:
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            lead = min([n.lineno] + [d.lineno for d in n.decorator_list])
+            while lead > 1 and lines[lead - 2].lstrip().startswith("#"):
+                lead -= 1
+            out.append((lead, n.lineno, getattr(n, "end_lineno", n.lineno), n.name))
+    return out
 
 
 def _span_sha(path, lo, hi):  # implements: REQ-MEMBERDRIFT-982
@@ -349,11 +356,11 @@ def _span_sha(path, lo, hi):  # implements: REQ-MEMBERDRIFT-982
 def _member_span_key(spans, fp, ln, path):
     # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
     """(key, span) for one tag hit: `fp#name` / (path, lo, hi) when `ln`
-    falls inside a top-level definition span, else the whole-file key
-    `fp` with span None."""
+    falls inside a top-level definition or the comments right above it,
+    else the whole-file key `fp` with span None."""
     if spans:
-        for lo, hi, name in spans:
-            if lo <= ln <= hi:
+        for lead, lo, hi, name in spans:  # implements: REQ-MEMBERDRIFT-1134
+            if lead <= ln <= hi:
                 return "{}#{}".format(fp, name), (path, lo, hi)
     return fp, None
 

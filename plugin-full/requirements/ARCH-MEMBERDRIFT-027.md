@@ -25,6 +25,7 @@ Every bullet below is binding.
 - Member content hashes live in a separate, versioned sidecar `_memberlock.json` (`{"_schema": N, "members": {id: {relfile: sha}}}`) computed only for single-requirement member files, on line-ending-normalized bytes, and it fails open when absent, corrupt or newer-schema. [[REQ-MEMBERDRIFT-879]]
 - The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not; a requirement whose contract also drifted is skipped, since forward drift already owns it. [[REQ-MEMBERDRIFT-880]]
 - The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]
+- A tag in the comments right above a Python definition owns that definition, so the code most repositories already tag keeps its drift. [[REQ-MEMBERDRIFT-1134]]
 
 ## Cases
 CASE-1
@@ -249,3 +250,48 @@ CASE-4 — a non-Python member is unchanged
 - Measured on this repo before the change: 34 member files, 13 hashed, 21 dropped as shared — and the dropped set included `plugin-full/scripts/reqmap.py`, a member of 205 requirements. After: 53 requirements carry a hash over 113 keys, 99 of them per-definition, and that one file contributes 93 keys where it contributed none.
 - The gain is 13 → 53 requirements, not 13 → 205. Most definitions in this engine carry several `implements:` tags, so they remain shared and are still dropped — correctly. A projection made before implementing said 204; it had not applied the shared-definition rule, and is corrected here rather than quietly restated.
 - Nesting is not descended on purpose: a tag inside a method belongs to the class a reader opens, and per-method keys would split one contract's implementation across many.
+
+--------------------
+
+
+---
+id: REQ-MEMBERDRIFT-1134
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MEMBERDRIFT-027]
+---
+
+# A tag above a definition owns it
+
+## Description
+> Most code puts a tag on the comment line above a function, not inside it. Such a tag fell
+> back to the whole file, and a file several requirements share was dropped from member drift:
+> on an existing repository, a changed function was never reported. See
+> [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).
+
+Every bullet below is binding.
+- A tag on a comment line in the unbroken block right above a top-level Python definition, or
+  above its decorators, keys that definition, as a tag inside it does.
+- A blank line ends the block: a tag above it keys the whole file.
+- The hash still covers the definition only, from its `def` or `class` line to its end, so
+  editing the comments above it is not a change of code.
+
+## Cases
+CASE-1 — each definition is keyed to the tag above it
+  Given  two functions, each with a tag on the line above, one also under a comment and above a
+         decorator
+  When   member hashes are computed
+  Then   each requirement's key names its own function
+
+CASE-2 — a blank line ends the block
+  Given  a tag followed by a blank line, then a function
+  When   member hashes are computed
+  Then   that requirement's key is the file
+
+CASE-3 — a changed body is drift, a changed comment is not
+  Given  the two functions
+  When   one body changes, and then only the comment above it
+  Then   only that requirement's hash moves, and the comment edit moves none
+

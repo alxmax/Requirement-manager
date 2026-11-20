@@ -1,7 +1,7 @@
 ---
 generated: 2026-11-20
-engine: 2026-11-20.3
-nodes: 359
+engine: 2026-11-20.4
+nodes: 361
 edges: 130
 design pass-rate: 91% (128/140 source files without a design candidate)
 ---
@@ -137,6 +137,7 @@ graph LR
     REQ_CHECK_1035["A Description link to a requirement that does not exist<br><small>REQ-CHECK-1035</small>"]
     REQ_CHECK_1036["A bare gate says only what is broken<br><small>REQ-CHECK-1036</small>"]
     REQ_CHECK_1133["The map is written when the gate fails<br><small>REQ-CHECK-1133</small>"]
+    REQ_CHECK_1135["A drift the engine cannot demote is kept<br><small>REQ-CHECK-1135</small>"]
     REQ_CLARIFY_956["Detecting what a requirement leaves open<br><small>REQ-CLARIFY-956</small>"]
     REQ_CLARIFY_957["Reporting the open questions<br><small>REQ-CLARIFY-957</small>"]
     REQ_CLARIFY_975["An answer can raise a question the old text never had<br><small>REQ-CLARIFY-975</small>"]
@@ -234,6 +235,7 @@ graph LR
     REQ_MEMBERDRIFT_879["The member-hash sidecar<br><small>REQ-MEMBERDRIFT-879</small>"]
     REQ_MEMBERDRIFT_880["Warning when code moves ahead of its spec<br><small>REQ-MEMBERDRIFT-880</small>"]
     REQ_MEMBERDRIFT_982["The member hash keys on the tagged definition<br><small>REQ-MEMBERDRIFT-982</small>"]
+    REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small>"]
     REQ_NEW_881["Stamping a fresh requirement file from a template<br><small>REQ-NEW-881</small>"]
     REQ_NEW_882["Refusing to clobber, and a scaffold that lints clean<br><small>REQ-NEW-882</small>"]
     REQ_NEW_1032["'new' says it is going away<br><small>REQ-NEW-1032</small>"]
@@ -519,10 +521,10 @@ graph LR
   ARCH_CHECK_006 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_758
   f_plugin_full_scripts_reqmap_engine___init___py_12["plugin-full/scripts/reqmap_engine/__init__.py:12"]
   ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine___init___py_12
-  f_plugin_full_scripts_reqmap_engine_gate_py_26_343["plugin-full/scripts/reqmap_engine/gate.py:26-343"]
-  ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_gate_py_26_343
-  f_plugin_full_scripts_reqmap_engine_locks_py_276_472["plugin-full/scripts/reqmap_engine/locks.py:276-472"]
-  ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_locks_py_276_472
+  f_plugin_full_scripts_reqmap_engine_gate_py_26_351["plugin-full/scripts/reqmap_engine/gate.py:26-351"]
+  ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_gate_py_26_351
+  f_plugin_full_scripts_reqmap_engine_locks_py_276_479["plugin-full/scripts/reqmap_engine/locks.py:276-479"]
+  ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_locks_py_276_479
   f_plugin_full_scripts_reqmap_engine_mapjson_py_10["plugin-full/scripts/reqmap_engine/mapjson.py:10"]
   ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_mapjson_py_10
   f_plugin_full_scripts_reqmap_engine_model_py_235["plugin-full/scripts/reqmap_engine/model.py:235"]
@@ -532,8 +534,8 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_sections_py_131_284["plugin-full/scripts/reqmap_engine/sections.py:131-284"]
   ARCH_CHECK_006 -->|implements| f_plugin_full_scripts_reqmap_engine_sections_py_131_284
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_full_scripts_test_reqmap_author_py_2441_3410["plugin-full/scripts/test_reqmap_author.py:2441-3410"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_2441_3410
+  f_plugin_full_scripts_test_reqmap_author_py_2441_3414["plugin-full/scripts/test_reqmap_author.py:2441-3414"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_2441_3414
   f_plugin_full_scripts_reqmap_engine_clarify_py_133_295["plugin-full/scripts/reqmap_engine/clarify.py:133-295"]
   ARCH_CLARIFY_062 -->|implements| f_plugin_full_scripts_reqmap_engine_clarify_py_133_295
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
@@ -574,8 +576,8 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_customtrace_py_9["plugin-full/scripts/reqmap_engine/customtrace.py:9"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_customtrace_py_9
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_full_scripts_test_reqmap_author_py_1787_3580["plugin-full/scripts/test_reqmap_author.py:1787-3580"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_1787_3580
+  f_plugin_full_scripts_test_reqmap_author_py_1787_3584["plugin-full/scripts/test_reqmap_author.py:1787-3584"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_1787_3584
   f_plugin_full_scripts_test_reqmap_report_py_5295["plugin-full/scripts/test_reqmap_report.py:5295"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_5295
   f_plugin_full_scripts_reqmap_engine_decompose_py_54_114["plugin-full/scripts/reqmap_engine/decompose.py:54-114"]
@@ -761,8 +763,8 @@ graph LR
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
   f_plugin_full_scripts_test_reqmap_gate_py_325["plugin-full/scripts/test_reqmap_gate.py:325"]
   ARCH_MEMBERDRIFT_027 -->|tested-by| f_plugin_full_scripts_test_reqmap_gate_py_325
-  f_plugin_full_scripts_reqmap_engine_locks_py_118_408["plugin-full/scripts/reqmap_engine/locks.py:118-408"]
-  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_full_scripts_reqmap_engine_locks_py_118_408
+  f_plugin_full_scripts_reqmap_engine_locks_py_118_415["plugin-full/scripts/reqmap_engine/locks.py:118-415"]
+  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_full_scripts_reqmap_engine_locks_py_118_415
   f_plugin_full_scripts_reqmap_engine_rulesrepo_py_87["plugin-full/scripts/reqmap_engine/rulesrepo.py:87"]
   ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_full_scripts_reqmap_engine_rulesrepo_py_87
   ARCH_NEW_004["Scaffold a requirement<br><small>ARCH-NEW-004</small>"]
@@ -835,8 +837,8 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_health_py_125_323["plugin-full/scripts/reqmap_engine/health.py:125-323"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_full_scripts_reqmap_engine_health_py_125_323
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_full_scripts_test_reqmap_author_py_4392["plugin-full/scripts/test_reqmap_author.py:4392"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4392
+  f_plugin_full_scripts_test_reqmap_author_py_4396["plugin-full/scripts/test_reqmap_author.py:4396"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4396
   f_plugin_full_scripts_reqmap_engine_plandrift_py_362_428["plugin-full/scripts/reqmap_engine/plandrift.py:362-428"]
   ARCH_RELEASE_072 -->|implements| f_plugin_full_scripts_reqmap_engine_plandrift_py_362_428
   f_plugin_full_scripts_reqmap_engine_release_py_1_386["plugin-full/scripts/reqmap_engine/release.py:1-386"]
@@ -849,8 +851,8 @@ graph LR
   f_scripts_test_pipeline_wiring_py_238["scripts/test_pipeline_wiring.py:238"]
   ARCH_REPRO_041 -->|tested-by| f_scripts_test_pipeline_wiring_py_238
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_full_scripts_test_reqmap_author_py_2061_3525["plugin-full/scripts/test_reqmap_author.py:2061-3525"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_2061_3525
+  f_plugin_full_scripts_test_reqmap_author_py_2061_3529["plugin-full/scripts/test_reqmap_author.py:2061-3529"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_2061_3529
   f_plugin_full_scripts_test_reqmap_report_py_5295["plugin-full/scripts/test_reqmap_report.py:5295"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_5295
   f_plugin_full_scripts_reqmap_engine_retire_py_12_229["plugin-full/scripts/reqmap_engine/retire.py:12-229"]
@@ -882,8 +884,8 @@ graph LR
   ARCH_RULES_059["The gate rule registry<br><small>ARCH-RULES-059</small>"]
   f_plugin_full_scripts_test_reqmap_gate_py_2416_3437["plugin-full/scripts/test_reqmap_gate.py:2416-3437"]
   ARCH_RULES_059 -->|tested-by| f_plugin_full_scripts_test_reqmap_gate_py_2416_3437
-  f_plugin_full_scripts_reqmap_engine_gate_py_55_343["plugin-full/scripts/reqmap_engine/gate.py:55-343"]
-  ARCH_RULES_059 -->|implements| f_plugin_full_scripts_reqmap_engine_gate_py_55_343
+  f_plugin_full_scripts_reqmap_engine_gate_py_55_351["plugin-full/scripts/reqmap_engine/gate.py:55-351"]
+  ARCH_RULES_059 -->|implements| f_plugin_full_scripts_reqmap_engine_gate_py_55_351
   f_plugin_full_scripts_reqmap_engine_model_py_124_169["plugin-full/scripts/reqmap_engine/model.py:124-169"]
   ARCH_RULES_059 -->|implements| f_plugin_full_scripts_reqmap_engine_model_py_124_169
   f_plugin_full_scripts_reqmap_engine_workspace_py_98_167["plugin-full/scripts/reqmap_engine/workspace.py:98-167"]
@@ -966,8 +968,8 @@ graph LR
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
   f_plugin_full_scripts_reqmap_py_270["plugin-full/scripts/reqmap.py:270"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_py_270
-  f_plugin_full_scripts_test_reqmap_author_py_4604["plugin-full/scripts/test_reqmap_author.py:4604"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4604
+  f_plugin_full_scripts_test_reqmap_author_py_4608["plugin-full/scripts/test_reqmap_author.py:4608"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_4608
   f_plugin_full_scripts_reqmap_engine_git_py_88_107["plugin-full/scripts/reqmap_engine/git.py:88-107"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_git_py_88_107
   f_plugin_full_scripts_reqmap_engine_init_py_320["plugin-full/scripts/reqmap_engine/init.py:320"]
@@ -1177,7 +1179,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>277 caps</small>"]
+  a_REQ["REQ<br><small>279 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1210,9 +1212,11 @@ graph LR
     REQ_BUGS_1129["The map shows what was fixed<br><small>REQ-BUGS-1129</small><br>unreviewed"]
     REQ_BUGS_1131["A requirement shows the open bugs that name it<br><small>REQ-BUGS-1131</small><br>unreviewed"]
     REQ_CHECK_1133["The map is written when the gate fails<br><small>REQ-CHECK-1133</small><br>unreviewed"]
+    REQ_CHECK_1135["A drift the engine cannot demote is kept<br><small>REQ-CHECK-1135</small><br>unreviewed"]
     REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
+    REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
   end
   style ARCH_BUGS_078 fill:#fff3cd,stroke:#a66,color:#630
@@ -1230,10 +1234,12 @@ graph LR
   style REQ_BUGS_1129 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1131 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CHECK_1133 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_CHECK_1135 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_INIT_1132 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_MEMBERDRIFT_1134 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
@@ -1256,8 +1262,10 @@ graph LR
 | REQ-BUGS-1129 | draft | 10 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1131 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CHECK-1133 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-CHECK-1135 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-INIT-1132 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-MEMBERDRIFT-1134 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
