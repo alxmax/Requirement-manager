@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-20.2",
+  "engine_version": "2026-11-20.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -303,7 +303,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2863"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2906"
         },
         {
           "role": "implements",
@@ -402,7 +402,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:352"
+          "loc": "plugin-full/scripts/reqmap.py:353"
         },
         {
           "role": "tested-by",
@@ -513,7 +513,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:352"
+          "loc": "plugin-full/scripts/reqmap.py:353"
         },
         {
           "role": "tested-by",
@@ -1311,7 +1311,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:291"
+          "loc": "plugin-full/scripts/reqmap.py:293"
         },
         {
           "role": "tested-by",
@@ -3582,6 +3582,7 @@
         "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.",
         "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
         "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.",
+        "`sync` writes the map whatever the gate's verdict, with the gate's errors in it, and keeps the gate's exit code. [[REQ-CHECK-1133]] details the behaviour.",
         "`gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.",
         "A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour."
       ],
@@ -3639,7 +3640,8 @@
         "REQ-CHECK-832",
         "REQ-CHECK-833",
         "REQ-CHECK-1035",
-        "REQ-CHECK-1036"
+        "REQ-CHECK-1036",
+        "REQ-CHECK-1133"
       ],
       "members": [
         {
@@ -3688,39 +3690,39 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1322"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1365"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1974"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2017"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2092"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2135"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2199"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2179"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2222"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2220"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2263"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2661"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2834"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2877"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3060"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3103"
         },
         {
           "role": "tested-by",
@@ -3902,7 +3904,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2661"
         },
         {
           "role": "implements",
@@ -4016,7 +4018,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3615"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3658"
         },
         {
           "role": "implements",
@@ -4076,7 +4078,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2834"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2877"
         },
         {
           "role": "implements",
@@ -4132,7 +4134,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2661"
         },
         {
           "role": "tested-by",
@@ -4284,7 +4286,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2935"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2978"
         },
         {
           "role": "implements",
@@ -4332,7 +4334,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness\n\n\nCASE-5 — formatting does not bypass lint\n  Given  an implemented requirement with eight acceptance criteria\n  When   text and JSON gates run, including strict and full modes\n  Then   both fail with the lint finding; both honor `--no-lint` and write nothing\n\nCASE-6 — formatting does not bypass map freshness\n  Given  a stale generated map\n  When   text and JSON gates run\n  Then   both fail and identify the stale map; both honor `--no-map-check`",
+      "accept": "CASE-1 — the default set is exactly the listed rules\n  Given  the rule registry\n  When   `DEFAULT_RULES` is read\n  Then   it equals the listed codes, and every error-severity rule is in it\n\nCASE-2 — breakage still fails a bare gate\n  Given  a corpus with a `depends_on` naming no requirement\n  When   `gate` runs bare\n  Then   it exits 1 and names RM003\n\nCASE-3 — advice is hidden by default and shown by --full\n  Given  a confirmed requirement with an implements member and no `tested-by:` link\n  When   `gate` runs bare, then with `--full`\n  Then   the bare run prints no RM007 and the `--full` run prints it\n\nCASE-4 — the verdict is the last line\n  Given  a repository with one confirmed, implemented requirement\n  When   a bare `gate` runs\n  Then   its last line is the `gate:` verdict, naming readability and map freshness\n\n\nCASE-5 — formatting does not bypass lint\n  Given  an implemented requirement with eight acceptance criteria\n  When   text and JSON gates run, including strict and full modes\n  Then   both fail with the lint finding; both honor `--no-lint` and write nothing\n\nCASE-6 — formatting does not bypass map freshness\n  Given  a stale generated map\n  When   text and JSON gates run\n  Then   both fail and identify the stale map; both honor `--no-map-check`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -4345,11 +4347,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3225"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3268"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3536"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3579"
         },
         {
           "role": "implements",
@@ -4368,6 +4370,81 @@
       "milestone": null,
       "priority": "",
       "risks": [],
+      "clauses": 6,
+      "covered": 6,
+      "clarify": []
+    },
+    {
+      "id": "REQ-CHECK-1133",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The map is written when the gate fails",
+      "intent": "A first check of an existing repository fails: tags that name no requirement, requirements with no code. That is when its map is read, and `sync` wrote none, with a message naming a `map` verb that no longer exists. A map written then must say what failed, and a tag that names no requirement has no requirement to show it on.",
+      "contract": [
+        "`sync` writes the map whatever the gate's verdict, and exits with the gate's code.",
+        "On a failing gate, `sync` writes only the map: the findings digest, the site page and the advisories wait for a passing one. It says so on stderr and names no verb that does not exist.",
+        "The map's health record carries the gate's link-sync error lines, empty when there are none.",
+        "The map's Problems page shows a tag that names no requirement as an error, which counts toward the build-blocking banner.",
+        "The map viewer opens a map that has no requirement when its gate failed, on the Problems page, instead of saying there is no map."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a failing sync writes the map and keeps the exit code\n  Given  a corpus with a tag that names no requirement\n  When   `sync` runs\n  Then   it exits 1, `_map.json` exists, and the message says the map was written\n\nCASE-2 — the map carries the gate's lines\n  Given  the same corpus\n  When   `sync` runs\n  Then   the map's health record has one error and its line names the dangling id\n\nCASE-3 — only the map is rebuilt on failure\n  Given  the same corpus and `--findings`\n  When   `sync` runs\n  Then   `_map.json` exists and `_findings.md` does not\n\nCASE-4 — a clean map lists no gate error\n  Given  a corpus whose gate passes\n  When   `sync` runs\n  Then   it exits 0 and the map's error lines are empty\n\nCASE-5 — the page shows the dangling tag\n  Given  a map whose gate lines name one dangling tag and one requirement with no code\n  When   the Problems page renders\n  Then   the dangling id is one error row, the other is not repeated, and the banner says the\n         gate blocks the build\n\nCASE-6 — a first check with no requirement opens on Problems\n  Given  a map with no requirement whose gate lines name a dangling tag\n  When   the viewer loads it\n  Then   it opens on the Problems page and shows the dangling id, and a map with no\n         requirement and no gate error still reads as no map",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CHECK-006"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/explorer.jsx:456"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/App.jsx:61"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/loadData.js:138"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ProblemsView.jsx:5"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap.py:257"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap.py:298"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1118"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:298"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
       "clauses": 6,
       "covered": 6,
       "clarify": []
@@ -5105,11 +5182,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3119"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3162"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3171"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3214"
         },
         {
           "role": "implements",
@@ -5177,7 +5254,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3192"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3235"
         },
         {
           "role": "implements",
@@ -5242,7 +5319,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2038"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2081"
         },
         {
           "role": "implements",
@@ -5301,7 +5378,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:332"
+          "loc": "plugin-full/scripts/reqmap.py:333"
         },
         {
           "role": "tested-by",
@@ -5374,7 +5451,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3614"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3657"
         },
         {
           "role": "tested-by",
@@ -5592,7 +5669,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:311"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:315"
         },
         {
           "role": "implements",
@@ -5659,7 +5736,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:312"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:316"
         },
         {
           "role": "implements",
@@ -6894,7 +6971,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:328"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:332"
         },
         {
           "role": "implements",
@@ -7406,7 +7483,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2970"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3013"
         },
         {
           "role": "implements",
@@ -7456,7 +7533,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2970"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3013"
         },
         {
           "role": "implements",
@@ -7548,15 +7625,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2199"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2582"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2690"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2733"
         },
         {
           "role": "tested-by",
@@ -7637,11 +7714,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2199"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2582"
         },
         {
           "role": "tested-by",
@@ -7694,7 +7771,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2539"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2582"
         },
         {
           "role": "implements",
@@ -7757,7 +7834,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2690"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2733"
         },
         {
           "role": "implements",
@@ -9326,19 +9403,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:301"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:305"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:367"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:371"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:389"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:393"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:452"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:456"
         },
         {
           "role": "implements",
@@ -9393,19 +9470,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:301"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:305"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:367"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:371"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:389"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:393"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:452"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:456"
         }
       ],
       "test_exempt": null,
@@ -9469,19 +9546,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:302"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:306"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:368"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:372"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:390"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:394"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:453"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:457"
         }
       ],
       "test_exempt": null,
@@ -9550,19 +9627,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:302"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:306"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:368"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:372"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:390"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:394"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:453"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:457"
         }
       ],
       "test_exempt": null,
@@ -10236,11 +10313,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2282"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2325"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2596"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2639"
         },
         {
           "role": "implements",
@@ -10305,11 +10382,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2282"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2325"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2596"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2639"
         },
         {
           "role": "implements",
@@ -10708,7 +10785,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3094"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3137"
         },
         {
           "role": "implements",
@@ -10787,7 +10864,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3094"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3137"
         },
         {
           "role": "implements",
@@ -11488,15 +11565,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2242"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2285"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3419"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3462"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3496"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3539"
         },
         {
           "role": "tested-by",
@@ -11799,11 +11876,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2242"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2285"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3466"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3509"
         },
         {
           "role": "tested-by",
@@ -12863,7 +12940,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3603"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3646"
         },
         {
           "role": "tested-by",
@@ -13388,7 +13465,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2465"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2508"
         },
         {
           "role": "implements",
@@ -14191,7 +14268,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:352"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:356"
         },
         {
           "role": "implements",
@@ -14340,7 +14417,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2644"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2687"
         },
         {
           "role": "implements",
@@ -14406,7 +14483,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2644"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2687"
         },
         {
           "role": "implements",
@@ -14576,7 +14653,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3613"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3656"
         },
         {
           "role": "tested-by",
@@ -14903,15 +14980,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:398"
+          "loc": "plugin-full/scripts/reqmap.py:399"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:419"
+          "loc": "plugin-full/scripts/reqmap.py:420"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2261"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2304"
         }
       ],
       "test_exempt": null,
@@ -14962,11 +15039,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:419"
+          "loc": "plugin-full/scripts/reqmap.py:420"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2261"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2304"
         }
       ],
       "test_exempt": null,
@@ -15797,11 +15874,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1875"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2610"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2653"
         }
       ],
       "test_exempt": null,
@@ -15865,15 +15942,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:308"
+          "loc": "plugin-full/scripts/reqmap.py:309"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1875"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2610"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2653"
         }
       ],
       "test_exempt": null,
@@ -15940,7 +16017,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:319"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:323"
         }
       ],
       "test_exempt": null,
@@ -16048,7 +16125,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:323"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:327"
         }
       ],
       "test_exempt": null,
@@ -16336,7 +16413,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:361"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:365"
         },
         {
           "role": "implements",
@@ -17565,7 +17642,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:327"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:331"
         },
         {
           "role": "implements",
@@ -18007,7 +18084,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/health.py:357"
+          "loc": "plugin-full/scripts/reqmap_engine/health.py:361"
         },
         {
           "role": "implements",
@@ -18065,7 +18142,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3273"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3316"
         },
         {
           "role": "implements",
@@ -18250,15 +18327,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2373"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2416"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2771"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2814"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3394"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3437"
         },
         {
           "role": "implements",
@@ -18348,7 +18425,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2373"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2416"
         },
         {
           "role": "implements",
@@ -18424,7 +18501,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2373"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2416"
         },
         {
           "role": "implements",
@@ -18516,7 +18593,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2771"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2814"
         },
         {
           "role": "implements",
@@ -21053,7 +21130,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:279"
+          "loc": "plugin-full/scripts/reqmap.py:281"
         },
         {
           "role": "tested-by",
@@ -21119,7 +21196,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:268"
+          "loc": "plugin-full/scripts/reqmap.py:270"
         },
         {
           "role": "tested-by",
@@ -21733,7 +21810,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2575"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "implements",
@@ -21847,7 +21924,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2575"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "implements",
@@ -21963,7 +22040,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2575"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2618"
         },
         {
           "role": "implements",
@@ -22040,7 +22117,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1199"
         },
         {
           "role": "implements",
@@ -22138,7 +22215,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1199"
         },
         {
           "role": "implements",
@@ -22214,7 +22291,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:1156"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:1199"
         },
         {
           "role": "implements",
@@ -25116,7 +25193,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2654"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2697"
         },
         {
           "role": "implements",
@@ -25171,7 +25248,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:2325"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:2368"
         },
         {
           "role": "implements",
@@ -26418,6 +26495,10 @@
     ],
     [
       "REQ-CHECK-1036",
+      "ARCH-CHECK-006"
+    ],
+    [
+      "REQ-CHECK-1133",
       "ARCH-CHECK-006"
     ],
     [
@@ -30070,13 +30151,13 @@
         "file": "plugin-full/scripts/reqmap.py",
         "line": 217,
         "name": "_dispatch_sync",
-        "detail": "`_dispatch_sync` is 85 lines (over 80)"
+        "detail": "`_dispatch_sync` is 86 lines (over 80)"
       },
       {
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin-full/scripts/reqmap.py",
-        "line": 302,
+        "line": 303,
         "name": "main",
         "detail": "`main` is 95 lines (over 80)"
       },
@@ -30130,15 +30211,15 @@
   },
   "health": {
     "score": 94,
-    "total": 358,
-    "scored": 336,
+    "total": 359,
+    "scored": 337,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 325,
-    "tested": 326,
-    "drafts": 19,
+    "implemented": 326,
+    "tested": 327,
+    "drafts": 20,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30256,6 +30337,13 @@
         ]
       },
       {
+        "id": "REQ-CHECK-1133",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-INIT-1132",
         "status": "draft",
         "why": [
@@ -30297,7 +30385,8 @@
           "lint_exempt"
         ]
       }
-    ]
+    ],
+    "gate_error_lines": []
   },
   "planning": {
     "milestones": {

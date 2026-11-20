@@ -57,7 +57,9 @@ export const openTab = (setTab, setView) => (tab) => {
 };
 
 export default function App() {
-  const [view, setView] = useState("explorer");
+  // With no requirement there is nothing to explore yet: open on the problems
+  // a first check found.  implements: REQ-CHECK-1133
+  const [view, setView] = useState(REQUIREMENTS.length ? "explorer" : "problems");
   const [selId, setSelId] = useState(() => readHashId() || "ARCH-CHECK-006");
   const [query, setQuery] = useState("");
   const [theme, setTheme] = useState("light");

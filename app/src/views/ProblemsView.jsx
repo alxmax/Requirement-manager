@@ -2,6 +2,7 @@
 // implements: REQ-VIEWER-977
 // implements: REQ-VIEWER-1084
 // implements: REQ-BUGS-1121
+// implements: REQ-CHECK-1133
 import { useState } from "react";
 import {
   REQUIREMENTS, coverageOf, DESIGN, HEALTH, BUGS,
@@ -66,6 +67,18 @@ export function computeProblems() {
         loc: (r.members.find((m) => m.role === "tested-by") || {}).loc
           || "" });
     }
+  });
+  // A tag that names no requirement has no node to hang a risk on, so it comes
+  // from the gate's own lines, which the map carries even when `sync` failed.
+  const gateLines = (HEALTH && Array.isArray(HEALTH.gate_error_lines))
+    ? HEALTH.gate_error_lines : [];
+  gateLines.forEach((line) => {
+    const m = /^dangling tag: code references (\S+)/.exec(line);
+    if (!m) return;
+    out.push({ id: m[1], title: "", signal: "dangling", sev: "ERROR",
+      noSpec: true, msg: "Code is tagged with this id, but no requirement "
+        + "has it.",
+      fix: "Add the requirement, correct the tag, or remove it.", loc: "" });
   });
   const design = (DESIGN && Array.isArray(DESIGN.findings))
     ? DESIGN.findings : [];

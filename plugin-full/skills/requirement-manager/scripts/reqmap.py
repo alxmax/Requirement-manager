@@ -248,13 +248,15 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         cmd_gen_integration(reqs_dir, code_root)
     # rescan + regenerate map + advance the drift baseline (guarded). Members
     # were already scanned above; cmd_check rewrites the lock unless confirmed
-    # drift is detected without --accept-drift, then map regenerates only on
-    # success. `--accept-drift` alone yields True, with a reason the string,
-    # absent False; cmd_check reads all three.
+    # drift is detected without --accept-drift. `--accept-drift` alone yields
+    # True, with a reason the string, absent False; cmd_check reads all three.
     rc = cmd_check(ws, True, strict=a.strict,
                    accept_drift=getattr(a, "accept_drift", False))
+    # The map is written whatever the verdict: a first check of an existing
+    # repository fails, and that is when its map is read. It carries the
+    # gate's errors, and the exit code stays the gate's.  # implements: REQ-CHECK-1133
+    cmd_map(ws, code_root)
     if rc == 0:
-        cmd_map(ws, code_root)
         # Everything derived is rebuilt in one place: there is no state of the
         # world in which regenerating the map but not the findings digest, the
         # presentation page or (in this repository) the generated integration
@@ -291,12 +293,11 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         # fact that its corpus is flat.  # implements: REQ-AUDIT-973
         _audit_summary(reqs, members, reqs_dir, code_root)
     else:
-        # The lock may still have advanced above (it is written unless CONFIRMED
-        # drift was refused), while the map was not regenerated — the two then
-        # disagree, `gate` passes locally, and CI fails on `map --check`. Say so
-        # where it happens instead of leaving the reader to infer it.
-        print("sync: gate failed — the map was NOT regenerated. Fix the "
-              "errors above and re-run `sync`, or run `map` explicitly.",
+        # Only the map is rebuilt on a failing gate; the findings digest, the
+        # site page and the advisories wait for a passing one.
+        # implements: REQ-CHECK-1133
+        print("sync: gate failed — the map was written with the errors above "
+              "in it; fix them and re-run `sync` to rebuild the rest.",
               file=sys.stderr)
     return rc
 def main():

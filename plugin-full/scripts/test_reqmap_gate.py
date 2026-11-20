@@ -1115,9 +1115,9 @@ class DependsOnCycles(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested
             self.assertEqual(code, 0)
 
 
-class SyncMapNotRegenerated(unittest.TestCase):  # tested-by: ARCH-CHECK-006
-    """`sync` writes the lock even when the gate errors, but skips the map — the two
-    then disagree, `gate` passes locally, and CI fails on `map --check`."""
+class SyncMapNotRegenerated(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: REQ-CHECK-1133
+    """`sync` writes the map whatever the gate's verdict: a first check of an existing
+    repository fails, and that is when its map is read. The exit code stays the gate's."""
 
     def _sync(self, d):
         old_argv, err = sys.argv, io.StringIO()
@@ -1134,15 +1134,58 @@ class SyncMapNotRegenerated(unittest.TestCase):  # tested-by: ARCH-CHECK-006
                "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
         _write(os.path.join(d, "a.py"), tag("A-FOO-001") + "\n")
 
-    def test_failing_sync_says_the_map_was_not_regenerated(self):
+    def _failing(self, d):
+        reqs_dir = os.path.join(d, "requirements")
+        self._seed(d, reqs_dir)
+        _write(os.path.join(d, "b.py"), tag("GHOST-X-999") + "\n")   # dangling tag -> gate error
+        return reqs_dir
+
+    def _health(self, reqs_dir):
+        with io.open(os.path.join(reqs_dir, "_map.json"), encoding="utf-8") as f:
+            return json.load(f)["health"]
+
+    def test_a_failing_sync_writes_the_map_and_keeps_the_exit_code(self):  # verifies: REQ-CHECK-1133#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = self._failing(d)
+            rc, err = self._sync(d)
+            self.assertEqual(rc, 1)
+            self.assertIn("the map was written with the errors above in it", err)
+            self.assertNotIn("`map`", err)                  # names no verb that does not exist
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.json")))
+
+    def test_the_map_carries_the_gate_error_lines(self):  # verifies: REQ-CHECK-1133#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = self._failing(d)
+            self._sync(d)
+            health = self._health(reqs_dir)
+        self.assertEqual(1, health["gate_errors"])
+        self.assertEqual(
+            ["dangling tag: code references GHOST-X-999 but no requirement exists"],
+            health["gate_error_lines"])
+        self.assertFalse(health["gate_link_sync_clean"])
+
+    def test_a_failing_sync_rebuilds_only_the_map(self):  # verifies: REQ-CHECK-1133#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = self._failing(d)
+            old_argv = sys.argv
+            sys.argv = ["reqmap", "sync", "--root", d, "--code", d, "--findings"]
+            try:
+                with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                    rc = R.main()
+            finally:
+                sys.argv = old_argv
+            self.assertEqual(1, rc)
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.json")))
+            self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_findings.md")))
+
+    def test_a_clean_map_lists_no_gate_errors(self):  # verifies: REQ-CHECK-1133#CASE-4
         with tempfile.TemporaryDirectory() as d:
             reqs_dir = os.path.join(d, "requirements")
             self._seed(d, reqs_dir)
-            _write(os.path.join(d, "b.py"), tag("GHOST-X-999") + "\n")   # dangling tag -> gate error
-            rc, err = self._sync(d)
-            self.assertEqual(rc, 1)
-            self.assertIn("map was NOT regenerated", err)
-            self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_map.json")))
+            rc, _err = self._sync(d)
+            health = self._health(reqs_dir)
+        self.assertEqual(0, rc)
+        self.assertEqual([], health["gate_error_lines"])
 
     def test_clean_sync_writes_the_map(self):  # verifies: REQ-CHECK-833#CASE-2
         with tempfile.TemporaryDirectory() as d:

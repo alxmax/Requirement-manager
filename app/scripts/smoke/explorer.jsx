@@ -9,7 +9,7 @@ import { rankRequirements, searchRequirements } from "../../src/lib/search.js";
 import {
   adoptMapExport, REQUIREMENTS, ROADMAP, HISTORY, TARGETS,
 } from "../../src/lib/data.js";
-import { adaptNode, loadData } from "../../src/lib/loadData.js";
+import { adaptNode, loadData, readable } from "../../src/lib/loadData.js";
 import {
   ProblemsView, computeProblems,
 } from "../../src/views/ProblemsView.jsx";
@@ -451,3 +451,38 @@ const translationChecks = [
     !trNone.includes(MARK)],
 ];
 for (const [label, ok] of translationChecks) test(label, ok);
+
+// ---- a failing gate's dangling tags reach the page (REQ-CHECK-1133) ----------
+// tested-by: REQ-CHECK-1133
+{
+  // verifies: REQ-CHECK-1133#CASE-5
+  // A tag that names no requirement has no node; the map carries the gate's
+  // lines, and only the dangling ones become rows (an orphan already is one).
+  adoptMapExport({ nodes: json.nodes.map(adaptNode), health: { score: 50,
+    gate_error_lines: [
+      "dangling tag: code references GHOST-X-999 but no requirement exists",
+      "ARCH-X-001: enforced requirement has no implements: member"] } });
+  const rows = computeProblems().filter((p) => p.signal === "dangling");
+  const html = renderToString(<ProblemsView openSpec={noop} />);
+  adoptMapExport({ nodes: json.nodes.map(adaptNode) });
+  test("problems: a tag that names no requirement is an error on the page",
+    rows.length === 1 && rows[0].id === "GHOST-X-999" && rows[0].sev === "ERROR"
+      && html.includes("GHOST-X-999") && html.includes("gate blocks the build"));
+}
+{
+  // verifies: REQ-CHECK-1133#CASE-6
+  // A first check of an existing repository: no requirement read yet, the gate
+  // failed on tags. The viewer opens it, on Problems, with the error shown.
+  const failed = { nodes: [], health: { score: 0, gate_error_lines: [
+    "dangling tag: code references GHOST-X-999 but no requirement exists"] } };
+  const prevWindow = globalThis.window;
+  globalThis.window = { __REQMAP_DATA__: failed };
+  loadData();
+  globalThis.window = prevWindow;
+  const firstCheck = renderToString(<App />);
+  adoptMapExport({ nodes: json.nodes.map(adaptNode) });
+  test("viewer: a map with no requirement but a failing gate opens on Problems",
+    readable(failed) && !readable({ nodes: [] }) && !readable(null)
+      && firstCheck.includes("GHOST-X-999")
+      && firstCheck.includes("gate blocks the build"));
+}
