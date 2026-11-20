@@ -228,10 +228,12 @@ def load_bugs(root, reqs_dir):
     return bugs, problems
 
 
-def map_block(root, reqs_dir):
-    # implements: REQ-BUGS-1117
-    """The `bugs` list `_map.json` carries."""
-    return load_bugs(root, reqs_dir)[0]
+def map_block(root, reqs_dir, ids=()):
+    # implements: REQ-BUGS-1117  # implements: REQ-BUGS-1131
+    """The `bugs` list `_map.json` carries, each bug with the requirement
+    ids of `ids` it names."""
+    from .bugreqs import link
+    return link(load_bugs(root, reqs_dir)[0], ids)
 
 
 def input_problems(root, reqs_dir):

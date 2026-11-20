@@ -1,6 +1,7 @@
 // implements: ARCH-VIEWER-007
+// implements: REQ-BUGS-1131
 import { Fragment } from "react";
-import { coverageDetail, exemptReason } from "../../lib/data.js";
+import { BUGS, coverageDetail, exemptReason } from "../../lib/data.js";
 import { mdInline, reqLinkProps } from "../../lib/ui.jsx";
 
 export function parseTranslatedBlocks(text) {
@@ -116,6 +117,30 @@ export function SpecMeta({ r, t, onNav }) {
           <Fragment key={d}>{i > 0 ? ", " : ""}<button className="dep-link" onClick={() => onNav && onNav(d)}>{d}</button></Fragment>
         ))}</span>
       </span>}
+    </div>
+  );
+}
+
+/** The open bugs whose row names this requirement, highest priority first.
+ * The engine writes `reqs` on each bug; an older map has none, and shows
+ * nothing here. */
+export function bugsNaming(id, bugs = BUGS) {
+  return bugs.filter((b) => (b.reqs || []).includes(id))
+    .sort((a, b) => (a.prio + a.id).localeCompare(b.prio + b.id));
+}
+
+export function BugsSection({ r, t }) {
+  const bugs = bugsNaming(r.id);
+  if (!bugs.length) return null;
+  return (
+    <div className="sec">
+      <div className="eyebrow warn">{t("Open bugs")} ({bugs.length})</div>
+      {bugs.map((b) => (
+        <div className="member" key={b.id}>
+          <b>{b.prio}</b> {b.id} — {b.title}
+          {b.where && <span style={{ color: "var(--fg-muted)" }}> · {b.where}</span>}
+        </div>
+      ))}
     </div>
   );
 }

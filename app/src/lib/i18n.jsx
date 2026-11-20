@@ -237,6 +237,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "milestone": "reper",
   "Used by": "Folosit de",
   "Risk — recommended action": "Risc — acțiune recomandată",
+  "Open bugs": "Buguri deschise",
   "Open full spec": "Deschide specificația completă",
   "center & highlight in the map": "centrează și evidențiază în hartă",
   "close": "închide",

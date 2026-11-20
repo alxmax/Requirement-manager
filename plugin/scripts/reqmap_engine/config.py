@@ -200,6 +200,9 @@ CLARIFY_FAILURE_WORDS = [
     "refuse", "refuses", "reject", "rejects", "corrupt", "malformed",
     "unreadable", "not found", "timeout", "conflict", "duplicate", "unknown",
     "no ", "none", "cannot", "without",
+    # a leading space, as "no " has a trailing one: the match is a substring,
+    # and "default" would read as a failure path
+    " fault", "defect", "degraded",
 ]
 
 

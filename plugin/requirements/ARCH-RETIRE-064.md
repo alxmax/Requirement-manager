@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `retire` deprecates by default, refuses while dependents or children exist unless forced, and never writes without `--apply`. [[REQ-RETIRE-961]]
 - `retire --delete` removes the requirement block, its lock entries and its membership tags — never a function body. [[REQ-RETIRE-962]]
 - `retire` takes a whole class out in one call, ordered from the graph and guarded once; a pointer from a deprecated requirement, or from one retired in the same call, never blocks. [[REQ-RETIRE-963]]
+- A retirement that fails says so, and stops the batch, before anything after it is written. [[REQ-RETIRE-1130]]
 
 ## Cases
 CASE-1 — the plan comes before the change
@@ -247,3 +248,55 @@ CASE-4 — a single id is unchanged
   Given  one requirement nothing points at
   When   `retire` runs on it alone
   Then   the output carries no batch ordering line
+
+---
+id: REQ-RETIRE-1130
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-RETIRE-064]
+---
+
+# A retirement that fails says so and stops
+
+## Description
+> `retire --apply` reported a deletion as applied when the requirement's block was still in its
+> file, dropped its lock entries anyway, ignored a file it could not write, and went on to the
+> next requirement in the batch, which is the base of the one that failed. It also cut a tag's
+> text out of a string literal, as if every match were a tag.
+
+Every bullet below is binding.
+- `--delete` cuts a tag only where the scanner reads one: a tag's text inside a string literal,
+  a fenced example or a backtick span stays as written.
+- A member file that cannot be read or written makes the retirement fail; the requirement and
+  its lock entries stay.
+- A block that cannot be removed makes the retirement fail; its lock entries stay.
+- `applied` is true only when the tags, the block and the lock entries are all gone.
+- A failed step exits 1 and stops the batch: no later requirement is retired.
+
+## Cases
+CASE-1 — a string literal survives
+  Given  a member line `s = "# implements: X"  # implements: X`
+  When   `retire --delete --apply` retires X
+  Then   the literal keeps its text and only the comment tag goes
+
+CASE-2 — a block that cannot be removed is not reported as applied
+  Given  a requirement whose block removal fails
+  When   `retire --delete --apply` runs
+  Then   it exits 1, `applied` is not true, and the lock entry is still there
+
+CASE-3 — a file that cannot be written fails the step
+  Given  a member file that cannot be written
+  When   `retire --delete --apply` runs
+  Then   it exits 1 and the requirement block is still in its file
+
+CASE-4 — the batch stops at the first failure
+  Given  a batch of two where the first retirement fails
+  When   `retire --delete --apply` runs on both
+  Then   the second is not attempted and the exit code is 1
+
+CASE-5 — an HTML-comment tag is still cut
+  Given  a Markdown member carrying `<!-- implements: X -->` on its own line
+  When   `retire --delete --apply` retires X
+  Then   the line is gone and the next gate reports no dangling tag

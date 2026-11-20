@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "10263b7db4d60ea4f2286986ffbd7095cd24fedaf2a404b62c08352e8eee2d30",
+      "plugin/scripts/reqmap_engine/__init__.py": "cf37413fc96b644b4792768f1222c4612ba186befb915875ed27bc715531bb6d",
       "plugin/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -95,7 +95,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "a480da868cdbdd803024f4509b65fe08b707b5063b1564e697c88029284771e7",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "ab86bf05b63c07156b27f89a04854877d9736eb0155fc739abb2e67832b3a8e4",
+      "scripts/check_engine_budget.py": "5212d08a66ab37eee93da83af55ce7a134d307806d825baf3f76b4c0a1c175b5",
       "scripts/check_engine_bump.py": "b2e529008531d08e750895ef0c5bb71c1edec49e16383adf4dc257af23cbb963",
       "scripts/check_engine_perf.py": "515dcf905508e15f0aa6405892ffe1b8038965456cc559f0a2828cdfe17211d9",
       "scripts/check_versions.py": "b2c1dae0980fdac26b70489a568eb1c6d47c2a88d18297785b473f66ad7eadff",
@@ -149,8 +149,7 @@
       "app/src/views/commands/CommandGroup.jsx": "b9425b46532df218e5f3c4f86a89a61b18dda082226a9894b783a4eb89e390a3",
       "app/src/views/explorer/ExplorerFilters.jsx": "56828b07ed43f0930eadee08493ffefbf65d147c4522377f24f498bce9eaa912",
       "app/src/views/roadmap/EntryBody.jsx": "d609917ec39cd5b11b47555f7227a272845c1c76b6a324c85df6955f1e3b2c18",
-      "app/src/views/roadmap/PlanGantt.jsx": "d09679f4b402239487eed90c62ef2f6cf40297e6d682d0465f7665af6088abc6",
-      "app/src/views/spec/SpecParts.jsx": "3a8a265816ccde809700121a0a232f19b8e63c2cf3407ffa9b5b70bbf1ee235b"
+      "app/src/views/roadmap/PlanGantt.jsx": "d09679f4b402239487eed90c62ef2f6cf40297e6d682d0465f7665af6088abc6"
     },
     "ARCH-VIEWERFILE-074": {
       "app/vite.viewer.config.js": "fd4b379d740fa96f18d3913600fc1492ec62dadeb0e8944544815feeb5155bcd"
@@ -207,7 +206,6 @@
     },
     "REQ-BUGS-1117": {
       "plugin/scripts/reqmap_engine/bugs.py#_bug_paths": "408f2560ebc854804831b38d087b9e3c033c47ca811aac100451131856cfcd0d",
-      "plugin/scripts/reqmap_engine/bugs.py#map_block": "8c98494b0ff2c085d068200863d5e83919b2e0ca1bb9b62017f9e9f909b6955f",
       "plugin/scripts/reqmap_engine/bugs.py#module_key": "4eb0d28184834cf9e2a5ec6ad7e39dfba8f049f68a04f170b2025e0be03df88e",
       "plugin/scripts/reqmap_engine/config.py#bugs_declared": "591dbcade1a25b3d099a16b59aa1fead4eeaa49b35ce91ea9f101d2c857bed6e"
     },
@@ -250,6 +248,11 @@
       "app/src/lib/bugStats.js": "59dc2fcb7f51cdb036e94495e83e8cd47fa0f0df2ba76f1cb6de00f7055e8324",
       "plugin/scripts/reqmap_engine/bugclose.py#fixed_block": "64577934453a3144938949ffa0d7516c72709ade26532a0572bd0a4516356c8e",
       "plugin/scripts/reqmap_engine/bugclose.py#forge_of": "35ba9f7973ef675ff6c68eb5491dd18e666cbb85375e2cb377ccbd24559a4b9b"
+    },
+    "REQ-BUGS-1131": {
+      "plugin/scripts/reqmap_engine/bugreqs.py#attach": "8e605049f274a01347218124cc79995dfa178c570cb73973bea9e7142fa2d372",
+      "plugin/scripts/reqmap_engine/bugreqs.py#open_bugs_of": "9762591b1323b98fa76b15d94d439652a73f154f174ec231e63ffe6b7f12811e",
+      "plugin/scripts/reqmap_engine/bugreqs.py#print_open": "4aa4283fbea92ba29ee46b24a298e1fcbf3942c102fc1b4099b5d9eaa3c7a3a6"
     },
     "REQ-CHECK-1035": {
       "plugin/scripts/reqmap_engine/wikilinks.py#_dangling_wikilink_rule": "224c47cf8d7f4a929a339c65f802ecb8cad38718c8206d6ab5620a0cdc9c14ca",
@@ -491,7 +494,7 @@
       "plugin/scripts/reqmap_engine/watch.py#cmd_propose": "d2e4f812013b12ed79859a40d4c0d635b3ced0d352be4da73cc3174c8250e997"
     },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "12f41b832e12d306032d21b5cc4161b91ebf61a17119dffe600e212464a30f60"
+      "plugin/scripts/reqmap.py": "8167637e659ea1050d492f3cc0301d0180ae451f0ed99ca8c1697aab1775fd8a"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "60a5966ee67c5f4d7ae327036c8a44cd08688e3de46834b4a493f14234e0a817"
@@ -509,6 +512,9 @@
       "plugin/scripts/reqmap_engine/release.py#_declared": "1bf2fc37f78af1c99b03c4543762029ac9a2357a57273e1f630db36d26327ef9",
       "plugin/scripts/reqmap_engine/release.py#release_workflow": "eea0ca9240d1bfc73d626d61a08137e64471aef17cd867325f7aaf67b0804eec"
     },
+    "REQ-RETIRE-1130": {
+      "plugin/scripts/reqmap_engine/retireapply.py#_tag_starts": "83050809a63c2f1cc7fcc4936b2aa03ee96c8bdc87dd93e4290a022cf4d1a520"
+    },
     "REQ-RETIRE-960": {
       "plugin/scripts/reqmap_engine/retire.py#_print_retire_plan": "440bd03b5f034a9ef6019dc6dcb3d27f5ea14c4dba9caba9132e11a392000205"
     },
@@ -519,7 +525,6 @@
     "REQ-RETIRE-962": {
       "plugin/scripts/reqmap_engine/retireapply.py#_drop_lock_entries": "782fa1dd622b477362d051a5d279433537e832c84c14944e3010804818eda44e",
       "plugin/scripts/reqmap_engine/retireapply.py#_remove_requirement_block": "1fe6ee5d943d49f989fc37ab656354582ecd539c60b290cabd45e0a8bf5c44e9",
-      "plugin/scripts/reqmap_engine/retireapply.py#_strip_member_tags": "7fad3d97e2bee0d6328bf21c9aeb2a50c93d9b47f7335e5a13d01dd1131bb989",
       "plugin/scripts/reqmap_engine/retireapply.py#_trim_emptied_comment": "1c3e54dd1b31f5fbe99743419abc4d2cf7d69a5e5b52cec798d8e800e773d28d"
     },
     "REQ-RETIRE-963": {

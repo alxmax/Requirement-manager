@@ -73,7 +73,9 @@ PACKAGE = "reqmap_engine"
 # test-file globs and requirement sources. customtrace.py stays lazy.
 # Raised to 6,779 by ADR-0080: the bug flags, their dispatch, `bugs_declared`
 # and the map's bugs block. bugs.py stays lazy.
-CORE_LOGICAL_BUDGET = 6810
+# Raised to 6,814 by ADR-0083: the two call sites that list a requirement's open
+# bugs in `gate --show`. bugreqs.py stays lazy.
+CORE_LOGICAL_BUDGET = 6814
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 TOTAL_LINE_CEILING = 20000
