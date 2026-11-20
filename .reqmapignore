@@ -1,28 +1,32 @@
 # Paths reqmap should not scan when invoked with --code pointed at the repo
 # root (this repo's own CI + pre-commit hook only, via `--code ..`/`--code .`).
-# The narrow default invocation (cd plugin/ && reqmap.py gate, no --code) never
-# reads this file — it reads plugin/.reqmapignore instead. The two are kept in
+# The narrow default invocation (cd plugin-full/ && reqmap.py gate, no --code) never
+# reads this file — it reads plugin-full/.reqmapignore instead. The two are kept in
 # sync deliberately, NOT merged into one relocated file: moving plugin's own
 # .reqmapignore to the repo root would silently stop excluding these same
 # paths for the narrow invocation, since load_ignore() checks reqs_dir then
 # code_root, and code_root differs between the two invocation styles.
 
-plugin/scripts/_map_viewer.html
+plugin-full/scripts/_map_viewer.html
 
 # The skill's generated copy of the engine (ADR-0068). Same reason as build/**
 # below: scanned, every member would be counted twice.
-plugin/skills/requirement-manager/scripts/**
+plugin-full/skills/requirement-manager/scripts/**
 
-plugin/skills/excalidraw-diagram/SKILL.md
-plugin/skills/excalidraw-diagram/SKILL.universal.md
-plugin/skills/excalidraw-diagram/examples/*.py
-plugin/skills/excalidraw-diagram/references/excalidraw_format.md
+# The directory edition: hand-kept Markdown copies of the skills, whose example
+# tags would otherwise be read as members and dangling refs.
+plugin/**
 
-plugin/skills/requirement-manager/SKILL.md
-plugin/skills/requirement-manager/SKILL.universal.md
-plugin/skills/requirement-manager/references/*.md
+plugin-full/skills/excalidraw-diagram/SKILL.md
+plugin-full/skills/excalidraw-diagram/SKILL.universal.md
+plugin-full/skills/excalidraw-diagram/examples/*.py
+plugin-full/skills/excalidraw-diagram/references/excalidraw_format.md
 
-plugin/docs/superpowers/specs/*.md
+plugin-full/skills/requirement-manager/SKILL.md
+plugin-full/skills/requirement-manager/SKILL.universal.md
+plugin-full/skills/requirement-manager/references/*.md
+
+plugin-full/docs/superpowers/specs/*.md
 
 # Session working artifacts (specs/plans), gitignored, not capability implementations.
 docs/superpowers/**
@@ -70,7 +74,7 @@ diagrams/**
 TODO-feedback-*.md
 
 # docs/map.html is the published render of the SAME generated viewer template
-# excluded above (plugin/scripts/_map_viewer.html) — it inlines this repo's own
+# excluded above (plugin-full/scripts/_map_viewer.html) — it inlines this repo's own
 # _map.json, which embeds ARCH-SCAN-002's prose (its own "implements: LOGIN-001"
 # illustration and its "AC-1" acceptance-criterion label) as plain JS/JSON text.
 # Once code_root reaches docs/, that inlined text matches TAG_RE and reads as a
@@ -97,8 +101,8 @@ docs/plan-source-audit.html
 
 # The suite's entry point and its shared fixtures hold no test function of their own
 # (the parts do, and carry the tested-by tags), so a tag here would fail RM012.
-plugin/scripts/test_reqmap.py
-plugin/scripts/test_reqmap_common.py
+plugin-full/scripts/test_reqmap.py
+plugin-full/scripts/test_reqmap_common.py
 
 # Prose, page shells, build config and dev tooling: not capability implementations.
 README.md
@@ -113,10 +117,10 @@ docs/planning-contract.md
 docs/requirements.md
 docs/case-studies.md
 docs/stability.md
-plugin/README.md
+plugin-full/README.md
 # The APM manifest: package metadata whose version `check_versions.py` keeps in step,
 # the same class as plugin.json. Not a capability implementation.
-plugin/apm.yml
+plugin-full/apm.yml
 # ROADMAP.md is INPUT the engine reads (`_roadmap_signals`, ARCH-ROADMAP-038), not a
 # capability and not an artifact derived from one. A `generated-from:` tag would be
 # backwards: the drift gate would call the plan stale whenever the requirement that

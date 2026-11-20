@@ -4,12 +4,12 @@
       "type": "stdio",
       "command": "python",
       "args": [
-        "${workspaceFolder}/plugin/scripts/reqmap.py",
+        "${workspaceFolder}/plugin-full/scripts/reqmap.py",
         "mcp",
         "--root",
         "${workspaceFolder}",
         "--reqs",
-        "${workspaceFolder}/plugin/requirements",
+        "${workspaceFolder}/plugin-full/requirements",
         "--code",
         "${workspaceFolder}"
       ]

@@ -22,7 +22,7 @@
 - [ ] `lint --strict --code ..` is clean, or the new finding has a justified `lint_exempt:`
 - [ ] Regenerated artifacts committed: `_map.md`, `_map.json`, `_reqlock.json`, `_memberlock.json`
 - [ ] Tests added for the new behaviour, and the relevant suites pass locally with `-X utf8`
-- [ ] Anything under `plugin/` changed → plugin semver bumped in all three places
+- [ ] Anything under `plugin-full/` changed → plugin semver bumped in all three places
       (`scripts/check_versions.py --fix`) **and** a matching `` `vX.Y.Z` `` CHANGELOG entry
 - [ ] Engine changed → `MAP_ENGINE_VERSION` bumped
 - [ ] No new third-party dependency (the engine is stdlib-only, deliberately)

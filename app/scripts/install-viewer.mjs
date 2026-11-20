@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, "..");
 const src = resolve(appRoot, "dist-viewer", "viewer.html");
-const destDir = resolve(appRoot, "..", "plugin", "scripts");
+const destDir = resolve(appRoot, "..", "plugin-full", "scripts");
 const dest = resolve(destDir, "_map_viewer.html");
 
 // Sanity: the engine relies on this exact marker to inject data.

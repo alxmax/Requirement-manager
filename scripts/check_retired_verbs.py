@@ -62,8 +62,8 @@ def live_verbs():
     (ADR-0035), with the single-file `reqmap.py` still accepted for an older
     checkout."""
     block = None
-    for rel in (("plugin", "scripts", "reqmap_engine", "commands.py"),
-                ("plugin", "scripts", "reqmap.py")):
+    for rel in (("plugin-full", "scripts", "reqmap_engine", "commands.py"),
+                ("plugin-full", "scripts", "reqmap.py")):
         path = os.path.join(ROOT, *rel)
         if os.path.exists(path):
             src = io.open(path, encoding="utf-8").read()
@@ -96,8 +96,8 @@ def live_flags(root=None):
     """
     base = root or ROOT
     src = ""
-    for parts in (("plugin", "scripts", "reqmap.py"),
-                  ("plugin", "scripts", "reqmap_engine", "cliflags.py")):
+    for parts in (("plugin-full", "scripts", "reqmap.py"),
+                  ("plugin-full", "scripts", "reqmap_engine", "cliflags.py")):
         try:
             with io.open(os.path.join(base, *parts), encoding="utf-8") as fh:
                 src += fh.read()
@@ -112,17 +112,17 @@ INSTRUCTION_FILES = [
     # The engine prints instructions too: the audit report names the command
     # that runs each section on its own. Those strings go stale like any other
     # doc.
-    "plugin/scripts/reqmap.py",
+    "plugin-full/scripts/reqmap.py",
     "CLAUDE.md",
     "README.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
     # The hook shipped to consumers: a retired verb there fails every
     # consumer commit.
-    "plugin/hooks/pre-commit",
+    "plugin-full/hooks/pre-commit",
     # NOT one skill by name: the plugin ships three, and naming one is how six
     # dead invocations reached consumers through `requirement-quality-review`.
-    # The glob below reads every SKILL*.md under plugin/skills/, whatever is
+    # The glob below reads every SKILL*.md under plugin-full/skills/, whatever is
     # added next.
     ".githooks/pre-commit",
     ".github/workflows/ci.yml",
@@ -130,12 +130,12 @@ INSTRUCTION_FILES = [
 ]
 # The engine package prints instructions too (audit sections, decompose, next
 # steps).
-INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml"),
-                     ("plugin/scripts/reqmap_engine", ".py")]
+INSTRUCTION_GLOBS = [("plugin-full/requirements", ".md"), ("check", ".yml"),
+                     ("plugin-full/scripts/reqmap_engine", ".py")]
 # Every skill the plugin ships, at any depth, and the `references/` pages a
 # SKILL.md links to: each one instructs a reader to run the engine, and each
 # goes stale the same way.
-INSTRUCTION_TREES = [("plugin/skills", "", ".md")]
+INSTRUCTION_TREES = [("plugin-full/skills", "", ".md")]
 
 # Verbs this project has had and no longer has. Only these are flagged:
 # matching "any word after reqmap" turns every sentence that mentions the file
@@ -187,7 +187,7 @@ INVOCATION = re.compile(
 )
 
 # The same call with no delimiter in front of it. `.githooks/pre-commit` wrote
-# its own repair hint as `(fix: reqmap.py map --root plugin --code .)` — a live
+# its own repair hint as `(fix: reqmap.py map --root plugin-full --code .)` — a live
 # instruction, in a file this guard already scanned, that the delimited pattern
 # above could not see. Kept as a SECOND pattern rather than a relaxation of the
 # first, because only the retired-VERB check may use it: an undelimited match is
@@ -204,7 +204,7 @@ FLAG = re.compile(r"(--[a-z][a-z0-9-]*)")
 END_OF_CALL = re.compile(r"`|\"|&&|\|\||;")
 
 
-# A consumer checkout has no `plugin/` prefix and no skills tree — it vendored
+# A consumer checkout has no `plugin-full/` prefix and no skills tree — it vendored
 # the engine and wrote its own instructions around it. Scanned as globs rather
 # than a fixed list because no two consumers lay their docs out the same way.
 CONSUMER_FILES = ["CLAUDE.md", "README.md", "AGENTS.md", "CONTRIBUTING.md",

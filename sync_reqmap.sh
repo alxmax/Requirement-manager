@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # implements: REQ-SELFGATE-1072
-# sync_reqmap.sh — propagate plugin/scripts/reqmap.py to the plugin cache
+# sync_reqmap.sh — propagate plugin-full/scripts/reqmap.py to the plugin cache
 # and any registered consumer repos.
 #
 # Usage:
@@ -40,13 +40,13 @@ find_engine() {
 }
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"
+SRC="$SCRIPT_DIR/plugin-full/scripts/reqmap.py"
 # The engine is the CLI module plus the reqmap_engine/ package beside it (v7.0.0);
 # the two travel together, and the version line lives in the package.
-PKG_SRC="$SCRIPT_DIR/plugin/scripts/reqmap_engine"
+PKG_SRC="$SCRIPT_DIR/plugin-full/scripts/reqmap_engine"
 # The pre-built single-file viewer ships beside the engine; propagate it too so
 # `map` can emit the self-contained _map.html wherever the engine lands.
-VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
+VIEWER_SRC="$SCRIPT_DIR/plugin-full/scripts/_map_viewer.html"
 # Derive the cache path from the plugin's declared version (NOT a hard-coded one,
 # which silently no-ops once the published version moves on). Fall back to whatever
 # version dir is actually installed if that exact one is absent.
@@ -54,8 +54,9 @@ VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
 # CLAUDE_CONFIG_DIR names the one the running session actually loads plugins from.
 # Backslashes are folded to forward slashes so a Windows-style value still tests.
 CLAUDE_DIR=$(printf %s "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" | tr '\134' '/')
-CACHE_BASE="$CLAUDE_DIR/plugins/cache/requirement-manager/requirement-manager"
-PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin/.claude-plugin/plugin.json" \
+# The cache dir is <marketplace>/<plugin>; the engine ships only in the full edition.
+CACHE_BASE="$CLAUDE_DIR/plugins/cache/requirement-manager/requirement-manager-full"
+PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin-full/.claude-plugin/plugin.json" \
   | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
 CACHE="$CACHE_BASE/$PLUGIN_VERSION"
 if [[ ! -d "$CACHE" ]]; then

@@ -22,7 +22,7 @@ import tempfile
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                "..", "plugin", "scripts"))
+                                "..", "plugin-full", "scripts"))
 import reqmap as R  # noqa: E402
 
 REQ = """---
