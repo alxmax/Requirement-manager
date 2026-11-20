@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+**Drift holds on a repository that already has its requirements and tags (ADR-0085).**
+
+- A tag on the comment line right above a Python function (or above its decorators) now keys that function in the member lock. Such a tag used to fall back to the whole file, and a file several requirements share was dropped, so a changed function was never reported. REQ-MEMBERDRIFT-1134
+- A confirmed requirement read from a text or HTML source, edited, used to be absorbed by the next `sync`: it could not be set back to draft, and the lock advanced anyway. Its baseline is now kept and the gate reports the drift until `sync --accept-drift`. REQ-CHECK-1135
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.4`. The core rises to 6,825 logical lines; the physical total stays under 20,000.
+
 **The map is written when the gate fails.**
 
 - `sync` writes the map whatever the gate's verdict and keeps the gate's exit code, so a first check of an existing repository, which fails, can be read. On a failing gate only the map is rebuilt; the findings digest, the site page and the advisories wait for a passing one. REQ-CHECK-1133

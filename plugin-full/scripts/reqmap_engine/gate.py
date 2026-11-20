@@ -121,10 +121,12 @@ def _demote_drifted_confirmed(reqs, confirmed_drift, full_members):
     # implements: REQ-CHECK-832  # implements: REQ-CHECK-833
     # implements: REQ-RULES-948
     """Demote each drifted confirmed/implemented requirement back to draft,
-    printing why and which member files to re-check."""
+    printing why and which member files to re-check. Returns the ids it
+    could not demote (read from a file it never writes)."""
     print("Contract changed on %d confirmed requirement(s) — status back to "
           "`draft`, because nobody has re-validated them:"
           % len(confirmed_drift))
+    kept = []  # implements: REQ-CHECK-1135
     for rid in confirmed_drift:
         r = reqs.get(rid) or {}
         was = r.get("meta", {}).get("status")
@@ -143,13 +145,17 @@ def _demote_drifted_confirmed(reqs, confirmed_drift, full_members):
             else:
                 print("      no members tagged — add an `implements:` tag")
         else:
-            print("  WARN  %s: no `status:` line to change" % rid)
+            kept.append(rid)
+            print("  WARN  %s: no `status:` line to change — its baseline is "
+                  "kept, so the drift stays reported until --accept-drift"
+                  % rid)
     print("  These no longer gate. Re-read the code above against the new "
           "contract,")
     print("  change whichever is wrong, then set the status back by hand — or "
           "re-run")
     print("  with --accept-drift if the edit did not change what the code must "
           "do.")
+    return kept
 
 
 def _unchanged_since_lock(reqs, reqs_dir, rids):  # implements: REQ-PROMOTE-974
@@ -242,7 +248,9 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
         print("  ERROR: %s; the baseline was not advanced." % e)
         return str(e)
     if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
-        _demote_drifted_confirmed(reqs, confirmed_drift, full_members)
+        # implements: REQ-CHECK-1135 — not demoted, so its old baseline stays
+        new_lock.update({rid: lock[rid] for rid in _demote_drifted_confirmed(
+            reqs, confirmed_drift, full_members) if rid in lock})
     save_lock(reqs_dir, new_lock)
     save_memberlock(reqs_dir, full_member_hashes
                      if full_member_hashes is not None
