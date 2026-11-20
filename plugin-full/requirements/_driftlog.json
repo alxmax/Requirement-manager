@@ -22,8 +22,8 @@
       "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
     },
     "ARCH-CHECK-006": {
-      "hash": "ff35bb69ae43",
-      "reason": "Input integrity: structured diagnostics and strict corrupt baseline"
+      "hash": "33fa43f5b959",
+      "reason": "REQ-CHECK-1133: sync writes the map when the gate fails"
     },
     "ARCH-CLARIFY-062": {
       "hash": "21b462b80dad",

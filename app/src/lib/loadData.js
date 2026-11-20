@@ -133,10 +133,19 @@ export function adaptNode(n) {
  * rendered. `adoptMapExport` reads only the keys it knows and validates
  * each one, so a spread is the safe shape and an added key needs no edit
  * here.  implements: REQ-VIEWER-969 */
+/** A map worth opening: one with requirements, or one with none whose gate
+ * failed, which is what a first check of an existing repository writes.
+ * implements: REQ-CHECK-1133 */
+export function readable(m) {
+  if (!m || !Array.isArray(m.nodes)) return false;
+  const lines = (m.health && m.health.gate_error_lines) || [];
+  return m.nodes.length > 0 || (Array.isArray(lines) && lines.length > 0);
+}
+
 export async function loadData() {
   // 1. inlined single-file viewer
   const inl = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
-  if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
+  if (readable(inl)) {
     adoptMapExport({ ...inl, nodes: inl.nodes.map(adaptNode) });
     return {
       source: "inline", engineVersion: inl.engine_version || null,
@@ -150,9 +159,7 @@ export async function loadData() {
       `${import.meta.env.BASE_URL}data.json`, { cache: "no-store" });
     if (!res.ok) return { source: "none" };
     const json = await res.json();
-    if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) {
-      return { source: "none" };
-    }
+    if (!readable(json)) return { source: "none" };
     adoptMapExport({ ...json, nodes: json.nodes.map(adaptNode) });
     return {
       source: "engine", engineVersion: json.engine_version || null,

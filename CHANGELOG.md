@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+**The map is written when the gate fails.**
+
+- `sync` writes the map whatever the gate's verdict and keeps the gate's exit code, so a first check of an existing repository, which fails, can be read. On a failing gate only the map is rebuilt; the findings digest, the site page and the advisories wait for a passing one. REQ-CHECK-1133
+- The message no longer tells you to run `map`, a verb that no longer exists.
+- The map's health record carries the gate's link-sync error lines (`gate_error_lines`), and the Problems page shows a tag that names no requirement as an error, counted in the build-blocking banner. REQ-CHECK-1133
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.3`. The core does not grow: the map call moved out of the success branch.
+
 **Text stays inside its box in the Explorer.**
 
 - A tree row keeps its id and title in one block that wraps: the title stays beside the id while it has room for a few words, drops under it otherwise (it was squeezed to one letter), and shows in full on hover. A long id breaks at a hyphen instead of pushing the clause count out of the pane.

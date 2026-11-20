@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
+- `sync` writes the map whatever the gate's verdict, with the gate's errors in it, and keeps the gate's exit code. [[REQ-CHECK-1133]] details the behaviour.
 - `gate` warns on a Description link `[[ID]]` whose target no requirement defines, without affecting the exit code. [[REQ-CHECK-1035]] details the behaviour.
 - A bare `gate` runs only the rules that say a link, the drift baseline or the committed map is broken, and prints readability errors only; `gate --full` runs everything. [[REQ-CHECK-1036]] details the behaviour.
 
@@ -638,3 +639,66 @@ CASE-6 — formatting does not bypass map freshness
   Given  a stale generated map
   When   text and JSON gates run
   Then   both fail and identify the stale map; both honor `--no-map-check`
+
+--------------------
+
+
+---
+id: REQ-CHECK-1133
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CHECK-006]
+---
+
+# The map is written when the gate fails
+
+## Description
+> A first check of an existing repository fails: tags that name no requirement, requirements
+> with no code. That is when its map is read, and `sync` wrote none, with a message naming a
+> `map` verb that no longer exists. A map written then must say what failed, and a tag that
+> names no requirement has no requirement to show it on.
+
+Every bullet below is binding.
+- `sync` writes the map whatever the gate's verdict, and exits with the gate's code.
+- On a failing gate, `sync` writes only the map: the findings digest, the site page and the
+  advisories wait for a passing one. It says so on stderr and names no verb that does not exist.
+- The map's health record carries the gate's link-sync error lines, empty when there are none.
+- The map's Problems page shows a tag that names no requirement as an error, which counts
+  toward the build-blocking banner.
+- The map viewer opens a map that has no requirement when its gate failed, on the Problems
+  page, instead of saying there is no map.
+
+## Cases
+CASE-1 — a failing sync writes the map and keeps the exit code
+  Given  a corpus with a tag that names no requirement
+  When   `sync` runs
+  Then   it exits 1, `_map.json` exists, and the message says the map was written
+
+CASE-2 — the map carries the gate's lines
+  Given  the same corpus
+  When   `sync` runs
+  Then   the map's health record has one error and its line names the dangling id
+
+CASE-3 — only the map is rebuilt on failure
+  Given  the same corpus and `--findings`
+  When   `sync` runs
+  Then   `_map.json` exists and `_findings.md` does not
+
+CASE-4 — a clean map lists no gate error
+  Given  a corpus whose gate passes
+  When   `sync` runs
+  Then   it exits 0 and the map's error lines are empty
+
+CASE-5 — the page shows the dangling tag
+  Given  a map whose gate lines name one dangling tag and one requirement with no code
+  When   the Problems page renders
+  Then   the dangling id is one error row, the other is not repeated, and the banner says the
+         gate blocks the build
+
+CASE-6 — a first check with no requirement opens on Problems
+  Given  a map with no requirement whose gate lines name a dangling tag
+  When   the viewer loads it
+  Then   it opens on the Problems page and shows the dangling id, and a map with no
+         requirement and no gate error still reads as no map

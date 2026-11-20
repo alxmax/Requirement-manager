@@ -292,8 +292,12 @@ def _health_record(reqs, members, reqs_dir, with_rows=False):
         data["reviewed_score"] = reviewed_score
         data["reviewed_total"] = reviewed_total
     if with_rows:
-        data["unhealthy"], data["exempt_ids"] = _health_rows(
-            reqs, flags)
+        # The map also carries the gate's messages: one written while the gate
+        # fails must say what failed, and a dangling tag has no requirement to
+        # show it on. Only here, so `--json` keeps to numbers.
+        # implements: REQ-CHECK-1133
+        (data["unhealthy"], data["exempt_ids"]), data["gate_error_lines"] = (
+            _health_rows(reqs, flags), gate_errors)
     return data
 
 
