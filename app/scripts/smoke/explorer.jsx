@@ -120,6 +120,11 @@ const explorerChecks = [
       && explorerHtml.includes("Links — traceability")],
   ["explorer: a collapsed parent advertises its clause count",
     explorerHtml.includes("clauses")],
+  // The id and the title share one wrapping block, so a long id moves the title under
+  // it instead of squeezing it to one letter, and the full title is on hover.
+  ["explorer: a row's id and title wrap together, the title in full on hover",
+    /<span class="ex-label"><span class="ex-id">SYS-SSOT-001<\/span><span class="ex-title" title="[^"]+">/
+      .test(explorerHtml)],
 ];
 for (const [label, ok] of explorerChecks) test(label, ok);
 adoptMapExport({ nodes: [
