@@ -73,6 +73,10 @@
       "hash": "f37afd7a0755",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "ARCH-INIT-012": {
+      "hash": "46433d99f0d1",
+      "reason": "ADR-0084: init prints the instructions an assistant without the skill reads (REQ-INIT-1132)"
+    },
     "ARCH-LINT-014": {
       "hash": "231ccfc2d76e",
       "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"

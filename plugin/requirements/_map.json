@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-20",
+  "engine_version": "2026-11-20.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -8534,7 +8534,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:97"
+          "loc": "plugin/scripts/reqmap_engine/init.py:98"
         },
         {
           "role": "implements",
@@ -9932,7 +9932,8 @@
       "intent": "Setting up requirement tracking on a fresh project means doing five fiddly steps in the right order. This is the single \"get started\" command that does all of them for you: it makes the folder, reads your existing code and drafts requirements from it, records a baseline, builds the navigable map, and tells you the one next thing to do. Without it, a newcomer has to learn and chain those steps by hand, and most give up before the project is in a usable state.",
       "contract": [
         "`init` creates the requirements folder and a starter `.reqmapignore` when either is missing, never overwriting one that already exists. [[REQ-INIT-860]]",
-        "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order, and ends with a short summary pointing at the one next command. [[REQ-INIT-861]]"
+        "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order, and ends with a short summary pointing at the one next command. [[REQ-INIT-861]]",
+        "`init` prints the instructions an assistant that does not load the skill needs, and writes no instructions file. [[REQ-INIT-1132]]"
       ],
       "verify": [],
       "notes": [
@@ -9963,7 +9964,8 @@
       ],
       "satisfied_by": [
         "REQ-INIT-860",
-        "REQ-INIT-861"
+        "REQ-INIT-861",
+        "REQ-INIT-1132"
       ],
       "members": [
         {
@@ -9984,27 +9986,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:146"
+          "loc": "plugin/scripts/reqmap_engine/init.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:177"
+          "loc": "plugin/scripts/reqmap_engine/init.py:178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:240"
+          "loc": "plugin/scripts/reqmap_engine/init.py:241"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:263"
+          "loc": "plugin/scripts/reqmap_engine/init.py:264"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:292"
+          "loc": "plugin/scripts/reqmap_engine/init.py:293"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:335"
+          "loc": "plugin/scripts/reqmap_engine/init.py:346"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:363"
         }
       ],
       "test_exempt": null,
@@ -10056,11 +10062,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:177"
+          "loc": "plugin/scripts/reqmap_engine/init.py:178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:240"
+          "loc": "plugin/scripts/reqmap_engine/init.py:241"
         }
       ],
       "test_exempt": null,
@@ -10090,7 +10096,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the lock and map cover the requirements init just drafted\n  Given  an untagged `app.py` in a repo with no `requirements/`\n  When   `cmd_init` runs\n  Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written\n\nCASE-2 — the summary names next, not the full command list\n  Given  a repo with extractable code\n  When   `cmd_init` runs\n  Then   its output contains \"reqmap.py gate --risk\" but names none of \"confirm\", \"dupes\", \"search\" or \"coverage\"\n\nCASE-3 — an extraction-free repo gets a distinct empty-result message\n  Given  a repo containing only `README.txt` (no extractable code)\n  When   `cmd_init` runs\n  Then   its output says \"no requirements were extracted\" and points at writing `requirements/AREA-NAME-NNN.md`, never \"0 requirement(s) tracked\"\n\nCASE-4 — a second init run exits clean and reprints the summary\n  Given  a repo already initialized by one `cmd_init` run\n  When   `cmd_init` runs again\n  Then   it exits 0 and its output again contains \"reqmap.py gate --risk\"\n\nCASE-5 — a hand-authored requirement and .reqmapignore survive a re-run\n  Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`\n  When   `cmd_init` runs (no `--wipe`)\n  Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged\n\n\nCASE-5 — minimal initialization preserves existing optional files\n  Given a repository with an existing roadmap\n  When minimal init runs twice\n  Then maps and locks exist, no optional scaffolding is added, and the roadmap is unchanged",
+      "accept": "CASE-1 — the lock and map cover the requirements init just drafted\n  Given  an untagged `app.py` in a repo with no `requirements/`\n  When   `cmd_init` runs\n  Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written\n\nCASE-2 — the summary names next, not the full command list\n  Given  a repo with extractable code\n  When   `cmd_init` runs\n  Then   its output contains \"reqmap.py gate --risk\" but names none of \"confirm\", \"dupes\", \"search\" or \"coverage\"\n\nCASE-3 — an extraction-free repo gets a distinct empty-result message\n  Given  a repo containing only `README.txt` (no extractable code)\n  When   `cmd_init` runs\n  Then   its output says \"no requirements were extracted\" and points at writing `requirements/AREA-NAME-NNN.md`, never \"0 requirement(s) tracked\"\n\nCASE-4 — a second init run exits clean and reprints the summary\n  Given  a repo already initialized by one `cmd_init` run\n  When   `cmd_init` runs again\n  Then   it exits 0 and its output again contains \"reqmap.py gate --risk\"\n\nCASE-5 — a hand-authored requirement and .reqmapignore survive a re-run\n  Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`\n  When   `cmd_init` runs (no `--wipe`)\n  Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged\n\n\nCASE-5 — minimal initialization preserves existing optional files\n  Given a repository with an existing roadmap\n  When minimal init runs twice\n  Then maps and locks exist, no optional scaffolding is added, and the roadmap is unchanged\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -10111,11 +10117,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4795"
+          "loc": "plugin/scripts/test_reqmap_author.py:4840"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:335"
+          "loc": "plugin/scripts/reqmap_engine/init.py:363"
         }
       ],
       "test_exempt": null,
@@ -10125,6 +10131,67 @@
       "clauses": 6,
       "covered": 6,
       "clarify": []
+    },
+    {
+      "id": "REQ-INIT-1132",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "An assistant without the skill still learns the gate",
+      "intent": "Copilot's chat in an IDE or on github.com reads `.github/copilot-instructions.md`, and its agents read `AGENTS.md`; neither loads this skill, and a cloud agent runs no git hook. The few rules that keep a repository in step have to reach that file, and it belongs to the repository. See [ADR-0084](../../docs/adr/0084-init-prints-what-an-assistant-reads.md).",
+      "contract": [
+        "After a run that tracks at least one requirement, `init` prints a block of four rules under one line that names `.github/copilot-instructions.md` and `AGENTS.md`.",
+        "The rules say to run `gate --full` before finishing, to read a requirement with `gate --show` before changing its code, to tag code and tests, and that a person confirms.",
+        "Each command names the engine path the repository runs, relative to its root, or a bare `reqmap.py` when the engine is outside it.",
+        "No rule reads as a membership tag, so the block can be pasted into a scanned file.",
+        "`init` writes neither file."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — printed, not written\n  Given  a repository with one source file and no instructions file\n  When   `init` runs and its block is pasted into `.github/copilot-instructions.md`\n  Then   the output carries the four rules, `init` wrote neither file, and the next gate exits 0\n\nCASE-2 — no line is a tag\n  Given  the four rules\n  When   the tag pattern reads each one\n  Then   it finds nothing\n\nCASE-3 — the engine path is the repository's own\n  Given  an engine inside the repository under `scripts/`, then one outside it\n  When   the block is printed\n  Then   the first names `python scripts/reqmap.py gate --full`, the second\n         `python reqmap.py gate --full`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-INIT-012"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:4096"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:346"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-LEVEL-051",
@@ -12986,7 +13053,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:285"
+          "loc": "plugin/scripts/reqmap_engine/init.py:286"
         },
         {
           "role": "implements",
@@ -16062,7 +16129,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4347"
+          "loc": "plugin/scripts/test_reqmap_author.py:4392"
         },
         {
           "role": "implements",
@@ -16157,7 +16224,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:292"
+          "loc": "plugin/scripts/reqmap_engine/init.py:293"
         },
         {
           "role": "implements",
@@ -16261,7 +16328,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4096"
+          "loc": "plugin/scripts/test_reqmap_author.py:4141"
         },
         {
           "role": "implements",
@@ -16320,7 +16387,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4133"
+          "loc": "plugin/scripts/test_reqmap_author.py:4178"
         },
         {
           "role": "implements",
@@ -16382,7 +16449,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4155"
+          "loc": "plugin/scripts/test_reqmap_author.py:4200"
         },
         {
           "role": "implements",
@@ -16464,7 +16531,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4267"
+          "loc": "plugin/scripts/test_reqmap_author.py:4312"
         },
         {
           "role": "implements",
@@ -16523,7 +16590,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4155"
+          "loc": "plugin/scripts/test_reqmap_author.py:4200"
         },
         {
           "role": "implements",
@@ -16577,7 +16644,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4388"
+          "loc": "plugin/scripts/test_reqmap_author.py:4433"
         },
         {
           "role": "implements",
@@ -16648,7 +16715,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4503"
+          "loc": "plugin/scripts/test_reqmap_author.py:4548"
         },
         {
           "role": "implements",
@@ -17681,7 +17748,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:305"
+          "loc": "plugin/scripts/reqmap_engine/init.py:306"
         },
         {
           "role": "implements",
@@ -17830,11 +17897,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:146"
+          "loc": "plugin/scripts/reqmap_engine/init.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:263"
+          "loc": "plugin/scripts/reqmap_engine/init.py:264"
         },
         {
           "role": "implements",
@@ -18073,7 +18140,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4503"
+          "loc": "plugin/scripts/test_reqmap_author.py:4548"
         },
         {
           "role": "implements",
@@ -20948,7 +21015,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4559"
+          "loc": "plugin/scripts/test_reqmap_author.py:4604"
         },
         {
           "role": "implements",
@@ -20960,7 +21027,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:319"
+          "loc": "plugin/scripts/reqmap_engine/init.py:320"
         },
         {
           "role": "implements",
@@ -21059,11 +21126,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:4562"
+          "loc": "plugin/scripts/test_reqmap_author.py:4607"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:319"
+          "loc": "plugin/scripts/reqmap_engine/init.py:320"
         },
         {
           "role": "implements",
@@ -26574,6 +26641,10 @@
       "ARCH-INIT-012"
     ],
     [
+      "REQ-INIT-1132",
+      "ARCH-INIT-012"
+    ],
+    [
       "ARCH-LEVEL-051",
       "SYS-VMODEL-107"
     ],
@@ -29916,16 +29987,16 @@
     }
   },
   "health": {
-    "score": 95,
-    "total": 356,
-    "scored": 334,
+    "score": 94,
+    "total": 357,
+    "scored": 335,
     "healthy": 316,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 316,
-    "implemented": 323,
-    "tested": 324,
-    "drafts": 18,
+    "implemented": 324,
+    "tested": 325,
+    "drafts": 19,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30037,6 +30108,13 @@
       },
       {
         "id": "REQ-BUGS-1131",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-INIT-1132",
         "status": "draft",
         "why": [
           "not confirmed"

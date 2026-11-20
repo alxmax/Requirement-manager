@@ -2,6 +2,7 @@
 import json
 import os
 
+from . import ENGINE_DIR
 from .draft import cmd_extract
 from .mapdata import _roadmap_signals
 from .gate import cmd_check
@@ -331,6 +332,33 @@ def _init_site(ws, code_root):
         print("note: site step skipped ({}).".format(e))
 
 
+# What a person pastes into the file their assistant reads. `<ID>` keeps each
+# line from reading as a tag wherever it is pasted.
+ASSISTANT_BLOCK = (
+    "Before you finish, run `python {e} gate --full` and fix every error.",
+    "Before changing a requirement's code, read it: `python {e} gate --show <ID>`.",
+    "Tag code with an `implements: <ID>` comment, and its test with `tested-by: <ID>`.",
+    "Never set `status: confirmed`: a person confirms a requirement.",
+)
+
+
+def _print_assistant_block(code_root):
+    # implements: ARCH-INIT-012  # implements: REQ-INIT-1132
+    """The instructions for an assistant that does not load the skill, such
+    as Copilot's chat: printed, never written, since that file is the
+    repository's own (ADR-0084). The engine path is the one this repository
+    runs; one outside it is named bare, as it cannot be committed."""
+    try:
+        rel = os.path.relpath(os.path.join(ENGINE_DIR, "reqmap.py"), code_root)
+    except ValueError:          # Windows: another drive has no relative form
+        rel = ".."
+    engine = "reqmap.py" if rel.startswith("..") else rel.replace(os.sep, "/")
+    print("\nFor Copilot or another assistant, paste into "
+          ".github/copilot-instructions.md or AGENTS.md:")
+    for line in ASSISTANT_BLOCK:
+        print("  - " + line.format(e=engine))
+
+
 def cmd_init(reqs_dir, code_root, wipe=False, no_site=False, minimal=False):
     # implements: ARCH-INIT-012  # implements: REQ-INIT-861
     """First-use bootstrap for a fresh repo: create requirements/, seed
@@ -390,6 +418,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False, minimal=False):
           "most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to "
           "your pre-commit hook.")
+    _print_assistant_block(code_root)
     # `init` drafts the three rungs only for code it EXTRACTED, and it
     # extracts only untagged files (ARCH-EXTRACT-008). On a repo that
     # already carries membership tags it therefore proposes nothing

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+**What Copilot reads, per surface, and the rules `init` prints for it (ADR-0084).**
+
+- `init` ends by printing four rules to paste into `.github/copilot-instructions.md` or `AGENTS.md`: run `gate --full` before finishing, read a requirement with `gate --show` first, tag code and tests, a person confirms. Each command names the engine the repository runs, no line reads as a tag, and `init` writes neither file. REQ-INIT-1132
+- `docs/integrations.md` gains a GitHub Copilot section: for each surface, where it reads the skill, the MCP server and its instructions, and what runs the gate. The server's start directory and `${CLAUDE_PLUGIN_ROOT}` in `SKILL.md` are marked not observed until a Copilot client is run against them.
+- The skill's `references/mcp.md` says resources are listed by Claude Code and Visual Studio, and that elsewhere the assistant calls `reqmap_show`.
+- `docs/integrations.md` says no Copilot surface reads `tool_definition.json`; the file stays.
+- ROADMAP's licence line names Apache-2.0 and ADR-0069.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.1`. `init.py` is lazy, so the core does not grow.
+
 **A requirement shows the open bugs that name it (ADR-0083).**
 
 - A bug names a requirement by writing its id whole in the title, where, why or source; no new column. `_map.json` gives each bug `reqs`. REQ-BUGS-1131

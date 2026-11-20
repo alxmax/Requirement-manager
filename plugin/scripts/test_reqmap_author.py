@@ -4093,6 +4093,51 @@ class ChangelogForms(unittest.TestCase):  # tested-by: REQ-CHANGELOGFORMS-1015 @
             self.assertIn("CHANGELOG.md", _text(d, ".reqmapignore").splitlines())
 
 
+class InitPrintsAssistantInstructions(unittest.TestCase):  # tested-by: REQ-INIT-1132 @unit
+    """An assistant that does not load the skill still learns the gate: `init`
+    prints what to paste, and writes no instructions file."""
+
+    def test_the_block_is_printed_and_no_file_is_written(self):  # verifies: REQ-INIT-1132#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "def f(x):\n    return x\n")
+            reqs = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_init(reqs, d)
+            out = buf.getvalue()
+            written = [p for p in (".github/copilot-instructions.md", "AGENTS.md")
+                       if os.path.exists(os.path.join(d, *p.split("/")))]
+            # pasted where it is meant to go, it must not fail the next gate
+            _write(os.path.join(d, ".github", "copilot-instructions.md"),
+                   out.split("AGENTS.md:\n", 1)[1])
+            with redirect_stdout(io.StringIO()):
+                gate = R.cmd_check(R.Workspace(R.load_requirements(reqs),
+                                               R.scan_members(d, reqs), reqs, d),
+                                   update_lock=False)
+        self.assertEqual([], written)
+        self.assertIn("paste into .github/copilot-instructions.md or AGENTS.md:", out)
+        for line in R.init.ASSISTANT_BLOCK:
+            self.assertIn("  - " + line.format(e="reqmap.py"), out)
+        self.assertLessEqual(len(R.init.ASSISTANT_BLOCK), 4)
+        self.assertEqual(0, gate)
+
+    def test_no_line_reads_as_a_tag(self):  # verifies: REQ-INIT-1132#CASE-2
+        for line in R.init.ASSISTANT_BLOCK:
+            self.assertEqual([], R.TAG_RE.findall(line.format(e="scripts/reqmap.py")))
+
+    def test_the_engine_path_is_the_one_the_repository_runs(self):  # verifies: REQ-INIT-1132#CASE-3
+        inside = os.path.dirname(R.init.ENGINE_DIR)    # the engine sits in its scripts/
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.init._print_assistant_block(inside)
+        self.assertIn("`python scripts/reqmap.py gate --full`", buf.getvalue())
+        with tempfile.TemporaryDirectory() as d:
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.init._print_assistant_block(d)
+        self.assertIn("`python reqmap.py gate --full`", buf.getvalue())
+
+
 class VersionAlignment(unittest.TestCase):  # tested-by: REQ-VERSIONALIGN-1016 @unit
     """Where the version files, the CHANGELOG and the tags disagree."""
 

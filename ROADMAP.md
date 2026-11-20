@@ -64,7 +64,7 @@ Cadence: one release a week, not one per merge.
 ### Adoption
 
 - [ ] Template repo `hello-reqmap`: "Use this template" produces a gate that passes | req: ARCH-INIT-012 | unpark: an evaluator reports that `init` left them stranded
-- [x] An Apache-2.0 / MIT licence instead of BSL 1.1 | done: MIT, ADR-0066, 2026-10-11
+- [x] An Apache-2.0 / MIT licence instead of BSL 1.1 | done: Apache-2.0, ADR-0069, 2026-10-13
 
 ### Viewer
 

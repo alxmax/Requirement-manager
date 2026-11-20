@@ -94,6 +94,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0081](0081-what-a-first-bug-list-changed.md) | What a first bug list changed | Accepted |
 | [0082](0082-a-bug-leaves-the-list-into-a-register.md) | A bug leaves the list into a register | Accepted |
 | [0083](0083-a-bug-names-the-requirement-it-breaks.md) | A bug names the requirement it breaks | Accepted |
+| [0084](0084-init-prints-what-an-assistant-reads.md) | `init` prints what an assistant reads, and Copilot is tested before it is changed for | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
