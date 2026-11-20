@@ -2,11 +2,11 @@ __pycache__/
 *.pyc
 .consilium/
 
-# Generated, regenerable views — rebuild with: cd plugin && python scripts/reqmap.py map
-plugin/requirements/_map.html
+# Generated, regenerable views — rebuild with: cd plugin-full && python scripts/reqmap.py map
+plugin-full/requirements/_map.html
 
 # Opt-in scan cache (machine-local, keyed by file mtime — never committed; ARCH-SCANCACHE-023)
-plugin/requirements/_scancache.json
+plugin-full/requirements/_scancache.json
 
 # Dev-only shortcuts (Windows, localhost — not for seeded repos)
 *.cmd

@@ -65,7 +65,7 @@ class BundleSkillEngine(unittest.TestCase):
             self.assertEqual(B.diff(src, dest), [])
 
     def test_committed_copy_is_current(self):
-        """The check CI runs, as a test: editing plugin/scripts/ without
+        """The check CI runs, as a test: editing plugin-full/scripts/ without
         re-running the bundler fails here with the files named."""
         self.assertEqual(B.diff(), [])
 

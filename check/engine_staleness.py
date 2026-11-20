@@ -25,15 +25,15 @@ import re
 import sys
 
 # The version's shape (ISO date + optional same-day `.N` suffix) is defined by
-# MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py and asserted by
+# MAP_ENGINE_VERSION in plugin-full/scripts/reqmap_engine/__init__.py and asserted by
 # scripts/check_versions.py.
 _VERSION_RE = re.compile(r'(?m)^MAP_ENGINE_VERSION\s*=\s*"([^"]+)"')
 
 # The engine this action ships, relative to this file:
-# check/ -> plugin/scripts/reqmap.py.
+# check/ -> plugin-full/scripts/reqmap.py.
 DEFAULT_REFERENCE = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "plugin", "scripts", "reqmap.py")
+    "plugin-full", "scripts", "reqmap.py")
 
 
 def version_at(path):
@@ -118,7 +118,7 @@ def _probe(vendored_path, reference_path, mode):
         return 0
 
     message = ("vendored reqmap.py is stale ({} < action {}) - re-seed "
-               "it from the requirement-manager plugin, or pin an "
+               "it from the requirement-manager-full plugin, or pin an "
                "older check@vN, so the gate runs the "
                "checks this action expects".format(vendored, reference))
     if os.environ.get("GITHUB_ACTIONS"):

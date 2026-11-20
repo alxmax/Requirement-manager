@@ -3,6 +3,12 @@
 Read this before authoring, confirmation, synchronization or review. Both agent
 entry points use this contract; platform-specific setup stays in those entries.
 
+**This copy ships in the directory edition, which carries no engine.** Every
+`python scripts/reqmap.py …` command below runs the engine the user's repository
+already vendors (engine mode). When the repository has none, follow
+[manual mode](manual-mode.md) instead: the authoring rules, statuses and gate
+vocabulary below still hold, and only the commands change.
+
 ## Actions
 
 | Action | What it does and when to pick it | Commands to run (in order) |
@@ -11,7 +17,7 @@ entry points use this contract; platform-specific setup stays in those entries.
 | **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py init --minimal` → `gate` → report draft count + result |
 | **confirm** (validate a reviewed requirement) | Human-validation step. There is no command: read the requirement, then set `status: confirmed` in its frontmatter. The gate refuses a confirmed requirement with no `implements:` member (RM006), and `sync` demotes an edited contract back to `draft` on its own. | 1. Tag the implementing file. 2. Edit `status:`. 3. `python scripts/reqmap.py sync`. |
 | **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map (plus `_findings.md`, if the repo keeps one) — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift "review reason"` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
-| **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` and `scripts/reqmap_engine/` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after a plugin update to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. Every file is overwritten whole: a local edit to the vendored engine or to `_map_viewer.html` is lost, so name any you find before copying and ask for the change upstream. | copy `${REQMAP_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py`, replace `scripts/reqmap_engine/` with `${REQMAP_PLUGIN_ROOT}/scripts/reqmap_engine/`, and `${REQMAP_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item -Recurse`; POSIX: `cp -r`), then `python scripts/reqmap.py sync` → `gate` |
+| **update-engine** (refresh a vendored engine) | This edition carries no engine to copy from. Report the repository's current `MAP_ENGINE_VERSION` (in `scripts/reqmap_engine/__init__.py`) and tell the user that a refresh needs the full plugin (see SKILL.md). Never download or run engine code yourself. | none in this edition |
 | **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py gate --risk` (see status). 2. Present C/E/A framework to user (see triage.md). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
 
 **Advisory doc-sync and clarify answers** are assistant steps, not engine commands: read [references/assistant-steps.md](assistant-steps.md) before relaying a `clarify` or `gate --risk` question to the user.
@@ -29,7 +35,7 @@ entry points use this contract; platform-specific setup stays in those entries.
   `## Context (non-binding)` section with bold `**Notes**` / `**Example**` / `**Current
   implementation**` sub-groups, replacing the older three separate headings (`## WHAT —
   Notes & known limitations`, `## Example — in practice`, `## WHERE — Current
-  implementation`) for newly-authored requirements ([ADR-0017](../../../../docs/adr/0017-consolidated-context-section.md)).
+  implementation`) for newly-authored requirements ([ADR-0017](https://github.com/alxmax/requirement-manager/blob/main/docs/adr/0017-consolidated-context-section.md)).
   The three-heading form remains fully valid — nothing in the gate, lint, or drift hash
   reads either form by name over the other, so existing requirement files never need to
   change. `map`'s emitted `notes`/`current_impl` fields try the legacy heading first and
@@ -111,7 +117,7 @@ The check is mechanical: **try to write the `Then`**. If the observable you writ
 repeats the clause in other words, the clause is not a capability. That test is the rule —
 no word count, no clause count, and no lint check substitutes for it, because none of them
 can tell a terse-but-complete obligation from a fragment (see
-[ADR-0022](../../../../docs/adr/0022-no-minimum-requirement-size-check.md), which measured the
+[ADR-0022](https://github.com/alxmax/requirement-manager/blob/main/docs/adr/0022-no-minimum-requirement-size-check.md), which measured the
 attempt and rejected it).
 
 1. **Before implementing**, run `reqmap.py sync` or read `requirements/` and check

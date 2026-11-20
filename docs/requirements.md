@@ -234,5 +234,5 @@ every group open; choose "Save as PDF" there.
   (`_reqlock.json`).
 - **Layer (`bus` vs `feature`)** — `bus` is shared foundation that many things
   rely on; `feature` is built on top of the bus.
-- **Dogfooding** — this repo uses the tool on itself: `plugin/requirements/`
+- **Dogfooding** — this repo uses the tool on itself: `plugin-full/requirements/`
   describes `reqmap.py`'s own capabilities, and its own gate passes with zero errors.

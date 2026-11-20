@@ -24,13 +24,13 @@ The parts of this project that run somewhere you did not write:
 
 - **`check/action.yml` and `check/engine_staleness.py`** — the published GitHub Action,
   which executes inside a consumer's CI.
-- **`plugin/scripts/reqmap.py`** — the engine, which reads every file in a repo it is
+- **`plugin-full/scripts/reqmap.py`** — the engine, which reads every file in a repo it is
   pointed at and writes generated artifacts. Anything that lets repository *content* (a
   file name, a tag, a requirement body) escape into code execution, or into the generated
   HTML as script, is in scope. The `_map.html` viewer inlines a repo's `_map.json` into a
   `<script>` block, which is the sharpest edge here and has had dedicated hardening
   (`</script>` sequences, U+2028/U+2029, lone surrogates).
-- **`plugin/hooks/pre-commit`** — shipped into consumer repos and run on their commits.
+- **`plugin-full/hooks/pre-commit`** — shipped into consumer repos and run on their commits.
 
 A useful framing for a report: *what can a repository whose contents I do not control make
 this tool do to the machine running it?*

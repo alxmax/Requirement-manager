@@ -3,7 +3,7 @@
 The product plan. It is not a log: what shipped lives in the CHANGELOG and in the git tags, and
 a checked item leaves this file.
 
-Edit it here, directly. The bars in the viewer's Gantt are written in `plugin/requirements/_planning.json`.
+Edit it here, directly. The bars in the viewer's Gantt are written in `plugin-full/requirements/_planning.json`.
 
 Format: `- [ ] text | req: ID` under Now/Next. Later needs `unpark:`.
 Reserved headings: Now, Next, Later, Not now. Categories are `###` headings inside them.

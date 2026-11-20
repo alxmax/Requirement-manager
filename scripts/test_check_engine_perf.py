@@ -54,7 +54,7 @@ class EnginePerf(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        (self.root / "plugin" / "requirements").mkdir(parents=True)
+        (self.root / "plugin-full" / "requirements").mkdir(parents=True)
         self.env = {"RUNNER_OS": "Linux", "ImageOS": "ubuntu24"}
 
     def tearDown(self):
@@ -101,14 +101,14 @@ class EnginePerf(unittest.TestCase):
         self.assertEqual(0, rc)
         for needle in ("runner:", "python ", "RUNNER_OS=Linux",
                        "ImageOS=ubuntu24", "corpus: ",
-                       str(self.root / "plugin"), "commit: abc1234",
+                       str(self.root / "plugin-full"), "commit: abc1234",
                        "n: 3 runs", "median 0.500 s", "sd 0.000 s",
                        "gate --full --code ..", "gate --code ..",
                        "import reqmap"):
             self.assertIn(needle, out)
 
     def test_runs_cold_from_plugin(self):
-        cache = self.root / "plugin" / "requirements" / "_scancache.json"
+        cache = self.root / "plugin-full" / "requirements" / "_scancache.json"
         cache.write_text("{}", encoding="utf-8")
         runner = FakeRunner()
         self._main("--runs", "2", runner=runner)
@@ -116,7 +116,7 @@ class EnginePerf(unittest.TestCase):
         engine = [(a, c) for a, c in runner.calls if a[0] != "git"]
         self.assertEqual(6, len(engine))
         for argv, cwd in engine:
-            self.assertEqual(self.root / "plugin", Path(cwd))
+            self.assertEqual(self.root / "plugin-full", Path(cwd))
             self.assertNotIn("--cache", argv)
             self.assertEqual(["-X", "utf8"], argv[1:3])
 
@@ -126,7 +126,7 @@ class EnginePerf(unittest.TestCase):
         doc = json.loads(out)
         self.assertEqual("abc1234", doc["commit"])
         self.assertEqual(2, doc["n"])
-        self.assertEqual(str(self.root / "plugin"), doc["corpus"])
+        self.assertEqual(str(self.root / "plugin-full"), doc["corpus"])
         self.assertEqual("Linux", doc["runner"]["runner_os"])
         self.assertEqual(3, len(doc["commands"]))
         for c in doc["commands"]:

@@ -7,7 +7,7 @@ of the seeded engine).
 first two used to do so independently:
 
   app/src/styles/colors_and_type.css           the Vite viewer, three themes
-  plugin/scripts/reqmap_engine/site_template.py  the project site `sync` emits
+  plugin-full/scripts/reqmap_engine/site_template.py  the project site `sync` emits
   docs/architecture.html                         this repo's hand-authored page
 
 They had drifted to different accents — ink blue in one, terracotta in the other
@@ -31,7 +31,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SOURCE = os.path.join(ROOT, "design", "tokens.json")
 CSS = os.path.join(ROOT, "app", "src", "styles", "colors_and_type.css")
-SITE = os.path.join(ROOT, "plugin", "scripts", "reqmap_engine", "site_template.py")
+SITE = os.path.join(ROOT, "plugin-full", "scripts", "reqmap_engine", "site_template.py")
 PAGE = os.path.join(ROOT, "docs", "architecture.html")
 
 ALIAS = re.compile(r"^\{([A-Za-z0-9-]+)\}$")

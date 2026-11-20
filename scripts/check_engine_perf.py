@@ -9,7 +9,7 @@ The pinned snapshot is "this repository at this commit", named in the
 output together with the runner, so a later change can turn the median
 plus three sample standard deviations into a threshold.
 
-Every command runs from `plugin/`, cold: no `--cache` flag, and
+Every command runs from `plugin-full/`, cold: no `--cache` flag, and
 `requirements/_scancache.json` is deleted before each run.
 
   --runs N    runs per command (default 10; lower only for tests)
@@ -31,7 +31,7 @@ DEFAULT_RUNS = 10
 RUN_TIMEOUT_S = 600
 IMPORT_SNIPPET = ("import sys; sys.path.insert(0,'scripts'); "
                   "import reqmap")
-# (label, arguments after `python -X utf8`), each run from plugin/.
+# (label, arguments after `python -X utf8`), each run from plugin-full/.
 COMMANDS = (
     ("gate --full --code ..",
      ["scripts/reqmap.py", "gate", "--full", "--code", ".."]),
@@ -146,7 +146,7 @@ def _clear_cache(plugin_dir):
 
 def collect(root, runs, run=_run, clock=time.perf_counter, env=None):
     """The whole report as one dict (what --json prints)."""
-    plugin_dir = Path(root) / "plugin"
+    plugin_dir = Path(root) / "plugin-full"
     report = {"runner": runner_info(env), "corpus": str(plugin_dir),
               "commit": git_commit(root, run), "n": runs,
               "cold": True, "commands": []}
