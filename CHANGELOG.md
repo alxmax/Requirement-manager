@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+**Text stays inside its box in the Explorer.**
+
+- A tree row keeps its id and title in one block that wraps: the title stays beside the id while it has room for a few words, drops under it otherwise (it was squeezed to one letter), and shows in full on hover. A long id breaks at a hyphen instead of pushing the clause count out of the pane.
+- The tree pane is at least 380 px wide (30%), so the longest ids fit on one line.
+- In the neighbourhood graph the selected requirement's card is centred, and a long word in a card's title or id wraps inside the card.
+- A breadcrumb that wraps is left-aligned, not centred.
+
 **What Copilot reads, per surface, and the rules `init` prints for it (ADR-0084).**
 
 - `init` ends by printing four rules to paste into `.github/copilot-instructions.md` or `AGENTS.md`: run `gate --full` before finishing, read a requirement with `gate --show` first, tag code and tests, a person confirms. Each command names the engine the repository runs, no line reads as a tag, and `init` writes neither file. REQ-INIT-1132

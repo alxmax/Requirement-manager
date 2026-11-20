@@ -47,8 +47,10 @@ function Row({ row, selected, onSelect, onToggle }) {
       <span className={"ex-lvl lvl-" + lvl} title={LEVEL_LABEL[lvl]}>
         {LEVEL_SHORT[lvl]}
       </span>
-      <span className="ex-id">{r.id}</span>
-      <span className="ex-title">{r.title}</span>
+      <span className="ex-label">
+        <span className="ex-id">{r.id}</span>
+        <span className="ex-title" title={r.title}>{r.title}</span>
+      </span>
       <span className="ex-glyphs">
         {hasOpenQuestions(r) && (
           <span className="ex-q" title="has an open verify-intent question">
