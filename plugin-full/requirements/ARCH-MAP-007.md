@@ -570,7 +570,7 @@ CASE-3 — an unindented line ends the detail
 
 ---
 id: REQ-MAP-1144
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

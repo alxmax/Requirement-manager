@@ -188,7 +188,7 @@ CASE-5 — the generated files stay put, and a source is not untagged code
 
 ---
 id: REQ-CUSTOMTRACE-1137
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
