@@ -241,6 +241,20 @@ class TraceBlock(unittest.TestCase):  # tested-by: REQ-MAP-1144 @unit
         self.assertEqual(1, rules[0]["count"])
         self.assertEqual({"file": "src/a.cpp", "line": 3}, rules[0]["hits"][0])
 
+    def test_coverage_skips_prose_and_ignored_files(self):  # verifies: REQ-MAP-1144#CASE-5
+        if not shutil.which("git"):
+            self.skipTest("git is not installed")
+        d = _repo(self)
+        for rel, text in {"src/a.c": "int a(void) { return 1; }\n",
+                          "src/local.c": "int l(void) { return 2; }\n",
+                          "docs/notes.md": "# Notes\n",
+                          "docs/page.html": "<p>page</p>\n"}.items():
+            _write(os.path.join(d, rel), text)
+        subprocess.run(["git", "-C", d, "init", "-q"], check=True)
+        _write(os.path.join(d, ".git", "info", "exclude"), "/src/local.c\n")
+        files = R.tracecover._code_files(d, None)
+        self.assertEqual(["src/a.c"], [rel.replace(os.sep, "/") for _a, rel, _t in files])
+
 
 if __name__ == "__main__":
     unittest.main()

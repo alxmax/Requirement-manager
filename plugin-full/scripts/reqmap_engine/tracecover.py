@@ -13,9 +13,10 @@ import re
 
 from . import config as cfg
 from .candidates import _tested_stem
+from .orphans import git_ignored
 from .scan import _walk_code
 from .sections import binding_hash, CONTRACT_LABELS, _from_any
-from .tags import _is_test_path
+from .tags import PROSE_EXTS, _is_test_path
 from .text import _bullets
 
 _MAX_LIST = 200
@@ -23,24 +24,31 @@ _MAX_HITS = 50
 _NO_CODE = ("need", "aggregate")
 
 
-def _code_files(code_root, reqs_dir):
-    """[(abs, rel, is_test)] for every program file the scanner reads."""
+def _code_files(code_root, reqs_dir):  # implements: REQ-MAP-1144
+    """[(abs, rel, is_test)] for every program file the scanner reads, less
+    what git ignores. Prose (`.md`, `.html`) is read for tags but is not code,
+    and an ignored file exists on one checkout and not the next, so counting
+    either would make the committed map depend on the machine that wrote it.
+    The same set the coverage ratio skips; without git nothing is skipped."""
+    ignored = git_ignored(code_root)
     return [(fp, rel, _is_test_path(rel, fp))
-            for fp, rel in _walk_code(code_root, reqs_dir)]
+            for fp, rel in _walk_code(code_root, reqs_dir)
+            if not rel.lower().endswith(PROSE_EXTS) and not rel.startswith(ignored)]
+
+
+def _memberlock(reqs_dir):
+    """The member lock's `members`, `{}` when it is absent or unreadable."""
+    try:
+        with open(os.path.join(reqs_dir, "_memberlock.json"), encoding="utf-8") as f:
+            return json.load(f).get("members") or {}
+    except (OSError, ValueError):
+        return {}
 
 
 def _memberlock_files(reqs_dir):
     """Files the member lock holds a hash for (a definition counts its file)."""
-    try:
-        with open(os.path.join(reqs_dir, "_memberlock.json"), encoding="utf-8") as f:
-            doc = json.load(f)
-    except (OSError, ValueError):
-        return set()
-    out = set()
-    for keys in (doc.get("members") or {}).values():
-        for key in keys or {}:
-            out.add(key.split("#", 1)[0])
-    return out
+    return {key.split("#", 1)[0]
+            for keys in _memberlock(reqs_dir).values() for key in keys or {}}
 
 
 def _coverage(files, members, reqs_dir):  # implements: REQ-MAP-1144
@@ -72,11 +80,7 @@ def _suggestions(reqs, members, files, code_root, reqs_dir):
     `implements:` member and no `tested-by:` one. Tier A: a test file paired
     with its code by name names the requirement or one of its definitions.
     B: a test is paired by name only. C: no test is paired, a real gap."""
-    try:
-        with open(os.path.join(reqs_dir, "_memberlock.json"), encoding="utf-8") as f:
-            lock = (json.load(f).get("members") or {})
-    except (OSError, ValueError):
-        lock = {}
+    lock = _memberlock(reqs_dir)
     tests_by_stem = {}
     for fp, rel, test in files:
         stem = _tested_stem(rel, code_root) if test else None

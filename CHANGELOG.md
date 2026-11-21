@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+**The trace block counts the same files on every checkout.**
+
+- `coverage` in the map's `trace` block counted every file the tag scan reads, prose included, and files git ignores. A local copy holding documents kept in `.git/info/exclude` wrote different numbers into the committed `_map.json` than CI did (298 code files against 291 here). It now skips prose (`.md`, `.html`) and whatever git ignores, the same set the coverage ratio skips. Here `code_files` falls from 291 to 190: about a hundred documents were being counted as code. REQ-MAP-1144
+- The member lock is read in one place in `tracecover.py`; the core shrinks and its budget moves down with it.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.8`.
+
 **The Report reads an audit, and the map carries the trace's reach (ADR-0091).**
 
 - `sync` writes a `trace` block in `_map.json`: the share of code files with a tag and of production files the drift lock watches; for each requirement with code and no `tested-by:`, a suggestion by tier (A: a test paired by name already names it; B: paired by name only; C: none found); duplicates and confirmed requirements with no clause; and, with `DESIGN_RULES` in `_config.json`, each local design rule's hits with file and line. Advice only: the gate's freshness check neither computes nor compares it. REQ-MAP-1144
