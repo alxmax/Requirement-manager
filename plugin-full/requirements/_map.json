@@ -28101,6 +28101,46 @@
       "section_date": null
     },
     {
+      "name": "The Copilot hands-on matrix is run and recorded. Done when: the skill-discovery and MCP-start-directory rows of `docs/integrations.md` carry a dated PASS or FAIL on Windows and Linux, and a FAIL names the change it calls for",
+      "horizon": "next",
+      "req": "ARCH-MCP-073",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "CSV and JSON requirement sources with a field map. Done when: `format: csv",
+      "horizon": "next",
+      "req": "ARCH-CUSTOMTRACE-077",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`init` writes `.github/copilot-instructions.md` when absent. Done when: the matrix passes, a second `init` leaves an existing file byte-identical, and a record supersedes ADR-0084's print-only line",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The skill takes \"check folders X against requirements in Z into W\" as one request. Done when: the matrix passes; the skill writes the folder's `_config.json` only when absent, refuses an output folder inside the scanned code, prints the absolute `_map.html` path and lists the person's steps; no engine file changes",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
       "name": "The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048)",
       "horizon": "later",
       "req": "ARCH-SELFGATE-039",
@@ -28237,6 +28277,66 @@
       "unpark": null,
       "done": true,
       "category": "Adoption",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Several code folders in one check (`--code` repeated, or a list in `_config.json`)",
+      "horizon": "later",
+      "req": "ARCH-SCAN-002",
+      "unpark": "the common-parent plus `.reqmapignore` route fails a real run; the change must leave a single `--code` byte-identical in every lock, give two `a.py` files in different folders distinct members, and pay its core lines with an equal cut",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "YAML requirement sources",
+      "horizon": "later",
+      "req": "ARCH-CUSTOMTRACE-077",
+      "unpark": "a second independent corpus needs YAML; the reader names its supported grammar in an ADR, reports a `file:line` problem per unsupported construct, and takes a block scalar's title from its folded text, not its first raw line",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Clarify questions with answer options saved and read by `sync`",
+      "horizon": "later",
+      "req": "ARCH-CLARIFY-062",
+      "unpark": "one real audit run with sources has happened, an answer rate is measured over five audits, a record supersedes ADR-0058's choice, and each saved answer carries its rule and its clause's hash so a changed clause reopens it. Until then the skill offers the options and the person edits the requirement",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A doctor that reports, per assistant, which of skill, MCP config and instructions is present, with the fix",
+      "horizon": "later",
+      "req": "ARCH-INIT-012",
+      "unpark": "the Copilot matrix passes and a person reports a setup they could not diagnose from the guide",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Audit packets for parallel reviewers (`--audit-plan --batches N`) and an ingest check",
+      "horizon": "later",
+      "req": "ARCH-AUDITRUN-076",
+      "unpark": "a recorded session of 30 or more requirements shows the hand step costs over 5 minutes each; ingest only validates and never writes `_audit.json`, a packet carries its contract hash and capped code, run 2 is a separate packet in a seeded order, and ADR-0076's k/n with Wilson intervals stays as it is",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A Copilot agent file for audit runs (`.github/agents/*.agent.md`)",
+      "horizon": "later",
+      "req": "ARCH-AUDITRUN-076",
+      "unpark": "the Copilot matrix passes and the file is generated from, or links to, the skill's `references/audit.md` instead of copying its prompt",
+      "done": false,
+      "category": "Checking an existing repository",
       "context": "",
       "section_date": null
     },
