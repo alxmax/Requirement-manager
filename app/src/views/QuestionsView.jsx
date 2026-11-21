@@ -31,13 +31,16 @@ function verifyRows(origin) {
 }
 
 /* What a `clarify` question rests on, strongest first: a section that is
- * absent, two numbers that disagree, a word on a list (ADR-0070). The last
- * one is shown as Optional. */
+ * absent, two numbers that disagree, a word on a list (ADR-0070). Each basis
+ * is one priority: High, Medium, Low. */
 const BASIS_ORDER = { structure: 0, count: 1, wording: 2 };
-const BASIS_LABEL = { structure: "must fix", count: "to check",
-  wording: "optional" };
+export const PRIO_OF_BASIS = { structure: "high", count: "medium",
+  wording: "low" };
 export const basisOf = (q) => (BASIS_ORDER[q.basis] !== undefined ? q.basis
   : q.severity === "blocking" ? "structure" : "wording");
+/** High, Medium or Low for a `clarify` question. A person's Verify-intent
+ * question is High and an Observed one Medium (their tabs carry them). */
+export const priorityOf = (q) => PRIO_OF_BASIS[basisOf(q)];
 
 /** Every open question, by origin. `clarify` rows carry the records the
  * map holds, strongest basis first inside each requirement. */
@@ -53,40 +56,28 @@ export function computeQuestions() {
   return { code: verifyRows("code"), person: verifyRows("person"), clarify };
 }
 
-/** The count of the All tab, which is also the rail's: every Verify-intent
- * question, and every `clarify` question that is not Optional. */
+/** The rail's count: every Verify-intent question (High or Medium), and
+ * every `clarify` question that is not Low. */
 export function questionCount(qs = computeQuestions()) {
   const n = (rows) => rows.reduce((a, r) => a + r.questions.length, 0);
   return n(qs.code) + n(qs.person) + qs.clarify.reduce((a, r) => a
     + r.questions.filter((q) => basisOf(q) !== "wording").length, 0);
 }
 
-/* A count rule's tab name; a rule the viewer has not met keeps its own. */
-const RULE_TAB = { "clause-without-case": "Clause without case",
-  "over-scoped": "Over-scoped" };
-const ruleTitle = (rule) => RULE_TAB[rule] || rule;
-
-/** The tabs, in order, each with what it keeps and its count. Must fix
- * appears only when a section is missing; every rule resting on a count
- * gets a tab of its own; Optional holds every word-list question. */
+/** The tabs, in order, each with what it keeps and its count: All, then
+ * one per priority. A person's question is High, an Observed one Medium; Low
+ * holds every word-list question and filters by rule. */
 export function questionTabs(qs = computeQuestions()) {
   const all = qs.clarify.flatMap((r) => r.questions);
   const n = (keep) => all.filter(keep).length;
-  const countRules = [...new Set(all.filter((q) => basisOf(q) === "count")
-    .map((q) => q.rule))].sort();
   const tabs = [
-    { key: "all", label: "All", n: questionCount(qs), verify: ["person", "code"],
-      keep: (q) => basisOf(q) !== "wording" },
-    { key: "structure", label: "Must fix",
-      keep: (q) => basisOf(q) === "structure" },
-    { key: "person", label: "Asked by a person", verify: ["person"],
-      keep: () => false },
-    { key: "code", label: "Observed in code", verify: ["code"],
-      keep: () => false },
-    ...countRules.map((rule) => ({ key: rule, label: ruleTitle(rule),
-      keep: (q) => q.rule === rule })),
-    { key: "optional", label: "Optional", rules: true,
-      keep: (q) => basisOf(q) === "wording" },
+    { key: "all", label: "All", verify: ["person", "code"], keep: () => true },
+    { key: "high", label: "High", verify: ["person"],
+      keep: (q) => priorityOf(q) === "high" },
+    { key: "medium", label: "Medium", verify: ["code"],
+      keep: (q) => priorityOf(q) === "medium" },
+    { key: "low", label: "Low", rules: true,
+      keep: (q) => priorityOf(q) === "low" },
   ];
   tabs.forEach((tab) => {
     if (tab.n === undefined) {
@@ -94,7 +85,7 @@ export function questionTabs(qs = computeQuestions()) {
         (a, o) => a + qs[o].reduce((b, r) => b + r.questions.length, 0), 0);
     }
   });
-  return tabs.filter((tab) => tab.key !== "structure" || tab.n > 0);
+  return tabs;
 }
 
 const MUTED = { color: "var(--fg-muted)", font: "var(--text-small)" };
@@ -104,12 +95,13 @@ const COUNT = {
 };
 
 function ClarifyList({ qs }) {
+  const { t } = useI18n();
   return (
     <ul className="finding-qs">
       {qs.map((q, j) => (
         <li key={j}>
           <span className={"prob-sev basis-" + basisOf(q)}
-            style={BADGE}>{BASIS_LABEL[basisOf(q)]}</span>
+            style={BADGE}>{t(priorityOf(q))}</span>
           <code>{q.rule}</code> · {q.where}
           {q.quote && <div style={MUTED}>“{q.quote}”</div>}
           <div>{q.question}</div>
@@ -198,7 +190,7 @@ export function QuestionsView({ openSpec, initialTab = "all",
   const [rule, setRule] = useState(null);
   const [pick, setPick] = useState(initialPick);
   const tab = tabs.find((x) => x.key === key);
-  const missing = (tabs.find((x) => x.key === "structure") || {}).n || 0;
+  const high = (tabs.find((x) => x.key === "high") || {}).n || 0;
   const keep = (q) => tab.keep(q) && (!rule || q.rule === rule);
   const rules = {};
   if (tab.rules) {
@@ -216,16 +208,16 @@ export function QuestionsView({ openSpec, initialTab = "all",
           </button>
         ))}
         <div className="tab-legend">
-          {missing > 0
+          {high > 0
             ? <>
                 <Icon name="triangle-alert" size={14}
                   style={{ color: "var(--status-error)" }} />
-                {" "}{t("{n} must fix — a section is missing", { n: missing })}
+                {" "}{t("{n} high priority open", { n: high })}
               </>
             : <>
                 <Icon name="shield-check" size={14}
                   style={{ color: "var(--status-confirmed)" }} />
-                {" "}{t("nothing missing")}
+                {" "}{t("no high priority question")}
               </>}
         </div>
       </div>

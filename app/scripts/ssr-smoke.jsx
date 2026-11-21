@@ -13,6 +13,7 @@ import "./smoke/rail.jsx";
 import "./smoke/plan.jsx";
 import "./smoke/history.jsx";
 import "./smoke/audit.jsx";
+import "./smoke/report.jsx";
 import { bugFileChecks } from "./smoke/bugs.jsx";
 
 // The one async part: `saveBug` awaits its folder handle.

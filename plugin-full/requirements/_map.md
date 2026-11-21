@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-21
 engine: 2026-11-21.2
-nodes: 364
+nodes: 365
 edges: 130
-design pass-rate: 91% (128/141 source files without a design candidate)
+design pass-rate: 91% (131/144 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -365,6 +365,7 @@ graph LR
     REQ_HISTORYWEEK_1098["A series of patch releases is drawn one block per week, on the days it shipped<br><small>REQ-HISTORYWEEK-1098</small>"]
     REQ_VIEWER_1101["Questions have a page of their own<br><small>REQ-VIEWER-1101</small>"]
     REQ_VIEWER_1114["Choosing a question shows it beside the list<br><small>REQ-VIEWER-1114</small>"]
+    REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small>"]
     REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
     REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
@@ -1059,6 +1060,8 @@ graph LR
   ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_history_jsx_1
   f_app_scripts_smoke_rail_jsx_1["app/scripts/smoke/rail.jsx:1"]
   ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_rail_jsx_1
+  f_app_scripts_smoke_report_jsx_1["app/scripts/smoke/report.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_scripts_smoke_report_jsx_1
   f_app_scripts_smoke_views_jsx_4["app/scripts/smoke/views.jsx:4"]
   ARCH_VIEWER_007 -->|tested-by| f_app_scripts_smoke_views_jsx_4
   f_app_src_App_jsx_1["app/src/App.jsx:1"]
@@ -1085,6 +1088,8 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_loadData_js_1
   f_app_src_lib_planBars_js_1["app/src/lib/planBars.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_planBars_js_1
+  f_app_src_lib_report_js_1["app/src/lib/report.js:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_lib_report_js_1
   f_app_src_lib_timeline_js_1["app/src/lib/timeline.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_timeline_js_1
   f_app_src_lib_tree_js_1["app/src/lib/tree.js:1"]
@@ -1107,6 +1112,8 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_ProblemsView_jsx_1
   f_app_src_views_QuestionsView_jsx_1["app/src/views/QuestionsView.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_QuestionsView_jsx_1
+  f_app_src_views_ReportView_jsx_1["app/src/views/ReportView.jsx:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_views_ReportView_jsx_1
   f_app_src_views_RoadmapView_jsx_1["app/src/views/RoadmapView.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_RoadmapView_jsx_1
   f_app_src_views_SpecDoc_jsx_1["app/src/views/SpecDoc.jsx:1"]
@@ -1184,7 +1191,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>282 caps</small>"]
+  a_REQ["REQ<br><small>283 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1226,6 +1233,7 @@ graph LR
     REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
     REQ_SCAN_1136["A copied engine is not scanned<br><small>REQ-SCAN-1136</small><br>unreviewed"]
+    REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small><br>unreviewed"]
   end
   style ARCH_BUGS_078 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1116 fill:#fff3cd,stroke:#a66,color:#630
@@ -1252,6 +1260,7 @@ graph LR
   style REQ_MEMBERDRIFT_1134 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SCAN_1136 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_VIEWER_1139 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
@@ -1283,3 +1292,4 @@ graph LR
 | REQ-MEMBERDRIFT-1134 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SCAN-1136 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-VIEWER-1139 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

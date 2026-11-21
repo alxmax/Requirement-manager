@@ -256,17 +256,88 @@ const RO = {  // implements: REQ-VIEWER-943
   "Warnings": "Avertismente",
   "Questions": "Întrebări",
   "ASKED": "NOTAT",
-  "Observed in code": "Observate în cod",
-  "Asked by a person": "Puse de un om",
   "No open questions here.": "Nicio întrebare deschisă aici.",
   "Open requirement": "Deschide cerința",
   "Close": "Închide",
-  "Must fix": "De reparat",
-  "Clause without case": "Clauză fără caz",
-  "Over-scoped": "Prea largă",
-  "Optional": "Opțional",
-  "nothing missing": "nu lipsește nimic",
-  "{n} must fix — a section is missing": "{n} de reparat — lipsește o secțiune",
+  "High": "Ridicată",
+  "Medium": "Medie",
+  "Low": "Scăzută",
+  "no high priority question": "nicio întrebare cu prioritate ridicată",
+  "{n} high priority open": "{n} cu prioritate ridicată deschise",
+  // report  (REQ-VIEWER-1139)
+  "Report": "Raport",
+  "Summary": "Rezumat",
+  "How it was checked": "Cum s-a verificat",
+  "Results in numbers": "Rezultate în cifre",
+  "Problem types": "Tipuri de probleme",
+  "Top 10 questions": "Top 10 întrebări",
+  "Recommendations": "Recomandări",
+  "not measured": "nemăsurat",
+  "open bugs": "buguri deschise",
+  "fixed bugs": "buguri rezolvate",
+  "High questions": "întrebări cu prioritate ridicată",
+  "Medium questions": "întrebări cu prioritate medie",
+  "Low questions": "întrebări cu prioritate scăzută",
+  "requirements with no code": "cerințe fără cod",
+  "requirements with no test": "cerințe fără test",
+  "unproven cases": "cazuri nedovedite",
+  "confirmed, no implements": "confirmate, fără implements",
+  "draft, no implements": "draft, fără implements",
+  "code, no tested-by": "cu cod, fără tested-by",
+  "cases with no verifies": "cazuri fără verifies",
+  "dangling tags": "taguri orfane",
+  "Dangling tags (RM001)": "Taguri orfane (RM001)",
+  "Confirmed, no implements": "Confirmate, fără implements",
+  "Draft, no implements": "Draft, fără implements",
+  "Drift": "Drift",
+  "Requirements with a High question": "Cerințe cu o întrebare ridicată",
+  "Code, no tested-by": "Cu cod, fără tested-by",
+  "Cases with no verifies": "Cazuri fără verifies",
+  "Health {s}/100: {a} of {b} requirements green.":
+    "Sănătate {s}/100: {a} din {b} cerințe sunt verzi.",
+  "{a} of {b} live requirements are confirmed.":
+    "{a} din {b} cerințe active sunt confirmate.",
+  "Open: bugs {bugs}, High questions {high}, missing trace tags {tags}.":
+    "Deschise: buguri {bugs}, întrebări cu prioritate ridicată {high}, taguri de trasabilitate lipsă {tags}.",
+  "The largest open item: {x}.": "Cel mai mare punct deschis: {x}.",
+  "Nothing is open.": "Nu e nimic deschis.",
+  "Map written {at} on branch {b}, engine {e}.":
+    "Harta scrisă {at} pe branch-ul {b}, engine {e}.",
+  "{r} requirements and {f} tagged files read.":
+    "{r} cerințe și {f} fișiere taggate citite.",
+  "Gate link sync: every tag names a requirement (RM001).":
+    "Gate link sync: fiecare tag numește o cerință (RM001).",
+  "Drift lock: a confirmed contract changed since the lock.":
+    "Drift lock: un contract confirmat s-a schimbat de la lock.",
+  "Test links: `implements:`, `tested-by:` and `# verifies:` tags.":
+    "Legături de test: tagurile `implements:`, `tested-by:` și `# verifies:`.",
+  "`clarify`: questions read from each requirement's own text.":
+    "`clarify`: întrebări citite din textul fiecărei cerințe.",
+  "Bug files: the open and fixed bugs the repository keeps.":
+    "Fișierele de buguri: bugurile deschise și rezolvate din repository.",
+  "Nothing is open: no recommendation.": "Nu e nimic deschis: nicio recomandare.",
+  ["tags name no requirement (RM001): fix the id or remove the tag; "
+    + "`gate` lists each line"]:
+    "taguri nu numesc nicio cerință (RM001): corectează id-ul sau șterge tagul; `gate` listează fiecare linie",
+  ["confirmed requirements have no code: tag it with `# implements: ID`, "
+    + "or set them back to draft"]:
+    "cerințe confirmate nu au cod: taggează-l cu `# implements: ID` sau trece-le înapoi în draft",
+  ["requirements changed since the lock: re-check their code, then "
+    + "`sync --accept-drift \"reason\"`"]:
+    "cerințe s-au schimbat de la lock: reverifică-le codul, apoi `sync --accept-drift \"motiv\"`",
+  ["High questions are open: answer each in its requirement's Description "
+    + "or Cases"]:
+    "întrebări cu prioritate ridicată sunt deschise: răspunde la fiecare în Description sau Cases",
+  ["requirements have code but no test: tag the test with "
+    + "`# tested-by: ID`"]:
+    "cerințe au cod dar nu au test: taggează testul cu `# tested-by: ID`",
+  ["cases are not proven by a test: add `# verifies: ID#CASE-N` on the "
+    + "test that proves each"]:
+    "cazuri nu sunt dovedite de un test: pune `# verifies: ID#CASE-N` pe testul care îl dovedește",
+  "P0/P1 bugs are open: fix them, then `sync --fix ID`":
+    "buguri P0/P1 sunt deschise: rezolvă-le, apoi `sync --fix ID`",
+  "Medium questions are open: read them once the High ones are answered":
+    "întrebări cu prioritate medie sunt deschise: citește-le după cele ridicate",
   ["A word on a list matched. Often not a real gap; read it when you "
     + "have time."]:
     "S-a potrivit un cuvânt dintr-o listă. Adesea nu e o lipsă reală; "

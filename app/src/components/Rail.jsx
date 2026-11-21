@@ -18,6 +18,8 @@ const NAV = [
   { key: "questions", label: "Questions", icon: "circle-help" },
   // only while an audit runs  implements: REQ-AUDITRUN-1108
   { key: "audit", label: "Audit", icon: "scan-line", when: () => !!AUDIT },
+  // implements: REQ-VIEWER-1139
+  { key: "report", label: "Report", icon: "file-text" },
 ];
 
 function Gauge({ pct, tone, size = 28 }) {
@@ -66,6 +68,7 @@ function RailNav({ view, setView, problems }) {
     commands: CLI.length || null,
     questions: asked,
     audit: AUDIT ? AUDIT.plan.ranked + AUDIT.plan.random : null,
+    report: null,
   };
   return (
     <>

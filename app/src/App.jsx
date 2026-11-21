@@ -8,6 +8,7 @@ import { ExplorerView } from "./views/ExplorerView.jsx";
 import { CommandsView } from "./views/CommandsView.jsx";
 import { QuestionsView } from "./views/QuestionsView.jsx";
 import { AuditView } from "./views/AuditView.jsx";
+import { ReportView } from "./views/ReportView.jsx";
 import { TopBar } from "./components/TopBar.jsx";
 import { Rail } from "./components/Rail.jsx";
 
@@ -123,6 +124,7 @@ export default function App() {
           {view === "commands" && <CommandsView />}
           {view === "questions" && <QuestionsView openSpec={openSpec} />}
           {view === "audit" && <AuditView openSpec={openSpec} />}
+          {view === "report" && <ReportView openSpec={openSpec} />}
         </ErrorBoundary>
       </div>
     </div>
