@@ -23,11 +23,12 @@
 - The Bugs tab has a legend under the priority chips: `P0` critical, `P1` high, `P2` medium, `P3` low, `P4` minor, in the colours the rows use, and `*` for a priority an assistant estimated and no user has confirmed yet. REQ-BUGS-1121
 - Every bundled language must translate the same strings: a smoke check fails when one table names a string the other does not.
 
-**Eight more drafts are confirmed, the ones the gate finds nothing wrong with.**
+**Six more drafts are confirmed, each read clause by clause against its code and tests.**
 
-- REQ-BUGS-1122, REQ-BUGS-1123, REQ-CUSTOMTRACE-1137, REQ-CUSTOMTRACE-1138, REQ-INIT-1132, REQ-MAP-1144, REQ-MEMBERDRIFT-1134 and REQ-RETIRE-1130. Each has code and tests, every case proven by a `# verifies:` tag, and no open question; confirming it adds nothing to `gate --full --strict`.
-- The other 18 drafts stay drafts, each for what the strict gate reports once it is confirmed: a code-level requirement tested only `@integration` (RM010, 13 of them), more than 7 cases (`ac-count-high`), fewer than 3, or code spread over 3+ directories. ARCH-MAPSTAMP-079 has no code of its own (RM006).
-- Health goes from 93 to 95: 331 of 349 requirements green.
+- REQ-BUGS-1122, REQ-BUGS-1123, REQ-CUSTOMTRACE-1137, REQ-INIT-1132, REQ-MAP-1144 and REQ-MEMBERDRIFT-1134. Every clause was traced to the code that does it and every case to a test that asserts it; confirming them adds nothing to `gate --full --strict`.
+- Two drafts passed the gate but not the read, and stay drafts. REQ-CUSTOMTRACE-1138: a JSON row whose contract is a list and has no title gets the list's Python text as its title. REQ-RETIRE-1130: "a tag's text inside a string literal stays" holds for Python only; in JavaScript or TypeScript the scanner reads such a literal as a tag, and `retire --delete` cuts it.
+- The other 18 drafts stay drafts for what the strict gate reports once they are confirmed: a code-level requirement tested only `@integration` (RM010, 13 of them), more than 7 cases, fewer than 3, or code spread over 3+ directories. ARCH-MAPSTAMP-079 has no code of its own (RM006).
+- Health goes from 93 to 94: 329 of 349 requirements green.
 
 **Six requirements are confirmed.**
 

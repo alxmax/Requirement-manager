@@ -6274,7 +6274,7 @@
       "id": "REQ-CUSTOMTRACE-1138",
       "layer": "feature",
       "level": "code",
-      "status": "confirmed",
+      "status": "draft",
       "area": "REQ",
       "title": "Requirements kept as rows",
       "intent": "A corpus exported from a requirements tool comes as rows: a CSV file or a JSON list, with its own column names, and with headings and information entries among the requirements. Reading one took a few hundred lines of glue. A field map does it. See [ADR-0088](../../docs/adr/0088-requirements-kept-as-rows.md).",
@@ -6329,7 +6329,12 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [],
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
       "clauses": 6,
       "covered": 6,
       "clarify": [
@@ -17898,7 +17903,7 @@
       "id": "REQ-RETIRE-1130",
       "layer": "feature",
       "level": "code",
-      "status": "confirmed",
+      "status": "draft",
       "area": "REQ",
       "title": "A retirement that fails says so and stops",
       "intent": "`retire --apply` reported a deletion as applied when the requirement's block was still in its file, dropped its lock entries anyway, ignored a file it could not write, and went on to the next requirement in the batch, which is the base of the one that failed. It also cut a tag's text out of a string literal, as if every match were a tag.",
@@ -17947,7 +17952,12 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [],
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
       "clauses": 5,
       "covered": 5,
       "clarify": []
@@ -31304,16 +31314,16 @@
     }
   },
   "health": {
-    "score": 95,
+    "score": 94,
     "total": 371,
     "scored": 349,
-    "healthy": 331,
+    "healthy": 329,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 331,
+    "confirmed": 329,
     "implemented": 338,
     "tested": 339,
-    "drafts": 18,
+    "drafts": 20,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31321,7 +31331,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 331,
+    "reviewed_total": 329,
     "unhealthy": [
       {
         "id": "ARCH-BUGS-078",
@@ -31424,6 +31434,13 @@
         ]
       },
       {
+        "id": "REQ-CUSTOMTRACE-1138",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-MAPSTAMP-1124",
         "status": "draft",
         "why": [
@@ -31432,6 +31449,13 @@
       },
       {
         "id": "REQ-MAPSTAMP-1125",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-RETIRE-1130",
         "status": "draft",
         "why": [
           "not confirmed"

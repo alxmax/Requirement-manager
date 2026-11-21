@@ -242,7 +242,7 @@ CASE-5 — a glob the repository would match is pointed at root: repo
 
 ---
 id: REQ-CUSTOMTRACE-1138
-status: confirmed
+status: draft
 level: code
 layer: feature
 owner: Alex
