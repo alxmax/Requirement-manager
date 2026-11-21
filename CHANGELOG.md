@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## plugin `v8.25.0` — 2026-11-21
+
+**Release v8.25.0.**
+
+- Retire: comments only, writes checked (ARCH-RETIRE-064)
+- Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped (REQ-DRIFT-1103)
+- An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged (ARCH-AUDITRUN-076)
+- clarify knows failure words beyond its list (ARCH-CLARIFY-062)
+- The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it) (ARCH-MAP-007)
+- MCP docs count the tools a client sees (ARCH-MCP-073)
+- The viewer makes no network request (ARCH-VIEWER-007)
+- A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded (ARCH-CUSTOMTRACE-077)
+
 **The requirement document wraps long text cleanly.**
 
 - The `depends on` list wraps only between ids: a line used to be able to start with the comma of the previous id, because each id is a button and the bare `, ` before it was a break point. Each id and its comma now sit in one unbreakable item; the last has no comma.
