@@ -87,7 +87,8 @@ PACKAGE = "reqmap_engine"
 # Raised to 7,062 by ADR-0091: tracecover.py, the map's trace block (coverage,
 # tested-by suggestions, corpus hygiene, a repository's own design rules), which
 # `sync` writes and the gate's freshness check neither computes nor compares.
-CORE_LOGICAL_BUDGET = 7062
+# Down to 7,058: tracecover.py reads the member lock in one place.
+CORE_LOGICAL_BUDGET = 7058
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.

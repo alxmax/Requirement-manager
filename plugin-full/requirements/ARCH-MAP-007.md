@@ -592,6 +592,9 @@ Every bullet below is binding.
   computes nor compares it.
 - `coverage` counts program files, files with a tag, production (non-test) files, and
   production files the member lock holds a hash for.
+- Every count is over program files: prose (`.md`, `.html`) and a file git ignores are left out,
+  so a file kept only on one machine never reaches the committed map. Without git, nothing is
+  left out for being ignored.
 - For each live requirement held to code with an `implements:` member and no `tested-by:` one,
   `suggestions` gives a tier: A when a test file paired with its code by name names the
   requirement or one of its definitions, B when a test is paired by name only, C when none is.
@@ -623,4 +626,10 @@ CASE-4 — a design rule is counted on production code only
          and a test file with another
   When   the trace block is computed
   Then   the rule has one hit, on the production file's line
+
+CASE-5 — prose and ignored files do not count
+  Given  a git repository holding `src/a.c`, `docs/notes.md`, `docs/page.html` and
+         `src/local.c`, the last named in `.git/info/exclude`
+  When   the trace block lists its files
+  Then   it lists `src/a.c` alone
 

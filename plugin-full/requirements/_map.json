@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.7",
+  "engine_version": "2026-11-21.8",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -12661,6 +12661,7 @@
       "contract": [
         "`sync` writes a `trace` block in `_map.json` with `coverage`, `suggestions` and `hygiene`, and `rules` when the repository declares `DESIGN_RULES`; the gate's freshness check neither computes nor compares it.",
         "`coverage` counts program files, files with a tag, production (non-test) files, and production files the member lock holds a hash for.",
+        "Every count is over program files: prose (`.md`, `.html`) and a file git ignores are left out, so a file kept only on one machine never reaches the committed map. Without git, nothing is left out for being ignored.",
         "For each live requirement held to code with an `implements:` member and no `tested-by:` one, `suggestions` gives a tier: A when a test file paired with its code by name names the requirement or one of its definitions, B when a test is paired by name only, C when none is. A and B list at most three tests.",
         "`hygiene` lists requirements whose binding text is the same, confirmed requirements with no clause, and counts structural entries read from a source.",
         "Each `DESIGN_RULES` entry is counted on production code with its file and line, at most 50 kept; an entry with no string `id` or `pattern` is reported and left out."
@@ -12668,7 +12669,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — coverage counts files, tags and the member lock\n  Given  two code files, one tagged with a member hash in the lock, and one test file\n  When   the trace block is computed\n  Then   it counts 3 program files, 1 tagged file, 2 production files and 1 watched for drift\n\nCASE-2 — a test that names the requirement is tier A\n  Given  `brake.c` implementing R-1 and `brake_test.c` naming R-1, `pedal.c` implementing R-2\n         with `pedal_test.c` that names neither, and `horn.c` implementing R-3 with no test\n  When   the trace block is computed\n  Then   R-1 is tier A with `brake_test.c`, R-2 tier B with `pedal_test.c`, R-3 tier C\n\nCASE-3 — duplicates and empty confirmed requirements are listed\n  Given  two requirements with the same clause and a confirmed one with none\n  When   the trace block is computed\n  Then   the pair is a duplicate and the empty one is listed\n\nCASE-4 — a design rule is counted on production code only\n  Given  `DESIGN_RULES` banning `throw`, a production file with one `throw` and one in a comment,\n         and a test file with another\n  When   the trace block is computed\n  Then   the rule has one hit, on the production file's line",
+      "accept": "CASE-1 — coverage counts files, tags and the member lock\n  Given  two code files, one tagged with a member hash in the lock, and one test file\n  When   the trace block is computed\n  Then   it counts 3 program files, 1 tagged file, 2 production files and 1 watched for drift\n\nCASE-2 — a test that names the requirement is tier A\n  Given  `brake.c` implementing R-1 and `brake_test.c` naming R-1, `pedal.c` implementing R-2\n         with `pedal_test.c` that names neither, and `horn.c` implementing R-3 with no test\n  When   the trace block is computed\n  Then   R-1 is tier A with `brake_test.c`, R-2 tier B with `pedal_test.c`, R-3 tier C\n\nCASE-3 — duplicates and empty confirmed requirements are listed\n  Given  two requirements with the same clause and a confirmed one with none\n  When   the trace block is computed\n  Then   the pair is a duplicate and the empty one is listed\n\nCASE-4 — a design rule is counted on production code only\n  Given  `DESIGN_RULES` banning `throw`, a production file with one `throw` and one in a comment,\n         and a test file with another\n  When   the trace block is computed\n  Then   the rule has one hit, on the production file's line\n\nCASE-5 — prose and ignored files do not count\n  Given  a git repository holding `src/a.c`, `docs/notes.md`, `docs/page.html` and\n         `src/local.c`, the last named in `.git/info/exclude`\n  When   the trace block lists its files\n  Then   it lists `src/a.c` alone",
       "input": "",
       "output": "",
       "desc": "",
@@ -12709,23 +12710,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:46"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:70"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:54"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:110"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:132"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:114"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:158"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:136"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:162"
         }
       ],
       "test_exempt": null,
@@ -12737,8 +12742,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 5,
+      "covered": 5,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -12746,7 +12751,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -31656,10 +31661,10 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 291,
-      "tagged_files": 185,
-      "production_files": 267,
-      "drift_files": 101
+      "code_files": 190,
+      "tagged_files": 183,
+      "production_files": 166,
+      "drift_files": 100
     },
     "suggestions": {},
     "hygiene": {
