@@ -114,7 +114,11 @@ export function SpecMeta({ r, t, onNav }) {
       {r.deps.length > 0 && <span className="mk-deps">
         <span className="mk-key">{t("depends on")}</span>
         <span className="mk-val">{r.deps.map((d, i) => (
-          <Fragment key={d}>{i > 0 ? ", " : ""}<button className="dep-link" onClick={() => onNav && onNav(d)}>{d}</button></Fragment>
+          // The comma lives INSIDE a nowrap item, and the line may only break
+          // at the space after it: a button is an atomic inline, so a bare
+          // ", " text node before it let the browser wrap with the comma
+          // stranded at the start of the next line.
+          <Fragment key={d}>{i > 0 ? " " : ""}<span className="dep-item"><button className="dep-link" onClick={() => onNav && onNav(d)}>{d}</button>{i < r.deps.length - 1 ? "," : ""}</span></Fragment>
         ))}</span>
       </span>}
     </div>

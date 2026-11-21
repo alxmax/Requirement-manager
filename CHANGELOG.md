@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+**The requirement document wraps long text cleanly.**
+
+- The `depends on` list wraps only between ids: a line used to be able to start with the comma of the previous id, because each id is a button and the bare `, ` before it was a break point. Each id and its comma now sit in one unbreakable item; the last has no comma.
+- A title holding one long unbreakable token (a camelCase signal name, a path) wraps inside the sheet instead of running past its edge; the breadcrumb does the same. Viewer-only change; the engine does not change.
+
 **The skill takes "check these folders against those requirements" as one request.**
 
 - A seventh action, `check`, in the `requirement-manager` skill (`references/check-existing.md`): read the code folder, the requirements and the output folder from the request, refuse an output folder inside the code, write the folder's `_config.json` only when absent (otherwise show the change and ask), run `sync` and `gate --risk` with today's flags, print the absolute `_map.html` path, and end with the person's own steps. No engine change.
