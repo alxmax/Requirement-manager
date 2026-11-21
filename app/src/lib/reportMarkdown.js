@@ -22,9 +22,11 @@ export function reportMarkdown(c, repo, rows) {
       + "planned requirements.");
   }
   L.push("", "## How it was checked", "");
-  L.push(`- Map written ${val(c.method.at)}, engine ${val(c.method.engine)}; `
-    + `${c.method.requirements} requirements and ${c.method.files} tagged `
-    + "files read.");
+  const m = c.method;
+  const stamp = [m.at && `Map written ${m.at}.`, m.engine && `Engine ${m.engine}.`,
+    m.branch && `Branch ${m.branch}.`].filter(Boolean).join(" ");
+  L.push(`- ${stamp ? stamp + " " : ""}${m.requirements} requirements and `
+    + `${m.files} tagged files read.`);
   if (c.audit) {
     L.push(`- Audit session: ${c.audit.reviewed}/${c.audit.planned} read, `
       + `band ${c.audit.band}.`);
@@ -64,5 +66,7 @@ export function reportMarkdown(c, repo, rows) {
   L.push("", "## Recommendations", "");
   if (!c.recommendations.length) L.push("Nothing is open.");
   c.recommendations.forEach((r, i) => L.push(`${i + 1}. ${r.n} ${r.text}`));
+  L.push("", "## Deliverables", "");
+  c.deliverables.forEach((d) => L.push(`- \`${d.path}\`: ${d.what}`));
   return L.join("\n") + "\n";
 }

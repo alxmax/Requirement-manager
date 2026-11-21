@@ -63,15 +63,28 @@ test("report: bugs and questions are counted as their pages count them",
     && c3.questions.high === 1 && c3.questions.medium === 1
     && c3.questions.low === 1
     && page.includes("P1 1 · P2 1"));
-test("report: the six sections come in order",
+// verifies: REQ-VIEWER-1145#CASE-5
+test("report: the seven sections come in order, each in the contents",
   ["Summary", "How it was checked", "Results in numbers", "Problem types",
-    "Top 10 questions", "Recommendations"].map((h) => page.indexOf(`>${h}<`))
-    .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])));
+    "Top 10 questions", "Recommendations", "Deliverables"]
+    .map((h) => page.indexOf(`>${h}<`))
+    .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1]))
+    && (page.match(/class="rep-toc-i/g) || []).length === 7);
+// verifies: REQ-VIEWER-1145#CASE-6
+test("report: each question priority opens its requirements",
+  ["high", "medium", "low"].every((p) => c3.questionIds[p].length === 1)
+    && c3.deliverables.some((d) => d.path === "bugs/"));
 
 // verifies: REQ-VIEWER-1139#CASE-4
 test("report: what the map does not carry is not shown as zero",
   c3.dangling === null && c3.drift === null
     && page.includes("not measured"));
+// verifies: REQ-VIEWER-1145#CASE-7
+test("report: a build stamp the map lacks is left out, not 'not measured'",
+  c3.method.at === null && !page.includes("Map written")
+    && !page.includes(">Date:<")
+    && !/Map written|not measured/.test(reportMarkdown(c3, null, problemRows(c3))
+      .split("## Results")[0]));
 
 // verifies: REQ-VIEWER-1139#CASE-5
 adoptMapExport({ nodes: [
@@ -139,7 +152,8 @@ test("report: suggestions are listed by tier with their test",
 const md = reportMarkdown(c3b, "demo/repo", problemRows(c3b));
 test("report: the Markdown export carries the same numbers",
   ["## Summary", "## How it was checked", "## Results in numbers",
-    "## Problem types", "## Top 10 questions", "## Recommendations"]
+    "## Problem types", "## Top 10 questions", "## Recommendations",
+    "## Deliverables"]
     .every((h) => md.includes(h))
     && md.includes("| Open bugs | 0 |") && md.includes("brake_test.c")
     && md.includes("2/4 (50%)"));

@@ -174,6 +174,26 @@ function suggestionTiers() {
   return tiers;
 }
 
+/** What the audit leaves behind and where: the two exports this page makes,
+ * then the files `sync` writes beside the requirements, each only when the
+ * map shows it exists. Paths are relative to the requirements folder. */
+function deliverables(c) {
+  const out = [
+    { path: "report.md", what: "this page as Markdown (Export Markdown)" },
+    { path: "report.pdf", what: "this page as PDF (Export PDF)" },
+    { path: "_map.json", what: "the graph the map and this page read" },
+    { path: "_map.md", what: "the map as text" },
+    { path: "_findings.md", what: "the open findings, per requirement" },
+  ];
+  if (c.audit) {
+    out.push({ path: "_audit.json", what: "the audit session: plan, reads, rates" });
+  }
+  if (c.bugs.open.length || c.bugs.fixed) {
+    out.push({ path: "bugs/", what: "the bug files, one per module" });
+  }
+  return out;
+}
+
 /** Everything the Report page shows. */
 export function computeReport() {
   const qs = computeQuestions();
@@ -203,6 +223,9 @@ export function computeReport() {
       all: n("all") },
     highReqs: [...new Set(ranked.filter((q) => q.prio === "high")
       .map((q) => q.id))],
+    questionIds: Object.fromEntries(["high", "medium", "low"].map((p) =>
+      [p, [...new Set(ranked.filter((q) => q.prio === p).map((q) => q.id))]
+        .sort()])),
     trace: traceCounts(),
     dangling: HEALTH
       ? (HEALTH.gate_error_lines || []).filter((l) => /RM001/.test(l)) : null,
@@ -222,5 +245,6 @@ export function computeReport() {
       : [],
   };
   c.recommendations = recommend(c);
+  c.deliverables = deliverables(c);
   return c;
 }

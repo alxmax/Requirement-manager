@@ -13296,11 +13296,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:494"
+          "loc": "app/src/lib/i18n.jsx:543"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:506"
+          "loc": "app/src/lib/i18n.jsx:555"
         },
         {
           "role": "tested-by",
@@ -23322,7 +23322,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:460"
+          "loc": "app/src/lib/i18n.jsx:509"
         },
         {
           "role": "implements",
@@ -24183,11 +24183,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:449"
+          "loc": "app/src/lib/i18n.jsx:498"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:502"
+          "loc": "app/src/lib/i18n.jsx:551"
         }
       ],
       "test_exempt": null,
@@ -24373,11 +24373,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:416"
+          "loc": "app/src/lib/i18n.jsx:465"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:524"
+          "loc": "app/src/lib/i18n.jsx:573"
         },
         {
           "role": "implements",
@@ -25415,13 +25415,14 @@
       "title": "One page reports what is open",
       "intent": "Bugs, questions and missing tags each live on their own page, so the answer to \"how much is left?\" took four clicks and some adding up. One page counts them, lists what is behind each count, and prints, so the state of a repository can be handed to someone who does not open the map.",
       "contract": [
-        "The viewer's Workspace rail lists Report last, and selecting it opens one page in six sections, in this order: Summary, How it was checked, Results in numbers, Problem types, Top 10 questions and Recommendations.",
+        "The viewer's Workspace rail lists Report last, and selecting it opens one page in seven sections, in this order: Summary, How it was checked, Results in numbers, Problem types, Top 10 questions, Recommendations and Deliverables.",
         "Summary: one paragraph built from the counts below, naming the health score, the confirmed share, and the largest open count of bugs, High questions and missing tags.",
-        "How it was checked: the engine version, the branch and the time the map was written, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
+        "How it was checked: the engine version, the branch and the time the map was written, each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
         "Results in numbers: open bugs in total and per priority, and the number fixed; open questions by High, Medium and Low as the Questions page counts them; and, over requirements that are neither deprecated, `need` nor `aggregate` (and not `test_exempt` for tests), those with no `implements:` member, split into confirmed and draft, those with code but no `tested-by:` member, and the cases no `# verifies:` tag proves, summed from the engine's `clauses` and `covered`, never estimated.",
         "Problem types: every kind found, each with its count and the requirements behind it: missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's dangling tags (RM001 lines) and drift, as the map's health record gives them.",
         "Top 10 questions: the ten most important open questions, High before Medium before Low, then a confirmed requirement before a draft, then the requirement more others depend on first, then by id; each with its requirement, rule or origin and text.",
         "Recommendations: one per non-zero problem type, most severe first (dangling tags, confirmed with no code, drift, High questions, missing tests, unproven cases, open P0 and P1 bugs, Medium questions), each naming the count and the command or edit that closes it. With nothing open it says so.",
+        "Deliverables: the files the report and the audit leave behind, each with its path in the repository and what it holds.",
         "Every listed requirement opens its document.",
         "`Export PDF` prints the page through the browser's print dialog, every list out in full.",
         "A count the map does not carry is shown as not measured, not as zero, and adds no recommendation."
@@ -25474,7 +25475,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 10 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 11 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -25493,12 +25494,14 @@
         "With a `trace` block, the Report shows the share of code files with a tag and of production files watched for drift, the tested-by suggestions by tier with the test each names, the duplicates, the confirmed requirements with no clause and each design rule's hits.",
         "Each list of requirements sits behind a chip that opens it; printed, every list is open.",
         "`Export Markdown` downloads the same numbers and lists as a Markdown file.",
+        "The page opens with a title and a line naming the date, branch, engine and audit band, each only when the map carries it; a contents list beside it names the seven sections, numbered, and marks the one in view.",
+        "Summary shows the key numbers as tiles and the main conclusions as bullets, each with chips to the requirements behind it. Results in numbers is a table of indicator and value, where the open questions per priority and the requirements with no tested-by per tier each open from a chip.",
         "Recommendations add, when non-zero: audit findings of a bug or missing code, tier A suggestions, false-coverage findings, duplicates, empty confirmed requirements and design rule hits."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the six sections, the open bug count and every problem row",
+      "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the seven sections, the open bug count and every problem row\n\nCASE-5 — a contents list names the seven sections\n  Given  any registry\n  When   the Report is rendered\n  Then   the seven sections come in order, and the contents list holds one entry for each\n\nCASE-6 — each question priority opens its requirements\n  Given  one High, one Medium and one Low question, each on its own requirement\n  When   the Report is computed\n  Then   each priority lists one requirement behind its chip\n\nCASE-7 — a build stamp the map lacks is left out\n  Given  a map with no `generated_at`\n  When   the Report and its Markdown are produced\n  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured\n         for it",
       "input": "",
       "output": "",
       "desc": "",
@@ -25527,7 +25530,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:547"
+          "loc": "app/src/styles/app.css:566"
         },
         {
           "role": "implements",
@@ -25547,8 +25550,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -25556,17 +25559,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        },
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
         }
       ]
     },
@@ -31122,10 +31116,10 @@
   ],
   "design": {
     "files": 150,
-    "clean_files": 134,
+    "clean_files": 133,
     "score": 89,
     "candidates": {
-      "encapsulation": 6,
+      "encapsulation": 10,
       "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
@@ -31146,15 +31140,15 @@
         "file": "app/src/lib/i18n.jsx",
         "line": 1,
         "name": "i18n.jsx",
-        "detail": "530 lines (over 500)"
+        "detail": "579 lines (over 500)"
       },
       {
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/lib/i18n.jsx",
-        "line": 329,
+        "line": 378,
         "name": "i18n.jsx",
-        "detail": "2 line(s) wider than 120 columns, first at line 329"
+        "detail": "2 line(s) wider than 120 columns, first at line 378"
       },
       {
         "pillar": "encapsulation",
@@ -31163,6 +31157,38 @@
         "line": 143,
         "name": "QuestionPanel",
         "detail": "`QuestionPanel` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 22,
+        "name": "Ids",
+        "detail": "full, openSpec, t travel together through 5 functions: Conclusions, Ids, Numbers, Summary, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, full, openSpec, t travel together through 4 functions: Conclusions, Numbers, Summary, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, openSpec, t travel together through 5 functions: Conclusions, Numbers, Summary, Top, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, full, openSpec travel together through 5 functions: Conclusions, Numbers, ReportBody, Summary, Types"
       },
       {
         "pillar": "abstraction",
@@ -31286,6 +31312,7 @@
       }
     ],
     "advice": {
+      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
       "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",

@@ -19,7 +19,7 @@ const PRIO_CLASS = { high: "structure", medium: "count", low: "wording" };
 const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
 
 /** A count's requirements behind a chip that opens them; on paper, open. */
-function Ids({ rows, openSpec, full, t }) {
+function Ids({ rows, openSpec, full, t, label }) {
   if (!rows || !rows.length) return null;
   const list = (
     <div className="rep-ids">
@@ -37,19 +37,10 @@ function Ids({ rows, openSpec, full, t }) {
   if (full) return list;
   return (
     <details className="rep-chip">
-      <summary>{t("{n} requirements", { n: rows.length })}</summary>
+      <summary>{label ? `${rows.length} ${t(label)}`
+        : t("{n} requirements", { n: rows.length })}</summary>
       {list}
     </details>
-  );
-}
-
-function Num({ label, value, sub, t }) {
-  return (
-    <div className="rep-num">
-      <b>{value == null ? t(NOT_MEASURED) : value}</b>
-      <span>{t(label)}</span>
-      {sub && <span style={MONO}>{sub}</span>}
-    </div>
   );
 }
 
@@ -67,7 +58,7 @@ function largest(c, t) {
   return items[0][0] ? `${items[0][1]} (${items[0][0]})` : null;
 }
 
-function Summary({ c, t }) {
+function Summary({ c, t, openSpec, full }) {
   const parts = [];
   if (c.health) {
     parts.push(t("Health {s}/100: {a} of {b} requirements green.",
@@ -88,17 +79,106 @@ function Summary({ c, t }) {
   const big = largest(c, t);
   parts.push(big ? t("The largest open item: {x}.", { x: big })
     : t("Nothing is open."));
-  return <p className="rep-summary">{parts.join(" ")}</p>;
+  return (
+    <>
+      <p className="rep-summary">{parts.join(" ")}</p>
+      <KeyNumbers c={c} t={t} />
+      <Conclusions c={c} t={t} openSpec={openSpec} full={full} />
+    </>
+  );
+}
+
+/** The few numbers a reader takes away, as tiles: the audit's reach, then
+ * whatever is open. */
+function KeyNumbers({ c, t }) {
+  const q = c.questions, tr = c.trace;
+  const tiles = [
+    c.audit && [`${pct(c.audit.reviewed, c.audit.planned)}%`,
+      t("of planned requirements read by the audit ({a} of {b})",
+        { a: c.audit.reviewed, b: c.audit.planned })],
+    c.coverage && [`${pct(c.coverage.tagged_files, c.coverage.code_files)}%`,
+      t("code files with a tag")],
+    [c.bugs.open.length, t("open bugs")],
+    [q.high + q.medium + q.low, t("questions for requirement owners")],
+    ...c.findings.slice(0, 2).map((f) => [f.n,
+      t("audit findings") + ": " + f.kind]),
+    [tr.noTest.length, t("requirements with code, no tested-by")],
+  ].filter(Boolean);
+  return (
+    <div className="rep-nums rep-key">
+      {tiles.map(([v, l]) => (
+        <div key={l} className="rep-num"><b>{v}</b><span>{l}</span></div>))}
+    </div>
+  );
+}
+
+/** One bullet per open finding, its count in bold, and a chip per list
+ * behind it. */
+function Conclusions({ c, t, openSpec, full }) {
+  const q = c.questions, qi = c.questionIds, tr = c.trace, tiers = c.tiers;
+  const chip = (rows, label) => (
+    <Ids key={label} rows={rows} openSpec={openSpec} full={full} t={t}
+      label={label} />);
+  const allQ = [...new Set([...qi.high, ...qi.medium, ...qi.low])].sort();
+  const items = [
+    c.audit && [t("{a} of {b} planned requirements read ({p}%)", {
+      a: c.audit.reviewed, b: c.audit.planned,
+      p: pct(c.audit.reviewed, c.audit.planned) }),
+    t("band {band}.", { band: c.audit.band }), []],
+    c.bugs.open.length > 0 && [t("{n} open bugs.", { n: c.bugs.open.length }),
+      Object.entries(c.bugs.byPrio).map(([p, n]) => `${p} ${n}`).join(", "),
+      []],
+    allQ.length > 0 && [t("{n} questions for requirement owners",
+      { n: q.high + q.medium + q.low }),
+    t("on {m} requirements: {h} High, {md} Medium, {l} Low.",
+      { m: allQ.length, h: q.high, md: q.medium, l: q.low }),
+    [chip(allQ, "all requirements"), chip(qi.high, "High"),
+      chip(qi.medium, "Medium"), chip(qi.low, "Low")]],
+    ...c.findings.map((f) => [t("{n} audit findings: {k}",
+      { n: f.n, k: f.kind }), t("on {m} requirements.", { m: f.ids.length }),
+    [chip(f.ids, "requirements")]]),
+    tr.noTest.length > 0 && [t("{n} requirements have code but no tested-by",
+      { n: tr.noTest.length }),
+    tiers ? t("mostly tagging gaps when tier A dominates.") : "",
+    [chip(tr.noTest, "all"), ...(tiers ? [chip(tiers.A, "tier A"),
+      chip(tiers.B, "tier B"), chip(tiers.C, "tier C")] : [])]],
+    tr.noImplConfirmed.length > 0 && [t("{n} confirmed requirements have no "
+      + "code", { n: tr.noImplConfirmed.length }), "",
+    [chip(tr.noImplConfirmed, "requirements")]],
+  ].filter(Boolean);
+  if (!items.length) return null;
+  return (
+    <>
+      <p className="rep-lead">{t("Main conclusions:")}</p>
+      <ul className="rep-concl">
+        {items.map(([head, rest, chips]) => (
+          <li key={head}><b>{head}</b>{rest ? " " + rest : ""}
+            {chips.length > 0 && <div className="rep-chips">{chips}</div>}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
+/** The build stamp as the map carries it: a part the map lacks is left
+ * out, as the rail's footer does (the date and branch ride only in
+ * `_map.html`, never in the committed `_map.json`). */
+function stampText(m, t) {
+  return [
+    m.at && t("Map written {at}.", { at: m.at }),
+    m.engine && t("Engine {e}.", { e: m.engine }),
+    m.branch && t("Branch {b}.", { b: m.branch }),
+  ].filter(Boolean).join(" ");
 }
 
 function Method({ c, t }) {
   const m = c.method;
+  const stamp = stampText(m, t);
   return (
     <>
       <p>
-        {t("Map written {at}, engine {e}.", {
-          at: m.at || t(NOT_MEASURED), e: m.engine || t(NOT_MEASURED),
-        })}{m.branch ? " " + t("Branch {b}.", { b: m.branch }) : ""}{" "}
+        {stamp ? stamp + " " : ""}
         {t("{r} requirements and {f} tagged files read.",
           { r: m.requirements, f: m.files })}
       </p>
@@ -119,56 +199,70 @@ function Method({ c, t }) {
 }
 
 function rateSub(r) {
-  return r && r.n ? `${r.k}/${r.n}` : null;
+  return r && r.n ? `${r.k}/${r.n} (${pct(r.k, r.n)}%)` : null;
 }
 
-function Numbers({ c, t }) {
-  const tr = c.trace, cov = c.coverage;
+const share = (a, b) => `${pct(a, b)}% (${a}/${b})`;
+
+/** Indicator | value, a chip row under a value whose requirements open. */
+function Numbers({ c, t, openSpec, full }) {
+  const tr = c.trace, cov = c.coverage, q = c.questions, qi = c.questionIds;
+  const chip = (rows, label) => (
+    <Ids key={label} rows={rows} openSpec={openSpec} full={full} t={t}
+      label={label} />);
+  const allQ = [...new Set([...qi.high, ...qi.medium, ...qi.low])].sort();
+  const prios = Object.entries(c.bugs.byPrio).map(([p, n]) => `${p} ${n}`)
+    .join(" · ");
+  const rows = [
+    ...(c.audit ? [
+      ["Read by the audit", share(c.audit.reviewed, c.audit.planned)],
+      ["Agreement between runs", rateSub(c.audit.rates.agreement)],
+      ["Audit precision", rateSub(c.audit.rates.precision)],
+      ["Audit findings", String(c.findings.reduce((n, f) => n + f.n, 0)),
+        c.findings.map((f) => chip(f.ids, f.kind))],
+    ] : []),
+    ["Open bugs", `${c.bugs.open.length}${prios ? ` (${prios})` : ""}`],
+    ["Fixed bugs", String(c.bugs.fixed)],
+    ["Questions", t("{n} on {m} requirements ({h} High, {md} Medium, {l} Low)",
+      { n: q.high + q.medium + q.low, m: allQ.length, h: q.high,
+        md: q.medium, l: q.low }),
+    [chip(allQ, "all"), chip(qi.high, "High"), chip(qi.medium, "Medium"),
+      chip(qi.low, "Low")]],
+    ["Confirmed, no implements", String(tr.noImplConfirmed.length),
+      [chip(tr.noImplConfirmed, "requirements")]],
+    ["Draft, no implements", String(tr.noImplDraft.length),
+      [chip(tr.noImplDraft, "requirements")]],
+    ["Code, no tested-by", String(tr.noTest.length), c.tiers
+      ? [chip(tr.noTest, "all"), chip(c.tiers.A, "tier A"),
+        chip(c.tiers.B, "tier B"), chip(c.tiers.C, "tier C")]
+      : [chip(tr.noTest, "requirements")]],
+    ["Cases with no verifies", String(tr.unprovenCases),
+      [chip(tr.unproven, "requirements")]],
+    ["Dangling tags", c.dangling == null ? null : String(c.dangling.length)],
+    ["Drift", c.drift == null ? null : String(c.drift.length)],
+    ...(cov ? [
+      ["Code files with a tag", share(cov.tagged_files, cov.code_files)],
+      ["Production files watched for drift",
+        share(cov.drift_files, cov.production_files)],
+    ] : []),
+    ...(c.health ? [["Health score", t("{s} ({a} of {b} requirements green)",
+      { s: c.health.score, a: c.health.healthy, b: c.health.scored })]] : []),
+  ];
   return (
-    <>
-      {c.audit && (
-        <div className="rep-nums">
-          <Num t={t} label="read by the audit"
-            value={`${pct(c.audit.reviewed, c.audit.planned)}%`}
-            sub={`${c.audit.reviewed}/${c.audit.planned}`} />
-          <Num t={t} label="audit findings"
-            value={c.findings.reduce((n, f) => n + f.n, 0)} />
-          <Num t={t} label="agreement between runs"
-            value={rateSub(c.audit.rates.agreement)} />
-          <Num t={t} label="audit precision"
-            value={rateSub(c.audit.rates.precision)} />
-        </div>
-      )}
-      <div className="rep-nums">
-        <Num t={t} label="open bugs" value={c.bugs.open.length} />
-        <Num t={t} label="fixed bugs" value={c.bugs.fixed} />
-        <Num t={t} label="High questions" value={c.questions.high} />
-        <Num t={t} label="Medium questions" value={c.questions.medium} />
-        <Num t={t} label="Low questions" value={c.questions.low} />
-      </div>
-      {Object.keys(c.bugs.byPrio).length > 0 && (
-        <p style={MONO}>{Object.entries(c.bugs.byPrio)
-          .map(([p, n]) => `${p} ${n}`).join(" · ")}</p>
-      )}
-      <div className="rep-nums">
-        <Num t={t} label="confirmed, no implements"
-          value={tr.noImplConfirmed.length} />
-        <Num t={t} label="draft, no implements" value={tr.noImplDraft.length} />
-        <Num t={t} label="code, no tested-by" value={tr.noTest.length} />
-        <Num t={t} label="cases with no verifies" value={tr.unprovenCases} />
-        <Num t={t} label="dangling tags"
-          value={c.dangling == null ? null : c.dangling.length} />
-        <Num t={t} label="drift" value={c.drift == null ? null : c.drift.length} />
-      </div>
-      <div className="rep-nums">
-        <Num t={t} label="code files with a tag"
-          value={cov ? `${pct(cov.tagged_files, cov.code_files)}%` : null}
-          sub={cov ? `${cov.tagged_files}/${cov.code_files}` : null} />
-        <Num t={t} label="production files watched for drift"
-          value={cov ? `${pct(cov.drift_files, cov.production_files)}%` : null}
-          sub={cov ? `${cov.drift_files}/${cov.production_files}` : null} />
-      </div>
-    </>
+    <table className="rep-table rep-kv">
+      <tbody>
+        {rows.map(([label, value, chips]) => (
+          <tr key={label}>
+            <td>{t(label)}</td>
+            <td>
+              {value == null ? t(NOT_MEASURED) : value}
+              {chips && chips.some(Boolean)
+                && <div className="rep-chips">{chips}</div>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
@@ -261,20 +355,81 @@ function Recs({ c, t }) {
   );
 }
 
-/** The six sections, the same on screen and on paper. */
-export function ReportBody({ c, openSpec, full = false }) {
-  const { t } = useI18n();
-  const sec = (title, body) => (
-    <section className="rep-sec"><h2>{t(title)}</h2>{body}</section>);
+function Deliverables({ c, t }) {
   return (
     <>
-      {sec("Summary", <Summary c={c} t={t} />)}
-      {sec("How it was checked", <Method c={c} t={t} />)}
-      {sec("Results in numbers", <Numbers c={c} t={t} />)}
-      {sec("Problem types", <Types c={c} t={t} openSpec={openSpec} full={full} />)}
-      {sec("Top 10 questions", <Top c={c} t={t} openSpec={openSpec} />)}
-      {sec("Recommendations", <Recs c={c} t={t} />)}
+      <p>{t("Paths are relative to the requirements folder; keep them in "
+        + "the repository, not in a temporary folder.")}</p>
+      <table className="rep-table">
+        <tbody>
+          {c.deliverables.map((d) => (
+            <tr key={d.path}>
+              <td style={MONO}>{d.path}</td>
+              <td colSpan={2}>{t(d.what)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </>
+  );
+}
+
+/** The sections in order: the body and the table of contents read this. */
+export const SECTIONS = ["Summary", "How it was checked", "Results in numbers",
+  "Problem types", "Top 10 questions", "Recommendations", "Deliverables"];
+const secId = (i) => `rep-sec-${i + 1}`;
+
+/** The seven sections, the same on screen and on paper. */
+export function ReportBody({ c, openSpec, full = false }) {
+  const { t } = useI18n();
+  const bodies = [
+    <Summary c={c} t={t} openSpec={openSpec} full={full} />,
+    <Method c={c} t={t} />,
+    <Numbers c={c} t={t} openSpec={openSpec} full={full} />,
+    <Types c={c} t={t} openSpec={openSpec} full={full} />,
+    <Top c={c} t={t} openSpec={openSpec} />,
+    <Recs c={c} t={t} />,
+    <Deliverables c={c} t={t} />,
+  ];
+  return (
+    <>
+      {SECTIONS.map((title, i) => (
+        <section key={title} className="rep-sec" id={full ? undefined : secId(i)}>
+          <h2 data-n={`${i + 1}.`}>{t(title)}</h2>{bodies[i]}
+        </section>
+      ))}
+    </>
+  );
+}
+
+/** Table of contents: one link per section, the one in view marked. */
+function Toc({ t }) {
+  const [on, setOn] = useState(0);
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return undefined;
+    const els = SECTIONS.map((_, i) => document.getElementById(secId(i)))
+      .filter(Boolean);
+    const io = new IntersectionObserver((entries) => {
+      const seen = entries.filter((e) => e.isIntersecting)
+        .map((e) => els.indexOf(e.target));
+      if (seen.length) setOn(Math.min(...seen));
+    }, { rootMargin: "0px 0px -70% 0px" });
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  const go = (i) => {
+    setOn(i);
+    const el = document.getElementById(secId(i));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  return (
+    <nav className="rep-toc">
+      <div className="rep-toc-h">{t("Contents")}</div>
+      {SECTIONS.map((s, i) => (
+        <button key={s} type="button" className={"rep-toc-i" + (on === i ? " on" : "")}
+          onClick={() => go(i)}>{i + 1}. {t(s)}</button>
+      ))}
+    </nav>
   );
 }
 
@@ -314,8 +469,20 @@ export function ReportView({ openSpec }) {
           </button>
         </div>
       </div>
-      <div className="problems rep-page">
-        <ReportBody c={c} openSpec={openSpec} />
+      <div className="rep-layout">
+        <Toc t={t} />
+        <div className="problems rep-page">
+          <header className="rep-head">
+            <h1>{REPO ? `${REPO}: ` : ""}{t("Report")}</h1>
+            <div className="rep-meta">
+              {[["Date", c.method.at], ["Branch", c.method.branch],
+                ["Engine", c.method.engine], ["Audit", c.audit && c.audit.band]]
+                .filter(([, v]) => v).map(([k, v], i) => (
+                  <span key={k}>{i ? " | " : ""}<b>{t(k)}:</b> {v}</span>))}
+            </div>
+          </header>
+          <ReportBody c={c} openSpec={openSpec} />
+        </div>
       </div>
       {printing && createPortal(
         <div className="bug-report rep-print">

@@ -1347,13 +1347,13 @@ satisfies: [ARCH-VIEWER-007]
 > not open the map.
 
 Every bullet below is binding.
-- The viewer's Workspace rail lists Report last, and selecting it opens one page in six
+- The viewer's Workspace rail lists Report last, and selecting it opens one page in seven
   sections, in this order: Summary, How it was checked, Results in numbers, Problem types,
-  Top 10 questions and Recommendations.
+  Top 10 questions, Recommendations and Deliverables.
 - Summary: one paragraph built from the counts below, naming the health score, the
   confirmed share, and the largest open count of bugs, High questions and missing tags.
 - How it was checked: the engine version, the branch and the time the map was written,
-  the number of requirements and member files read, and the checks behind the numbers
+  each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers
   (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.
 - Results in numbers: open bugs in total and per priority, and the number fixed; open
   questions by High, Medium and Low as the Questions page counts them; and, over
@@ -1371,6 +1371,8 @@ Every bullet below is binding.
   confirmed with no code, drift, High questions, missing tests, unproven cases, open P0
   and P1 bugs, Medium questions), each naming the count and the command or edit that
   closes it. With nothing open it says so.
+- Deliverables: the files the report and the audit leave behind, each with its path in the
+  repository and what it holds.
 - Every listed requirement opens its document.
 - `Export PDF` prints the page through the browser's print dialog, every list out in full.
 - A count the map does not carry is shown as not measured, not as zero, and adds no
@@ -1441,6 +1443,13 @@ Every bullet below is binding.
   duplicates, the confirmed requirements with no clause and each design rule's hits.
 - Each list of requirements sits behind a chip that opens it; printed, every list is open.
 - `Export Markdown` downloads the same numbers and lists as a Markdown file.
+- The page opens with a title and a line naming the date, branch, engine and audit band, each
+  only when the map carries it; a contents list beside it names the seven sections, numbered,
+  and marks the one in view.
+- Summary shows the key numbers as tiles and the main conclusions as bullets, each with chips
+  to the requirements behind it. Results in numbers is a table of indicator and value, where
+  the open questions per priority and the requirements with no tested-by per tier each open
+  from a chip.
 - Recommendations add, when non-zero: audit findings of a bug or missing code, tier A
   suggestions, false-coverage findings, duplicates, empty confirmed requirements and design
   rule hits.
@@ -1467,5 +1476,21 @@ CASE-3 — suggestions are listed by tier with their test
 CASE-4 — the Markdown export carries the same numbers
   Given  the Report of CASE-2
   When   its Markdown is produced
-  Then   it holds the six sections, the open bug count and every problem row
+  Then   it holds the seven sections, the open bug count and every problem row
+
+CASE-5 — a contents list names the seven sections
+  Given  any registry
+  When   the Report is rendered
+  Then   the seven sections come in order, and the contents list holds one entry for each
+
+CASE-6 — each question priority opens its requirements
+  Given  one High, one Medium and one Low question, each on its own requirement
+  When   the Report is computed
+  Then   each priority lists one requirement behind its chip
+
+CASE-7 — a build stamp the map lacks is left out
+  Given  a map with no `generated_at`
+  When   the Report and its Markdown are produced
+  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured
+         for it
 
