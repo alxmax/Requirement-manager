@@ -29,8 +29,8 @@ rules, status model, action steps and gate policy for both assistant variants.
 ## Start and choose an action
 
 Use the user's requested action directly: setup, draft, sync, confirm,
-update-engine or triage (hyphens/spaces and case are interchangeable).
-When the request gives no action or goal, offer those six choices.
+update-engine, triage or check (hyphens/spaces and case are interchangeable).
+When the request gives no action or goal, offer those seven choices.
 The shared workflow explains each action. Prefer `init --minimal` for first use;
 ordinary `init` also seeds planning, release, MCP and site files.
 
@@ -77,6 +77,8 @@ The following region is generated from the command registry. Do not maintain it 
 - [Assistant review steps](references/assistant-steps.md): before relaying clarify/risk questions.
 - [Adding a known bug](references/bugs.md): when a bug is reported or an audit finds one.
 - [Intent triage](references/triage.md): before classifying an unconfirmed auto-generated corpus.
+- [Check an existing repository](references/check-existing.md): the `check` action, when code
+  that already has its requirements and tags is to be checked, one folder or several.
 - [Prose buckets](references/prose-buckets.md): before drafting from documentation.
 - [CI and hooks](references/ci.md): wire the gate locally and in CI.
 - [Audit session](references/audit.md): when auditing a traced repository with an assistant.

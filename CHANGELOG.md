@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+**The skill takes "check these folders against those requirements" as one request.**
+
+- A seventh action, `check`, in the `requirement-manager` skill (`references/check-existing.md`): read the code folder, the requirements and the output folder from the request, refuse an output folder inside the code, write the folder's `_config.json` only when absent (otherwise show the change and ask), run `sync` and `gate --risk` with today's flags, print the absolute `_map.html` path, and end with the person's own steps. No engine change.
+- Questions relayed without a question tool (Copilot and most other assistants) come as `a)` to `d)` with the recommended one marked `(default)`; the default is never applied without the person's answer.
+
 **Requirements kept as CSV rows or a JSON list (ADR-0088).**
 
 - `REQUIREMENT_SOURCES` takes `format: csv` and `format: json` with a `fields` map (`id` required; `title`, `contract`, `cases`, `status`, `depends_on`, `satisfies`). A CSV loses its byte-order mark and takes a `delimiter`; a JSON source is a list or one under `items`. A row with no id is a problem; the rest are read. REQ-CUSTOMTRACE-1138
