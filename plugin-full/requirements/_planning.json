@@ -25,7 +25,7 @@
       "title": "MCP server: expose reqmap as a tool",
       "lane": "Feature",
       "start": "2026-09-16",
-      "end": "2026-09-23",
+      "end": "2026-11-14",
       "req": "ARCH-MCP-073",
       "progress": 100
     },
@@ -33,55 +33,55 @@
       "title": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
       "lane": "Feature",
       "start": "2026-09-28",
-      "end": "2026-10-30",
+      "end": "2026-12-31",
       "req": "SYS-SSOT-001",
       "progress": 0
     },
     {
       "title": "Words match the engine",
       "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-20",
+      "start": "2026-11-27",
+      "end": "2026-11-27",
       "req": "ARCH-MCP-073",
       "roadmap": "The words about `sync` match what it does. Done when: `docs/commands.md:62` and `mcp.py:127` say an edited confirmed contract is demoted to draft (they say `sync` refuses), and `app/scripts/sync-data.mjs:4` points to `sync`, not to `reqmap.py export`, which no longer exists"
     },
     {
       "title": "Release waits for the smoke test",
       "lane": "Feature",
-      "start": "2026-10-21",
-      "end": "2026-10-22",
+      "start": "2026-12-01",
+      "end": "2026-12-02",
       "req": "ARCH-SELFGATE-039",
       "roadmap": "A release waits for the published-action smoke test. Done when: `release` does not go ahead while `dogfood.yml` is red"
     },
     {
       "title": "The plan keeps only what is open",
       "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
+      "start": "2026-12-02",
+      "end": "2026-12-02",
       "req": "ARCH-RELEASE-072",
       "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays"
     },
     {
       "title": "Read the clause-without-case questions, family by family",
       "lane": "Feature",
-      "start": "2026-10-20",
-      "end": "2026-10-23",
+      "start": "2026-12-02",
+      "end": "2026-12-04",
       "req": "ARCH-CLARIFY-062",
       "roadmap": "The `clause-without-case` questions are read family by family, as the guesses they are (ADR-0075: 7 of 20 real). Done when: ARCH-VIEWER-007's nine are read, and the next four families by count too: add the cases that are really missing with their tests, and leave a clause a case already proves as it is"
     },
     {
       "title": "accept-drift does not report what it just accepted",
       "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
+      "start": "2026-11-30",
+      "end": "2026-12-01",
       "req": "ARCH-PROMOTE-011",
       "roadmap": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements"
     },
     {
       "title": "The skill's engine copy has a requirement",
       "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
+      "start": "2026-11-27",
+      "end": "2026-11-27",
       "req": "ARCH-SELFGATE-039",
       "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file"
     },
