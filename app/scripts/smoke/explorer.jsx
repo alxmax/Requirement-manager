@@ -305,29 +305,30 @@ const railHtml = renderToString(
 const navAt = (label) => railHtml.indexOf(`</svg>${label}<`);
 const mergeChecks = [
   // verifies: REQ-VIEWER-1101#CASE-1
-  ["questions: a person's question is on the page, under its own tab",
+  ["questions: a person's question is High",
     asked.person.length === 1 && asked.person[0].id === "Q-ASKED-001"
-      && pageHtml("person").includes("stale tested-by range")
-      && !pageHtml("person").includes("src/x.py:6")],
+      && pageHtml("high").includes("stale tested-by range")
+      && !pageHtml("high").includes("src/x.py:6")],
   // verifies: REQ-VIEWER-1101#CASE-1
-  ["questions: an Observed bullet is listed as code, never as a person's",
+  ["questions: an Observed bullet is Medium, never a person's",
     asked.code.length === 1 && asked.code[0].id === "Q-SEEN-003"
       && !asked.person.some((r) => r.id === "Q-SEEN-003")
-      && pageHtml("code").includes("src/x.py:6")
-      && !pageHtml("code").includes("stale tested-by range")],
+      && pageHtml("medium").includes("src/x.py:6")
+      && !pageHtml("medium").includes("stale tested-by range")],
   // verifies: REQ-VIEWER-1101#CASE-2
   ["questions: the placeholder verify bullet is still not a question",
     !Object.values(asked).flat().some((r) => r.id === "Q-QUIET-002")],
   // verifies: REQ-VIEWER-1101#CASE-3
-  ["questions: clarify questions are listed by basis, Optional on its tab",
+  ["questions: clarify questions are listed by priority, Low on its tab",
     asked.clarify.length === 1
       && asked.clarify[0].questions.map((q) => q.basis).join()
         === "structure,count,wording"
-      && pageHtml("optional").includes("the vague-term question")
-      && pageHtml("optional").includes("basis-wording")
-      && !pageHtml("optional").includes("the no-cases question")],
+      && pageHtml("low").includes("the vague-term question")
+      && pageHtml("low").includes("basis-wording")
+      && pageHtml("low").includes(">low</span>")
+      && !pageHtml("low").includes("the no-cases question")],
   // verifies: REQ-VIEWER-1101#CASE-4
-  ["questions: the rail counts the All tab, which leaves Optional out",
+  ["questions: the rail counts High and Medium, leaving Low out",
     questionCount(asked) === 4 && railHtml.includes(">4<")],
   // verifies: REQ-VIEWER-1101#CASE-5
   ["questions: Problems has no Questions tab and lists no question row",
@@ -337,16 +338,17 @@ const mergeChecks = [
   ["questions: the page sits in the rail below Commands",
     navAt("Questions") > navAt("Commands") && navAt("Commands") > 0],
   // verifies: REQ-VIEWER-1101#CASE-7
-  ["questions: All leaves Optional out, and a tab names each kind",
+  ["questions: All holds every question, and the bar names the priorities",
     firstOpen.includes("the no-cases question")
       && firstOpen.includes("basis-structure")
+      && firstOpen.includes(">high</span>")
       && firstOpen.includes("the clause-without-case question")
       && firstOpen.includes("stale tested-by range")
-      && !firstOpen.includes("the vague-term question")
-      && ["Must fix", "Asked by a person", "Observed in code",
-        "Clause without case", "Optional"].every(
+      && firstOpen.includes("the vague-term question")
+      && ["All", "High", "Medium", "Low"].every(
         (l) => firstOpen.includes(`>${l}<span`))
-      && firstOpen.includes("1 must fix — a section is missing")],
+      && !firstOpen.includes(">Optional<span")
+      && firstOpen.includes("2 high priority open")],
   // verifies: REQ-VIEWER-1101#CASE-2
   ["questions: a deprecated requirement asks nothing",
     !Object.values(asked).flat().some((r) => r.id === "Q-OLD-005")

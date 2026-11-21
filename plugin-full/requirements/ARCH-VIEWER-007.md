@@ -26,8 +26,9 @@ Every bullet below is binding.
 - Each row of the viewer's registry tally requests the slice it counts and brings the outline forward. [[REQ-VIEWER-1082]]
 - The viewer draws a lone release from its first commit to its last, patch releases of one minor version sharing a block per ISO week labelled vX.Y.x, releases that start on the same day sharing one block labelled from the lowest version to the highest, at least as wide as its version, on a second row only where those boxes would cover each other, and selecting a block opens that release with its headline and its CHANGELOG entry. [[REQ-HISTORY-1081]] [[REQ-HISTORYWEEK-1098]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
-- The viewer gives open questions a page of their own, grouped by whether the code, a person or `clarify` raised them, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
+- The viewer gives open questions a page of their own, each marked High, Medium or Low priority, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
 - Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]
+- A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
@@ -1216,31 +1217,31 @@ satisfies: [ARCH-VIEWER-007]
 Every bullet below is binding.
 - The viewer's Workspace rail lists Questions below Commands, and selecting it opens a page
   of every open question.
-- The page has one tab per kind of question, in the Problems tab bar's form, each with
-  its count: All; `Must fix`, present only while a `structure` question exists; Asked by
-  a person (a Verify-intent bullet not starting `Observed`); Observed in code (one
-  starting `Observed`); one tab per `clarify` rule resting on a `count`, such as Clause
-  without case and Over-scoped; and Optional, every `wording` question.
-- All lists every question except the Optional ones, and opens first.
-- Within a requirement, `clarify` questions are listed by basis, `structure` then
-  `count` then `wording`, each with its rule, location, quoted clause and suggestion.
-- Each `clarify` question is marked by its basis: `structure` in red labelled `must fix`,
-  `count` in amber labelled `to check`, and `wording` in grey labelled `optional`.
-- The Optional tab filters by rule. The tab bar states at its right whether a section is
-  missing anywhere.
+- Every question has one priority. High: a `clarify` question resting on `structure`, and
+  a Verify-intent bullet a person wrote (not starting `Observed`). Medium: a `clarify`
+  question resting on a `count`, and a bullet starting `Observed`. Low: a `clarify`
+  question resting on `wording`.
+- The page has four tabs, in the Problems tab bar's form, each with its count: All, every
+  question, which opens first; High; Medium; and Low.
+- Within a requirement, `clarify` questions are listed by priority, High then Medium then
+  Low, each with its rule, location, quoted clause and suggestion.
+- Each `clarify` question is marked by its priority: High in red, Medium in amber and Low
+  in grey, each labelled with its priority's name.
+- The Low tab filters by rule. The tab bar states at its right how many High questions are
+  open, or that none is.
 - The authored placeholder (a bullet starting `None`) is not a question.
 - A deprecated requirement contributes no question from any source.
-- The rail count for Questions is the All tab's count, shown like every other entry's
-  count.
+- The rail count for Questions is the count of High and Medium questions, shown like every
+  other entry's count.
 - The Problems inbox has no Questions tab and lists no question row.
 
 ## Cases
-CASE-1 — a person's question and an observed one land on their own tabs
+CASE-1 — a person's question is High, an observed one Medium
   Given  a requirement whose Verify intent holds one question a person wrote, and another
          whose Verify intent holds a bullet starting `Observed at`
   When   the Questions page is computed and its tabs are rendered
-  Then   Asked by a person lists only the first, with the question's text; Observed in
-         code lists only the second
+  Then   High lists only the first, with the question's text; Medium lists only the
+         second
 
 CASE-2 — a placeholder and a deprecated requirement ask nothing
   Given  a requirement whose Verify intent holds only the authored placeholder, and a
@@ -1248,14 +1249,14 @@ CASE-2 — a placeholder and a deprecated requirement ask nothing
   When   the Questions page is computed
   Then   neither appears on any tab, and the deprecated one adds nothing to the rail's count
 
-CASE-3 — clarify questions are listed by basis, Optional on its own tab
+CASE-3 — clarify questions are listed by priority, Low on its own tab
   Given  a requirement whose map node carries a `count`, a `wording` and a `structure`
          question
-  When   the page's questions are computed and the Optional tab is rendered
-  Then   they are kept in the order structure, count, wording, and the Optional tab
-         shows the `wording` one marked grey and not the `structure` one
+  When   the page's questions are computed and the Low tab is rendered
+  Then   they are kept in the order structure, count, wording, and the Low tab shows the
+         `wording` one marked grey and labelled `low`, and not the `structure` one
 
-CASE-4 — the rail counts the All tab, which leaves Optional out
+CASE-4 — the rail counts High and Medium, leaving Low out
   Given  one person's question, one observed question, and one `structure`, one
          `count` and one `wording` `clarify` question
   When   the rail is rendered
@@ -1271,13 +1272,14 @@ CASE-6 — the page sits below Commands in the rail
   When   its Workspace entries are read in order
   Then   Questions comes after Commands
 
-CASE-7 — All leaves Optional out, and a tab names each kind
+CASE-7 — All holds every question, and the bar names the four priorities
   Given  questions of every origin, with a `structure`, a `count` and a `wording`
          `clarify` question
   When   the page first opens
-  Then   it is on All, which shows the `structure` question marked red and not the
-         `wording` one; the bar offers Must fix, Asked by a person, Observed in code,
-         Clause without case and Optional, and says a section is missing
+  Then   it is on All, which shows the `structure` question marked red and labelled
+         `high` and the `wording` one labelled `low`; the bar offers High, Medium and
+         Low, and says two High questions are open, the person's and the
+         `structure` one
 
 ---
 id: REQ-VIEWER-1114
@@ -1325,3 +1327,89 @@ CASE-3 — the panel opens the requirement only when asked
   When   its open button is used, and the panel's layout is read
   Then   the requirement opens, choosing a row never opens it, the buttons precede the
          questions, and the narrow layout pins the panel to the bottom of the screen
+
+---
+id: REQ-VIEWER-1139
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# One page reports what is open
+
+## Description
+> Bugs, questions and missing tags each live on their own page, so the answer to "how much
+> is left?" took four clicks and some adding up. One page counts them, lists what is behind
+> each count, and prints, so the state of a repository can be handed to someone who does
+> not open the map.
+
+Every bullet below is binding.
+- The viewer's Workspace rail lists Report last, and selecting it opens one page in six
+  sections, in this order: Summary, How it was checked, Results in numbers, Problem types,
+  Top 10 questions and Recommendations.
+- Summary: one paragraph built from the counts below, naming the health score, the
+  confirmed share, and the largest open count of bugs, High questions and missing tags.
+- How it was checked: the engine version, the branch and the time the map was written,
+  the number of requirements and member files read, and the checks behind the numbers
+  (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.
+- Results in numbers: open bugs in total and per priority, and the number fixed; open
+  questions by High, Medium and Low as the Questions page counts them; and, over
+  requirements that are neither deprecated, `need` nor `aggregate` (and not
+  `test_exempt` for tests), those with no `implements:` member, split into confirmed and
+  draft, those with code but no `tested-by:` member, and the cases no `# verifies:` tag
+  proves, summed from the engine's `clauses` and `covered`, never estimated.
+- Problem types: every kind found, each with its count and the requirements behind it:
+  missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's
+  dangling tags (RM001 lines) and drift, as the map's health record gives them.
+- Top 10 questions: the ten most important open questions, High before Medium before
+  Low, then a confirmed requirement before a draft, then the requirement more others
+  depend on first, then by id; each with its requirement, rule or origin and text.
+- Recommendations: one per non-zero problem type, most severe first (dangling tags,
+  confirmed with no code, drift, High questions, missing tests, unproven cases, open P0
+  and P1 bugs, Medium questions), each naming the count and the command or edit that
+  closes it. With nothing open it says so.
+- Every listed requirement opens its document.
+- `Export PDF` prints the page through the browser's print dialog, every list out in full.
+- A count the map does not carry is shown as not measured, not as zero, and adds no
+  recommendation.
+
+## Cases
+CASE-1 — the page sits last in the rail
+  Given  the rail rendered over any registry
+  When   its Workspace entries are read in order
+  Then   Report comes after Questions
+
+CASE-2 — missing tags are counted over the requirements that need them
+  Given  a confirmed requirement with no member, a draft with no member, a requirement
+         with code and no test, an `aggregate` with no member, and one with 3 cases of
+         which 1 is covered
+  When   the report is computed
+  Then   no implements is 1 confirmed and 1 draft, no tested-by is 1, and 2 cases have no
+         `# verifies:` tag; the `aggregate` is in no count
+
+CASE-3 — bugs and questions are counted as their pages count them
+  Given  two open bugs at P1 and P2, one fixed bug, and a `structure`, a `count` and a
+         `wording` `clarify` question
+  When   the report is rendered
+  Then   it shows 2 open bugs, P1 1 and P2 1, 1 fixed, and High 1, Medium 1, Low 1
+
+CASE-4 — what the map does not carry is not shown as zero
+  Given  a map with no health record
+  When   the report is rendered
+  Then   dangling tags and drift read `not measured`
+
+CASE-5 — the top questions come in priority order and stop at ten
+  Given  twelve open questions: a High on a draft, a High on a confirmed requirement two
+         others depend on, a High on a confirmed requirement nothing depends on, and nine
+         Low
+  When   the report is computed
+  Then   it lists ten, starting with the confirmed High two depend on, then the other
+         confirmed High, then the draft's
+
+CASE-6 — a recommendation per problem, most severe first
+  Given  one confirmed requirement with no code and one requirement with no test
+  When   the report is computed
+  Then   it recommends two things, the missing code first, each with its count; with
+         nothing open it gives the single line that nothing is open

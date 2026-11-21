@@ -162,8 +162,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "801b147677f2",
-      "reason": null
+      "hash": "9ae5ef1c3336",
+      "reason": "Questions get High/Medium/Low priority and the Report page is added, at the maintainer's request"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -638,8 +638,8 @@
       "reason": null
     },
     "REQ-VIEWER-1101": {
-      "hash": "9e5be4fbe62c",
-      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+      "hash": "422b0979e9c5",
+      "reason": "Questions get High/Medium/Low priority and the Report page is added, at the maintainer's request"
     },
     "REQ-VIEWER-1114": {
       "hash": "d2e43f99cec6",

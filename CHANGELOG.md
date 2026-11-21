@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+**Questions have a priority, and one page reports what is open.**
+
+- A question is High, Medium or Low. High: a `clarify` question resting on `structure`, and a Verify-intent question a person wrote. Medium: one resting on a `count`, and an `Observed` bullet. Low: one resting on `wording`. The Questions page has four tabs, All (every question, first), High, Medium and Low, and each `clarify` question is labelled with its priority; Low filters by rule. The rail still counts High and Medium. REQ-VIEWER-1101
+- A Report page, last in the rail, in six sections: Summary, How it was checked, Results in numbers (bugs open, by priority and fixed; questions by priority; requirements with no `implements:`, confirmed and draft; code with no `tested-by:`; cases no `# verifies:` proves; dangling tags; drift), Problem types with the requirements behind each, the Top 10 questions (High first, then confirmed, then the most depended on) and Recommendations, one per open problem, most severe first, each with the command or edit that closes it. A count the map does not carry reads `not measured`. `Export PDF` prints it with every list in full. REQ-VIEWER-1139, a draft until it is read
+- Viewer-only change; the engine does not change.
+
 ## plugin `v8.25.0` — 2026-11-21
 
 **Release v8.25.0.**
