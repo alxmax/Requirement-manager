@@ -24,7 +24,7 @@ export const DE = {
   "low": "niedrig",
   "minor": "geringfügig",
   "Priorities": "Prioritäten",
-  "estimated, not yet set by a person": "geschätzt, noch nicht von einer Person festgelegt",
+  "estimated, not yet confirmed by a user": "geschätzt, noch nicht von einem Benutzer bestätigt",
   "What is broken": "Was ist kaputt",
   "Module": "Modul",
   "Priority": "Priorität",

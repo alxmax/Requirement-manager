@@ -173,7 +173,7 @@ const bugChecks = [
         + { P0: "critical", P1: "high", P2: "medium", P3: "low", P4: "minor" }[p])))
         .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1]))
       && english.includes('class="prob-sev sev-ERROR">P0</span>')
-      && english.includes("estimated, not yet set by a person")
+      && english.includes("estimated, not yet confirmed by a user")
       && romanian.includes("Priorități") && romanian.includes("foarte grav")],
   // verifies: REQ-BUGS-1123#CASE-1
   ["bugs: the report holds every field, highest priority first",

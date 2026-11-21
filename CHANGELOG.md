@@ -6,7 +6,7 @@
 
 - `DE` joins `EN` and `RO` in the language switch, translating the viewer's own text (241 strings) and the command descriptions; dates follow the language. `P4`'s name, `minor`, was missing from the Romanian table and is added to both. Requirement text and engine words (`confirmed`, `draft`, the gate's severities) stay as written. REQ-VIEWER-943
 - `MAP_LANGUAGE` accepts `de`, so a repository can open its map in German. REQ-MAPSTAMP-1125
-- The Bugs tab has a legend under the priority chips: `P0` critical, `P1` high, `P2` medium, `P3` low, `P4` minor, in the colours the rows use, and `*` for a priority an assistant estimated. REQ-BUGS-1121
+- The Bugs tab has a legend under the priority chips: `P0` critical, `P1` high, `P2` medium, `P3` low, `P4` minor, in the colours the rows use, and `*` for a priority an assistant estimated and no user has confirmed yet. REQ-BUGS-1121
 - Every bundled language must translate the same strings: a smoke check fails when one table names a string the other does not.
 
 **Six requirements are confirmed.**

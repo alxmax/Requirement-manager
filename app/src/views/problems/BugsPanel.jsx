@@ -114,7 +114,7 @@ export function PrioLegend() {
         </span>
       ))}
       <span className="bug-legend-i">
-        <b>*</b> {t("estimated, not yet set by a person")}
+        <b>*</b> {t("estimated, not yet confirmed by a user")}
       </span>
     </div>
   );

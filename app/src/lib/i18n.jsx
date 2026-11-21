@@ -73,7 +73,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "low": "mic",
   "minor": "minor",
   "Priorities": "Priorități",
-  "estimated, not yet set by a person": "estimată, nestabilită încă de o persoană",
+  "estimated, not yet confirmed by a user": "estimată, neconfirmată încă de un utilizator",
   "What is broken": "Ce nu merge",
   "Module": "Modul",
   "Priority": "Prioritate",
