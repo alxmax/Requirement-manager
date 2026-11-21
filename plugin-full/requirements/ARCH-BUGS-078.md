@@ -368,7 +368,7 @@ CASE-5 — a list of priorities, and a total
 
 ---
 id: REQ-BUGS-1121
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
