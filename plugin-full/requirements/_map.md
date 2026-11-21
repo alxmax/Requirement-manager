@@ -1227,7 +1227,6 @@ graph LR
     REQ_BUGS_1118["The gate reads the list and does not judge it<br><small>REQ-BUGS-1118</small><br>unreviewed"]
     REQ_BUGS_1119["'sync --bug' adds one row<br><small>REQ-BUGS-1119</small><br>unreviewed"]
     REQ_BUGS_1120["'ask --bugs' lists them by module<br><small>REQ-BUGS-1120</small><br>unreviewed"]
-    REQ_BUGS_1121["The Bugs tab groups by module<br><small>REQ-BUGS-1121</small><br>unreviewed"]
     REQ_BUGS_1122["The tab adds a bug to the repository<br><small>REQ-BUGS-1122</small><br>unreviewed"]
     REQ_BUGS_1123["The tab exports what it shows<br><small>REQ-BUGS-1123</small><br>unreviewed"]
     REQ_BUGS_1126["'sync --bug' writes in the file's own shape<br><small>REQ-BUGS-1126</small><br>unreviewed"]
@@ -1245,7 +1244,6 @@ graph LR
     REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
     REQ_SCAN_1136["A copied engine is not scanned<br><small>REQ-SCAN-1136</small><br>unreviewed"]
-    REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small><br>unreviewed"]
   end
   style ARCH_BUGS_078 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1116 fill:#fff3cd,stroke:#a66,color:#630
@@ -1253,7 +1251,6 @@ graph LR
   style REQ_BUGS_1118 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1119 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1120 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_BUGS_1121 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1122 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1123 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1126 fill:#fff3cd,stroke:#a66,color:#630
@@ -1272,7 +1269,6 @@ graph LR
   style REQ_MEMBERDRIFT_1134 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SCAN_1136 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1139 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
@@ -1285,7 +1281,6 @@ graph LR
 | REQ-BUGS-1118 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1119 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1120 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-BUGS-1121 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1122 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1123 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1126 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
@@ -1304,4 +1299,3 @@ graph LR
 | REQ-MEMBERDRIFT-1134 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SCAN-1136 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1139 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
