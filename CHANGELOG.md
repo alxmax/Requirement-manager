@@ -2,8 +2,9 @@
 
 ## [Unreleased]
 
-**Four C/C++ requirements are confirmed.**
+**Six requirements are confirmed.**
 
+- REQ-VIEWER-1139 (the Report page) and REQ-BUGS-1121 (the Bugs tab, with Expand/Collapse all) were read and confirmed.
 - REQ-MEMBERDRIFT-1140, REQ-CANDIDATES-1141, REQ-EXTRACT-1142 and REQ-RULES-1143 were read and confirmed. REQ-RULES-1143 gains a `@unit` test of its claim grammar and definition reader beside the `@integration` one, as a confirmed code-level requirement needs.
 
 ## plugin `v8.26.0` — 2026-11-21

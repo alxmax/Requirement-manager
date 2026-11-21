@@ -2413,7 +2413,7 @@
       "id": "REQ-BUGS-1121",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The Bugs tab groups by module",
       "intent": "A list of hundreds is read by component. Module is the only grouping, and a bug's date sits under its priority so it can be read without opening the row.",
@@ -2472,12 +2472,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -25302,7 +25297,7 @@
       "id": "REQ-VIEWER-1139",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "One page reports what is open",
       "intent": "Bugs, questions and missing tags each live on their own page, so the answer to \"how much is left?\" took four clicks and some adding up. One page counts them, lists what is behind each count, and prints, so the state of a repository can be handed to someone who does not open the map.",
@@ -25356,12 +25351,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": [
@@ -31078,13 +31068,13 @@
     "score": 93,
     "total": 369,
     "scored": 347,
-    "healthy": 321,
+    "healthy": 323,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 321,
+    "confirmed": 323,
     "implemented": 336,
     "tested": 337,
-    "drafts": 26,
+    "drafts": 24,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31092,7 +31082,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 321,
+    "reviewed_total": 323,
     "unhealthy": [
       {
         "id": "ARCH-BUGS-078",
@@ -31140,13 +31130,6 @@
       },
       {
         "id": "REQ-BUGS-1120",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1121",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31266,13 +31249,6 @@
       },
       {
         "id": "REQ-SCAN-1136",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1139",
         "status": "draft",
         "why": [
           "not confirmed"

@@ -1330,7 +1330,7 @@ CASE-3 — the panel opens the requirement only when asked
 
 ---
 id: REQ-VIEWER-1139
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
