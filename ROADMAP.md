@@ -35,6 +35,13 @@ Cadence: one release a week, not one per merge.
 - [ ] `sync --release --apply` ticks the `ROADMAP.md` items whose requirement id matches a bar on the cut milestone | req: ARCH-RELEASE-072
 - [ ] `gate --strict` fails a stale plan (`REQ-PLANSTALE-1013`); bare `gate` stays warn-only | req: ARCH-RELEASE-072
 
+### Checking an existing repository with Copilot
+
+- [ ] The Copilot hands-on matrix is run and recorded. Done when: the skill-discovery and MCP-start-directory rows of `docs/integrations.md` carry a dated PASS or FAIL on Windows and Linux, and a FAIL names the change it calls for | req: ARCH-MCP-073
+- [ ] CSV and JSON requirement sources with a field map. Done when: `format: csv|json` with `fields` reads N rows into N requirements and a problem per bad row, in a lazy module, under its own ADR, with the core unchanged | req: ARCH-CUSTOMTRACE-077
+- [ ] `init` writes `.github/copilot-instructions.md` when absent. Done when: the matrix passes, a second `init` leaves an existing file byte-identical, and a record supersedes ADR-0084's print-only line | req: ARCH-INIT-012
+- [ ] The skill takes "check folders X against requirements in Z into W" as one request. Done when: the matrix passes; the skill writes the folder's `_config.json` only when absent, refuses an output folder inside the scanned code, prints the absolute `_map.html` path and lists the person's steps; no engine file changes | req: ARCH-INIT-012
+
 ## Later
 
 ### Engine surface
@@ -65,6 +72,15 @@ Cadence: one release a week, not one per merge.
 
 - [ ] Template repo `hello-reqmap`: "Use this template" produces a gate that passes | req: ARCH-INIT-012 | unpark: an evaluator reports that `init` left them stranded
 - [x] An Apache-2.0 / MIT licence instead of BSL 1.1 | done: Apache-2.0, ADR-0069, 2026-10-13
+
+### Checking an existing repository
+
+- [ ] Several code folders in one check (`--code` repeated, or a list in `_config.json`) | req: ARCH-SCAN-002 | unpark: the common-parent plus `.reqmapignore` route fails a real run; the change must leave a single `--code` byte-identical in every lock, give two `a.py` files in different folders distinct members, and pay its core lines with an equal cut
+- [ ] YAML requirement sources | req: ARCH-CUSTOMTRACE-077 | unpark: a second independent corpus needs YAML; the reader names its supported grammar in an ADR, reports a `file:line` problem per unsupported construct, and takes a block scalar's title from its folded text, not its first raw line
+- [ ] Clarify questions with answer options saved and read by `sync` | req: ARCH-CLARIFY-062 | unpark: one real audit run with sources has happened, an answer rate is measured over five audits, a record supersedes ADR-0058's choice, and each saved answer carries its rule and its clause's hash so a changed clause reopens it. Until then the skill offers the options and the person edits the requirement
+- [ ] A doctor that reports, per assistant, which of skill, MCP config and instructions is present, with the fix | req: ARCH-INIT-012 | unpark: the Copilot matrix passes and a person reports a setup they could not diagnose from the guide
+- [ ] Audit packets for parallel reviewers (`--audit-plan --batches N`) and an ingest check | req: ARCH-AUDITRUN-076 | unpark: a recorded session of 30 or more requirements shows the hand step costs over 5 minutes each; ingest only validates and never writes `_audit.json`, a packet carries its contract hash and capped code, run 2 is a separate packet in a seeded order, and ADR-0076's k/n with Wilson intervals stays as it is
+- [ ] A Copilot agent file for audit runs (`.github/agents/*.agent.md`) | req: ARCH-AUDITRUN-076 | unpark: the Copilot matrix passes and the file is generated from, or links to, the skill's `references/audit.md` instead of copying its prompt
 
 ### Viewer
 

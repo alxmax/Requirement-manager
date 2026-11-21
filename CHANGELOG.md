@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+**Requirements kept as CSV rows or a JSON list (ADR-0088).**
+
+- `REQUIREMENT_SOURCES` takes `format: csv` and `format: json` with a `fields` map (`id` required; `title`, `contract`, `cases`, `status`, `depends_on`, `satisfies`). A CSV loses its byte-order mark and takes a `delimiter`; a JSON source is a list or one under `items`. A row with no id is a problem; the rest are read. REQ-CUSTOMTRACE-1138
+- Rows marked structural (`fields.structural: {field, values}`) are layer `aggregate`, exempt from code and tests; more than half of a file marked so is reported. YAML stays parked.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.2`. The new `sourcerows.py` is lazy; the core does not change.
+
 **A requirement source can read from the repository (ADR-0087).**
 
 - A `REQUIREMENT_SOURCES` entry takes `"root": "repo"`: its glob is read from the repository holding the code root (the nearest folder with `.git`), so checking one folder with `--code` still finds requirements kept in `specs/`. Without `root` nothing changes. A glob that matches only from the repository is reported with that hint, never read silently. REQ-CUSTOMTRACE-1137

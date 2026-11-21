@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.1",
+  "engine_version": "2026-11-21.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -5898,7 +5898,8 @@
         "`TRACE_TAGS` adds tag forms, each a pattern whose first group is the id, and a role. [[REQ-CUSTOMTRACE-1110]]",
         "`TEST_FILE_PATTERNS` adds globs that make a file a test file. [[REQ-CUSTOMTRACE-1112]]",
         "`REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, in folders of the repository's choosing. [[REQ-CUSTOMTRACE-1113]]",
-        "A source can read its glob from the repository instead of the code folder, so one folder is checked against requirements kept elsewhere. [[REQ-CUSTOMTRACE-1137]]"
+        "A source can read its glob from the repository instead of the code folder, so one folder is checked against requirements kept elsewhere. [[REQ-CUSTOMTRACE-1137]]",
+        "Requirements kept as CSV rows or a JSON list are read through a field map, and rows marked structural are exempt from code and tests. [[REQ-CUSTOMTRACE-1138]]"
       ],
       "verify": [],
       "notes": [],
@@ -5919,12 +5920,13 @@
         "REQ-CUSTOMTRACE-1110",
         "REQ-CUSTOMTRACE-1112",
         "REQ-CUSTOMTRACE-1113",
-        "REQ-CUSTOMTRACE-1137"
+        "REQ-CUSTOMTRACE-1137",
+        "REQ-CUSTOMTRACE-1138"
       ],
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_customtrace.py:236"
+          "loc": "plugin-full/scripts/test_reqmap_customtrace.py:329"
         },
         {
           "role": "implements",
@@ -5937,6 +5939,10 @@
         {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:9"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/sourcerows.py:4"
         }
       ],
       "test_exempt": null,
@@ -5986,11 +5992,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:100"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:106"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:116"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:122"
         },
         {
           "role": "implements",
@@ -6052,7 +6058,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:121"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:127"
         },
         {
           "role": "implements",
@@ -6112,19 +6118,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:132"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:138"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:146"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:152"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:166"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:218"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:227"
         },
         {
           "role": "implements",
@@ -6178,7 +6184,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a glob reads from the code folder as before\n  Given  a source with no `root`, and the same source written with `../` from a subfolder\n  When   each is loaded from its code root\n  Then   both read the same requirements\n\nCASE-2 — root: repo reads from the repository\n  Given  a repository with `.git` and a source with `root: repo`\n  When   it is loaded with a subfolder as the code root\n  Then   it reads the requirements under the repository\n\nCASE-3 — no repository above is named\n  Given  a source with `root: repo` and no `.git` above the code root\n  When   it is loaded\n  Then   nothing is read and the problem says no repository holds the code folder\n\nCASE-4 — an unknown root is refused\n  Given  a source with `root: up`\n  When   the config is validated\n  Then   the source is ignored and the problem lists code and repo\n\nCASE-5 — a glob the repository would match is pointed at root: repo\n  Given  a source with no `root` whose glob matches only from the repository\n  When   it is loaded with a subfolder as the code root\n  Then   nothing is read and the problem says to set root: repo",
+      "accept": "CASE-1 — a glob reads from the code folder as before\n  Given  a source with no `root`, and the same source written with `../` from a subfolder\n  When   each is loaded from its code root\n  Then   both read the same requirements\n\nCASE-2 — root: repo reads from the repository\n  Given  a repository with `.git` and a source with `root: repo`\n  When   it is loaded with a subfolder as the code root\n  Then   it reads the requirements under the repository\n\nCASE-3 — no repository above is named\n  Given  a source with `root: repo` and no `.git` above the code root\n  When   it is loaded\n  Then   nothing is read and the problem says no repository holds the code folder\n\nCASE-4 — an unknown root is refused\n  Given  a source with `root: up`\n  When   the config is validated\n  Then   the source is ignored and the problem lists code and repo\n\nCASE-5 — a glob the repository would match is pointed at root: repo\n  Given  a source with no `root` whose glob matches only from the repository\n  When   it is loaded with a subfolder as the code root\n  Then   nothing is read and the problem says to set root: repo\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -6195,15 +6201,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:76"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:80"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:202"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:211"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:224"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:233"
         }
       ],
       "test_exempt": null,
@@ -6226,6 +6232,85 @@
           "quote": "",
           "question": "4 of 5 Given lines open on the same word (\"source\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-CUSTOMTRACE-1138",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "Requirements kept as rows",
+      "intent": "A corpus exported from a requirements tool comes as rows: a CSV file or a JSON list, with its own column names, and with headings and information entries among the requirements. Reading one took a few hundred lines of glue. A field map does it. See [ADR-0088](../../docs/adr/0088-requirements-kept-as-rows.md).",
+      "contract": [
+        "A source with `format: csv` or `json` reads one requirement per row through `fields`, which maps `id` (required) and optionally `title`, `contract`, `cases`, `status`, `depends_on` and `satisfies` to the source's columns or keys; any other key is a config problem.",
+        "A contract text is one clause per sentence, a list one clause per item; cases are one case per item. A title missing from the row is the contract's first sentence.",
+        "`depends_on` and `satisfies` split on `list_separator` (default `,`), or take a JSON list.",
+        "A status of `confirmed`, `draft` or `deprecated` in the row wins over the source's status.",
+        "A CSV file is read without its byte-order mark, with `delimiter` (default `,`); a JSON source is a list of objects, or one under the key `items` names.",
+        "A row with no id is a problem naming the file and the row, and the other rows are read.",
+        "A row whose `fields.structural.field` holds one of its `values` is a requirement of layer `aggregate`, exempt from code and tests; when more than half the rows of a file are, that is a problem naming the count."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — each CSV row is a requirement\n  Given  a CSV file with a byte-order mark, `;` between columns and its own column names\n  When   it is read through a field map\n  Then   each row with an id is a requirement with its title, clauses, cases, dependencies\n         and status\n\nCASE-2 — a row with no id is a problem\n  Given  the same file with one row whose id cell is empty\n  When   it is read\n  Then   that row is a problem naming its number, and the others are read\n\nCASE-3 — a structural row is exempt, and too many are named\n  Given  a row marked as a heading, then a file where most rows are\n  When   each is read\n  Then   the heading is layer aggregate, and the second file is a problem with its count\n\nCASE-4 — a JSON list under a key is read\n  Given  a JSON object whose `requirements` key holds a list\n  When   it is read with `items: requirements`\n  Then   each object is a requirement, a list contract is one clause per item\n\nCASE-5 — a field map without an id is refused\n  Given  field maps with no id, or with an unknown key\n  When   the config is validated\n  Then   each source is ignored with one problem\n\nCASE-6 — the gate reads a CSV corpus\n  Given  a repository whose only requirements are CSV rows, one tagged in code, one a heading\n  When   the gate runs\n  Then   neither is reported as missing code, and no tag is dangling",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CUSTOMTRACE-077"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_customtrace.py:247"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:67"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:193"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/sourcerows.py:4"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/sourcerows.py:18"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/sourcerows.py:79"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 6,
+      "covered": 6,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -26848,6 +26933,10 @@
       "ARCH-CUSTOMTRACE-077"
     ],
     [
+      "REQ-CUSTOMTRACE-1138",
+      "ARCH-CUSTOMTRACE-077"
+    ],
+    [
       "ARCH-DECOMPOSE-050",
       "SYS-AUTHOR-101"
     ],
@@ -28101,6 +28190,46 @@
       "section_date": null
     },
     {
+      "name": "The Copilot hands-on matrix is run and recorded. Done when: the skill-discovery and MCP-start-directory rows of `docs/integrations.md` carry a dated PASS or FAIL on Windows and Linux, and a FAIL names the change it calls for",
+      "horizon": "next",
+      "req": "ARCH-MCP-073",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "CSV and JSON requirement sources with a field map. Done when: `format: csv",
+      "horizon": "next",
+      "req": "ARCH-CUSTOMTRACE-077",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "`init` writes `.github/copilot-instructions.md` when absent. Done when: the matrix passes, a second `init` leaves an existing file byte-identical, and a record supersedes ADR-0084's print-only line",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "The skill takes \"check folders X against requirements in Z into W\" as one request. Done when: the matrix passes; the skill writes the folder's `_config.json` only when absent, refuses an output folder inside the scanned code, prints the absolute `_map.html` path and lists the person's steps; no engine file changes",
+      "horizon": "next",
+      "req": "ARCH-INIT-012",
+      "unpark": null,
+      "done": false,
+      "category": "Checking an existing repository with Copilot",
+      "context": "",
+      "section_date": null
+    },
+    {
       "name": "The next cut from the engine: one capability from the removable list (`gate --risk`/`--audit`, `clarify`/decompose, `ask`, lint, `sync --retire`), with an ADR, a retire and the budget lowered in the same commit. The floor with the ROADMAP, MCP and `init` kept: 9,303 lines (ADR-0048)",
       "horizon": "later",
       "req": "ARCH-SELFGATE-039",
@@ -28237,6 +28366,66 @@
       "unpark": null,
       "done": true,
       "category": "Adoption",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Several code folders in one check (`--code` repeated, or a list in `_config.json`)",
+      "horizon": "later",
+      "req": "ARCH-SCAN-002",
+      "unpark": "the common-parent plus `.reqmapignore` route fails a real run; the change must leave a single `--code` byte-identical in every lock, give two `a.py` files in different folders distinct members, and pay its core lines with an equal cut",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "YAML requirement sources",
+      "horizon": "later",
+      "req": "ARCH-CUSTOMTRACE-077",
+      "unpark": "a second independent corpus needs YAML; the reader names its supported grammar in an ADR, reports a `file:line` problem per unsupported construct, and takes a block scalar's title from its folded text, not its first raw line",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Clarify questions with answer options saved and read by `sync`",
+      "horizon": "later",
+      "req": "ARCH-CLARIFY-062",
+      "unpark": "one real audit run with sources has happened, an answer rate is measured over five audits, a record supersedes ADR-0058's choice, and each saved answer carries its rule and its clause's hash so a changed clause reopens it. Until then the skill offers the options and the person edits the requirement",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A doctor that reports, per assistant, which of skill, MCP config and instructions is present, with the fix",
+      "horizon": "later",
+      "req": "ARCH-INIT-012",
+      "unpark": "the Copilot matrix passes and a person reports a setup they could not diagnose from the guide",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "Audit packets for parallel reviewers (`--audit-plan --batches N`) and an ingest check",
+      "horizon": "later",
+      "req": "ARCH-AUDITRUN-076",
+      "unpark": "a recorded session of 30 or more requirements shows the hand step costs over 5 minutes each; ingest only validates and never writes `_audit.json`, a packet carries its contract hash and capped code, run 2 is a separate packet in a seeded order, and ADR-0076's k/n with Wilson intervals stays as it is",
+      "done": false,
+      "category": "Checking an existing repository",
+      "context": "",
+      "section_date": null
+    },
+    {
+      "name": "A Copilot agent file for audit runs (`.github/agents/*.agent.md`)",
+      "horizon": "later",
+      "req": "ARCH-AUDITRUN-076",
+      "unpark": "the Copilot matrix passes and the file is generated from, or links to, the skill's `references/audit.md` instead of copying its prompt",
+      "done": false,
+      "category": "Checking an existing repository",
       "context": "",
       "section_date": null
     },
@@ -30336,8 +30525,8 @@
     }
   ],
   "design": {
-    "files": 140,
-    "clean_files": 127,
+    "files": 141,
+    "clean_files": 128,
     "score": 91,
     "candidates": {
       "encapsulation": 5,
@@ -30449,7 +30638,7 @@
         "file": "plugin-full/scripts/reqmap_engine/customtrace.py",
         "line": 52,
         "name": "validate_sources",
-        "detail": "`validate_sources` nests 5 levels deep (over 4)"
+        "detail": "`validate_sources` nests 6 levels deep (over 4)"
       },
       {
         "pillar": "abstraction",
@@ -30477,15 +30666,15 @@
   },
   "health": {
     "score": 93,
-    "total": 363,
-    "scored": 341,
+    "total": 364,
+    "scored": 342,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 330,
-    "tested": 331,
-    "drafts": 24,
+    "implemented": 331,
+    "tested": 332,
+    "drafts": 25,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30618,6 +30807,13 @@
       },
       {
         "id": "REQ-CUSTOMTRACE-1137",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-CUSTOMTRACE-1138",
         "status": "draft",
         "why": [
           "not confirmed"
