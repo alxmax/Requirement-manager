@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## plugin `v8.26.0` — 2026-11-21
+
+**Release v8.26.0.**
+
 **The Bugs tab opens or closes every module at once.**
 
 - `Expand all` sits at the right of the priority chips, under `Export PDF`, which moves to the right of the bar; once every group is open it reads `Collapse all`. Searching or picking a priority still opens the groups it narrows to. REQ-BUGS-1121

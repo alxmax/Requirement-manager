@@ -30589,17 +30589,26 @@
     },
     {
       "month": "2026-11",
-      "count": 3,
+      "count": 4,
       "first": "2026-11-14",
       "last": "2026-11-21",
       "versions": [
         "v8.24.7",
         "v8.24.8",
-        "v8.25.0"
+        "v8.25.0",
+        "v8.26.0"
       ],
-      "landmark": "v8.25.0",
-      "headline": "Release v8.25.0",
+      "landmark": "v8.26.0",
+      "headline": "Release v8.26.0",
       "entries": [
+        {
+          "version": "v8.26.0",
+          "date": "2026-11-21",
+          "headline": "Release v8.26.0",
+          "body": "**Release v8.26.0.**\n\n**The Bugs tab opens or closes every module at once.**\n\n- `Expand all` sits at the right of the priority chips, under `Export PDF`, which moves to the right of the bar; once every group is open it reads `Collapse all`. Searching or picking a priority still opens the groups it narrows to. REQ-BUGS-1121\n- Viewer-only change; the engine does not change.\n\n**C and C++ in an audit: tests, draft questions, stated values (ADR-0090).**\n\n- A C/C++ test is known by GoogleTest's names (`foo_test.cc`, `foo_unittest.cc`, `foo_tests.cpp`), a `UnitTests/` or `unit_tests/` directory, or the framework it includes: GoogleTest/GoogleMock, CppUTest, Unity, Catch2, Boost.Test, cmocka, doctest. A CamelCase `FooTest.cpp` is a test, and pairs with `Foo`, only when it includes one, because `RamTest.c` is often a production self-test. REQ-CANDIDATES-1141\n- `init`'s draft of a C/C++ file asks about the lines that look like accidents, inside each definition: a compared number other than 0, 1, 2, -1; a return value cast to `(void)`; a statement after an unguarded `return`/`break`/`continue`/`goto`. Unbalanced braces are said, not read as clean. REQ-EXTRACT-1142\n- `RM038` (`gate --full`): a clause that gives a constant a value (\"`MAX_RETRIES` is 3\", \"`TIMEOUT_MS` = 1,000\", \"`MASK` (0x10)\") is compared with that name's definitions in the requirement's own code (`#define`, `NAME = v`, brace initializer, enum member), by value. A difference names both sides and asks which is right. The bare gate does not run it. REQ-RULES-1143\n- All three requirements are drafts until they are read.\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.4`. The core rises to 6,932 logical lines (ADR-0090); 20,583 physical lines in 86 files. `csignals.py` is lazy.\n\n**C and C++ definitions key member drift (ADR-0089).**\n\n- A tag inside a top-level C/C++ definition, or in the comment block right above it, keys that definition in `_memberlock.json`, as Python's do since ADR-0085. A file several requirements share now has member drift per function or class instead of none. REQ-MEMBERDRIFT-1140, a draft until it is read\n- The reader is narrow: comments, literals and preprocessor lines are blanked; `namespace` and `extern \"C\"` are read through; a class/struct/union/enum body is one definition; an overload's key carries its parameter list; braces that do not balance keep the whole-file key. It loads only for a C/C++ member (`.c .h .cc .cpp .cxx .hh .hpp .hxx .inl`).\n- On the first `sync` after an upgrade a C/C++ key moves from the file to the definition; a key with no recorded hash is skipped, so no drift is reported for it.\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.3`. `bracedefs.py` is lazy; the span helpers move from `locks.py` to `memberspans.py`. The core rises to 6,840 logical lines (ADR-0089); 20,353 physical lines in 84 files.\n\n**Questions have a priority, and one page reports what is open.**\n\n- A question is High, Medium or Low. High: a `clarify` question resting on `structure`, and a Verify-intent question a person wrote. Medium: one resting on a `count`, and an `Observed` bullet. Low: one resting on `wording`. The Questions page has four tabs, All (every question, first), High, Medium and Low, and each `clarify` question is labelled with its priority; Low filters by rule. The rail still counts High and Medium. REQ-VIEWER-1101\n- A Report page, last in the rail, in six sections: Summary, How it was checked, Results in numbers (bugs open, by priority and fixed; questions by priority; requirements with no `implements:`, confirmed and draft; code with no `tested-by:`; cases no `# verifies:` proves; dangling tags; drift), Problem types with the requirements behind each, the Top 10 questions (High first, then confirmed, then the most depended on) and Recommendations, one per open problem, most severe first, each with the command or edit that closes it. A count the map does not carry reads `not measured`. `Export PDF` prints it with every list in full. REQ-VIEWER-1139, a draft until it is read\n- Viewer-only change; the engine does not change.",
+          "first_commit": "2026-11-21",
+          "last_commit": "2026-11-21"
+        },
         {
           "version": "v8.25.0",
           "date": "2026-11-21",
