@@ -1235,19 +1235,15 @@ graph LR
     REQ_BUGS_1128["A commit closes the bug it names<br><small>REQ-BUGS-1128</small><br>unreviewed"]
     REQ_BUGS_1129["The map shows what was fixed<br><small>REQ-BUGS-1129</small><br>unreviewed"]
     REQ_BUGS_1131["A requirement shows the open bugs that name it<br><small>REQ-BUGS-1131</small><br>unreviewed"]
-    REQ_CANDIDATES_1141["A C or C++ test is known by its name or its framework<br><small>REQ-CANDIDATES-1141</small><br>unreviewed"]
     REQ_CHECK_1133["The map is written when the gate fails<br><small>REQ-CHECK-1133</small><br>unreviewed"]
     REQ_CHECK_1135["A drift the engine cannot demote is kept<br><small>REQ-CHECK-1135</small><br>unreviewed"]
     REQ_CUSTOMTRACE_1137["A source reads from the code folder or from the repository<br><small>REQ-CUSTOMTRACE-1137</small><br>unreviewed"]
     REQ_CUSTOMTRACE_1138["Requirements kept as rows<br><small>REQ-CUSTOMTRACE-1138</small><br>unreviewed"]
-    REQ_EXTRACT_1142["A C or C++ draft asks about the lines that look like accidents<br><small>REQ-EXTRACT-1142</small><br>unreviewed"]
     REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
     REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_1140["C and C++ definitions key member drift<br><small>REQ-MEMBERDRIFT-1140</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
-    REQ_RULES_1143["A value a requirement gives a constant is checked against its code<br><small>REQ-RULES-1143</small><br>unreviewed"]
     REQ_SCAN_1136["A copied engine is not scanned<br><small>REQ-SCAN-1136</small><br>unreviewed"]
     REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small><br>unreviewed"]
   end
@@ -1265,20 +1261,16 @@ graph LR
   style REQ_BUGS_1128 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1129 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1131 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_1141 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CHECK_1133 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CHECK_1135 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CUSTOMTRACE_1137 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CUSTOMTRACE_1138 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_1142 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_INIT_1132 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MEMBERDRIFT_1134 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_1140 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_RULES_1143 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SCAN_1136 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VIEWER_1139 fill:#fff3cd,stroke:#a66,color:#630
 ```
@@ -1301,19 +1293,15 @@ graph LR
 | REQ-BUGS-1128 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1129 | draft | 10 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-BUGS-1131 | draft | 11 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-1141 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CHECK-1133 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CHECK-1135 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CUSTOMTRACE-1137 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CUSTOMTRACE-1138 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-1142 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-INIT-1132 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MEMBERDRIFT-1134 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-1140 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-RULES-1143 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SCAN-1136 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VIEWER-1139 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

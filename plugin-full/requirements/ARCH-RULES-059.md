@@ -222,7 +222,7 @@ CASE-5 — the registry is not mutated
 
 ---
 id: REQ-RULES-1143
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

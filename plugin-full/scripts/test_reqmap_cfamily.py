@@ -156,5 +156,23 @@ class SpecValueAgainstCode(unittest.TestCase):  # tested-by: REQ-RULES-1143 @int
         self.assertNotIn("RM038", bare)
 
 
+class SpecValueReading(unittest.TestCase):  # tested-by: REQ-RULES-1143 @unit
+    """The claim grammar and the definition reader, without a gate run."""
+
+    def test_a_connector_makes_a_claim_and_prose_does_not(self):  # verifies: REQ-RULES-1143#CASE-3
+        body = ("## Description\n> Why.\n\nEvery bullet below is binding.\n"
+                "- `gate` retries 3 times, `MAX_RETRIES` is 3 and `MASK` (0x10).\n")
+        claims = [(n, v) for n, v, _lit in R.specvalues.spec_claims(body)]
+        self.assertEqual([("MAX_RETRIES", 3.0), ("MASK", 16.0)], claims)
+
+    def test_definitions_compare_by_value(self):  # verifies: REQ-RULES-1143#CASE-2
+        d = _repo(self)
+        _write(os.path.join(d, "c.h"), "#define MASK 16u\n"
+               "static const uint32_t TIMEOUT_MS = 1000UL;\nenum { LIMIT = 3, };\n")
+        vals = {n: [v for v, _f, _l, _lit in R.specvalues.code_values(d, {"c.h"}, n)]
+                for n in ("MASK", "TIMEOUT_MS", "LIMIT")}
+        self.assertEqual({"MASK": [16.0], "TIMEOUT_MS": [1000.0], "LIMIT": [3.0]}, vals)
+
+
 if __name__ == "__main__":
     unittest.main()
