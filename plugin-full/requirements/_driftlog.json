@@ -98,8 +98,8 @@
       "reason": null
     },
     "ARCH-MEMBERDRIFT-027": {
-      "hash": "01c1292f7c80",
-      "reason": "ADR-0085: drift holds on an existing corpus (REQ-MEMBERDRIFT-1134, REQ-CHECK-1135)"
+      "hash": "81a6a2fddef1",
+      "reason": "ARCH-MEMBERDRIFT-027 gains its C/C++ obligation (ADR-0089)"
     },
     "ARCH-NEW-004": {
       "hash": "f55421f03e9a",

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.2",
+  "engine_version": "2026-11-21.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3768,15 +3768,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:276"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:277"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:471"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:419"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:479"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:427"
         },
         {
           "role": "implements",
@@ -4024,7 +4024,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:276"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:277"
         }
       ],
       "test_exempt": null,
@@ -4480,7 +4480,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_verify.py:65"
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:124"
         },
         {
           "role": "implements",
@@ -4761,15 +4761,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:244"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:245"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:248"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:249"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:267"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:268"
         }
       ],
       "test_exempt": null,
@@ -7861,23 +7861,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:12"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:13"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:18"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:19"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:40"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:41"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:61"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:62"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:212"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:213"
         },
         {
           "role": "implements",
@@ -7995,15 +7995,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:12"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:13"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:18"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:19"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:40"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:41"
         }
       ],
       "test_exempt": null,
@@ -8058,19 +8058,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:155"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:156"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:159"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:160"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:199"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:200"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:212"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:213"
         }
       ],
       "test_exempt": null,
@@ -8124,11 +8124,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:48"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:61"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:62"
         },
         {
           "role": "implements",
@@ -8180,15 +8180,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:48"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:180"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:181"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:230"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:231"
         }
       ],
       "test_exempt": null,
@@ -13447,7 +13447,8 @@
         "Member content hashes live in a separate, versioned sidecar `_memberlock.json` (`{\"_schema\": N, \"members\": {id: {relfile: sha}}}`) computed only for single-requirement member files, on line-ending-normalized bytes, and it fails open when absent, corrupt or newer-schema. [[REQ-MEMBERDRIFT-879]]",
         "The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not; a requirement whose contract also drifted is skipped, since forward drift already owns it. [[REQ-MEMBERDRIFT-880]]",
         "The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]",
-        "A tag in the comments right above a Python definition owns that definition, so the code most repositories already tag keeps its drift. [[REQ-MEMBERDRIFT-1134]]"
+        "A tag in the comments right above a Python definition owns that definition, so the code most repositories already tag keeps its drift. [[REQ-MEMBERDRIFT-1134]]",
+        "A top-level C or C++ definition keys its tags as a Python one does, read by a reader that falls back to the whole file on any doubt. [[REQ-MEMBERDRIFT-1140]]"
       ],
       "verify": [],
       "notes": [
@@ -13476,7 +13477,8 @@
         "REQ-MEMBERDRIFT-879",
         "REQ-MEMBERDRIFT-880",
         "REQ-MEMBERDRIFT-982",
-        "REQ-MEMBERDRIFT-1134"
+        "REQ-MEMBERDRIFT-1134",
+        "REQ-MEMBERDRIFT-1140"
       ],
       "members": [
         {
@@ -13485,35 +13487,43 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:118"
+          "loc": "plugin-full/scripts/reqmap_engine/bracedefs.py:16"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:123"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:141"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:298"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:316"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:357"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:317"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:369"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:363"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:415"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:5"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:12"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:64"
         },
         {
           "role": "implements",
@@ -13562,23 +13572,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:118"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:123"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:141"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:357"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:317"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:369"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:64"
         }
       ],
       "test_exempt": null,
@@ -13632,7 +13642,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:415"
+          "loc": "plugin-full/scripts/reqmap_engine/locks.py:363"
         }
       ],
       "test_exempt": null,
@@ -13692,11 +13702,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:316"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:12"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:342"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:38"
         }
       ],
       "test_exempt": null,
@@ -13750,11 +13760,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:323"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:19"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/locks.py:362"
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:69"
         }
       ],
       "test_exempt": null,
@@ -13768,6 +13778,65 @@
       ],
       "clauses": 3,
       "covered": 3,
+      "clarify": []
+    },
+    {
+      "id": "REQ-MEMBERDRIFT-1140",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "C and C++ definitions key member drift",
+      "intent": "In C and C++ one source file usually implements several requirements, so a hash per file can be blamed on none of them and member drift said nothing. A narrow reader gives each top-level definition its own span, and steps back to the file whenever it is unsure. See [ADR-0089](../../docs/adr/0089-c-and-cpp-definitions-key-member-drift.md).",
+      "contract": [
+        "A tag inside a top-level C/C++ definition, or in the unbroken comment block right above it, keys that definition; a blank line ends the block, and the hash covers the definition only.",
+        "Comments, string and character literals and preprocessor lines never move a span; `namespace` and `extern \"C\"` blocks are read through; a `class`, `struct`, `union` or `enum` body is one definition; a constructor's brace initializer belongs to its header.",
+        "The key is the name as written, qualified; an overloaded name carries its parameter list.",
+        "A file whose braces do not balance keeps the whole-file key for every member.",
+        "The reader is imported only when a member is a C/C++ file."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — definitions are keyed through a namespace\n  Given  a `.cpp` file with a class and a constructor inside `namespace app`, each under a tag\n  When   member hashes are computed\n  Then   their keys are `m.cpp#Widget` and `m.cpp#Foo::Foo`\n\nCASE-2 — overloads and braces in text keep their own span\n  Given  two overloads of `add`, one with `}` in a comment and `{` in a string nearby, and a\n         macro holding braces\n  When   member hashes are computed\n  Then   each requirement's key is its overload with its parameter list\n\nCASE-3 — a changed body is drift, a changed comment is not\n  Given  the file\n  When   one function's body changes, and then only a comment above another\n  Then   only that function's requirement's hash moves, and the comment edit moves none\n\nCASE-4 — braces that do not balance key the file\n  Given  a `.c` file with an unclosed function under a tag\n  When   member hashes are computed\n  Then   that requirement's key is the file\n\nCASE-5 — a repository with no C/C++ member never loads the reader\n  Given  a repository whose only member is a Python file\n  When   member hashes are computed in a fresh interpreter\n  Then   `reqmap_engine.bracedefs` is not in `sys.modules`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MEMBERDRIFT-027"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:68"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bracedefs.py:17"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bracedefs.py:151"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/memberspans.py:52"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 5,
+      "covered": 5,
       "clarify": []
     },
     {
@@ -27437,6 +27506,10 @@
       "ARCH-MEMBERDRIFT-027"
     ],
     [
+      "REQ-MEMBERDRIFT-1140",
+      "ARCH-MEMBERDRIFT-027"
+    ],
+    [
       "ARCH-NEW-004",
       "SYS-AUTHOR-101"
     ],
@@ -30309,7 +30382,7 @@
           "date": "2026-11-21",
           "headline": "Release v8.25.0",
           "body": "**Release v8.25.0.**\n\n- Retire: comments only, writes checked (ARCH-RETIRE-064)\n- Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped (REQ-DRIFT-1103)\n- An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged (ARCH-AUDITRUN-076)\n- clarify knows failure words beyond its list (ARCH-CLARIFY-062)\n- The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it) (ARCH-MAP-007)\n- MCP docs count the tools a client sees (ARCH-MCP-073)\n- The viewer makes no network request (ARCH-VIEWER-007)\n- A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded (ARCH-CUSTOMTRACE-077)\n\n**The requirement document wraps long text cleanly.**\n\n- The `depends on` list wraps only between ids: a line used to be able to start with the comma of the previous id, because each id is a button and the bare `, ` before it was a break point. Each id and its comma now sit in one unbreakable item; the last has no comma.\n- A title holding one long unbreakable token (a camelCase signal name, a path) wraps inside the sheet instead of running past its edge; the breadcrumb does the same. Viewer-only change; the engine does not change.\n\n**The skill takes \"check these folders against those requirements\" as one request.**\n\n- A seventh action, `check`, in the `requirement-manager` skill (`references/check-existing.md`): read the code folder, the requirements and the output folder from the request, refuse an output folder inside the code, write the folder's `_config.json` only when absent (otherwise show the change and ask), run `sync` and `gate --risk` with today's flags, print the absolute `_map.html` path, and end with the person's own steps. No engine change.\n- Questions relayed without a question tool (Copilot and most other assistants) come as `a)` to `d)` with the recommended one marked `(default)`; the default is never applied without the person's answer.\n\n**Requirements kept as CSV rows or a JSON list (ADR-0088).**\n\n- `REQUIREMENT_SOURCES` takes `format: csv` and `format: json` with a `fields` map (`id` required; `title`, `contract`, `cases`, `status`, `depends_on`, `satisfies`). A CSV loses its byte-order mark and takes a `delimiter`; a JSON source is a list or one under `items`. A row with no id is a problem; the rest are read. REQ-CUSTOMTRACE-1138\n- Rows marked structural (`fields.structural: {field, values}`) are layer `aggregate`, exempt from code and tests; more than half of a file marked so is reported. YAML stays parked.\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.2`. The new `sourcerows.py` is lazy; the core does not change.\n\n**A requirement source can read from the repository (ADR-0087).**\n\n- A `REQUIREMENT_SOURCES` entry takes `\"root\": \"repo\"`: its glob is read from the repository holding the code root (the nearest folder with `.git`), so checking one folder with `--code` still finds requirements kept in `specs/`. Without `root` nothing changes. A glob that matches only from the repository is reported with that hint, never read silently. REQ-CUSTOMTRACE-1137\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.1`. The core does not change; `customtrace.py` stays lazy.\n\n**A guide: check an existing repository with GitHub Copilot.**\n\n- `docs/copilot-audit.md` walks a repository that already has its requirements and tags: install the skill where Copilot reads it, declare where the requirements are, `sync`, read the map, keep checking every change, audit what the engine cannot see, and let Copilot run it over MCP. Every command in it was run as written on a scratch repository. It says which difference is found by the engine and which only by the audit, and which steps stay the person's.\n\n**A copied engine is not scanned (ADR-0086).**\n\n- A skill installed where an assistant reads it (`.github/skills`, `.agents/skills`, `.claude/skills`) carries the engine, whose tags name this repository's requirements: the repository's gate failed with about 290 dangling tags. In a directory holding `reqmap.py` beside `reqmap_engine/`, the scan now skips the engine and its viewer, whatever `.reqmapignore` says; the directory's other files are scanned as before. REQ-SCAN-1136\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21`. The core rises to 6,828 logical lines. The physical ceiling moves from 20,000 to 21,000 by the maintainer's decision (ADR-0086); the total is 20,000.\n\n**Drift holds on a repository that already has its requirements and tags (ADR-0085).**\n\n- A tag on the comment line right above a Python function (or above its decorators) now keys that function in the member lock. Such a tag used to fall back to the whole file, and a file several requirements share was dropped, so a changed function was never reported. REQ-MEMBERDRIFT-1134\n- A confirmed requirement read from a text or HTML source, edited, used to be absorbed by the next `sync`: it could not be set back to draft, and the lock advanced anyway. Its baseline is now kept and the gate reports the drift until `sync --accept-drift`. REQ-CHECK-1135\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.4`. The core rises to 6,825 logical lines; the physical total stays under 20,000.\n\n**The map is written when the gate fails.**\n\n- `sync` writes the map whatever the gate's verdict and keeps the gate's exit code, so a first check of an existing repository, which fails, can be read. On a failing gate only the map is rebuilt; the findings digest, the site page and the advisories wait for a passing one. REQ-CHECK-1133\n- The message no longer tells you to run `map`, a verb that no longer exists.\n- The map's health record carries the gate's link-sync error lines (`gate_error_lines`), and the Problems page shows a tag that names no requirement as an error, counted in the build-blocking banner. REQ-CHECK-1133\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.3`. The core does not grow: the map call moved out of the success branch.\n\n**Text stays inside its box in the Explorer.**\n\n- A tree row keeps its id and title in one block that wraps: the title stays beside the id while it has room for a few words, drops under it otherwise (it was squeezed to one letter), and shows in full on hover. A long id breaks at a hyphen instead of pushing the clause count out of the pane.\n- The tree pane is at least 380 px wide (30%), so the longest ids fit on one line.\n- In the neighbourhood graph the selected requirement's card is centred, and a long word in a card's title or id wraps inside the card.\n- A breadcrumb that wraps is left-aligned, not centred.\n\n**What Copilot reads, per surface, and the rules `init` prints for it (ADR-0084).**\n\n- `init` ends by printing four rules to paste into `.github/copilot-instructions.md` or `AGENTS.md`: run `gate --full` before finishing, read a requirement with `gate --show` first, tag code and tests, a person confirms. Each command names the engine the repository runs, no line reads as a tag, and `init` writes neither file. REQ-INIT-1132\n- `docs/integrations.md` gains a GitHub Copilot section: for each surface, where it reads the skill, the MCP server and its instructions, and what runs the gate. The server's start directory and `${CLAUDE_PLUGIN_ROOT}` in `SKILL.md` are marked not observed until a Copilot client is run against them.\n- The skill's `references/mcp.md` says resources are listed by Claude Code and Visual Studio, and that elsewhere the assistant calls `reqmap_show`.\n- `docs/integrations.md` says no Copilot surface reads `tool_definition.json`; the file stays.\n- ROADMAP's licence line names Apache-2.0 and ADR-0069.\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.2`. `init.py` is lazy, so the core does not grow.\n\n**A requirement shows the open bugs that name it (ADR-0083).**\n\n- A bug names a requirement by writing its id whole in the title, where, why or source; no new column. `_map.json` gives each bug `reqs`. REQ-BUGS-1131\n- `gate --show ID` lists the open bugs that name `ID` under `Open bugs`, highest priority first, and its `--json` carries them as `bugs`. A bug in the register is not listed. REQ-BUGS-1131\n- A requirement's page in the map lists them too (`Buguri deschise` in Romanian). REQ-BUGS-1131\n- The gate's verdict does not move: an open bug, of any priority, still adds no finding. The warning for a confirmed requirement with an open P0 or P1 was considered and not added (ADR-0083).\n- `bugreqs.py` stays lazy; the core rises to 6,814 logical lines for the two call sites in `show.py`.\n\n**A retirement that fails says so, and the map loads nothing from the network.**\n\n- `retire --delete --apply` reports `applied` only when the tags, the block and the lock entries are all gone. A member file it cannot read or write, or a block it cannot remove, fails the step with exit 1 and leaves the requirement and its lock entries in place; the message goes to stderr, so `--json` stays a document. REQ-RETIRE-1130\n- A failed step stops a batch, so the base of a consumer whose retirement failed is not retired. REQ-RETIRE-1130\n- The tag strip cuts only what the scanner reads as a tag: a tag's text in a string literal, a fenced example or a backtick span stays. A line that held only `<!-- implements: X -->` is removed instead of left as `<!-- -->`. REQ-RETIRE-1130\n- `clarify`'s default failure words gain \" fault\", \"defect\" and \"degraded\". \" fault\" carries a leading space because the match is a substring and \"default\" is not a failure path; on this corpus the count of `no-failure-case` questions is unchanged (16).\n- `_map_viewer.html` no longer links three Google web fonts no style used; the viewer already set system fonts only.\n- `docs/commands.md` and `docs/integrations.md` say eleven read-only MCP tools, and two writing ones behind `--allow-writes`. The skill's `references/mcp.md` no longer names `reqmap_new` nor promises that no client asks before a call.\n- CI measures the engine budget on every pull request, as ADR-0053 says it does. Only a release is blocked by it (ADR-0046).\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20`. The core stays at 6,810 logical lines.\n\n**A fixed bug leaves the list for a register (ADR-0082).**\n\n- `sync --fix ID` moves a row to `requirements/bugs/_fixed.md` with its found and fixed dates, version and commit. `--note` closes without a fix. REQ-BUGS-1127\n- A `Fixes-bug: ID` commit trailer closes the bug on the next `sync`, with that commit's SHA, date and version. `BUG_FIX_TRAILERS` renames it. REQ-BUGS-1128\n- `sync --bug` and the page write into the module's existing file, in its columns, under its priority's section, and a number is never given twice. A title the module already holds needs `--force`. REQ-BUGS-1126\n- `_map.json` gains `bugs_fixed` and, for a repository's own format, `bug_format`. The Bugs tab gains a Fixed view with found against fixed by week and the median days to fix by priority, and the export a section of the last 30 days. REQ-BUGS-1129\n- Fixed lists its rows only for a chosen week or a search, and the tab's lists come in pages of 25. REQ-BUGS-1129\n\n**Known bugs are listed by module, on the map and from the command line (ADR-0080).**\n\n- `requirements/bugs/<module>.md` holds a repository's bugs: a heading that names the module, and a table of `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters`, `Source`. REQ-BUGS-1116\n- `BUG_SOURCES` in `_config.json` names files a repository already keeps, and `BUG_COLUMNS` names their columns. They are read and never written. REQ-BUGS-1117\n- `sync` carries both in `_map.json` under `bugs`. With neither, `bugs.py` is not imported and the map has no `bugs` key. REQ-BUGS-1117\n- A row that cannot be read is an `INPUT:bugs` warning, an error under `--strict`. An open bug of any priority adds no finding, and bugs reach no lock. REQ-BUGS-1118\n- `sync --bug TITLE --module M` (`--prio`, `--date`, `--where`, `--why`, `--source`) adds one row instead of syncing, and `ask --bugs` (`--module`, `--prio`, `--json`) lists them. The verbs stay six. REQ-BUGS-1119, REQ-BUGS-1120\n- The skill's `references/bugs.md` makes an assistant the usual way to add a bug: check the list, check the code, add it with `--prio P2*`. The `*` marks an estimate until a person edits the row. REQ-BUGS-1119\n- Problems gains a Bugs tab (Buguri in Romanian): bugs grouped by module, with the date under the priority, priority chips and a search. REQ-BUGS-1121\n- The tab adds a bug. With the File System Access API the row goes into the module's file in a folder the reader picks; elsewhere the form prints the `sync --bug` command. REQ-BUGS-1122\n- `Export PDF` in the tab prints the filtered list with every group open and every field out, through the browser's print dialog. REQ-BUGS-1123\n- `BUG_SKIP_SECTIONS` is a regex on `##` headings whose tables are not open bugs (ADR-0081). REQ-BUGS-1116\n- Spellings of a module that differ only in case, diacritics or punctuation are one group, under the first one read. REQ-BUGS-1117\n- `ask --bugs --prio` takes a list (`P0,P1`), `--module` ignores diacritics and punctuation, and the text output ends with a total. A bug carries the line of its row, and selecting text in an open row no longer closes it. REQ-BUGS-1116, REQ-BUGS-1120, REQ-BUGS-1121\n- `MAP_LANGUAGE` in `_config.json` (`en`, `ro`) sets the language the map opens in. `LANGUAGE`, retired in ADR-0047, stays ignored, and the viewer now stores a language only when a reader changes it. REQ-MAPSTAMP-1125\n- The rail's footer shows the engine version, the branch and the time `_map.html` was written, so an old map in a second checkout can be told from a new one. `_map.json` carries neither of the last two. REQ-MAPSTAMP-1124\n- `docs/integrations.md` says a vendored engine is extended through `_config.json`, because a refresh replaces it whole\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-02.1`. The core rises to 6,788 logical lines, and `bugs.py` stays lazy\n\n**An audit is a recorded session: a fixed plan, one file of findings, and a report that gives every rate as k/n with its interval (ADR-0076).**\n\n- `sync --audit-plan` (`--ranked N`, `--random N`, `--seed S`) writes `requirements/_audit.json` once: the ranked set (untested cases, then `clarify` questions, then linked files), a seeded random set of the rest, and the decision bands from `AUDIT_BANDS`. Only confirmed requirements that carry code are planned; an existing file is never replaced. REQ-AUDITRUN-1105\n- Findings and decisions are edits to that file, as confirming a requirement is. A malformed entry, an id outside the plan or a second decision for one finding is an `INPUT:audit` warning in the bare gate, an error under `--strict`; the engine never rewrites the file. An `ok` nobody contradicts needs no decision. REQ-AUDITRUN-1106\n- `gate --audit` gains an audit section, in text and `--json` (`audit_session`): each counter, Copilot precision, the miss rate on the random set and the agreement between runs, each as k/n with a Wilson 95% interval, and the band. A finding whose runs disagree counts as unresolved; a rate on fewer than `AUDIT_MIN_POSITIVES` cases is printed and not judged. The exit code stays the gate's. REQ-AUDITRUN-1107\n- `sync` copies the section into `_map.json` under `audit`, and the viewer gains an Audit view: the plan and its seed, each requirement's state, runs and decisions, the counters and the rates. No MCP tool is added and none writes. REQ-AUDITRUN-1108\n- `ask --review` (and `reqmap_review`) carries the review prompt and each requirement's place in the plan while a session is open; the skill's `references/audit.md` holds the method for an assistant. REQ-AUDITRUN-1109\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.1`; 18,617 physical lines in 77 files (the README says so). The core rises to 6,706 logical lines (ADR-0076); `auditrun.py` loads only while an audit runs\n\n**A repository describes its own trace convention in `_config.json` (ADR-0077).**\n\n- `TRACE_TAGS` adds tag forms: a regex whose first group is the id, and a role (`implements`, `tested-by`, or `auto`, which is tested-by in a test file and implements elsewhere). A configured tag is a member, can be dangling (RM001) and counts against the untagged-file report. The built-in forms stay. REQ-CUSTOMTRACE-1110\n- `TEST_FILE_PATTERNS` adds globs that make a file a test file, beside the built-in convention. REQ-CUSTOMTRACE-1112\n- `REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, from any folders: `start` is the regex of the line a requirement starts on, each sentence is a clause, and an HTML table row reads as one line. A text or HTML requirement is not held to the Markdown format, while every link check applies; a source file is not untagged code; a source matching no file is an `INPUT:requirements` error. REQ-CUSTOMTRACE-1113\n- A bad entry is an `INPUT:config` warning, an error under `--strict`. With none of the keys set nothing changes, and `customtrace.py` is never imported\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.2`; 18,888 physical lines in 78 files (the README says so). The core rises to 6,741 logical lines (ADR-0077)\n\n**`clarify`'s `vague-term` stops asking about words that count or size (ADR-0078).**\n\n- \"several\", \"many\", \"various\", \"small\" and \"large\" raise no question. They were 23 of the rule's 27 questions on this corpus, and 1 of 20 sampled questions was real, on \"best-effort\". `clarify` asks 160 questions here instead of 183. REQ-CLARIFY-1102\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.3`; the core stays at 6,741 logical lines\n\n**A code draft no longer observes a signal quoted in a string, and a partial scan says what it did not look for.**\n\n- `s = \"# TODO: example\"` and `t = \"# noqa\"` in Python, and `const text = \"catch (e) {}\";` in JS, each raised an `Observed at` question about a comment or handler that does not exist. A Python marker or suppression now counts only in a comment token, from `tokenize`, and none counts in a file that does not tokenize (before 3.12 an unclosed string turned the rest of its line into a comment). Elsewhere string literals are blanked before the patterns run, and comments too before an empty `catch` is looked for, so `// catch (e) {} is wrong` is prose. REQ-EXTRACT-1099\n- A Python file that does not parse, and a file in a language with no parser, returned no parsed signal exactly as a clean file did. Its draft's Context now says that swallowed errors, unnamed numbers and dead code were not looked for; the generic question stays open. REQ-EXTRACT-1099\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.4`; 18,928 physical lines in 78 files (the README says so). The core stays at 6,741 logical lines; `draftquestions.py` loads only when `init` drafts code\n\n**`clarify` says what its counts measure and nothing more.**\n\n- `clause-without-case` named a number of clauses with no case, from the difference of two counts; in ADR-0075's sample that number matched the real gap in 4 of 7 real questions, because one case often proves two clauses. It now reads \"There are 5 clauses and 2 cases. Does each clause have a case that proves it?\" and says the check compares counts, not coverage. REQ-CLARIFY-956\n- `case-monoculture` said \"Every case starts from the same kind of input\" while it fires at 75%. It now reads \"3 of 4 Given lines open on the same word\", and its suggestion says a repeated word need not be a repeated kind of input. REQ-CLARIFY-956\n- The skill's `references/assistant-steps.md` quotes the new wording\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.5`; 18,927 physical lines in 78 files (the README says so). The core drops to 6,740 logical lines\n\n**The real questions a sample of `clarify` found are answered in the requirements, and the one that needs a decision is asked.**\n\n- Seven requirements gain the case their own clause already promised, each with a test: `show` with no tagged member (REQ-SHOW-918), a draft in a language with no parser (REQ-EXTRACT-851), a link outside the Description (REQ-CHECK-1035), a small or tagged docs file (REQ-DOCBUNDLE-840), a body with no quote (REQ-MAP-873), a repository with nothing to compare (REQ-VERSIONALIGN-1016) and a body with no normative section (REQ-DRIFT-841). REQ-MAP-871 and REQ-CANDIDATES-826 replace \"best-effort\" with the order and the patterns the code follows\n- A Python file that does not parse no longer counts as clean in the design score: it is left out of `files` and the score, `design` names it on one line, `design --json` lists it under `unparsed`, and the summary record carries `unparsed` only when such a file exists, so a badge payload keeps its shape. The question was asked in REQ-DESIGN-952's Verify intent and answered there. REQ-DESIGN-952\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.6`; 18,938 physical lines in 78 files (the README says so). The core rises to 6,748 logical lines: the eight are the unparsed list, its key and its report line in `design_report.py`, which `sync` loads for the summary\n- `clarify` asks 149 questions here instead of 160\n\n**Choosing a question on the viewer's Questions page shows it beside the list instead of leaving the page.**\n\n- A row opened its requirement, so the reader lost the list for every question. It now opens a panel with the requirement's id, title and status, its questions as the current tab shows them (a decision question's options on their own lines), and its Description clauses and Cases. A button opens the requirement and another closes the panel; the Problems inbox still opens a requirement from its row. REQ-VIEWER-1114\n- The panel's buttons come before its questions, so a long requirement never pushes them out of sight; below 820px the panel is a sheet fixed to the bottom of the screen. Seen in a headless render at 700px, the narrow layout had put the panel under a 150-row list, where a chosen row never showed it. REQ-VIEWER-1114\n\n**`clarify`'s word lists are a repository's to set, so a corpus written in another language is not judged by English words (ADR-0079).**\n\n- `CLARIFY_HEDGES` and `CLARIFY_FAILURE_WORDS` are `_config.json` keys. A list set there replaces the default, as the `LINT_QUESTION_*` lists do, and is compared without regard to case; a value that is not a list of strings is reported and the default stays. Measured read-only on three consumer corpora written in Romanian, the English lists made `vague-term` 0 of 19 real and `no-failure-case` 5 of 20, mostly because cases proving a failure path in Romanian words or by status code were not recognised. REQ-CLARIFY-1115, a draft until it is read\n- `case-monoculture` reads a Given's head word in any script: a word with a diacritic lost its first letters. REQ-CLARIFY-1115\n- Engine change: `MAP_ENGINE_VERSION` is `2026-10-19.7`; 18,949 physical lines in 78 files (the README says so). The core rises to 6,750 logical lines: the two are the function that builds the hedge pattern from the configured list",
-          "first_commit": "2026-11-21",
+          "first_commit": "2026-11-20",
           "last_commit": "2026-11-21"
         },
         {
@@ -30630,12 +30703,12 @@
     }
   ],
   "design": {
-    "files": 144,
-    "clean_files": 131,
-    "score": 91,
+    "files": 146,
+    "clean_files": 132,
+    "score": 90,
     "candidates": {
       "encapsulation": 5,
-      "abstraction": 8,
+      "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
       "standards": 2
@@ -30716,6 +30789,14 @@
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
+        "file": "plugin-full/scripts/reqmap_engine/bracedefs.py",
+        "line": 109,
+        "name": "_blocks",
+        "detail": "`_blocks` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
         "file": "plugin-full/scripts/reqmap_engine/bugs.py",
         "line": 124,
         "name": "_parse",
@@ -30771,15 +30852,15 @@
   },
   "health": {
     "score": 92,
-    "total": 365,
-    "scored": 343,
+    "total": 366,
+    "scored": 344,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 332,
-    "tested": 333,
-    "drafts": 26,
+    "implemented": 333,
+    "tested": 334,
+    "drafts": 27,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30947,6 +31028,13 @@
       },
       {
         "id": "REQ-MEMBERDRIFT-1134",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-MEMBERDRIFT-1140",
         "status": "draft",
         "why": [
           "not confirmed"

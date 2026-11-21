@@ -99,6 +99,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0086](0086-a-copied-engine-is-not-scanned.md) | A copied engine is not scanned | Accepted |
 | [0087](0087-a-source-reads-from-the-repository.md) | A source reads from the code folder or from the repository | Accepted |
 | [0088](0088-requirements-kept-as-rows.md) | Requirements kept as rows are read through a field map | Accepted |
+| [0089](0089-c-and-cpp-definitions-key-member-drift.md) | C and C++ definitions key member drift | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

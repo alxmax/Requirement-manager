@@ -78,7 +78,10 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,825 by ADR-0085: a tag above a Python definition keys it, and a
 # drifted requirement sync cannot demote keeps its baseline.
 # Raised to 6,828 by ADR-0086: a copied engine is not scanned.
-CORE_LOGICAL_BUDGET = 6828
+# Raised to 6,840 by ADR-0089: the member span helpers move to memberspans.py
+# (its imports and docstring) and locks.py gains the C/C++ dispatch;
+# bracedefs.py, the reader, stays lazy.
+CORE_LOGICAL_BUDGET = 6840
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.
