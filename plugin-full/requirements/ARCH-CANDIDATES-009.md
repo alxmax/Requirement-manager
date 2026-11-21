@@ -420,7 +420,7 @@ CASE-3 — the marker is untouched
 
 ---
 id: REQ-CANDIDATES-1141
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -507,7 +507,7 @@ CASE-7 — a partial scan says what it did not look for
 
 ---
 id: REQ-EXTRACT-1142
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

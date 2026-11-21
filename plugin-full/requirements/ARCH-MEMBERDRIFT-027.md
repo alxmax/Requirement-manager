@@ -298,7 +298,7 @@ CASE-3 — a changed body is drift, a changed comment is not
 
 ---
 id: REQ-MEMBERDRIFT-1140
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

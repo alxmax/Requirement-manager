@@ -3572,7 +3572,7 @@
       "id": "REQ-CANDIDATES-1141",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A C or C++ test is known by its name or its framework",
       "intent": "A C/C++ repository names its tests `foo_test.cc` or `FooTest.cpp`, or keeps them under `UnitTests/`. The convention knew none of these, so its tests read as code. A CamelCase `*Test` name cannot decide alone: in embedded code `RamTest.c` is often the production RAM self-test. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
@@ -3611,12 +3611,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -8994,7 +8989,7 @@
       "id": "REQ-EXTRACT-1142",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A C or C++ draft asks about the lines that look like accidents",
       "intent": "A C/C++ file got only the comment markers: no parser read it, so its draft said that swallowed errors, unnamed numbers and dead code were not looked for. The brace reader of ADR-0089 gives each definition's lines, and inside them the same signals are read, plus a return value cast to `void`. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
@@ -9038,12 +9033,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -13913,7 +13903,7 @@
       "id": "REQ-MEMBERDRIFT-1140",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "C and C++ definitions key member drift",
       "intent": "In C and C++ one source file usually implements several requirements, so a hash per file can be blamed on none of them and member drift said nothing. A narrow reader gives each top-level definition its own span, and steps back to the file whenever it is unsure. See [ADR-0089](../../docs/adr/0089-c-and-cpp-definitions-key-member-drift.md).",
@@ -13962,12 +13952,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": []
@@ -19096,7 +19081,7 @@
       "id": "REQ-RULES-1143",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A value a requirement gives a constant is checked against its code",
       "intent": "In embedded code a requirement often states the value of a named constant, and the code defines it in a header. When the two disagree, one of them is wrong, and a reader who compares them by hand finds it late. The comparison is mechanical once the clause names the constant. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
@@ -19125,6 +19110,10 @@
           "loc": "plugin-full/scripts/test_reqmap_cfamily.py:109"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:159"
+        },
+        {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:14"
         },
@@ -19144,12 +19133,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "clarify": [
@@ -31091,16 +31075,16 @@
     }
   },
   "health": {
-    "score": 91,
+    "score": 93,
     "total": 369,
     "scored": 347,
-    "healthy": 317,
+    "healthy": 321,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 317,
+    "confirmed": 321,
     "implemented": 336,
     "tested": 337,
-    "drafts": 30,
+    "drafts": 26,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31108,7 +31092,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 317,
+    "reviewed_total": 321,
     "unhealthy": [
       {
         "id": "ARCH-BUGS-078",
@@ -31218,13 +31202,6 @@
         ]
       },
       {
-        "id": "REQ-CANDIDATES-1141",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
         "id": "REQ-CHECK-1133",
         "status": "draft",
         "why": [
@@ -31247,13 +31224,6 @@
       },
       {
         "id": "REQ-CUSTOMTRACE-1138",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-EXTRACT-1142",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31288,21 +31258,7 @@
         ]
       },
       {
-        "id": "REQ-MEMBERDRIFT-1140",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
         "id": "REQ-RETIRE-1130",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-RULES-1143",
         "status": "draft",
         "why": [
           "not confirmed"
