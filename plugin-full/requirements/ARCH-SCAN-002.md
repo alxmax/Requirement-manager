@@ -21,6 +21,7 @@ Every bullet below is binding.
 - `scan_members` walks a code root and, in every source file with a known extension, finds inline `role: <ID>` tags and returns `cap_id -> [(role, relative_file, line), ...]`. [[REQ-SCAN-908]]
 - A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]
 - Every scanner reads the same masked view of a file, so a tag written inside a code fence or a string literal is an example to all of them and a member to none. [[REQ-SCAN-992]]
+- A copy of the engine inside a repository is not scanned: its tags name requirements only the engine's own repository has. [[REQ-SCAN-1136]]
 
 ## Cases
 CASE-1
@@ -307,3 +308,49 @@ CASE-5 — the three scanners agree on every position
   Given  a tree mixing fenced examples, docstring examples and real tags
   When   `scan_all` and the three standalone scanners run over it
   Then   they return the same members, the same `verifies:` coverage and the same levels
+
+--------------------
+
+
+---
+id: REQ-SCAN-1136
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SCAN-002]
+---
+
+# A copied engine is not scanned
+
+## Description
+> The skill carries its own copy of the engine, and an assistant reads a skill from inside the
+> repository (`.github/skills`, `.agents/skills`, `.claude/skills`). The copy's tags name this
+> repository's requirements, so a repository that installed the skill there failed its gate
+> with about 290 dangling tags. A `.reqmapignore` written before the skill moved there does not
+> cover it. See [ADR-0086](../../docs/adr/0086-a-copied-engine-is-not-scanned.md).
+
+Every bullet below is binding.
+- In a directory that holds `reqmap.py` beside a `reqmap_engine/` directory, the scan skips
+  `reqmap_engine/`, `reqmap.py` and `_map_viewer.html`, whatever `.reqmapignore` says.
+- Every other file in that directory is scanned as before.
+- The engine's own repository, recognised by its plugin manifest and viewer source, scans its
+  engine.
+
+## Cases
+CASE-1 — a skill copied where assistants read it adds no member
+  Given  a repository with one requirement, and the skill copied into `.github/skills`,
+         `.agents/skills` or `.claude/skills`
+  When   members are scanned
+  Then   none comes from the copy
+
+CASE-2 — a repository's scripts folder keeps its own tags
+  Given  the engine copied into `scripts/` beside a script of the repository's own, tagged
+  When   members are scanned
+  Then   the engine adds no member and the repository's script is still a member
+
+CASE-3 — the source repository still scans its engine
+  Given  the engine's own repository and another one
+  When   each is asked whether it is the source
+  Then   only the engine's own repository is
+

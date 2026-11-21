@@ -94,6 +94,7 @@ Why a server when the CLI already works, and why it is not declared by the plugi
 ### GitHub Copilot
 
 Copilot reads most of what this repository ships, and where it reads it differs by surface.
+To check an existing repository with it, step by step: [copilot-audit](copilot-audit.md).
 As of 2026-11-20, from GitHub's and VS Code's documentation; no row marked *not observed*
 has been run against this engine yet.
 

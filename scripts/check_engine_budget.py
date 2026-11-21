@@ -77,10 +77,12 @@ PACKAGE = "reqmap_engine"
 # bugs in `gate --show`. bugreqs.py stays lazy.
 # Raised to 6,825 by ADR-0085: a tag above a Python definition keys it, and a
 # drifted requirement sync cannot demote keeps its baseline.
-CORE_LOGICAL_BUDGET = 6825
+# Raised to 6,828 by ADR-0086: a copied engine is not scanned.
+CORE_LOGICAL_BUDGET = 6828
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
-TOTAL_LINE_CEILING = 20000
+# Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.
+TOTAL_LINE_CEILING = 21000
 
 # Run in a fresh interpreter: argv[1] is the scripts dir, argv[2] the
 # fixture repository. Prints the loaded engine modules as one JSON line.

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-20.4",
+  "engine_version": "2026-11-20.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -88,11 +88,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:226"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:339"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:353"
         }
       ],
       "test_exempt": null,
@@ -137,7 +137,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:339"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:353"
         }
       ],
       "test_exempt": null,
@@ -18740,7 +18740,8 @@
       "contract": [
         "`scan_members` walks a code root and, in every source file with a known extension, finds inline `role: <ID>` tags and returns `cap_id -> [(role, relative_file, line), ...]`. [[REQ-SCAN-908]]",
         "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]",
-        "Every scanner reads the same masked view of a file, so a tag written inside a code fence or a string literal is an example to all of them and a member to none. [[REQ-SCAN-992]]"
+        "Every scanner reads the same masked view of a file, so a tag written inside a code fence or a string literal is an example to all of them and a member to none. [[REQ-SCAN-992]]",
+        "A copy of the engine inside a repository is not scanned: its tags name requirements only the engine's own repository has. [[REQ-SCAN-1136]]"
       ],
       "verify": [],
       "notes": [
@@ -18788,7 +18789,8 @@
       "satisfied_by": [
         "REQ-SCAN-908",
         "REQ-SCAN-909",
-        "REQ-SCAN-992"
+        "REQ-SCAN-992",
+        "REQ-SCAN-1136"
       ],
       "members": [
         {
@@ -18821,39 +18823,39 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:16"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:53"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:66"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:74"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:81"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:89"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:125"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:133"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:219"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:233"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:248"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:262"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:311"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:325"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:320"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:334"
         },
         {
           "role": "implements",
@@ -18921,15 +18923,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:249"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:263"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:311"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:325"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:320"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:334"
         },
         {
           "role": "implements",
@@ -19006,23 +19008,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:16"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:53"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:61"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:66"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:74"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:81"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:89"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:125"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:133"
         }
       ],
       "test_exempt": null,
@@ -19061,7 +19063,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a verifies tag inside a Markdown fence is not coverage\n  Given  a `.md` file whose ```-fenced example contains `# verifies: REQ-FAKE-999#CASE-1`\n  When   the per-criterion coverage scan runs\n  Then   `REQ-FAKE-999` is absent from the coverage map\n\nCASE-2 — a tag outside the fence in the same file is still real\n  Given  the same file also carrying `<!-- verifies: REQ-REAL-001#CASE-2 -->` outside any fence\n  When   the per-criterion coverage scan runs\n  Then   `REQ-REAL-001` maps `CASE-2` to that file and line\n\nCASE-3 — a tag in a Python docstring is masked, one in a comment is not\n  Given  a `.py` file with `# verifies: REQ-DOC-1#CASE-1` inside a triple-quoted string and\n         `# verifies: REQ-CODE-1#CASE-1` on a comment line\n  When   the per-criterion coverage scan runs\n  Then   only `REQ-CODE-1` is recorded\n\nCASE-4 — an indented fence marker does not open a fence\n  Given  a `.md` file whose four-space-indented line begins with ``` and whose later lines\n         carry a real `<!-- implements: <ID> -->` tag\n  When   member discovery runs\n  Then   the later tag is still recorded\n\nCASE-5 — the three scanners agree on every position\n  Given  a tree mixing fenced examples, docstring examples and real tags\n  When   `scan_all` and the three standalone scanners run over it\n  Then   they return the same members, the same `verifies:` coverage and the same levels",
+      "accept": "CASE-1 — a verifies tag inside a Markdown fence is not coverage\n  Given  a `.md` file whose ```-fenced example contains `# verifies: REQ-FAKE-999#CASE-1`\n  When   the per-criterion coverage scan runs\n  Then   `REQ-FAKE-999` is absent from the coverage map\n\nCASE-2 — a tag outside the fence in the same file is still real\n  Given  the same file also carrying `<!-- verifies: REQ-REAL-001#CASE-2 -->` outside any fence\n  When   the per-criterion coverage scan runs\n  Then   `REQ-REAL-001` maps `CASE-2` to that file and line\n\nCASE-3 — a tag in a Python docstring is masked, one in a comment is not\n  Given  a `.py` file with `# verifies: REQ-DOC-1#CASE-1` inside a triple-quoted string and\n         `# verifies: REQ-CODE-1#CASE-1` on a comment line\n  When   the per-criterion coverage scan runs\n  Then   only `REQ-CODE-1` is recorded\n\nCASE-4 — an indented fence marker does not open a fence\n  Given  a `.md` file whose four-space-indented line begins with ``` and whose later lines\n         carry a real `<!-- implements: <ID> -->` tag\n  When   member discovery runs\n  Then   the later tag is still recorded\n\nCASE-5 — the three scanners agree on every position\n  Given  a tree mixing fenced examples, docstring examples and real tags\n  When   `scan_all` and the three standalone scanners run over it\n  Then   they return the same members, the same `verifies:` coverage and the same levels\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -19078,7 +19080,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:226"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:240"
         },
         {
           "role": "implements",
@@ -19099,6 +19101,55 @@
       "risks": [],
       "clauses": 5,
       "covered": 5,
+      "clarify": []
+    },
+    {
+      "id": "REQ-SCAN-1136",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A copied engine is not scanned",
+      "intent": "The skill carries its own copy of the engine, and an assistant reads a skill from inside the repository (`.github/skills`, `.agents/skills`, `.claude/skills`). The copy's tags name this repository's requirements, so a repository that installed the skill there failed its gate with about 290 dangling tags. A `.reqmapignore` written before the skill moved there does not cover it. See [ADR-0086](../../docs/adr/0086-a-copied-engine-is-not-scanned.md).",
+      "contract": [
+        "In a directory that holds `reqmap.py` beside a `reqmap_engine/` directory, the scan skips `reqmap_engine/`, `reqmap.py` and `_map_viewer.html`, whatever `.reqmapignore` says.",
+        "Every other file in that directory is scanned as before.",
+        "The engine's own repository, recognised by its plugin manifest and viewer source, scans its engine."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a skill copied where assistants read it adds no member\n  Given  a repository with one requirement, and the skill copied into `.github/skills`,\n         `.agents/skills` or `.claude/skills`\n  When   members are scanned\n  Then   none comes from the copy\n\nCASE-2 — a repository's scripts folder keeps its own tags\n  Given  the engine copied into `scripts/` beside a script of the repository's own, tagged\n  When   members are scanned\n  Then   the engine adds no member and the repository's script is still a member\n\nCASE-3 — the source repository still scans its engine\n  Given  the engine's own repository and another one\n  When   each is asked whether it is the source\n  Then   only the engine's own repository is",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-SCAN-002"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1924"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:157"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
       "clarify": []
     },
     {
@@ -19142,19 +19193,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:97"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:105"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:102"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:110"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:114"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:122"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:248"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:262"
         }
       ],
       "test_exempt": null,
@@ -19222,19 +19273,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:97"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:105"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:102"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:110"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:114"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:122"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:249"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:263"
         }
       ],
       "test_exempt": null,
@@ -22971,11 +23022,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:177"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:205"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:219"
         }
       ],
       "test_exempt": null,
@@ -23035,11 +23086,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:177"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:205"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:219"
         }
       ],
       "test_exempt": null,
@@ -25138,7 +25189,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:352"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:366"
         },
         {
           "role": "implements",
@@ -25190,7 +25241,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:352"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:366"
         },
         {
           "role": "implements",
@@ -25257,7 +25308,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/scan.py:353"
+          "loc": "plugin-full/scripts/reqmap_engine/scan.py:367"
         }
       ],
       "test_exempt": null,
@@ -27440,6 +27491,10 @@
     ],
     [
       "REQ-SCAN-992",
+      "ARCH-SCAN-002"
+    ],
+    [
+      "REQ-SCAN-1136",
       "ARCH-SCAN-002"
     ],
     [
@@ -30339,16 +30394,16 @@
     }
   },
   "health": {
-    "score": 94,
-    "total": 361,
-    "scored": 339,
+    "score": 93,
+    "total": 362,
+    "scored": 340,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 328,
-    "tested": 329,
-    "drafts": 22,
+    "implemented": 329,
+    "tested": 330,
+    "drafts": 23,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30509,6 +30564,13 @@
       },
       {
         "id": "REQ-RETIRE-1130",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-SCAN-1136",
         "status": "draft",
         "why": [
           "not confirmed"
