@@ -26,6 +26,7 @@ Every bullet below is binding.
 - Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.
 - Extraction links each source file to the draft it produced by writing that file’s membership tag into it, reversibly, so a stub never ships with zero members. [[REQ-INITTAG-1008]]
 - `draft` asks one question per line where the scan finds a marker, a suppression, a swallowed error, an unnamed number or unreachable code, naming the line. [[REQ-EXTRACT-1099]]
+- A C or C++ file gets the same parsed signals as Python, read inside each definition, and a file the reader cannot follow says so. [[REQ-EXTRACT-1142]]
 
 ## Cases
 CASE-1
@@ -503,3 +504,48 @@ CASE-7 — a partial scan says what it did not look for
   the module stays out of the core `sync` and `gate --full` load (ADR-0070).
 - The engine's own fail-open `except Exception: return None` is asked about like any
   other swallowed error. The scan cannot read intent, and the question says so.
+
+---
+id: REQ-EXTRACT-1142
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-EXTRACT-008]
+---
+
+# A C or C++ draft asks about the lines that look like accidents
+
+## Description
+> A C/C++ file got only the comment markers: no parser read it, so its draft said that
+> swallowed errors, unnamed numbers and dead code were not looked for. The brace reader of
+> ADR-0089 gives each definition's lines, and inside them the same signals are read, plus a
+> return value cast to `void`. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).
+
+Every bullet below is binding.
+- Inside each top-level C/C++ definition, a number compared with something, other than 0,
+  1, 2 and -1, is an unnamed number.
+- A call whose result is cast to `(void)` discards a return value.
+- A statement after a `return`, `break`, `continue` or `goto` on its own line, in the same
+  block, can never run; a closing brace, a `case`, a `default`, an `else` or a label ends the
+  block, and an exit under an `if (...)`, `else` or `do` on the line above is not
+  unconditional.
+- A file whose braces do not balance asks nothing parsed and says its braces do not balance.
+
+## Cases
+CASE-1 — each signal names its line
+  Given  a C function comparing with 250, casting a call to `(void)`, and a statement after
+         its last `return`
+  When   its draft questions are computed
+  Then   there is one question on each of the three lines, and none says a part was not read
+
+CASE-2 — a guarded exit and a plain number ask nothing
+  Given  the same file, with `if (v == 0) return 0;`, an exit under `if (v < LIMIT)` and
+         `case 3: return 4;` before `default: break;`
+  When   its draft questions are computed
+  Then   only the three lines of CASE-1 are asked about
+
+CASE-3 — unbalanced braces are reported as not read
+  Given  a C function with no closing brace
+  When   its draft questions are computed
+  Then   none is asked, and the note says its braces do not balance

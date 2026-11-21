@@ -321,7 +321,7 @@ def cmd_extract(ws):
             review = _write_code_draft(dest, cap, rel, fp, src, arch_id)
         proposed += 1
         by_dir.setdefault(rel_dir, []).append(cap)
-        linked = _tag_the_source(fp, rel, cap, _is_test_path(rel))
+        linked = _tag_the_source(fp, rel, cap, _is_test_path(rel, fp))
         tagged_n += linked
         print(f"{review:14} {cap}  <- {rel}"
               f"{'' if linked else '   (source not tagged)'}")

@@ -81,7 +81,10 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,840 by ADR-0089: the member span helpers move to memberspans.py
 # (its imports and docstring) and locks.py gains the C/C++ dispatch;
 # bracedefs.py, the reader, stays lazy.
-CORE_LOGICAL_BUDGET = 6840
+# Raised to 6,932 by ADR-0090: RM038 (specvalues.py, a gate rule, so core), the
+# C/C++ test-framework check in tags.py and the test pairing in candidates.py.
+# csignals.py, the C/C++ draft signals, stays lazy.
+CORE_LOGICAL_BUDGET = 6932
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.

@@ -100,6 +100,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0087](0087-a-source-reads-from-the-repository.md) | A source reads from the code folder or from the repository | Accepted |
 | [0088](0088-requirements-kept-as-rows.md) | Requirements kept as rows are read through a field map | Accepted |
 | [0089](0089-c-and-cpp-definitions-key-member-drift.md) | C and C++ definitions key member drift | Accepted |
+| [0090](0090-c-and-cpp-in-an-audit.md) | C and C++ in an audit: tests, draft signals, stated values | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

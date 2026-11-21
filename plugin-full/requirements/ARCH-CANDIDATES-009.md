@@ -25,6 +25,7 @@ Every bullet below is binding.
 - The plan and the write path read ONE definition of an already-covered file, so a file the write path would skip is never reported as new. [[REQ-PLANTAGGED-1005]]
 - The plan states the rung of every candidate it would draft and the upper rungs the same run would mint, so the pyramid is visible before anything is written. [[REQ-PLANLEVEL-1006]]
 - Each candidate the write path would draft also states the id that write path will mint for it, without either id being renamed. [[REQ-PLANDRAFTID-1010]]
+- A C or C++ test is known by GoogleTest's file names or by the unit-test framework it includes, and is paired with the code it tests. [[REQ-CANDIDATES-1141]]
 
 ## Cases
 CASE-1
@@ -416,3 +417,49 @@ CASE-3 — the marker is untouched
   authoring suggestion look like the unreviewed-draft marker, and `_minted_groups` can
   group several files under one id while `_draft_id` is per file — they are different
   granularities, not two spellings of one thing.
+
+---
+id: REQ-CANDIDATES-1141
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CANDIDATES-009]
+---
+
+# A C or C++ test is known by its name or its framework
+
+## Description
+> A C/C++ repository names its tests `foo_test.cc` or `FooTest.cpp`, or keeps them under
+> `UnitTests/`. The convention knew none of these, so its tests read as code. A CamelCase
+> `*Test` name cannot decide alone: in embedded code `RamTest.c` is often the production RAM
+> self-test. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).
+
+Every bullet below is binding.
+- A file named `*_test`, `*_tests` or `*_unittest` with a C/C++ extension, or under a
+  `unittest`, `unittests`, `unit_test` or `unit_tests` directory (any case), is a test.
+- A C/C++ file that includes GoogleTest or GoogleMock, CppUTest, Unity, Catch2, Boost.Test,
+  cmocka or doctest in its first 16 KB is a test, whatever its name, wherever the caller can
+  name the file on disk.
+- A test is paired with the code it tests by stem: `test_foo` and `foo_test`, `foo_tests`,
+  `foo_unittest` test `foo`; `FooTest` and `FooTests` test `Foo` only when the file includes a
+  test framework.
+
+## Cases
+CASE-1 — the names mark a test
+  Given  `src/brake_test.cc`, `src/brake_unittest.cpp`, `src/brake_tests.c`,
+         `UnitTests/brake.cpp`, `unit_tests/brake.c` and `src/RamTest.c`
+  When   each is classified by its path
+  Then   all are tests but `src/RamTest.c`
+
+CASE-2 — an included framework marks a test
+  Given  `BrakeTest.cpp` including `<gtest/gtest.h>`, `BrakeSpec.cpp` including CppUTest,
+         `brake_check.c` including `unity.h`, and `RamTest.c` including only `ram.h`
+  When   each is classified with its path on disk
+  Then   the first three are tests and `RamTest.c` is code
+
+CASE-3 — a test is paired with the code it tests
+  Given  `brake.cpp` and a GoogleTest `BrakeTest.cpp`, `pedal.c` and `pedal_test.cc`, `Ram.c`
+         and a `RamTest.c` with no framework
+  When   the tests are indexed by stem
+  Then   `Brake` has `BrakeTest.cpp`, `pedal` has `pedal_test.cc`, and `Ram` has none

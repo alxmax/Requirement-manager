@@ -18,8 +18,8 @@
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
     "ARCH-CANDIDATES-009": {
-      "hash": "fe6645d2ba41",
-      "reason": "review actions 1/5/6: RM034 dangling-verifies check, plan draft_id disclosure, pyramid.py tracked"
+      "hash": "9a3cce30b75b",
+      "reason": "ARCH-CANDIDATES-009, ARCH-EXTRACT-008 and ARCH-RULES-059 gain their C/C++ obligations (ADR-0090)"
     },
     "ARCH-CHECK-006": {
       "hash": "cd206331cc24",
@@ -62,8 +62,8 @@
       "reason": null
     },
     "ARCH-EXTRACT-008": {
-      "hash": "a66264af4df1",
-      "reason": null
+      "hash": "6ed9488e6ad3",
+      "reason": "ARCH-CANDIDATES-009, ARCH-EXTRACT-008 and ARCH-RULES-059 gain their C/C++ obligations (ADR-0090)"
     },
     "ARCH-GITRUN-067": {
       "hash": "d1ff7d6940c6",
@@ -130,8 +130,8 @@
       "reason": "ADR-0064: the level axis is a tree; plan bars too short for their titles"
     },
     "ARCH-RULES-059": {
-      "hash": "8fff0918ce55",
-      "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
+      "hash": "4dd48d469cc4",
+      "reason": "ARCH-CANDIDATES-009, ARCH-EXTRACT-008 and ARCH-RULES-059 gain their C/C++ obligations (ADR-0090)"
     },
     "ARCH-SCAN-002": {
       "hash": "cd0e38789d12",

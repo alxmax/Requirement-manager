@@ -3439,7 +3439,8 @@ class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
     a caller happens to import first: a split once let RM032 register
     before RM001, and no other test noticed."""
 
-    ENTRIES = ("axis", "docclaims", "wikilinks", "planinput", "rulesrepo",
+    ENTRIES = ("axis", "docclaims", "wikilinks", "planinput", "specvalues",
+               "rulesrepo",
                "rules", "gate", "audit", "audittail", "relevel", "health")
 
     def _order_after(self, first):
@@ -3454,7 +3455,8 @@ class RuleOrderIsStable(unittest.TestCase):  # tested-by: ARCH-RULES-059
         orders = {m: self._order_after(m) for m in self.ENTRIES}
         first = orders["gate"]
         self.assertEqual(first[:3], ["RM001", "RM002", "RM031"])
-        self.assertEqual(first[-4:], ["RM032", "RM035", "RM036", "RM037"])
+        self.assertEqual(first[-5:],
+                         ["RM032", "RM035", "RM036", "RM037", "RM038"])
         for m, order in orders.items():
             self.assertEqual(order, first, m)
 

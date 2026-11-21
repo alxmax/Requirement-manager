@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `GATE_RULES` holds every gate rule as a `Rule` with a unique `RMnnn` code, a default severity, a `--strict` promotion flag and the function that produces its findings. [[REQ-RULES-947]]
 - Every printed gate line carries its rule code, `--json` carries the same findings as records, and `gate_exempt: [RMnnn]` in a requirement's frontmatter silences that one rule for that one requirement. [[REQ-RULES-948]]
 - A repo may raise the drift rules to errors for itself through its own config, without `--strict` and without moving anyone else's default; a requirement's own exemption still wins. [[REQ-RULES-989]]
+- Under `gate --full`, a value a clause gives a named constant is compared with that constant's definitions in the requirement's own code, and a difference is a warning naming both. [[REQ-RULES-1143]]
 
 ## Cases
 CASE-1
@@ -218,3 +219,55 @@ CASE-5 — the registry is not mutated
   Given  a promoted run
   When   it finishes
   Then   every registered rule carries the severity it was declared with
+
+---
+id: REQ-RULES-1143
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-RULES-059]
+---
+
+# A value a requirement gives a constant is checked against its code
+
+## Description
+> In embedded code a requirement often states the value of a named constant, and the code
+> defines it in a header. When the two disagree, one of them is wrong, and a reader who
+> compares them by hand finds it late. The comparison is mechanical once the clause names
+> the constant. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).
+
+Every bullet below is binding.
+- A clause makes a claim when it names a constant in backticks followed by `is`, `=`, `:`,
+  `equals`, `set to`, `is set to` or an opening parenthesis, then a number; any other mention
+  of a number is prose.
+- Each claim is compared with the definitions of that name in the requirement's own
+  `implements:` files: `#define NAME value`, `NAME = value`, a brace initializer, an enum
+  member.
+- Numbers compare by value: hexadecimal, thousands commas and the C suffixes `u`, `l`, `f`
+  do not make a difference.
+- A difference is warning `RM038`, naming the clause's value, the file, the line and the
+  code's value. Only `gate --full` and `gate --audit` run it.
+
+## Cases
+CASE-1 — a different value is reported with both sides
+  Given  a clause "`MAX_RETRIES` is 3" and its header `#define MAX_RETRIES 5U`
+  When   `gate --full` runs
+  Then   an `RM038` warning names `MAX_RETRIES` 3 and the header's line defining 5
+
+CASE-2 — the same value written otherwise is not
+  Given  clauses giving `MASK` 0x10, `TIMEOUT_MS` 1,000 and `SCALE` 2.5, and code defining
+         16u, 1000UL and a `SCALE` brace initializer of 2.5f
+  When   `gate --full` runs
+  Then   there is no `RM038`
+
+CASE-3 — prose and other requirements' files are not read
+  Given  a clause "`gate` retries 3 times, `MAX_RETRIES` is 3", its header defining 3, and an
+         untagged header defining `MAX_RETRIES` 9
+  When   `gate --full` runs
+  Then   there is no `RM038`
+
+CASE-4 — the bare gate does not run it
+  Given  a clause and a header that disagree
+  When   the bare `gate` runs
+  Then   there is no `RM038`

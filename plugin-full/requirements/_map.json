@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.3",
+  "engine_version": "2026-11-21.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3091,7 +3091,8 @@
         "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]",
         "The plan and the write path read ONE definition of an already-covered file, so a file the write path would skip is never reported as new. [[REQ-PLANTAGGED-1005]]",
         "The plan states the rung of every candidate it would draft and the upper rungs the same run would mint, so the pyramid is visible before anything is written. [[REQ-PLANLEVEL-1006]]",
-        "Each candidate the write path would draft also states the id that write path will mint for it, without either id being renamed. [[REQ-PLANDRAFTID-1010]]"
+        "Each candidate the write path would draft also states the id that write path will mint for it, without either id being renamed. [[REQ-PLANDRAFTID-1010]]",
+        "A C or C++ test is known by GoogleTest's file names or by the unit-test framework it includes, and is paired with the code it tests. [[REQ-CANDIDATES-1141]]"
       ],
       "verify": [],
       "notes": [
@@ -3118,7 +3119,8 @@
         "REQ-CANDIDATES-827",
         "REQ-PLANTAGGED-1005",
         "REQ-PLANLEVEL-1006",
-        "REQ-PLANDRAFTID-1010"
+        "REQ-PLANDRAFTID-1010",
+        "REQ-CANDIDATES-1141"
       ],
       "members": [
         {
@@ -3191,31 +3193,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:241"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:263"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:256"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:277"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:291"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:309"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:331"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:349"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:371"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:337"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:360"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:351"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:376"
         }
       ],
       "test_exempt": null,
@@ -3299,15 +3301,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:241"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:263"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:256"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:277"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:349"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:371"
         }
       ],
       "test_exempt": null,
@@ -3375,19 +3377,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:277"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:298"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:291"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:301"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:323"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:337"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:360"
         }
       ],
       "test_exempt": null,
@@ -3434,7 +3436,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:351"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:376"
         }
       ],
       "test_exempt": null,
@@ -3483,7 +3485,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:309"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:331"
         }
       ],
       "test_exempt": null,
@@ -3541,11 +3543,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:310"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:332"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:462"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:485"
         }
       ],
       "test_exempt": null,
@@ -3565,6 +3567,59 @@
           "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
         }
       ]
+    },
+    {
+      "id": "REQ-CANDIDATES-1141",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A C or C++ test is known by its name or its framework",
+      "intent": "A C/C++ repository names its tests `foo_test.cc` or `FooTest.cpp`, or keeps them under `UnitTests/`. The convention knew none of these, so its tests read as code. A CamelCase `*Test` name cannot decide alone: in embedded code `RamTest.c` is often the production RAM self-test. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
+      "contract": [
+        "A file named `*_test`, `*_tests` or `*_unittest` with a C/C++ extension, or under a `unittest`, `unittests`, `unit_test` or `unit_tests` directory (any case), is a test.",
+        "A C/C++ file that includes GoogleTest or GoogleMock, CppUTest, Unity, Catch2, Boost.Test, cmocka or doctest in its first 16 KB is a test, whatever its name, wherever the caller can name the file on disk.",
+        "A test is paired with the code it tests by stem: `test_foo` and `foo_test`, `foo_tests`, `foo_unittest` test `foo`; `FooTest` and `FooTests` test `Foo` only when the file includes a test framework."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the names mark a test\n  Given  `src/brake_test.cc`, `src/brake_unittest.cpp`, `src/brake_tests.c`,\n         `UnitTests/brake.cpp`, `unit_tests/brake.c` and `src/RamTest.c`\n  When   each is classified by its path\n  Then   all are tests but `src/RamTest.c`\n\nCASE-2 — an included framework marks a test\n  Given  `BrakeTest.cpp` including `<gtest/gtest.h>`, `BrakeSpec.cpp` including CppUTest,\n         `brake_check.c` including `unity.h`, and `RamTest.c` including only `ram.h`\n  When   each is classified with its path on disk\n  Then   the first three are tests and `RamTest.c` is code\n\nCASE-3 — a test is paired with the code it tests\n  Given  `brake.cpp` and a GoogleTest `BrakeTest.cpp`, `pedal.c` and `pedal_test.cc`, `Ram.c`\n         and a `RamTest.c` with no framework\n  When   the tests are indexed by stem\n  Then   `Brake` has `BrakeTest.cpp`, `pedal` has `pedal_test.cc`, and `Ram` has none",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CANDIDATES-009"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:29"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:247"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:347"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "ARCH-CHECK-006",
@@ -3736,35 +3791,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:26"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:27"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:97"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:98"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:120"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:121"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:201"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:280"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:298"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:311"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:351"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
         },
         {
           "role": "implements",
@@ -4020,7 +4075,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3658"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3660"
         },
         {
           "role": "implements",
@@ -4144,27 +4199,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:98"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:99"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:121"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:122"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:282"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:353"
         }
       ],
       "test_exempt": null,
@@ -4218,27 +4273,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:98"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:99"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:121"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:122"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:282"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:353"
         }
       ],
       "test_exempt": null,
@@ -4353,11 +4408,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3579"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3581"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:75"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:76"
         },
         {
           "role": "implements",
@@ -4484,11 +4539,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:129"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:130"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:251"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:252"
         }
       ],
       "test_exempt": null,
@@ -4757,7 +4812,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:263"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:264"
         },
         {
           "role": "implements",
@@ -5516,7 +5571,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3657"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3659"
         },
         {
           "role": "tested-by",
@@ -5996,7 +6051,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:122"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:123"
         },
         {
           "role": "implements",
@@ -6058,11 +6113,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:127"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:128"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:342"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:366"
         }
       ],
       "test_exempt": null,
@@ -6118,19 +6173,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:138"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:139"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:152"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:153"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:172"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:173"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:227"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:228"
         },
         {
           "role": "implements",
@@ -6205,11 +6260,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:211"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:212"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:233"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:234"
         }
       ],
       "test_exempt": null,
@@ -6276,7 +6331,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:193"
+          "loc": "plugin-full/scripts/reqmap_engine/customtrace.py:194"
         },
         {
           "role": "implements",
@@ -8176,7 +8231,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:247"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:248"
         },
         {
           "role": "implements",
@@ -8355,7 +8410,8 @@
         "`draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size, and never overwrites an existing draft. [[REQ-EXTRACT-851]] details the behaviour.",
         "Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.",
         "Extraction links each source file to the draft it produced by writing that file’s membership tag into it, reversibly, so a stub never ships with zero members. [[REQ-INITTAG-1008]]",
-        "`draft` asks one question per line where the scan finds a marker, a suppression, a swallowed error, an unnamed number or unreachable code, naming the line. [[REQ-EXTRACT-1099]]"
+        "`draft` asks one question per line where the scan finds a marker, a suppression, a swallowed error, an unnamed number or unreachable code, naming the line. [[REQ-EXTRACT-1099]]",
+        "A C or C++ file gets the same parsed signals as Python, read inside each definition, and a file the reader cannot follow says so. [[REQ-EXTRACT-1142]]"
       ],
       "verify": [],
       "notes": [
@@ -8387,7 +8443,8 @@
         "REQ-EXTRACT-851",
         "REQ-EXTRACT-981",
         "REQ-INITTAG-1008",
-        "REQ-EXTRACT-1099"
+        "REQ-EXTRACT-1099",
+        "REQ-EXTRACT-1142"
       ],
       "members": [
         {
@@ -8412,15 +8469,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:419"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:442"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:424"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:447"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:461"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:484"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/csignals.py:8"
         },
         {
           "role": "implements",
@@ -8456,31 +8517,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:42"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:44"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:56"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:62"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:78"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:80"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:95"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:97"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:125"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:166"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:173"
         },
         {
           "role": "implements",
@@ -8488,11 +8549,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:395"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:420"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:410"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:435"
         }
       ],
       "test_exempt": null,
@@ -8617,7 +8678,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:461"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:484"
         },
         {
           "role": "implements",
@@ -8739,15 +8800,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:419"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:442"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:424"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:447"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:432"
+          "loc": "plugin-full/scripts/reqmap_engine/candidates.py:455"
         },
         {
           "role": "implements",
@@ -8835,11 +8896,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:395"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:420"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:410"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:435"
         }
       ],
       "test_exempt": null,
@@ -8894,31 +8955,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:42"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:44"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:56"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:62"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:78"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:80"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:95"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:97"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:125"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:166"
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:173"
         }
       ],
       "test_exempt": null,
@@ -8928,6 +8989,74 @@
       "clauses": 7,
       "covered": 7,
       "clarify": []
+    },
+    {
+      "id": "REQ-EXTRACT-1142",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A C or C++ draft asks about the lines that look like accidents",
+      "intent": "A C/C++ file got only the comment markers: no parser read it, so its draft said that swallowed errors, unnamed numbers and dead code were not looked for. The brace reader of ADR-0089 gives each definition's lines, and inside them the same signals are read, plus a return value cast to `void`. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
+      "contract": [
+        "Inside each top-level C/C++ definition, a number compared with something, other than 0, 1, 2 and -1, is an unnamed number.",
+        "A call whose result is cast to `(void)` discards a return value.",
+        "A statement after a `return`, `break`, `continue` or `goto` on its own line, in the same block, can never run; a closing brace, a `case`, a `default`, an `else` or a label ends the block, and an exit under an `if (...)`, `else` or `do` on the line above is not unconditional.",
+        "A file whose braces do not balance asks nothing parsed and says its braces do not balance."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — each signal names its line\n  Given  a C function comparing with 250, casting a call to `(void)`, and a statement after\n         its last `return`\n  When   its draft questions are computed\n  Then   there is one question on each of the three lines, and none says a part was not read\n\nCASE-2 — a guarded exit and a plain number ask nothing\n  Given  the same file, with `if (v == 0) return 0;`, an exit under `if (v < LIMIT)` and\n         `case 3: return 4;` before `default: break;`\n  When   its draft questions are computed\n  Then   only the three lines of CASE-1 are asked about\n\nCASE-3 — unbalanced braces are reported as not read\n  Given  a C function with no closing brace\n  When   its draft questions are computed\n  Then   none is asked, and the note says its braces do not balance",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-EXTRACT-008"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:66"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/csignals.py:9"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/csignals.py:34"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/draftquestions.py:138"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 4 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-FANOUT-052",
@@ -11789,11 +11918,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3462"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3464"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3539"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3541"
         },
         {
           "role": "tested-by",
@@ -12100,7 +12229,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3509"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3511"
         },
         {
           "role": "tested-by",
@@ -13160,7 +13289,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3646"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3648"
         },
         {
           "role": "tested-by",
@@ -13820,6 +13949,10 @@
         {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/bracedefs.py:151"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bracedefs.py:172"
         },
         {
           "role": "implements",
@@ -14998,7 +15131,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_gate.py:3656"
+          "loc": "plugin-full/scripts/test_reqmap_gate.py:3658"
         },
         {
           "role": "tested-by",
@@ -15740,19 +15873,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:161"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:162"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:228"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:229"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:250"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:251"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:298"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:299"
         }
       ],
       "test_exempt": null,
@@ -18643,7 +18776,8 @@
       "contract": [
         "`GATE_RULES` holds every gate rule as a `Rule` with a unique `RMnnn` code, a default severity, a `--strict` promotion flag and the function that produces its findings. [[REQ-RULES-947]]",
         "Every printed gate line carries its rule code, `--json` carries the same findings as records, and `gate_exempt: [RMnnn]` in a requirement's frontmatter silences that one rule for that one requirement. [[REQ-RULES-948]]",
-        "A repo may raise the drift rules to errors for itself through its own config, without `--strict` and without moving anyone else's default; a requirement's own exemption still wins. [[REQ-RULES-989]]"
+        "A repo may raise the drift rules to errors for itself through its own config, without `--strict` and without moving anyone else's default; a requirement's own exemption still wins. [[REQ-RULES-989]]",
+        "Under `gate --full`, a value a clause gives a named constant is compared with that constant's definitions in the requirement's own code, and a difference is a warning naming both. [[REQ-RULES-1143]]"
       ],
       "verify": [],
       "notes": [
@@ -18667,7 +18801,8 @@
       "satisfied_by": [
         "REQ-RULES-947",
         "REQ-RULES-948",
-        "REQ-RULES-989"
+        "REQ-RULES-989",
+        "REQ-RULES-1143"
       ],
       "members": [
         {
@@ -18684,31 +18819,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:55"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:56"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:97"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:98"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:120"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:121"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:201"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:280"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:311"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:312"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:351"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:352"
         },
         {
           "role": "implements",
@@ -18721,6 +18856,10 @@
         {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/model.py:169"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:13"
         },
         {
           "role": "implements",
@@ -18774,7 +18913,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:55"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:56"
         },
         {
           "role": "implements",
@@ -18850,31 +18989,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:56"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:99"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:100"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:122"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:204"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:282"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:283"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:313"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:314"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:353"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:354"
         },
         {
           "role": "implements",
@@ -18942,7 +19081,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:56"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:57"
         }
       ],
       "test_exempt": null,
@@ -18952,6 +19091,78 @@
       "clauses": 5,
       "covered": 5,
       "clarify": []
+    },
+    {
+      "id": "REQ-RULES-1143",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A value a requirement gives a constant is checked against its code",
+      "intent": "In embedded code a requirement often states the value of a named constant, and the code defines it in a header. When the two disagree, one of them is wrong, and a reader who compares them by hand finds it late. The comparison is mechanical once the clause names the constant. See [ADR-0090](../../docs/adr/0090-c-and-cpp-in-an-audit.md).",
+      "contract": [
+        "A clause makes a claim when it names a constant in backticks followed by `is`, `=`, `:`, `equals`, `set to`, `is set to` or an opening parenthesis, then a number; any other mention of a number is prose.",
+        "Each claim is compared with the definitions of that name in the requirement's own `implements:` files: `#define NAME value`, `NAME = value`, a brace initializer, an enum member.",
+        "Numbers compare by value: hexadecimal, thousands commas and the C suffixes `u`, `l`, `f` do not make a difference.",
+        "A difference is warning `RM038`, naming the clause's value, the file, the line and the code's value. Only `gate --full` and `gate --audit` run it."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a different value is reported with both sides\n  Given  a clause \"`MAX_RETRIES` is 3\" and its header `#define MAX_RETRIES 5U`\n  When   `gate --full` runs\n  Then   an `RM038` warning names `MAX_RETRIES` 3 and the header's line defining 5\n\nCASE-2 — the same value written otherwise is not\n  Given  clauses giving `MASK` 0x10, `TIMEOUT_MS` 1,000 and `SCALE` 2.5, and code defining\n         16u, 1000UL and a `SCALE` brace initializer of 2.5f\n  When   `gate --full` runs\n  Then   there is no `RM038`\n\nCASE-3 — prose and other requirements' files are not read\n  Given  a clause \"`gate` retries 3 times, `MAX_RETRIES` is 3\", its header defining 3, and an\n         untagged header defining `MAX_RETRIES` 9\n  When   `gate --full` runs\n  Then   there is no `RM038`\n\nCASE-4 — the bare gate does not run it\n  Given  a clause and a header that disagree\n  When   the bare `gate` runs\n  Then   there is no `RM038`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-RULES-059"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:109"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:14"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:42"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:62"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/specvalues.py:86"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "case-monoculture",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "3 of 4 Given lines open on the same word (\"clause\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
     },
     {
       "id": "ARCH-SCAN-002",
@@ -26946,6 +27157,10 @@
       "ARCH-CANDIDATES-009"
     ],
     [
+      "REQ-CANDIDATES-1141",
+      "ARCH-CANDIDATES-009"
+    ],
+    [
       "ARCH-CHECK-006",
       "SYS-GATE-102"
     ],
@@ -27239,6 +27454,10 @@
     ],
     [
       "REQ-EXTRACT-1099",
+      "ARCH-EXTRACT-008"
+    ],
+    [
+      "REQ-EXTRACT-1142",
       "ARCH-EXTRACT-008"
     ],
     [
@@ -27803,6 +28022,10 @@
     ],
     [
       "REQ-RULES-989",
+      "ARCH-RULES-059"
+    ],
+    [
+      "REQ-RULES-1143",
       "ARCH-RULES-059"
     ],
     [
@@ -30703,11 +30926,11 @@
     }
   ],
   "design": {
-    "files": 146,
-    "clean_files": 132,
+    "files": 148,
+    "clean_files": 133,
     "score": 90,
     "candidates": {
-      "encapsulation": 5,
+      "encapsulation": 6,
       "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
@@ -30803,6 +31026,14 @@
         "detail": "`_parse` nests 7 levels deep (over 4)"
       },
       {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin-full/scripts/reqmap_engine/candidates.py",
+        "line": 275,
+        "name": "_build_candidates",
+        "detail": "`_build_candidates` takes 7 parameters (over 6)"
+      },
+      {
         "pillar": "standards",
         "kind": "file-too-long",
         "file": "plugin-full/scripts/reqmap_engine/commands.py",
@@ -30830,7 +31061,7 @@
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "plugin-full/scripts/reqmap_engine/draftquestions.py",
-        "line": 94,
+        "line": 96,
         "name": "_py_signals",
         "detail": "`_py_signals` nests 5 levels deep (over 4)"
       },
@@ -30851,16 +31082,16 @@
     }
   },
   "health": {
-    "score": 92,
-    "total": 366,
-    "scored": 344,
+    "score": 91,
+    "total": 369,
+    "scored": 347,
     "healthy": 317,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 317,
-    "implemented": 333,
-    "tested": 334,
-    "drafts": 27,
+    "implemented": 336,
+    "tested": 337,
+    "drafts": 30,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -30978,6 +31209,13 @@
         ]
       },
       {
+        "id": "REQ-CANDIDATES-1141",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-CHECK-1133",
         "status": "draft",
         "why": [
@@ -31000,6 +31238,13 @@
       },
       {
         "id": "REQ-CUSTOMTRACE-1138",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-EXTRACT-1142",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31042,6 +31287,13 @@
       },
       {
         "id": "REQ-RETIRE-1130",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-RULES-1143",
         "status": "draft",
         "why": [
           "not confirmed"
