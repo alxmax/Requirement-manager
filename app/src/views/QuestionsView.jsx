@@ -1,6 +1,7 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1101
 // implements: REQ-VIEWER-1114
+// implements: REQ-VIEWER-1145
 import { useState } from "react";
 import { REQUIREMENTS } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
@@ -8,7 +9,9 @@ import { useI18n } from "../lib/i18n.jsx";
 import {
   Pill, statusKind, mdInline, mdQuestion, reqLinkProps,
 } from "../lib/ui.jsx";
-import { openQuestions, isObserved, clarifyQuestions } from "../lib/tree.js";
+import {
+  openQuestions, isObserved, isAuditFinding, clarifyQuestions,
+} from "../lib/tree.js";
 import { ChipRow, ProblemRow } from "./problems/ProblemsPanels.jsx";
 
 const ANSWER_FIX = "Answer it: fold the answer into the Description and "
@@ -17,11 +20,12 @@ const ANSWER_FIX = "Answer it: fold the answer into the Description and "
 
 /** Verify-intent rows, one per requirement, holding only the bullets of one
  * origin: observed in code, or asked by a person. */
-function verifyRows(origin) {
+export function verifyRows(origin) {
   const out = [];
   REQUIREMENTS.forEach((r) => {
     if (r.status === "deprecated") return;   // retired: nothing to answer
-    const qs = openQuestions(r)
+    const qs = openQuestions(r)       // an audit's findings are not questions
+      .filter((q) => !isAuditFinding(q))
       .filter((q) => isObserved(q) === (origin === "code"));
     if (!qs.length) return;
     out.push({ id: r.id, title: r.title, sev: "QUESTION", status: r.status,

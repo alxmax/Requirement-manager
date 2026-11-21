@@ -60,6 +60,10 @@ export let HISTORY = [];
  * no audit runs, and then the rail lists no Audit entry.
  * implements: REQ-AUDITRUN-1108 */
 export let AUDIT = null;
+/* The map's `trace` block (ADR-0091): coverage of the code by the trace,
+ * tested-by suggestions by tier, corpus hygiene, a repository's own design
+ * rules. Absent from an older map.  implements: REQ-MAP-1144 */
+export let TRACE = null;
 /* The branch git was on when the map was written, when it could say.
  * Absent is not a wrong answer — a detached HEAD or no work tree both
  * read as unknown, and the band keeps its former label.
@@ -113,6 +117,8 @@ export function adoptMapExport(data) {
   DESIGN = (design && typeof design.score === "number") ? design : null;
   AUDIT = (data.audit && typeof data.audit === "object" && data.audit.plan)
     ? data.audit : null;
+  TRACE = (data.trace && typeof data.trace === "object"
+    && data.trace.coverage) ? data.trace : null;
   const planning = data.planning || data.targets;
   TARGETS = (planning && typeof planning === "object") ? planning : null;
 }

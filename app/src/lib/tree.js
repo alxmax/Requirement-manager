@@ -53,6 +53,21 @@ export function isObserved(q) {
   return /^[*_ ]*observed\b/i.test(String(q));
 }
 
+/* A Verify-intent bullet an audit wrote: `Observed (audit, <kind>) ...`. It
+ * is a finding, not a question, and the Questions page leaves it out.
+ * implements: REQ-VIEWER-1145 */
+const AUDIT_RE = /^[*_ ]*observed\s*\(\s*audit\b\s*,?\s*([^)]*)\)/i;
+export function isAuditFinding(q) {
+  return AUDIT_RE.test(String(q));
+}
+/** The kind an audit finding names (`bug`, `false coverage`...), or
+ * `finding` when it names none. */
+export function auditKind(q) {
+  const m = AUDIT_RE.exec(String(q));
+  const k = m ? m[1].trim().toLowerCase().replace(/[-_]+/g, " ") : "";
+  return k || "finding";
+}
+
 /* What `clarify` asks of a requirement's text, as the map carries it. A map
  * written before the field existed has none. */
 export function clarifyQuestions(r) {

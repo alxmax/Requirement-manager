@@ -128,6 +128,10 @@ nothing changes.
   names; lists in a cell split on `list_separator` (default `,`). Headings and information
   entries: `"structural": {"field": "Type", "values": ["Heading", "Info"]}` makes those rows
   layer `aggregate`, exempt from code and tests (ADR-0088).
+- **`DESIGN_RULES`** — a repository's own design rules, each `{"id", "pattern", "why", "exts"}`:
+  `pattern` is a regular expression searched in production code (comments and literals blanked
+  for C/C++), `exts` optionally narrows the files. The map's `trace` block counts each rule's
+  hits with file and line, and the Report page lists them; nothing reaches the gate (ADR-0091).
 
 ```json
 {"glob": "export/reqs.csv", "format": "csv", "delimiter": ";", "root": "repo",

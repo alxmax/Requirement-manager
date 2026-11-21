@@ -169,6 +169,9 @@ AUDIT_MIN_POSITIVES = 5
 TRACE_TAGS = []
 TEST_FILE_PATTERNS = []
 REQUIREMENT_SOURCES = []
+# implements: REQ-MAP-1144 - a repository's own design rules (ADR-0091):
+# [{"id", "pattern" (regex), "why", "exts" (optional)}], counted in the map
+DESIGN_RULES = []
 # Known bugs (ADR-0080): the folder under requirements/ this repository writes
 # them to, the files it already keeps them in (globs from the code root, read
 # only), the names those files give to each column, and a regex on the `##`
@@ -283,7 +286,7 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
                "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES",
-               "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE",
+               "DESIGN_RULES", "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE",
                "BUG_REGISTER", "BUG_REGISTER_COLUMNS", "BUG_FIX_TRAILERS")
 
 # A string-valued config key names a behaviour, so its accepted spellings are
@@ -368,6 +371,17 @@ def apply_config(cfg, out=None, problems=None):
                 reject("config: ignoring unknown key {!r}".format(key))
             continue
         default = g[key]
+        if key == "DESIGN_RULES":  # implements: REQ-MAP-1144
+            ok = [r for r in value if isinstance(r, dict)
+                  and isinstance(r.get("id"), str)
+                  and isinstance(r.get("pattern"), str)] if isinstance(
+                      value, list) else []
+            if not isinstance(value, list) or len(ok) != len(value):
+                reject("config: DESIGN_RULES keeps only entries with a string "
+                       "`id` and `pattern`")
+            g[key] = ok
+            applied.append(key)
+            continue
         if key in ("TRACE_TAGS", "REQUIREMENT_SOURCES"):
             # implements: ARCH-CUSTOMTRACE-077 — lists of objects, checked there
             from . import customtrace

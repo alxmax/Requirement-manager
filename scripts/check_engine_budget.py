@@ -84,7 +84,10 @@ PACKAGE = "reqmap_engine"
 # Raised to 6,932 by ADR-0090: RM038 (specvalues.py, a gate rule, so core), the
 # C/C++ test-framework check in tags.py and the test pairing in candidates.py.
 # csignals.py, the C/C++ draft signals, stays lazy.
-CORE_LOGICAL_BUDGET = 6932
+# Raised to 7,062 by ADR-0091: tracecover.py, the map's trace block (coverage,
+# tested-by suggestions, corpus hygiene, a repository's own design rules), which
+# `sync` writes and the gate's freshness check neither computes nor compares.
+CORE_LOGICAL_BUDGET = 7062
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.

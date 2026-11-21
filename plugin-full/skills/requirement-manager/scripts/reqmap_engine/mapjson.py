@@ -114,6 +114,8 @@ def _build_json_text(data, compact=None, stamped=False):
         payload["health"] = data["health"]
     if data.get("planning"):
         payload["planning"] = data["planning"]
+    if data.get("trace"):                       # implements: REQ-MAP-1144
+        payload["trace"] = data["trace"]
     if data.get("audit"):                       # implements: REQ-AUDITRUN-1108
         payload["audit"] = data["audit"]
     if data.get("bugs"):                        # implements: REQ-BUGS-1117
