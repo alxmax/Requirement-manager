@@ -1,11 +1,12 @@
 """The committed baselines: _reqlock, _memberlock, the drift log, the
 clarify lock, member hashes and the engine-staleness probe.
 """
-import ast, hashlib, json, os, re
+import hashlib, json, os, re
 
 from . import MAP_ENGINE_VERSION
 from .git import _git
 from .sections import binding_hash
+from .memberspans import _def_spans, _member_span_key, _span_sha  # noqa: F401
 
 
 def lock_path(reqs_dir):
@@ -312,64 +313,11 @@ def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
     return hashlib.sha256(data).hexdigest()
 
 
-def _py_def_spans(path):
-    # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-982
-    """`[(lead_line, first_line, last_line, name)]` for the top-level
-    definitions of a Python file, or None when it is not Python or does not
-    parse. Nesting is deliberately not descended: a tag inside a method
-    belongs to the class a reader opens. `lead_line` starts the comments
-    right above the definition and its decorators, where most code puts a
-    tag; the hash covers `first_line..last_line` only."""
-    # implements: REQ-MEMBERDRIFT-1134
-    if not path.lower().endswith(".py"):
-        return None
-    try:
-        with open(path, encoding="utf-8", errors="ignore") as f:
-            text = f.read()
-        tree = ast.parse(text)
-    except (OSError, SyntaxError, ValueError):
-        return None
-    lines, out = text.splitlines(), []
-    for n in tree.body:
-        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            lead = min([n.lineno] + [d.lineno for d in n.decorator_list])
-            while lead > 1 and lines[lead - 2].lstrip().startswith("#"):
-                lead -= 1
-            out.append((lead, n.lineno, getattr(n, "end_lineno", n.lineno), n.name))
-    return out
-
-
-def _span_sha(path, lo, hi):  # implements: REQ-MEMBERDRIFT-982
-    """SHA-256 of one line span, LF-normalized exactly as `_file_sha`
-    normalizes a whole file — for the same reason: a CRLF checkout must
-    not read as drift."""
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-    except OSError:
-        return None
-    data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-    lines = data.split(b"\n")
-    return hashlib.sha256(b"\n".join(lines[lo - 1:hi])).hexdigest()
-
-
-def _member_span_key(spans, fp, ln, path):
-    # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
-    """(key, span) for one tag hit: `fp#name` / (path, lo, hi) when `ln`
-    falls inside a top-level definition or the comments right above it,
-    else the whole-file key `fp` with span None."""
-    if spans:
-        for lead, lo, hi, name in spans:  # implements: REQ-MEMBERDRIFT-1134
-            if lead <= ln <= hi:
-                return "{}#{}".format(fp, name), (path, lo, hi)
-    return fp, None
-
-
 def compute_member_hashes(code_root, members):
     # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
     """`{rid: {key: sha}}` for the members one requirement owns alone,
-    where a key is `relfile#definition` for a tag inside a Python
-    top-level definition and `relfile` for anything else.
+    where a key is `relfile#definition` for a tag inside a top-level
+    Python or C/C++ definition and `relfile` for anything else.
 
     Ownership is what makes a hash attributable, and the unit of
     ownership is the unit the tag sits in. Keyed per file, a file tagged
@@ -381,10 +329,10 @@ def compute_member_hashes(code_root, members):
     requirements is still ambiguous and still dropped, at that finer
     granularity.
 
-    Python only, because a wrong span is a wrong drift signal: the brace
-    languages are read by heuristics elsewhere in this engine and keep
-    the whole-file hash. The key says which was used, so the lock is
-    self-describing."""
+    Python and C/C++ only, because a wrong span is a wrong drift signal:
+    C/C++ is read by a narrow reader that returns nothing on any doubt
+    (ADR-0089), and the other brace languages keep the whole-file hash.
+    The key says which was used, so the lock is self-describing."""
     owners = {}   # key -> set(rid);  where -> (path, lo, hi) or None for
                    # whole-file
     where = {}
@@ -395,7 +343,7 @@ def compute_member_hashes(code_root, members):
                 continue
             path = os.path.join(code_root, fp)
             if fp not in spans_by_file:
-                spans_by_file[fp] = _py_def_spans(path)
+                spans_by_file[fp] = _def_spans(path)
             key, span = _member_span_key(spans_by_file[fp], fp, ln, path)
             owners.setdefault(key, set()).add(rid)
             where[key] = span

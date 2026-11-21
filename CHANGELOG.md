@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+**C and C++ definitions key member drift (ADR-0089).**
+
+- A tag inside a top-level C/C++ definition, or in the comment block right above it, keys that definition in `_memberlock.json`, as Python's do since ADR-0085. A file several requirements share now has member drift per function or class instead of none. REQ-MEMBERDRIFT-1140, a draft until it is read
+- The reader is narrow: comments, literals and preprocessor lines are blanked; `namespace` and `extern "C"` are read through; a class/struct/union/enum body is one definition; an overload's key carries its parameter list; braces that do not balance keep the whole-file key. It loads only for a C/C++ member (`.c .h .cc .cpp .cxx .hh .hpp .hxx .inl`).
+- On the first `sync` after an upgrade a C/C++ key moves from the file to the definition; a key with no recorded hash is skipped, so no drift is reported for it.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.3`. `bracedefs.py` is lazy; the span helpers move from `locks.py` to `memberspans.py`. The core rises to 6,840 logical lines (ADR-0089); 20,353 physical lines in 84 files.
+
 **Questions have a priority, and one page reports what is open.**
 
 - A question is High, Medium or Low. High: a `clarify` question resting on `structure`, and a Verify-intent question a person wrote. Medium: one resting on a `count`, and an `Observed` bullet. Low: one resting on `wording`. The Questions page has four tabs, All (every question, first), High, Medium and Low, and each `clarify` question is labelled with its priority; Low filters by rule. The rail still counts High and Medium. REQ-VIEWER-1101

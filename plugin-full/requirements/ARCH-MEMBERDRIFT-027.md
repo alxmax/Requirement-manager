@@ -26,6 +26,7 @@ Every bullet below is binding.
 - The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not; a requirement whose contract also drifted is skipped, since forward drift already owns it. [[REQ-MEMBERDRIFT-880]]
 - The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]
 - A tag in the comments right above a Python definition owns that definition, so the code most repositories already tag keeps its drift. [[REQ-MEMBERDRIFT-1134]]
+- A top-level C or C++ definition keys its tags as a Python one does, read by a reader that falls back to the whole file on any doubt. [[REQ-MEMBERDRIFT-1140]]
 
 ## Cases
 CASE-1
@@ -295,3 +296,56 @@ CASE-3 — a changed body is drift, a changed comment is not
   When   one body changes, and then only the comment above it
   Then   only that requirement's hash moves, and the comment edit moves none
 
+---
+id: REQ-MEMBERDRIFT-1140
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MEMBERDRIFT-027]
+---
+
+# C and C++ definitions key member drift
+
+## Description
+> In C and C++ one source file usually implements several requirements, so a hash per file can
+> be blamed on none of them and member drift said nothing. A narrow reader gives each top-level
+> definition its own span, and steps back to the file whenever it is unsure. See
+> [ADR-0089](../../docs/adr/0089-c-and-cpp-definitions-key-member-drift.md).
+
+Every bullet below is binding.
+- A tag inside a top-level C/C++ definition, or in the unbroken comment block right above it,
+  keys that definition; a blank line ends the block, and the hash covers the definition only.
+- Comments, string and character literals and preprocessor lines never move a span;
+  `namespace` and `extern "C"` blocks are read through; a `class`, `struct`, `union` or `enum`
+  body is one definition; a constructor's brace initializer belongs to its header.
+- The key is the name as written, qualified; an overloaded name carries its parameter list.
+- A file whose braces do not balance keeps the whole-file key for every member.
+- The reader is imported only when a member is a C/C++ file.
+
+## Cases
+CASE-1 — definitions are keyed through a namespace
+  Given  a `.cpp` file with a class and a constructor inside `namespace app`, each under a tag
+  When   member hashes are computed
+  Then   their keys are `m.cpp#Widget` and `m.cpp#Foo::Foo`
+
+CASE-2 — overloads and braces in text keep their own span
+  Given  two overloads of `add`, one with `}` in a comment and `{` in a string nearby, and a
+         macro holding braces
+  When   member hashes are computed
+  Then   each requirement's key is its overload with its parameter list
+
+CASE-3 — a changed body is drift, a changed comment is not
+  Given  the file
+  When   one function's body changes, and then only a comment above another
+  Then   only that function's requirement's hash moves, and the comment edit moves none
+
+CASE-4 — braces that do not balance key the file
+  Given  a `.c` file with an unclosed function under a tag
+  When   member hashes are computed
+  Then   that requirement's key is the file
+
+CASE-5 — a repository with no C/C++ member never loads the reader
+  Given  a repository whose only member is a Python file
+  When   member hashes are computed in a fresh interpreter
+  Then   `reqmap_engine.bracedefs` is not in `sys.modules`
