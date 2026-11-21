@@ -40,7 +40,9 @@ import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
 import { CommandsView } from "../../src/views/CommandsView.jsx";
 
-import { I18nProvider, translate } from "../../src/lib/i18n.jsx";
+import {
+  I18nProvider, translate, DICT_KEYS, dateLocale,
+} from "../../src/lib/i18n.jsx";
 import { computeLayout } from "../../src/lib/layout.js";
 import {
   buildHierarchy, defaultExpanded, allExpanded, flattenTree, ancestorsOf,
@@ -252,7 +254,7 @@ const spec = (locale) => renderToString(
   <I18nProvider initialLocale={locale}>
     {specOf("ARCH-MAP-007")}
   </I18nProvider>);
-const specEn = spec("en"), specRo = spec("ro");
+const specEn = spec("en"), specRo = spec("ro"), specDe = spec("de");
 const reqUnderTest = REQ_BY_ID["ARCH-MAP-007"];
 const i18nChecks = [
   // verifies: REQ-VIEWER-943#CASE-1
@@ -271,6 +273,19 @@ const i18nChecks = [
   // verifies: REQ-VIEWER-943#CASE-6
   ["i18n: engine vocabulary stays literal (status value, not a translation)",
     specRo.includes(reqUnderTest.status)],
+  // verifies: REQ-VIEWER-943#CASE-2
+  ["i18n: German translates a section header and keeps the status literal",
+    specDe.includes("Wo — Mitglieder im Code")
+      && !specDe.includes("Where — Members in code")
+      && specDe.includes(reqUnderTest.status)
+      && translate("de", "{n} members bound", { n: 7 }) === "7 Mitglieder gebunden"
+      && dateLocale("de") === "de-DE" && dateLocale("xx") === "en-GB"],
+  // verifies: REQ-VIEWER-943#CASE-7
+  ["i18n: every bundled language translates the same strings",
+    Object.values(DICT_KEYS).every((keys) =>
+      keys.length === DICT_KEYS.ro.length
+        && [...keys].sort().join("\n") === [...DICT_KEYS.ro].sort().join("\n"))
+      && Object.keys(DICT_KEYS).length >= 2],
 ];
 for (const [label, ok] of i18nChecks) test(label, ok);
 

@@ -34,11 +34,18 @@
  * degrades to English instead of to `nav.map.label`.
  */
 import { createContext, useContext, useEffect, useState } from "react";
+import { DE, COMMAND_DE } from "./i18n.de.js";
 
 export const LOCALES = [
-  { code: "en", label: "EN", name: "English" },
-  { code: "ro", label: "RO", name: "Română" },
+  { code: "en", label: "EN", name: "English", dates: "en-GB" },
+  { code: "ro", label: "RO", name: "Română", dates: "ro-RO" },
+  { code: "de", label: "DE", name: "Deutsch", dates: "de-DE" },
 ];
+
+/** The BCP 47 tag dates are written in for a locale; English otherwise. */
+export function dateLocale(code) {
+  return (LOCALES.find((l) => l.code === code) || LOCALES[0]).dates;
+}
 
 const STORAGE_KEY = "reqmap.viewer.locale";
 
@@ -64,6 +71,9 @@ const RO = {  // implements: REQ-VIEWER-943
   "high": "grav",
   "medium": "mediu",
   "low": "mic",
+  "minor": "minor",
+  "Priorities": "Priorități",
+  "estimated, not yet set by a person": "estimată, nestabilită încă de o persoană",
   "What is broken": "Ce nu merge",
   "Module": "Modul",
   "Priority": "Prioritate",
@@ -391,7 +401,13 @@ const COMMAND_RO = {  // implements: REQ-VIEWER-964
       + "când un contract confirmat chiar s-a schimbat.",
 };
 
-const DICT = { ro: RO };
+const DICT = { ro: RO, de: DE };
+const COMMAND_DICT = { ro: COMMAND_RO, de: COMMAND_DE };
+
+/* The English text of every chrome string a bundled language translates;
+ * a smoke check holds each language to the same list. */
+export const DICT_KEYS = Object.fromEntries(
+  Object.entries(DICT).map(([code, table]) => [code, Object.keys(table)]));
 
 /* `{n}`-style placeholders, so a translated sentence can reorder them. */
 function interpolate(s, params) {
@@ -443,12 +459,13 @@ const Ctx = createContext({
  * loadData, so the module-level LANGUAGE is still its default at the
  * moment the initial locale is chosen. The single-file viewer — the
  * artifact consumers actually open — always has the blob at mount time.
- * `ro` opens in Romanian; anything else opens in English. */
+ * A bundled language opens in that language; anything else in English. */
 function engineDefault() {
   // implements: REQ-MAPSTAMP-1125
   try {
     const d = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
-    return d && d.language === "ro" ? "ro" : "en";
+    const v = d && d.language;
+    return LOCALES.some((l) => l.code === v) ? v : "en";
   } catch { return "en"; }
 }
 
@@ -476,8 +493,9 @@ export function I18nProvider({ children, initialLocale }) {
 /** A command's summary in `locale`, falling back to the engine's own
  * English. */
 export function commandSummary(cmd, locale) {  // implements: REQ-VIEWER-964
-  const ro = locale === "ro" && cmd && COMMAND_RO[cmd.name];
-  return ro || (cmd && cmd.summary) || "";
+  const table = COMMAND_DICT[locale];
+  const own = table && cmd && table[cmd.name];
+  return own || (cmd && cmd.summary) || "";
 }
 
 export function useI18n() { return useContext(Ctx); }

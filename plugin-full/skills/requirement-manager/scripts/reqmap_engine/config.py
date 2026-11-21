@@ -291,7 +291,7 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
 # Without this, a repo that wrote `"eror"` would get the default back in silence
 # — precisely the failure the whole config mechanism exists to avoid.
 CONFIG_ENUMS = {"MAP_PROFILE": ("full", "compact"), "DRIFT_SEVERITY": ("warn", "error"),
-                "MAP_LANGUAGE": ("en", "ro")}
+                "MAP_LANGUAGE": ("en", "ro", "de")}
 
 # Keys a released engine once read and then dropped with what they tuned
 # (ADR-0047, ADR-0051): the design metrics, the docstring and definition-count

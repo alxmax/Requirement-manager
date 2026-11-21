@@ -101,6 +101,25 @@ export const groupOpen = (openAll, fallback) => openAll ?? fallback;
 
 const inOrder = (rows) => [...rows].sort((a, b) => a.prio.localeCompare(b.prio));
 const located = (b) => b.file + (b.line ? `:${b.line}` : "");
+/** What each priority means, in the colours the rows use, and what `*` is.
+ * implements: REQ-BUGS-1121 */
+export function PrioLegend() {
+  const { t } = useI18n();
+  return (
+    <div className="bug-legend" aria-label={t("Priorities")}>
+      <span className="bug-legend-h">{t("Priorities")}:</span>
+      {PRIOS.map((p) => (
+        <span key={p} className="bug-legend-i">
+          <span className={"prob-sev sev-" + SEV[p]}>{p}</span> {t(PRIO_NAME[p])}
+        </span>
+      ))}
+      <span className="bug-legend-i">
+        <b>*</b> {t("estimated, not yet set by a person")}
+      </span>
+    </div>
+  );
+}
+
 const prioMix = (rows) => PRIOS.filter((p) => rows.some((b) => b.prio === p))
   .map((p) => [p, rows.filter((b) => b.prio === p).length]);
 
@@ -390,6 +409,7 @@ export function BugsPanel({ added, setAdded }) {
             {t(toggleAllLabel(openAll))}
           </button>
         )} />}
+      {view === "open" && <PrioLegend />}
       {view === "open" && keys.map((k) => (
         <BugGroup key={`${k}:${gen}`} label={k} rows={groups[k]}
           defaultOpen={groupOpen(openAll, keys.length === 1 || Boolean(q)

@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-21
-engine: 2026-11-21.4
+engine: 2026-11-21.6
 nodes: 369
 edges: 130
-design pass-rate: 90% (133/148 source files without a design candidate)
+design pass-rate: 89% (132/149 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -1090,6 +1090,8 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_canvasZoom_jsx_1
   f_app_src_lib_data_js_1["app/src/lib/data.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_data_js_1
+  f_app_src_lib_i18n_de_js_1["app/src/lib/i18n.de.js:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_lib_i18n_de_js_1
   f_app_src_lib_i18n_jsx_1["app/src/lib/i18n.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_i18n_jsx_1
   f_app_src_lib_icons_jsx_1["app/src/lib/icons.jsx:1"]

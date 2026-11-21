@@ -1,6 +1,7 @@
 // implements: ARCH-VIEWER-007
 /** Calendar helpers for the planning Gantt (day-index layout, month/week
  *  headers). */
+import { dateLocale } from "./i18n.jsx";
 
 export const PX_PER_DAY = 5;
 export const LANE_LABEL_W = 148;
@@ -33,7 +34,7 @@ export function addDays(d, n) {
 
 /** Month bands covering [origin .. origin+totalDays). */
 export function buildMonthBands(origin, totalDays, locale) {
-  const loc = locale === "ro" ? "ro-RO" : "en-GB";
+  const loc = dateLocale(locale);
   const bands = [];
   let i = 0;
   while (i < totalDays) {
