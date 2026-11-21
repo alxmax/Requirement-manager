@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-21
-engine: 2026-11-21.1
-nodes: 363
+engine: 2026-11-21.2
+nodes: 364
 edges: 130
-design pass-rate: 91% (127/140 source files without a design candidate)
+design pass-rate: 91% (128/141 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -157,6 +157,7 @@ graph LR
     REQ_CUSTOMTRACE_1112["Test files by the repository's own naming<br><small>REQ-CUSTOMTRACE-1112</small>"]
     REQ_CUSTOMTRACE_1113["Requirements kept as text, HTML or Markdown, in any folders<br><small>REQ-CUSTOMTRACE-1113</small>"]
     REQ_CUSTOMTRACE_1137["A source reads from the code folder or from the repository<br><small>REQ-CUSTOMTRACE-1137</small>"]
+    REQ_CUSTOMTRACE_1138["Requirements kept as rows<br><small>REQ-CUSTOMTRACE-1138</small>"]
     REQ_DECOMPOSE_837["--decompose is opt-in; the default lint run never writes<br><small>REQ-DECOMPOSE-837</small>"]
     REQ_DECOMPOSE_838["A created draft's shape: status, parent link, seeded clause, id<br><small>REQ-DECOMPOSE-838</small>"]
     REQ_DECOMPOSE_839["The parent never changes, and the command knows its own limits<br><small>REQ-DECOMPOSE-839</small>"]
@@ -571,12 +572,14 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_orphans_py_163_191["plugin-full/scripts/reqmap_engine/orphans.py:163-191"]
   ARCH_COVERAGE_029 -->|implements| f_plugin_full_scripts_reqmap_engine_orphans_py_163_191
   ARCH_CUSTOMTRACE_077["A repository describes its own trace convention<br><small>ARCH-CUSTOMTRACE-077</small>"]
-  f_plugin_full_scripts_test_reqmap_customtrace_py_236["plugin-full/scripts/test_reqmap_customtrace.py:236"]
-  ARCH_CUSTOMTRACE_077 -->|tested-by| f_plugin_full_scripts_test_reqmap_customtrace_py_236
+  f_plugin_full_scripts_test_reqmap_customtrace_py_329["plugin-full/scripts/test_reqmap_customtrace.py:329"]
+  ARCH_CUSTOMTRACE_077 -->|tested-by| f_plugin_full_scripts_test_reqmap_customtrace_py_329
   f_plugin_full_scripts_reqmap_engine_config_py_167_372["plugin-full/scripts/reqmap_engine/config.py:167-372"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_167_372
   f_plugin_full_scripts_reqmap_engine_customtrace_py_9["plugin-full/scripts/reqmap_engine/customtrace.py:9"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_customtrace_py_9
+  f_plugin_full_scripts_reqmap_engine_sourcerows_py_4["plugin-full/scripts/reqmap_engine/sourcerows.py:4"]
+  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_sourcerows_py_4
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
   f_plugin_full_scripts_test_reqmap_author_py_1787_3584["plugin-full/scripts/test_reqmap_author.py:1787-3584"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_full_scripts_test_reqmap_author_py_1787_3584
@@ -1181,7 +1184,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>281 caps</small>"]
+  a_REQ["REQ<br><small>282 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1216,6 +1219,7 @@ graph LR
     REQ_CHECK_1133["The map is written when the gate fails<br><small>REQ-CHECK-1133</small><br>unreviewed"]
     REQ_CHECK_1135["A drift the engine cannot demote is kept<br><small>REQ-CHECK-1135</small><br>unreviewed"]
     REQ_CUSTOMTRACE_1137["A source reads from the code folder or from the repository<br><small>REQ-CUSTOMTRACE-1137</small><br>unreviewed"]
+    REQ_CUSTOMTRACE_1138["Requirements kept as rows<br><small>REQ-CUSTOMTRACE-1138</small><br>unreviewed"]
     REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
@@ -1240,6 +1244,7 @@ graph LR
   style REQ_CHECK_1133 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CHECK_1135 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CUSTOMTRACE_1137 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_CUSTOMTRACE_1138 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_INIT_1132 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
@@ -1270,6 +1275,7 @@ graph LR
 | REQ-CHECK-1133 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CHECK-1135 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CUSTOMTRACE-1137 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-CUSTOMTRACE-1138 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-INIT-1132 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

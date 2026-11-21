@@ -122,6 +122,18 @@ nothing changes.
   code root (the nearest folder with `.git`), so a scan of one folder still finds requirements
   kept elsewhere. A glob that matches nothing from the code root but would from the repository
   is reported with that hint, never read silently (ADR-0087).
+- **Rows: `format: csv` or `json`** — one requirement per row, through `fields`: `id` (required),
+  `title`, `contract`, `cases`, `status`, `depends_on`, `satisfies`, each naming a column or key.
+  A CSV takes `delimiter` (default `,`); a JSON source is a list, or one under the key `items`
+  names; lists in a cell split on `list_separator` (default `,`). Headings and information
+  entries: `"structural": {"field": "Type", "values": ["Heading", "Info"]}` makes those rows
+  layer `aggregate`, exempt from code and tests (ADR-0088).
+
+```json
+{"glob": "export/reqs.csv", "format": "csv", "delimiter": ";", "root": "repo",
+ "fields": {"id": "Key", "title": "Name", "contract": "Text", "depends_on": "Needs",
+            "structural": {"field": "Type", "values": ["Heading"]}}}
+```
 
 A requirement read from text or HTML is not held to the Markdown format above: no section, case
 or readability check. Every link check still applies: a tag to no requirement, a requirement with

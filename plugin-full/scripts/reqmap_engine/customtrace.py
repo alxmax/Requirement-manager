@@ -17,7 +17,7 @@ from . import config as cfg
 from .parse import parse_frontmatter, split_requirement_blocks
 
 TAG_ROLES = ("implements", "tested-by", "auto")
-SOURCE_FORMATS = ("text", "html", "md")
+SOURCE_FORMATS = ("text", "html", "md", "csv", "json")
 SOURCE_STATUSES = ("confirmed", "draft")
 
 
@@ -63,7 +63,11 @@ def validate_sources(value):
             continue
         fmt = e.get("format", "text")
         status = e.get("status", "confirmed")
-        rx = _compiles(e.get("start")) if fmt != "md" else re.compile("(x)")
+        extra, why = {}, None
+        if fmt in ("csv", "json"):  # implements: REQ-CUSTOMTRACE-1138
+            from .sourcerows import validate as validate_rows
+            extra, why = validate_rows(e)
+        rx = _compiles(e.get("start")) if fmt not in ("md", "csv", "json") else re.compile("(x)")
         if fmt not in SOURCE_FORMATS:
             problems.append(where + " (format must be one of {})".format(
                 ", ".join(SOURCE_FORMATS)))
@@ -75,10 +79,12 @@ def validate_sources(value):
                 ", ".join(SOURCE_STATUSES)))
         elif e.get("root", "code") not in ("code", "repo"):  # implements: REQ-CUSTOMTRACE-1137
             problems.append(where + " (root must be one of code, repo)")
+        elif why:
+            problems.append(where + " ({})".format(why))
         else:
-            kept.append({"glob": e["glob"], "format": fmt, "status": status,
-                         "start": e.get("start"), "root": e.get("root", "code"),
-                         "owner": str(e.get("owner") or "external")})
+            kept.append(dict(extra, glob=e["glob"], format=fmt, status=status,
+                             start=e.get("start"), root=e.get("root", "code"),
+                             owner=str(e.get("owner") or "external")))
     return kept, problems
 
 
@@ -182,8 +188,11 @@ def _read(path):
         return f.read()
 
 
-def _source_blocks(path, src):
+def _source_blocks(path, src, problem=lambda _msg: None):
     """[(id, meta, body)] for one file of one source."""
+    if src["format"] in ("csv", "json"):  # implements: REQ-CUSTOMTRACE-1138
+        from .sourcerows import blocks
+        return blocks(_read(path), src, path, problem)
     if src["format"] == "md":
         out = []
         for blk in split_requirement_blocks(_read(path)):
@@ -237,7 +246,7 @@ def load_sources(reqs, code_root):
             continue
         for path in paths:
             try:
-                blocks = _source_blocks(path, src)
+                blocks = _source_blocks(path, src, reqs.problem)
             except OSError as e:
                 reqs.problem("skipping unreadable requirement source {!r}: {}"
                              .format(path, e))

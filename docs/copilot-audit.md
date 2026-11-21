@@ -42,7 +42,7 @@ documents out of the "untagged files" advice too, add one line to `.reqmapignore
 ## 2. Say where your requirements and tags are
 
 Requirements already kept as Markdown in the engine's format need nothing. Requirements in your
-own text, HTML or Markdown files, and tags written in your own form, are declared in
+own text, HTML, Markdown, CSV or JSON files, and tags written in your own form, are declared in
 `requirements/_config.json`:
 
 ```json

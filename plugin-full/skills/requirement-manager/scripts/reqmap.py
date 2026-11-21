@@ -460,7 +460,7 @@ _LAZY_MODULES = ("retire", "retireapply", "review", "mcp", "audit", "design",
                  "plandrift", "planschema", "release",
                  "testgaps", "init", "levelshape", "watch", "todoparse",
                  "draftquestions", "auditrun", "customtrace", "bugs", "bugclose",
-                 "bugreqs")
+                 "bugreqs", "sourcerows")
 
 
 def __getattr__(name):
