@@ -191,6 +191,25 @@ const linkChecks = [
 ];
 for (const [label, ok] of linkChecks) test(label, ok);
 
+// ---- the depends-on list wraps between items, never before a comma ---------
+// Each id was a button (an atomic inline) preceded by a bare ", " text node,
+// so a wrap could land BEFORE the comma and start a line with ", ID".
+adoptMapExport({ nodes: ["DEP-A-001", "DEP-B-002", "DEP-C-003"].map((id, i) =>
+  adaptNode({ id, title: id, area: "DEP", layer: "feature", status: "draft",
+    intent: "", contract: ["c"], acc: [], members: [], used_by: [],
+    deps: i === 0 ? ["DEP-B-002", "DEP-C-003"] : [] })) });
+const depSpec = renderToString(specOf("DEP-A-001"));
+const depItems = depSpec.match(/<span class="dep-item">.*?<\/span>/g) || [];
+const depChecks = [
+  ["deps: every id sits in its own nowrap item", depItems.length === 2],
+  ["deps: the comma is inside the item it follows, not before the next",
+    depItems[0] && depItems[0].endsWith("</button>,</span>")
+      && !depSpec.includes(", <button")],
+  ["deps: the last item carries no trailing comma",
+    depItems[1] && depItems[1].endsWith("</button></span>")],
+];
+for (const [label, ok] of depChecks) test(label, ok);
+
 // ---- a question asked as a decision (REQ-FINDINGS-853) ---------------------
 // One verify string: the question, then a line per option and label. Each
 // line after the first is its own block; a plain question stays as it was.

@@ -2449,7 +2449,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:473"
+          "loc": "app/src/styles/app.css:477"
         },
         {
           "role": "implements",
@@ -2592,7 +2592,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:507"
+          "loc": "app/src/styles/app.css:511"
         },
         {
           "role": "implements",
