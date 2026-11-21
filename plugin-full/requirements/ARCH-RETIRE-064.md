@@ -251,7 +251,7 @@ CASE-4 — a single id is unchanged
 
 ---
 id: REQ-RETIRE-1130
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

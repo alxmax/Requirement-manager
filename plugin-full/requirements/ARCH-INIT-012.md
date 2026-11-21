@@ -239,7 +239,7 @@ CASE-5 — minimal initialization preserves existing optional files
 
 ---
 id: REQ-INIT-1132
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

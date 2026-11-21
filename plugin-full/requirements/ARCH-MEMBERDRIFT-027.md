@@ -257,7 +257,7 @@ CASE-4 — a non-Python member is unchanged
 
 ---
 id: REQ-MEMBERDRIFT-1134
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

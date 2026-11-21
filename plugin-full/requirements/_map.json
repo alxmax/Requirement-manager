@@ -2496,7 +2496,7 @@
       "id": "REQ-BUGS-1122",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The tab adds a bug to the repository",
       "intent": "A static page reaches the disk only through a folder the reader picks. Where a browser cannot do that, the form still gives the reader the command, so no input is lost.",
@@ -2538,12 +2538,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -2562,7 +2557,7 @@
       "id": "REQ-BUGS-1123",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The tab exports what it shows",
       "intent": "A team sends the list to people who do not open the map. The browser's own \"Save as PDF\" does that with no dependency, so the page only has to lay the list out for paper.",
@@ -2602,12 +2597,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -6221,7 +6211,7 @@
       "id": "REQ-CUSTOMTRACE-1137",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A source reads from the code folder or from the repository",
       "intent": "Checking one folder means pointing `--code` at it, and a source's glob is read from there: requirements kept beside it, in `specs/`, were only reached with `../`. A source can name where its glob starts instead. See [ADR-0087](../../docs/adr/0087-a-source-reads-from-the-repository.md).",
@@ -6265,12 +6255,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -6289,7 +6274,7 @@
       "id": "REQ-CUSTOMTRACE-1138",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Requirements kept as rows",
       "intent": "A corpus exported from a requirements tool comes as rows: a CSV file or a JSON list, with its own column names, and with headings and information entries among the requirements. Reading one took a few hundred lines of glue. A field map does it. See [ADR-0088](../../docs/adr/0088-requirements-kept-as-rows.md).",
@@ -6344,12 +6329,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": [
@@ -10552,7 +10532,7 @@
       "id": "REQ-INIT-1132",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "An assistant without the skill still learns the gate",
       "intent": "Copilot's chat in an IDE or on github.com reads `.github/copilot-instructions.md`, and its agents read `AGENTS.md`; neither loads this skill, and a cloud agent runs no git hook. The few rules that keep a repository in step have to reach that file, and it belongs to the repository. See [ADR-0084](../../docs/adr/0084-init-prints-what-an-assistant-reads.md).",
@@ -10589,12 +10569,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -12654,7 +12629,7 @@
       "id": "REQ-MAP-1144",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The map carries how far the trace reaches",
       "intent": "An audit report counted, by hand, how many files carried a tag, how much production code the drift lock watched, which test probably proved a requirement with no `tested-by:`, which requirements repeated each other and which local design rules were broken. All of it is read from what the scan already knows, so `sync` writes it once and every reader agrees. See [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).",
@@ -12736,12 +12711,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -13962,7 +13932,7 @@
       "id": "REQ-MEMBERDRIFT-1134",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A tag above a definition owns it",
       "intent": "Most code puts a tag on the comment line above a function, not inside it. Such a tag fell back to the whole file, and a file several requirements share was dropped from member drift: on an existing repository, a changed function was never reported. See [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).",
@@ -14001,12 +13971,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -17933,7 +17898,7 @@
       "id": "REQ-RETIRE-1130",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A retirement that fails says so and stops",
       "intent": "`retire --apply` reported a deletion as applied when the requirement's block was still in its file, dropped its lock entries anyway, ignored a file it could not write, and went on to the next requirement in the batch, which is the base of the one that failed. It also cut a tag's text out of a string literal, as if every match were a tag.",
@@ -17982,12 +17947,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": []
@@ -31344,16 +31304,16 @@
     }
   },
   "health": {
-    "score": 93,
+    "score": 95,
     "total": 371,
     "scored": 349,
-    "healthy": 323,
+    "healthy": 331,
     "exempt": 2,
     "deprecated": 22,
-    "confirmed": 323,
+    "confirmed": 331,
     "implemented": 338,
     "tested": 339,
-    "drafts": 26,
+    "drafts": 18,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31361,7 +31321,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 323,
+    "reviewed_total": 331,
     "unhealthy": [
       {
         "id": "ARCH-BUGS-078",
@@ -31409,20 +31369,6 @@
       },
       {
         "id": "REQ-BUGS-1120",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1122",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1123",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31478,34 +31424,6 @@
         ]
       },
       {
-        "id": "REQ-CUSTOMTRACE-1137",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CUSTOMTRACE-1138",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-INIT-1132",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-MAP-1144",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
         "id": "REQ-MAPSTAMP-1124",
         "status": "draft",
         "why": [
@@ -31514,20 +31432,6 @@
       },
       {
         "id": "REQ-MAPSTAMP-1125",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-MEMBERDRIFT-1134",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-RETIRE-1130",
         "status": "draft",
         "why": [
           "not confirmed"

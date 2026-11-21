@@ -429,7 +429,7 @@ CASE-6 — a legend says what each priority means
 
 ---
 id: REQ-BUGS-1122
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -481,7 +481,7 @@ CASE-5 — the form renders its fields
 
 ---
 id: REQ-BUGS-1123
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

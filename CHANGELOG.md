@@ -23,6 +23,12 @@
 - The Bugs tab has a legend under the priority chips: `P0` critical, `P1` high, `P2` medium, `P3` low, `P4` minor, in the colours the rows use, and `*` for a priority an assistant estimated and no user has confirmed yet. REQ-BUGS-1121
 - Every bundled language must translate the same strings: a smoke check fails when one table names a string the other does not.
 
+**Eight more drafts are confirmed, the ones the gate finds nothing wrong with.**
+
+- REQ-BUGS-1122, REQ-BUGS-1123, REQ-CUSTOMTRACE-1137, REQ-CUSTOMTRACE-1138, REQ-INIT-1132, REQ-MAP-1144, REQ-MEMBERDRIFT-1134 and REQ-RETIRE-1130. Each has code and tests, every case proven by a `# verifies:` tag, and no open question; confirming it adds nothing to `gate --full --strict`.
+- The other 18 drafts stay drafts, each for what the strict gate reports once it is confirmed: a code-level requirement tested only `@integration` (RM010, 13 of them), more than 7 cases (`ac-count-high`), fewer than 3, or code spread over 3+ directories. ARCH-MAPSTAMP-079 has no code of its own (RM006).
+- Health goes from 93 to 95: 331 of 349 requirements green.
+
 **Six requirements are confirmed.**
 
 - REQ-VIEWER-1139 (the Report page) and REQ-BUGS-1121 (the Bugs tab, with Expand/Collapse all) were read and confirmed.
