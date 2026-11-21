@@ -42,8 +42,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-CUSTOMTRACE-077": {
-      "hash": "b0f7b54fdcc1",
-      "reason": "ARCH-CUSTOMTRACE-077 confirmed by its owner on 2026-10-19; design revised before code: REQUIREMENT_SOURCES for text and HTML, no ID_PATTERN"
+      "hash": "eb2250e440f3",
+      "reason": "ADR-0087: a source reads from the code folder or the repository (REQ-CUSTOMTRACE-1137)"
     },
     "ARCH-DECOMPOSE-050": {
       "hash": "78a106d8a915",

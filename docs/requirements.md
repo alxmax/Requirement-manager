@@ -117,7 +117,11 @@ nothing changes.
   and HTML, `start` matches the line a requirement starts on (its first group is the id); the
   requirement runs to the next such line, and each sentence is one clause. HTML is read as text
   first, so a table row with an id cell and a text cell is one requirement. `status` (default
-  `confirmed`) and `owner` (default `external`) apply to the whole source.
+  `confirmed`) and `owner` (default `external`) apply to the whole source. `glob` is read from
+  the code root (`--code`); with `"root": "repo"` it is read from the repository that holds the
+  code root (the nearest folder with `.git`), so a scan of one folder still finds requirements
+  kept elsewhere. A glob that matches nothing from the code root but would from the repository
+  is reported with that hint, never read silently (ADR-0087).
 
 A requirement read from text or HTML is not held to the Markdown format above: no section, case
 or readability check. Every link check still applies: a tag to no requirement, a requirement with

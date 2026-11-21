@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+**A requirement source can read from the repository (ADR-0087).**
+
+- A `REQUIREMENT_SOURCES` entry takes `"root": "repo"`: its glob is read from the repository holding the code root (the nearest folder with `.git`), so checking one folder with `--code` still finds requirements kept in `specs/`. Without `root` nothing changes. A glob that matches only from the repository is reported with that hint, never read silently. REQ-CUSTOMTRACE-1137
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.1`. The core does not change; `customtrace.py` stays lazy.
+
 **A guide: check an existing repository with GitHub Copilot.**
 
 - `docs/copilot-audit.md` walks a repository that already has its requirements and tags: install the skill where Copilot reads it, declare where the requirements are, `sync`, read the map, keep checking every change, audit what the engine cannot see, and let Copilot run it over MCP. Every command in it was run as written on a scratch repository. It says which difference is found by the engine and which only by the audit, and which steps stay the person's.

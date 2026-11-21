@@ -21,6 +21,7 @@ Every bullet below is binding.
 - `TRACE_TAGS` adds tag forms, each a pattern whose first group is the id, and a role. [[REQ-CUSTOMTRACE-1110]]
 - `TEST_FILE_PATTERNS` adds globs that make a file a test file. [[REQ-CUSTOMTRACE-1112]]
 - `REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, in folders of the repository's choosing. [[REQ-CUSTOMTRACE-1113]]
+- A source can read its glob from the repository instead of the code folder, so one folder is checked against requirements kept elsewhere. [[REQ-CUSTOMTRACE-1137]]
 
 ## Cases
 CASE-1 — a repository in its own convention is read
@@ -180,3 +181,58 @@ CASE-5 — the generated files stay put, and a source is not untagged code
   Given  an HTML source and a code tree
   When   `sync` and `gate --risk` run
   Then   `_reqlock.json` and `_map.json` are written in `requirements/` only, and the HTML file is not listed as untagged
+
+--------------------
+
+
+---
+id: REQ-CUSTOMTRACE-1137
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CUSTOMTRACE-077]
+---
+
+# A source reads from the code folder or from the repository
+
+## Description
+> Checking one folder means pointing `--code` at it, and a source's glob is read from there:
+> requirements kept beside it, in `specs/`, were only reached with `../`. A source can name
+> where its glob starts instead. See
+> [ADR-0087](../../docs/adr/0087-a-source-reads-from-the-repository.md).
+
+Every bullet below is binding.
+- A source with no `root` reads its glob from the code root, exactly as before.
+- With `root: repo`, it reads its glob from the nearest folder at or above the code root that
+  holds `.git`; with none, that is a problem naming the source and nothing is read.
+- A `root` other than `code` or `repo` is a config problem and the source is ignored.
+- A glob that matches no file from the code root but would from the repository is reported
+  with that hint, and is not read.
+
+## Cases
+CASE-1 — a glob reads from the code folder as before
+  Given  a source with no `root`, and the same source written with `../` from a subfolder
+  When   each is loaded from its code root
+  Then   both read the same requirements
+
+CASE-2 — root: repo reads from the repository
+  Given  a repository with `.git` and a source with `root: repo`
+  When   it is loaded with a subfolder as the code root
+  Then   it reads the requirements under the repository
+
+CASE-3 — no repository above is named
+  Given  a source with `root: repo` and no `.git` above the code root
+  When   it is loaded
+  Then   nothing is read and the problem says no repository holds the code folder
+
+CASE-4 — an unknown root is refused
+  Given  a source with `root: up`
+  When   the config is validated
+  Then   the source is ignored and the problem lists code and repo
+
+CASE-5 — a glob the repository would match is pointed at root: repo
+  Given  a source with no `root` whose glob matches only from the repository
+  When   it is loaded with a subfolder as the code root
+  Then   nothing is read and the problem says to set root: repo
+

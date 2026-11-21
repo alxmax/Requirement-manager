@@ -53,7 +53,8 @@ own text, HTML or Markdown files, and tags written in your own form, are declare
 }
 ```
 
-Globs are relative to the code root (`--code`, the repository root by default). Tag forms other
+Globs are relative to the code root (`--code`, the repository root by default); add
+`"root": "repo"` to a source to read its glob from the repository instead. Tag forms other
 than `# implements: ID` go in `TRACE_TAGS`. Every key is in [requirements](requirements.md).
 Do not run `init` for this: it drafts requirements from untagged code, which is not the question.
 
@@ -69,8 +70,9 @@ errors in it. Open `requirements/_map.html`: with no requirement read it opens o
 otherwise Problems is one click away. `gate --risk` prints the same list in the terminal, most
 important first.
 
-**One folder or several.** Point `--code` at the folder and `--reqs` at where the results go;
-put the `_config.json` there, with globs relative to that folder:
+**One folder or several.** Point `--code` at the folder and `--reqs` at where the results go,
+and put the `_config.json` there; with `"root": "repo"` on a source, its glob stays
+`specs/*.txt` whichever folder is checked:
 
 ```bash
 python .github/skills/requirement-manager/scripts/reqmap.py --root . --code src/billing --reqs audit/billing sync

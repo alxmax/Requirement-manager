@@ -73,9 +73,11 @@ def validate_sources(value):
         elif status not in SOURCE_STATUSES:
             problems.append(where + " (status must be one of {})".format(
                 ", ".join(SOURCE_STATUSES)))
+        elif e.get("root", "code") not in ("code", "repo"):  # implements: REQ-CUSTOMTRACE-1137
+            problems.append(where + " (root must be one of code, repo)")
         else:
             kept.append({"glob": e["glob"], "format": fmt, "status": status,
-                         "start": e.get("start"),
+                         "start": e.get("start"), "root": e.get("root", "code"),
                          "owner": str(e.get("owner") or "external")})
     return kept, problems
 
@@ -197,6 +199,21 @@ def _source_blocks(path, src):
             for rid, body in split_text(text, src["start"])]
 
 
+def _repo_root(code_root):  # implements: REQ-CUSTOMTRACE-1137
+    """The nearest directory at or above `code_root` holding `.git`, or None."""
+    here = os.path.abspath(code_root or ".")
+    while not os.path.exists(os.path.join(here, ".git")):
+        if os.path.dirname(here) == here:
+            return None
+        here = os.path.dirname(here)
+    return here
+
+
+def _matching(base, pattern):
+    return sorted(p for p in glob.glob(os.path.join(base, pattern), recursive=True)
+                  if os.path.isfile(p))
+
+
 def load_sources(reqs, code_root):
     # implements: REQ-CUSTOMTRACE-1113
     """Add every requirement the configured sources hold to `reqs`. A source
@@ -204,11 +221,19 @@ def load_sources(reqs, code_root):
     problem on `reqs`, as they are for `requirements/`."""
     from .model import Requirement
     for i, src in enumerate(cfg.REQUIREMENT_SOURCES):
-        paths = sorted(p for p in glob.glob(os.path.join(code_root or ".", src["glob"]),
-                                            recursive=True) if os.path.isfile(p))
+        repo = _repo_root(code_root)  # implements: REQ-CUSTOMTRACE-1137
+        base = repo if src.get("root") == "repo" else (code_root or ".")
+        if base is None:
+            reqs.problem("REQUIREMENT_SOURCES[{}] has root: repo, but no repository "
+                         "holds the code folder".format(i))
+            continue
+        paths = _matching(base, src["glob"])
         if not paths:
-            reqs.problem("REQUIREMENT_SOURCES[{}] matches no file: {}".format(
-                i, src["glob"]))
+            hint = ("; it matches under the repository, so set root: repo"
+                    if src.get("root") != "repo" and repo and _matching(repo, src["glob"])
+                    else "")
+            reqs.problem("REQUIREMENT_SOURCES[{}] matches no file: {}{}".format(
+                i, src["glob"], hint))
             continue
         for path in paths:
             try:

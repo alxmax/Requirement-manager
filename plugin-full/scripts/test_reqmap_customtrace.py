@@ -184,6 +184,55 @@ class RequirementSources(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1113 
         self.assertNotIn("specs/spec.html", untagged)
 
 
+class SourcesOutsideTheCodeFolder(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1137 @unit
+    """A source's glob reads from the code folder, as it always has, or, with
+    `root: repo`, from the repository that holds it; never both silently."""
+
+    def _load(self, code_root, *sources):
+        kept, problems = R.customtrace.validate_sources(list(sources))
+        reqs = R.parse.RequirementIndex()
+        with _patched(REQUIREMENT_SOURCES=kept):
+            R.customtrace.load_sources(reqs, code_root)
+        return reqs, problems
+
+    def test_a_glob_reads_from_the_code_folder_as_before(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-1
+        d = _repo(self)
+        here, _ = self._load(d, TEXT_SOURCE)
+        sub, _ = self._load(os.path.join(d, "src"),
+                            dict(TEXT_SOURCE, glob="../" + TEXT_SOURCE["glob"]))
+        self.assertEqual({"AB_CD12", "AB_CD13", "AB_DL01"}, set(here))
+        self.assertEqual(set(here), set(sub))
+
+    def test_root_repo_reads_from_the_repository(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-2
+        d = _repo(self)
+        os.makedirs(os.path.join(d, ".git"))
+        reqs, problems = self._load(os.path.join(d, "src"), dict(TEXT_SOURCE, root="repo"))
+        self.assertEqual([], problems)
+        self.assertEqual({"AB_CD12", "AB_CD13", "AB_DL01"}, set(reqs))
+
+    def test_no_repository_above_is_named(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-3
+        reqs, _ = self._load(os.path.join(_repo(self), "src"), dict(TEXT_SOURCE, root="repo"))
+        self.assertEqual([], list(reqs))
+        self.assertTrue(any("no repository" in p for p in reqs.problems))
+
+    def test_an_unknown_root_is_refused(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-4
+        kept, problems = R.customtrace.validate_sources([dict(TEXT_SOURCE, root="up")])
+        self.assertEqual([], kept)
+        self.assertTrue(any("root must be one of code, repo" in p for p in problems))
+
+    def test_a_glob_the_repository_would_match_is_pointed_at_root_repo(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-5
+        d = _repo(self)
+        os.makedirs(os.path.join(d, ".git"))
+        reqs, _ = self._load(os.path.join(d, "src"), TEXT_SOURCE)
+        self.assertEqual([], list(reqs))                 # not chosen silently
+        self.assertTrue(any("root: repo" in p for p in reqs.problems), reqs.problems)
+
+
 class CustomTraceRepo(unittest.TestCase):  # tested-by: ARCH-CUSTOMTRACE-077 @integration
     def test_a_repository_in_its_own_convention_is_read(self):
         # verifies: ARCH-CUSTOMTRACE-077#CASE-1
