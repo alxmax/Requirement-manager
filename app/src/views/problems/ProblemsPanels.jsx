@@ -74,7 +74,7 @@ function PillarGroup({ pillar, rows, advice }) {
 
 /** A row of filter chips: `All` plus one per key, each with its count.
  * implements: REQ-VIEWER-1084 */
-export function ChipRow({ counts, total, value, setValue, label }) {
+export function ChipRow({ counts, total, value, setValue, label, end = null }) {
   const { t } = useI18n();
   const keys = [null, ...Object.keys(counts).sort()];
   return (
@@ -88,6 +88,7 @@ export function ChipRow({ counts, total, value, setValue, label }) {
           <span style={COUNT}>{k ? counts[k] : total}</span>
         </button>
       ))}
+      {end && <div style={{ marginLeft: "auto" }}>{end}</div>}
     </div>
   );
 }

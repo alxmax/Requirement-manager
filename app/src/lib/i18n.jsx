@@ -79,6 +79,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Search bugs": "Caută în buguri",
   "Add bug": "Adaugă bug",
   "Export PDF": "Exportă PDF",
+  "Expand all": "Deschide tot",
+  "Collapse all": "Închide tot",
   "Open": "Deschise",
   "Fixed": "Rezolvate",
   "Found": "Găsit",

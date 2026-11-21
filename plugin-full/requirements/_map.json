@@ -2423,12 +2423,13 @@
         "A row shows its priority, its date under the priority, its id and its title.",
         "Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.",
         "Priority chips and a text search narrow the list, and a narrowed list opens its groups.",
+        "At the right of the chip row, under `Export PDF`, one button opens every group (`Expand all`) or, once all are open, closes them (`Collapse all`).",
         "Every label goes through `t()`."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15\n  When   the panel renders\n  Then   each module is one group, and `15.03.2026` follows that bug's priority\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\n--------------------",
+      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15\n  When   the panel renders\n  Then   each module is one group, and `15.03.2026` follows that bug's priority\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\nCASE-5 — one button opens or closes every group\n  Given  bugs in two modules, both groups closed\n  When   `Expand all` is pressed, then the button again\n  Then   both groups are open and the button reads `Collapse all`; then both are closed\n         and it reads `Expand all`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2458,6 +2459,14 @@
         {
           "role": "implements",
           "loc": "app/src/views/problems/BugsPanel.jsx:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:96"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:304"
         }
       ],
       "test_exempt": null,
@@ -2469,8 +2478,8 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 4,
-      "covered": 4,
+      "clauses": 5,
+      "covered": 5,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -2478,17 +2487,8 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        },
-        {
-          "rule": "case-monoculture",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "3 of 4 Given lines open on the same word (\"map\"). Do the cases cover the other kinds of input a caller can supply?",
-          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
     },
@@ -2592,7 +2592,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:511"
+          "loc": "app/src/styles/app.css:513"
         },
         {
           "role": "implements",
@@ -13204,11 +13204,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:446"
+          "loc": "app/src/lib/i18n.jsx:448"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:458"
+          "loc": "app/src/lib/i18n.jsx:460"
         },
         {
           "role": "tested-by",
@@ -23236,7 +23236,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:412"
+          "loc": "app/src/lib/i18n.jsx:414"
         },
         {
           "role": "implements",
@@ -24091,11 +24091,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:401"
+          "loc": "app/src/lib/i18n.jsx:403"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:454"
+          "loc": "app/src/lib/i18n.jsx:456"
         }
       ],
       "test_exempt": null,
@@ -24281,11 +24281,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:368"
+          "loc": "app/src/lib/i18n.jsx:370"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:476"
+          "loc": "app/src/lib/i18n.jsx:478"
         },
         {
           "role": "implements",
@@ -24930,15 +24930,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/ProblemsPanels.jsx:102"
+          "loc": "app/src/views/problems/ProblemsPanels.jsx:103"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/ProblemsPanels.jsx:155"
+          "loc": "app/src/views/problems/ProblemsPanels.jsx:156"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/ProblemsPanels.jsx:165"
+          "loc": "app/src/views/problems/ProblemsPanels.jsx:166"
         }
       ],
       "test_exempt": null,
@@ -25362,7 +25362,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:527"
+          "loc": "app/src/styles/app.css:529"
         },
         {
           "role": "implements",
@@ -30957,9 +30957,9 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/problems/BugsPanel.jsx",
-        "line": 285,
+        "line": 293,
         "name": "BugsPanel",
-        "detail": "`BugsPanel` is 107 lines (over 80)"
+        "detail": "`BugsPanel` is 119 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
