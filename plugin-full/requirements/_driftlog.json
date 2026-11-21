@@ -42,8 +42,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-CUSTOMTRACE-077": {
-      "hash": "b0f7b54fdcc1",
-      "reason": "ARCH-CUSTOMTRACE-077 confirmed by its owner on 2026-10-19; design revised before code: REQUIREMENT_SOURCES for text and HTML, no ID_PATTERN"
+      "hash": "f2c8a6faeb63",
+      "reason": "ADR-0088: requirements kept as rows (REQ-CUSTOMTRACE-1138)"
     },
     "ARCH-DECOMPOSE-050": {
       "hash": "78a106d8a915",
@@ -134,8 +134,8 @@
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
     },
     "ARCH-SCAN-002": {
-      "hash": "43d5fd4acbce",
-      "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+      "hash": "cd0e38789d12",
+      "reason": "ADR-0086: a copied engine is not scanned (REQ-SCAN-1136)"
     },
     "ARCH-SECTIONS-068": {
       "hash": "1b379be4fc5e",

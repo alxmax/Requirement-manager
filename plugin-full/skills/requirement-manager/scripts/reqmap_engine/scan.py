@@ -12,6 +12,14 @@ from .tags import (
 _REQS_REAL_CACHE = {}   # reqs_dir -> realpath, resolved once per process
 
 
+def _is_source_repo(code_root):
+    """True in the repository that dogfoods the engine, never in a consumer."""
+    return (os.path.exists(os.path.join(
+                code_root, "plugin-full", ".claude-plugin", "plugin.json"))
+            and os.path.exists(os.path.join(
+                code_root, "app", "src", "lib", "data.js")))
+
+
 def _prune_dirs(dirpath, dirs, reqs_dir, code_root=None, ignore=()):
     # implements: ARCH-SCAN-002  # implements: REQ-SCAN-909
     """Drop noise dirs and the SSOT output dir from an os.walk in place.
@@ -144,6 +152,12 @@ def _walk_files(code_root, reqs_dir=None, accept=None):
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
+        if ("reqmap.py" in files and "reqmap_engine" in dirs
+                and not _is_source_repo(code_root)):
+            # implements: REQ-SCAN-1136 — a copied engine carries tags naming
+            # requirements only its source repository has
+            dirs.remove("reqmap_engine")
+            files = [f for f in files if f not in ("reqmap.py", "_map_viewer.html")]
         # deterministic descent — raw os.walk order is OS-dependent
         dirs.sort()
         # deterministic file order — the map must not depend on the filesystem

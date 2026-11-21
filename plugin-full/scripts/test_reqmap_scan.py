@@ -1919,3 +1919,45 @@ class StringMaskEdges(unittest.TestCase):  # tested-by: ARCH-SCAN-002
     def test_each_edge_masks_exactly_the_string_contents(self):
         for line, want in self.CASES:
             self.assertEqual(R.tags._strip_py_strings(line), want, line)
+
+
+class VendoredEngineIsNotScanned(unittest.TestCase):  # tested-by: REQ-SCAN-1136 @integration
+    """A copy of the engine, with the skill or beside a repository's own scripts,
+    carries this repository's tags; scanning it reported hundreds of dangling tags."""
+
+    ENGINE = os.path.dirname(os.path.abspath(__file__))
+    SKILL = os.path.join(os.path.dirname(ENGINE), "skills", "requirement-manager")
+
+    def _repo(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        _write(os.path.join(d, "requirements", "APP-X-001.md"),
+               "---\nid: APP-X-001\nstatus: draft\nlayer: feature\n---\n# T\n")
+        _write(os.path.join(d, "src", "app.py"), tag("APP-X-001") + "\ndef f():\n    return 1\n")
+        return d
+
+    def _dangling(self, d):
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        return sorted(cap for cap in members if cap != "APP-X-001")
+
+    def test_a_skill_copied_where_assistants_read_it_adds_no_member(self):  # verifies: REQ-SCAN-1136#CASE-1
+        for where in (".github/skills", ".agents/skills", ".claude/skills"):
+            d = self._repo()
+            shutil.copytree(self.SKILL, os.path.join(d, *where.split("/"), "requirement-manager"))
+            self.assertEqual([], self._dangling(d), where)
+
+    def test_a_repository_scripts_folder_keeps_its_own_tags(self):  # verifies: REQ-SCAN-1136#CASE-2
+        d = self._repo()
+        scripts = os.path.join(d, "scripts")
+        shutil.copytree(os.path.join(self.ENGINE, "reqmap_engine"),
+                        os.path.join(scripts, "reqmap_engine"))
+        shutil.copy(os.path.join(self.ENGINE, "reqmap.py"), scripts)
+        _write(os.path.join(scripts, "build.py"), tag("APP-X-001") + "\ndef build():\n    pass\n")
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        self.assertEqual([], self._dangling(d))
+        self.assertIn("scripts/build.py", {fp for _r, fp, _l in members["APP-X-001"]})
+
+    def test_the_source_repository_still_scans_its_engine(self):  # verifies: REQ-SCAN-1136#CASE-3
+        root = os.path.dirname(os.path.dirname(self.ENGINE))
+        self.assertTrue(R.scan._is_source_repo(root))
+        self.assertFalse(R.scan._is_source_repo(self._repo()))

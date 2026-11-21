@@ -8,7 +8,7 @@ from .locks import load_lock
 from .mapcmd import _assemble_map_data
 from .model import Requirement, _as_list, _satisfied_by
 from .parse import load_requirements
-from .scan import scan_ac_verifies, scan_all, scan_test_levels
+from .scan import _is_source_repo, scan_ac_verifies, scan_all, scan_test_levels  # noqa: F401
 from .sections import binding_hash
 
 
@@ -230,12 +230,3 @@ class GateContext(object):
         return [x[0] for x in self.full_members.get(rid, [])]
 
 
-def _is_source_repo(code_root):
-    """True inside the requirement-manager repository itself (the
-    one that dogfoods the engine), never in a consumer: the plugin
-    manifest and the viewer's source both sit under `code_root`.
-    `sync` regenerates this repo's own integration artifacts only here."""
-    return (os.path.exists(os.path.join(
-                code_root, "plugin-full", ".claude-plugin", "plugin.json"))
-            and os.path.exists(os.path.join(
-                code_root, "app", "src", "lib", "data.js")))
