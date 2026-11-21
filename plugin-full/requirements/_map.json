@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.6",
+  "engine_version": "2026-11-21.7",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1836,7 +1836,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:117"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:119"
         }
       ],
       "test_exempt": null,
@@ -2178,7 +2178,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:323"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:326"
         },
         {
           "role": "implements",
@@ -2186,7 +2186,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:119"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:121"
         }
       ],
       "test_exempt": null,
@@ -2960,11 +2960,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:121"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:130"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:132"
         }
       ],
       "test_exempt": null,
@@ -3597,7 +3597,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:29"
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:31"
         },
         {
           "role": "implements",
@@ -4987,7 +4987,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:188"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:191"
         }
       ],
       "test_exempt": null,
@@ -5505,11 +5505,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:306"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:309"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:340"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:343"
         }
       ],
       "test_exempt": null,
@@ -5574,15 +5574,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:306"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:309"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:329"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:332"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:340"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:343"
         }
       ],
       "test_exempt": null,
@@ -5984,7 +5984,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:372"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:386"
         },
         {
           "role": "implements",
@@ -7566,7 +7566,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:141"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:147"
         }
       ],
       "test_exempt": null,
@@ -9015,7 +9015,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:66"
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:68"
         },
         {
           "role": "implements",
@@ -9268,7 +9268,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:236"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:242"
         },
         {
           "role": "implements",
@@ -9505,7 +9505,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:212"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:218"
         }
       ],
       "test_exempt": null,
@@ -11852,6 +11852,7 @@
         "A `TODO.md` item's indented lines ride into `todos` as its `detail`, and a `|` inside its title stays in its name. [[REQ-TODODETAIL-1096]]",
         "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]",
         "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]",
+        "`sync` writes a `trace` block beside the graph: how much code the trace reaches, a probable test for each requirement with none, the corpus's own defects and a repository's design rules. [[REQ-MAP-1144]]",
         "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]",
         "What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, each release carrying the first and last commit of the work, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]"
       ],
@@ -11895,7 +11896,8 @@
         "REQ-MAP-873",
         "REQ-PLANCADENCE-1000",
         "REQ-HISTORY-1003",
-        "REQ-TODODETAIL-1096"
+        "REQ-TODODETAIL-1096",
+        "REQ-MAP-1144"
       ],
       "members": [
         {
@@ -11988,19 +11990,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:140"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:186"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:192"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:212"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:218"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:258"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:264"
         },
         {
           "role": "implements",
@@ -12020,7 +12022,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:139"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:141"
         },
         {
           "role": "implements",
@@ -12065,6 +12067,10 @@
         {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/text.py:129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:8"
         }
       ],
       "test_exempt": null,
@@ -12153,7 +12159,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:139"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:141"
         }
       ],
       "test_exempt": null,
@@ -12243,19 +12249,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:140"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:146"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:186"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:192"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:213"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:219"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:258"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:264"
         },
         {
           "role": "implements",
@@ -12641,6 +12647,107 @@
           "quote": "",
           "question": "3 of 3 Given lines open on the same word (\"todo.md\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-MAP-1144",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The map carries how far the trace reaches",
+      "intent": "An audit report counted, by hand, how many files carried a tag, how much production code the drift lock watched, which test probably proved a requirement with no `tested-by:`, which requirements repeated each other and which local design rules were broken. All of it is read from what the scan already knows, so `sync` writes it once and every reader agrees. See [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).",
+      "contract": [
+        "`sync` writes a `trace` block in `_map.json` with `coverage`, `suggestions` and `hygiene`, and `rules` when the repository declares `DESIGN_RULES`; the gate's freshness check neither computes nor compares it.",
+        "`coverage` counts program files, files with a tag, production (non-test) files, and production files the member lock holds a hash for.",
+        "For each live requirement held to code with an `implements:` member and no `tested-by:` one, `suggestions` gives a tier: A when a test file paired with its code by name names the requirement or one of its definitions, B when a test is paired by name only, C when none is. A and B list at most three tests.",
+        "`hygiene` lists requirements whose binding text is the same, confirmed requirements with no clause, and counts structural entries read from a source.",
+        "Each `DESIGN_RULES` entry is counted on production code with its file and line, at most 50 kept; an entry with no string `id` or `pattern` is reported and left out."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — coverage counts files, tags and the member lock\n  Given  two code files, one tagged with a member hash in the lock, and one test file\n  When   the trace block is computed\n  Then   it counts 3 program files, 1 tagged file, 2 production files and 1 watched for drift\n\nCASE-2 — a test that names the requirement is tier A\n  Given  `brake.c` implementing R-1 and `brake_test.c` naming R-1, `pedal.c` implementing R-2\n         with `pedal_test.c` that names neither, and `horn.c` implementing R-3 with no test\n  When   the trace block is computed\n  Then   R-1 is tier A with `brake_test.c`, R-2 tier B with `pedal_test.c`, R-3 tier C\n\nCASE-3 — duplicates and empty confirmed requirements are listed\n  Given  two requirements with the same clause and a confirmed one with none\n  When   the trace block is computed\n  Then   the pair is a duplicate and the empty one is listed\n\nCASE-4 — a design rule is counted on production code only\n  Given  `DESIGN_RULES` banning `throw`, a production file with one `throw` and one in a comment,\n         and a test file with another\n  When   the trace block is computed\n  Then   the rule has one hit, on the production file's line",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-MAP-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "app/src/lib/data.js:65"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:179"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:172"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:374"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:117"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:9"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:46"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:70"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:110"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:132"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:158"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -13132,7 +13239,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:70"
+          "loc": "app/src/lib/data.js:74"
         },
         {
           "role": "tested-by",
@@ -13140,7 +13247,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:126"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:128"
         }
       ],
       "test_exempt": null,
@@ -13194,11 +13301,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:464"
+          "loc": "app/src/lib/i18n.jsx:555"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:477"
+          "loc": "app/src/lib/i18n.jsx:568"
         },
         {
           "role": "tested-by",
@@ -13206,11 +13313,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:185"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:188"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:124"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:126"
         }
       ],
       "test_exempt": null,
@@ -18486,7 +18593,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:66"
+          "loc": "app/src/lib/data.js:70"
         },
         {
           "role": "tested-by",
@@ -19107,11 +19214,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:109"
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:111"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:159"
+          "loc": "plugin-full/scripts/test_reqmap_cfamily.py:161"
         },
         {
           "role": "implements",
@@ -21807,7 +21914,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:251"
+          "loc": "plugin-full/scripts/reqmap_engine/mapcmd.py:257"
         },
         {
           "role": "implements",
@@ -23220,7 +23327,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:430"
+          "loc": "app/src/lib/i18n.jsx:521"
         },
         {
           "role": "implements",
@@ -23684,6 +23791,7 @@
         "The viewer gives open questions a page of their own, each marked High, Medium or Low priority, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]",
         "Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]",
         "A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]",
+        "The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]",
         "Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]",
@@ -23754,7 +23862,8 @@
         "REQ-HISTORYWEEK-1098",
         "REQ-VIEWER-1101",
         "REQ-VIEWER-1114",
-        "REQ-VIEWER-1139"
+        "REQ-VIEWER-1139",
+        "REQ-VIEWER-1145"
       ],
       "members": [
         {
@@ -23848,6 +23957,10 @@
         {
           "role": "implements",
           "loc": "app/src/lib/report.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/reportMarkdown.js:1"
         },
         {
           "role": "implements",
@@ -24084,11 +24197,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:419"
+          "loc": "app/src/lib/i18n.jsx:510"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:473"
+          "loc": "app/src/lib/i18n.jsx:564"
         }
       ],
       "test_exempt": null,
@@ -24266,15 +24379,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.de.js:290"
+          "loc": "app/src/lib/i18n.de.js:373"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:380"
+          "loc": "app/src/lib/i18n.jsx:471"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:495"
+          "loc": "app/src/lib/i18n.jsx:586"
         },
         {
           "role": "implements",
@@ -24379,7 +24492,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:83"
+          "loc": "app/src/lib/data.js:87"
         },
         {
           "role": "implements",
@@ -25312,13 +25425,14 @@
       "title": "One page reports what is open",
       "intent": "Bugs, questions and missing tags each live on their own page, so the answer to \"how much is left?\" took four clicks and some adding up. One page counts them, lists what is behind each count, and prints, so the state of a repository can be handed to someone who does not open the map.",
       "contract": [
-        "The viewer's Workspace rail lists Report last, and selecting it opens one page in six sections, in this order: Summary, How it was checked, Results in numbers, Problem types, Top 10 questions and Recommendations.",
+        "The viewer's Workspace rail lists Report last, and selecting it opens one page in seven sections, in this order: Summary, How it was checked, Results in numbers, Problem types, Top 10 questions, Recommendations and Deliverables.",
         "Summary: one paragraph built from the counts below, naming the health score, the confirmed share, and the largest open count of bugs, High questions and missing tags.",
-        "How it was checked: the engine version, the branch and the time the map was written, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
+        "How it was checked: the engine version, the branch and the time the map was written, each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
         "Results in numbers: open bugs in total and per priority, and the number fixed; open questions by High, Medium and Low as the Questions page counts them; and, over requirements that are neither deprecated, `need` nor `aggregate` (and not `test_exempt` for tests), those with no `implements:` member, split into confirmed and draft, those with code but no `tested-by:` member, and the cases no `# verifies:` tag proves, summed from the engine's `clauses` and `covered`, never estimated.",
         "Problem types: every kind found, each with its count and the requirements behind it: missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's dangling tags (RM001 lines) and drift, as the map's health record gives them.",
         "Top 10 questions: the ten most important open questions, High before Medium before Low, then a confirmed requirement before a draft, then the requirement more others depend on first, then by id; each with its requirement, rule or origin and text.",
         "Recommendations: one per non-zero problem type, most severe first (dangling tags, confirmed with no code, drift, High questions, missing tests, unproven cases, open P0 and P1 bugs, Medium questions), each naming the count and the command or edit that closes it. With nothing open it says so.",
+        "Deliverables: the files the report and the audit leave behind, each with its path in the repository and what it holds.",
         "Every listed requirement opens its document.",
         "`Export PDF` prints the page through the browser's print dialog, every list out in full.",
         "A count the map does not carry is shown as not measured, not as zero, and adds no recommendation."
@@ -25371,7 +25485,91 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 10 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 11 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-VIEWER-1145",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The Report reads an audit",
+      "intent": "After an audit the Report page left out the audit itself, mixed its findings into the questions, and a reader needed a separate table to reconcile the two counts. It also kept no copy outside the browser. See [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).",
+      "contract": [
+        "A Verify-intent bullet starting `Observed (audit, KIND)` is an audit finding: the Questions page leaves it out, and the Report counts findings by kind with their requirements.",
+        "With an audit session in the map, the Report says how many planned requirements were read, and shows the agreement and precision rates as `k/n`.",
+        "With a `trace` block, the Report shows the share of code files with a tag and of production files watched for drift, the tested-by suggestions by tier with the test each names, the duplicates, the confirmed requirements with no clause and each design rule's hits.",
+        "Each list of requirements sits behind a chip that opens it; printed, every list is open.",
+        "`Export Markdown` downloads the same numbers and lists as a Markdown file.",
+        "The page opens with a title and a line naming the date, branch, engine and audit band, each only when the map carries it; a contents list beside it names the seven sections, numbered, and marks the one in view.",
+        "Summary shows the key numbers as tiles and the main conclusions as bullets, each with chips to the requirements behind it. Results in numbers is a table of indicator and value, where the open questions per priority and the requirements with no tested-by per tier each open from a chip.",
+        "Recommendations add, when non-zero: audit findings of a bug or missing code, tier A suggestions, false-coverage findings, duplicates, empty confirmed requirements and design rule hits."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the seven sections, the open bug count and every problem row\n\nCASE-5 — a contents list names the seven sections\n  Given  any registry\n  When   the Report is rendered\n  Then   the seven sections come in order, and the contents list holds one entry for each\n\nCASE-6 — each question priority opens its requirements\n  Given  one High, one Medium and one Low question, each on its own requirement\n  When   the Report is computed\n  Then   each priority lists one requirement behind its chip\n\nCASE-7 — a build stamp the map lacks is left out\n  Given  a map with no `generated_at`\n  When   the Report and its Markdown are produced\n  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured\n         for it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/report.jsx:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/report.js:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/reportMarkdown.js:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/tree.js:58"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/styles/app.css:570"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/QuestionsView.jsx:4"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ReportView.jsx:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 7,
+      "covered": 7,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -27633,6 +27831,10 @@
       "ARCH-MAP-007"
     ],
     [
+      "REQ-MAP-1144",
+      "ARCH-MAP-007"
+    ],
+    [
       "ARCH-MAPDIAGRAMS-055",
       "SYS-VISUAL-106"
     ],
@@ -28362,6 +28564,10 @@
     ],
     [
       "REQ-VIEWER-1139",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-VIEWER-1145",
       "ARCH-VIEWER-007"
     ],
     [
@@ -30919,15 +31125,15 @@
     }
   ],
   "design": {
-    "files": 149,
-    "clean_files": 132,
-    "score": 89,
+    "files": 151,
+    "clean_files": 133,
+    "score": 88,
     "candidates": {
-      "encapsulation": 6,
+      "encapsulation": 10,
       "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 4
+      "standards": 5
     },
     "findings": [
       {
@@ -30944,7 +31150,7 @@
         "file": "app/src/lib/i18n.de.js",
         "line": 15,
         "name": "i18n.de.js",
-        "detail": "11 line(s) wider than 120 columns, first at line 15"
+        "detail": "16 line(s) wider than 120 columns, first at line 15"
       },
       {
         "pillar": "standards",
@@ -30952,15 +31158,55 @@
         "file": "app/src/lib/i18n.jsx",
         "line": 1,
         "name": "i18n.jsx",
-        "detail": "502 lines (over 500)"
+        "detail": "593 lines (over 500)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/i18n.jsx",
+        "line": 388,
+        "name": "i18n.jsx",
+        "detail": "2 line(s) wider than 120 columns, first at line 388"
       },
       {
         "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "app/src/views/QuestionsView.jsx",
-        "line": 139,
+        "line": 143,
         "name": "QuestionPanel",
         "detail": "`QuestionPanel` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 22,
+        "name": "Ids",
+        "detail": "full, openSpec, t travel together through 5 functions: Conclusions, Ids, Numbers, Summary, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, full, openSpec, t travel together through 4 functions: Conclusions, Numbers, Summary, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, openSpec, t travel together through 5 functions: Conclusions, Numbers, Summary, Top, Types"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 61,
+        "name": "Summary",
+        "detail": "c, full, openSpec travel together through 5 functions: Conclusions, Numbers, ReportBody, Summary, Types"
       },
       {
         "pillar": "abstraction",
@@ -31054,9 +31300,9 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "plugin-full/scripts/reqmap_engine/config.py",
-        "line": 339,
+        "line": 342,
         "name": "apply_config",
-        "detail": "`apply_config` is 91 lines (over 80)"
+        "detail": "`apply_config` is 102 lines (over 80)"
       },
       {
         "pillar": "abstraction",
@@ -31084,6 +31330,7 @@
       }
     ],
     "advice": {
+      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
       "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
@@ -31093,15 +31340,15 @@
   },
   "health": {
     "score": 93,
-    "total": 369,
-    "scored": 347,
+    "total": 371,
+    "scored": 349,
     "healthy": 323,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 323,
-    "implemented": 336,
-    "tested": 337,
-    "drafts": 24,
+    "implemented": 338,
+    "tested": 339,
+    "drafts": 26,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31247,6 +31494,13 @@
         ]
       },
       {
+        "id": "REQ-MAP-1144",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-MAPSTAMP-1124",
         "status": "draft",
         "why": [
@@ -31276,6 +31530,13 @@
       },
       {
         "id": "REQ-SCAN-1136",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-VIEWER-1145",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31392,5 +31653,19 @@
       "2026-12-18",
       "2026-12-25"
     ]
+  },
+  "trace": {
+    "coverage": {
+      "code_files": 291,
+      "tagged_files": 185,
+      "production_files": 267,
+      "drift_files": 101
+    },
+    "suggestions": {},
+    "hygiene": {
+      "duplicates": [],
+      "title_only_confirmed": [],
+      "structural": 0
+    }
   }
 }

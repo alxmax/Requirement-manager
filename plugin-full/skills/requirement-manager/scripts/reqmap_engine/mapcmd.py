@@ -125,6 +125,12 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
         data["bugs_fixed"] = fixed_block(reqs_dir)
         data["forge"] = forge_of(root)
         data["bug_format"] = format_block()
+    if with_design:
+        # implements: REQ-MAP-1144 - trace coverage, test suggestions and
+        # hygiene: advice like the design record, so the freshness check
+        # neither computes nor compares it
+        from .tracecover import trace_block
+        data["trace"] = trace_block(root, reqs_dir, reqs, members)
     _attach_translations(data, reqs, reqs_dir)
     return data
 
@@ -158,7 +164,7 @@ def _strip_generated(text):
     except ValueError:
         payload = None
     if isinstance(payload, dict) and "nodes" in payload:
-        for key in ("engine_version", "repo", "branch", "design"):
+        for key in ("engine_version", "repo", "branch", "design", "trace"):
             payload.pop(key, None)
         return json.dumps(payload, sort_keys=True, ensure_ascii=False)
     out, in_design = [], False

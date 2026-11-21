@@ -14,6 +14,8 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reqmap as R
+from reqmap_engine import tracecover as _tracecover
+R.tracecover = _tracecover
 from test_reqmap_common import _ROLE, _write
 
 ENGINE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
@@ -172,6 +174,72 @@ class SpecValueReading(unittest.TestCase):  # tested-by: REQ-RULES-1143 @unit
         vals = {n: [v for v, _f, _l, _lit in R.specvalues.code_values(d, {"c.h"}, n)]
                 for n in ("MASK", "TIMEOUT_MS", "LIMIT")}
         self.assertEqual({"MASK": [16.0], "TIMEOUT_MS": [1000.0], "LIMIT": [3.0]}, vals)
+
+
+class TraceBlock(unittest.TestCase):  # tested-by: REQ-MAP-1144 @unit
+    """The map's trace block: reach, tested-by suggestions, hygiene, rules."""
+
+    def _ws(self, d, reqs, files):
+        for rel, text in files.items():
+            _write(os.path.join(d, rel), text)
+        os.makedirs(os.path.join(d, "requirements"), exist_ok=True)
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        return R.tracecover, reqs, members
+
+    def _req(self, rid, status="confirmed", clauses=("It does a thing.",)):
+        body = "## Description\n> Why.\n\nEvery bullet below is binding.\n" + "".join(
+            "- {}\n".format(c) for c in clauses)
+        return {"meta": {"id": rid, "status": status, "layer": "feature"},
+                "body": body, "path": rid + ".md"}
+
+    def test_coverage_counts_files_tags_and_the_lock(self):  # verifies: REQ-MAP-1144#CASE-1
+        d = _repo(self)
+        tc, _r, members = self._ws(d, {}, {
+            "src/a.c": CTAG + "R-1\nint a(void) { return 1; }\n",
+            "src/b.c": "int b(void) { return 2; }\n",
+            "tests/a_test.c": "int t(void) { return 0; }\n"})
+        with open(os.path.join(d, "requirements", "_memberlock.json"), "w") as f:
+            f.write('{"members": {"R-1": {"src/a.c#a": "x"}}}')
+        cov = tc._coverage(tc._code_files(d, os.path.join(d, "requirements")),
+                           members, os.path.join(d, "requirements"))
+        self.assertEqual({"code_files": 3, "tagged_files": 1,
+                          "production_files": 2, "drift_files": 1}, cov)
+
+    def test_a_test_that_names_the_requirement_is_tier_a(self):  # verifies: REQ-MAP-1144#CASE-2
+        d = _repo(self)
+        reqs = {rid: self._req(rid) for rid in ("R-1", "R-2", "R-3")}
+        tc, reqs, members = self._ws(d, reqs, {
+            "src/brake.c": CTAG + "R-1\nint brake(void) { return 1; }\n",
+            "src/pedal.c": CTAG + "R-2\nint pedal(void) { return 1; }\n",
+            "src/horn.c": CTAG + "R-3\nint horn(void) { return 1; }\n",
+            "tests/brake_test.c": "/* R-1 */ void t(void) {}\n",
+            "tests/pedal_test.c": "void t(void) {}\n"})
+        rd = os.path.join(d, "requirements")
+        s = tc._suggestions(reqs, members, tc._code_files(d, rd), d, rd)
+        self.assertEqual({"tier": "A", "tests": ["tests/brake_test.c"]}, s["R-1"])
+        self.assertEqual({"tier": "B", "tests": ["tests/pedal_test.c"]}, s["R-2"])
+        self.assertEqual({"tier": "C", "tests": []}, s["R-3"])
+
+    def test_duplicates_and_empty_confirmed_are_listed(self):  # verifies: REQ-MAP-1144#CASE-3
+        reqs = {"R-1": self._req("R-1"), "R-2": self._req("R-2"),
+                "R-3": self._req("R-3", clauses=())}
+        h = R.tracecover._hygiene(reqs)
+        self.assertEqual([["R-1", "R-2"]], h["duplicates"])
+        self.assertEqual(["R-3"], h["title_only_confirmed"])
+
+    def test_a_design_rule_counts_production_code_only(self):  # verifies: REQ-MAP-1144#CASE-4
+        d = _repo(self)
+        for rel, text in {"src/a.cpp": "// throw here\nvoid f() {\n  throw 1;\n}\n",
+                          "tests/a_test.cpp": "void t() { throw 2; }\n"}.items():
+            _write(os.path.join(d, rel), text)
+        old = R.config.DESIGN_RULES
+        R.config.DESIGN_RULES = [{"id": "no-exceptions", "pattern": r"\bthrow\b",
+                                  "why": "no exceptions"}]
+        self.addCleanup(setattr, R.config, "DESIGN_RULES", old)
+        rules, problems = R.tracecover._rules(R.tracecover._code_files(d, None))
+        self.assertEqual([], problems)
+        self.assertEqual(1, rules[0]["count"])
+        self.assertEqual({"file": "src/a.cpp", "line": 3}, rules[0]["hits"][0])
 
 
 if __name__ == "__main__":

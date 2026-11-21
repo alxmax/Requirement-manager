@@ -29,6 +29,7 @@ Every bullet below is binding.
 - The viewer gives open questions a page of their own, each marked High, Medium or Low priority, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
 - Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]
 - A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]
+- The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
 - Choosing a rail reading opens Problems on that reading's own tab. [[REQ-VIEWER-1090]]
@@ -1353,13 +1354,13 @@ satisfies: [ARCH-VIEWER-007]
 > not open the map.
 
 Every bullet below is binding.
-- The viewer's Workspace rail lists Report last, and selecting it opens one page in six
+- The viewer's Workspace rail lists Report last, and selecting it opens one page in seven
   sections, in this order: Summary, How it was checked, Results in numbers, Problem types,
-  Top 10 questions and Recommendations.
+  Top 10 questions, Recommendations and Deliverables.
 - Summary: one paragraph built from the counts below, naming the health score, the
   confirmed share, and the largest open count of bugs, High questions and missing tags.
 - How it was checked: the engine version, the branch and the time the map was written,
-  the number of requirements and member files read, and the checks behind the numbers
+  each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers
   (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.
 - Results in numbers: open bugs in total and per priority, and the number fixed; open
   questions by High, Medium and Low as the Questions page counts them; and, over
@@ -1377,6 +1378,8 @@ Every bullet below is binding.
   confirmed with no code, drift, High questions, missing tests, unproven cases, open P0
   and P1 bugs, Medium questions), each naming the count and the command or edit that
   closes it. With nothing open it says so.
+- Deliverables: the files the report and the audit leave behind, each with its path in the
+  repository and what it holds.
 - Every listed requirement opens its document.
 - `Export PDF` prints the page through the browser's print dialog, every list out in full.
 - A count the map does not carry is shown as not measured, not as zero, and adds no
@@ -1420,3 +1423,81 @@ CASE-6 — a recommendation per problem, most severe first
   When   the report is computed
   Then   it recommends two things, the missing code first, each with its count; with
          nothing open it gives the single line that nothing is open
+
+---
+id: REQ-VIEWER-1145
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# The Report reads an audit
+
+## Description
+> After an audit the Report page left out the audit itself, mixed its findings into the
+> questions, and a reader needed a separate table to reconcile the two counts. It also kept no
+> copy outside the browser. See [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).
+
+Every bullet below is binding.
+- A Verify-intent bullet starting `Observed (audit, KIND)` is an audit finding: the Questions
+  page leaves it out, and the Report counts findings by kind with their requirements.
+- With an audit session in the map, the Report says how many planned requirements were read, and
+  shows the agreement and precision rates as `k/n`.
+- With a `trace` block, the Report shows the share of code files with a tag and of production
+  files watched for drift, the tested-by suggestions by tier with the test each names, the
+  duplicates, the confirmed requirements with no clause and each design rule's hits.
+- Each list of requirements sits behind a chip that opens it; printed, every list is open.
+- `Export Markdown` downloads the same numbers and lists as a Markdown file.
+- The page opens with a title and a line naming the date, branch, engine and audit band, each
+  only when the map carries it; a contents list beside it names the seven sections, numbered,
+  and marks the one in view.
+- Summary shows the key numbers as tiles and the main conclusions as bullets, each with chips
+  to the requirements behind it. Results in numbers is a table of indicator and value, where
+  the open questions per priority and the requirements with no tested-by per tier each open
+  from a chip.
+- Recommendations add, when non-zero: audit findings of a bug or missing code, tier A
+  suggestions, false-coverage findings, duplicates, empty confirmed requirements and design
+  rule hits.
+
+## Cases
+CASE-1 — an audit finding is not a question
+  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a
+         person wrote
+  When   the Questions page and the Report are computed
+  Then   the page lists only the person's question, and the Report counts one `bug` finding
+
+CASE-2 — the audit session and the trace reach are shown
+  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of
+         4 code files tagged
+  When   the Report is rendered
+  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4
+
+CASE-3 — suggestions are listed by tier with their test
+  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3
+  When   the Report is rendered
+  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the
+         tier A count
+
+CASE-4 — the Markdown export carries the same numbers
+  Given  the Report of CASE-2
+  When   its Markdown is produced
+  Then   it holds the seven sections, the open bug count and every problem row
+
+CASE-5 — a contents list names the seven sections
+  Given  any registry
+  When   the Report is rendered
+  Then   the seven sections come in order, and the contents list holds one entry for each
+
+CASE-6 — each question priority opens its requirements
+  Given  one High, one Medium and one Low question, each on its own requirement
+  When   the Report is computed
+  Then   each priority lists one requirement behind its chip
+
+CASE-7 — a build stamp the map lacks is left out
+  Given  a map with no `generated_at`
+  When   the Report and its Markdown are produced
+  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured
+         for it
+

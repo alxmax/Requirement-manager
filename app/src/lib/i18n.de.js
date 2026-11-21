@@ -284,6 +284,89 @@ export const DE = {
   "progress": "in Arbeit",
   "draft": "Entwurf",
   "planned": "geplant",
+  // report, audit depth  (REQ-VIEWER-1145)
+  "{n} requirements": "{n} Anforderungen",
+  "Export Markdown": "Als Markdown exportieren",
+  "Deliverables": "Ergebnisse",
+  "Engine": "Engine",
+  "Branch": "Branch",
+  "Audit": "Audit",
+  "Main conclusions:": "Wichtigste Schlussfolgerungen:",
+  "of planned requirements read by the audit ({a} of {b})":
+    "der geplanten Anforderungen vom Audit gelesen ({a} von {b})",
+  "questions for requirement owners": "Fragen an die Verantwortlichen der Anforderungen",
+  "requirements with code, no tested-by": "Anforderungen mit Code, ohne tested-by",
+  "{a} of {b} planned requirements read ({p}%)":
+    "{a} von {b} geplanten Anforderungen gelesen ({p} %)",
+  "band {band}.": "Band {band}.",
+  "{n} open bugs.": "{n} offene Bugs.",
+  "{n} questions for requirement owners": "{n} Fragen an die Verantwortlichen der Anforderungen",
+  "on {m} requirements: {h} High, {md} Medium, {l} Low.":
+    "zu {m} Anforderungen: {h} hoch, {md} mittel, {l} niedrig.",
+  "{n} audit findings: {k}": "{n} Audit-Befunde: {k}",
+  "on {m} requirements.": "zu {m} Anforderungen.",
+  "{n} requirements have code but no tested-by":
+    "{n} Anforderungen haben Code, aber kein tested-by",
+  "mostly tagging gaps when tier A dominates.": "meist fehlende Tags, wenn Stufe A überwiegt.",
+  "{n} confirmed requirements have no code": "{n} bestätigte Anforderungen haben keinen Code",
+  "all requirements": "alle Anforderungen",
+  "all": "alle",
+  "requirements": "Anforderungen",
+  "Read by the audit": "Vom Audit gelesen",
+  "Agreement between runs": "Übereinstimmung zwischen Läufen",
+  "Audit precision": "Präzision des Audits",
+  "Audit findings": "Audit-Befunde",
+  "Fixed bugs": "Behobene Bugs",
+  "{n} on {m} requirements ({h} High, {md} Medium, {l} Low)":
+    "{n} zu {m} Anforderungen ({h} hoch, {md} mittel, {l} niedrig)",
+  "Dangling tags": "Verwaiste Tags",
+  "Code files with a tag": "Codedateien mit Tag",
+  "Production files watched for drift": "Produktionsdateien unter Drift-Überwachung",
+  "Health score": "Zustandswert",
+  "{s} ({a} of {b} requirements green)": "{s} ({a} von {b} Anforderungen grün)",
+  "Contents": "Inhalt",
+  "Paths are relative to the requirements folder; keep them in the repository, not in a temporary folder.":
+    "Pfade sind relativ zum Anforderungsordner; behalte sie im Repository, nicht in einem temporären Ordner.",
+  "this page as Markdown (Export Markdown)": "diese Seite als Markdown (Als Markdown exportieren)",
+  "this page as PDF (Export PDF)": "diese Seite als PDF (Als PDF exportieren)",
+  "the graph the map and this page read": "der Graph, den die Karte und diese Seite lesen",
+  "the map as text": "die Karte als Text",
+  "the open findings, per requirement": "die offenen Befunde, je Anforderung",
+  "the audit session: plan, reads, rates": "die Audit-Sitzung: Plan, Lesungen, Raten",
+  "the bug files, one per module": "die Bug-Dateien, eine je Modul",
+  "Map written {at}.": "Karte geschrieben {at}.",
+  "Engine {e}.": "Engine {e}.",
+  "Branch {b}.": "Branch {b}.",
+  "An audit read {a} of the {b} planned requirements.":
+    "Ein Audit hat {a} der {b} geplanten Anforderungen gelesen.",
+  "Audit session: {a} of {b} planned requirements read (ranked by risk, plus a random sample), band {band}.":
+    "Audit-Sitzung: {a} von {b} geplanten Anforderungen gelesen (nach Risiko geordnet, plus eine Zufallsstichprobe), Band {band}.",
+  "audit findings": "Audit-Befunde",
+  "code files with a tag": "Codedateien mit Tag",
+  "Audit finding": "Audit-Befund",
+  "tested-by suggestion, tier A (a test already names it)":
+    "tested-by-Vorschlag, Stufe A (ein Test nennt sie bereits)",
+  "tested-by suggestion, tier B (a test is paired by name)":
+    "tested-by-Vorschlag, Stufe B (ein Test passt dem Namen nach)",
+  "tested-by suggestion, tier C (no test found)":
+    "tested-by-Vorschlag, Stufe C (kein Test gefunden)",
+  "Same text under two ids": "Gleicher Text unter zwei IDs",
+  "Confirmed with a title and no clause": "Bestätigt, mit Titel und ohne Klausel",
+  "Design rule": "Designregel",
+  "audit findings say the code does not do what a clause says: confirm each with a reproduction, then fix it or file a bug":
+    "Audit-Befunde sagen, dass der Code nicht tut, was eine Klausel sagt: bestätige jeden mit einer Reproduktion, dann behebe ihn oder lege einen Bug an",
+  "requirements have a test that already names them: add the `# tested-by: ID` tag the suggestion gives":
+    "Anforderungen haben einen Test, der sie bereits nennt: füge das `# tested-by: ID`-Tag aus dem Vorschlag hinzu",
+  "requirements have code but no test: tag the test with `# tested-by: ID`, or write one":
+    "Anforderungen haben Code, aber keinen Test: tagge den Test mit `# tested-by: ID` oder schreibe einen",
+  "audit findings say a test cannot fail when the code is wrong: strengthen those tests first":
+    "Audit-Befunde sagen, dass ein Test nicht fehlschlagen kann, wenn der Code falsch ist: verstärke zuerst diese Tests",
+  "requirements repeat another's text word for word: merge or retire one of each pair":
+    "Anforderungen wiederholen wörtlich den Text einer anderen: führe jedes Paar zusammen oder lege eine davon still",
+  "confirmed requirements have a title and no clause: write the clause or set them back to draft":
+    "bestätigte Anforderungen haben einen Titel und keine Klausel: schreibe die Klausel oder setze sie zurück auf Entwurf",
+  "places break the repository's own design rules: see each rule's list under Problem types":
+    "Stellen verletzen die eigenen Designregeln des Repositorys: siehe die Liste jeder Regel unter Problemarten",
 };
 
 /* The CLI's description of itself, as in COMMAND_RO. Flags stay literal. */

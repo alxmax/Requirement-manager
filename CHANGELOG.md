@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+**The Report reads an audit, and the map carries the trace's reach (ADR-0091).**
+
+- `sync` writes a `trace` block in `_map.json`: the share of code files with a tag and of production files the drift lock watches; for each requirement with code and no `tested-by:`, a suggestion by tier (A: a test paired by name already names it; B: paired by name only; C: none found); duplicates and confirmed requirements with no clause; and, with `DESIGN_RULES` in `_config.json`, each local design rule's hits with file and line. Advice only: the gate's freshness check neither computes nor compares it. REQ-MAP-1144
+- The Report page shows the audit session (read out of planned, agreement and precision), counts the audit's findings (`Observed (audit, KIND)`) by kind and no longer lists them as questions, shows the trace block, opens each list from a chip, and downloads as Markdown beside the PDF. New recommendations follow from each. REQ-VIEWER-1145
+- The Report reads as a document: a title with the build stamp, a numbered contents list that marks the section in view, key numbers as tiles, the main conclusions with chips, Results in numbers as an indicator and value table, and a seventh section, Deliverables, naming the files the report and the audit leave in the repository. A date, branch or engine the map does not carry is left out instead of reading `not measured`. REQ-VIEWER-1139 REQ-VIEWER-1145
+- Both requirements are drafts until they are read.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.7`. The core rises to 7,062 logical lines (ADR-0091); 20,772 physical lines in 87 files.
+
 **The viewer speaks German.**
 
 - `DE` joins `EN` and `RO` in the language switch, translating the viewer's own text (241 strings) and the command descriptions; dates follow the language. `P4`'s name, `minor`, was missing from the Romanian table and is added to both. Requirement text and engine words (`confirmed`, `draft`, the gate's severities) stay as written. REQ-VIEWER-943

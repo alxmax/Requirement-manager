@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-21
-engine: 2026-11-21.6
-nodes: 369
+engine: 2026-11-21.7
+nodes: 371
 edges: 130
-design pass-rate: 89% (132/149 source files without a design candidate)
+design pass-rate: 88% (133/151 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -225,6 +225,7 @@ graph LR
     REQ_PLANCADENCE_1000["A release cadence, computed once and only drawn by the chart<br><small>REQ-PLANCADENCE-1000</small>"]
     REQ_HISTORY_1003["What already shipped, read from the CHANGELOG and grouped by month<br><small>REQ-HISTORY-1003</small>"]
     REQ_TODODETAIL_1096["A TODO.md item carries its own description, and keeps a pipe in its title<br><small>REQ-TODODETAIL-1096</small>"]
+    REQ_MAP_1144["The map carries how far the trace reaches<br><small>REQ-MAP-1144</small>"]
     REQ_MAPDIAGRAMS_874["_map.md: four legended, always-regenerated Mermaid blocks<br><small>REQ-MAPDIAGRAMS-874</small>"]
     REQ_MAPDIAGRAMS_875["Specification Hierarchy: satisfies edges only, code counted not drawn<br><small>REQ-MAPDIAGRAMS-875</small>"]
     REQ_MAPDIAGRAMS_876["System Map: per-area subgraphs, bus edges hidden<br><small>REQ-MAPDIAGRAMS-876</small>"]
@@ -370,6 +371,7 @@ graph LR
     REQ_VIEWER_1101["Questions have a page of their own<br><small>REQ-VIEWER-1101</small>"]
     REQ_VIEWER_1114["Choosing a question shows it beside the list<br><small>REQ-VIEWER-1114</small>"]
     REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small>"]
+    REQ_VIEWER_1145["The Report reads an audit<br><small>REQ-VIEWER-1145</small>"]
     REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
     REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
@@ -562,8 +564,8 @@ graph LR
   ARCH_CONFIG_060 -->|implements| f_plugin_full_scripts_reqmap_py_333
   f_plugin_full_scripts_test_reqmap_report_py_3244_5683["plugin-full/scripts/test_reqmap_report.py:3244-5683"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_3244_5683
-  f_plugin_full_scripts_reqmap_engine_config_py_306_340["plugin-full/scripts/reqmap_engine/config.py:306-340"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_306_340
+  f_plugin_full_scripts_reqmap_engine_config_py_309_343["plugin-full/scripts/reqmap_engine/config.py:309-343"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_309_343
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
   f_plugin_full_scripts_test_reqmap_report_py_564_4022["plugin-full/scripts/test_reqmap_report.py:564-4022"]
   ARCH_CONTEXT_048 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_564_4022
@@ -579,8 +581,8 @@ graph LR
   ARCH_CUSTOMTRACE_077["A repository describes its own trace convention<br><small>ARCH-CUSTOMTRACE-077</small>"]
   f_plugin_full_scripts_test_reqmap_customtrace_py_329["plugin-full/scripts/test_reqmap_customtrace.py:329"]
   ARCH_CUSTOMTRACE_077 -->|tested-by| f_plugin_full_scripts_test_reqmap_customtrace_py_329
-  f_plugin_full_scripts_reqmap_engine_config_py_167_372["plugin-full/scripts/reqmap_engine/config.py:167-372"]
-  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_167_372
+  f_plugin_full_scripts_reqmap_engine_config_py_167_386["plugin-full/scripts/reqmap_engine/config.py:167-386"]
+  ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_167_386
   f_plugin_full_scripts_reqmap_engine_customtrace_py_9["plugin-full/scripts/reqmap_engine/customtrace.py:9"]
   ARCH_CUSTOMTRACE_077 -->|implements| f_plugin_full_scripts_reqmap_engine_customtrace_py_9
   f_plugin_full_scripts_reqmap_engine_sourcerows_py_4["plugin-full/scripts/reqmap_engine/sourcerows.py:4"]
@@ -664,8 +666,8 @@ graph LR
   ARCH_FINDINGS_010 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_153_4068
   f_plugin_full_scripts_reqmap_engine_findings_py_15_151["plugin-full/scripts/reqmap_engine/findings.py:15-151"]
   ARCH_FINDINGS_010 -->|implements| f_plugin_full_scripts_reqmap_engine_findings_py_15_151
-  f_plugin_full_scripts_reqmap_engine_mapcmd_py_58_236["plugin-full/scripts/reqmap_engine/mapcmd.py:58-236"]
-  ARCH_FINDINGS_010 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_58_236
+  f_plugin_full_scripts_reqmap_engine_mapcmd_py_58_242["plugin-full/scripts/reqmap_engine/mapcmd.py:58-242"]
+  ARCH_FINDINGS_010 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_58_242
   f_plugin_full_scripts_reqmap_engine_text_py_210["plugin-full/scripts/reqmap_engine/text.py:210"]
   ARCH_FINDINGS_010 -->|implements| f_plugin_full_scripts_reqmap_engine_text_py_210
   ARCH_GITRUN_067["Talking to git<br><small>ARCH-GITRUN-067</small>"]
@@ -740,12 +742,12 @@ graph LR
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_acceptance_py_85
   f_plugin_full_scripts_reqmap_engine_git_py_63["plugin-full/scripts/reqmap_engine/git.py:63"]
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_git_py_63
-  f_plugin_full_scripts_reqmap_engine_mapcmd_py_26_258["plugin-full/scripts/reqmap_engine/mapcmd.py:26-258"]
-  ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_26_258
+  f_plugin_full_scripts_reqmap_engine_mapcmd_py_26_264["plugin-full/scripts/reqmap_engine/mapcmd.py:26-264"]
+  ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_26_264
   f_plugin_full_scripts_reqmap_engine_mapdata_py_43_117["plugin-full/scripts/reqmap_engine/mapdata.py:43-117"]
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapdata_py_43_117
-  f_plugin_full_scripts_reqmap_engine_mapjson_py_61_139["plugin-full/scripts/reqmap_engine/mapjson.py:61-139"]
-  ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapjson_py_61_139
+  f_plugin_full_scripts_reqmap_engine_mapjson_py_61_141["plugin-full/scripts/reqmap_engine/mapjson.py:61-141"]
+  ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapjson_py_61_141
   f_plugin_full_scripts_reqmap_engine_mapmd_py_42["plugin-full/scripts/reqmap_engine/mapmd.py:42"]
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_mapmd_py_42
   f_plugin_full_scripts_reqmap_engine_model_py_282["plugin-full/scripts/reqmap_engine/model.py:282"]
@@ -756,6 +758,8 @@ graph LR
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_targets_py_1
   f_plugin_full_scripts_reqmap_engine_text_py_34_129["plugin-full/scripts/reqmap_engine/text.py:34-129"]
   ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_text_py_34_129
+  f_plugin_full_scripts_reqmap_engine_tracecover_py_8["plugin-full/scripts/reqmap_engine/tracecover.py:8"]
+  ARCH_MAP_007 -->|implements| f_plugin_full_scripts_reqmap_engine_tracecover_py_8
   ARCH_MAPDIAGRAMS_055["Mermaid diagrams (_map.md)<br><small>ARCH-MAPDIAGRAMS-055</small>"]
   f_plugin_full_scripts_test_reqmap_report_py_31_4549["plugin-full/scripts/test_reqmap_report.py:31-4549"]
   ARCH_MAPDIAGRAMS_055 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_31_4549
@@ -992,8 +996,8 @@ graph LR
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_git_py_88_107
   f_plugin_full_scripts_reqmap_engine_init_py_320["plugin-full/scripts/reqmap_engine/init.py:320"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_init_py_320
-  f_plugin_full_scripts_reqmap_engine_mapcmd_py_251["plugin-full/scripts/reqmap_engine/mapcmd.py:251"]
-  ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_251
+  f_plugin_full_scripts_reqmap_engine_mapcmd_py_257["plugin-full/scripts/reqmap_engine/mapcmd.py:257"]
+  ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_mapcmd_py_257
   f_plugin_full_scripts_reqmap_engine_site_py_15_182["plugin-full/scripts/reqmap_engine/site.py:15-182"]
   ARCH_SITE_026 -->|implements| f_plugin_full_scripts_reqmap_engine_site_py_15_182
   f_plugin_full_scripts_reqmap_engine_site_template_py_9["plugin-full/scripts/reqmap_engine/site_template.py:9"]
@@ -1104,6 +1108,8 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_planBars_js_1
   f_app_src_lib_report_js_1["app/src/lib/report.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_report_js_1
+  f_app_src_lib_reportMarkdown_js_1["app/src/lib/reportMarkdown.js:1"]
+  ARCH_VIEWER_007 -->|implements| f_app_src_lib_reportMarkdown_js_1
   f_app_src_lib_timeline_js_1["app/src/lib/timeline.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_lib_timeline_js_1
   f_app_src_lib_tree_js_1["app/src/lib/tree.js:1"]
@@ -1205,7 +1211,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>287 caps</small>"]
+  a_REQ["REQ<br><small>289 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1241,11 +1247,13 @@ graph LR
     REQ_CUSTOMTRACE_1137["A source reads from the code folder or from the repository<br><small>REQ-CUSTOMTRACE-1137</small><br>unreviewed"]
     REQ_CUSTOMTRACE_1138["Requirements kept as rows<br><small>REQ-CUSTOMTRACE-1138</small><br>unreviewed"]
     REQ_INIT_1132["An assistant without the skill still learns the gate<br><small>REQ-INIT-1132</small><br>unreviewed"]
+    REQ_MAP_1144["The map carries how far the trace reaches<br><small>REQ-MAP-1144</small><br>unreviewed"]
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
     REQ_MEMBERDRIFT_1134["A tag above a definition owns it<br><small>REQ-MEMBERDRIFT-1134</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
     REQ_SCAN_1136["A copied engine is not scanned<br><small>REQ-SCAN-1136</small><br>unreviewed"]
+    REQ_VIEWER_1145["The Report reads an audit<br><small>REQ-VIEWER-1145</small><br>unreviewed"]
   end
   style ARCH_BUGS_078 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_BUGS_1116 fill:#fff3cd,stroke:#a66,color:#630
@@ -1265,12 +1273,14 @@ graph LR
   style REQ_CUSTOMTRACE_1137 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_CUSTOMTRACE_1138 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_INIT_1132 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_MAP_1144 fill:#fff3cd,stroke:#a66,color:#630
   style ARCH_MAPSTAMP_079 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MEMBERDRIFT_1134 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SCAN_1136 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_VIEWER_1145 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
@@ -1295,9 +1305,11 @@ graph LR
 | REQ-CUSTOMTRACE-1137 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-CUSTOMTRACE-1138 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-INIT-1132 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-MAP-1144 | draft | 12 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | ARCH-MAPSTAMP-079 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MEMBERDRIFT-1134 | draft | 3 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SCAN-1136 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-VIEWER-1145 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

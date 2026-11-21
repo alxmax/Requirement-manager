@@ -1,12 +1,14 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1139
+// implements: REQ-VIEWER-1145
 /* The Report page's numbers, computed once from what the map carries. Every
  * count either comes from the map or is `null` ("not measured"): nothing is
  * estimated, and a count that is null adds no recommendation. */
 import {
   REQUIREMENTS, BUGS, BUGS_FIXED, HEALTH, ENGINE_VERSION, BRANCH,
-  GENERATED_AT,
+  GENERATED_AT, AUDIT, TRACE,
 } from "./data.js";
+import { openQuestions, isAuditFinding, auditKind } from "./tree.js";
 import { isFix } from "./bugStats.js";
 import { ENFORCED } from "../views/SpecDoc.jsx";
 import {
@@ -102,9 +104,29 @@ function recommend(c) {
   add(c.questions.high,
     "High questions are open: answer each in its requirement's Description "
     + "or Cases");
-  add(c.trace.noTest.length,
+  add(c.findings.filter((f) => /bug|not implemented|unimplemented/
+    .test(f.kind)).reduce((n, f) => n + f.n, 0),
+    "audit findings say the code does not do what a clause says: confirm "
+    + "each with a reproduction, then fix it or file a bug");
+  add(c.tiers && c.tiers.A.length,
+    "requirements have a test that already names them: add the "
+    + "`# tested-by: ID` tag the suggestion gives");
+  add(Math.max(0, c.trace.noTest.length - (c.tiers ? c.tiers.A.length : 0)),
     "requirements have code but no test: tag the test with "
-    + "`# tested-by: ID`");
+    + "`# tested-by: ID`, or write one");
+  add(c.findings.filter((f) => /false coverage/.test(f.kind))
+    .reduce((n, f) => n + f.n, 0),
+    "audit findings say a test cannot fail when the code is wrong: "
+    + "strengthen those tests first");
+  add(c.hygiene && c.hygiene.duplicates.length,
+    "requirements repeat another's text word for word: merge or "
+    + "retire one of each pair");
+  add(c.hygiene && c.hygiene.title_only_confirmed.length,
+    "confirmed requirements have a title and no clause: write the "
+    + "clause or set them back to draft");
+  add(c.designRules.reduce((n, r) => n + r.count, 0),
+    "places break the repository's own design rules: see each rule's "
+    + "list under Problem types");
   add(c.trace.unprovenCases,
     "cases are not proven by a test: add `# verifies: ID#CASE-N` on the "
     + "test that proves each");
@@ -113,6 +135,63 @@ function recommend(c) {
   add(c.questions.medium,
     "Medium questions are open: read them once the High ones are answered");
   return rec;
+}
+
+/** The findings an audit wrote into Verify intent, by kind, each with the
+ * requirements behind it, most frequent kind first. */
+function auditFindings() {
+  const kinds = {};
+  REQUIREMENTS.forEach((r) => {
+    if (r.status === "deprecated") return;
+    openQuestions(r).filter(isAuditFinding).forEach((q) => {
+      const k = auditKind(q);
+      (kinds[k] = kinds[k] || { n: 0, ids: new Set() }).n += 1;
+      kinds[k].ids.add(r.id);
+    });
+  });
+  return Object.entries(kinds).map(([kind, v]) => ({ kind, n: v.n,
+    ids: [...v.ids].sort() })).sort((a, b) => b.n - a.n
+    || a.kind.localeCompare(b.kind));
+}
+
+/** The audit session, when one runs: reviewed out of planned, the counters
+ * and the three rates as the engine computed them. */
+function auditSession() {
+  if (!AUDIT) return null;
+  return { planned: AUDIT.plan.ranked + AUDIT.plan.random,
+    reviewed: AUDIT.reviewed.total, counters: AUDIT.counters || {},
+    rates: AUDIT.rates || {}, band: AUDIT.band };
+}
+
+/** tested-by suggestions by tier, from the map's trace block. */
+function suggestionTiers() {
+  if (!TRACE) return null;
+  const tiers = { A: [], B: [], C: [] };
+  Object.entries(TRACE.suggestions || {}).forEach(([id, s]) => {
+    if (tiers[s.tier]) tiers[s.tier].push({ id, tests: s.tests || [] });
+  });
+  Object.values(tiers).forEach((l) => l.sort((a, b) => (a.id < b.id ? -1 : 1)));
+  return tiers;
+}
+
+/** What the audit leaves behind and where: the two exports this page makes,
+ * then the files `sync` writes beside the requirements, each only when the
+ * map shows it exists. Paths are relative to the requirements folder. */
+function deliverables(c) {
+  const out = [
+    { path: "report.md", what: "this page as Markdown (Export Markdown)" },
+    { path: "report.pdf", what: "this page as PDF (Export PDF)" },
+    { path: "_map.json", what: "the graph the map and this page read" },
+    { path: "_map.md", what: "the map as text" },
+    { path: "_findings.md", what: "the open findings, per requirement" },
+  ];
+  if (c.audit) {
+    out.push({ path: "_audit.json", what: "the audit session: plan, reads, rates" });
+  }
+  if (c.bugs.open.length || c.bugs.fixed) {
+    out.push({ path: "bugs/", what: "the bug files, one per module" });
+  }
+  return out;
 }
 
 /** Everything the Report page shows. */
@@ -144,6 +223,9 @@ export function computeReport() {
       all: n("all") },
     highReqs: [...new Set(ranked.filter((q) => q.prio === "high")
       .map((q) => q.id))],
+    questionIds: Object.fromEntries(["high", "medium", "low"].map((p) =>
+      [p, [...new Set(ranked.filter((q) => q.prio === p).map((q) => q.id))]
+        .sort()])),
     trace: traceCounts(),
     dangling: HEALTH
       ? (HEALTH.gate_error_lines || []).filter((l) => /RM001/.test(l)) : null,
@@ -154,7 +236,15 @@ export function computeReport() {
     rules: Object.entries(rules).map(([rule, ids]) => ({ rule, n: ids.size,
       ids: [...ids].sort() })).sort((a, b) => b.n - a.n),
     top: ranked.slice(0, 10),
+    audit: auditSession(),
+    findings: auditFindings(),
+    coverage: TRACE ? TRACE.coverage : null,
+    tiers: suggestionTiers(),
+    hygiene: TRACE ? TRACE.hygiene : null,
+    designRules: TRACE && TRACE.rules ? TRACE.rules.filter((x) => x.count > 0)
+      : [],
   };
   c.recommendations = recommend(c);
+  c.deliverables = deliverables(c);
   return c;
 }

@@ -23,6 +23,7 @@ Every bullet below is binding.
 - A `TODO.md` item's indented lines ride into `todos` as its `detail`, and a `|` inside its title stays in its name. [[REQ-TODODETAIL-1096]]
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
+- `sync` writes a `trace` block beside the graph: how much code the trace reaches, a probable test for each requirement with none, the corpus's own defects and a repository's design rules. [[REQ-MAP-1144]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
 - What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, each release carrying the first and last commit of the work, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
 
@@ -566,3 +567,60 @@ CASE-3 — an unindented line ends the detail
 ## Context
 **Notes**
 - `distinct_from: REQ-MAP-871` - `REQ-MAP-871` says `todos` is derived from `TODO.md`; this says what each entry carries.
+
+---
+id: REQ-MAP-1144
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+---
+
+# The map carries how far the trace reaches
+
+## Description
+> An audit report counted, by hand, how many files carried a tag, how much production code the
+> drift lock watched, which test probably proved a requirement with no `tested-by:`, which
+> requirements repeated each other and which local design rules were broken. All of it is read
+> from what the scan already knows, so `sync` writes it once and every reader agrees. See
+> [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).
+
+Every bullet below is binding.
+- `sync` writes a `trace` block in `_map.json` with `coverage`, `suggestions` and `hygiene`, and
+  `rules` when the repository declares `DESIGN_RULES`; the gate's freshness check neither
+  computes nor compares it.
+- `coverage` counts program files, files with a tag, production (non-test) files, and
+  production files the member lock holds a hash for.
+- For each live requirement held to code with an `implements:` member and no `tested-by:` one,
+  `suggestions` gives a tier: A when a test file paired with its code by name names the
+  requirement or one of its definitions, B when a test is paired by name only, C when none is.
+  A and B list at most three tests.
+- `hygiene` lists requirements whose binding text is the same, confirmed requirements with no
+  clause, and counts structural entries read from a source.
+- Each `DESIGN_RULES` entry is counted on production code with its file and line, at most 50 kept;
+  an entry with no string `id` or `pattern` is reported and left out.
+
+## Cases
+CASE-1 — coverage counts files, tags and the member lock
+  Given  two code files, one tagged with a member hash in the lock, and one test file
+  When   the trace block is computed
+  Then   it counts 3 program files, 1 tagged file, 2 production files and 1 watched for drift
+
+CASE-2 — a test that names the requirement is tier A
+  Given  `brake.c` implementing R-1 and `brake_test.c` naming R-1, `pedal.c` implementing R-2
+         with `pedal_test.c` that names neither, and `horn.c` implementing R-3 with no test
+  When   the trace block is computed
+  Then   R-1 is tier A with `brake_test.c`, R-2 tier B with `pedal_test.c`, R-3 tier C
+
+CASE-3 — duplicates and empty confirmed requirements are listed
+  Given  two requirements with the same clause and a confirmed one with none
+  When   the trace block is computed
+  Then   the pair is a duplicate and the empty one is listed
+
+CASE-4 — a design rule is counted on production code only
+  Given  `DESIGN_RULES` banning `throw`, a production file with one `throw` and one in a comment,
+         and a test file with another
+  When   the trace block is computed
+  Then   the rule has one hit, on the production file's line
+

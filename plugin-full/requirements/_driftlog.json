@@ -86,8 +86,8 @@
       "reason": "decision-question lint amends ARCH-LINTCHECKS-025, ARCH-LINT-014, REQ-LINT-864 (v8.13.0)"
     },
     "ARCH-MAP-007": {
-      "hash": "837acd003e9a",
-      "reason": null
+      "hash": "0d91a1dd0d93",
+      "reason": "ARCH-MAP-007 and ARCH-VIEWER-007 gain their trace and audit-report obligations (ADR-0091)"
     },
     "ARCH-MAPDIAGRAMS-055": {
       "hash": "0e45d4b8d45e",
@@ -162,8 +162,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "9ae5ef1c3336",
-      "reason": "Questions get High/Medium/Low priority and the Report page is added, at the maintainer's request"
+      "hash": "80ee0596527c",
+      "reason": "ARCH-MAP-007 and ARCH-VIEWER-007 gain their trace and audit-report obligations (ADR-0091)"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -648,6 +648,10 @@
     "REQ-VIEWER-1114": {
       "hash": "d2e43f99cec6",
       "reason": null
+    },
+    "REQ-VIEWER-1139": {
+      "hash": "9bfcc73b9b09",
+      "reason": "Report: seven sections with Deliverables; the stamp shows only what the map carries"
     },
     "REQ-VIEWER-940": {
       "hash": "77e9d38ebfb9",

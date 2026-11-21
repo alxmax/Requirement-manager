@@ -328,6 +328,97 @@ const RO = {  // implements: REQ-VIEWER-943
   "Bug files: the open and fixed bugs the repository keeps.":
     "Fișierele de buguri: bugurile deschise și rezolvate din repository.",
   "Nothing is open: no recommendation.": "Nu e nimic deschis: nicio recomandare.",
+  // report, audit depth  (REQ-VIEWER-1145)
+  "{n} requirements": "{n} cerințe",
+  "Export Markdown": "Exportă Markdown",
+  "Deliverables": "Livrabile",
+  "Engine": "Engine",
+  "Branch": "Branch",
+  "Audit": "Audit",
+  "Main conclusions:": "Concluzii principale:",
+  "of planned requirements read by the audit ({a} of {b})":
+    "din cerințele planificate citite de audit ({a} din {b})",
+  "questions for requirement owners": "întrebări pentru proprietarii cerințelor",
+  "requirements with code, no tested-by": "cerințe cu cod, fără tested-by",
+  "{a} of {b} planned requirements read ({p}%)":
+    "{a} din {b} cerințe planificate citite ({p}%)",
+  "band {band}.": "banda {band}.",
+  "{n} open bugs.": "{n} buguri deschise.",
+  "{n} questions for requirement owners": "{n} întrebări pentru proprietarii cerințelor",
+  "on {m} requirements: {h} High, {md} Medium, {l} Low.":
+    "pe {m} cerințe: {h} ridicată, {md} medie, {l} scăzută.",
+  "{n} audit findings: {k}": "{n} constatări de audit: {k}",
+  "on {m} requirements.": "pe {m} cerințe.",
+  "{n} requirements have code but no tested-by":
+    "{n} cerințe au cod, dar fără tag tested-by",
+  "mostly tagging gaps when tier A dominates.":
+    "în mare parte lacune de etichetare când domină tier A.",
+  "{n} confirmed requirements have no code": "{n} cerințe confirmate nu au cod",
+  "all requirements": "toate cerințele",
+  "all": "toate",
+  "requirements": "cerințe",
+  "Read by the audit": "Citite de audit",
+  "Agreement between runs": "Acord între rulări",
+  "Audit precision": "Precizia auditului",
+  "Audit findings": "Constatări de audit",
+  "Fixed bugs": "Buguri rezolvate",
+  "{n} on {m} requirements ({h} High, {md} Medium, {l} Low)":
+    "{n} pe {m} cerințe ({h} ridicată, {md} medie, {l} scăzută)",
+  "Dangling tags": "Taguri orfane",
+  "Code files with a tag": "Fișiere de cod cu tag",
+  "Production files watched for drift": "Fișiere de producție urmărite pentru drift",
+  "Health score": "Scor Health",
+  "{s} ({a} of {b} requirements green)": "{s} ({a} din {b} cerințe verzi)",
+  "Contents": "Cuprins",
+  "Paths are relative to the requirements folder; keep them in the repository, not in a temporary folder.":
+    "Căile sunt relative la folderul de cerințe; păstrează-le în repository, nu într-un folder temporar.",
+  "this page as Markdown (Export Markdown)": "această pagină ca Markdown (Exportă Markdown)",
+  "this page as PDF (Export PDF)": "această pagină ca PDF (Export PDF)",
+  "the graph the map and this page read": "graful citit de hartă și de această pagină",
+  "the map as text": "harta ca text",
+  "the open findings, per requirement": "constatările deschise, pe cerință",
+  "the audit session: plan, reads, rates": "sesiunea de audit: plan, citiri, rate",
+  "the bug files, one per module": "fișierele de buguri, câte unul pe modul",
+  "Map written {at}.": "Harta scrisă {at}.",
+  "Engine {e}.": "Engine {e}.",
+  "Branch {b}.": "Branch {b}.",
+  "An audit read {a} of the {b} planned requirements.":
+    "Un audit a citit {a} din cele {b} cerințe planificate.",
+  "Audit session: {a} of {b} planned requirements read (ranked by risk, plus a random sample), band {band}.":
+    "Sesiune de audit: {a} din {b} cerințe planificate citite (ordonate după risc, plus un eșantion aleatoriu), banda {band}.",
+  "audit findings": "constatări de audit",
+  "code files with a tag": "fișiere de cod cu tag",
+  "Audit finding": "Constatare de audit",
+  "tested-by suggestion, tier A (a test already names it)":
+    "sugestie tested-by, tier A (un test o numește deja)",
+  "tested-by suggestion, tier B (a test is paired by name)":
+    "sugestie tested-by, tier B (un test e asociat după nume)",
+  "tested-by suggestion, tier C (no test found)":
+    "sugestie tested-by, tier C (niciun test găsit)",
+  "Same text under two ids": "Același text sub două id-uri",
+  "Confirmed with a title and no clause": "Confirmate cu titlu și fără clauză",
+  "Design rule": "Regulă de design",
+  ["audit findings say the code does not do what a clause says: confirm "
+    + "each with a reproduction, then fix it or file a bug"]:
+    "constatări de audit spun că codul nu face ce spune o clauză: confirmă fiecare cu o reproducere, apoi repar-o sau deschide un bug",
+  ["requirements have a test that already names them: add the "
+    + "`# tested-by: ID` tag the suggestion gives"]:
+    "cerințe au deja un test care le numește: adaugă tagul `# tested-by: ID` din sugestie",
+  ["requirements have code but no test: tag the test with "
+    + "`# tested-by: ID`, or write one"]:
+    "cerințe au cod dar nu au test: taggează testul cu `# tested-by: ID`, sau scrie unul",
+  ["audit findings say a test cannot fail when the code is wrong: "
+    + "strengthen those tests first"]:
+    "constatări de audit spun că un test nu poate pica atunci când codul e greșit: întărește întâi aceste teste",
+  ["requirements repeat another's text word for word: merge or "
+    + "retire one of each pair"]:
+    "cerințe repetă cuvânt cu cuvânt textul alteia: unește-le sau retrage una din fiecare pereche",
+  ["confirmed requirements have a title and no clause: write the "
+    + "clause or set them back to draft"]:
+    "cerințe confirmate au titlu dar nicio clauză: scrie clauza sau trece-le înapoi în draft",
+  ["places break the repository's own design rules: see each rule's "
+    + "list under Problem types"]:
+    "locuri încalcă regulile de design ale repository-ului: vezi lista fiecărei reguli la Tipuri de probleme",
   ["tags name no requirement (RM001): fix the id or remove the tag; "
     + "`gate` lists each line"]:
     "taguri nu numesc nicio cerință (RM001): corectează id-ul sau șterge tagul; `gate` listează fiecare linie",

@@ -1,5 +1,6 @@
 // implements: ARCH-VIEWER-007
 // tested-by: REQ-VIEWER-1139
+// tested-by: REQ-VIEWER-1145
 /* The Report page: one place for the counts of bugs, questions and missing
  * tags, the ten most important questions and what to do next. Each check
  * adopts its own fixture and the real export is put back at the end. */
@@ -7,7 +8,9 @@ import { renderToString } from "react-dom/server";
 import { adoptMapExport } from "../../src/lib/data.js";
 import { adaptNode } from "../../src/lib/loadData.js";
 import { computeReport } from "../../src/lib/report.js";
-import { ReportView } from "../../src/views/ReportView.jsx";
+import { ReportView, problemRows } from "../../src/views/ReportView.jsx";
+import { reportMarkdown } from "../../src/lib/reportMarkdown.js";
+import { verifyRows } from "../../src/views/QuestionsView.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
 import { test, json, noop } from "./harness.jsx";
 
@@ -60,15 +63,28 @@ test("report: bugs and questions are counted as their pages count them",
     && c3.questions.high === 1 && c3.questions.medium === 1
     && c3.questions.low === 1
     && page.includes("P1 1 · P2 1"));
-test("report: the six sections come in order",
+// verifies: REQ-VIEWER-1145#CASE-5
+test("report: the seven sections come in order, each in the contents",
   ["Summary", "How it was checked", "Results in numbers", "Problem types",
-    "Top 10 questions", "Recommendations"].map((h) => page.indexOf(`>${h}<`))
-    .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1])));
+    "Top 10 questions", "Recommendations", "Deliverables"]
+    .map((h) => page.indexOf(`>${h}<`))
+    .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1]))
+    && (page.match(/class="rep-toc-i/g) || []).length === 7);
+// verifies: REQ-VIEWER-1145#CASE-6
+test("report: each question priority opens its requirements",
+  ["high", "medium", "low"].every((p) => c3.questionIds[p].length === 1)
+    && c3.deliverables.some((d) => d.path === "bugs/"));
 
 // verifies: REQ-VIEWER-1139#CASE-4
 test("report: what the map does not carry is not shown as zero",
   c3.dangling === null && c3.drift === null
     && page.includes("not measured"));
+// verifies: REQ-VIEWER-1145#CASE-7
+test("report: a build stamp the map lacks is left out, not 'not measured'",
+  c3.method.at === null && !page.includes("Map written")
+    && !page.includes(">Date:<")
+    && !/Map written|not measured/.test(reportMarkdown(c3, null, problemRows(c3))
+      .split("## Results")[0]));
 
 // verifies: REQ-VIEWER-1139#CASE-5
 adoptMapExport({ nodes: [
@@ -95,5 +111,51 @@ test("report: a recommendation per problem, most severe first",
   rec.length === 2 && rec[0].n === 1 && /no code/.test(rec[0].text)
     && /no test/.test(rec[1].text)
     && none.includes("Nothing is open: no recommendation."));
+
+// verifies: REQ-VIEWER-1145#CASE-1
+adoptMapExport({ nodes: [node("R-AUD-001", { members: [IMPL, TEST],
+  verify: ["Observed (audit, bug): the code clamps at 10, the clause says 12.",
+    "Which unit does the limit use?"] })] });
+const vf = computeReport().findings;
+const personQs = verifyRows("person");
+test("report: an audit finding is not a question",
+  vf.length === 1 && vf[0].kind === "bug" && vf[0].ids.join() === "R-AUD-001"
+    && personQs.length === 1 && personQs[0].questions.length === 1
+    && /unit/.test(personQs[0].questions[0]));
+
+// verifies: REQ-VIEWER-1145#CASE-2
+const AUD = { plan: { date: "2026-11-21", seed: 1, ranked: 3, random: 1 },
+  reviewed: { total: 3, ranked: 2, random: 1 }, counters: {},
+  rates: { agreement: { k: 2, n: 3 }, precision: { k: 1, n: 2 } },
+  band: "continue", problems: [], requirements: [] };
+const TRACE = { coverage: { code_files: 4, tagged_files: 2,
+  production_files: 3, drift_files: 1 },
+  suggestions: { "R-1": { tier: "A", tests: ["brake_test.c"] },
+    "R-3": { tier: "C", tests: [] } },
+  hygiene: { duplicates: [], title_only_confirmed: [], structural: 0 } };
+adoptMapExport({ nodes: [node("R-1", { members: [IMPL] }),
+  node("R-3", { members: [IMPL] })], audit: AUD, trace: TRACE });
+const page2 = renderToString(<ReportView openSpec={noop} />);
+test("report: the audit session and the trace reach are shown",
+  page2.includes("75%") && page2.includes("3/4") && page2.includes("50%")
+    && page2.includes("2/4"));
+
+// verifies: REQ-VIEWER-1145#CASE-3
+const c3b = computeReport();
+const tierRows = problemRows(c3b).filter(([l]) => /tier/.test(l));
+test("report: suggestions are listed by tier with their test",
+  c3b.tiers.A[0].id === "R-1" && c3b.tiers.A[0].tests[0] === "brake_test.c"
+    && c3b.tiers.C[0].id === "R-3" && tierRows.length === 2
+    && c3b.recommendations.some((r) => /already names them/.test(r.text)));
+
+// verifies: REQ-VIEWER-1145#CASE-4
+const md = reportMarkdown(c3b, "demo/repo", problemRows(c3b));
+test("report: the Markdown export carries the same numbers",
+  ["## Summary", "## How it was checked", "## Results in numbers",
+    "## Problem types", "## Top 10 questions", "## Recommendations",
+    "## Deliverables"]
+    .every((h) => md.includes(h))
+    && md.includes("| Open bugs | 0 |") && md.includes("brake_test.c")
+    && md.includes("2/4 (50%)"));
 
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
