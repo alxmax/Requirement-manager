@@ -22,6 +22,7 @@ Every bullet below is binding.
 - `TEST_FILE_PATTERNS` adds globs that make a file a test file. [[REQ-CUSTOMTRACE-1112]]
 - `REQUIREMENT_SOURCES` reads requirements kept as text, HTML or Markdown, in folders of the repository's choosing. [[REQ-CUSTOMTRACE-1113]]
 - A source can read its glob from the repository instead of the code folder, so one folder is checked against requirements kept elsewhere. [[REQ-CUSTOMTRACE-1137]]
+- Requirements kept as CSV rows or a JSON list are read through a field map, and rows marked structural are exempt from code and tests. [[REQ-CUSTOMTRACE-1138]]
 
 ## Cases
 CASE-1 — a repository in its own convention is read
@@ -235,4 +236,71 @@ CASE-5 — a glob the repository would match is pointed at root: repo
   Given  a source with no `root` whose glob matches only from the repository
   When   it is loaded with a subfolder as the code root
   Then   nothing is read and the problem says to set root: repo
+
+--------------------
+
+
+---
+id: REQ-CUSTOMTRACE-1138
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CUSTOMTRACE-077]
+---
+
+# Requirements kept as rows
+
+## Description
+> A corpus exported from a requirements tool comes as rows: a CSV file or a JSON list, with its
+> own column names, and with headings and information entries among the requirements. Reading
+> one took a few hundred lines of glue. A field map does it. See
+> [ADR-0088](../../docs/adr/0088-requirements-kept-as-rows.md).
+
+Every bullet below is binding.
+- A source with `format: csv` or `json` reads one requirement per row through `fields`, which
+  maps `id` (required) and optionally `title`, `contract`, `cases`, `status`, `depends_on` and
+  `satisfies` to the source's columns or keys; any other key is a config problem.
+- A contract text is one clause per sentence, a list one clause per item; cases are one case
+  per item. A title missing from the row is the contract's first sentence.
+- `depends_on` and `satisfies` split on `list_separator` (default `,`), or take a JSON list.
+- A status of `confirmed`, `draft` or `deprecated` in the row wins over the source's status.
+- A CSV file is read without its byte-order mark, with `delimiter` (default `,`); a JSON source
+  is a list of objects, or one under the key `items` names.
+- A row with no id is a problem naming the file and the row, and the other rows are read.
+- A row whose `fields.structural.field` holds one of its `values` is a requirement of layer
+  `aggregate`, exempt from code and tests; when more than half the rows of a file are, that is a
+  problem naming the count.
+
+## Cases
+CASE-1 — each CSV row is a requirement
+  Given  a CSV file with a byte-order mark, `;` between columns and its own column names
+  When   it is read through a field map
+  Then   each row with an id is a requirement with its title, clauses, cases, dependencies
+         and status
+
+CASE-2 — a row with no id is a problem
+  Given  the same file with one row whose id cell is empty
+  When   it is read
+  Then   that row is a problem naming its number, and the others are read
+
+CASE-3 — a structural row is exempt, and too many are named
+  Given  a row marked as a heading, then a file where most rows are
+  When   each is read
+  Then   the heading is layer aggregate, and the second file is a problem with its count
+
+CASE-4 — a JSON list under a key is read
+  Given  a JSON object whose `requirements` key holds a list
+  When   it is read with `items: requirements`
+  Then   each object is a requirement, a list contract is one clause per item
+
+CASE-5 — a field map without an id is refused
+  Given  field maps with no id, or with an unknown key
+  When   the config is validated
+  Then   each source is ignored with one problem
+
+CASE-6 — the gate reads a CSV corpus
+  Given  a repository whose only requirements are CSV rows, one tagged in code, one a heading
+  When   the gate runs
+  Then   neither is reported as missing code, and no tag is dangling
 

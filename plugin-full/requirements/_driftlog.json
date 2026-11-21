@@ -42,8 +42,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "ARCH-CUSTOMTRACE-077": {
-      "hash": "eb2250e440f3",
-      "reason": "ADR-0087: a source reads from the code folder or the repository (REQ-CUSTOMTRACE-1137)"
+      "hash": "f2c8a6faeb63",
+      "reason": "ADR-0088: requirements kept as rows (REQ-CUSTOMTRACE-1138)"
     },
     "ARCH-DECOMPOSE-050": {
       "hash": "78a106d8a915",
