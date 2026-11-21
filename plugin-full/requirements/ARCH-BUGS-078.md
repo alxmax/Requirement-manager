@@ -387,6 +387,7 @@ Every bullet below is binding.
 - A row shows its priority, its date under the priority, its id and its title.
 - Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.
 - Priority chips and a text search narrow the list, and a narrowed list opens its groups.
+- At the right of the chip row, under `Export PDF`, one button opens every group (`Expand all`) or, once all are open, closes them (`Collapse all`).
 - Every label goes through `t()`.
 
 ## Cases
@@ -409,6 +410,12 @@ CASE-4 — a repository with no bugs still has the tab
   Given  a map with no `bugs` key
   When   the panel renders
   Then   the tab reads 0 and the panel offers `Add bug`
+
+CASE-5 — one button opens or closes every group
+  Given  bugs in two modules, both groups closed
+  When   `Expand all` is pressed, then the button again
+  Then   both groups are open and the button reads `Collapse all`; then both are closed
+         and it reads `Expand all`
 
 --------------------
 

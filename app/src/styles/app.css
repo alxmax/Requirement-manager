@@ -476,6 +476,8 @@ h1 .i18n-badge { font-size: 12px; }
 /* ---- Known bugs, by module ----------------------------------------------- */
 /* implements: REQ-BUGS-1121 */
 .bug-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+/* Export PDF at the right; Expand/Collapse all under it, on the chip row */
+.bug-bar .bug-export { margin-left: auto; }
 .bug-search { flex: 1 1 200px; min-width: 0; font: var(--text-small); padding: 7px 10px; color: var(--fg); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-1); }
 .bug-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-2); background: var(--surface); font: var(--text-small); }
 .bug-form label { display: flex; flex-direction: column; gap: 4px; min-width: 0; font-size: 12px; color: var(--fg-muted); }

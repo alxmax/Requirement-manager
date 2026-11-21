@@ -91,6 +91,14 @@ export function BugForm({ modules, add, close, error }) {
   );
 }
 
+/** Expand / Collapse all: what a press leads to, the button's label, and
+ * whether a group opens. `null` leaves a group to its own default.
+ * implements: REQ-BUGS-1121 */
+export const nextOpenAll = (openAll) => openAll !== true;
+export const toggleAllLabel = (openAll) => (openAll === true
+  ? "Collapse all" : "Expand all");
+export const groupOpen = (openAll, fallback) => openAll ?? fallback;
+
 const inOrder = (rows) => [...rows].sort((a, b) => a.prio.localeCompare(b.prio));
 const located = (b) => b.file + (b.line ? `:${b.line}` : "");
 const prioMix = (rows) => PRIOS.filter((p) => rows.some((b) => b.prio === p))
@@ -292,6 +300,11 @@ export function BugsPanel({ added, setAdded }) {
   const [command, setCommand] = useState(null);
   const [printing, setPrinting] = useState(false);
   const [view, setView] = useState("open");
+  // Expand / Collapse all: null leaves each group to its default; a press
+  // remounts the groups (gen) open or closed.  implements: REQ-BUGS-1121
+  const [openAll, setOpenAll] = useState(null);
+  const [gen, setGen] = useState(0);
+  const toggleAll = () => { setOpenAll(nextOpenAll(openAll)); setGen(gen + 1); };
   useEffect(() => {
     if (!printing) return undefined;
     const done = () => setPrinting(false);
@@ -337,7 +350,7 @@ export function BugsPanel({ added, setAdded }) {
           onClick={() => setAdding(!adding)}>
           <Icon name="plus" size={13} /> {t("Add bug")}
         </button>
-        <button className="btn btn-ghost" disabled={keys.length === 0}
+        <button className="btn btn-ghost bug-export" disabled={keys.length === 0}
           onClick={() => setPrinting(true)}>
           {t("Export PDF")}
         </button>
@@ -370,10 +383,17 @@ export function BugsPanel({ added, setAdded }) {
         </div>
       )}
       {view === "open" && <ChipRow counts={counts} total={found.length}
-        value={prio} setValue={setPrio} label={(k) => k} />}
+        value={prio} setValue={setPrio} label={(k) => k}
+        end={keys.length > 0 && (
+          <button type="button" className="btn btn-ghost bug-toggle-all"
+            onClick={toggleAll}>
+            {t(toggleAllLabel(openAll))}
+          </button>
+        )} />}
       {view === "open" && keys.map((k) => (
-        <BugGroup key={k} label={k} rows={groups[k]}
-          defaultOpen={keys.length === 1 || Boolean(q) || Boolean(prio)}
+        <BugGroup key={`${k}:${gen}`} label={k} rows={groups[k]}
+          defaultOpen={groupOpen(openAll, keys.length === 1 || Boolean(q)
+            || Boolean(prio))}
           pick={pick} setPick={setPick} />
       ))}
       {view === "open" && keys.length === 0 && (

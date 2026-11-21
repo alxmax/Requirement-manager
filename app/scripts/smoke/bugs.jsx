@@ -23,6 +23,7 @@ import {
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
   BugForm, BugHistory, BugReport, BugsPanel, moduleChoices,
+  nextOpenAll, toggleAllLabel, groupOpen,
 } from "../../src/views/problems/BugsPanel.jsx";
 import { json, noop, specOf, test } from "./harness.jsx";
 import { bugsNaming } from "../../src/views/spec/SpecParts.jsx";
@@ -156,6 +157,14 @@ const bugChecks = [
   ["bugs: a repository with no bugs still has the tab and the button",
     />Bugs<span[^>]*>0</.test(empty) && empty.includes("Add bug")
       && panel.includes("Add bug")],
+  // verifies: REQ-BUGS-1121#CASE-5
+  ["bugs: one button opens or closes every group",
+    /Expand all<\/button><\/div><\/div>/.test(english)
+      && english.indexOf("Expand all") > english.indexOf(">All<")
+      && nextOpenAll(null) === true && toggleAllLabel(true) === "Collapse all"
+      && groupOpen(true, false) === true
+      && nextOpenAll(true) === false && toggleAllLabel(false) === "Expand all"
+      && groupOpen(false, true) === false && groupOpen(null, true) === true],
   // verifies: REQ-BUGS-1123#CASE-1
   ["bugs: the report holds every field, highest priority first",
     ["P1 1", "P2 1", "Money", "`p.py:3`", "ticket", "bugs/Payments.md:5",

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+**The Bugs tab opens or closes every module at once.**
+
+- `Expand all` sits at the right of the priority chips, under `Export PDF`, which moves to the right of the bar; once every group is open it reads `Collapse all`. Searching or picking a priority still opens the groups it narrows to. REQ-BUGS-1121
+- Viewer-only change; the engine does not change.
+
 **C and C++ in an audit: tests, draft questions, stated values (ADR-0090).**
 
 - A C/C++ test is known by GoogleTest's names (`foo_test.cc`, `foo_unittest.cc`, `foo_tests.cpp`), a `UnitTests/` or `unit_tests/` directory, or the framework it includes: GoogleTest/GoogleMock, CppUTest, Unity, Catch2, Boost.Test, cmocka, doctest. A CamelCase `FooTest.cpp` is a test, and pairs with `Foo`, only when it includes one, because `RamTest.c` is often a production self-test. REQ-CANDIDATES-1141
