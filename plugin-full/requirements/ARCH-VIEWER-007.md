@@ -228,6 +228,8 @@ Every bullet below is binding.
 - A chrome string with no entry in the active locale falls back to its English text.
 - The reader's chosen locale is remembered on their machine and is never written into the
   generated file, so `_map.html` stays byte-identical whatever anyone last selected.
+- The bundled languages are English, Romanian and German, and each translates the same set
+  of chrome strings.
 
 ## Cases
 CASE-1 — the viewer defaults to English chrome
@@ -236,9 +238,9 @@ CASE-1 — the viewer defaults to English chrome
   Then   its section headers appear in English
 
 CASE-2 — switching locale translates chrome section headers
-  Given  the Romanian locale selected
+  Given  the Romanian or the German locale selected
   When   the same spec is rendered
-  Then   its section headers appear in Romanian, and the English header text is gone
+  Then   its section headers appear in that language, and the English header text is gone
 
 CASE-3 — an untranslated chrome string falls back to English
   Given  a chrome string with no entry in the active locale's dictionary
@@ -257,6 +259,11 @@ CASE-5 — requirement content stays in the author's language under any locale
 CASE-6 — engine vocabulary stays literal under any locale
   Given  the Romanian locale selected and a requirement's spec rendered
   Then   its `status` value appears as the literal engine string, not a translated word
+
+CASE-7 — every bundled language translates the same strings
+  Given  the Romanian and German dictionaries
+  When   their English keys are compared
+  Then   both name exactly the same chrome strings
 ---
 id: REQ-VIEWER-944
 status: confirmed

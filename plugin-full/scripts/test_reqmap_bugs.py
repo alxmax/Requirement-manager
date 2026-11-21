@@ -467,6 +467,10 @@ class MapLanguage(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1125 @integrati
                json.dumps({"MAP_LANGUAGE": "ro"}))
         self.assertEqual(0, _run(d, "sync").returncode)
         self.assertEqual("ro", _map(d)["language"])
+        _write(os.path.join(d, "requirements", "_config.json"),
+               json.dumps({"MAP_LANGUAGE": "de"}))
+        self.assertEqual(0, _run(d, "sync").returncode)
+        self.assertEqual("de", _map(d)["language"])
 
     def test_the_default_adds_no_key(self):
         # verifies: REQ-MAPSTAMP-1125#CASE-2

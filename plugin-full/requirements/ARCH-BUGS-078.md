@@ -388,6 +388,7 @@ Every bullet below is binding.
 - Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.
 - Priority chips and a text search narrow the list, and a narrowed list opens its groups.
 - At the right of the chip row, under `Export PDF`, one button opens every group (`Expand all`) or, once all are open, closes them (`Collapse all`).
+- Under the chip row a legend names each priority, `P0` critical to `P4` minor, in the colour its rows use, and says that `*` marks an estimated priority.
 - Every label goes through `t()`.
 
 ## Cases
@@ -416,6 +417,12 @@ CASE-5 — one button opens or closes every group
   When   `Expand all` is pressed, then the button again
   Then   both groups are open and the button reads `Collapse all`; then both are closed
          and it reads `Expand all`
+
+CASE-6 — a legend says what each priority means
+  Given  bugs in two modules
+  When   the panel renders
+  Then   under the chip row, P0 to P4 appear in order with critical, high, medium, low and
+         minor, each in its rows' colour, and `*` is explained as an estimate
 
 --------------------
 

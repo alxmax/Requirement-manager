@@ -198,6 +198,8 @@ const cmdsEn = renderToString(
   <I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
 const cmdsRo = renderToString(
   <I18nProvider initialLocale="ro"><CommandsView /></I18nProvider>);
+const cmdsDe = renderToString(
+  <I18nProvider initialLocale="de"><CommandsView /></I18nProvider>);
 adoptMapExport({ commands: [] });
 const cmdsEmpty = renderToString(
   <I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
@@ -210,7 +212,9 @@ const cmdChecks = [
   // verifies: REQ-VIEWER-964#CASE-2
   ["commands: the summary follows the chosen language",
     cmdsRo.includes("Verdictul complet")
-      && !cmdsRo.includes("Run the commit/CI gate.")],
+      && !cmdsRo.includes("Run the commit/CI gate.")
+      && cmdsDe.includes("Das vollständige Urteil")
+      && !cmdsDe.includes("Run the commit/CI gate.")],
   // verifies: REQ-VIEWER-964#CASE-3
   ["commands: an untranslated command falls back to the engine's English",
     cmdsRo.includes("A command no dictionary knows.")],

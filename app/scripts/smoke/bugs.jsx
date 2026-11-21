@@ -165,6 +165,16 @@ const bugChecks = [
       && groupOpen(true, false) === true
       && nextOpenAll(true) === false && toggleAllLabel(false) === "Expand all"
       && groupOpen(false, true) === false && groupOpen(null, true) === true],
+  // verifies: REQ-BUGS-1121#CASE-6
+  ["bugs: a legend names each priority in its rows' colour",
+    english.indexOf('class="bug-legend"') > english.indexOf("Expand all")
+      && ["P0", "P1", "P2", "P3", "P4"].map((p) => english.search(new RegExp(
+        `>${p}</span> (<!-- -->)?`
+        + { P0: "critical", P1: "high", P2: "medium", P3: "low", P4: "minor" }[p])))
+        .every((i, k, a) => i > 0 && (k === 0 || i > a[k - 1]))
+      && english.includes('class="prob-sev sev-ERROR">P0</span>')
+      && english.includes("estimated, not yet confirmed by a user")
+      && romanian.includes("Priorități") && romanian.includes("foarte grav")],
   // verifies: REQ-BUGS-1123#CASE-1
   ["bugs: the report holds every field, highest priority first",
     ["P1 1", "P2 1", "Money", "`p.py:3`", "ticket", "bugs/Payments.md:5",

@@ -4,7 +4,7 @@
 import {
   TARGETS, ROADMAP, HISTORY, BRANCH, TODOS,
 } from "../lib/data.js";
-import { useI18n } from "../lib/i18n.jsx";
+import { useI18n, dateLocale } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import {
   ZoomControl, useCanvasZoom, clampZoom, ZOOM_DEFAULT, ZOOM_MIN,
@@ -33,7 +33,7 @@ const parseZoom = (v) => {
 function formatDue(iso, locale) {
   try {
     const d = new Date(`${iso}T12:00:00`);
-    return d.toLocaleDateString(locale === "ro" ? "ro-RO" : "en-GB",
+    return d.toLocaleDateString(dateLocale(locale),
                                 { day: "numeric", month: "short",
                                   year: "numeric" });
   } catch { return iso; }

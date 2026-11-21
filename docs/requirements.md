@@ -213,7 +213,7 @@ written, and the map stays stale until `sync` runs after one of them changes:
 
 A table with no id, title and priority column is skipped, and so is every table under a `##`
 heading `BUG_SKIP_SECTIONS` matches, down to the next `##`. Without it, a "recently fixed"
-table with the bug columns reads as open bugs. `MAP_LANGUAGE` (`en` or `ro`) is the language
+table with the bug columns reads as open bugs. `MAP_LANGUAGE` (`en`, `ro` or `de`) is the language
 the map opens in until a reader picks one, for the page's own labels. A row that cannot be
 read is an `INPUT:bugs` warning. An open bug never fails the gate, whatever its priority, and
 bugs never reach the drift lock.
