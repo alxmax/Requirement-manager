@@ -9,7 +9,7 @@
 **A copied engine is not scanned (ADR-0086).**
 
 - A skill installed where an assistant reads it (`.github/skills`, `.agents/skills`, `.claude/skills`) carries the engine, whose tags name this repository's requirements: the repository's gate failed with about 290 dangling tags. In a directory holding `reqmap.py` beside `reqmap_engine/`, the scan now skips the engine and its viewer, whatever `.reqmapignore` says; the directory's other files are scanned as before. REQ-SCAN-1136
-- Engine change: `MAP_ENGINE_VERSION` is `2026-11-20.5`. The core rises to 6,828 logical lines. The physical ceiling moves from 20,000 to 21,000 by the maintainer's decision (ADR-0086); the total is 20,000.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21`. The core rises to 6,828 logical lines. The physical ceiling moves from 20,000 to 21,000 by the maintainer's decision (ADR-0086); the total is 20,000.
 
 **Drift holds on a repository that already has its requirements and tags (ADR-0085).**
 

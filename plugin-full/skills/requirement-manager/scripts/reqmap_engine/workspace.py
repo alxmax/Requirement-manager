@@ -8,7 +8,7 @@ from .locks import load_lock
 from .mapcmd import _assemble_map_data
 from .model import Requirement, _as_list, _satisfied_by
 from .parse import load_requirements
-from .scan import _is_source_repo, scan_ac_verifies, scan_all, scan_test_levels
+from .scan import _is_source_repo, scan_ac_verifies, scan_all, scan_test_levels  # noqa: F401
 from .sections import binding_hash
 
 
