@@ -38,21 +38,11 @@
       "progress": 0
     },
     {
-      "title": "Retire: comments only, writes checked",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-21",
-      "req": "ARCH-RETIRE-064",
-      "milestone": "v8.25.0",
-      "progress": 100
-    },
-    {
       "title": "Words match the engine",
       "lane": "Feature",
       "start": "2026-10-19",
       "end": "2026-10-20",
       "req": "ARCH-MCP-073",
-      "milestone": "v8.25.0",
       "roadmap": "The words about `sync` match what it does. Done when: `docs/commands.md:62` and `mcp.py:127` say an edited confirmed contract is demoted to draft (they say `sync` refuses), and `app/scripts/sync-data.mjs:4` points to `sync`, not to `reqmap.py export`, which no longer exists"
     },
     {
@@ -61,7 +51,6 @@
       "start": "2026-10-21",
       "end": "2026-10-22",
       "req": "ARCH-SELFGATE-039",
-      "milestone": "v8.25.0",
       "roadmap": "A release waits for the published-action smoke test. Done when: `release` does not go ahead while `dogfood.yml` is red"
     },
     {
@@ -70,7 +59,6 @@
       "start": "2026-10-19",
       "end": "2026-10-19",
       "req": "ARCH-RELEASE-072",
-      "milestone": "v8.25.0",
       "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays"
     },
     {
@@ -79,44 +67,7 @@
       "start": "2026-10-20",
       "end": "2026-10-23",
       "req": "ARCH-CLARIFY-062",
-      "milestone": "v8.25.0",
       "roadmap": "The `clause-without-case` questions are read family by family, as the guesses they are (ADR-0075: 7 of 20 real). Done when: ARCH-VIEWER-007's nine are read, and the next four families by count too: add the cases that are really missing with their tests, and leave a clause a case already proves as it is"
-    },
-    {
-      "title": "Confirm the four drafts",
-      "lane": "Feature",
-      "start": "2026-10-23",
-      "end": "2026-10-23",
-      "req": "REQ-DRIFT-1103",
-      "milestone": "v8.25.0",
-      "roadmap": "Read and confirm REQ-EXTRACT-1099, REQ-VIEWER-1101, REQ-DRIFT-1103 and REQ-DRIFT-1104, the four drafts v8.24.0 to v8.24.4 shipped"
-    },
-    {
-      "title": "Audit session",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-AUDITRUN-076",
-      "milestone": "v8.25.0",
-      "roadmap": "An audit is a recorded session (ADR-0076). Done when: `sync --audit-plan` writes a seeded plan to `requirements/_audit.json` once, `gate --audit` reports each audit rate as k/n with a Wilson 95% interval and its band, `_map.html` has an Audit view, `reqmap_review` carries the review prompt, and the MCP tool set and the six verbs are unchanged"
-    },
-    {
-      "title": "clarify knows failure words beyond its list",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-CLARIFY-062",
-      "milestone": "v8.25.0",
-      "progress": 100
-    },
-    {
-      "title": "Release history reads the same on a branch and its merge",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-MAP-007",
-      "milestone": "v8.25.0",
-      "roadmap": "The map's release history reads the same on a branch and on its merge. Done when: a release's `first_commit` does not change when its branch is merged, so a pull request's gate and the branch's agree on map freshness (PR #405 failed on it)"
     },
     {
       "title": "accept-drift does not report what it just accepted",
@@ -124,26 +75,7 @@
       "start": "2026-10-19",
       "end": "2026-10-19",
       "req": "ARCH-PROMOTE-011",
-      "milestone": "v8.25.0",
       "roadmap": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements"
-    },
-    {
-      "title": "MCP docs count the tools a client sees",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-MCP-073",
-      "milestone": "v8.25.0",
-      "progress": 100
-    },
-    {
-      "title": "The viewer makes no network request",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-VIEWER-007",
-      "milestone": "v8.25.0",
-      "progress": 100
     },
     {
       "title": "The skill's engine copy has a requirement",
@@ -151,22 +83,8 @@
       "start": "2026-10-19",
       "end": "2026-10-19",
       "req": "ARCH-SELFGATE-039",
-      "milestone": "v8.25.0",
       "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file"
-    },
-    {
-      "title": "A repository describes its own trace convention",
-      "lane": "Feature",
-      "start": "2026-10-19",
-      "end": "2026-10-19",
-      "req": "ARCH-CUSTOMTRACE-077",
-      "milestone": "v8.25.0",
-      "roadmap": "A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded"
     }
   ],
-  "milestones": {
-    "v8.25.0": {
-      "due": "2026-10-23"
-    }
-  }
+  "milestones": {}
 }
