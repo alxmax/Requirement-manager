@@ -111,7 +111,8 @@ def custom_tags(fp, text):
         for m in rx.finditer(text):
             if role == "auto":
                 from .tags import _is_test_path
-                role_here = "tested-by" if _is_test_path(fp) else "implements"
+                role_here = ("tested-by" if _is_test_path(fp, fp)
+                             else "implements")
             else:
                 role_here = role
             out.append((role_here, m.group(1)))

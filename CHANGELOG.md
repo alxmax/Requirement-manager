@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+**C and C++ in an audit: tests, draft questions, stated values (ADR-0090).**
+
+- A C/C++ test is known by GoogleTest's names (`foo_test.cc`, `foo_unittest.cc`, `foo_tests.cpp`), a `UnitTests/` or `unit_tests/` directory, or the framework it includes: GoogleTest/GoogleMock, CppUTest, Unity, Catch2, Boost.Test, cmocka, doctest. A CamelCase `FooTest.cpp` is a test, and pairs with `Foo`, only when it includes one, because `RamTest.c` is often a production self-test. REQ-CANDIDATES-1141
+- `init`'s draft of a C/C++ file asks about the lines that look like accidents, inside each definition: a compared number other than 0, 1, 2, -1; a return value cast to `(void)`; a statement after an unguarded `return`/`break`/`continue`/`goto`. Unbalanced braces are said, not read as clean. REQ-EXTRACT-1142
+- `RM038` (`gate --full`): a clause that gives a constant a value ("`MAX_RETRIES` is 3", "`TIMEOUT_MS` = 1,000", "`MASK` (0x10)") is compared with that name's definitions in the requirement's own code (`#define`, `NAME = v`, brace initializer, enum member), by value. A difference names both sides and asks which is right. The bare gate does not run it. REQ-RULES-1143
+- All three requirements are drafts until they are read.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.4`. The core rises to 6,932 logical lines (ADR-0090); 20,583 physical lines in 86 files. `csignals.py` is lazy.
+
 **C and C++ definitions key member drift (ADR-0089).**
 
 - A tag inside a top-level C/C++ definition, or in the comment block right above it, keys that definition in `_memberlock.json`, as Python's do since ADR-0085. A file several requirements share now has member drift per function or class instead of none. REQ-MEMBERDRIFT-1140, a draft until it is read

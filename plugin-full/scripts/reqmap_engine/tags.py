@@ -327,24 +327,49 @@ def classify_prose(rel):
     # Bucket 3 — capability source (prompts/specs/modes and other prose .md).
     return "capability"
 _TEST_DIR_NAMES = {"test", "tests", "spec", "specs", "__tests__", "testing",
-                    "e2e"}
+                    "e2e", "unittest", "unittests", "unit_test", "unit_tests"}
 _TEST_FILE_SUFFIXES = (
     "_test.py", "_test.go", "_test.rs", "_spec.rb", ".test.ts", ".test.tsx",
-    ".test.js", ".test.jsx", ".spec.ts", ".spec.tsx", ".spec.js", ".e2e.ts")
+    ".test.js", ".test.jsx", ".spec.ts", ".spec.tsx", ".spec.js", ".e2e.ts",
+    # C/C++: GoogleTest's own `_test.cc` / `_unittest.cc` (REQ-CANDIDATES-1141)
+    "_test.c", "_test.cc", "_test.cpp", "_test.cxx", "_tests.c", "_tests.cc",
+    "_tests.cpp", "_unittest.cc", "_unittest.cpp")
+# A C/C++ file that includes a unit-test framework is a test, whatever its
+# name: `FooTest.cpp` is a CppUTest/GoogleTest habit, but `RamTest.c` is a
+# production self-test in embedded code, so the name alone cannot decide.
+_C_TEST_INCLUDE_RE = re.compile(
+    r'^\s*#\s*include\s*[<"](?:gtest/|gmock/|CppUTest/|CppUTestExt/|catch2/|'
+    r'catch\.hpp|boost/test/|unity\.h|unity_fixture\.h|cmocka\.h|'
+    r'doctest/|doctest\.h)', re.M)
+_C_SOURCE_EXTS = (".c", ".h", ".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx")
 
 
-def _is_test_path(rel):
+def _includes_test_framework(path):  # implements: REQ-CANDIDATES-1141
+    """True when a C/C++ file at `path` includes a unit-test framework in
+    its first 16 KB; False for any other file or one that cannot be read."""
+    if not path or not path.lower().endswith(_C_SOURCE_EXTS):
+        return False
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            return bool(_C_TEST_INCLUDE_RE.search(f.read(16384)))
+    except OSError:
+        return False
+
+
+def _is_test_path(rel, path=None):
     # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-827
     """Test code by convention (a `tests/` segment, `test_*.py`,
-    `*_test.go`, `*.spec.ts`)."""
+    `*_test.go`, `*.spec.ts`, `*_unittest.cc`), or, when the caller can name
+    the file on disk as `path`, a C/C++ file that includes a test framework."""
     parts = rel.replace(os.sep, "/").split("/")
     base = parts[-1]
     if cfg.TEST_FILE_PATTERNS:  # implements: REQ-CUSTOMTRACE-1112
         from .customtrace import matches_test_glob
         if matches_test_glob(rel):
             return True
-    return (any(p in _TEST_DIR_NAMES for p in parts[:-1])
-            or base.startswith("test_") or base.endswith(_TEST_FILE_SUFFIXES))
+    return (any(p.lower() in _TEST_DIR_NAMES for p in parts[:-1])
+            or base.startswith("test_") or base.endswith(_TEST_FILE_SUFFIXES)
+            or _includes_test_framework(path))
 
 
 def tagged_files(members):

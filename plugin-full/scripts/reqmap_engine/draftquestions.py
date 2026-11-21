@@ -32,7 +32,9 @@ _ASK = {
              "unit?",
     "dead": "can never run: it follows a return/raise. Delete it, or is "
             "the exit the bug?",
+    "discard": "discards a return value. Intended, or an unchecked error?",
 }
+_C_EXTS = (".c", ".h", ".cc", ".cpp", ".cxx", ".hh", ".hpp", ".hxx", ".inl")
 # A scan that could not parse the file says so, rather than reading as clean.
 _PARTIAL = "\nIn `{}`, {} were not looked for, because {}.\n"
 _UNPARSED = "swallowed errors, unnamed numbers and dead code"
@@ -133,6 +135,7 @@ def draft_questions(rel, src):
     too before looking for an empty `catch`."""
     lines = src.splitlines()
     is_py = rel.endswith(".py")
+    is_c = rel.lower().endswith(_C_EXTS)  # implements: REQ-EXTRACT-1142
     comments = _py_comments(src) if is_py else None
     found = []
     for n, line in enumerate(lines, 1):
@@ -144,9 +147,13 @@ def draft_questions(rel, src):
             found.append((n, "suppress"))
         if _EMPTY_CATCH_RE.search(_COMMENT_RE.sub("", bare)):
             found.append((n, "swallow"))
-    parsed = _py_signals(src) if is_py else None
+    if is_c:
+        from .csignals import c_signals
+    parsed = (_py_signals(src) if is_py else c_signals(src) if is_c
+              else None)
     found += parsed or []
     partial = "" if parsed is not None else (
+        (_UNPARSED, "its braces do not balance") if is_c else
         (_UNPARSED, "no parser reads this language") if not is_py else
         (_UNPARSED, "it does not parse as Python") if comments is not None
         else ("comment markers, suppressions, " + _UNPARSED,

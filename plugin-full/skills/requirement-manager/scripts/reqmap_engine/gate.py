@@ -19,6 +19,7 @@ from . import axis  # noqa: F401 — registers RM032 after every rule in `rules`
 from . import docclaims  # noqa: F401 — registers RM035, same reason as `axis`
 from . import wikilinks  # noqa: F401 — registers RM036, same reason as `axis`
 from . import planinput  # noqa: F401 — registers RM037, same reason as `axis`
+from . import specvalues  # noqa: F401 — registers RM038, same reason as `axis`
 from .sections import _legacy_schema_ids
 from .workspace import GateContext, Workspace
 

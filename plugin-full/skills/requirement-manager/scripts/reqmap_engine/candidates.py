@@ -237,22 +237,43 @@ def _minted_groups(files, facts_by_file, reqs_dir, reqs):
     return groups
 
 
-def _test_by_stem_index(files):
+# `foo_test.cc`, `foo_unittest.cc`, `foo_tests.cpp` test `foo`; a CamelCase
+# `FooTest.cpp` tests `Foo` only when it includes a test framework, because in
+# embedded code `RamTest.c` is often the production RAM self-test.
+_TEST_STEM_SUFFIXES = ("_unittest", "_tests", "_test")
+_CAMEL_TEST_SUFFIXES = ("Tests", "Test")
+
+
+def _tested_stem(rel, code_root=None):  # implements: REQ-CANDIDATES-1141
+    """The stem of the code `rel` tests, or None when it is not a test."""
+    stem = os.path.splitext(os.path.basename(rel))[0]
+    if stem.startswith("test_"):
+        return stem[len("test_"):]
+    for suf in _TEST_STEM_SUFFIXES:
+        if stem.endswith(suf) and len(stem) > len(suf):
+            return stem[:-len(suf)]
+    for suf in _CAMEL_TEST_SUFFIXES:
+        if (stem.endswith(suf) and len(stem) > len(suf) and code_root
+                and _is_test_path(rel, os.path.join(code_root, rel))):
+            return stem[:-len(suf)]
+    return None
+
+
+def _test_by_stem_index(files, code_root=None):
     # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
-    """Map each stem to its test_ files, so the per-group tested_by lookup in
-    `_build_candidates` is O(1) per stem instead of rescanning `files` per
-    group."""
+    """Map each stem to the test files that test it, so the per-group
+    tested_by lookup in `_build_candidates` is O(1) per stem instead of
+    rescanning `files` per group."""
     test_by_stem = {}
     for r in files:
-        b = os.path.basename(r)
-        if b.startswith("test_"):
-            test_by_stem.setdefault(
-                os.path.splitext(b)[0][len("test_"):], []).append(r)
+        stem = _tested_stem(r, code_root)
+        if stem:
+            test_by_stem.setdefault(stem, []).append(r)
     return test_by_stem
 
 
 def _build_candidates(groups, facts_by_file, stem_of, group_id_of_file,
-                       test_by_stem, tagged):
+                       test_by_stem, tagged, code_root=None):
     # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
     """One candidate dict per group: signatures, docstrings, imports, deps,
     tested_by."""
@@ -281,8 +302,9 @@ def _build_candidates(groups, facts_by_file, stem_of, group_id_of_file,
             "depends_on": deps, "tested_by": tested_by, "loc": loc,
             "existing_req": existing,
             "split_candidate": loc > cfg.SPLIT_LOC_THRESHOLD,
-            "is_test": bool(g["files"]) and all(_is_test_path(f)
-                        for f in g["files"]),
+            "is_test": bool(g["files"]) and all(
+                _is_test_path(f, os.path.join(code_root, f)) if code_root
+                else _is_test_path(f) for f in g["files"]),
         })
     return cands
 
@@ -372,9 +394,10 @@ def cmd_candidates(ws, out, md_globs=None):
 
     groups = _minted_groups(files, facts_by_file, reqs_dir, reqs)
     group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
-    test_by_stem = _test_by_stem_index(files)
+    test_by_stem = _test_by_stem_index(files, code_root)
     cands = _build_candidates(
-        groups, facts_by_file, stem_of, group_id_of_file, test_by_stem, tagged)
+        groups, facts_by_file, stem_of, group_id_of_file, test_by_stem, tagged,
+        code_root)
     _annotate_fanin(cands)
     pyramid = _annotate_pyramid(cands)
 

@@ -44,7 +44,7 @@ def _design_findings(code_root, reqs_dir=None):  # implements: REQ-DESIGN-952
     is named, and left out of the count."""
     n_files, findings, unparsed = 0, [], []
     for fp, rel in _walk_code(code_root, reqs_dir):
-        if not rel.lower().endswith(DESIGN_EXTS) or _is_test_path(rel):
+        if not rel.lower().endswith(DESIGN_EXTS) or _is_test_path(rel, fp):
             continue
         try:
             with open(fp, encoding="utf-8", errors="ignore") as f:

@@ -157,10 +157,22 @@ def c_def_spans(path):  # implements: REQ-MEMBERDRIFT-1140
         return None
     try:
         with open(path, encoding="utf-8", errors="ignore") as f:
-            text = f.read().replace("\r\n", "\n").replace("\r", "\n")
+            return c_def_spans_text(f.read())
     except OSError:
         return None
-    masked = _design_mask(_mask_preprocessor(text))
+
+
+def mask_c(text):
+    """`text` with preprocessor lines, comments and literals blanked, the
+    newlines kept, so line numbers still hold."""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    return _design_mask(_mask_preprocessor(text))
+
+
+def c_def_spans_text(text):  # implements: REQ-MEMBERDRIFT-1140
+    """`c_def_spans` over source text already read."""
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    masked = mask_c(text)
     lines = text.split("\n")
     found = []
     try:
