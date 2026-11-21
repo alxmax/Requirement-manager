@@ -1,7 +1,7 @@
 {
   "name": "requirement-manager",
   "description": "Directory edition of requirement-manager: the conventions and workflow as Markdown skills only. One markdown file per capability as the single source of truth, membership tags in code, and a drift review. Runs the repository's own vendored engine when it has one; otherwise applies the same rules by hand. No bundled engine, MCP server or hooks; the full engine edition installs as requirement-manager-full from the same marketplace.",
-  "version": "8.25.0",
+  "version": "8.26.0",
   "author": {
     "name": "Schipor Alexandru"
   },
