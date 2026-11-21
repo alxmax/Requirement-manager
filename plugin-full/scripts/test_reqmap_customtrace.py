@@ -184,6 +184,148 @@ class RequirementSources(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1113 
         self.assertNotIn("specs/spec.html", untagged)
 
 
+class SourcesOutsideTheCodeFolder(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1137 @unit
+    """A source's glob reads from the code folder, as it always has, or, with
+    `root: repo`, from the repository that holds it; never both silently."""
+
+    def _load(self, code_root, *sources):
+        kept, problems = R.customtrace.validate_sources(list(sources))
+        reqs = R.parse.RequirementIndex()
+        with _patched(REQUIREMENT_SOURCES=kept):
+            R.customtrace.load_sources(reqs, code_root)
+        return reqs, problems
+
+    def test_a_glob_reads_from_the_code_folder_as_before(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-1
+        d = _repo(self)
+        here, _ = self._load(d, TEXT_SOURCE)
+        sub, _ = self._load(os.path.join(d, "src"),
+                            dict(TEXT_SOURCE, glob="../" + TEXT_SOURCE["glob"]))
+        self.assertEqual({"AB_CD12", "AB_CD13", "AB_DL01"}, set(here))
+        self.assertEqual(set(here), set(sub))
+
+    def test_root_repo_reads_from_the_repository(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-2
+        d = _repo(self)
+        os.makedirs(os.path.join(d, ".git"))
+        reqs, problems = self._load(os.path.join(d, "src"), dict(TEXT_SOURCE, root="repo"))
+        self.assertEqual([], problems)
+        self.assertEqual({"AB_CD12", "AB_CD13", "AB_DL01"}, set(reqs))
+
+    def test_no_repository_above_is_named(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-3
+        reqs, _ = self._load(os.path.join(_repo(self), "src"), dict(TEXT_SOURCE, root="repo"))
+        self.assertEqual([], list(reqs))
+        self.assertTrue(any("no repository" in p for p in reqs.problems))
+
+    def test_an_unknown_root_is_refused(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-4
+        kept, problems = R.customtrace.validate_sources([dict(TEXT_SOURCE, root="up")])
+        self.assertEqual([], kept)
+        self.assertTrue(any("root must be one of code, repo" in p for p in problems))
+
+    def test_a_glob_the_repository_would_match_is_pointed_at_root_repo(self):
+        # verifies: REQ-CUSTOMTRACE-1137#CASE-5
+        d = _repo(self)
+        os.makedirs(os.path.join(d, ".git"))
+        reqs, _ = self._load(os.path.join(d, "src"), TEXT_SOURCE)
+        self.assertEqual([], list(reqs))                 # not chosen silently
+        self.assertTrue(any("root: repo" in p for p in reqs.problems), reqs.problems)
+
+
+CSV_FIELDS = {"id": "Key", "title": "Name", "contract": "Text", "cases": "Check",
+              "status": "State", "depends_on": "Needs",
+              "structural": {"field": "Kind", "values": ["Heading"]}}
+CSV_TEXT = ("﻿Key;Name;Text;Check;State;Needs;Kind\n"
+            "PAY-001;Refunds;A refund goes to the card. A larger one is refused.;"
+            "an over-refund is refused;confirmed;PAY-000;Req\n"
+            "PAY-000;Payments;;;;;Heading\n"
+            ";No id;Text.;;;;Req\n"
+            "PAY-002;;Over 10000 EUR needs a second approval.;;Draft;PAY-001, PAY-000;Req\n")
+
+
+class RowSources(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1138 @unit
+    """Requirements kept as CSV rows or a JSON list, read through a field map."""
+
+    def _load(self, d, source):
+        kept, problems = R.customtrace.validate_sources([source])
+        self.assertEqual([], problems)
+        reqs = R.parse.RequirementIndex()
+        with _patched(REQUIREMENT_SOURCES=kept):
+            R.customtrace.load_sources(reqs, d)
+        return reqs
+
+    def _csv(self):
+        d = _tmp(self)
+        _write(os.path.join(d, "specs", "reqs.csv"), CSV_TEXT)
+        return d, {"glob": "specs/*.csv", "format": "csv", "delimiter": ";",
+                   "fields": CSV_FIELDS}
+
+    def test_each_csv_row_is_a_requirement(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-1
+        d, src = self._csv()
+        reqs = self._load(d, src)
+        self.assertEqual({"PAY-000", "PAY-001", "PAY-002"}, set(reqs))   # the BOM is gone
+        body = reqs["PAY-001"]["body"]
+        self.assertTrue(body.startswith("# Refunds\n"))
+        self.assertIn("- A larger one is refused.", body)
+        self.assertIn("CASE-1 — an over-refund is refused", body)
+        self.assertEqual(["PAY-000"], reqs["PAY-001"]["meta"]["depends_on"])
+        self.assertEqual(["PAY-001", "PAY-000"], reqs["PAY-002"]["meta"]["depends_on"])
+        self.assertEqual("draft", reqs["PAY-002"]["meta"]["status"])
+        self.assertTrue(reqs["PAY-002"]["body"].startswith("# Over 10000 EUR"))
+
+    def test_a_row_with_no_id_is_a_problem_and_the_rest_are_read(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-2
+        d, src = self._csv()
+        reqs = self._load(d, src)
+        self.assertEqual(3, len(reqs))
+        self.assertTrue(any("row 3 has no id" in p for p in reqs.problems), reqs.problems)
+
+    def test_a_structural_row_is_exempt_and_too_many_are_named(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-3
+        d, src = self._csv()
+        reqs = self._load(d, src)
+        self.assertEqual("aggregate", reqs["PAY-000"]["meta"]["layer"])
+        self.assertEqual("feature", reqs["PAY-001"]["meta"]["layer"])
+        self.assertFalse(any("structural" in p for p in reqs.problems))
+        _write(os.path.join(d, "specs", "reqs.csv"),
+               "Key;Kind\nH-1;Heading\nH-2;Heading\nR-1;Req\n")
+        reqs = self._load(d, dict(src, fields={"id": "Key", "structural": CSV_FIELDS["structural"]}))
+        self.assertTrue(any("2 of 3 rows are structural" in p for p in reqs.problems))
+
+    def test_a_json_list_under_a_key_is_read(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-4
+        d = _tmp(self)
+        _write(os.path.join(d, "specs", "reqs.json"), json.dumps({"requirements": [
+            {"id": "PAY-010", "text": ["One.", "Two."], "parents": ["PAY-000"]}]}))
+        reqs = self._load(d, {"glob": "specs/*.json", "format": "json", "items": "requirements",
+                              "fields": {"id": "id", "contract": "text", "satisfies": "parents"}})
+        self.assertEqual(["PAY-010"], list(reqs))
+        self.assertIn("- Two.", reqs["PAY-010"]["body"])
+        self.assertEqual(["PAY-000"], reqs["PAY-010"]["meta"]["satisfies"])
+
+    def test_a_field_map_without_an_id_is_refused(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-5
+        for fields in ({}, {"title": "Name"}, {"id": "Key", "colour": "C"}):
+            kept, problems = R.customtrace.validate_sources(
+                [{"glob": "x.csv", "format": "csv", "fields": fields}])
+            self.assertEqual([], kept, fields)
+            self.assertEqual(1, len(problems), fields)
+
+    def test_the_gate_reads_a_csv_corpus(self):
+        # verifies: REQ-CUSTOMTRACE-1138#CASE-6
+        d, src = self._csv()
+        os.makedirs(os.path.join(d, "requirements"))
+        _write(os.path.join(d, "requirements", "_config.json"),
+               json.dumps({"REQUIREMENT_SOURCES": [src]}))
+        _write(os.path.join(d, "pay.py"), "# impl" "ements: PAY-001\ndef refund():\n    pass\n")
+        out = _run(d, "gate").stdout
+        self.assertNotIn("RM006 PAY-000", out)      # structural: no code expected
+        self.assertNotIn("RM006 PAY-001", out)      # tagged
+        self.assertNotIn("RM001", out)
+
+
 class CustomTraceRepo(unittest.TestCase):  # tested-by: ARCH-CUSTOMTRACE-077 @integration
     def test_a_repository_in_its_own_convention_is_read(self):
         # verifies: ARCH-CUSTOMTRACE-077#CASE-1
