@@ -82,7 +82,7 @@ satisfies: [ARCH-MAPSTAMP-079]
 > reader makes one. Remembering every first open would freeze the default for that browser.
 
 Every bullet below is binding.
-- `MAP_LANGUAGE` in `_config.json` is `en` or `ro`, and any other value is reported and ignored. `_map.json` carries `language` only when it is not `en`.
+- `MAP_LANGUAGE` in `_config.json` is `en`, `ro` or `de`, and any other value is reported and ignored. `_map.json` carries `language` only when it is not `en`.
 - The page opens in that language unless the reader has chosen one.
 - The language is stored when the reader changes it, not when the page opens.
 - The retired key `LANGUAGE` stays ignored.

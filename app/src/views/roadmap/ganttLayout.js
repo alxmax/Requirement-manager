@@ -7,6 +7,7 @@ import {
   buildDayBands, stackBars,
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
+import { dateLocale } from "../../lib/i18n.jsx";
 
 /* 22px a day, and a floor of 30. At 7px a week drew 43px and was floored to
  * 72 — nearly three days of borrowed room, which is what pushed a bar into
@@ -433,7 +434,7 @@ export function layoutPlan(planning, history, locale) {
       .map((iso) => ({ iso, idx: dayIndex(origin, parseIso(iso)) }))
       .filter((r) => r.idx >= 0 && r.idx < totalDays),
     releaseLane,
-    loc: locale === "ro" ? "ro-RO" : "en-GB",
+    loc: dateLocale(locale),
   };
   lay.guides = buildGuides(lay);
   return lay;

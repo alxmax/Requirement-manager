@@ -89,7 +89,7 @@ export function adoptMapExport(data) {
   if (Array.isArray(data.nodes)) { REQUIREMENTS = data.nodes; derive(); }
   if ("repo" in data) REPO = data.repo || null;
   if ("language" in data) {
-    LANGUAGE = (data.language === "ro" || data.language === "both")
+    LANGUAGE = ["ro", "de", "both"].includes(data.language)
       ? data.language : "en";
   }
   if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];

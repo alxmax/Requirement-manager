@@ -201,6 +201,10 @@
       "hash": "d1f8dd693b28",
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
+    "REQ-BUGS-1121": {
+      "hash": "f5201edaa12e",
+      "reason": "Bugs tab: a priority legend under the chips"
+    },
     "REQ-CANDIDATES-826": {
       "hash": "000ec6c8296f",
       "reason": null
@@ -656,6 +660,10 @@
     "REQ-VIEWER-942": {
       "hash": "4a922f2f7888",
       "reason": "the neighborhood and the four trace links close the spec"
+    },
+    "REQ-VIEWER-943": {
+      "hash": "716a3b7ac859",
+      "reason": "German locale: a new bundled language and its cases"
     },
     "REQ-VIEWER-945": {
       "hash": "f4badc80b394",

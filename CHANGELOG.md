@@ -8,7 +8,14 @@
 - The Report page shows the audit session (read out of planned, agreement and precision), counts the audit's findings (`Observed (audit, KIND)`) by kind and no longer lists them as questions, shows the trace block, opens each list from a chip, and downloads as Markdown beside the PDF. New recommendations follow from each. REQ-VIEWER-1145
 - The Report reads as a document: a title with the build stamp, a numbered contents list that marks the section in view, key numbers as tiles, the main conclusions with chips, Results in numbers as an indicator and value table, and a seventh section, Deliverables, naming the files the report and the audit leave in the repository. A date, branch or engine the map does not carry is left out instead of reading `not measured`. REQ-VIEWER-1139 REQ-VIEWER-1145
 - Both requirements are drafts until they are read.
-- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.5`. The core rises to 7,062 logical lines (ADR-0091); 20,772 physical lines in 87 files.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-21.7`. The core rises to 7,062 logical lines (ADR-0091); 20,772 physical lines in 87 files.
+
+**The viewer speaks German.**
+
+- `DE` joins `EN` and `RO` in the language switch, translating the viewer's own text (241 strings) and the command descriptions; dates follow the language. `P4`'s name, `minor`, was missing from the Romanian table and is added to both. Requirement text and engine words (`confirmed`, `draft`, the gate's severities) stay as written. REQ-VIEWER-943
+- `MAP_LANGUAGE` accepts `de`, so a repository can open its map in German. REQ-MAPSTAMP-1125
+- The Bugs tab has a legend under the priority chips: `P0` critical, `P1` high, `P2` medium, `P3` low, `P4` minor, in the colours the rows use, and `*` for a priority an assistant estimated and no user has confirmed yet. REQ-BUGS-1121
+- Every bundled language must translate the same strings: a smoke check fails when one table names a string the other does not.
 
 **Six requirements are confirmed.**
 

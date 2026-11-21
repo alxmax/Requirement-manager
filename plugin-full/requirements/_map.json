@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.5",
+  "engine_version": "2026-11-21.7",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -2424,12 +2424,13 @@
         "Opening a row shows why it matters, where, the source and the file with its line. Selecting that text leaves the row open.",
         "Priority chips and a text search narrow the list, and a narrowed list opens its groups.",
         "At the right of the chip row, under `Export PDF`, one button opens every group (`Expand all`) or, once all are open, closes them (`Collapse all`).",
+        "Under the chip row a legend names each priority, `P0` critical to `P4` minor, in the colour its rows use, and says that `*` marks an estimated priority.",
         "Every label goes through `t()`."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15\n  When   the panel renders\n  Then   each module is one group, and `15.03.2026` follows that bug's priority\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\nCASE-5 — one button opens or closes every group\n  Given  bugs in two modules, both groups closed\n  When   `Expand all` is pressed, then the button again\n  Then   both groups are open and the button reads `Collapse all`; then both are closed\n         and it reads `Expand all`\n\n--------------------",
+      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15\n  When   the panel renders\n  Then   each module is one group, and `15.03.2026` follows that bug's priority\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\nCASE-5 — one button opens or closes every group\n  Given  bugs in two modules, both groups closed\n  When   `Expand all` is pressed, then the button again\n  Then   both groups are open and the button reads `Collapse all`; then both are closed\n         and it reads `Expand all`\n\nCASE-6 — a legend says what each priority means\n  Given  bugs in two modules\n  When   the panel renders\n  Then   under the chip row, P0 to P4 appear in order with critical, high, medium, low and\n         minor, each in its rows' colour, and `*` is explained as an estimate\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2466,15 +2467,19 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:304"
+          "loc": "app/src/views/problems/BugsPanel.jsx:105"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:323"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 6,
+      "covered": 6,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -2482,7 +2487,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 7 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -2587,7 +2592,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:513"
+          "loc": "app/src/styles/app.css:517"
         },
         {
           "role": "implements",
@@ -4452,7 +4457,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:458"
+          "loc": "app/scripts/smoke/explorer.jsx:462"
         },
         {
           "role": "implements",
@@ -12453,7 +12458,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:431"
+          "loc": "app/src/views/roadmap/ganttLayout.js:432"
         },
         {
           "role": "tested-by",
@@ -13267,7 +13272,7 @@
       "title": "`MAP_LANGUAGE` sets the language the page opens in",
       "intent": "A reader's own choice beats a repository's default, so the choice is remembered only when a reader makes one. Remembering every first open would freeze the default for that browser.",
       "contract": [
-        "`MAP_LANGUAGE` in `_config.json` is `en` or `ro`, and any other value is reported and ignored. `_map.json` carries `language` only when it is not `en`.",
+        "`MAP_LANGUAGE` in `_config.json` is `en`, `ro` or `de`, and any other value is reported and ignored. `_map.json` carries `language` only when it is not `en`.",
         "The page opens in that language unless the reader has chosen one.",
         "The language is stored when the reader changes it, not when the page opens.",
         "The retired key `LANGUAGE` stays ignored."
@@ -13296,11 +13301,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:543"
+          "loc": "app/src/lib/i18n.jsx:555"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:555"
+          "loc": "app/src/lib/i18n.jsx:568"
         },
         {
           "role": "tested-by",
@@ -19974,7 +19979,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:130"
+          "loc": "app/scripts/smoke/views.jsx:132"
         },
         {
           "role": "implements",
@@ -23322,7 +23327,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:509"
+          "loc": "app/src/lib/i18n.jsx:521"
         },
         {
           "role": "implements",
@@ -23424,7 +23429,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:70"
+          "loc": "app/scripts/smoke/views.jsx:72"
         }
       ],
       "test_exempt": null,
@@ -23465,7 +23470,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:429"
+          "loc": "app/scripts/smoke/explorer.jsx:433"
         },
         {
           "role": "implements",
@@ -23927,6 +23932,10 @@
         },
         {
           "role": "implements",
+          "loc": "app/src/lib/i18n.de.js:1"
+        },
+        {
+          "role": "implements",
           "loc": "app/src/lib/i18n.jsx:1"
         },
         {
@@ -24157,12 +24166,13 @@
         "Requirement content is never translated: id, title, intent, contract clauses, acceptance criteria and member paths stay in the language their author wrote them in.",
         "The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and severity values stay the literal strings the requirement files and the gate use.",
         "A chrome string with no entry in the active locale falls back to its English text.",
-        "The reader's chosen locale is remembered on their machine and is never written into the generated file, so `_map.html` stays byte-identical whatever anyone last selected."
+        "The reader's chosen locale is remembered on their machine and is never written into the generated file, so `_map.html` stays byte-identical whatever anyone last selected.",
+        "The bundled languages are English, Romanian and German, and each translates the same set of chrome strings."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the viewer defaults to English chrome\n  Given  no locale has been selected before\n  When   a requirement's spec is rendered\n  Then   its section headers appear in English\n\nCASE-2 — switching locale translates chrome section headers\n  Given  the Romanian locale selected\n  When   the same spec is rendered\n  Then   its section headers appear in Romanian, and the English header text is gone\n\nCASE-3 — an untranslated chrome string falls back to English\n  Given  a chrome string with no entry in the active locale's dictionary\n  When   it is looked up for display\n  Then   it renders as the original English text, not blank\n\nCASE-4 — chrome translations interpolate their placeholders\n  Given  a chrome string containing a `{n}`-style placeholder\n  When   it is rendered in a non-English locale\n  Then   the placeholder's value is substituted into the translated sentence\n\nCASE-5 — requirement content stays in the author's language under any locale\n  Given  the Romanian locale selected and a requirement's spec rendered\n  Then   the requirement's own title appears exactly as authored, untranslated\n\nCASE-6 — engine vocabulary stays literal under any locale\n  Given  the Romanian locale selected and a requirement's spec rendered\n  Then   its `status` value appears as the literal engine string, not a translated word",
+      "accept": "CASE-1 — the viewer defaults to English chrome\n  Given  no locale has been selected before\n  When   a requirement's spec is rendered\n  Then   its section headers appear in English\n\nCASE-2 — switching locale translates chrome section headers\n  Given  the Romanian or the German locale selected\n  When   the same spec is rendered\n  Then   its section headers appear in that language, and the English header text is gone\n\nCASE-3 — an untranslated chrome string falls back to English\n  Given  a chrome string with no entry in the active locale's dictionary\n  When   it is looked up for display\n  Then   it renders as the original English text, not blank\n\nCASE-4 — chrome translations interpolate their placeholders\n  Given  a chrome string containing a `{n}`-style placeholder\n  When   it is rendered in a non-English locale\n  Then   the placeholder's value is substituted into the translated sentence\n\nCASE-5 — requirement content stays in the author's language under any locale\n  Given  the Romanian locale selected and a requirement's spec rendered\n  Then   the requirement's own title appears exactly as authored, untranslated\n\nCASE-6 — engine vocabulary stays literal under any locale\n  Given  the Romanian locale selected and a requirement's spec rendered\n  Then   its `status` value appears as the literal engine string, not a translated word\n\nCASE-7 — every bundled language translates the same strings\n  Given  the Romanian and German dictionaries\n  When   their English keys are compared\n  Then   both name exactly the same chrome strings",
       "input": "",
       "output": "",
       "desc": "",
@@ -24179,32 +24189,28 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:46"
+          "loc": "app/src/lib/i18n.de.js:2"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:498"
+          "loc": "app/src/lib/i18n.jsx:53"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:551"
+          "loc": "app/src/lib/i18n.jsx:510"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:564"
         }
       ],
       "test_exempt": null,
       "milestone": "v3.2",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
-      "clarify": [],
-      "i18n": {
-        "ro": {
-          "title": "Limba de chrome UI, conținutul cerinței netradus",
-          "intent": "Chrome-ul propriu al viewerului — etichete de navigare, butoane, titluri de secțiune — este text UI pe care unealta îl deține și poate traduce în siguranță. Titlul, contractul și criteriile de acceptance ale unei cerințe sunt artefactul aflat în revizuire; traducerea lor live ar pune cuvinte în gura autorului și ar diverge în tăcere de fișierul `.md` de pe disc. Cele două nu trebuie confundate niciodată, astfel aceasta trasează linia și o menține sub fiecare locale.",
-          "contract": "> Chrome-ul propriu al viewerului — etichete de navigare, butoane, titluri de secțiune —\n> este text UI pe care unealta îl deține și poate traduce în siguranță. Titlul, contractul și\n> criteriile de acceptance ale unei cerințe sunt artefactul aflat în revizuire; traducerea lor\n> live ar pune cuvinte în gura autorului și ar diverge în tăcere de fișierul `.md` de pe disc.\n> Cele două nu trebuie confundate niciodată, astfel aceasta trasează linia și o menține sub\n> fiecare locale.\n\nFiecare punct de mai jos este obligatoriu.\n- Viewerul randează propriul lui chrome UI implicit în engleză.\n- Un control de locale în bara de sus a viewerului comută acel chrome la o altă limbă inclusă.\n- Conținutul cerinței nu este niciodată tradus: id, titlu, intent, clauze de contract, criterii de\n  acceptance și căi de membri rămân în limba în care autorul lor le-a scris.\n- Nici vocabularul propriu al motorului nu este tradus: valorile `status`, `layer`, role de tag și\n  severitate rămân șirurile literale pe care fișierele de cerință și gate-ul le folosesc.\n- Un șir de chrome fără nicio intrare în locale-ul activ recurge la textul lui în engleză.\n- Locale-ul ales de cititor este reținut pe mașina lui și nu este scris niciodată în\n  fișierul generat, astfel `_map.html` rămâne identic byte cu byte indiferent de ce a selectat ultima dată oricine.",
-          "acceptance": "CASE-1 — viewerul implicit are chrome-ul în engleză\n  Given  niciun locale nu a fost selectat înainte\n  When   spec-ul unei cerințe este randat\n  Then   titlurile lui de secțiune apar în engleză\n\nCASE-2 — comutarea locale-ului traduce titlurile de secțiune de chrome\n  Given  locale-ul românesc selectat\n  When   același spec este randat\n  Then   titlurile lui de secțiune apar în română, iar textul de titlu englez a dispărut\n\nCASE-3 — un șir de chrome netradus recurge la engleză\n  Given  un șir de chrome fără nicio intrare în dicționarul locale-ului activ\n  When   este căutat pentru afișare\n  Then   se randează ca textul original englez, nu gol\n\nCASE-4 — traducerile de chrome interpolează placeholder-ele lor\n  Given  un șir de chrome conținând un placeholder în stil `{n}`\n  When   este randat într-un locale non-englez\n  Then   valoarea placeholder-ului este substituită în propoziția tradusă\n\nCASE-5 — conținutul cerinței rămâne în limba autorului sub orice locale\n  Given  locale-ul românesc selectat și spec-ul unei cerințe randat\n  Then   titlul propriu al cerinței apare exact așa cum a fost redactat, netradus\n\nCASE-6 — vocabularul motorului rămâne literal sub orice locale\n  Given  locale-ul românesc selectat și spec-ul unei cerințe randat\n  Then   valoarea lui `status` apare ca șirul literal al motorului, nu un cuvânt tradus"
-        }
-      }
+      "clauses": 7,
+      "covered": 7,
+      "clarify": []
     },
     {
       "id": "REQ-VIEWER-944",
@@ -24373,11 +24379,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:465"
+          "loc": "app/src/lib/i18n.de.js:373"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:573"
+          "loc": "app/src/lib/i18n.jsx:471"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:586"
         },
         {
           "role": "implements",
@@ -24740,7 +24750,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:125"
+          "loc": "app/src/lib/timeline.js:126"
         },
         {
           "role": "implements",
@@ -24748,15 +24758,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:17"
+          "loc": "app/src/views/roadmap/ganttLayout.js:18"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:81"
+          "loc": "app/src/views/roadmap/ganttLayout.js:82"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:193"
+          "loc": "app/src/views/roadmap/ganttLayout.js:194"
         }
       ],
       "test_exempt": null,
@@ -24809,7 +24819,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:98"
+          "loc": "app/src/lib/timeline.js:99"
         },
         {
           "role": "implements",
@@ -24890,23 +24900,23 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:111"
+          "loc": "app/src/views/roadmap/ganttLayout.js:112"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:221"
+          "loc": "app/src/views/roadmap/ganttLayout.js:222"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:272"
+          "loc": "app/src/views/roadmap/ganttLayout.js:273"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:305"
+          "loc": "app/src/views/roadmap/ganttLayout.js:306"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:332"
+          "loc": "app/src/views/roadmap/ganttLayout.js:333"
         }
       ],
       "test_exempt": null,
@@ -25142,7 +25152,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:135"
+          "loc": "app/src/views/roadmap/ganttLayout.js:136"
         }
       ],
       "test_exempt": null,
@@ -25256,11 +25266,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:249"
+          "loc": "app/src/views/roadmap/ganttLayout.js:250"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/ganttLayout.js:272"
+          "loc": "app/src/views/roadmap/ganttLayout.js:273"
         }
       ],
       "test_exempt": null,
@@ -25317,7 +25327,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:261"
+          "loc": "app/scripts/smoke/explorer.jsx:265"
         },
         {
           "role": "tested-by",
@@ -25381,7 +25391,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:360"
+          "loc": "app/scripts/smoke/explorer.jsx:364"
         },
         {
           "role": "implements",
@@ -25455,7 +25465,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:529"
+          "loc": "app/src/styles/app.css:533"
         },
         {
           "role": "implements",
@@ -25530,7 +25540,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:566"
+          "loc": "app/src/styles/app.css:570"
         },
         {
           "role": "implements",
@@ -31115,15 +31125,15 @@
     }
   ],
   "design": {
-    "files": 150,
+    "files": 151,
     "clean_files": 133,
-    "score": 89,
+    "score": 88,
     "candidates": {
       "encapsulation": 10,
       "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 4
+      "standards": 5
     },
     "findings": [
       {
@@ -31136,19 +31146,27 @@
       },
       {
         "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/i18n.de.js",
+        "line": 15,
+        "name": "i18n.de.js",
+        "detail": "16 line(s) wider than 120 columns, first at line 15"
+      },
+      {
+        "pillar": "standards",
         "kind": "file-too-long",
         "file": "app/src/lib/i18n.jsx",
         "line": 1,
         "name": "i18n.jsx",
-        "detail": "579 lines (over 500)"
+        "detail": "593 lines (over 500)"
       },
       {
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/lib/i18n.jsx",
-        "line": 378,
+        "line": 388,
         "name": "i18n.jsx",
-        "detail": "2 line(s) wider than 120 columns, first at line 378"
+        "detail": "2 line(s) wider than 120 columns, first at line 388"
       },
       {
         "pillar": "encapsulation",
@@ -31194,9 +31212,9 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/problems/BugsPanel.jsx",
-        "line": 293,
+        "line": 312,
         "name": "BugsPanel",
-        "detail": "`BugsPanel` is 119 lines (over 80)"
+        "detail": "`BugsPanel` is 120 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
@@ -31638,9 +31656,9 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 290,
-      "tagged_files": 184,
-      "production_files": 266,
+      "code_files": 291,
+      "tagged_files": 185,
+      "production_files": 267,
       "drift_files": 101
     },
     "suggestions": {},
