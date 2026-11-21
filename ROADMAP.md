@@ -11,6 +11,11 @@ Cadence: one release a week, not one per merge.
 
 ## Now
 
+### Version 8.27
+
+- [ ] A JSON source row whose contract is a list and has no title takes the list's first item as its title. Done when: `sourcerows.blocks` titles such a row with its first clause (today it gets the list's Python text, `['A refund goes to the card.', ...]`), a test proves it, and REQ-CUSTOMTRACE-1138 is read again and confirmed | req: REQ-CUSTOMTRACE-1138
+- [ ] `retire --delete` and its requirement agree on string literals. Done when: the maintainer picks one: the clause says Python strings only, or the scanner blanks JS/TS strings as it does Python's; it lands with a test on a `.ts` member, and REQ-RETIRE-1130 is read again and confirmed | req: REQ-RETIRE-1130
+
 ### Adoption
 
 - [ ] An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to | req: SYS-SSOT-001
@@ -29,6 +34,20 @@ Cadence: one release a week, not one per merge.
 - [x] A repository describes its own trace convention (ADR-0077). Done when: `_config.json` can set extra tag forms (`TRACE_TAGS`), test-file globs (`TEST_FILE_PATTERNS`) and requirement sources kept as text, HTML or Markdown (`REQUIREMENT_SOURCES`), a repository written only in such a convention is read by the gate, and with no config the module is never loaded | req: ARCH-CUSTOMTRACE-077
 
 ## Next
+
+### Drafts left after the 2026-11-21 read
+
+- [ ] The bug-file drafts tested only `@integration` gain a `@unit` test. Done when: REQ-BUGS-1117, 1118, 1119, 1120, 1126, 1127, 1128, 1129 and 1131 each have a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed | req: ARCH-BUGS-078
+- [ ] REQ-CHECK-1135, REQ-MAPSTAMP-1124, REQ-MAPSTAMP-1125 and REQ-SCAN-1136 gain a `@unit` test. Done when: each has a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed | req: ARCH-MAPSTAMP-079
+- [ ] Drafts with more than 7 cases are split. Done when: REQ-BUGS-1116 (10 cases), REQ-BUGS-1119 (8) and REQ-BUGS-1127 (8) hold 7 or fewer, each criterion moved to the requirement that owns it | req: ARCH-BUGS-078
+- [ ] Drafts with fewer than 3 cases gain the missing ones. Done when: REQ-CHECK-1135 (2 cases) and ARCH-MAPSTAMP-079 (1) reach 3, each with its test | req: ARCH-CHECK-006
+- [ ] Code spread over 3 or more directories is kept as one capability or split. Done when: ARCH-BUGS-078, REQ-CHECK-1133 and REQ-VIEWER-1145 are each either split or exempted from `file-spread` with the reason in their Context | req: REQ-VIEWER-1145
+- [ ] ARCH-MAPSTAMP-079 gets code and a test of its own, or becomes an aggregate. Done when: RM006 and RM007 no longer fire for it once it is confirmed | req: ARCH-MAPSTAMP-079
+- [ ] The Bugs tab's confirmed requirements close the gaps the read found. Done when: REQ-BUGS-1122's clauses 4 (a saved bug shows at once) and 6 (cancelling the picker keeps the form) each have a case and a test, and REQ-BUGS-1123's CASE-2 test filters the list instead of passing the filter label by hand | req: REQ-BUGS-1122
+- [ ] The trace block's caps are tested. Done when: a test proves a suggestion lists at most 3 tests and a design rule keeps at most 50 hits | req: REQ-MAP-1144
+- [ ] A failed `retire --delete` leaves the member files as they were. Done when: when a later member file cannot be written, the tags already cut from earlier files are put back, and a test proves it | req: REQ-RETIRE-1130
+- [ ] `init`'s "wire the gate" line names the engine path the repository runs. Done when: it prints the same relative or bare path as the assistant block below it, instead of a fixed `python scripts/reqmap.py gate` | req: ARCH-INIT-012
+- [ ] The German viewer text is read by a native reader. Done when: each correction lands in `app/src/lib/i18n.de.js`, and the smoke check that every language translates the same strings still passes | req: REQ-VIEWER-943
 
 ### Planning and releasing
 
