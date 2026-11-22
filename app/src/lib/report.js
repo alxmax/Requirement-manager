@@ -118,6 +118,9 @@ function recommend(c) {
     .reduce((n, f) => n + f.n, 0),
     "audit findings say a test cannot fail when the code is wrong: "
     + "strengthen those tests first");
+  add(c.vacuous && c.vacuous.length,
+    "tagged tests cannot fail: they assert nothing, a constant, or a value "
+    + "against itself; assert the behaviour, or drop the `# verifies:` tag");
   add(c.hygiene && c.hygiene.duplicates.length,
     "requirements repeat another's text word for word: merge or "
     + "retire one of each pair");
@@ -241,6 +244,8 @@ export function computeReport() {
     coverage: TRACE ? TRACE.coverage : null,
     tiers: suggestionTiers(),
     hygiene: TRACE ? TRACE.hygiene : null,
+    // implements: REQ-TESTGAPS-1146 - absent from an older map: not measured
+    vacuous: TRACE && TRACE.vacuous ? TRACE.vacuous : null,
     designRules: TRACE && TRACE.rules ? TRACE.rules.filter((x) => x.count > 0)
       : [],
   };

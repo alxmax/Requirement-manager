@@ -130,7 +130,7 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None,
         # hygiene: advice like the design record, so the freshness check
         # neither computes nor compares it
         from .tracecover import trace_block
-        data["trace"] = trace_block(root, reqs_dir, reqs, members)
+        data["trace"] = trace_block(root, reqs_dir, reqs, members, ac_cover)
     _attach_translations(data, reqs, reqs_dir)
     return data
 

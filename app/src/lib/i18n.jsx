@@ -305,6 +305,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "Requirements with a High question": "Cerințe cu o întrebare ridicată",
   "Code, no tested-by": "Cu cod, fără tested-by",
   "Cases with no verifies": "Cazuri fără verifies",
+  "Tests that cannot fail": "Teste care nu pot pica",
   "Health {s}/100: {a} of {b} requirements green.":
     "Sănătate {s}/100: {a} din {b} cerințe sunt verzi.",
   "{a} of {b} live requirements are confirmed.":
@@ -410,6 +411,9 @@ const RO = {  // implements: REQ-VIEWER-943
   ["audit findings say a test cannot fail when the code is wrong: "
     + "strengthen those tests first"]:
     "constatări de audit spun că un test nu poate pica atunci când codul e greșit: întărește întâi aceste teste",
+  ["tagged tests cannot fail: they assert nothing, a constant, or a value "
+    + "against itself; assert the behaviour, or drop the `# verifies:` tag"]:
+    "teste taggate nu pot pica: nu verifică nimic, verifică o constantă sau o valoare cu ea însăși; verifică comportamentul, sau scoate tagul `# verifies:`",
   ["requirements repeat another's text word for word: merge or "
     + "retire one of each pair"]:
     "cerințe repetă cuvânt cu cuvânt textul alteia: unește-le sau retrage una din fiecare pereche",

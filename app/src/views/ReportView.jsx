@@ -202,6 +202,10 @@ function rateSub(r) {
   return r && r.n ? `${r.k}/${r.n} (${pct(r.k, r.n)}%)` : null;
 }
 
+/** The requirements whose cases a test that cannot fail closes. */
+const vacuousIds = (list) => [...new Set(list.flatMap((v) =>
+  v.cases.map((x) => x.split("#")[0])))].sort();
+
 const share = (a, b) => `${pct(a, b)}% (${a}/${b})`;
 
 /** Indicator | value, a chip row under a value whose requirements open. */
@@ -238,6 +242,8 @@ function Numbers({ c, t, openSpec, full }) {
       : [chip(tr.noTest, "requirements")]],
     ["Cases with no verifies", String(tr.unprovenCases),
       [chip(tr.unproven, "requirements")]],
+    ["Tests that cannot fail", c.vacuous && String(c.vacuous.length),
+      c.vacuous && [chip(vacuousIds(c.vacuous), "requirements")]],
     ["Dangling tags", c.dangling == null ? null : String(c.dangling.length)],
     ["Drift", c.drift == null ? null : String(c.drift.length)],
     ...(cov ? [
@@ -285,6 +291,9 @@ export function problemRows(c, t = (s) => s) {
       ["tested-by suggestion, tier C (no test found)", tiers.C, tiers.C],
     ] : []),
     ["Cases with no verifies", tr.unproven, tr.unproven, tr.unprovenCases],
+    ["Tests that cannot fail", c.vacuous && c.vacuous.map((v) =>
+      `${v.file}:${v.line} ${v.test} (${v.kind}) -> ${v.cases.join(", ")}`),
+    null],
     ["Draft, no implements", tr.noImplDraft, tr.noImplDraft],
     ...(h ? [
       ["Same text under two ids", h.duplicates.map((p) => p.join(" = ")),

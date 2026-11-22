@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+**The worklist and the map name tagged tests that cannot fail (ADR-0092).**
+
+- A `# verifies:` tag closed its case whatever the test under it did. `next` (`gate --risk`) now prints a `Tests that cannot fail` bucket: each Python `test*` function a tag sits in or directly above that asserts nothing, asserts only a constant, or only compares an expression with itself, with its file, line and the cases it closes. A call to a same-file helper that asserts counts as an assertion; a function not named `test*` and other languages are not judged. Here it names 3 tests, each an `assertEqual(f(x), f(x))` determinism check. REQ-TESTGAPS-1146
+- `sync` writes the same list as `trace.vacuous` in `_map.json`, outside the freshness comparison. The Report counts it in Results in numbers, lists it under Problem types, recommends a fix, and exports it in the Markdown. A map without it reads `not measured`. REQ-TESTGAPS-1146
+- A requirement with no negative case was measured and left out: read from the shape of the assertions it went from 58 to 15 requirements after one rule changed, and still named a test that feeds a broken corpus. ADR-0092 records why.
+- The requirement is a draft until it is read.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22`. The core rises to 7,129 logical lines (ADR-0092); 20,897 physical lines in 88 files.
+
 **The trace block counts the same files on every checkout.**
 
 - `coverage` in the map's `trace` block counted every file the tag scan reads, prose included, and files git ignores. A local copy holding documents kept in `.git/info/exclude` wrote different numbers into the committed `_map.json` than CI did (298 code files against 291 here). It now skips prose (`.md`, `.html`) and whatever git ignores, the same set the coverage ratio skips. Here `code_files` falls from 291 to 190: about a hundred documents were being counted as code. REQ-MAP-1144

@@ -102,6 +102,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0089](0089-c-and-cpp-definitions-key-member-drift.md) | C and C++ definitions key member drift | Accepted |
 | [0090](0090-c-and-cpp-in-an-audit.md) | C and C++ in an audit: tests, draft signals, stated values | Accepted |
 | [0091](0091-report-reads-an-audit.md) | The Report reads an audit, and the map carries the trace's reach | Accepted |
+| [0092](0092-tests-that-cannot-fail.md) | The worklist and the map name tagged tests that cannot fail | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

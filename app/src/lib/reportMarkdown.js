@@ -43,6 +43,7 @@ export function reportMarkdown(c, repo, rows) {
   row("Draft, no implements", tr.noImplDraft.length);
   row("Code, no tested-by", tr.noTest.length);
   row("Cases with no verifies", tr.unprovenCases);
+  row("Tests that cannot fail", c.vacuous == null ? null : c.vacuous.length);
   row("Dangling tags", c.dangling == null ? null : c.dangling.length);
   row("Drift", c.drift == null ? null : c.drift.length);
   if (c.coverage) {
