@@ -106,6 +106,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0093](0093-cpp-tests-that-cannot-fail.md) | C and C++ tests that cannot fail are named too | Accepted |
 | [0094](0094-js-and-ts-strings-are-not-tags.md) | JS and TS strings are not tags, and the line ceiling moves to 23,000 | Accepted |
 | [0095](0095-the-design-candidates-are-cleared.md) | The design candidates are cleared, and the core grows by the names it gained | Accepted |
+| [0096](0096-mcp-json-uses-relative-paths.md) | `.mcp.json` uses relative paths, with no client variable | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

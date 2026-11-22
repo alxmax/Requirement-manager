@@ -437,6 +437,10 @@
       "hash": "18b42fb690c3",
       "reason": "plugin/ -> plugin-full/ move for the directory submission; the full edition's statements now name plugin-full/ and requirement-manager-full"
     },
+    "REQ-MCPSEED-1029": {
+      "hash": "5a557e584572",
+      "reason": "REQ-MCPSEED-1029: .mcp.json uses relative paths, no client variable (ADR-0096)"
+    },
     "REQ-MCPTOOLS-1028": {
       "hash": "f18d400d4a3f",
       "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"

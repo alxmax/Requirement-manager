@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+**`.mcp.json` works in every client that reads it (ADR-0096).**
+
+- `init` wrote `.mcp.json` with every path under `${CLAUDE_PROJECT_DIR:-.}`, Claude Code's own expansion. Copilot CLI and VS Code's Copilot read the same file and are not known to expand it, so the server could fail to start there or show up twice. The file now holds relative paths (`./scripts/reqmap.py mcp --root .`) and no variable; the server already resolves them against `CLAUDE_PROJECT_DIR` when a client sets it, else against the directory it starts in. `.vscode/mcp.json` keeps `${workspaceFolder}`. A test starts the seeded entry in the repository root with no `CLAUDE_PROJECT_DIR` and lists its tools. REQ-MCPSEED-1029
+- This repository's own `.mcp.json` and the example in `docs/integrations.md` follow.
+- An existing `.mcp.json` is still never edited: a consumer seeded before keeps the variable until it rewrites the file.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.5`.
+
 **The design record is clean: 158 of 158 source files (ADR-0095).**
 
 - The 25 design candidates `sync` named (88% of files clean) are cleared by naming steps, not by exemptions: long functions give up their steps, deep nesting becomes an early `continue` or a generator, a long parameter list becomes the object its values already form, and a long file is split where it already divides. `gate --risk` reads `Design pass-rate: 100%`.

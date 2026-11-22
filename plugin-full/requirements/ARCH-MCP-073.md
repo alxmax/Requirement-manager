@@ -219,8 +219,9 @@ Every bullet below is binding.
 - `init` writes `.mcp.json` with `mcpServers.reqmap` and `.vscode/mcp.json` with
   `servers.reqmap`, each a stdio entry running the vendored `reqmap.py mcp` with the
   repository's `--reqs` and `--code`.
-- The Claude Code entry writes its paths under `${CLAUDE_PROJECT_DIR:-.}`, the VS Code entry
-  under `${workspaceFolder}`.
+- The `.mcp.json` entry writes its paths relative to the repository root
+  (`./scripts/reqmap.py`, `--root .`), with no client variable, because several clients
+  read that file; the `.vscode/mcp.json` entry writes them under `${workspaceFolder}`.
 - An existing config is never edited; one with no `reqmap` server gets a note saying to add it.
 - When the engine is not inside the repository, no config is written and a note says why.
 
@@ -228,7 +229,7 @@ Every bullet below is binding.
 CASE-1 — both configs start the vendored engine
   Given  a repository vendoring the engine, with its requirements under `requirements/`
   When   the configs are seeded
-  Then   `.mcp.json` and `.vscode/mcp.json` each run `reqmap.py mcp` under their client's project variable, with `--reqs` ending in `requirements`
+  Then   `.mcp.json` runs `./scripts/reqmap.py mcp` with relative paths and `.vscode/mcp.json` runs it under `${workspaceFolder}`, each with `--reqs` ending in `requirements`
 
 CASE-2 — an existing config is left alone
   Given  a `.vscode/mcp.json` declaring only another server
@@ -239,6 +240,11 @@ CASE-3 — an engine outside the repository writes nothing
   Given  a repository that does not contain the engine
   When   the configs are seeded
   Then   no file is written and a note says the engine is not inside the repository
+
+CASE-4 — the `.mcp.json` entry needs no client variable
+  Given  the seeded `.mcp.json` entry, and no `CLAUDE_PROJECT_DIR` in the environment
+  When   a client starts it in the repository root and asks `tools/list`
+  Then   the server answers with its tools
 
 
 --------------------

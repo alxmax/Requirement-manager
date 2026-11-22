@@ -4,14 +4,14 @@
       "type": "stdio",
       "command": "python",
       "args": [
-        "${CLAUDE_PROJECT_DIR:-.}/plugin-full/scripts/reqmap.py",
+        "./plugin-full/scripts/reqmap.py",
         "mcp",
         "--root",
-        "${CLAUDE_PROJECT_DIR:-.}",
+        ".",
         "--reqs",
-        "${CLAUDE_PROJECT_DIR:-.}/plugin-full/requirements",
+        "./plugin-full/requirements",
         "--code",
-        "${CLAUDE_PROJECT_DIR:-.}"
+        "."
       ]
     }
   }
