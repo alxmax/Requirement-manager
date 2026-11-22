@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin-full/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin-full/scripts/reqmap_engine/__init__.py": "a776b2d266d39d0d0467b48c09e3e2f8b9fa442705c8f90e774b5d6b87dc747b",
+      "plugin-full/scripts/reqmap_engine/__init__.py": "590d21fc7164397c085423fd37545d1911f6f4f06cc991e3e784635bdbf94a20",
       "plugin-full/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin-full/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin-full/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -96,7 +96,7 @@
     "ARCH-SELFGATE-039": {
       ".github/workflows/dogfood.yml": "526049440c98171170628d182628bcfc6c213d656b575ebe93dba994e8accc61",
       "scripts/changelog_notes.py": "89166efdb420e6ddb62b5c17d9515dee46e86a6e948eb2bffc0b61a51d9a4f1b",
-      "scripts/check_engine_budget.py": "50791d0769fbeeb49332e5a7b1c006a870ab3416edcf5249d944840877e41a49",
+      "scripts/check_engine_budget.py": "eda9710e41c033265fe2ca1a895ff26b2c2a4990bb6449bb9ba113fea221e286",
       "scripts/check_engine_bump.py": "932755e793aa6382a307ec5a6778e3c6151645fe335641aefc7945f792c1c8c4",
       "scripts/check_engine_perf.py": "e40efe01de81aa0125be1134afd5463d29631329012baf5505947995de00089f",
       "scripts/check_versions.py": "d03219ba846c71ec634cdaa5c2542d16edc849d8bea6a2e42cfaec227c8cfb84",
@@ -596,9 +596,14 @@
       "plugin-full/scripts/reqmap_engine/testgaps.py#shared_test_files": "83e8bc7933764cfc777de0cbfd2405057a9f2b1c935d102425e3bf2e3995ef83"
     },
     "REQ-TESTGAPS-1146": {
-      "plugin-full/scripts/reqmap_engine/vacuoustests.py": "eccc769da4284e446fdbb595bf360655519f6727327c071a3196b329b324e63d",
+      "plugin-full/scripts/reqmap_engine/vacuoustests.py": "7b596a14bd7107e01ac7eb9b56f42eca4acb94e169ca4153337f77b496fd394d",
       "plugin-full/scripts/reqmap_engine/vacuoustests.py#_kind": "ff917e1460dbbb9cd9dfc31d7f5fbdd1165bfd697cad397e36bd8eeb310990fa",
-      "plugin-full/scripts/reqmap_engine/vacuoustests.py#vacuous_tests": "6cd7c6408bed8d77341db8482db8845374cd63202f5d4ce927059c7cd5959825"
+      "plugin-full/scripts/reqmap_engine/vacuoustests.py#vacuous_tests": "b37191ed3be257978384d54fd0373b6b5089fe51e3602b56a736466bcf8f7818"
+    },
+    "REQ-TESTGAPS-1147": {
+      "plugin-full/scripts/reqmap_engine/vacuouscpp.py": "70c8d41745711384bfad6f9d54692cef6b3a6314fe33139cb6e3b04e3a8e3fde",
+      "plugin-full/scripts/reqmap_engine/vacuouscpp.py#_kind": "f3f3ae847ac7fb4e5bf5384ae9cc15c13557ff6b5b5c8206d197d43c6f3c13c7",
+      "plugin-full/scripts/reqmap_engine/vacuouscpp.py#cpp_vacuous": "6196e8b0c8f444a5e3a8dbb1b4c9a800a8f8b0b1e0fe792fc1c257b3ae8087e0"
     },
     "REQ-UNPLANNED-1024": {
       "plugin-full/scripts/reqmap_engine/plandrift.py#unplanned_line": "bbe22c4d0e419425979c7dbb67dc2f4b3e2aac98ab1f069bdd3dd15e11c249e7"

@@ -90,7 +90,9 @@ PACKAGE = "reqmap_engine"
 # Down to 7,058: tracecover.py reads the member lock in one place.
 # Raised to 7,129 by ADR-0092: vacuoustests.py, the tagged tests that cannot
 # fail, which the map's trace block carries.
-CORE_LOGICAL_BUDGET = 7129
+# Raised to 7,132 by ADR-0093: the call into vacuouscpp.py, the C/C++ reader,
+# which stays lazy.
+CORE_LOGICAL_BUDGET = 7132
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.
