@@ -572,7 +572,7 @@ CASE-4 — a test gap alone is not "nothing pending"
 
 ---
 id: REQ-TESTGAPS-1146
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -642,7 +642,7 @@ CASE-5 — the Report shows it
 
 ---
 id: REQ-TESTGAPS-1147
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
