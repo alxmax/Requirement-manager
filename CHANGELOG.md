@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## plugin `v8.28.0` — 2026-11-22
+
+**Release v8.28.0.**
+
 **`.mcp.json` works in every client that reads it (ADR-0096).**
 
 - `init` wrote `.mcp.json` with every path under `${CLAUDE_PROJECT_DIR:-.}`, Claude Code's own expansion. Copilot CLI and VS Code's Copilot read the same file and are not known to expand it, so the server could fail to start there or show up twice. The file now holds relative paths (`./scripts/reqmap.py mcp --root .`) and no variable; the server already resolves them against `CLAUDE_PROJECT_DIR` when a client sets it, else against the directory it starts in. `.vscode/mcp.json` keeps `${workspaceFolder}`. A test starts the seeded entry in the repository root with no `CLAUDE_PROJECT_DIR` and lists its tools. REQ-MCPSEED-1029
