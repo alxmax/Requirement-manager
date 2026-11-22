@@ -24,7 +24,8 @@ import reqmap as R
 
 from test_reqmap_common import (  # noqa: F401  (fixtures used across the parts)
     _write, _ROLE, tag, gtag_html, _TB_ROLE, _VERIFY_ROLE,
-    tb_tag, v_tag, REQ, _ac_body, _SPEC_TMPL, _spec, _req_with_verify)
+    tb_tag, v_tag, REQ, _ac_body, _SPEC_TMPL, _spec, _req_with_verify,
+    _in_two_processes)
 
 
 
@@ -1515,7 +1516,12 @@ class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022  # tested-by: REQ
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
             reqs = R.load_requirements(d)
-            self.assertEqual(self._review(reqs), self._review(reqs))
+            first, second = _in_two_processes(
+                "import sys, reqmap as R; R.cmd_review(R.load_requirements(sys.argv[1]), None)", d)
+            in_process = self._review(reqs)
+        self.assertEqual(first, second)
+        self.assertEqual(first, in_process)
+        self.assertIn("A-R-001", first)
 
     def test_gate_ignores_ai_sidecar(self):  # DETERMINISM WALL — verifies: ARCH-REVIEW-022  # verifies: REQ-REVIEW-906#CASE-4  # verifies: REQ-REVIEW-906#CASE-5  # verifies: ARCH-REVIEW-022#CASE-4
         with tempfile.TemporaryDirectory() as d:
@@ -2632,7 +2638,14 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
 
     def test_questions_are_deterministic(self):  # verifies: ARCH-CLARIFY-062#CASE-2
         clauses = ["It scans all files quickly, retrying 3 times."]
-        self.assertEqual(self._qs(clauses), self._qs(clauses))
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-Q-001.md"), _spec("AREA-Q-001", clauses))
+            first, second = _in_two_processes(
+                "import sys, json, reqmap as R; reqs = R.load_requirements(sys.argv[1]); "
+                "print(json.dumps(R._clarify_questions('AREA-Q-001', reqs['AREA-Q-001'], reqs),"
+                " default=str))", d)
+        self.assertEqual(first, second)
+        self.assertGreater(len(json.loads(first)), 1)  # several questions, so order matters
 
 
 class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-960  # tested-by: REQ-RETIRE-961  # tested-by: REQ-RETIRE-962  # tested-by: REQ-RETIRE-963

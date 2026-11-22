@@ -23,7 +23,8 @@ import reqmap as R
 
 from test_reqmap_common import (  # noqa: F401  (fixtures used across the parts)
     _write, _ROLE, tag, gtag_html, _TB_ROLE, _VERIFY_ROLE,
-    tb_tag, v_tag, REQ, _ac_body, _SPEC_TMPL, _spec, _req_with_verify)
+    tb_tag, v_tag, REQ, _ac_body, _SPEC_TMPL, _spec, _req_with_verify,
+    _in_two_processes)
 
 
 
@@ -2594,7 +2595,11 @@ class CasesDrift(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: 
 
     def test_binding_hash_deterministic_across_calls(self):  # verifies: REQ-DRIFT-841#CASE-4
         body = "# T\n\n## Description\n- shall do X.\n"
-        self.assertEqual(R.binding_hash(body), R.binding_hash(body))
+        first, second = _in_two_processes(
+            "import sys, reqmap as R; print(R.binding_hash(sys.argv[1]))", body)
+        self.assertEqual(first, second)
+        self.assertEqual(first.strip(), R.binding_hash(body))
+        self.assertEqual(12, len(first.strip()))
 
     def test_no_normative_section_hashes_and_filling_it_drifts(self):  # verifies: REQ-DRIFT-841#CASE-5
         empty = "# T\n\n## Context\n- a note.\n"
