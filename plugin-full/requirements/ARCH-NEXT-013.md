@@ -28,6 +28,7 @@ Every bullet below is binding.
 - `next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]
 - `next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]
 - `next` names each tagged test that cannot fail, the sync'd map carries the same list, and the viewer's Report counts it. [[REQ-TESTGAPS-1146]]
+- The same three shapes are read from C and C++ tests: GoogleTest, Catch2, CppUTest and Unity. [[REQ-TESTGAPS-1147]]
 
 ## Cases
 CASE-1
@@ -595,7 +596,8 @@ Every bullet below is binding.
 - An assertion is an `assert` statement, a call whose name starts with `assert`, `fail`,
   `raises`, `check`, `expect` or `verify`, or a call to a function of the same file that
   itself asserts.
-- A function not named `test*` and a test in any other language are not judged.
+- A function not named `test*` is not judged. C and C++ tests are read by
+  `REQ-TESTGAPS-1147`; a test in any other language is not judged.
 - `sync` writes the same list under `trace.vacuous` in `_map.json`, outside the freshness
   comparison like the rest of `trace`; the viewer's Report counts it in its numbers, lists
   it under Problem types and recommends a fix when it is not empty.
@@ -637,3 +639,67 @@ CASE-5 — the Report shows it
   itself, all three determinism checks run in one process; a script whose failure is its exit
   code was the only false positive of a first draft, and is why only `test*` functions are
   judged.
+
+---
+id: REQ-TESTGAPS-1147
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-NEXT-013]
+---
+
+# C and C++ tests that cannot fail are named too
+
+## Description
+> A C or C++ repository tags its GoogleTest or Unity tests with `// verifies:` the same way a
+> Python one does, and the same tests prove nothing: a `TEST` body that only runs the code, an
+> `EXPECT_TRUE(true)`, an `EXPECT_EQ(f(x), f(x))`. The brace reader the engine already has for
+> C and C++ finds each test's body, so the three shapes can be read there too.
+
+Every bullet below is binding.
+- A C or C++ test is a top-level block the brace reader finds, opened by `TEST`, `TEST_F`,
+  `TEST_P`, `TYPED_TEST`, `TYPED_TEST_P`, `TEST_CASE`, `TEST_CASE_METHOD` or `SCENARIO`, or a
+  function whose name starts with `test`; it is judged when a `verifies:` tag sits in it or in
+  the comment block directly above it.
+- An assertion is a call to an `EXPECT_*`, `ASSERT_*`, `TEST_ASSERT*`, `TEST_FAIL*`, `FAIL`,
+  `ADD_FAILURE*`, `REQUIRE*`, `CHECK*` or `*_EQUAL*` macro or to `assert`; a call to a function
+  of the same file that asserts, or to any function whose name starts with `assert`, `fail`,
+  `check`, `expect` or `verify`, counts as one.
+- The test is named, with the same three kinds as a Python test, when it has no assertion, when
+  every assertion has one argument that is `true`, `false`, `nullptr`, `NULL` or an integer, or
+  when every assertion is an `EQ`/`EQUAL` macro whose first two arguments are the same text.
+- Comments and string literals are blanked before macros and parentheses are read, so a macro
+  named in a string is no assertion and a parenthesis in a string does not split an argument.
+- A file whose braces do not balance is skipped, and a repository whose tagged tests are all
+  Python never loads this reader.
+
+## Cases
+CASE-1 — a GoogleTest test with no assertion is named
+  Given  a `TEST(Suite, Runs)` whose body only calls the code, tagged in the comment above it
+  When   the tagged tests are read
+  Then   it is named as `no assertion`, with `TEST(Suite, Runs)` and its line
+
+CASE-2 — a constant or a self-comparison is named, a real assertion is not
+  Given  a tagged `TEST` asserting `EXPECT_TRUE(true)`, a tagged `TEST_F` asserting
+         `EXPECT_EQ(f(1), f(1))` and a tagged `TEST` asserting `EXPECT_EQ(f(1), 3)`
+  When   the tagged tests are read
+  Then   the first is `constant assertion`, the second `compares a value with itself`, and the
+         third is not named
+
+CASE-3 — a helper or a string does not mislead it
+  Given  a tagged test calling a same-file helper that asserts, a tagged test calling
+         `check_frame(...)` from another file, a tagged test asserting
+         `EXPECT_STREQ(name(), "a(b")`, and a tagged function `helper_main` with no assertion
+  When   the tagged tests are read
+  Then   none of them is named
+
+CASE-4 — a Unity test is read and the list reaches the worklist
+  Given  a `.c` file whose tagged `void test_x(void)` asserts `TEST_ASSERT_EQUAL(f(), f())`
+  When   `next` runs
+  Then   `Tests that cannot fail (1)` names `void test_x(void)` as `compares a value with itself`
+
+CASE-5 — what the reader cannot read is skipped
+  Given  a tagged `.cpp` test file whose braces do not balance
+  When   the tagged tests are read
+  Then   nothing is named for it and nothing fails

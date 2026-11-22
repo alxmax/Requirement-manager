@@ -5,18 +5,21 @@ Part of the `test_reqmap` suite — run it through the aggregator
 (`python scripts/test_reqmap.py`), or on its own with
 `python -m unittest test_reqmap_cfamily`.
 """
+import io
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reqmap as R
 from reqmap_engine import tracecover as _tracecover
 R.tracecover = _tracecover
-from test_reqmap_common import _ROLE, _write
+from test_reqmap_common import _ROLE, _spec, _write
 
 ENGINE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
 CTAG = "// " + _ROLE + ": "
@@ -254,6 +257,66 @@ class TraceBlock(unittest.TestCase):  # tested-by: REQ-MAP-1144 @unit
         _write(os.path.join(d, ".git", "info", "exclude"), "/src/local.c\n")
         files = R.tracecover._code_files(d, None)
         self.assertEqual(["src/a.c"], [rel.replace(os.sep, "/") for _a, rel, _t in files])
+
+
+
+class CppTestsThatCannotFail(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1147
+    """GoogleTest, Catch2, CppUTest and Unity tests that cannot fail."""
+    TAG = "// " + "verif" + "ies: "  # spelled apart so this file's scan sees no tag
+
+    def _read(self, src, fp="t_test.cpp"):
+        from reqmap_engine.vacuouscpp import cpp_vacuous
+        tags = [(i, c) for i, line in enumerate(src.split("\n"), 1)
+                for c in re.findall(r"ies: (\S+#CASE-\d+)", line)]
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, fp), src)
+            found = cpp_vacuous(d, fp, tags)
+        return [(v["test"], v["kind"], v["line"]) for v in found]
+
+    def test_a_test_with_no_assertion_is_named(self):  # verifies: REQ-TESTGAPS-1147#CASE-1
+        src = ("#include <gtest/gtest.h>\n"
+               + self.TAG + "REQ-A-001#CASE-1\n"
+               "TEST(Suite, Runs) {\n  run(1);\n}\n")
+        self.assertEqual([("TEST(Suite, Runs)", "no assertion", 3)], self._read(src))
+
+    def test_a_constant_or_a_self_comparison_is_named(self):  # verifies: REQ-TESTGAPS-1147#CASE-2
+        src = ("TEST(S, Const) {  " + self.TAG + "REQ-A-001#CASE-1\n  EXPECT_TRUE(true);\n}\n"
+               "TEST_F(F, Same) {  " + self.TAG + "REQ-A-001#CASE-2\n"
+               "  EXPECT_EQ(f(1), f(1));\n}\n"
+               "TEST(S, Real) {  " + self.TAG + "REQ-A-001#CASE-3\n  EXPECT_EQ(f(1), 3);\n}\n")
+        self.assertEqual([("TEST(S, Const)", "constant assertion", 1),
+                          ("TEST_F(F, Same)", "compares a value with itself", 4)],
+                         self._read(src))
+
+    def test_a_helper_or_a_string_does_not_mislead_it(self):  # verifies: REQ-TESTGAPS-1147#CASE-3
+        src = ("static void expect_three(int x) { EXPECT_EQ(x, 3); }\n"
+               "TEST(S, Helper) { expect_three(f()); }  " + self.TAG + "REQ-A-001#CASE-1\n"
+               "TEST(S, Lib) { check_frame(f()); }  " + self.TAG + "REQ-A-001#CASE-2\n"
+               "TEST(S, Str) {  " + self.TAG + "REQ-A-001#CASE-3\n"
+               "  EXPECT_STREQ(name(), \"a(b\");\n}\n"
+               "void helper_main(void) { run(); }  " + self.TAG + "REQ-A-001#CASE-4\n")
+        self.assertEqual([], self._read(src))
+
+    def test_a_unity_test_reaches_the_worklist(self):  # verifies: REQ-TESTGAPS-1147#CASE-4
+        src = ("#include \"unity.h\"\n"
+               "void test_x(void) {  " + self.TAG + "REQ-A-001#CASE-1\n"
+               "  TEST_ASSERT_EQUAL(f(), f());\n}\n")
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["A works."]))
+            _write(os.path.join(d, "test_a.c"), src)
+            ws = R.Workspace.load(rd, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_next(ws)
+        self.assertIn("Tests that cannot fail (1)", buf.getvalue())
+        self.assertIn("test_a.c:2   void test_x(void)   compares a value with itself",
+                      buf.getvalue())
+
+    def test_unbalanced_braces_are_skipped(self):  # verifies: REQ-TESTGAPS-1147#CASE-5
+        src = "TEST(S, Broken) {  " + self.TAG + "REQ-A-001#CASE-1\n  run(1);\n"
+        self.assertEqual([], self._read(src))
 
 
 if __name__ == "__main__":

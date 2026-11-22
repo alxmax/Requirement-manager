@@ -1,9 +1,9 @@
 ---
 generated: 2026-11-22
-engine: 2026-11-22
-nodes: 372
+engine: 2026-11-22.1
+nodes: 373
 edges: 130
-design pass-rate: 88% (134/152 source files without a design candidate)
+design pass-rate: 88% (135/153 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -254,6 +254,7 @@ graph LR
     REQ_PLANGAPS_1033["The plan's own gaps are a bucket in the worklist<br><small>REQ-PLANGAPS-1033</small>"]
     REQ_TESTGAPS_1088["The worklist names the tests the gate cannot see missing<br><small>REQ-TESTGAPS-1088</small>"]
     REQ_TESTGAPS_1146["The worklist names the tagged tests that cannot fail<br><small>REQ-TESTGAPS-1146</small>"]
+    REQ_TESTGAPS_1147["C and C++ tests that cannot fail are named too<br><small>REQ-TESTGAPS-1147</small>"]
     REQ_ORPHANCODE_888["Warning on a sizeable file with no requirement link<br><small>REQ-ORPHANCODE-888</small>"]
     REQ_PARSE_890["load_requirements returns one meta/body/path record per file<br><small>REQ-PARSE-890</small>"]
     REQ_PARSE_891["The hand-rolled frontmatter grammar: scalars and lists only<br><small>REQ-PARSE-891</small>"]
@@ -1212,7 +1213,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>290 caps</small>"]
+  a_REQ["REQ<br><small>291 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1247,6 +1248,7 @@ graph LR
     REQ_MAPSTAMP_1124["The page shows which build it is<br><small>REQ-MAPSTAMP-1124</small><br>unreviewed"]
     REQ_MAPSTAMP_1125["'MAP_LANGUAGE' sets the language the page opens in<br><small>REQ-MAPSTAMP-1125</small><br>unreviewed"]
     REQ_TESTGAPS_1146["The worklist names the tagged tests that cannot fail<br><small>REQ-TESTGAPS-1146</small><br>unreviewed"]
+    REQ_TESTGAPS_1147["C and C++ tests that cannot fail are named too<br><small>REQ-TESTGAPS-1147</small><br>unreviewed"]
     REQ_RETIRE_1130["A retirement that fails says so and stops<br><small>REQ-RETIRE-1130</small><br>unreviewed"]
     REQ_SCAN_1136["A copied engine is not scanned<br><small>REQ-SCAN-1136</small><br>unreviewed"]
     REQ_VIEWER_1145["The Report reads an audit<br><small>REQ-VIEWER-1145</small><br>unreviewed"]
@@ -1269,6 +1271,7 @@ graph LR
   style REQ_MAPSTAMP_1124 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_MAPSTAMP_1125 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_TESTGAPS_1146 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_TESTGAPS_1147 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_RETIRE_1130 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_SCAN_1136 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VIEWER_1145 fill:#fff3cd,stroke:#a66,color:#630
@@ -1296,6 +1299,7 @@ graph LR
 | REQ-MAPSTAMP-1124 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-MAPSTAMP-1125 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-TESTGAPS-1146 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-TESTGAPS-1147 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-RETIRE-1130 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-SCAN-1136 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VIEWER-1145 | draft | 7 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

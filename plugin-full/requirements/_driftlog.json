@@ -106,8 +106,8 @@
       "reason": "ADR-0045: new deprecated; REQ-NEW-1032 added, init case names the file to write"
     },
     "ARCH-NEXT-013": {
-      "hash": "e71dbebb2690",
-      "reason": "ARCH-NEXT-013 gains the REQ-TESTGAPS-1146 obligation"
+      "hash": "a011c552d88d",
+      "reason": "ARCH-NEXT-013 gains the REQ-TESTGAPS-1147 obligation"
     },
     "ARCH-PARSE-001": {
       "hash": "3eca960dd4f3",

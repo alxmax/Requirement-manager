@@ -3,9 +3,10 @@
 A `# verifies: ID#CASE-N` tag closes a case however the test is written, so a
 test that asserts nothing, asserts only a constant, or compares an expression
 with itself proves the case and checks nothing. This reads the Python test
-functions the tags sit in and names those. A function not named `test*` is
-not judged, nor is any other language: a script's exit code and a foreign
-runner's assertions are not visible to `ast`. Advice only, never a verdict.
+functions the tags sit in and names those; C and C++ tests are read by
+`vacuouscpp` (ADR-0093). A function not named `test*` is not judged, nor is
+any other language: a script's exit code and a foreign runner's assertions
+are not visible here. Advice only, never a verdict.
 """
 # implements: REQ-TESTGAPS-1146
 import ast
@@ -82,10 +83,13 @@ def vacuous_tests(code_root, ac_cover):  # implements: REQ-TESTGAPS-1146
     for rid, cases in (ac_cover or {}).items():
         for case, locs in cases.items():
             for fp, line in locs:
-                if fp.endswith(".py"):
-                    by_file.setdefault(fp, []).append((line, rid + "#" + case))
+                by_file.setdefault(fp, []).append((line, rid + "#" + case))
     out = []
     for fp in sorted(by_file):
+        if not fp.endswith(".py"):
+            from .vacuouscpp import cpp_vacuous  # C and C++ (ADR-0093)
+            out += cpp_vacuous(code_root, fp, by_file[fp])
+            continue
         try:
             with open(os.path.join(code_root, fp), encoding="utf-8") as fh:
                 tree = ast.parse(fh.read())
