@@ -17,6 +17,10 @@
       "hash": "9b895310a4a7",
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
+    "ARCH-BUGS-078": {
+      "hash": "8442bd10c77e",
+      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+    },
     "ARCH-CANDIDATES-009": {
       "hash": "9a3cce30b75b",
       "reason": "ARCH-CANDIDATES-009, ARCH-EXTRACT-008 and ARCH-RULES-059 gain their C/C++ obligations (ADR-0090)"
@@ -201,9 +205,21 @@
       "hash": "d1f8dd693b28",
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
+    "REQ-BUGS-1116": {
+      "hash": "e36baba21bad",
+      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+    },
+    "REQ-BUGS-1119": {
+      "hash": "cafbde37a412",
+      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+    },
     "REQ-BUGS-1121": {
       "hash": "f5201edaa12e",
       "reason": "Bugs tab: a priority legend under the chips"
+    },
+    "REQ-BUGS-1127": {
+      "hash": "972d59ffa9f1",
+      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
     },
     "REQ-CANDIDATES-826": {
       "hash": "000ec6c8296f",
@@ -216,6 +232,10 @@
     "REQ-CHECK-1036": {
       "hash": "bfd8e3e1acfc",
       "reason": null
+    },
+    "REQ-CHECK-1135": {
+      "hash": "37ed99e0bada",
+      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
     },
     "REQ-CHECK-828": {
       "hash": "7097c62875e6",
@@ -417,6 +437,10 @@
       "hash": "18b42fb690c3",
       "reason": "plugin/ -> plugin-full/ move for the directory submission; the full edition's statements now name plugin-full/ and requirement-manager-full"
     },
+    "REQ-MCPSEED-1029": {
+      "hash": "5a557e584572",
+      "reason": "REQ-MCPSEED-1029: .mcp.json uses relative paths, no client variable (ADR-0096)"
+    },
     "REQ-MCPTOOLS-1028": {
       "hash": "f18d400d4a3f",
       "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
@@ -532,6 +556,10 @@
     "REQ-SCAN-909": {
       "hash": "261024cbc471",
       "reason": "v8.0.1: engine upgrade keeps unchanged confirmations; ignoring reqmap.py ignores its package; marketplace versions move on release"
+    },
+    "REQ-SCAN-992": {
+      "hash": "fd601c9fc438",
+      "reason": "REQ-SCAN-992 gains the JS/TS masking clause and CASE-6 (ADR-0094)"
     },
     "REQ-SEARCH-913": {
       "hash": "c5b8550fa8c5",

@@ -646,11 +646,12 @@ CASE-6 — formatting does not bypass map freshness
 
 ---
 id: REQ-CHECK-1133
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-CHECK-006]
+lint_exempt: [file-spread]
 ---
 
 # The map is written when the gate fails
@@ -704,12 +705,16 @@ CASE-6 — a first check with no requirement opens on Problems
   Then   it opens on the Problems page and shows the dangling id, and a map with no
          requirement and no gate error still reads as no map
 
+## Context
+**Notes**
+- `lint_exempt: file-spread` — writing the map on a failing gate is one obligation met in three places: `sync` in the CLI and the engine writes the map, and the viewer opens a map whose gate failed on its Problems page.
+
 --------------------
 
 
 ---
 id: REQ-CHECK-1135
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -740,4 +745,9 @@ CASE-2 — accepting clears it and records why
   Given  the same requirement after that sync
   When   `sync --accept-drift REASON` runs
   Then   the gate reports no RM018 and `_driftlog.json` holds the reason
+
+CASE-3 — a requirement sync can write is demoted as before
+  Given  two drifted confirmed requirements, one in a file sync can write and one not
+  When   sync demotes them
+  Then   the first is set back to draft, and only the second keeps its baseline
 

@@ -78,12 +78,15 @@ and every requirement are also resources (`reqmap://map`, `reqmap://requirement/
 client can attach a requirement to the conversation instead of calling a tool about it.
 
 `init` writes the client configs when they are absent, and never edits one that exists:
-`.mcp.json` for Claude Code and `.vscode/mcp.json` for VS Code. By hand:
+`.mcp.json` for Claude Code and `.vscode/mcp.json` for VS Code. `.mcp.json` is read by Claude
+Code, Copilot CLI and VS Code's Copilot alike, which share no variable syntax, so its paths are
+relative to the repository root; the server resolves them against `CLAUDE_PROJECT_DIR` when a
+client sets it, else against the directory it starts in ([ADR-0096](adr/0096-mcp-json-uses-relative-paths.md)).
+By hand:
 
 ```json
 {"mcpServers": {"reqmap": {"type": "stdio", "command": "python",
-  "args": ["${CLAUDE_PROJECT_DIR:-.}/scripts/reqmap.py", "mcp",
-           "--root", "${CLAUDE_PROJECT_DIR:-.}"]}}}
+  "args": ["./scripts/reqmap.py", "mcp", "--root", "."]}}}
 ```
 
 The skill tells an assistant when to prefer these tools over the terminal, and which
@@ -117,7 +120,7 @@ has been run against this engine yet.
 - **The verdict.** A cloud agent commits without your hook, so the gate that holds for it is the
   one in CI (`uses: alxmax/requirement-manager/check@v8`, below).
 - **Not observed yet:** the directory a stdio server starts in under the Copilot harness, the CLI
-  and the cloud agent, which decides what `${CLAUDE_PROJECT_DIR:-.}` in the `.mcp.json` `init`
+  and the cloud agent, which decides what the relative paths in the `.mcp.json` `init`
   writes resolves to; and whether Copilot expands `${CLAUDE_PLUGIN_ROOT}` in a `SKILL.md`. Until
   they are, run the server from the repository root.
 

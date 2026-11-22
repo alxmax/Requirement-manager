@@ -2,18 +2,21 @@
 (ADR-0043).
 
 Two files, one per client family: `.mcp.json` for Claude Code and
-`.vscode/mcp.json` for VS Code with GitHub Copilot. Neither guarantees the
-server's working directory, so every path is written against the variable
-each client expands to the project root.
+`.vscode/mcp.json` for VS Code with GitHub Copilot. `.mcp.json` is read by
+more than one client (Claude Code, Copilot CLI, VS Code's Copilot), and no
+variable syntax is shared by all of them, so its paths are relative: the
+server resolves `--root`, `--reqs` and `--code` against `CLAUDE_PROJECT_DIR`
+when a client sets it, else against the directory it starts in (ADR-0096).
+`.vscode/mcp.json` is VS Code's alone and keeps `${workspaceFolder}`.
 """
 # implements: ARCH-MCP-073
 import json, os
 
 from . import ENGINE_DIR
 
-# (path, top-level key, the variable the client expands to the project root)
+# (path, top-level key, what every path is written under)
 MCP_CONFIGS = (
-    (".mcp.json", "mcpServers", "${CLAUDE_PROJECT_DIR:-.}"),
+    (".mcp.json", "mcpServers", "."),  # implements: REQ-MCPSEED-1029
     (".vscode/mcp.json", "servers", "${workspaceFolder}"),
 )
 SERVER_NAME = "reqmap"

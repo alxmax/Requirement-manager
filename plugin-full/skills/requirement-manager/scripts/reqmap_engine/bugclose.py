@@ -67,7 +67,7 @@ def parse_fixed(text):
     return rows
 
 
-def _read(path):
+def _read(path):  # implements: REQ-BUGS-1150
     # implements: REQ-BUGS-1127
     if not os.path.isfile(path):
         return ""
@@ -98,7 +98,7 @@ def highest_closed(reqs_dir, stem):
     return max(numbers)
 
 
-def close_bug(module_text, register_text, bug, meta):
+def close_bug(module_text, register_text, bug, meta):  # implements: REQ-BUGS-1150
     # implements: REQ-BUGS-1127
     """(module text, register text): the row on `bug["line"]` moved to the
     register, whose own columns decide the row's shape. Pure. A file that
@@ -147,7 +147,7 @@ def version_at(root, reqs_dir, sha=None):
         shutil.rmtree(folder, ignore_errors=True)
 
 
-def _writable(root, reqs_dir, bug):
+def _writable(root, reqs_dir, bug):  # implements: REQ-BUGS-1150
     # implements: REQ-BUGS-1127
     """Whether `bug` lives in the bugs folder: `BUG_SOURCES` files stay the
     repository's own, read and never written."""
@@ -170,7 +170,7 @@ def _close(root, reqs_dir, bug, meta):
         f.write(module_text)
 
 
-def cmd_bug_fix(root, reqs_dir, target, a):
+def cmd_bug_fix(root, reqs_dir, target, a):  # implements: REQ-BUGS-1150
     # implements: ARCH-BUGS-078  # implements: REQ-BUGS-1127
     """`sync --fix ID`: one row to the register. Exit 2, writing nothing, for
     an id that is unknown, closed already, or in a file this never writes."""

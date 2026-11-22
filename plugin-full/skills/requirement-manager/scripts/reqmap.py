@@ -19,7 +19,6 @@ import io, json
 from contextlib import redirect_stdout
 
 from reqmap_engine import config as cfg
-from reqmap_engine.audittail import _audit_summary
 from reqmap_engine.candidates import cmd_candidates
 from reqmap_engine.clarify import cmd_clarify
 from reqmap_engine.cliflags import (
@@ -27,7 +26,6 @@ from reqmap_engine.cliflags import (
     _verb_scope
 )
 from reqmap_engine.config import apply_config, load_config
-from reqmap_engine.findings import cmd_findings
 from reqmap_engine.gate import GateMode, cmd_check
 from reqmap_engine.model import Finding, GateResult
 from reqmap_engine.groups import cmd_decompose_groups
@@ -39,8 +37,8 @@ from reqmap_engine.registry import _cli_choices, cmd_gen_integration
 from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
 from reqmap_engine.search import SEARCH_TOP, cmd_search
-from reqmap_engine.similar import _redundant_groups, cmd_similar
-from reqmap_engine.site import _site_default_target, cmd_site
+from reqmap_engine.similar import cmd_similar
+from reqmap_engine.synctail import after_passing_sync
 from reqmap_engine.workspace import Workspace, _is_source_repo
 from reqmap_engine import (
     config, model, parse, sections, acceptance, text, tags, scan,
@@ -214,9 +212,10 @@ def _dispatch_ask(a, ws):  # implements: REQ-CMDREGISTRY-1031
     print("usage: reqmap ask --search QUERY | --dupes | --design | "
           "--review [ID] | --bugs")
     return 2
-def _dispatch_sync(a, ws, code_root, reqs_dir):
-    """`sync` and its write modes. Returns the exit code."""
-    reqs, members = ws.reqs, ws.members  # commands that take only part of it
+def _sync_write_mode(a, ws):
+    """The exit code of a `sync` write mode (`--retire`, `--release`,
+    `--audit-plan`, `--bug`, `--fix`), or None when none was asked for."""
+    code_root, reqs_dir = ws.code_root, ws.reqs_dir
     if a.mode_retire is not None:
         if not a.mode_retire:
             print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]")
@@ -237,6 +236,14 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     if a.mode_fix is not None:  # implements: REQ-BUGS-1127
         from reqmap_engine.bugclose import cmd_bug_fix
         return cmd_bug_fix(code_root, reqs_dir, a.mode_fix, a)
+    return None
+
+
+def _dispatch_sync(a, ws, code_root, reqs_dir):
+    """`sync` and its write modes. Returns the exit code."""
+    rc = _sync_write_mode(a, ws)
+    if rc is not None:
+        return rc
     if cfg.bugs_declared(reqs_dir):  # implements: REQ-BUGS-1128
         from reqmap_engine.bugclose import close_from_commits
         close_from_commits(code_root, reqs_dir)
@@ -257,41 +264,7 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     # gate's errors, and the exit code stays the gate's.  # implements: REQ-CHECK-1133
     cmd_map(ws, code_root)
     if rc == 0:
-        # Everything derived is rebuilt in one place: there is no state of the
-        # world in which regenerating the map but not the findings digest, the
-        # presentation page or (in this repository) the generated integration
-        # artifacts is what the caller wanted. Each step below is a no-op when
-        # its target does not exist. `map` already refreshes an existing digest;
-        # this is the create path, kept opt-in so a consumer repo never gains a
-        # file it did not ask for.
-        if a.findings and not os.path.exists(
-                os.path.join(reqs_dir, "_findings.md")):
-            cmd_findings(reqs, reqs_dir, raw=False)
-        # implements: ARCH-SITE-026 — an explicit --attach page is scaffolded
-        # when absent; the default docs/architecture.html only if it exists
-        # and already carries an engine region.
-        page = a.attach or _site_default_target(code_root)
-        if page and (a.attach or os.path.isfile(page)):
-            cmd_site(ws, code_root, attach=page, regions=["nav", "stats"],
-                     refresh_only=not a.attach)
-        # Deliberately here and not in cmd_check: `gate` runs on every commit
-        # via the hook, and a corpus-shape advisory there is noise on work that
-        # is already correct. `sync` is the moment the corpus was just
-        # rewritten, which is when
-        # a newly-minted duplicate appears.  # implements: REQ-REDUNDANCY-058
-        _dups = _redundant_groups(reqs)
-        if _dups:
-            print("info  {} group(s) of requirements share an identical "
-                  "contract ({} could be folded away) — run `reqmap.py "
-                  "gate --risk` to see them"
-                  .format(len(_dups), sum(len(g) - 1 for g in _dups)))
-        # Everything the engine can discover, named in one place at the moment
-        # the corpus was just rewritten. `sync` regenerates what is derived;
-        # until now it said nothing about what is WRONG beyond the gate, so a
-        # repo could sync for months without ever meeting `dupes`, `design`, the
-        # exemption list or the
-        # fact that its corpus is flat.  # implements: REQ-AUDIT-973
-        _audit_summary(reqs, members, reqs_dir, code_root)
+        after_passing_sync(a, ws)
     else:
         # Only the map is rebuilt on a failing gate; the findings digest, the
         # site page and the advisories wait for a passing one.
@@ -300,6 +273,41 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
               "in it; fix them and re-run `sync` to rebuild the rest.",
               file=sys.stderr)
     return rc
+def _force_utf8():
+    """UTF-8 on stdout and stderr, whatever the console's codepage."""
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
+def _dispatch_clarify(a, ws):
+    """`clarify`, `clarify --decompose` and `clarify --levels`."""
+    if a.decompose:
+        if a.arg and a.arg not in ws.reqs:
+            print("no requirement with id {}".format(a.arg)); return 1
+        # Two seams, tried in order. A requirement whose Description carries
+        # bold group labels is split along THOSE — the author already drew
+        # the lines, and the children are the code rung a tagged corpus
+        # otherwise cannot reach. Only a requirement with no groups falls
+        # through to the older clause-level path, which scaffolds one draft
+        # per over-long clause and never edits the parent.
+        rc = cmd_decompose_groups(ws, only=a.arg or None,
+                                  apply_it=a.do_apply,
+                                  code_root=ws.code_root)
+        if rc is not None:
+            return rc
+        return cmd_lint(ws, strict=False, decompose=True,
+                        only=a.arg or None)
+    if a.levels:
+        # the retrofit ADR-0030 leaves out: `init` mints the rungs only for
+        # the drafts it extracts, so a corpus that was already tagged has no
+        # path to the axis. Human-invoked on purpose, and never on `sync`.
+        return cmd_levels(ws, apply_it=a.do_apply, only=a.arg or None)
+    return cmd_clarify(ws.reqs, a.arg, as_json=a.as_json)
+
+
 def main():
     """Parse the command line, load the workspace once, and dispatch to the
     verb. Returns the process exit code."""
@@ -316,11 +324,7 @@ def main():
     # the gate on an encoding error, not a real violation. Force UTF-8 so no
     # caller has to remember `-X utf8`. Guarded: reconfigure() is Python 3.7+
     # and may be absent on exotic streams.
-    for _stream in (sys.stdout, sys.stderr):
-        try:
-            _stream.reconfigure(encoding="utf-8")
-        except (AttributeError, ValueError, OSError):
-            pass
+    _force_utf8()
     if not sys.argv[1:] or {"-h", "--help"} & set(sys.argv[1:]):
         from reqmap_engine.usage import intercept
         return intercept(sys.argv[1:])
@@ -373,28 +377,8 @@ def main():
     if a.cmd == "sync":
         return _dispatch_sync(a, ws, code_root, reqs_dir)
     if a.cmd == "clarify":
-        if a.decompose:
-            if a.arg and a.arg not in ws.reqs:
-                print("no requirement with id {}".format(a.arg)); return 1
-            # Two seams, tried in order. A requirement whose Description carries
-            # bold group labels is split along THOSE — the author already drew
-            # the lines, and the children are the code rung a tagged corpus
-            # otherwise cannot reach. Only a requirement with no groups falls
-            # through to the older clause-level path, which scaffolds one draft
-            # per over-long clause and never edits the parent.
-            rc = cmd_decompose_groups(ws, only=a.arg or None,
-                                      apply_it=a.do_apply,
-                                      code_root=code_root)
-            if rc is not None:
-                return rc
-            return cmd_lint(ws, strict=False, decompose=True,
-                            only=a.arg or None)
-        if a.levels:
-            # the retrofit ADR-0030 leaves out: `init` mints the rungs only for
-            # the drafts it extracts, so a corpus that was already tagged has no
-            # path to the axis. Human-invoked on purpose, and never on `sync`.
-            return cmd_levels(ws, apply_it=a.do_apply, only=a.arg or None)
-        return cmd_clarify(ws.reqs, a.arg, as_json=a.as_json)
+        return _dispatch_clarify(a, ws)
+
 
 def _pipe_closed():  # implements: ARCH-PIPE-046
     """The reader (`| head`) stopped listening: point stdout at the null

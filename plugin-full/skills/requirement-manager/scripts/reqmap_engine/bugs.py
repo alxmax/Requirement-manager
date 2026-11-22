@@ -66,7 +66,7 @@ def _column_index(header, columns=None):
     return index if {"id", "title", "prio"} <= set(index) else None
 
 
-def iso_date(text):
+def iso_date(text):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """`text`'s date as YYYY-MM-DD, or "" when it holds no real one."""
     m, parts = _ISO_RE.search(text or ""), None
@@ -81,7 +81,7 @@ def iso_date(text):
         return ""
 
 
-def _file_heading(text, stem):
+def _file_heading(text, stem):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """(module, date) from `# <anything> — <module> (<date>)`. The file's
     name is the module when there is no heading."""
@@ -127,28 +127,40 @@ def _parse(text, ctx, problems):
     somebody else's: a contents page, a list of questions. So is every table
     under a `##` heading `BUG_SKIP_SECTIONS` matches."""
     bugs, seen = [], set()
-    lines = re.split(r"\r?\n", text)
-    index, skip, skipped = None, ctx.get("skip"), False
+    rows = _bug_table_rows(re.split(r"\r?\n", text), ctx.get("skip"))
+    for line_no, cells, index in rows:
+        bug = _row(cells, index, ctx, line_no, problems)
+        if not bug:
+            continue
+        if bug["id"] in seen:
+            problems.append("{}:{}: {} appears twice".format(
+                ctx["file"], line_no, bug["ref"]))
+            continue
+        seen.add(bug["id"])
+        bugs.append(bug)
+    return bugs
+
+
+def _bug_table_rows(lines, skip):
+    # implements: REQ-BUGS-1116  # implements: REQ-BUGS-1148
+    """(line number, cells, column index) for each data row of a bug table,
+    outside a `##` section `skip` matches."""
+    index, skipped = None, False
     for n, line in enumerate(lines):
         section = re.match(r"##\s+(.+)", line)
         if section:
             skipped = bool(skip and skip.search(section.group(1)))
         if not line.startswith("|"):
             index = None
-        elif skipped:
             continue
-        elif index is None:
-            if n + 1 < len(lines) and _is_separator(lines[n + 1]):
-                index = _column_index(_cells(line)) or False
-        elif index and not _is_separator(line):
-            bug = _row(_cells(line), index, ctx, n + 1, problems)
-            if bug and bug["id"] in seen:
-                problems.append("{}:{}: {} appears twice".format(
-                    ctx["file"], n + 1, bug["ref"]))
-            elif bug:
-                seen.add(bug["id"])
-                bugs.append(bug)
-    return bugs
+        if skipped:
+            continue
+        if index is None:
+            header = n + 1 < len(lines) and _is_separator(lines[n + 1])
+            index = (_column_index(_cells(line)) or False) if header else None
+            continue
+        if index and not _is_separator(line):
+            yield n + 1, _cells(line), index
 
 
 def _read_file(path, root, problems, skip=None):
@@ -190,7 +202,7 @@ def _bug_paths(root, reqs_dir, problems):
     return [p for p in paths if p != register]
 
 
-def _skip_pattern(problems):
+def _skip_pattern(problems):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """`BUG_SKIP_SECTIONS` compiled, or None. A bad one is one problem line,
     and every table is then read."""
@@ -247,7 +259,7 @@ def _escape(value):
     return " ".join(str(value or "").split()).replace("|", "\\|")
 
 
-def module_file(module):
+def module_file(module):  # implements: REQ-BUGS-1149
     # implements: REQ-BUGS-1119
     """A module's file name: its words joined by `-`, or "" when it has
     none. The result can never leave the bugs folder."""
@@ -377,7 +389,7 @@ def _lookalikes(text, title):
                 b["title"].casefold().split())).ratio() >= SIMILAR_TITLE]
 
 
-def cmd_bug_add(reqs_dir, title, a):
+def cmd_bug_add(reqs_dir, title, a):  # implements: REQ-BUGS-1149
     # implements: ARCH-BUGS-078  # implements: REQ-BUGS-1119
     # implements: REQ-BUGS-1126
     """`sync --bug TITLE`: one row in the module's file. Exit 2 on input that

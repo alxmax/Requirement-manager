@@ -48,6 +48,27 @@ function shippedStyle(h, picked) {
  *  days are shorter than the label. A second row is taken when that box
  *  would cover another block. The headline opens in the note.
  *  implements: REQ-HISTORY-1081 */
+/** One shipped release (or a month of them): its version, a count, and a
+ * tooltip with both commit dates. */
+function ShippedBar({ h, picked, toggle, t }) {
+  const pick = () => toggle({ kind: "release", ...h });
+  const caption = h.members && !String(h.version).includes("-v")
+    ? `${h.members.length} ${t("releases")}` : "";
+  const dates = `${h.version}\n${t("first commit")} ${h.commitStart || h.start}\n`
+    + `${t("last commit")} ${h.commitEnd || h.end}`;
+  const tip = h.members
+    ? `${dates}\n${h.members.map((m) => m.version).join("\n")}` : dates;
+  const captionStyle = { overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500 };
+  return (
+    <div data-release={h.version} role="button"
+      tabIndex={0} onClick={pick} onKeyDown={onActivate(pick)}
+      style={shippedStyle(h, picked)} title={tip}>
+      <span style={{ fontWeight: 700, flexShrink: 0 }}>{h.version}</span>
+      {caption ? <span style={captionStyle}>{caption}</span> : null}
+    </div>
+  );
+}
+
 export function ShippedBand({ sel, t }) {
   const { lay, picked, toggle } = sel;
   if (!lay.pastBars.length) return null;
@@ -58,33 +79,9 @@ export function ShippedBand({ sel, t }) {
       background: fade(5),
     }}>
       <MonthRules months={lay.months} />
-      {lay.pastBars.map((h) => {
-        const pick = () => toggle({ kind: "release", ...h });
-        const caption = h.members && !String(h.version).includes("-v")
-          ? `${h.members.length} ${t("releases")}` : "";
-        const first = h.commitStart || h.start;
-        const last = h.commitEnd || h.end;
-        const tip = h.members
-          ? `${h.version}\n${t("first commit")} ${first}\n`
-            + `${t("last commit")} ${last}\n`
-            + h.members.map((m) => m.version).join("\n")
-          : `${h.version}\n${t("first commit")} ${first}\n`
-            + `${t("last commit")} ${last}`;
-        return (
-          <div key={h.key} data-release={h.version} role="button"
-            tabIndex={0} onClick={pick} onKeyDown={onActivate(pick)}
-            style={shippedStyle(h, picked)} title={tip}>
-            <span style={{ fontWeight: 700, flexShrink: 0 }}>{h.version}</span>
-            {caption ? (
-              <span style={{
-                overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500,
-              }}>
-                {caption}
-              </span>
-            ) : null}
-          </div>
-        );
-      })}
+      {lay.pastBars.map((h) => (
+        <ShippedBar key={h.key} h={h} picked={picked} toggle={toggle} t={t} />
+      ))}
     </div>
   );
 }

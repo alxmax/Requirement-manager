@@ -27,7 +27,7 @@ def _source(d):
     return src
 
 
-class BundleSkillEngine(unittest.TestCase):
+class BundleSkillEngine(unittest.TestCase):  # tested-by: ARCH-SELFGATE-039 @integration
     def test_build_then_diff_is_empty(self):
         with tempfile.TemporaryDirectory() as d:
             src, dest = _source(d), Path(d) / "skill" / "scripts"

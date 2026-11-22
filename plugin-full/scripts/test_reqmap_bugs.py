@@ -97,7 +97,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
             self.assertEqual("Fine", _read(self.d, std)[0]["title"])
 
     def test_the_heading_gives_module_and_date(self):
-        # verifies: REQ-BUGS-1116#CASE-3
+        # verifies: REQ-BUGS-1148#CASE-1  # tested-by: REQ-BUGS-1148 @unit
         path = _bug_file(self.d, "b.md",
                          "# Known issues — Billing (15.03.2026)\n\n"
                          "| ID | Bug | Priority |\n|---|---|---|\n"
@@ -106,7 +106,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
         self.assertEqual(("Billing", "2026-03-15"), (got["module"], got["date"]))
 
     def test_another_table_is_not_a_bug_table(self):
-        # verifies: REQ-BUGS-1116#CASE-4
+        # verifies: REQ-BUGS-1116#CASE-3
         path = _bug_file(self.d, "c.md", "# Contents\n\n| # | Module | P0 |\n"
                          "|---|---|---|\n| 01 | Core | 2 |\n\n" + HEAD
                          + "| B1 | Real | P2 | | | | |\n")
@@ -116,7 +116,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
         self.assertEqual([], problems)
 
     def test_a_bad_row_does_not_cost_the_others(self):
-        # verifies: REQ-BUGS-1116#CASE-5
+        # verifies: REQ-BUGS-1116#CASE-4
         path = _bug_file(self.d, "d.md", "# Bad\n\n" + HEAD
                          + "| B1 | No priority | high | | | | |\n"
                            "| B2 | Good | P2 | 2026-11-02 | | | |\n"
@@ -130,7 +130,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
                             for p in problems))
 
     def test_an_estimated_priority_is_kept_apart(self):
-        # verifies: REQ-BUGS-1116#CASE-6
+        # verifies: REQ-BUGS-1116#CASE-5
         path = _bug_file(self.d, "e.md", "# E\n\n" + HEAD
                          + "| B2* | Maybe | P3 | | | | |\n"
                            "| B3 | Mixed | P2 (audit), P1 | | | | |\n")
@@ -141,7 +141,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
 
 
     def test_a_named_section_is_not_read(self):
-        # verifies: REQ-BUGS-1116#CASE-7
+        # verifies: REQ-BUGS-1148#CASE-2
         _bug_file(self.d, "f.md", "# Bugs — Core\n\n## Open\n\n" + HEAD
                   + "| B1 | Live | P1 | | | | |\n\n## Recently fixed\n\n"
                   + "### Last week\n\n" + HEAD + "| B2 | Done | P2 | | | | |\n")
@@ -152,7 +152,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
         self.assertEqual((["Live"], []), ([b["title"] for b in bugs], problems))
 
     def test_a_bad_pattern_loses_nothing(self):
-        # verifies: REQ-BUGS-1116#CASE-8
+        # verifies: REQ-BUGS-1148#CASE-3
         _bug_file(self.d, "g.md", "# Bugs — Core\n\n## Fixed\n\n" + HEAD
                   + "| B1 | Kept | P1 | | | | |\n")
         with mock.patch.object(R.config, "BUG_SKIP_SECTIONS", "("):
@@ -162,7 +162,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
         self.assertIn("BUG_SKIP_SECTIONS", problems[0])
 
     def test_the_last_spaced_dash_ends_the_module_name(self):
-        # verifies: REQ-BUGS-1116#CASE-9
+        # verifies: REQ-BUGS-1148#CASE-4
         dash = _bug_file(self.d, "h.md", "# Known — Stock - Orders\n\n" + HEAD
                          + "| B1 | One | P2 | | | | |\n")
         joined = _bug_file(self.d, "i.md", "# Known — Stock-Orders\n\n" + HEAD
@@ -171,7 +171,7 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
         self.assertEqual("Stock-Orders", _read(self.d, joined)[0]["module"])
 
     def test_a_row_says_where_it_came_from(self):
-        # verifies: REQ-BUGS-1116#CASE-10
+        # verifies: REQ-BUGS-1116#CASE-6
         path = _bug_file(self.d, "j.md", "# J\n\n" + HEAD
                          + "| B1 | One | P2 | | | | |\n")
         got = _read(self.d, path)[0]
@@ -220,6 +220,7 @@ class BugsOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1117 @integration
         self.assertEqual(before, _bytes(doc))
 
     def test_a_pattern_that_matches_nothing_is_named(self):
+        # tested-by: REQ-BUGS-1117 @unit
         # verifies: REQ-BUGS-1117#CASE-4
         d = _repo(self)
         with mock.patch.object(R.config, "BUG_SOURCES", ["nope/*.md"]):
@@ -237,6 +238,7 @@ class BugsOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1117 @integration
         self.assertNotEqual(0, _run(d, "gate", "--full").returncode)
 
     def test_spellings_of_one_module_are_one_group(self):
+        # tested-by: REQ-BUGS-1117 @unit
         # verifies: REQ-BUGS-1117#CASE-6
         d = _repo(self)
         for name, module in (("a.md", "Café, API"), ("b.md", "cafe api"),
@@ -319,6 +321,7 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
             .decode("utf-8"))
 
     def test_the_next_bug_takes_the_next_id(self):
+        # tested-by: REQ-BUGS-1119 @unit
         # verifies: REQ-BUGS-1119#CASE-2
         text = "# Bugs — Core\n\nIntro.\n\n" + HEAD \
             + "| B1 | One | P1 | | | | |\n| B7 | Seven | P2 | | | | |\n" \
@@ -331,6 +334,7 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
             "| B7 | Seven | P2 | | | | |\n| B8 | New | P3 |  |  |  |  |\n"), out)
 
     def test_a_value_cannot_break_the_row(self):
+        # tested-by: REQ-BUGS-1119 @unit
         # verifies: REQ-BUGS-1119#CASE-3
         out, _ref = B.append_bug("", {"module": "Core", "title": "T",
                                       "prio": "P2", "why": "a|b\nc"})
@@ -340,7 +344,7 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
         self.assertEqual("a|b c", got["why"])
 
     def test_bad_input_writes_nothing(self):
-        # verifies: REQ-BUGS-1119#CASE-4
+        # verifies: REQ-BUGS-1149#CASE-1  # tested-by: REQ-BUGS-1149 @integration
         d = _repo(self)
         for extra in (("--module", "Core", "--prio", "P9"),
                       ("--module", "Core", "--date", "2026-13-40"),
@@ -349,7 +353,7 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
         self.assertFalse(os.path.exists(os.path.join(d, "requirements", "bugs")))
 
     def test_a_module_cannot_leave_the_folder(self):
-        # verifies: REQ-BUGS-1119#CASE-5
+        # verifies: REQ-BUGS-1149#CASE-2
         d = _repo(self)
         self.assertEqual(0, _run(d, "sync", "--bug", "T", "--module",
                                  "../../etc").returncode)
@@ -357,7 +361,7 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
             os.path.join(d, "requirements", "bugs")))
 
     def test_an_estimate_stays_an_estimate(self):
-        # verifies: REQ-BUGS-1119#CASE-7
+        # verifies: REQ-BUGS-1119#CASE-5
         d = _repo(self)
         self.assertEqual(0, _run(d, "sync", "--bug", "T", "--module", "Core",
                                  "--prio", "p2*").returncode)
@@ -365,7 +369,8 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
         self.assertEqual(("P2", True), (got["prio"], got["estimated"]))
 
     def test_the_engine_and_the_viewer_write_the_same_bytes(self):
-        # verifies: REQ-BUGS-1119#CASE-6
+        # tested-by: REQ-BUGS-1119 @unit
+        # verifies: REQ-BUGS-1119#CASE-4
         with open(FIXTURE, encoding="utf-8") as f:
             cases = json.load(f)
         for case in cases:
@@ -425,7 +430,8 @@ class ListBugs(unittest.TestCase):  # tested-by: REQ-BUGS-1120 @integration
         self.assertIn("no known bugs", done.stdout)
 
 
-class MapStamp(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1124 @integration
+class MapStamp(unittest.TestCase):
+    # tested-by: REQ-MAPSTAMP-1124 @integration  # tested-by: ARCH-MAPSTAMP-079 @integration
     def _html(self, d):
         with open(os.path.join(d, "requirements", "_map.html"),
                   encoding="utf-8") as f:
@@ -436,7 +442,7 @@ class MapStamp(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1124 @integration
         self.assertTrue(os.path.exists(tpl), "the vendored viewer is missing")
 
     def test_the_page_says_which_build_it_is(self):
-        # verifies: REQ-MAPSTAMP-1124#CASE-1
+        # verifies: REQ-MAPSTAMP-1124#CASE-1  # verifies: ARCH-MAPSTAMP-079#CASE-1
         # verifies: ARCH-MAPSTAMP-079#CASE-1
         self._template()
         d = _repo(self)
@@ -459,9 +465,10 @@ class MapStamp(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1124 @integration
         self.assertNotIn("branch", doc)
 
 
-class MapLanguage(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1125 @integration
+class MapLanguage(unittest.TestCase):
+    # tested-by: REQ-MAPSTAMP-1125 @integration  # tested-by: ARCH-MAPSTAMP-079 @integration
     def test_the_language_reaches_the_map(self):
-        # verifies: REQ-MAPSTAMP-1125#CASE-1
+        # verifies: REQ-MAPSTAMP-1125#CASE-1  # verifies: ARCH-MAPSTAMP-079#CASE-2
         d = _repo(self)
         _write(os.path.join(d, "requirements", "_config.json"),
                json.dumps({"MAP_LANGUAGE": "ro"}))
@@ -479,7 +486,7 @@ class MapLanguage(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1125 @integrati
         self.assertNotIn("language", _map(d))
 
     def test_a_value_outside_the_list_is_reported(self):
-        # verifies: REQ-MAPSTAMP-1125#CASE-3
+        # verifies: REQ-MAPSTAMP-1125#CASE-3  # verifies: ARCH-MAPSTAMP-079#CASE-3
         d = _repo(self)
         _write(os.path.join(d, "requirements", "_config.json"),
                json.dumps({"MAP_LANGUAGE": "fr"}))
@@ -487,6 +494,55 @@ class MapLanguage(unittest.TestCase):  # tested-by: REQ-MAPSTAMP-1125 @integrati
         self.assertIn("MAP_LANGUAGE", done.stderr)
         self.assertNotIn("language", _map(d))
 
+
+class BugsInIsolation(unittest.TestCase):
+    # tested-by: REQ-BUGS-1118 @unit  # tested-by: REQ-BUGS-1120 @unit
+    # tested-by: REQ-MAPSTAMP-1124 @unit  # tested-by: REQ-MAPSTAMP-1125 @unit
+    """The functions behind the gate's bug lines, the list's filters and the
+    map's build stamp and language, called directly."""
+
+    def _payload(self, stamped, **data):
+        from reqmap_engine import mapjson
+        return json.loads(mapjson._build_json_text(
+            dict({"nodes": [], "edges": []}, **data), stamped=stamped))
+
+    def test_a_malformed_row_is_a_problem_and_an_open_p0_is_not(self):
+        d = _repo(self)
+        _bug_file(d, "Core.md", "# Bugs — Core\n\n" + HEAD
+                  + "| B1 | Crash | P0 | 2026-11-02 |  |  |  |\n"
+                  + "| B2 | No priority | soon |  |  |  |  |\n")
+        problems = B.input_problems(d, os.path.join(d, "requirements"))
+        self.assertEqual(1, len(problems), problems)
+        self.assertIn("Core.md:6", problems[0])
+
+    def test_a_module_name_cannot_leave_the_folder(self):
+        # tested-by: REQ-BUGS-1149 @unit
+        self.assertEqual("etc.md", B.module_file("../../etc"))
+        self.assertEqual("Payments-API.md", B.module_file("Payments API"))
+        self.assertEqual("", B.module_file("///"))
+
+    def test_the_filters_ignore_case_diacritics_and_punctuation(self):
+        bug = {"module": "Facturare-Plăți", "prio": "P1"}
+        self.assertTrue(B._matches(bug, "PLATI", ["P1", "P2"]))
+        self.assertFalse(B._matches(bug, "plati", ["P0"]))
+        self.assertFalse(B._matches(bug, "stoc", []))
+        self.assertEqual("3 bugs: P0 1, P1 2",
+                         B._total_line([{"prio": "P1"}, {"prio": "P0"}, {"prio": "P1"}]))
+
+    def test_only_the_page_carries_the_build_stamp(self):
+        page = self._payload(True, branch="feat/x")
+        self.assertRegex(page["generated_at"], r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$")
+        self.assertEqual("feat/x", page["branch"])
+        committed = self._payload(False, branch="feat/x")
+        self.assertNotIn("generated_at", committed)
+        self.assertNotIn("branch", committed)
+
+    def test_the_language_is_carried_only_when_not_english(self):
+        from reqmap_engine import config as cfg
+        with mock.patch.object(cfg, "MAP_LANGUAGE", "ro"):
+            self.assertEqual("ro", self._payload(False)["language"])
+        with mock.patch.object(cfg, "MAP_LANGUAGE", "en"):
+            self.assertNotIn("language", self._payload(False))
 
 if __name__ == "__main__":
     unittest.main()

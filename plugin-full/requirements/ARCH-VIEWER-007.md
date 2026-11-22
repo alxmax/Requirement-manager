@@ -1426,11 +1426,12 @@ CASE-6 — a recommendation per problem, most severe first
 
 ---
 id: REQ-VIEWER-1145
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
+lint_exempt: [file-spread]
 ---
 
 # The Report reads an audit
@@ -1501,3 +1502,6 @@ CASE-7 — a build stamp the map lacks is left out
   Then   neither says `Map written` nor shows a `Date` field, and neither says not measured
          for it
 
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the Report page is one view whose numbers live in `lib/`, whose layout lives in `views/` and whose print styles live in `styles/`: the viewer's own split, not several capabilities.

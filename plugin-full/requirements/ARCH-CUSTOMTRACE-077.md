@@ -242,7 +242,7 @@ CASE-5 — a glob the repository would match is pointed at root: repo
 
 ---
 id: REQ-CUSTOMTRACE-1138
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -262,7 +262,8 @@ Every bullet below is binding.
   maps `id` (required) and optionally `title`, `contract`, `cases`, `status`, `depends_on` and
   `satisfies` to the source's columns or keys; any other key is a config problem.
 - A contract text is one clause per sentence, a list one clause per item; cases are one case
-  per item. A title missing from the row is the contract's first sentence.
+  per item. A title missing from the row is the contract's first sentence, or its first
+  item when the contract is a list.
 - `depends_on` and `satisfies` split on `list_separator` (default `,`), or take a JSON list.
 - A status of `confirmed`, `draft` or `deprecated` in the row wins over the source's status.
 - A CSV file is read without its byte-order mark, with `delimiter` (default `,`); a JSON source
@@ -292,7 +293,8 @@ CASE-3 — a structural row is exempt, and too many are named
 CASE-4 — a JSON list under a key is read
   Given  a JSON object whose `requirements` key holds a list
   When   it is read with `items: requirements`
-  Then   each object is a requirement, a list contract is one clause per item
+  Then   each object is a requirement, a list contract is one clause per item, and a row
+         with no title takes the list's first item as its title
 
 CASE-5 — a field map without an id is refused
   Given  field maps with no id, or with an unknown key

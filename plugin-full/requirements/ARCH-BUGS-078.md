@@ -1,11 +1,12 @@
 ---
 id: ARCH-BUGS-078
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
 depends_on: [ARCH-MAP-007, ARCH-VIEWER-007, ARCH-CONFIG-060]
 satisfies: [SYS-REPORT-105]
+lint_exempt: [file-spread]
 ---
 
 # Known bugs are listed by module
@@ -18,15 +19,18 @@ satisfies: [SYS-REPORT-105]
 
 Every bullet below is binding.
 - A bug file is Markdown: a heading that names the module, and tables with an id, a title and a priority. [[REQ-BUGS-1116]]
+- A bug file's heading gives its module and date, and a section `BUG_SKIP_SECTIONS` names is not read. [[REQ-BUGS-1148]]
 - `requirements/bugs/*.md` and the files `BUG_SOURCES` names reach `_map.json` under `bugs`; the second kind is never written. [[REQ-BUGS-1117]]
 - A malformed bug is an `INPUT:bugs` warning, and an open bug never fails the gate. [[REQ-BUGS-1118]]
 - `sync --bug` adds one row to the module's file and does nothing else. [[REQ-BUGS-1119]]
+- `sync --bug` refuses bad input, a module that would leave the folder and an unreadable file, writing nothing. [[REQ-BUGS-1149]]
 - `ask --bugs` lists the known bugs by module, without a verdict. [[REQ-BUGS-1120]]
 - The Problems page has a Bugs tab that groups by module and shows each bug's date. [[REQ-BUGS-1121]]
 - The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]
 - The tab exports the list it shows, for a reader who does not open the map. [[REQ-BUGS-1123]]
 - `sync --bug` writes in the shape of the file it lands in, and never gives a number twice. [[REQ-BUGS-1126]]
 - `sync --fix` moves a row to a register with its dates, version and commit. [[REQ-BUGS-1127]]
+- `sync --fix` refuses an unknown or closed id, a declared source, a moved row and an unreadable register, writing nothing. [[REQ-BUGS-1150]]
 - `sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]
 - The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]
 - A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]
@@ -47,12 +51,16 @@ CASE-3 — a repository with no bug list sees nothing change
   When   `sync` runs
   Then   `_map.json` has no `bugs` key
 
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the bug list is one capability with an engine side (read, add, close, list) and a viewer side (the Bugs tab and its file writer), so its members span the engine package and two viewer directories by design.
+
 --------------------
 
 
 ---
 id: REQ-BUGS-1116
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -69,11 +77,8 @@ Every bullet below is binding.
 - The canonical columns are `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters` and `Source`, compared without regard to case.
 - A table is a bug table when it has an id, a title and a priority column. Any other table in the file is skipped without a word.
 - `BUG_COLUMNS` in `_config.json` adds a repository's own column names beside the canonical ones.
-- The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.
-- A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.
 - A priority is the first `P0` to `P4` in its cell. `*` in the priority or id cell marks it estimated.
 - A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`. Renaming the file changes the id.
-- `BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read.
 - A bug records its file and the line of its row.
 - A row with no id, title or priority, an unreal date, a repeated id or an unreadable file is a problem line, and the rows around it are still read.
 
@@ -88,42 +93,22 @@ CASE-2 — a repository's own columns are read
   When   the file is read
   Then   its rows are bugs, and a canonical table in another file still reads
 
-CASE-3 — the heading gives the module and the date
-  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column
-  When   the file is read
-  Then   each bug has module `Billing` and date `2026-03-15`
-
-CASE-4 — another table is not a bug table
+CASE-3 — another table is not a bug table
   Given  a file with a contents table and a bug table
   When   the file is read
   Then   only the bug table's rows are bugs, and no problem is reported
 
-CASE-5 — a bad row does not cost the others
+CASE-4 — a bad row does not cost the others
   Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`
   When   the file is read
   Then   each gives one problem line naming its file and line, and the good rows are bugs
 
-CASE-6 — an estimated priority is kept apart
+CASE-5 — an estimated priority is kept apart
   Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`
   When   the file is read
   Then   the first is `B2`, estimated, and the second is `P2`
 
-CASE-7 — a named section is not read
-  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`
-  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty
-  Then   the first load holds only the open bug, and the second holds both
-
-CASE-8 — a bad pattern loses nothing
-  Given  `BUG_SKIP_SECTIONS` set to `(`
-  When   the bugs load
-  Then   the rows are read and one problem line names the key
-
-CASE-9 — a spaced dash ends the module name
-  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`
-  When   each file is read
-  Then   the modules are `Orders` and `Stock-Orders`
-
-CASE-10 — a row says where it came from
+CASE-6 — a row says where it came from
   Given  a bug on line 5 of a file
   When   the file is read
   Then   the bug carries that file and line
@@ -132,8 +117,53 @@ CASE-10 — a row says where it came from
 
 
 ---
+id: REQ-BUGS-1148
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# A file's heading names its module, and a named section is skipped
+
+## Description
+> A team's existing bug document carries its module and date in the heading and keeps
+> fixed bugs under their own section. Reading the heading and skipping that section is
+> what lets the same reader serve a file nobody wrote for this tool.
+
+Every bullet below is binding.
+- The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.
+- A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.
+- `BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read.
+
+## Cases
+CASE-1 — the heading gives the module and the date
+  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column
+  When   the file is read
+  Then   each bug has module `Billing` and date `2026-03-15`
+
+CASE-2 — a named section is not read
+  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`
+  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty
+  Then   the first load holds only the open bug, and the second holds both
+
+CASE-3 — a bad pattern loses nothing
+  Given  `BUG_SKIP_SECTIONS` set to `(`
+  When   the bugs load
+  Then   the rows are read and one problem line names the key
+
+CASE-4 — a spaced dash ends the module name
+  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`
+  When   each file is read
+  Then   the modules are `Orders` and `Stock-Orders`
+
+--------------------
+
+
+---
 id: REQ-BUGS-1117
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -190,7 +220,7 @@ CASE-6 — two spellings are one module
 
 ---
 id: REQ-BUGS-1118
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -250,7 +280,7 @@ CASE-7 — one id in two files
 
 ---
 id: REQ-BUGS-1119
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -265,12 +295,10 @@ satisfies: [ARCH-BUGS-078]
 
 Every bullet below is binding.
 - `sync --bug TITLE --module M` adds a row to the module's file under `requirements/bugs/`, creating the folder and the file with its heading, and prints the id and the file.
-- A new file's name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.
 - The id is the next `B<n>`, one past the highest in that file and in the register.
 - `--prio` defaults to `P2`, `--date` to today, and `--where`, `--why` and `--source` fill their columns.
 - `--prio P2*` writes the `*`, so a priority an assistant chose reads back as an estimate until a person edits the row.
 - A `|` in a value is escaped and a line break becomes a space, so the row stays one row.
-- With no title, no module, a priority outside `P0` to `P4` or a date that is not real, it prints the reason, exits 2 and writes nothing.
 - `moduleFile` and `appendBug` in `app/src/lib/bugFile.js` produce the same bytes, pinned by one fixture.
 
 ## Cases
@@ -289,27 +317,51 @@ CASE-3 — a value cannot break the row
   When   the bug is added
   Then   it reads back with that text on one line and the row has seven cells
 
-CASE-4 — bad input writes nothing
-  Given  a call with priority `P9`, a call with date `2026-13-40` and a call with module `///`
-  When   each runs
-  Then   each exits 2 and no file exists
-
-CASE-5 — a module cannot leave the folder
-  Given  a module named `../../etc`
-  When   `sync --bug` runs
-  Then   the file is `etc.md` inside `requirements/bugs/`
-
-CASE-6 — the engine and the viewer write the same bytes
+CASE-4 — the engine and the viewer write the same bytes
   Given  the shared fixture of a text and a bug
   When   `append_bug` and `appendBug` each run
   Then   each returns the fixture's expected text
 
-CASE-7 — an estimate stays an estimate
+CASE-5 — an estimate stays an estimate
   Given  a bug added with `--prio P2*`
   When   it is read back
   Then   its priority is `P2` and it is marked estimated
 
-CASE-8 — a file that cannot be read
+--------------------
+
+
+---
+id: REQ-BUGS-1149
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# `sync --bug` refuses what it cannot write safely
+
+## Description
+> A bug added from the command line must never write outside the bugs folder, and never
+> half a row: bad input is refused before anything is written.
+
+Every bullet below is binding.
+- A new file's name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.
+- With no title, no module, a priority outside `P0` to `P4` or a date that is not real, it prints the reason, exits 2 and writes nothing.
+- A bug file in the folder that cannot be read as UTF-8 makes it exit 2 and write nothing.
+
+## Cases
+CASE-1 — bad input writes nothing
+  Given  a call with priority `P9`, a call with date `2026-13-40` and a call with module `///`
+  When   each runs
+  Then   each exits 2 and no file exists
+
+CASE-2 — a module cannot leave the folder
+  Given  a module named `../../etc`
+  When   `sync --bug` runs
+  Then   the file is `etc.md` inside `requirements/bugs/`
+
+CASE-3 — a file that cannot be read
   Given  a file in the bugs folder that is not UTF-8
   When   `sync --bug` runs
   Then   it exits 2 and writes nothing
@@ -319,7 +371,7 @@ CASE-8 — a file that cannot be read
 
 ---
 id: REQ-BUGS-1120
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -521,7 +573,7 @@ CASE-3 — nothing to export
 
 ---
 id: REQ-BUGS-1126
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -573,7 +625,7 @@ CASE-5 — the engine and the viewer agree
 
 ---
 id: REQ-BUGS-1127
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -593,8 +645,6 @@ Every bullet below is binding.
 - `--note TEXT` closes without a fix: the version is `not a bug`, the commit `—`, and the note is kept.
 - `BUG_REGISTER` names the register and `BUG_REGISTER_COLUMNS` its columns. A register that exists keeps its own columns.
 - The register is not read as open bugs, whatever its columns, even when `BUG_SOURCES` matches it.
-- An unknown id, a closed id, or a bug in a file only `BUG_SOURCES` names exits 2 and writes nothing.
-- A row that is not on the line it was read from, or a register that cannot be read, exits 2 and writes nothing.
 
 ## Cases
 CASE-1 — a fix moves the row
@@ -612,27 +662,12 @@ CASE-3 — a dismissal
   When   `sync --fix ID --note "works as designed"` runs
   Then   the register says `not a bug` and keeps the note
 
-CASE-4 — refused closes write nothing
-  Given  an unknown id, a closed id and a bug in a declared source
-  When   `sync --fix` runs on each
-  Then   each exits 2 and every file is byte-identical
-
-CASE-5 — a repository's own register
+CASE-4 — a repository's own register
   Given  a register with localized columns and no module column
   When   a bug is closed
   Then   the row fits those columns
 
-CASE-6 — the right row or none
-  Given  a stray carriage return above the table, and a row that moved
-  When   a bug is closed
-  Then   the first closes the named row and the second is refused
-
-CASE-7 — a broken register survives
-  Given  a register that is not UTF-8
-  When   `sync --fix` runs
-  Then   it exits 2 and both files are byte-identical
-
-CASE-8 — a glob over the folder
+CASE-5 — a glob over the folder
   Given  `BUG_SOURCES` matching the bugs folder
   When   the list is read
   Then   the register's rows are not listed
@@ -641,8 +676,46 @@ CASE-8 — a glob over the folder
 
 
 ---
+id: REQ-BUGS-1150
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# `sync --fix` refuses what it cannot close exactly
+
+## Description
+> Closing a bug rewrites two files. When the id, the row or the register is not exactly
+> what was read, nothing is written, so a refused close never costs a row.
+
+Every bullet below is binding.
+- An unknown id, a closed id, or a bug in a file only `BUG_SOURCES` names exits 2 and writes nothing.
+- A row that is not on the line it was read from, or a register that cannot be read, exits 2 and writes nothing.
+
+## Cases
+CASE-1 — refused closes write nothing
+  Given  an unknown id, a closed id and a bug in a declared source
+  When   `sync --fix` runs on each
+  Then   each exits 2 and every file is byte-identical
+
+CASE-2 — the right row or none
+  Given  a stray carriage return above the table, and a row that moved
+  When   a bug is closed
+  Then   the first closes the named row and the second is refused
+
+CASE-3 — a broken register survives
+  Given  a register that is not UTF-8
+  When   `sync --fix` runs
+  Then   it exits 2 and both files are byte-identical
+
+--------------------
+
+
+---
 id: REQ-BUGS-1128
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -699,7 +772,7 @@ CASE-6 — a repository's own trailer
 
 ---
 id: REQ-BUGS-1129
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -762,7 +835,7 @@ CASE-7 — a long list
 
 ---
 id: REQ-BUGS-1131
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

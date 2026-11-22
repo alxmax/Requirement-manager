@@ -47,6 +47,7 @@ class BugsNameARequirement(unittest.TestCase):  # tested-by: ARCH-BUGS-078 @inte
         self.assertEqual([], rec["bugs"])
 
     def test_an_id_is_named_whole(self):
+        # tested-by: REQ-BUGS-1131 @unit
         # verifies: REQ-BUGS-1131#CASE-3
         bugs = [{"title": "X-10 fails"}, {"source": "X-1#CASE-2"},
                 {"why": "see [[X-1]]."}, {"where": "x-1"}]

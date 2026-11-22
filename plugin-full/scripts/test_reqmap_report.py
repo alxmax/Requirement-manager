@@ -4984,12 +4984,35 @@ class McpConfigSeed(unittest.TestCase):  # tested-by: REQ-MCPSEED-1029 @unit
             code = json.loads(self._read(d, ".vscode", "mcp.json"))
         self.assertEqual([".mcp.json", ".vscode/mcp.json"], created)
         self.assertEqual([], notes)
-        for entry, base in ((claude["mcpServers"]["reqmap"], "${CLAUDE_PROJECT_DIR:-.}"),
+        for entry, base in ((claude["mcpServers"]["reqmap"], "."),
                             (code["servers"]["reqmap"], "${workspaceFolder}")):
             self.assertEqual(base + "/scripts/reqmap.py", entry["args"][0])
             self.assertEqual("mcp", entry["args"][1])
             self.assertEqual(base + "/requirements",
                              entry["args"][entry["args"].index("--reqs") + 1])
+
+    def test_the_claude_entry_needs_no_variable(self):  # verifies: REQ-MCPSEED-1029#CASE-4
+        engine = os.path.dirname(os.path.abspath(R.__file__))
+        with tempfile.TemporaryDirectory() as d:
+            shutil.copytree(engine, os.path.join(d, "scripts"),
+                            ignore=shutil.ignore_patterns("test_*", "__pycache__"))
+            _write(os.path.join(d, "requirements", "A-B-001.md"), _spec("A-B-001", ["A works."]))
+            with mock.patch.object(R.mcpconfig, "ENGINE_DIR", os.path.join(d, "scripts")):
+                R.seed_mcp_files(d, os.path.join(d, "requirements"))
+            entry = json.loads(self._read(d, ".mcp.json"))["mcpServers"]["reqmap"]
+            self.assertNotIn("$", json.dumps(entry))
+            msgs = [{"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                     "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                                "clientInfo": {"name": "t", "version": "0"}}},
+                    {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}]
+            env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+            done = subprocess.run([sys.executable] + entry["args"], cwd=d, env=env,
+                                  input="".join(json.dumps(m) + "\n" for m in msgs),
+                                  capture_output=True, text=True, encoding="utf-8",
+                                  timeout=120)
+        replies = [json.loads(line) for line in done.stdout.splitlines() if line.strip()]
+        names = [t["name"] for t in replies[-1]["result"]["tools"]]
+        self.assertIn("reqmap_gate", names, done.stderr)
 
     def test_an_existing_config_is_left_alone(self):  # verifies: REQ-MCPSEED-1029#CASE-2
         with tempfile.TemporaryDirectory() as d, self._repo(d):

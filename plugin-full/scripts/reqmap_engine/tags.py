@@ -184,6 +184,9 @@ def _strip_py_strings(s):
     return ''.join(out), None
 
 
+JS_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
+
+
 def _close_triple_quote(s, in_triple):
     # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
     # implements: REQ-SCAN-992
@@ -215,7 +218,9 @@ def _visible_lines(fp, lines):
     code — those lines are not yielded at all. `<!-- implements: X -->` outside
     any such zone is a valid tag position and is yielded. PY: a triple-quoted
     string (state carried across lines) and single-line string literals are
-    blanked. Comments are kept — `code()  # implements: X` is a real tag.
+    blanked. JS/TS: quoted strings, template and regex literals are blanked to
+    the end of their line; a block comment's state is carried. Comments are
+    kept — `code()  # implements: X` is a real tag.
     Anything else: yielded unchanged.
     
     Backtick spans are deliberately NOT stripped here. The callers disagree on
@@ -252,6 +257,13 @@ def _visible_lines(fp, lines):
             if s is None:
                 continue
             s, in_triple = _strip_py_strings(s)
+            yield i, s
+
+    elif ext in JS_EXTS:
+        from .jsmask import strip_js_strings  # only when a JS/TS file is read
+        in_comment = False
+        for i, raw in enumerate(lines, 1):
+            s, in_comment = strip_js_strings(raw.rstrip("\n\r"), in_comment)
             yield i, s
 
     else:

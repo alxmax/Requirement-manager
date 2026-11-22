@@ -354,90 +354,96 @@ def apply_config(cfg, out=None, problems=None):
     applied = []
     g = globals()
     for key, value in (cfg or {}).items():
-        if key == "extra_code_exts":
-            if isinstance(value, list) and all(isinstance(x, str)
-                                               for x in value):
-                extra = tuple(x if x.startswith(".") else "." + x
-                             for x in value if x)
-                g["CODE_EXTS"] = g["CODE_EXTS"] + tuple(
-                    e for e in extra if e not in g["CODE_EXTS"])
+        handled = _apply_special(key, value, g, reject)
+        if handled is not None:
+            if handled:
                 applied.append(key)
-            else:
-                reject("config: ignoring extra_code_exts (expected a "
-                     "list of strings)")
             continue
         if key not in CONFIG_KEYS:
             if not key.startswith(RETIRED_CONFIG_PREFIXES):
                 reject("config: ignoring unknown key {!r}".format(key))
             continue
-        default = g[key]
-        if key == "DESIGN_RULES":  # implements: REQ-MAP-1144
-            ok = [r for r in value if isinstance(r, dict)
-                  and isinstance(r.get("id"), str)
-                  and isinstance(r.get("pattern"), str)] if isinstance(
-                      value, list) else []
-            if not isinstance(value, list) or len(ok) != len(value):
-                reject("config: DESIGN_RULES keeps only entries with a string "
-                       "`id` and `pattern`")
-            g[key] = ok
+        new = _coerce(key, g[key], value, reject)
+        if new is not _SKIP:
+            g[key] = new
             applied.append(key)
-            continue
-        if key in ("TRACE_TAGS", "REQUIREMENT_SOURCES"):
-            # implements: ARCH-CUSTOMTRACE-077 — lists of objects, checked there
-            from . import customtrace
-            g[key], bad = getattr(customtrace, "validate_" + (
-                "tags" if key == "TRACE_TAGS" else "sources"))(value)
-            for message in bad:
-                reject(message)
-            applied.append(key)
-            continue
-        # A string-valued key is an ENUM, never free text: every one of them
-        # names a behaviour, so an unrecognised spelling is a typo that must be
-        # reported. The numeric branch below would otherwise reject strings
-        # outright and a repo could never set one at all.
-        if isinstance(default, str):
-            allowed = CONFIG_ENUMS.get(key, ())
-            if not isinstance(value, str) or (allowed and value not in allowed):
-                reject("config: ignoring {} (expected one of {})".format(
-                    key, ", ".join(allowed) or "a string"))
-                continue
-            g[key] = value
-            applied.append(key)
-            continue
-        if isinstance(default, list):
-            # A list default was declared for exactly this (see DOC_CLAIM_FILES)
-            # and then fell through to the numeric branch, which rejected every
-            # override.
-            if not (isinstance(value, list)
-                   and all(isinstance(x, str) for x in value)):
-                reject("config: ignoring {} (expected a list of strings)"
-                     .format(key))
-                continue
-            g[key] = list(value)
-            applied.append(key)
-            continue
-        if isinstance(default, dict):
-            if not isinstance(value, dict):
-                reject("config: ignoring {} (expected an object)"
-                     .format(key))
-                continue
-            merged = dict(default)
-            for k, v in value.items():
-                if key == "LINT_FANOUT_BANDS" and not _band_ok(v):
-                    reject("config: ignoring {}[{!r}] (expected [low, high], "
-                           "high a whole number, low one or null, low <= "
-                           "high)".format(key, k))
-                    continue
-                merged[k] = tuple(v) if isinstance(v, list) else v
-            g[key] = merged
-        elif (isinstance(default, bool)
-             or not isinstance(default, (int, float))
-             or isinstance(value, bool)
-             or not isinstance(value, (int, float))):
-            reject("config: ignoring {} (expected {})".format(
-                key, type(default).__name__))
-            continue
-        else:
-            g[key] = type(default)(value)
-        applied.append(key)
     return applied
+
+
+_SKIP = object()   # _coerce's answer for a value it rejected
+
+
+def _apply_special(key, value, g, reject):
+    # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
+    """Apply a key with a rule of its own: True when applied, False when
+    rejected, None for any other key."""
+    if key == "extra_code_exts":
+        if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
+            reject("config: ignoring extra_code_exts (expected a list of strings)")
+            return False
+        extra = tuple(x if x.startswith(".") else "." + x for x in value if x)
+        g["CODE_EXTS"] = g["CODE_EXTS"] + tuple(
+            e for e in extra if e not in g["CODE_EXTS"])
+        return True
+    if key == "DESIGN_RULES":  # implements: REQ-MAP-1144
+        ok = [r for r in value if isinstance(r, dict)
+              and isinstance(r.get("id"), str)
+              and isinstance(r.get("pattern"), str)] if isinstance(
+                  value, list) else []
+        if not isinstance(value, list) or len(ok) != len(value):
+            reject("config: DESIGN_RULES keeps only entries with a string "
+                   "`id` and `pattern`")
+        g[key] = ok
+        return True
+    if key in ("TRACE_TAGS", "REQUIREMENT_SOURCES"):
+        # implements: ARCH-CUSTOMTRACE-077 — lists of objects, checked there
+        from . import customtrace
+        g[key], bad = getattr(customtrace, "validate_" + (
+            "tags" if key == "TRACE_TAGS" else "sources"))(value)
+        for message in bad:
+            reject(message)
+        return True
+    return None
+
+
+def _coerce(key, default, value, reject):
+    # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
+    """`value` checked against the type of `default`, or _SKIP once rejected."""
+    # A string-valued key is an ENUM, never free text: every one of them
+    # names a behaviour, so an unrecognised spelling is a typo that must be
+    # reported. The numeric branch below would otherwise reject strings
+    # outright and a repo could never set one at all.
+    if isinstance(default, str):
+        allowed = CONFIG_ENUMS.get(key, ())
+        if not isinstance(value, str) or (allowed and value not in allowed):
+            reject("config: ignoring {} (expected one of {})".format(
+                key, ", ".join(allowed) or "a string"))
+            return _SKIP
+        return value
+    if isinstance(default, list):
+        # A list default was declared for exactly this (see DOC_CLAIM_FILES)
+        # and then fell through to the numeric branch, which rejected every
+        # override.
+        if not (isinstance(value, list) and all(isinstance(x, str) for x in value)):
+            reject("config: ignoring {} (expected a list of strings)".format(key))
+            return _SKIP
+        return list(value)
+    if isinstance(default, dict):
+        if not isinstance(value, dict):
+            reject("config: ignoring {} (expected an object)".format(key))
+            return _SKIP
+        merged = dict(default)
+        for k, v in value.items():
+            if key == "LINT_FANOUT_BANDS" and not _band_ok(v):
+                reject("config: ignoring {}[{!r}] (expected [low, high], "
+                       "high a whole number, low one or null, low <= "
+                       "high)".format(key, k))
+                continue
+            merged[k] = tuple(v) if isinstance(v, list) else v
+        return merged
+    if (isinstance(default, bool) or not isinstance(default, (int, float))
+            or isinstance(value, bool) or not isinstance(value, (int, float))):
+        reject("config: ignoring {} (expected {})".format(
+            key, type(default).__name__))
+        return _SKIP
+    return type(default)(value)

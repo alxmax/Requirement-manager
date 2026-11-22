@@ -112,14 +112,22 @@ def _py_signals(src):
             v = _magic(node)
             if v is not None:
                 out.append((v.lineno, "magic"))
-            for body in (getattr(node, f, None)
-                         for f in ("body", "orelse", "finalbody")):
-                if not isinstance(body, list):
-                    continue
-                for a, b in zip(body, body[1:]):
-                    if isinstance(a, _EXIT) and isinstance(b, ast.stmt):
-                        out.append((b.lineno, "dead"))
-                        break
+            out += [(line, "dead") for line in _dead_after_exit(node)]
+    return out
+
+
+def _dead_after_exit(node):
+    # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-1099
+    """The line of the first statement after an unconditional exit, per body
+    of `node` (its body, else and finally)."""
+    out = []
+    for body in (getattr(node, f, None) for f in ("body", "orelse", "finalbody")):
+        if not isinstance(body, list):
+            continue
+        dead = next((b for a, b in zip(body, body[1:])
+                     if isinstance(a, _EXIT) and isinstance(b, ast.stmt)), None)
+        if dead is not None:
+            out.append(dead.lineno)
     return out
 
 

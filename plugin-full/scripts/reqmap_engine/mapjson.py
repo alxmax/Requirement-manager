@@ -123,6 +123,7 @@ def _build_json_text(data, compact=None, stamped=False):
     for key in ("bugs_fixed", "bug_format"):    # implements: REQ-BUGS-1129
         if data.get(key):
             payload[key] = data[key]
+    # implements: ARCH-MAPSTAMP-079 - the language it opens in and the build it is
     if cfg.MAP_LANGUAGE != "en":                # implements: REQ-MAPSTAMP-1125
         payload["language"] = cfg.MAP_LANGUAGE
     if stamped:                                 # implements: REQ-MAPSTAMP-1124

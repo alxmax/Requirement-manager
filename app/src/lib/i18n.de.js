@@ -12,7 +12,8 @@ export const DE = {
   "switch language": "Sprache wechseln",
   "No requirement map to show": "Keine Anforderungskarte zum Anzeigen",
   "This viewer opened without a map. Run this in your repository, then open requirements/_map.html:":
-    "Dieser Viewer wurde ohne Karte geöffnet. Führe dies in deinem Repository aus und öffne dann requirements/_map.html:",
+    "Dieser Viewer wurde ohne Karte geöffnet. Führe dies in deinem Repository aus und öffne "
+    + "dann requirements/_map.html:",
   "Workspace": "Arbeitsbereich",
   "Registry": "Register",
   "Signals": "Kennzahlen",
@@ -108,7 +109,8 @@ export const DE = {
   "open question": "offene Frage",
   "drift": "Drift",
   "Requirements not green on every axis — confirmed, implemented, tested, no open question, no drift.":
-    "Anforderungen, die nicht auf jeder Achse grün sind — bestätigt, implementiert, getestet, keine offene Frage, kein Drift.",
+    "Anforderungen, die nicht auf jeder Achse grün sind — bestätigt, implementiert, getestet, "
+    + "keine offene Frage, kein Drift.",
   "{a}/{b} files clean": "{a}/{b} Dateien sauber",
   "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
     "Anforderungen, die auf jeder Achse grün sind — bestätigt, implementiert, getestet, keine offene Frage, kein Drift",
@@ -157,11 +159,15 @@ export const DE = {
     "System + Architektur · {n} auf Code-Ebene ausgeblendet",
   "open verify-intent questions": "offene Fragen zur Absichtsprüfung",
   "No open questions.": "Keine offenen Fragen.",
-  "Every requirement's Verify-intent section is either empty or still carries the authored placeholder, which the engine does not count as a finding either.":
-    "Der Abschnitt Verify-intent jeder Anforderung ist entweder leer oder enthält noch den Platzhalter der Vorlage, den auch die Engine nicht als Befund zählt.",
+  ["Every requirement's Verify-intent section is either empty or still carries the authored "
+    + "placeholder, which the engine does not count as a finding either."]:
+    "Der Abschnitt Verify-intent jeder Anforderung ist entweder leer oder enthält noch den "
+    + "Platzhalter der Vorlage, den auch die Engine nicht als Befund zählt.",
   "{n} open question(s) across {m} requirement(s)": "{n} offene Frage(n) in {m} Anforderung(en)",
-  "Answer it: fold the answer into the Description and delete the bullet, or keep it under the question as `*Answer (YYYY-MM-DD):* …`.":
-    "Beantworte sie: Übernimm die Antwort in die Description und lösche den Punkt, oder behalte sie unter der Frage als `*Answer (YYYY-MM-DD):* …`.",
+  ["Answer it: fold the answer into the Description and delete the bullet, or keep it under the "
+    + "question as `*Answer (YYYY-MM-DD):* …`."]:
+    "Beantworte sie: Übernimm die Antwort in die Description und lösche den Punkt, oder "
+    + "behalte sie unter der Frage als `*Answer (YYYY-MM-DD):* …`.",
   "System Map": "Systemkarte",
   "Req→Code": "Anf.→Code",
   "Dependencies": "Abhängigkeiten",
@@ -341,7 +347,8 @@ export const DE = {
   "An audit read {a} of the {b} planned requirements.":
     "Ein Audit hat {a} der {b} geplanten Anforderungen gelesen.",
   "Audit session: {a} of {b} planned requirements read (ranked by risk, plus a random sample), band {band}.":
-    "Audit-Sitzung: {a} von {b} geplanten Anforderungen gelesen (nach Risiko geordnet, plus eine Zufallsstichprobe), Band {band}.",
+    "Audit-Sitzung: {a} von {b} geplanten Anforderungen gelesen (nach Risiko geordnet, plus "
+    + "eine Zufallsstichprobe), Band {band}.",
   "audit findings": "Audit-Befunde",
   "code files with a tag": "Codedateien mit Tag",
   "Audit finding": "Audit-Befund",
@@ -354,20 +361,26 @@ export const DE = {
   "Same text under two ids": "Gleicher Text unter zwei IDs",
   "Confirmed with a title and no clause": "Bestätigt, mit Titel und ohne Klausel",
   "Design rule": "Designregel",
-  "audit findings say the code does not do what a clause says: confirm each with a reproduction, then fix it or file a bug":
-    "Audit-Befunde sagen, dass der Code nicht tut, was eine Klausel sagt: bestätige jeden mit einer Reproduktion, dann behebe ihn oder lege einen Bug an",
+  ["audit findings say the code does not do what a clause says: confirm each with a "
+    + "reproduction, then fix it or file a bug"]:
+    "Audit-Befunde sagen, dass der Code nicht tut, was eine Klausel sagt: bestätige jeden mit "
+    + "einer Reproduktion, dann behebe ihn oder lege einen Bug an",
   "requirements have a test that already names them: add the `# tested-by: ID` tag the suggestion gives":
     "Anforderungen haben einen Test, der sie bereits nennt: füge das `# tested-by: ID`-Tag aus dem Vorschlag hinzu",
   "requirements have code but no test: tag the test with `# tested-by: ID`, or write one":
     "Anforderungen haben Code, aber keinen Test: tagge den Test mit `# tested-by: ID` oder schreibe einen",
   "audit findings say a test cannot fail when the code is wrong: strengthen those tests first":
-    "Audit-Befunde sagen, dass ein Test nicht fehlschlagen kann, wenn der Code falsch ist: verstärke zuerst diese Tests",
-  "tagged tests cannot fail: they assert nothing, a constant, or a value against itself; assert the behaviour, or drop the `# verifies:` tag":
-    "getaggte Tests können nicht fehlschlagen: sie prüfen nichts, eine Konstante oder einen Wert gegen sich selbst; prüfe das Verhalten oder entferne den `# verifies:`-Tag",
+    "Audit-Befunde sagen, dass ein Test nicht fehlschlagen kann, wenn der Code falsch ist: "
+    + "verstärke zuerst diese Tests",
+  ["tagged tests cannot fail: they assert nothing, a constant, or a value against itself; "
+    + "assert the behaviour, or drop the `# verifies:` tag"]:
+    "getaggte Tests können nicht fehlschlagen: sie prüfen nichts, eine Konstante oder einen "
+    + "Wert gegen sich selbst; prüfe das Verhalten oder entferne den `# verifies:`-Tag",
   "requirements repeat another's text word for word: merge or retire one of each pair":
     "Anforderungen wiederholen wörtlich den Text einer anderen: führe jedes Paar zusammen oder lege eine davon still",
   "confirmed requirements have a title and no clause: write the clause or set them back to draft":
-    "bestätigte Anforderungen haben einen Titel und keine Klausel: schreibe die Klausel oder setze sie zurück auf Entwurf",
+    "bestätigte Anforderungen haben einen Titel und keine Klausel: schreibe die Klausel oder "
+    + "setze sie zurück auf Entwurf",
   "places break the repository's own design rules: see each rule's list under Problem types":
     "Stellen verletzen die eigenen Designregeln des Repositorys: siehe die Liste jeder Regel unter Problemarten",
 };
@@ -375,13 +388,21 @@ export const DE = {
 /* The CLI's description of itself, as in COMMAND_RO. Flags stay literal. */
 export const COMMAND_DE = {  // implements: REQ-VIEWER-964
   "init":
-    "Erster Lauf: legt requirements/ und .reqmapignore an, falls sie fehlen, zieht Entwurfsanforderungen aus vorhandenem Code, baut Lock und Karte und gibt die nächsten Schritte aus. Idempotent.",
+    "Erster Lauf: legt requirements/ und .reqmapignore an, falls sie fehlen, zieht "
+    + "Entwurfsanforderungen aus vorhandenem Code, baut Lock und Karte und gibt die nächsten "
+    + "Schritte aus. Idempotent.",
   "new":
-    "Veraltet, entfällt in v8.0.0: schreibe die Anforderungsdatei direkt oder bitte den Assistenten darum. Bis dahin legt es aus der Vorlage ein Gerüst für eine neue Anforderung an; mit --from-todo und --id füllt es sie aus einem Eintrag in TODO.md vor.",
+    "Veraltet, entfällt in v8.0.0: schreibe die Anforderungsdatei direkt oder bitte den "
+    + "Assistenten darum. Bis dahin legt es aus der Vorlage ein Gerüst für eine neue Anforderung "
+    + "an; mit --from-todo und --id füllt es sie aus einem Eintrag in TODO.md vor.",
   "clarify":
-    "Fragt, was die Anforderung offen lässt: Begriffe ohne messbare Schwelle, Zahlen ohne Einheit, unbegrenzte Mengen, Klauseln ohne Fall, fehlender Fehlerpfad. Liest nur, endet immer mit 0.",
+    "Fragt, was die Anforderung offen lässt: Begriffe ohne messbare Schwelle, Zahlen ohne "
+    + "Einheit, unbegrenzte Mengen, Klauseln ohne Fall, fehlender Fehlerpfad. Liest nur, endet "
+    + "immer mit 0.",
   "gate":
-    "Das vollständige Urteil: Tag-Verknüpfungen, Drift, Testverknüpfung, dann Lesbarkeit der Anforderungen und Aktualität der committeten Karte. Meldet nur.",
+    "Das vollständige Urteil: Tag-Verknüpfungen, Drift, Testverknüpfung, dann Lesbarkeit der "
+    + "Anforderungen und Aktualität der committeten Karte. Meldet nur.",
   "sync":
-    "Baut alles Abgeleitete neu: Lock, Karte, Befund-Digest, Regionen der Präsentationsseite. --accept-drift, wenn sich ein bestätigter Vertrag wirklich geändert hat.",
+    "Baut alles Abgeleitete neu: Lock, Karte, Befund-Digest, Regionen der Präsentationsseite. "
+    + "--accept-drift, wenn sich ein bestätigter Vertrag wirklich geändert hat.",
 };

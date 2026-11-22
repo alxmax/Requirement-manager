@@ -303,6 +303,7 @@ class RowSources(unittest.TestCase):  # tested-by: REQ-CUSTOMTRACE-1138 @unit
                               "fields": {"id": "id", "contract": "text", "satisfies": "parents"}})
         self.assertEqual(["PAY-010"], list(reqs))
         self.assertIn("- Two.", reqs["PAY-010"]["body"])
+        self.assertTrue(reqs["PAY-010"]["body"].startswith("# One.\n"), reqs["PAY-010"]["body"])
         self.assertEqual(["PAY-000"], reqs["PAY-010"]["meta"]["satisfies"])
 
     def test_a_field_map_without_an_id_is_refused(self):

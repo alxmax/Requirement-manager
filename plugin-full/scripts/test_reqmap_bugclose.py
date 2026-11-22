@@ -82,6 +82,7 @@ class OwnShape(unittest.TestCase):  # tested-by: REQ-BUGS-1126 @integration
             d, "requirements", "bugs", "05_Ledger.md")))
 
     def test_no_section_for_the_priority_joins_the_first_table(self):
+        # tested-by: REQ-BUGS-1126 @unit
         # verifies: REQ-BUGS-1126#CASE-3
         table = "| ID | Bug | Priority |\n|---|---|---|\n"
         text = ("# Bugs — M\n\n## P0-P1\n\n" + table + "| B1 | a | P1 |\n\n"
@@ -104,6 +105,7 @@ class OwnShape(unittest.TestCase):  # tested-by: REQ-BUGS-1126 @integration
         self.assertIn(b"| B3 | Refund applied twice", _bytes(path))
 
     def test_the_engine_and_the_viewer_agree(self):
+        # tested-by: REQ-BUGS-1126 @unit
         # verifies: REQ-BUGS-1126#CASE-5
         with open(SHAPES, encoding="utf-8") as f:
             cases = json.load(f)
@@ -141,7 +143,7 @@ class AuditedEdges(unittest.TestCase):  # tested-by: REQ-BUGS-1118 @integration
         self.assertTrue(any("is also in" in p for p in out["problems"]))
 
     def test_an_unreadable_file_is_exit_2(self):
-        # verifies: REQ-BUGS-1119#CASE-8
+        # verifies: REQ-BUGS-1149#CASE-3  # tested-by: REQ-BUGS-1149 @integration
         d = _repo(self)
         path = os.path.join(d, "requirements", "bugs", "Billing.md")
         _write(path, "x")
@@ -182,7 +184,7 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
                          (row["version"], row["commit"], row["note"]))
 
     def test_refused_closes_write_nothing(self):
-        # verifies: REQ-BUGS-1127#CASE-4
+        # verifies: REQ-BUGS-1150#CASE-1  # tested-by: REQ-BUGS-1150 @integration
         d = _gitrepo(self)
         _write(os.path.join(d, "known.md"), "# Bugs — Own\n\n" + HEAD
                + "| B1 | Theirs | P2 |  |  |  |  |\n")
@@ -198,7 +200,7 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual(before, [_bytes(p) for p in paths])
 
     def test_a_stray_carriage_return_closes_the_right_row(self):
-        # verifies: REQ-BUGS-1127#CASE-6
+        # verifies: REQ-BUGS-1150#CASE-2
         d = _gitrepo(self)
         path = os.path.join(d, "requirements", "bugs", "Billing.md")
         with open(path, "w", encoding="utf-8", newline="") as f:
@@ -209,12 +211,13 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual("Billing:B2", _register(d)[0]["id"])
 
     def test_a_row_that_moved_is_refused(self):
-        # verifies: REQ-BUGS-1127#CASE-6
+        # tested-by: REQ-BUGS-1150 @unit
+        # verifies: REQ-BUGS-1150#CASE-2
         with self.assertRaises(ValueError):
             C.close_bug(OPEN, "", {"ref": "B9", "line": 5, "file": "f"}, {})
 
     def test_a_broken_register_is_not_overwritten(self):
-        # verifies: REQ-BUGS-1127#CASE-7
+        # verifies: REQ-BUGS-1150#CASE-3
         d = _gitrepo(self)
         path = os.path.join(d, "requirements", "bugs", "_fixed.md")
         with open(path, "wb") as f:
@@ -224,7 +227,7 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual(["Billing:B1", "Billing:B2"], _listed(d))
 
     def test_a_declared_folder_does_not_read_the_register(self):
-        # verifies: REQ-BUGS-1127#CASE-8
+        # verifies: REQ-BUGS-1127#CASE-5
         d = _gitrepo(self)
         _run(d, "sync", "--fix", "Billing:B1")
         _write(os.path.join(d, "requirements", "_config.json"),
@@ -232,10 +235,12 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual(["Billing:B2"], _listed(d))
 
     def test_an_id_spelled_with_a_space_after_the_colon(self):
+        # tested-by: REQ-BUGS-1127 @unit
         # verifies: REQ-BUGS-1127#CASE-1
         self.assertEqual("Billing:B1", C.bug_id("Billing: B1"))
 
     def test_a_dotted_date_reaches_the_map_as_iso(self):
+        # tested-by: REQ-BUGS-1127 @unit
         # verifies: REQ-BUGS-1129#CASE-1
         d = _repo(self)
         _bug_file(d, "_fixed.md", "| ID | Bug | Found | Fixed |\n|---|---|---|---|\n"
@@ -244,7 +249,7 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual(("2026-10-01", "2026-10-15"), (row["date"], row["fixed"]))
 
     def test_a_repositorys_own_register(self):
-        # verifies: REQ-BUGS-1127#CASE-5
+        # verifies: REQ-BUGS-1127#CASE-4
         d = _gitrepo(self)
         _write(os.path.join(d, "requirements", "_config.json"), json.dumps(
             {"BUG_REGISTER": "istoric.md", "BUG_REGISTER_COLUMNS": {
@@ -353,6 +358,29 @@ class FixedOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1129 @integration
                                return_value="https://gitlab.example/o/r"):
             self.assertEqual("", C.forge_of(d))
 
+
+class BugCloseInIsolation(unittest.TestCase):
+    # tested-by: REQ-BUGS-1128 @unit  # tested-by: REQ-BUGS-1129 @unit
+    """Reading the trailers, the forge and the register, with git stubbed."""
+
+    def test_a_trailer_is_read_whatever_its_case(self):
+        log = ("a" * 40 + "\x1fabc1234\x1f2026-11-20\x1fFix it\n\nfixes-BUG: Billing:B1\n\x1e"
+               + "b" * 40 + "\x1fdef5678\x1f2026-11-21\x1fNo trailer here\n\x1e")
+        with mock.patch.object(C, "_git", return_value=log):
+            self.assertEqual([("a" * 40, "abc1234", "2026-11-20", C.bug_id("Billing:B1"))],
+                             C.fix_trailers("."))
+        with mock.patch.object(C, "_git", return_value=None):
+            self.assertEqual([], C.fix_trailers("."))
+
+    def test_only_a_github_remote_is_a_forge(self):
+        for url, forge in (("https://github.com/o/r/", "https://github.com/o/r"),
+                           ("https://gitlab.example/o/r", ""), (None, "")):
+            with mock.patch.object(C, "_git_remote_web_url", return_value=url):
+                self.assertEqual(forge, C.forge_of("."), url)
+
+    def test_an_empty_register_is_an_empty_block(self):
+        d = _repo(self)
+        self.assertEqual([], C.fixed_block(os.path.join(d, "requirements")))
 
 if __name__ == "__main__":
     unittest.main()

@@ -67,25 +67,29 @@ def validate_sources(value):
         if fmt in ("csv", "json"):  # implements: REQ-CUSTOMTRACE-1138
             from .sourcerows import validate as validate_rows
             extra, why = validate_rows(e)
-        rx = _compiles(e.get("start")) if fmt not in ("md", "csv", "json") else re.compile("(x)")
-        if fmt not in SOURCE_FORMATS:
-            problems.append(where + " (format must be one of {})".format(
-                ", ".join(SOURCE_FORMATS)))
-        elif rx is None or rx.groups < 1:
-            problems.append(where + " (start missing, not a regex, or without a "
-                            "group for the id)")
-        elif status not in SOURCE_STATUSES:
-            problems.append(where + " (status must be one of {})".format(
-                ", ".join(SOURCE_STATUSES)))
-        elif e.get("root", "code") not in ("code", "repo"):  # implements: REQ-CUSTOMTRACE-1137
-            problems.append(where + " (root must be one of code, repo)")
-        elif why:
-            problems.append(where + " ({})".format(why))
-        else:
-            kept.append(dict(extra, glob=e["glob"], format=fmt, status=status,
-                             start=e.get("start"), root=e.get("root", "code"),
-                             owner=str(e.get("owner") or "external")))
+        reason = _source_problem(e, fmt, status, why)
+        if reason:
+            problems.append(where + " ({})".format(reason))
+            continue
+        kept.append(dict(extra, glob=e["glob"], format=fmt, status=status,
+                         start=e.get("start"), root=e.get("root", "code"),
+                         owner=str(e.get("owner") or "external")))
     return kept, problems
+
+
+def _source_problem(e, fmt, status, why):
+    # implements: REQ-CUSTOMTRACE-1113
+    """Why one `REQUIREMENT_SOURCES` entry is refused, or None."""
+    rx = _compiles(e.get("start")) if fmt not in ("md", "csv", "json") else re.compile("(x)")
+    if fmt not in SOURCE_FORMATS:
+        return "format must be one of {}".format(", ".join(SOURCE_FORMATS))
+    if rx is None or rx.groups < 1:
+        return "start missing, not a regex, or without a group for the id"
+    if status not in SOURCE_STATUSES:
+        return "status must be one of {}".format(", ".join(SOURCE_STATUSES))
+    if e.get("root", "code") not in ("code", "repo"):  # implements: REQ-CUSTOMTRACE-1137
+        return "root must be one of code, repo"
+    return why
 
 
 # ---------- tags and test files --------------------------------------------

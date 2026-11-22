@@ -114,23 +114,25 @@ def _blocks(masked):
     i, n = 0, len(masked)
     while i < n:
         ch = masked[i]
-        if ch in ";}" or ch == "{":
-            if ch == "{":
-                header = masked[start:i]
-                if _INIT_LIST_RE.search(header):
-                    i = _match(masked, i) + 1   # `b_{2}`: part of the header
-                    continue
-                if _TRANSPARENT_RE.search(header.strip()):
-                    stack.append(True)
-                else:
-                    close = _match(masked, i)
-                    yield start, i, close, header
-                    i = close
-            elif ch == "}":
-                if not stack:
-                    raise ValueError("unbalanced")
-                stack.pop()
-            start = i + 1
+        if ch not in ";{}":
+            i += 1
+            continue
+        if ch == "{":
+            header = masked[start:i]
+            if _INIT_LIST_RE.search(header):
+                i = _match(masked, i) + 1   # `b_{2}`: part of the header
+                continue
+            if _TRANSPARENT_RE.search(header.strip()):
+                stack.append(True)
+            else:
+                close = _match(masked, i)
+                yield start, i, close, header
+                i = close
+        elif ch == "}":
+            if not stack:
+                raise ValueError("unbalanced")
+            stack.pop()
+        start = i + 1
         i += 1
     if stack:
         raise ValueError("unbalanced")

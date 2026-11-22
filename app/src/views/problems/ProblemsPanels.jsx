@@ -9,9 +9,7 @@ const COUNT = {
   marginLeft: 6, opacity: .7, fontFamily: "var(--font-mono)", fontSize: 11,
 };
 
-export function ProblemTabBar({
-  filter, setFilter, counts, designCount, healthCount, bugCount, gateMsg,
-}) {
+export function ProblemTabBar({ filter, setFilter, counts, gateMsg }) {
   const { t } = useI18n();
   const Tab = ({ k, label, n }) => (
     <button className={"tab" + (filter === k ? " on" : "")}
@@ -23,13 +21,13 @@ export function ProblemTabBar({
     <div className="tabbar">
       <Tab k="ALL" label={t("All")} n={counts.all} />
       <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW || 0} />
-      {healthCount != null && (
-        <Tab k="HEALTH" label={t("Health")} n={healthCount} />
+      {counts.health != null && (
+        <Tab k="HEALTH" label={t("Health")} n={counts.health} />
       )}
-      {designCount > 0 && (
-        <Tab k="DESIGN" label={t("Design")} n={designCount} />
+      {counts.design > 0 && (
+        <Tab k="DESIGN" label={t("Design")} n={counts.design} />
       )}
-      <Tab k="BUGS" label={t("Bugs")} n={bugCount} />
+      <Tab k="BUGS" label={t("Bugs")} n={counts.bugs} />
       <div className="tab-legend">{gateMsg}</div>
     </div>
   );

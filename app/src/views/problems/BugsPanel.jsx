@@ -307,6 +307,88 @@ function BugGroup({ label, rows, defaultOpen, pick, setPick }) {
   );
 }
 
+/** The bugs a search and a priority keep, counted per priority before the
+ * priority filter and grouped by module in natural order. */
+function filterBugs(all, query, prio) {
+  const q = query.trim().toLowerCase();
+  const hay = (b) => `${b.ref} ${b.title} ${b.where || ""}`.toLowerCase();
+  const found = all.filter((b) => !q || hay(b).includes(q));
+  const counts = {};
+  found.forEach((b) => { counts[b.prio] = (counts[b.prio] || 0) + 1; });
+  const groups = {};
+  found.filter((b) => !prio || b.prio === prio)
+    .forEach((b) => { (groups[b.module] = groups[b.module] || []).push(b); });
+  const keys = Object.keys(groups).sort(
+    (a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  return { q, found, counts, groups, keys };
+}
+
+/** `[printing, setPrinting]`: true opens the browser's print dialog once. */
+function usePrinting() {
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    if (!printing) return undefined;
+    const done = () => setPrinting(false);
+    window.addEventListener("afterprint", done);
+    window.print();
+    return () => window.removeEventListener("afterprint", done);
+  }, [printing]);
+  return [printing, setPrinting];
+}
+
+/** Open / Fixed, shown only when the register holds a row. */
+function ViewToggle({ view, setView, openCount }) {
+  const { t } = useI18n();
+  if (!BUGS_FIXED.length) return null;
+  return (
+    <div className="bug-views">
+      {["open", "fixed"].map((v) => (
+        <button key={v} aria-pressed={view === v}
+          className={"btn " + (view === v ? "btn-secondary" : "btn-ghost")}
+          onClick={() => setView(v)}>
+          {t(v === "open" ? "Open" : "Fixed")}
+          <span style={COUNT}>
+            {v === "open" ? openCount : BUGS_FIXED.length}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** The command to run when this browser cannot write the file itself. */
+function CommandHint({ command }) {
+  const { t } = useI18n();
+  return (
+    <div className="bug-form">
+      <div className="bug-wide">
+        {t("This browser cannot write to the repository. Run this "
+          + "command, then `sync`:")}
+      </div>
+      <code className="bug-wide bug-command">{command}</code>
+    </div>
+  );
+}
+
+/** One group per module, or a line saying why there is none. */
+function BugGroups({ filtered, total, ui, narrowed }) {
+  const { t } = useI18n();
+  const { openAll, gen, pick, setPick } = ui;
+  const { groups, keys } = filtered;
+  if (!keys.length) {
+    return (
+      <div className="prob-empty">
+        <b>{t(total ? "No bugs found." : "No known bugs yet.")}</b>
+      </div>
+    );
+  }
+  return keys.map((k) => (
+    <BugGroup key={`${k}:${gen}`} label={k} rows={groups[k]}
+      defaultOpen={groupOpen(openAll, keys.length === 1 || narrowed)}
+      pick={pick} setPick={setPick} />
+  ));
+}
+
 /** Known bugs by module, the only grouping. `added` holds what this page
  * wrote, which the map cannot carry until the next `sync`. */
 export function BugsPanel({ added, setAdded }) {
@@ -317,20 +399,13 @@ export function BugsPanel({ added, setAdded }) {
   const [pick, setPick] = useState(null);
   const [error, setError] = useState(null);
   const [command, setCommand] = useState(null);
-  const [printing, setPrinting] = useState(false);
+  const [printing, setPrinting] = usePrinting();
   const [view, setView] = useState("open");
   // Expand / Collapse all: null leaves each group to its default; a press
   // remounts the groups (gen) open or closed.  implements: REQ-BUGS-1121
   const [openAll, setOpenAll] = useState(null);
   const [gen, setGen] = useState(0);
   const toggleAll = () => { setOpenAll(nextOpenAll(openAll)); setGen(gen + 1); };
-  useEffect(() => {
-    if (!printing) return undefined;
-    const done = () => setPrinting(false);
-    window.addEventListener("afterprint", done);
-    window.print();
-    return () => window.removeEventListener("afterprint", done);
-  }, [printing]);
   const all = useMemo(() => [...added, ...BUGS], [added]);
   const modules = useMemo(
     () => moduleChoices(all, REQUIREMENTS), [all]);
@@ -350,16 +425,8 @@ export function BugsPanel({ added, setAdded }) {
       if (e.name !== "AbortError") setError(e.message);
     }
   };
-  const q = query.trim().toLowerCase();
-  const hay = (b) => `${b.ref} ${b.title} ${b.where || ""}`.toLowerCase();
-  const found = all.filter((b) => !q || hay(b).includes(q));
-  const counts = {};
-  found.forEach((b) => { counts[b.prio] = (counts[b.prio] || 0) + 1; });
-  const shown = found.filter((b) => !prio || b.prio === prio);
-  const groups = {};
-  shown.forEach((b) => { (groups[b.module] = groups[b.module] || []).push(b); });
-  const keys = Object.keys(groups).sort(
-    (a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const filtered = filterBugs(all, query, prio);
+  const { q, found, counts, groups, keys } = filtered;
   return (
     <>
       <div className="bug-bar">
@@ -374,33 +441,12 @@ export function BugsPanel({ added, setAdded }) {
           {t("Export PDF")}
         </button>
       </div>
-      {BUGS_FIXED.length > 0 && (
-        <div className="bug-views">
-          {["open", "fixed"].map((v) => (
-            <button key={v} aria-pressed={view === v}
-              className={"btn " + (view === v ? "btn-secondary" : "btn-ghost")}
-              onClick={() => setView(v)}>
-              {t(v === "open" ? "Open" : "Fixed")}
-              <span style={COUNT}>
-                {v === "open" ? all.length : BUGS_FIXED.length}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      <ViewToggle view={view} setView={setView} openCount={all.length} />
       {view === "fixed" && <BugHistory open={all} fixed={BUGS_FIXED}
         query={query} />}
       {view === "open" && adding && <BugForm modules={modules} add={add} error={error}
         close={() => setAdding(false)} />}
-      {view === "open" && command && (
-        <div className="bug-form">
-          <div className="bug-wide">
-            {t("This browser cannot write to the repository. Run this "
-              + "command, then `sync`:")}
-          </div>
-          <code className="bug-wide bug-command">{command}</code>
-        </div>
-      )}
+      {view === "open" && command && <CommandHint command={command} />}
       {view === "open" && <ChipRow counts={counts} total={found.length}
         value={prio} setValue={setPrio} label={(k) => k}
         end={keys.length > 0 && (
@@ -410,17 +456,9 @@ export function BugsPanel({ added, setAdded }) {
           </button>
         )} />}
       {view === "open" && <PrioLegend />}
-      {view === "open" && keys.map((k) => (
-        <BugGroup key={`${k}:${gen}`} label={k} rows={groups[k]}
-          defaultOpen={groupOpen(openAll, keys.length === 1 || Boolean(q)
-            || Boolean(prio))}
-          pick={pick} setPick={setPick} />
-      ))}
-      {view === "open" && keys.length === 0 && (
-        <div className="prob-empty">
-          <b>{t(all.length ? "No bugs found." : "No known bugs yet.")}</b>
-        </div>
-      )}
+      {view === "open" && <BugGroups filtered={filtered} total={all.length}
+        ui={{ openAll, gen, pick, setPick }}
+        narrowed={Boolean(q) || Boolean(prio)} />}
       {printing && createPortal(
         <BugReport groups={groups} keys={keys}
           fixed={fixedSince(BUGS_FIXED, today())}

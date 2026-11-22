@@ -85,3 +85,16 @@ def _spec(rid, clauses, cases=("CASE-1 — c\n  Given x\n  When y\n  Then z",),
         id=rid, status=status, extra=extra, title=title,
         clauses="\n".join("- " + c for c in clauses),
         cases="\n\n".join(cases))
+
+
+def _in_two_processes(code, *args):
+    """stdout of `code` run in two fresh interpreters with different
+    PYTHONHASHSEED values. A determinism test compares these: inside one
+    process a set or dict of strings iterates the same way every time, so
+    `f(x) == f(x)` there passes for almost any `f`."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    return [subprocess.run([sys.executable, "-X", "utf8", "-c", code] + list(args),
+                           cwd=here, env=dict(os.environ, PYTHONHASHSEED=seed),
+                           capture_output=True, text=True, encoding="utf-8",
+                           check=True).stdout
+            for seed in ("1", "2")]

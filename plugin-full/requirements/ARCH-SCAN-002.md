@@ -277,6 +277,9 @@ Every bullet below is binding.
   open a fence that swallows the rest of the file.
 - In a `.py` file, string-literal content — including a docstring spanning many lines — is
   blanked before the search, and comment text is not.
+- In a `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs` or `.cjs` file, the content of a quoted string, a
+  template literal and a regex literal is blanked to the end of its line, and `//` and `/* */`
+  comment text, a block comment spanning lines included, is not.
 - Stripping inline backtick spans is the caller's decision, not the masking pass's: member
   discovery strips them in prose, the levelled `tested-by:` scan strips them everywhere, and
   the `verifies:` scan does not.
@@ -309,12 +312,19 @@ CASE-5 — the three scanners agree on every position
   When   `scan_all` and the three standalone scanners run over it
   Then   they return the same members, the same `verifies:` coverage and the same levels
 
+CASE-6 — a JS or TS string is masked, a comment is not
+  Given  a `.ts` file with a `verifies:` tag inside a quoted string, one inside a template
+         literal, one in a `//` comment after a regex literal holding a backtick, one in a
+         block comment spanning two lines and one in a `//` comment
+  When   the per-criterion coverage scan runs
+  Then   only the three tags in comments are recorded, the one after the regex literal included
+
 --------------------
 
 
 ---
 id: REQ-SCAN-1136
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

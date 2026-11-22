@@ -272,11 +272,13 @@ def _test_by_stem_index(files, code_root=None):
     return test_by_stem
 
 
-def _build_candidates(groups, facts_by_file, stem_of, group_id_of_file,
-                       test_by_stem, tagged, code_root=None):
+def _build_candidates(groups, facts_by_file, index, tagged, code_root=None):
     # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
     """One candidate dict per group: signatures, docstrings, imports, deps,
-    tested_by."""
+    tested_by. `index` holds the three lookups: `stem_of` (a module name to
+    its file), `group_of` (a file to its group id) and `test_by_stem`."""
+    stem_of, group_id_of_file = index["stem_of"], index["group_of"]
+    test_by_stem = index["test_by_stem"]
     cands = []
     for g in groups:
         sigs, docs, imps, loc = [], {}, set(), 0
@@ -395,9 +397,9 @@ def cmd_candidates(ws, out, md_globs=None):
     groups = _minted_groups(files, facts_by_file, reqs_dir, reqs)
     group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
     test_by_stem = _test_by_stem_index(files, code_root)
-    cands = _build_candidates(
-        groups, facts_by_file, stem_of, group_id_of_file, test_by_stem, tagged,
-        code_root)
+    index = {"stem_of": stem_of, "group_of": group_id_of_file,
+             "test_by_stem": test_by_stem}
+    cands = _build_candidates(groups, facts_by_file, index, tagged, code_root)
     _annotate_fanin(cands)
     pyramid = _annotate_pyramid(cands)
 

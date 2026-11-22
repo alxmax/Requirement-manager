@@ -12,37 +12,11 @@ import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { computeReport } from "../lib/report.js";
 import { reportMarkdown } from "../lib/reportMarkdown.js";
+import {
+  Deliverables, Numbers, Recs, Top, Types, chipper, pct, problemRows, questionIds,
+} from "./report/ReportSections.jsx";
 
-const NOT_MEASURED = "not measured";
-const MONO = { fontFamily: "var(--font-mono)", fontSize: 12 };
-const PRIO_CLASS = { high: "structure", medium: "count", low: "wording" };
-const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
-
-/** A count's requirements behind a chip that opens them; on paper, open. */
-function Ids({ rows, openSpec, full, t, label }) {
-  if (!rows || !rows.length) return null;
-  const list = (
-    <div className="rep-ids">
-      {rows.map((r) => {
-        const id = typeof r === "string" ? r : r.id;
-        const extra = r.gap ? ` (${r.gap})` : r.tests && r.tests.length
-          ? ` → ${r.tests.join(", ")}` : "";
-        return (
-          <button key={id} type="button" className="dep-link"
-            onClick={() => openSpec && openSpec(id)}>{id}{extra}</button>
-        );
-      })}
-    </div>
-  );
-  if (full) return list;
-  return (
-    <details className="rep-chip">
-      <summary>{label ? `${rows.length} ${t(label)}`
-        : t("{n} requirements", { n: rows.length })}</summary>
-      {list}
-    </details>
-  );
-}
+export { problemRows };
 
 /** The largest open count, named, for the summary's last sentence. */
 function largest(c, t) {
@@ -58,7 +32,8 @@ function largest(c, t) {
   return items[0][0] ? `${items[0][1]} (${items[0][0]})` : null;
 }
 
-function Summary({ c, t, openSpec, full }) {
+function Summary({ ctx }) {
+  const { c, t } = ctx;
   const parts = [];
   if (c.health) {
     parts.push(t("Health {s}/100: {a} of {b} requirements green.",
@@ -83,7 +58,7 @@ function Summary({ c, t, openSpec, full }) {
     <>
       <p className="rep-summary">{parts.join(" ")}</p>
       <KeyNumbers c={c} t={t} />
-      <Conclusions c={c} t={t} openSpec={openSpec} full={full} />
+      <Conclusions ctx={ctx} />
     </>
   );
 }
@@ -114,12 +89,11 @@ function KeyNumbers({ c, t }) {
 
 /** One bullet per open finding, its count in bold, and a chip per list
  * behind it. */
-function Conclusions({ c, t, openSpec, full }) {
+function Conclusions({ ctx }) {
+  const { c, t } = ctx;
   const q = c.questions, qi = c.questionIds, tr = c.trace, tiers = c.tiers;
-  const chip = (rows, label) => (
-    <Ids key={label} rows={rows} openSpec={openSpec} full={full} t={t}
-      label={label} />);
-  const allQ = [...new Set([...qi.high, ...qi.medium, ...qi.low])].sort();
+  const chip = chipper(ctx);
+  const allQ = questionIds(qi);
   const items = [
     c.audit && [t("{a} of {b} planned requirements read ({p}%)", {
       a: c.audit.reviewed, b: c.audit.planned,
@@ -198,191 +172,6 @@ function Method({ c, t }) {
   );
 }
 
-function rateSub(r) {
-  return r && r.n ? `${r.k}/${r.n} (${pct(r.k, r.n)}%)` : null;
-}
-
-/** The requirements whose cases a test that cannot fail closes. */
-const vacuousIds = (list) => [...new Set(list.flatMap((v) =>
-  v.cases.map((x) => x.split("#")[0])))].sort();
-
-const share = (a, b) => `${pct(a, b)}% (${a}/${b})`;
-
-/** Indicator | value, a chip row under a value whose requirements open. */
-function Numbers({ c, t, openSpec, full }) {
-  const tr = c.trace, cov = c.coverage, q = c.questions, qi = c.questionIds;
-  const chip = (rows, label) => (
-    <Ids key={label} rows={rows} openSpec={openSpec} full={full} t={t}
-      label={label} />);
-  const allQ = [...new Set([...qi.high, ...qi.medium, ...qi.low])].sort();
-  const prios = Object.entries(c.bugs.byPrio).map(([p, n]) => `${p} ${n}`)
-    .join(" · ");
-  const rows = [
-    ...(c.audit ? [
-      ["Read by the audit", share(c.audit.reviewed, c.audit.planned)],
-      ["Agreement between runs", rateSub(c.audit.rates.agreement)],
-      ["Audit precision", rateSub(c.audit.rates.precision)],
-      ["Audit findings", String(c.findings.reduce((n, f) => n + f.n, 0)),
-        c.findings.map((f) => chip(f.ids, f.kind))],
-    ] : []),
-    ["Open bugs", `${c.bugs.open.length}${prios ? ` (${prios})` : ""}`],
-    ["Fixed bugs", String(c.bugs.fixed)],
-    ["Questions", t("{n} on {m} requirements ({h} High, {md} Medium, {l} Low)",
-      { n: q.high + q.medium + q.low, m: allQ.length, h: q.high,
-        md: q.medium, l: q.low }),
-    [chip(allQ, "all"), chip(qi.high, "High"), chip(qi.medium, "Medium"),
-      chip(qi.low, "Low")]],
-    ["Confirmed, no implements", String(tr.noImplConfirmed.length),
-      [chip(tr.noImplConfirmed, "requirements")]],
-    ["Draft, no implements", String(tr.noImplDraft.length),
-      [chip(tr.noImplDraft, "requirements")]],
-    ["Code, no tested-by", String(tr.noTest.length), c.tiers
-      ? [chip(tr.noTest, "all"), chip(c.tiers.A, "tier A"),
-        chip(c.tiers.B, "tier B"), chip(c.tiers.C, "tier C")]
-      : [chip(tr.noTest, "requirements")]],
-    ["Cases with no verifies", String(tr.unprovenCases),
-      [chip(tr.unproven, "requirements")]],
-    ["Tests that cannot fail", c.vacuous && String(c.vacuous.length),
-      c.vacuous && [chip(vacuousIds(c.vacuous), "requirements")]],
-    ["Dangling tags", c.dangling == null ? null : String(c.dangling.length)],
-    ["Drift", c.drift == null ? null : String(c.drift.length)],
-    ...(cov ? [
-      ["Code files with a tag", share(cov.tagged_files, cov.code_files)],
-      ["Production files watched for drift",
-        share(cov.drift_files, cov.production_files)],
-    ] : []),
-    ...(c.health ? [["Health score", t("{s} ({a} of {b} requirements green)",
-      { s: c.health.score, a: c.health.healthy, b: c.health.scored })]] : []),
-  ];
-  return (
-    <table className="rep-table rep-kv">
-      <tbody>
-        {rows.map(([label, value, chips]) => (
-          <tr key={label}>
-            <td>{t(label)}</td>
-            <td>
-              {value == null ? t(NOT_MEASURED) : value}
-              {chips && chips.some(Boolean)
-                && <div className="rep-chips">{chips}</div>}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-/** [label, list, ids, n] per problem kind with something in it. */
-export function problemRows(c, t = (s) => s) {
-  const tr = c.trace, h = c.hygiene, tiers = c.tiers;
-  return [
-    ["Dangling tags (RM001)", c.dangling, null],
-    ["Confirmed, no implements", tr.noImplConfirmed, tr.noImplConfirmed],
-    ["Drift", c.drift, c.drift],
-    ["Requirements with a High question", c.highReqs, c.highReqs],
-    ...c.findings.map((f) => [t("Audit finding") + ": " + f.kind, f.ids,
-      f.ids, f.n]),
-    ["Code, no tested-by", tr.noTest, tr.noTest],
-    ...(tiers ? [
-      ["tested-by suggestion, tier A (a test already names it)", tiers.A,
-        tiers.A],
-      ["tested-by suggestion, tier B (a test is paired by name)", tiers.B,
-        tiers.B],
-      ["tested-by suggestion, tier C (no test found)", tiers.C, tiers.C],
-    ] : []),
-    ["Cases with no verifies", tr.unproven, tr.unproven, tr.unprovenCases],
-    ["Tests that cannot fail", c.vacuous && c.vacuous.map((v) =>
-      `${v.file}:${v.line} ${v.test} (${v.kind}) -> ${v.cases.join(", ")}`),
-    null],
-    ["Draft, no implements", tr.noImplDraft, tr.noImplDraft],
-    ...(h ? [
-      ["Same text under two ids", h.duplicates.map((p) => p.join(" = ")),
-        null],
-      ["Confirmed with a title and no clause", h.title_only_confirmed,
-        h.title_only_confirmed],
-    ] : []),
-    ...c.designRules.map((r) => [t("Design rule") + ": " + r.id
-      + (r.why ? " (" + r.why + ")" : ""),
-    r.hits.map((x) => `${x.file}:${x.line}`), null, r.count]),
-    ...c.rules.map((r) => [r.rule, r.ids, r.ids, r.n]),
-  ].filter(([, list, , n]) => list == null || (n ?? list.length) > 0);
-}
-
-function Types({ c, t, openSpec, full }) {
-  const rows = problemRows(c, t);
-  if (!rows.length) return <p>{t("Nothing is open.")}</p>;
-  return (
-    <table className="rep-table">
-      <tbody>
-        {rows.map(([label, list, ids, n]) => (
-          <tr key={label}>
-            <td><b>{t(label)}</b></td>
-            <td style={MONO}>
-              {list == null ? t(NOT_MEASURED) : (n ?? list.length)}
-            </td>
-            <td>
-              {ids && <Ids rows={ids} openSpec={openSpec} full={full} t={t} />}
-              {!ids && list && (full ? list : list.slice(0, 20)).map((l, i) => (
-                <div key={i} style={MONO}>{l}</div>))}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function Top({ c, t, openSpec }) {
-  if (!c.top.length) return <p>{t("No open questions here.")}</p>;
-  return (
-    <ol className="rep-top">
-      {c.top.map((q, i) => (
-        <li key={i}>
-          <span className={"prob-sev basis-" + PRIO_CLASS[q.prio]}>
-            {t(q.prio)}
-          </span>{" "}
-          <button type="button" className="dep-link"
-            onClick={() => openSpec && openSpec(q.id)}>{q.id}</button>
-          {" · "}<code>{q.kind}</code>
-          <div>{q.text}</div>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function Recs({ c, t }) {
-  if (!c.recommendations.length) {
-    return <p>{t("Nothing is open: no recommendation.")}</p>;
-  }
-  return (
-    <ol className="rep-recs">
-      {c.recommendations.map((r, i) => (
-        <li key={i}><b>{r.n}</b> {t(r.text)}</li>
-      ))}
-    </ol>
-  );
-}
-
-function Deliverables({ c, t }) {
-  return (
-    <>
-      <p>{t("Paths are relative to the requirements folder; keep them in "
-        + "the repository, not in a temporary folder.")}</p>
-      <table className="rep-table">
-        <tbody>
-          {c.deliverables.map((d) => (
-            <tr key={d.path}>
-              <td style={MONO}>{d.path}</td>
-              <td colSpan={2}>{t(d.what)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
-  );
-}
-
 /** The sections in order: the body and the table of contents read this. */
 export const SECTIONS = ["Summary", "How it was checked", "Results in numbers",
   "Problem types", "Top 10 questions", "Recommendations", "Deliverables"];
@@ -391,14 +180,11 @@ const secId = (i) => `rep-sec-${i + 1}`;
 /** The seven sections, the same on screen and on paper. */
 export function ReportBody({ c, openSpec, full = false }) {
   const { t } = useI18n();
+  const ctx = { c, t, openSpec, full };
   const bodies = [
-    <Summary c={c} t={t} openSpec={openSpec} full={full} />,
-    <Method c={c} t={t} />,
-    <Numbers c={c} t={t} openSpec={openSpec} full={full} />,
-    <Types c={c} t={t} openSpec={openSpec} full={full} />,
-    <Top c={c} t={t} openSpec={openSpec} />,
-    <Recs c={c} t={t} />,
-    <Deliverables c={c} t={t} />,
+    <Summary ctx={ctx} />, <Method c={c} t={t} />, <Numbers ctx={ctx} />,
+    <Types ctx={ctx} />, <Top ctx={ctx} />, <Recs ctx={ctx} />,
+    <Deliverables ctx={ctx} />,
   ];
   return (
     <>
