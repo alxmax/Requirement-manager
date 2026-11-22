@@ -3483,6 +3483,17 @@ class RetireStopsOnFailure(unittest.TestCase):  # tested-by: REQ-RETIRE-1130
         self.assertEqual(0, code)
         self.assertEqual('s = "{}"\ndef f():\n    return s\n'.format(tag("AREA-R-001")), got)
 
+    def test_a_typescript_string_keeps_the_tags_text(self):  # verifies: REQ-RETIRE-1130#CASE-1
+        literal = tag("AREA-R-001")[2:]
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, extra_files=False)
+            _write(os.path.join(d, "t.ts"),
+                   "const s = '{0}';  // {0}\nexport const f = () => s;\n".format(literal))
+            code, _out = self._run(d, delete=True, do_apply=True)
+            got = self._read(d, "t.ts")
+        self.assertEqual(0, code)
+        self.assertEqual("const s = '{}';\nexport const f = () => s;\n".format(literal), got)
+
     def test_a_failed_block_removal_is_not_applied(self):  # verifies: REQ-RETIRE-1130#CASE-2
         with tempfile.TemporaryDirectory() as d:
             rd = self._seed(d)

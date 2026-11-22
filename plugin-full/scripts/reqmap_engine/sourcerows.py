@@ -101,8 +101,9 @@ def blocks(text, src, path, problem):
                 "depends_on": _items(_cell(row, "depends_on", fields), sep),
                 "satisfies": _items(_cell(row, "satisfies", fields), sep)}
         contract = _cell(row, "contract", fields)
-        title = str(_cell(row, "title", fields)).strip() or (
-            _SENTENCE.split(" ".join(str(contract).split()))[0][:80] if contract else rid)
+        first = (_items(contract, sep)[:1] or [""])[0] if isinstance(contract, list) else (
+            _SENTENCE.split(" ".join(str(contract).split()))[0])
+        title = str(_cell(row, "title", fields)).strip() or first[:80] or rid
         out.append((rid, meta, _body(title, contract, _cell(row, "cases", fields))))
     if out and structural * 2 > len(out):
         problem("{!r}: {} of {} rows are structural, exempt from code and tests; "

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# implements: ARCH-SELFGATE-039
 """Keep the engine the requirement-manager skill carries equal to plugin-full/scripts/.
 
 An APM install copies one directory, `skills/<name>/`, and nothing beside it, so

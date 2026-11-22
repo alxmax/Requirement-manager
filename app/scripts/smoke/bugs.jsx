@@ -196,7 +196,7 @@ const bugChecks = [
   // verifies: REQ-MAPSTAMP-1125#CASE-4
   ["language: the page opens in the map's language and stores nothing",
     opened.includes("Buguri") && written.length === 0],
-  // verifies: REQ-BUGS-1119#CASE-6
+  // verifies: REQ-BUGS-1119#CASE-4
   ["bugs: the viewer writes the fixture's bytes",
     fixture.every((c) => moduleFile(c.bug.module) === c.file
       && appendBug(c.text, c.bug).text === c.expected)],

@@ -66,7 +66,7 @@ def _column_index(header, columns=None):
     return index if {"id", "title", "prio"} <= set(index) else None
 
 
-def iso_date(text):
+def iso_date(text):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """`text`'s date as YYYY-MM-DD, or "" when it holds no real one."""
     m, parts = _ISO_RE.search(text or ""), None
@@ -81,7 +81,7 @@ def iso_date(text):
         return ""
 
 
-def _file_heading(text, stem):
+def _file_heading(text, stem):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """(module, date) from `# <anything> — <module> (<date>)`. The file's
     name is the module when there is no heading."""
@@ -190,7 +190,7 @@ def _bug_paths(root, reqs_dir, problems):
     return [p for p in paths if p != register]
 
 
-def _skip_pattern(problems):
+def _skip_pattern(problems):  # implements: REQ-BUGS-1148
     # implements: REQ-BUGS-1116
     """`BUG_SKIP_SECTIONS` compiled, or None. A bad one is one problem line,
     and every table is then read."""
@@ -247,7 +247,7 @@ def _escape(value):
     return " ".join(str(value or "").split()).replace("|", "\\|")
 
 
-def module_file(module):
+def module_file(module):  # implements: REQ-BUGS-1149
     # implements: REQ-BUGS-1119
     """A module's file name: its words joined by `-`, or "" when it has
     none. The result can never leave the bugs folder."""
@@ -377,7 +377,7 @@ def _lookalikes(text, title):
                 b["title"].casefold().split())).ratio() >= SIMILAR_TITLE]
 
 
-def cmd_bug_add(reqs_dir, title, a):
+def cmd_bug_add(reqs_dir, title, a):  # implements: REQ-BUGS-1149
     # implements: ARCH-BUGS-078  # implements: REQ-BUGS-1119
     # implements: REQ-BUGS-1126
     """`sync --bug TITLE`: one row in the module's file. Exit 2 on input that

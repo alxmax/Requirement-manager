@@ -12,7 +12,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import io
 import unittest
+from contextlib import redirect_stdout
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reqmap as R
@@ -160,6 +163,23 @@ class DriftOnARequirementReadFromASource(unittest.TestCase):  # tested-by: REQ-C
         with open(os.path.join(d, "audit", "_driftlog.json"), encoding="utf-8") as f:
             self.assertIn("capped is the rule", f.read())
 
+
+class KeptDriftInIsolation(unittest.TestCase):  # tested-by: REQ-CHECK-1135 @unit
+    """The demotion keeps the baseline of what it cannot write, called directly."""
+
+    def test_a_requirement_that_cannot_be_written_is_kept(self):
+        # verifies: REQ-CHECK-1135#CASE-3
+        from reqmap_engine import gate as G
+        reqs = {"A-1": {"meta": {"status": "confirmed"}, "path": "a.md"},
+                "B-2": {"meta": {"status": "confirmed"}, "path": "b.md"}}
+        with mock.patch.object(G, "_write_frontmatter_status",
+                               side_effect=lambda r, s: r["path"] == "b.md"), \
+                redirect_stdout(io.StringIO()) as out:
+            kept = G._demote_drifted_confirmed(reqs, ["A-1", "B-2"], {})
+        self.assertEqual(["A-1"], kept)
+        self.assertEqual("confirmed", reqs["A-1"]["meta"]["status"])
+        self.assertEqual("draft", reqs["B-2"]["meta"]["status"])
+        self.assertIn("A-1: no `status:` line to change", out.getvalue())
 
 if __name__ == "__main__":
     unittest.main()

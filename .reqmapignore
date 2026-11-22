@@ -117,6 +117,7 @@ docs/planning-contract.md
 docs/requirements.md
 docs/case-studies.md
 docs/stability.md
+docs/copilot-audit.md
 plugin-full/README.md
 # The APM manifest: package metadata whose version `check_versions.py` keeps in step,
 # the same class as plugin.json. Not a capability implementation.

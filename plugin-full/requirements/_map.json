@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-22.1",
+  "engine_version": "2026-11-22.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1804,7 +1804,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/components/Rail.jsx:19"
+          "loc": "app/src/components/Rail.jsx:20"
         },
         {
           "role": "implements",
@@ -1923,29 +1923,35 @@
       "id": "ARCH-BUGS-078",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Known bugs are listed by module",
       "intent": "A repository's known bugs sat in documents nothing could read, so the map showed what was traced and said nothing about what was broken. Each repository now lists them by module, whether it already keeps them in files or adds them one at a time. See [ADR-0080](../../docs/adr/0080-known-bugs-are-listed-by-module.md).",
       "contract": [
         "A bug file is Markdown: a heading that names the module, and tables with an id, a title and a priority. [[REQ-BUGS-1116]]",
+        "A bug file's heading gives its module and date, and a section `BUG_SKIP_SECTIONS` names is not read. [[REQ-BUGS-1148]]",
         "`requirements/bugs/*.md` and the files `BUG_SOURCES` names reach `_map.json` under `bugs`; the second kind is never written. [[REQ-BUGS-1117]]",
         "A malformed bug is an `INPUT:bugs` warning, and an open bug never fails the gate. [[REQ-BUGS-1118]]",
         "`sync --bug` adds one row to the module's file and does nothing else. [[REQ-BUGS-1119]]",
+        "`sync --bug` refuses bad input, a module that would leave the folder and an unreadable file, writing nothing. [[REQ-BUGS-1149]]",
         "`ask --bugs` lists the known bugs by module, without a verdict. [[REQ-BUGS-1120]]",
         "The Problems page has a Bugs tab that groups by module and shows each bug's date. [[REQ-BUGS-1121]]",
         "The tab adds a bug to the repository's own file, or prints the command that does. [[REQ-BUGS-1122]]",
         "The tab exports the list it shows, for a reader who does not open the map. [[REQ-BUGS-1123]]",
         "`sync --bug` writes in the shape of the file it lands in, and never gives a number twice. [[REQ-BUGS-1126]]",
         "`sync --fix` moves a row to a register with its dates, version and commit. [[REQ-BUGS-1127]]",
+        "`sync --fix` refuses an unknown or closed id, a declared source, a moved row and an unreadable register, writing nothing. [[REQ-BUGS-1150]]",
         "`sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]",
         "The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]",
         "A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]"
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the bug list is one capability with an engine side (read, add, close, list) and a viewer side (the Bugs tab and its file writer), so its members span the engine package and two viewer directories by design.",
+        "-------------------"
+      ],
       "current_impl": [],
-      "accept": "CASE-1 — a bug goes from the command line to the map\n  Given  a repository with no bug folder\n  When   `sync --bug` adds a bug and `sync` runs\n  Then   `_map.json` carries that bug under `bugs`, with its module and date\n\nCASE-2 — a repository's own files are read and left alone\n  Given  a repository whose `_config.json` names a bug document with its own column names\n  When   `sync` runs\n  Then   `_map.json` carries that document's bugs, and the document is byte-identical\n\nCASE-3 — a repository with no bug list sees nothing change\n  Given  a repository with no bug folder and no `BUG_SOURCES`\n  When   `sync` runs\n  Then   `_map.json` has no `bugs` key\n\n--------------------",
+      "accept": "CASE-1 — a bug goes from the command line to the map\n  Given  a repository with no bug folder\n  When   `sync --bug` adds a bug and `sync` runs\n  Then   `_map.json` carries that bug under `bugs`, with its module and date\n\nCASE-2 — a repository's own files are read and left alone\n  Given  a repository whose `_config.json` names a bug document with its own column names\n  When   `sync` runs\n  Then   `_map.json` carries that document's bugs, and the document is byte-identical\n\nCASE-3 — a repository with no bug list sees nothing change\n  Given  a repository with no bug folder and no `BUG_SOURCES`\n  When   `sync` runs\n  Then   `_map.json` has no `bugs` key",
       "input": "",
       "output": "",
       "desc": "",
@@ -1960,15 +1966,18 @@
       ],
       "satisfied_by": [
         "REQ-BUGS-1116",
+        "REQ-BUGS-1148",
         "REQ-BUGS-1117",
         "REQ-BUGS-1118",
         "REQ-BUGS-1119",
+        "REQ-BUGS-1149",
         "REQ-BUGS-1120",
         "REQ-BUGS-1121",
         "REQ-BUGS-1122",
         "REQ-BUGS-1123",
         "REQ-BUGS-1126",
         "REQ-BUGS-1127",
+        "REQ-BUGS-1150",
         "REQ-BUGS-1128",
         "REQ-BUGS-1129",
         "REQ-BUGS-1131"
@@ -2014,12 +2023,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -2038,7 +2042,7 @@
       "id": "REQ-BUGS-1116",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A bug file is a heading and tables",
       "intent": "The format is a table a person can read and edit in any editor, so the same reader serves a file the engine wrote and a document that already existed.",
@@ -2046,18 +2050,15 @@
         "The canonical columns are `ID`, `Bug`, `Priority`, `Date`, `Where`, `Why it matters` and `Source`, compared without regard to case.",
         "A table is a bug table when it has an id, a title and a priority column. Any other table in the file is skipped without a word.",
         "`BUG_COLUMNS` in `_config.json` adds a repository's own column names beside the canonical ones.",
-        "The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.",
-        "A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.",
         "A priority is the first `P0` to `P4` in its cell. `*` in the priority or id cell marks it estimated.",
         "A bug's id is `<file stem>:<row id>`, so two modules can each have a `B1`. Renaming the file changes the id.",
-        "`BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read.",
         "A bug records its file and the line of its row.",
         "A row with no id, title or priority, an unreal date, a repeated id or an unreadable file is a problem line, and the rows around it are still read."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column\n  When   the file is read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — the heading gives the module and the date\n  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column\n  When   the file is read\n  Then   each bug has module `Billing` and date `2026-03-15`\n\nCASE-4 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-5 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-6 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\nCASE-7 — a named section is not read\n  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`\n  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty\n  Then   the first load holds only the open bug, and the second holds both\n\nCASE-8 — a bad pattern loses nothing\n  Given  `BUG_SKIP_SECTIONS` set to `(`\n  When   the bugs load\n  Then   the rows are read and one problem line names the key\n\nCASE-9 — a spaced dash ends the module name\n  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`\n  When   each file is read\n  Then   the modules are `Orders` and `Stock-Orders`\n\nCASE-10 — a row says where it came from\n  Given  a bug on line 5 of a file\n  When   the file is read\n  Then   the bug carries that file and line\n\n--------------------",
+      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column\n  When   the file is read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-4 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-5 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\nCASE-6 — a row says where it came from\n  Given  a bug on line 5 of a file\n  When   the file is read\n  Then   the bug carries that file and line\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2116,21 +2117,78 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
+      "risks": [],
+      "clauses": 6,
+      "covered": 6,
+      "clarify": [
         {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1148",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A file's heading names its module, and a named section is skipped",
+      "intent": "A team's existing bug document carries its module and date in the heading and keeps fixed bugs under their own section. Reading the heading and skipping that section is what lets the same reader serve a file nobody wrote for this tool.",
+      "contract": [
+        "The first `#` heading gives the module: the text after its last dash with a space on each side (`—`, `–` or `-`), without a trailing `(date)`. A file with no heading uses its own name.",
+        "A row's date is `YYYY-MM-DD` or `DD.MM.YYYY`. A row with no date takes the date in the heading, and with neither it has none.",
+        "`BUG_SKIP_SECTIONS` in `_config.json` is a regex on `##` headings: no table under a matching heading is read, down to the next `##`. A regex that does not compile is a problem line, and every table is then read."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the heading gives the module and the date\n  Given  a heading `# Known issues — Billing (15.03.2026)` over rows with no date column\n  When   the file is read\n  Then   each bug has module `Billing` and date `2026-03-15`\n\nCASE-2 — a named section is not read\n  Given  bug tables under `## Open` and `## Recently fixed`, the second below a `###`\n  When   the bugs load with `BUG_SKIP_SECTIONS` set to `(?i)fixed`, and again with it empty\n  Then   the first load holds only the open bug, and the second holds both\n\nCASE-3 — a bad pattern loses nothing\n  Given  `BUG_SKIP_SECTIONS` set to `(`\n  When   the bugs load\n  Then   the rows are read and one problem line names the key\n\nCASE-4 — a spaced dash ends the module name\n  Given  a heading `# Known — Stock - Orders` and a heading `# Known — Stock-Orders`\n  When   each file is read\n  Then   the modules are `Orders` and `Stock-Orders`\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:100"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:69"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:84"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:193"
         }
       ],
-      "clauses": 10,
-      "covered": 10,
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
       "clarify": []
     },
     {
       "id": "REQ-BUGS-1117",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The map carries each repository's own bugs",
       "intent": "Each repository shows its own list. A repository that keeps none must see no change at all, neither a new key in its map nor a module loaded.",
@@ -2159,6 +2217,14 @@
         {
           "role": "tested-by",
           "loc": "plugin-full/scripts/test_reqmap_bugs.py:181"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:223"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:241"
         },
         {
           "role": "implements",
@@ -2192,12 +2258,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": []
@@ -2206,7 +2267,7 @@
       "id": "REQ-BUGS-1118",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The gate reads the list and does not judge it",
       "intent": "The gate says whether the traces hold. An open bug is work to do, not a broken link, so a repository with a P0 still has a verdict about its traces. A file that cannot be read back is a different matter, because the map would silently lose rows.",
@@ -2235,11 +2296,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:119"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:121"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:268"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:270"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:499"
         },
         {
           "role": "implements",
@@ -2249,12 +2314,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 7,
       "covered": 7,
       "clarify": []
@@ -2263,24 +2323,22 @@
       "id": "REQ-BUGS-1119",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`sync --bug` adds one row",
       "intent": "Adding a bug is a write, and `sync` is where writes live. Like `--release` and `--audit-plan` it runs instead of syncing, so one call changes one file.",
       "contract": [
         "`sync --bug TITLE --module M` adds a row to the module's file under `requirements/bugs/`, creating the folder and the file with its heading, and prints the id and the file.",
-        "A new file's name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.",
         "The id is the next `B<n>`, one past the highest in that file and in the register.",
         "`--prio` defaults to `P2`, `--date` to today, and `--where`, `--why` and `--source` fill their columns.",
         "`--prio P2*` writes the `*`, so a priority an assistant chose reads back as an estimate until a person edits the row.",
         "A `|` in a value is escaped and a line break becomes a space, so the row stays one row.",
-        "With no title, no module, a priority outside `P0` to `P4` or a date that is not real, it prints the reason, exits 2 and writes nothing.",
         "`moduleFile` and `appendBug` in `app/src/lib/bugFile.js` produce the same bytes, pinned by one fixture."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the first bug creates the file\n  Given  a repository with no bug folder\n  When   `sync --bug \"Refund is applied twice\" --module \"Payments API\" --prio P1` runs\n  Then   `requirements/bugs/Payments-API.md` holds its heading and a row with id `B1`\n\nCASE-2 — the next bug takes the next id\n  Given  a file holding `B1` and `B7`\n  When   `sync --bug` adds to that module\n  Then   the new row is the last of the table, with id `B8`, and no other line changes\n\nCASE-3 — a value cannot break the row\n  Given  a why of `a|b` over two lines\n  When   the bug is added\n  Then   it reads back with that text on one line and the row has seven cells\n\nCASE-4 — bad input writes nothing\n  Given  a call with priority `P9`, a call with date `2026-13-40` and a call with module `///`\n  When   each runs\n  Then   each exits 2 and no file exists\n\nCASE-5 — a module cannot leave the folder\n  Given  a module named `../../etc`\n  When   `sync --bug` runs\n  Then   the file is `etc.md` inside `requirements/bugs/`\n\nCASE-6 — the engine and the viewer write the same bytes\n  Given  the shared fixture of a text and a bug\n  When   `append_bug` and `appendBug` each run\n  Then   each returns the fixture's expected text\n\nCASE-7 — an estimate stays an estimate\n  Given  a bug added with `--prio P2*`\n  When   it is read back\n  Then   its priority is `P2` and it is marked estimated\n\nCASE-8 — a file that cannot be read\n  Given  a file in the bugs folder that is not UTF-8\n  When   `sync --bug` runs\n  Then   it exits 2 and writes nothing\n\n--------------------",
+      "accept": "CASE-1 — the first bug creates the file\n  Given  a repository with no bug folder\n  When   `sync --bug \"Refund is applied twice\" --module \"Payments API\" --prio P1` runs\n  Then   `requirements/bugs/Payments-API.md` holds its heading and a row with id `B1`\n\nCASE-2 — the next bug takes the next id\n  Given  a file holding `B1` and `B7`\n  When   `sync --bug` adds to that module\n  Then   the new row is the last of the table, with id `B8`, and no other line changes\n\nCASE-3 — a value cannot break the row\n  Given  a why of `a|b` over two lines\n  When   the bug is added\n  Then   it reads back with that text on one line and the row has seven cells\n\nCASE-4 — the engine and the viewer write the same bytes\n  Given  the shared fixture of a text and a bug\n  When   `append_bug` and `appendBug` each run\n  Then   each returns the fixture's expected text\n\nCASE-5 — an estimate stays an estimate\n  Given  a bug added with `--prio P2*`\n  When   it is read back\n  Then   its priority is `P2` and it is marked estimated\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2297,7 +2355,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:307"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:309"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:324"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:337"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:372"
         },
         {
           "role": "implements",
@@ -2323,21 +2393,82 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
         {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1149",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "`sync --bug` refuses what it cannot write safely",
+      "intent": "A bug added from the command line must never write outside the bugs folder, and never half a row: bad input is refused before anything is written.",
+      "contract": [
+        "A new file's name is the module's words joined by `-`, so it cannot leave the folder. A module with no word is refused.",
+        "With no title, no module, a priority outside `P0` to `P4` or a date that is not real, it prints the reason, exits 2 and writes nothing.",
+        "A bug file in the folder that cannot be read as UTF-8 makes it exit 2 and write nothing."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — bad input writes nothing\n  Given  a call with priority `P9`, a call with date `2026-13-40` and a call with module `///`\n  When   each runs\n  Then   each exits 2 and no file exists\n\nCASE-2 — a module cannot leave the folder\n  Given  a module named `../../etc`\n  When   `sync --bug` runs\n  Then   the file is `etc.md` inside `requirements/bugs/`\n\nCASE-3 — a file that cannot be read\n  Given  a file in the bugs folder that is not UTF-8\n  When   `sync --bug` runs\n  Then   it exits 2 and writes nothing\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:146"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:347"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:519"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:250"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:380"
         }
       ],
-      "clauses": 8,
-      "covered": 8,
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
       "clarify": []
     },
     {
       "id": "REQ-BUGS-1120",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`ask --bugs` lists them by module",
       "intent": "The same list the page shows, for a terminal or an assistant, read-only like every `ask`.",
@@ -2367,7 +2498,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:377"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:382"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:499"
         },
         {
           "role": "implements",
@@ -2389,12 +2524,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -2616,7 +2746,7 @@
       "id": "REQ-BUGS-1126",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`sync --bug` writes in the file's own shape",
       "intent": "A repository that numbers its files, or names its columns in its own language, ended up with a second file beside the first. A row belongs where a person would have put it.",
@@ -2655,6 +2785,14 @@
           "loc": "plugin-full/scripts/test_reqmap_bugclose.py:60"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:85"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:108"
+        },
+        {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/bugs.py:259"
         },
@@ -2690,12 +2828,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": [
@@ -2714,7 +2847,7 @@
       "id": "REQ-BUGS-1127",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`sync --fix` closes one bug",
       "intent": "A row deleted by hand took its dates with it. The register keeps what the list no longer needs: when a bug was found, when it left, and in which version or commit.",
@@ -2724,14 +2857,12 @@
         "The version is `--version`, else the repository's version file, else `—`. The commit is `--commit`, else the short `HEAD`, else `—`.",
         "`--note TEXT` closes without a fix: the version is `not a bug`, the commit `—`, and the note is kept.",
         "`BUG_REGISTER` names the register and `BUG_REGISTER_COLUMNS` its columns. A register that exists keeps its own columns.",
-        "The register is not read as open bugs, whatever its columns, even when `BUG_SOURCES` matches it.",
-        "An unknown id, a closed id, or a bug in a file only `BUG_SOURCES` names exits 2 and writes nothing.",
-        "A row that is not on the line it was read from, or a register that cannot be read, exits 2 and writes nothing."
+        "The register is not read as open bugs, whatever its columns, even when `BUG_SOURCES` matches it."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a fix moves the row\n  Given  an open bug and a version file\n  When   `sync --fix` runs\n  Then   `ask --bugs` no longer lists it and the register row has every field\n\nCASE-2 — a number is never given twice\n  Given  the highest bug closed\n  When   `sync --bug` adds to that file\n  Then   the new row takes the next number\n\nCASE-3 — a dismissal\n  Given  an open bug\n  When   `sync --fix ID --note \"works as designed\"` runs\n  Then   the register says `not a bug` and keeps the note\n\nCASE-4 — refused closes write nothing\n  Given  an unknown id, a closed id and a bug in a declared source\n  When   `sync --fix` runs on each\n  Then   each exits 2 and every file is byte-identical\n\nCASE-5 — a repository's own register\n  Given  a register with localized columns and no module column\n  When   a bug is closed\n  Then   the row fits those columns\n\nCASE-6 — the right row or none\n  Given  a stray carriage return above the table, and a row that moved\n  When   a bug is closed\n  Then   the first closes the named row and the second is refused\n\nCASE-7 — a broken register survives\n  Given  a register that is not UTF-8\n  When   `sync --fix` runs\n  Then   it exits 2 and both files are byte-identical\n\nCASE-8 — a glob over the folder\n  Given  `BUG_SOURCES` matching the bugs folder\n  When   the list is read\n  Then   the register's rows are not listed\n\n--------------------",
+      "accept": "CASE-1 — a fix moves the row\n  Given  an open bug and a version file\n  When   `sync --fix` runs\n  Then   `ask --bugs` no longer lists it and the register row has every field\n\nCASE-2 — a number is never given twice\n  Given  the highest bug closed\n  When   `sync --bug` adds to that file\n  Then   the new row takes the next number\n\nCASE-3 — a dismissal\n  Given  an open bug\n  When   `sync --fix ID --note \"works as designed\"` runs\n  Then   the register says `not a bug` and keeps the note\n\nCASE-4 — a repository's own register\n  Given  a register with localized columns and no module column\n  When   a bug is closed\n  Then   the row fits those columns\n\nCASE-5 — a glob over the folder\n  Given  `BUG_SOURCES` matching the bugs folder\n  When   the list is read\n  Then   the register's rows are not listed\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2748,7 +2879,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:154"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:156"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:238"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:243"
         },
         {
           "role": "implements",
@@ -2810,21 +2949,85 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
         {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1150",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "`sync --fix` refuses what it cannot close exactly",
+      "intent": "Closing a bug rewrites two files. When the id, the row or the register is not exactly what was read, nothing is written, so a refused close never costs a row.",
+      "contract": [
+        "An unknown id, a closed id, or a bug in a file only `BUG_SOURCES` names exits 2 and writes nothing.",
+        "A row that is not on the line it was read from, or a register that cannot be read, exits 2 and writes nothing."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — refused closes write nothing\n  Given  an unknown id, a closed id and a bug in a declared source\n  When   `sync --fix` runs on each\n  Then   each exits 2 and every file is byte-identical\n\nCASE-2 — the right row or none\n  Given  a stray carriage return above the table, and a row that moved\n  When   a bug is closed\n  Then   the first closes the named row and the second is refused\n\nCASE-3 — a broken register survives\n  Given  a register that is not UTF-8\n  When   `sync --fix` runs\n  Then   it exits 2 and both files are byte-identical\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:187"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:214"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:70"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:101"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:150"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:173"
         }
       ],
-      "clauses": 8,
-      "covered": 8,
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
       "clarify": []
     },
     {
       "id": "REQ-BUGS-1128",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A commit closes the bug it names",
       "intent": "The commit that fixes a bug already says so, and a second step gets forgotten. `sync` reads the history instead, so the register needs no lock and a team without versions loses nothing.",
@@ -2856,7 +3059,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:261"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:266"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:363"
         },
         {
           "role": "implements",
@@ -2874,12 +3081,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": []
@@ -2888,7 +3090,7 @@
       "id": "REQ-BUGS-1129",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The map shows what was fixed",
       "intent": "The dates a closed bug keeps add up to a trend, with no new input from anyone.",
@@ -2934,7 +3136,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:324"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:329"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:363"
         },
         {
           "role": "implements",
@@ -2954,18 +3160,13 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:132"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:133"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 7,
       "covered": 7,
       "clarify": [
@@ -2984,7 +3185,7 @@
       "id": "REQ-BUGS-1131",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A requirement shows the open bugs that name it",
       "intent": "A bug list by module answers \"what is broken in Billing\". The question a reader of one requirement has is \"is this one broken\", and the answer sat in a `Source` cell nothing read. A row that writes the id is the link: no new column, nothing to keep in step. See [ADR-0083](../../docs/adr/0083-a-bug-names-the-requirement-it-breaks.md).",
@@ -3023,6 +3224,10 @@
           "loc": "plugin-full/scripts/test_reqmap_bugreqs.py:25"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugreqs.py:50"
+        },
+        {
           "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/bugreqs.py:15"
         },
@@ -3058,12 +3263,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": []
@@ -3203,11 +3403,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:360"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:371"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:376"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:387"
         }
       ],
       "test_exempt": null,
@@ -3379,7 +3579,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:360"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:371"
         }
       ],
       "test_exempt": null,
@@ -3422,11 +3622,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3788"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3799"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:376"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:387"
         }
       ],
       "test_exempt": null,
@@ -3471,7 +3671,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3788"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3799"
         },
         {
           "role": "implements",
@@ -3529,7 +3729,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3788"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3799"
         },
         {
           "role": "implements",
@@ -3595,7 +3795,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:347"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:358"
         }
       ],
       "test_exempt": null,
@@ -4420,7 +4620,7 @@
       "id": "REQ-CHECK-1133",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The map is written when the gate fails",
       "intent": "A first check of an existing repository fails: tags that name no requirement, requirements with no code. That is when its map is read, and `sync` wrote none, with a message naming a `map` verb that no longer exists. A map written then must say what failed, and a tag that names no requirement has no requirement to show it on.",
@@ -4432,9 +4632,12 @@
         "The map viewer opens a map that has no requirement when its gate failed, on the Problems page, instead of saying there is no map."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — writing the map on a failing gate is one obligation met in three places: `sync` in the CLI and the engine writes the map, and the viewer opens a map whose gate failed on its Problems page.",
+        "-------------------"
+      ],
       "current_impl": [],
-      "accept": "CASE-1 — a failing sync writes the map and keeps the exit code\n  Given  a corpus with a tag that names no requirement\n  When   `sync` runs\n  Then   it exits 1, `_map.json` exists, and the message says the map was written\n\nCASE-2 — the map carries the gate's lines\n  Given  the same corpus\n  When   `sync` runs\n  Then   the map's health record has one error and its line names the dangling id\n\nCASE-3 — only the map is rebuilt on failure\n  Given  the same corpus and `--findings`\n  When   `sync` runs\n  Then   `_map.json` exists and `_findings.md` does not\n\nCASE-4 — a clean map lists no gate error\n  Given  a corpus whose gate passes\n  When   `sync` runs\n  Then   it exits 0 and the map's error lines are empty\n\nCASE-5 — the page shows the dangling tag\n  Given  a map whose gate lines name one dangling tag and one requirement with no code\n  When   the Problems page renders\n  Then   the dangling id is one error row, the other is not repeated, and the banner says the\n         gate blocks the build\n\nCASE-6 — a first check with no requirement opens on Problems\n  Given  a map with no requirement whose gate lines name a dangling tag\n  When   the viewer loads it\n  Then   it opens on the Problems page and shows the dangling id, and a map with no\n         requirement and no gate error still reads as no map\n\n--------------------",
+      "accept": "CASE-1 — a failing sync writes the map and keeps the exit code\n  Given  a corpus with a tag that names no requirement\n  When   `sync` runs\n  Then   it exits 1, `_map.json` exists, and the message says the map was written\n\nCASE-2 — the map carries the gate's lines\n  Given  the same corpus\n  When   `sync` runs\n  Then   the map's health record has one error and its line names the dangling id\n\nCASE-3 — only the map is rebuilt on failure\n  Given  the same corpus and `--findings`\n  When   `sync` runs\n  Then   `_map.json` exists and `_findings.md` does not\n\nCASE-4 — a clean map lists no gate error\n  Given  a corpus whose gate passes\n  When   `sync` runs\n  Then   it exits 0 and the map's error lines are empty\n\nCASE-5 — the page shows the dangling tag\n  Given  a map whose gate lines name one dangling tag and one requirement with no code\n  When   the Problems page renders\n  Then   the dangling id is one error row, the other is not repeated, and the banner says the\n         gate blocks the build\n\nCASE-6 — a first check with no requirement opens on Problems\n  Given  a map with no requirement whose gate lines name a dangling tag\n  When   the viewer loads it\n  Then   it opens on the Problems page and shows the dangling id, and a map with no\n         requirement and no gate error still reads as no map",
       "input": "",
       "output": "",
       "desc": "",
@@ -4481,12 +4684,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": []
@@ -4495,7 +4693,7 @@
       "id": "REQ-CHECK-1135",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A drift the engine cannot demote is kept",
       "intent": "A confirmed requirement whose text changed is set back to draft by `sync`, so a person re-reads it. One read from a file the engine never writes, a text or HTML source, has no `status:` line to change: `sync` said so, advanced the lock anyway, and the change vanished from the next gate. See [ADR-0085](../../docs/adr/0085-drift-holds-on-an-existing-corpus.md).",
@@ -4507,7 +4705,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the drift survives a plain sync\n  Given  a confirmed requirement read from a text source, baselined, then edited\n  When   `sync` runs without `--accept-drift`\n  Then   it says the baseline is kept, and the next gate reports RM018 for it\n\nCASE-2 — accepting clears it and records why\n  Given  the same requirement after that sync\n  When   `sync --accept-drift REASON` runs\n  Then   the gate reports no RM018 and `_driftlog.json` holds the reason",
+      "accept": "CASE-1 — the drift survives a plain sync\n  Given  a confirmed requirement read from a text source, baselined, then edited\n  When   `sync` runs without `--accept-drift`\n  Then   it says the baseline is kept, and the next gate reports RM018 for it\n\nCASE-2 — accepting clears it and records why\n  Given  the same requirement after that sync\n  When   `sync --accept-drift REASON` runs\n  Then   the gate reports no RM018 and `_driftlog.json` holds the reason\n\nCASE-3 — a requirement sync can write is demoted as before\n  Given  two drifted confirmed requirements, one in a file sync can write and one not\n  When   sync demotes them\n  Then   the first is set back to draft, and only the second keeps its baseline",
       "input": "",
       "output": "",
       "desc": "",
@@ -4520,7 +4718,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_verify.py:124"
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:127"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:167"
         },
         {
           "role": "implements",
@@ -4534,25 +4736,10 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 2,
-      "covered": 2,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 3 clauses and 2 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "ARCH-CLARIFY-062",
@@ -5966,7 +6153,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_customtrace.py:329"
+          "loc": "plugin-full/scripts/test_reqmap_customtrace.py:330"
         },
         {
           "role": "implements",
@@ -6044,7 +6231,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:290"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:301"
         }
       ],
       "test_exempt": null,
@@ -6102,7 +6289,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:366"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:377"
         }
       ],
       "test_exempt": null,
@@ -6274,13 +6461,13 @@
       "id": "REQ-CUSTOMTRACE-1138",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Requirements kept as rows",
       "intent": "A corpus exported from a requirements tool comes as rows: a CSV file or a JSON list, with its own column names, and with headings and information entries among the requirements. Reading one took a few hundred lines of glue. A field map does it. See [ADR-0088](../../docs/adr/0088-requirements-kept-as-rows.md).",
       "contract": [
         "A source with `format: csv` or `json` reads one requirement per row through `fields`, which maps `id` (required) and optionally `title`, `contract`, `cases`, `status`, `depends_on` and `satisfies` to the source's columns or keys; any other key is a config problem.",
-        "A contract text is one clause per sentence, a list one clause per item; cases are one case per item. A title missing from the row is the contract's first sentence.",
+        "A contract text is one clause per sentence, a list one clause per item; cases are one case per item. A title missing from the row is the contract's first sentence, or its first item when the contract is a list.",
         "`depends_on` and `satisfies` split on `list_separator` (default `,`), or take a JSON list.",
         "A status of `confirmed`, `draft` or `deprecated` in the row wins over the source's status.",
         "A CSV file is read without its byte-order mark, with `delimiter` (default `,`); a JSON source is a list of objects, or one under the key `items` names.",
@@ -6290,7 +6477,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each CSV row is a requirement\n  Given  a CSV file with a byte-order mark, `;` between columns and its own column names\n  When   it is read through a field map\n  Then   each row with an id is a requirement with its title, clauses, cases, dependencies\n         and status\n\nCASE-2 — a row with no id is a problem\n  Given  the same file with one row whose id cell is empty\n  When   it is read\n  Then   that row is a problem naming its number, and the others are read\n\nCASE-3 — a structural row is exempt, and too many are named\n  Given  a row marked as a heading, then a file where most rows are\n  When   each is read\n  Then   the heading is layer aggregate, and the second file is a problem with its count\n\nCASE-4 — a JSON list under a key is read\n  Given  a JSON object whose `requirements` key holds a list\n  When   it is read with `items: requirements`\n  Then   each object is a requirement, a list contract is one clause per item\n\nCASE-5 — a field map without an id is refused\n  Given  field maps with no id, or with an unknown key\n  When   the config is validated\n  Then   each source is ignored with one problem\n\nCASE-6 — the gate reads a CSV corpus\n  Given  a repository whose only requirements are CSV rows, one tagged in code, one a heading\n  When   the gate runs\n  Then   neither is reported as missing code, and no tag is dangling",
+      "accept": "CASE-1 — each CSV row is a requirement\n  Given  a CSV file with a byte-order mark, `;` between columns and its own column names\n  When   it is read through a field map\n  Then   each row with an id is a requirement with its title, clauses, cases, dependencies\n         and status\n\nCASE-2 — a row with no id is a problem\n  Given  the same file with one row whose id cell is empty\n  When   it is read\n  Then   that row is a problem naming its number, and the others are read\n\nCASE-3 — a structural row is exempt, and too many are named\n  Given  a row marked as a heading, then a file where most rows are\n  When   each is read\n  Then   the heading is layer aggregate, and the second file is a problem with its count\n\nCASE-4 — a JSON list under a key is read\n  Given  a JSON object whose `requirements` key holds a list\n  When   it is read with `items: requirements`\n  Then   each object is a requirement, a list contract is one clause per item, and a row\n         with no title takes the list's first item as its title\n\nCASE-5 — a field map without an id is refused\n  Given  field maps with no id, or with an unknown key\n  When   the config is validated\n  Then   each source is ignored with one problem\n\nCASE-6 — the gate reads a CSV corpus\n  Given  a repository whose only requirements are CSV rows, one tagged in code, one a heading\n  When   the gate runs\n  Then   neither is reported as missing code, and no tag is dangling",
       "input": "",
       "output": "",
       "desc": "",
@@ -6329,12 +6516,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6,
       "clarify": [
@@ -6422,7 +6604,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3597"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3608"
         },
         {
           "role": "tested-by",
@@ -6707,7 +6889,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3597"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3608"
         },
         {
           "role": "implements",
@@ -8529,11 +8711,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:420"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:431"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:435"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:446"
         }
       ],
       "test_exempt": null,
@@ -8864,7 +9046,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3918"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3929"
         },
         {
           "role": "implements",
@@ -8876,11 +9058,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:420"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:431"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:435"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:446"
         }
       ],
       "test_exempt": null,
@@ -9550,7 +9732,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1584"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1595"
         },
         {
           "role": "implements",
@@ -9608,7 +9790,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1584"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1595"
         },
         {
           "role": "implements",
@@ -10518,7 +10700,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4857"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4868"
         },
         {
           "role": "implements",
@@ -10564,7 +10746,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4113"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4124"
         },
         {
           "role": "implements",
@@ -12002,7 +12184,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:141"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:142"
         },
         {
           "role": "implements",
@@ -12139,7 +12321,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:141"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:142"
         }
       ],
       "test_exempt": null,
@@ -13133,7 +13315,7 @@
       "id": "ARCH-MAPSTAMP-079",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "A map says which build it is and how it opens",
       "intent": "`_map.html` is regenerated and gitignored, so a second checkout can hold an old one that looks like a missing feature. And a repository written in another language opened every map in English. See [ADR-0081](../../docs/adr/0081-what-a-first-bug-list-changed.md).",
@@ -13144,7 +13326,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an old map can be told from a new one\n  Given  a repository on a named branch\n  When   `sync` writes `_map.html`\n  Then   the page carries the engine version, that branch and the time\n\n--------------------",
+      "accept": "CASE-1 — an old map can be told from a new one\n  Given  a repository on a named branch\n  When   `sync` writes `_map.html`\n  Then   the page carries the engine version, that branch and the time\n\nCASE-2 — the map opens in the repository's language\n  Given  a repository whose `_config.json` sets `MAP_LANGUAGE` to `ro`\n  When   `sync` writes the map\n  Then   `_map.json` carries `language: ro`\n\nCASE-3 — a language the page cannot show is refused\n  Given  `MAP_LANGUAGE` set to a value outside `en`, `ro` and `de`\n  When   `sync` writes the map\n  Then   the value is reported and the map carries no `language`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -13159,35 +13341,37 @@
         "REQ-MAPSTAMP-1124",
         "REQ-MAPSTAMP-1125"
       ],
-      "members": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "app/src/components/Rail.jsx:4"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:434"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:469"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:126"
+        }
+      ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
-      "clauses": 1,
-      "covered": 1,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ]
+      "risks": [],
+      "clauses": 3,
+      "covered": 3,
+      "clarify": []
     },
     {
       "id": "REQ-MAPSTAMP-1124",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The page shows which build it is",
       "intent": "The clock and the branch stay out of `_map.json`: that file is committed, and either would rewrite a line on every run. `_map.html` is gitignored, so it can carry both.",
@@ -13223,22 +13407,21 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:428"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:434"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:500"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:128"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:129"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -13247,7 +13430,7 @@
       "id": "REQ-MAPSTAMP-1125",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "`MAP_LANGUAGE` sets the language the page opens in",
       "intent": "A reader's own choice beats a repository's default, so the choice is remembered only when a reader makes one. Remembering every first open would freeze the default for that browser.",
@@ -13289,7 +13472,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:462"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:469"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:500"
         },
         {
           "role": "implements",
@@ -13297,18 +13484,13 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:126"
+          "loc": "plugin-full/scripts/reqmap_engine/mapjson.py:127"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4,
       "clarify": [
@@ -13962,7 +14144,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_verify.py:31"
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:34"
         },
         {
           "role": "implements",
@@ -14012,7 +14194,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_verify.py:68"
+          "loc": "plugin-full/scripts/test_reqmap_verify.py:71"
         },
         {
           "role": "implements",
@@ -16363,7 +16545,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:302"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:313"
         }
       ],
       "test_exempt": null,
@@ -16421,7 +16603,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:302"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:313"
         }
       ],
       "test_exempt": null,
@@ -16881,7 +17063,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4409"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4420"
         },
         {
           "role": "implements",
@@ -16972,7 +17154,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4026"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4037"
         },
         {
           "role": "implements",
@@ -17025,7 +17207,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4079"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4090"
         },
         {
           "role": "implements",
@@ -17080,7 +17262,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4158"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4169"
         },
         {
           "role": "implements",
@@ -17139,7 +17321,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4195"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4206"
         },
         {
           "role": "implements",
@@ -17201,7 +17383,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4217"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4228"
         },
         {
           "role": "implements",
@@ -17283,7 +17465,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4329"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4340"
         },
         {
           "role": "implements",
@@ -17342,7 +17524,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4217"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4228"
         },
         {
           "role": "implements",
@@ -17396,7 +17578,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4450"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4461"
         },
         {
           "role": "implements",
@@ -17467,7 +17649,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4565"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4576"
         },
         {
           "role": "implements",
@@ -17654,7 +17836,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3542"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3553"
         },
         {
           "role": "tested-by",
@@ -17898,7 +18080,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3542"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3553"
         },
         {
           "role": "implements",
@@ -18033,7 +18215,7 @@
       "id": "REQ-RETIRE-1130",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A retirement that fails says so and stops",
       "intent": "`retire --apply` reported a deletion as applied when the requirement's block was still in its file, dropped its lock entries anyway, ignored a file it could not write, and went on to the next requirement in the batch, which is the base of the one that failed. It also cut a tag's text out of a string literal, as if every match were a tag.",
@@ -18047,7 +18229,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a string literal survives\n  Given  a member line `s = \"# implements: X\"  # implements: X`\n  When   `retire --delete --apply` retires X\n  Then   the literal keeps its text and only the comment tag goes\n\nCASE-2 — a block that cannot be removed is not reported as applied\n  Given  a requirement whose block removal fails\n  When   `retire --delete --apply` runs\n  Then   it exits 1, `applied` is not true, and the lock entry is still there\n\nCASE-3 — a file that cannot be written fails the step\n  Given  a member file that cannot be written\n  When   `retire --delete --apply` runs\n  Then   it exits 1 and the requirement block is still in its file\n\nCASE-4 — the batch stops at the first failure\n  Given  a batch of two where the first retirement fails\n  When   `retire --delete --apply` runs on both\n  Then   the second is not attempted and the exit code is 1\n\nCASE-5 — an HTML-comment tag is still cut\n  Given  a Markdown member carrying `<!-- implements: X -->` on its own line\n  When   `retire --delete --apply` retires X\n  Then   the line is gone and the next gate reports no dangling tag",
+      "accept": "CASE-1 — a string literal survives\n  Given  a member line `s = \"# implements: X\"  # implements: X`, and the same in a `.ts`\n         member written `const s = 'implements: X';  // implements: X`\n  When   `retire --delete --apply` retires X\n  Then   the literal keeps its text and only the comment tag goes\n\nCASE-2 — a block that cannot be removed is not reported as applied\n  Given  a requirement whose block removal fails\n  When   `retire --delete --apply` runs\n  Then   it exits 1, `applied` is not true, and the lock entry is still there\n\nCASE-3 — a file that cannot be written fails the step\n  Given  a member file that cannot be written\n  When   `retire --delete --apply` runs\n  Then   it exits 1 and the requirement block is still in its file\n\nCASE-4 — the batch stops at the first failure\n  Given  a batch of two where the first retirement fails\n  When   `retire --delete --apply` runs on both\n  Then   the second is not attempted and the exit code is 1\n\nCASE-5 — an HTML-comment tag is still cut\n  Given  a Markdown member carrying `<!-- implements: X -->` on its own line\n  When   `retire --delete --apply` retires X\n  Then   the line is gone and the next gate reports no dangling tag",
       "input": "",
       "output": "",
       "desc": "",
@@ -18061,6 +18243,10 @@
         {
           "role": "tested-by",
           "loc": "plugin-full/scripts/test_reqmap_author.py:3465"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/jsmask.py:42"
         },
         {
           "role": "implements",
@@ -18082,12 +18268,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 5,
       "covered": 5,
       "clarify": []
@@ -18892,7 +19073,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4565"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4576"
         },
         {
           "role": "implements",
@@ -19450,7 +19631,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1902"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1913"
         },
         {
           "role": "implements",
@@ -19498,15 +19679,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:188"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:200"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:263"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:274"
         }
       ],
       "test_exempt": null,
@@ -19570,15 +19751,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:188"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:200"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:203"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:263"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:274"
         }
       ],
       "test_exempt": null,
@@ -19689,12 +19870,13 @@
         "In a `.md` or `.html` file, a line inside a fenced code block (``` or ~~~, CommonMark length-matched, the closer bare) carries no tag of any kind.",
         "In a `.md` file, a line indented by four spaces or a tab is an indented code block and carries no tag. The check runs before fence detection, so an indented fence marker cannot open a fence that swallows the rest of the file.",
         "In a `.py` file, string-literal content — including a docstring spanning many lines — is blanked before the search, and comment text is not.",
+        "In a `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs` or `.cjs` file, the content of a quoted string, a template literal and a regex literal is blanked to the end of its line, and `//` and `/* */` comment text, a block comment spanning lines included, is not.",
         "Stripping inline backtick spans is the caller's decision, not the masking pass's: member discovery strips them in prose, the levelled `tested-by:` scan strips them everywhere, and the `verifies:` scan does not."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a verifies tag inside a Markdown fence is not coverage\n  Given  a `.md` file whose ```-fenced example contains `# verifies: REQ-FAKE-999#CASE-1`\n  When   the per-criterion coverage scan runs\n  Then   `REQ-FAKE-999` is absent from the coverage map\n\nCASE-2 — a tag outside the fence in the same file is still real\n  Given  the same file also carrying `<!-- verifies: REQ-REAL-001#CASE-2 -->` outside any fence\n  When   the per-criterion coverage scan runs\n  Then   `REQ-REAL-001` maps `CASE-2` to that file and line\n\nCASE-3 — a tag in a Python docstring is masked, one in a comment is not\n  Given  a `.py` file with `# verifies: REQ-DOC-1#CASE-1` inside a triple-quoted string and\n         `# verifies: REQ-CODE-1#CASE-1` on a comment line\n  When   the per-criterion coverage scan runs\n  Then   only `REQ-CODE-1` is recorded\n\nCASE-4 — an indented fence marker does not open a fence\n  Given  a `.md` file whose four-space-indented line begins with ``` and whose later lines\n         carry a real `<!-- implements: <ID> -->` tag\n  When   member discovery runs\n  Then   the later tag is still recorded\n\nCASE-5 — the three scanners agree on every position\n  Given  a tree mixing fenced examples, docstring examples and real tags\n  When   `scan_all` and the three standalone scanners run over it\n  Then   they return the same members, the same `verifies:` coverage and the same levels\n\n--------------------",
+      "accept": "CASE-1 — a verifies tag inside a Markdown fence is not coverage\n  Given  a `.md` file whose ```-fenced example contains `# verifies: REQ-FAKE-999#CASE-1`\n  When   the per-criterion coverage scan runs\n  Then   `REQ-FAKE-999` is absent from the coverage map\n\nCASE-2 — a tag outside the fence in the same file is still real\n  Given  the same file also carrying `<!-- verifies: REQ-REAL-001#CASE-2 -->` outside any fence\n  When   the per-criterion coverage scan runs\n  Then   `REQ-REAL-001` maps `CASE-2` to that file and line\n\nCASE-3 — a tag in a Python docstring is masked, one in a comment is not\n  Given  a `.py` file with `# verifies: REQ-DOC-1#CASE-1` inside a triple-quoted string and\n         `# verifies: REQ-CODE-1#CASE-1` on a comment line\n  When   the per-criterion coverage scan runs\n  Then   only `REQ-CODE-1` is recorded\n\nCASE-4 — an indented fence marker does not open a fence\n  Given  a `.md` file whose four-space-indented line begins with ``` and whose later lines\n         carry a real `<!-- implements: <ID> -->` tag\n  When   member discovery runs\n  Then   the later tag is still recorded\n\nCASE-5 — the three scanners agree on every position\n  Given  a tree mixing fenced examples, docstring examples and real tags\n  When   `scan_all` and the three standalone scanners run over it\n  Then   they return the same members, the same `verifies:` coverage and the same levels\n\nCASE-6 — a JS or TS string is masked, a comment is not\n  Given  a `.ts` file with a `verifies:` tag inside a quoted string, one inside a template\n         literal, one in a `//` comment after a regex literal holding a backtick, one in a\n         block comment spanning two lines and one in a `//` comment\n  When   the per-criterion coverage scan runs\n  Then   only the three tags in comments are recorded, the one after the regex literal included\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -19711,6 +19893,14 @@
         },
         {
           "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/jsmask.py:4"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/jsmask.py:42"
+        },
+        {
+          "role": "implements",
           "loc": "plugin-full/scripts/reqmap_engine/scan.py:240"
         },
         {
@@ -19719,26 +19909,26 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:189"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:192"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tags.py:201"
+          "loc": "plugin-full/scripts/reqmap_engine/tags.py:204"
         }
       ],
       "test_exempt": null,
       "milestone": "v6.3",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 6,
+      "covered": 6,
       "clarify": []
     },
     {
       "id": "REQ-SCAN-1136",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A copied engine is not scanned",
       "intent": "The skill carries its own copy of the engine, and an assistant reads a skill from inside the repository (`.github/skills`, `.agents/skills`, `.claude/skills`). The copy's tags name this repository's requirements, so a repository that installed the skill there failed its gate with about 290 dangling tags. A `.reqmapignore` written before the skill moved there does not cover it. See [ADR-0086](../../docs/adr/0086-a-copied-engine-is-not-scanned.md).",
@@ -19763,7 +19953,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1924"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1935"
         },
         {
           "role": "implements",
@@ -19773,12 +19963,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3,
       "clarify": []
@@ -20434,7 +20619,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1655"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1666"
         },
         {
           "role": "implements",
@@ -20491,7 +20676,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1655"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1666"
         },
         {
           "role": "implements",
@@ -20664,6 +20849,10 @@
         },
         {
           "role": "implements",
+          "loc": "scripts/bundle_skill_engine.py:2"
+        },
+        {
+          "role": "implements",
           "loc": "scripts/changelog_notes.py:2"
         },
         {
@@ -20697,6 +20886,10 @@
         {
           "role": "implements",
           "loc": "scripts/gen_tokens.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_bundle_skill_engine.py:30"
         },
         {
           "role": "tested-by",
@@ -22003,7 +22196,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4621"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4632"
         },
         {
           "role": "implements",
@@ -22114,7 +22307,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4624"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4635"
         },
         {
           "role": "implements",
@@ -23637,11 +23830,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1764"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1775"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1843"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1854"
         },
         {
           "role": "implements",
@@ -23705,7 +23898,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_scan.py:1764"
+          "loc": "plugin-full/scripts/test_reqmap_scan.py:1775"
         },
         {
           "role": "implements",
@@ -25562,7 +25755,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/components/Rail.jsx:21"
+          "loc": "app/src/components/Rail.jsx:22"
         },
         {
           "role": "implements",
@@ -25599,7 +25792,7 @@
       "id": "REQ-VIEWER-1145",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "The Report reads an audit",
       "intent": "After an audit the Report page left out the audit itself, mixed its findings into the questions, and a reader needed a separate table to reconcile the two counts. It also kept no copy outside the browser. See [ADR-0091](../../docs/adr/0091-report-reads-an-audit.md).",
@@ -25614,7 +25807,9 @@
         "Recommendations add, when non-zero: audit findings of a bug or missing code, tier A suggestions, false-coverage findings, duplicates, empty confirmed requirements and design rule hits."
       ],
       "verify": [],
-      "notes": [],
+      "notes": [
+        "`lint_exempt: file-spread` — the Report page is one view whose numbers live in `lib/`, whose layout lives in `views/` and whose print styles live in `styles/`: the viewer's own split, not several capabilities."
+      ],
       "current_impl": [],
       "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the seven sections, the open bug count and every problem row\n\nCASE-5 — a contents list names the seven sections\n  Given  any registry\n  When   the Report is rendered\n  Then   the seven sections come in order, and the contents list holds one entry for each\n\nCASE-6 — each question priority opens its requirements\n  Given  one High, one Medium and one Low question, each on its own requirement\n  When   the Report is computed\n  Then   each priority lists one requirement behind its chip\n\nCASE-7 — a build stamp the map lacks is left out\n  Given  a map with no `generated_at`\n  When   the Report and its Markdown are produced\n  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured\n         for it",
       "input": "",
@@ -25659,12 +25854,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 7,
       "covered": 7,
       "clarify": [
@@ -27372,6 +27562,10 @@
       "ARCH-BUGS-078"
     ],
     [
+      "REQ-BUGS-1148",
+      "ARCH-BUGS-078"
+    ],
+    [
       "REQ-BUGS-1117",
       "ARCH-BUGS-078"
     ],
@@ -27381,6 +27575,10 @@
     ],
     [
       "REQ-BUGS-1119",
+      "ARCH-BUGS-078"
+    ],
+    [
+      "REQ-BUGS-1149",
       "ARCH-BUGS-078"
     ],
     [
@@ -27405,6 +27603,10 @@
     ],
     [
       "REQ-BUGS-1127",
+      "ARCH-BUGS-078"
+    ],
+    [
+      "REQ-BUGS-1150",
       "ARCH-BUGS-078"
     ],
     [
@@ -28759,7 +28961,7 @@
       "horizon": "now",
       "req": "REQ-CUSTOMTRACE-1138",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Version 8.27",
       "context": "",
       "section_date": null
@@ -28769,18 +28971,8 @@
       "horizon": "now",
       "req": "REQ-RETIRE-1130",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Version 8.27",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
-      "horizon": "now",
-      "req": "SYS-SSOT-001",
-      "unpark": null,
-      "done": false,
-      "category": "Adoption",
       "context": "",
       "section_date": null
     },
@@ -28809,7 +29001,7 @@
       "horizon": "now",
       "req": "ARCH-RELEASE-072",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Version 8.25",
       "context": "",
       "section_date": null
@@ -28869,7 +29061,7 @@
       "horizon": "now",
       "req": "ARCH-SELFGATE-039",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Version 8.25",
       "context": "",
       "section_date": null
@@ -28889,7 +29081,7 @@
       "horizon": "next",
       "req": "ARCH-BUGS-078",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -28899,7 +29091,7 @@
       "horizon": "next",
       "req": "ARCH-MAPSTAMP-079",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -28909,7 +29101,7 @@
       "horizon": "next",
       "req": "ARCH-BUGS-078",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -28919,7 +29111,7 @@
       "horizon": "next",
       "req": "ARCH-CHECK-006",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -28929,7 +29121,7 @@
       "horizon": "next",
       "req": "REQ-VIEWER-1145",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -28939,7 +29131,7 @@
       "horizon": "next",
       "req": "ARCH-MAPSTAMP-079",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -29018,16 +29210,6 @@
       "name": "The Copilot hands-on matrix is run and recorded. Done when: the skill-discovery and MCP-start-directory rows of `docs/integrations.md` carry a dated PASS or FAIL on Windows and Linux, and a FAIL names the change it calls for",
       "horizon": "next",
       "req": "ARCH-MCP-073",
-      "unpark": null,
-      "done": false,
-      "category": "Checking an existing repository with Copilot",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "CSV and JSON requirement sources with a field map. Done when: `format: csv",
-      "horizon": "next",
-      "req": "ARCH-CUSTOMTRACE-077",
       "unpark": null,
       "done": false,
       "category": "Checking an existing repository with Copilot",
@@ -29180,16 +29362,6 @@
       "req": "ARCH-INIT-012",
       "unpark": "an evaluator reports that `init` left them stranded",
       "done": false,
-      "category": "Adoption",
-      "context": "",
-      "section_date": null
-    },
-    {
-      "name": "An Apache-2.0 / MIT licence instead of BSL 1.1",
-      "horizon": "later",
-      "req": null,
-      "unpark": null,
-      "done": true,
       "category": "Adoption",
       "context": "",
       "section_date": null
@@ -31377,8 +31549,8 @@
     }
   ],
   "design": {
-    "files": 153,
-    "clean_files": 135,
+    "files": 154,
+    "clean_files": 136,
     "score": 88,
     "candidates": {
       "encapsulation": 10,
@@ -31599,169 +31771,30 @@
     }
   },
   "health": {
-    "score": 94,
-    "total": 373,
-    "scored": 351,
-    "healthy": 331,
-    "exempt": 2,
+    "score": 100,
+    "total": 376,
+    "scored": 354,
+    "healthy": 354,
+    "exempt": 5,
     "deprecated": 22,
-    "confirmed": 331,
-    "implemented": 340,
-    "tested": 341,
-    "drafts": 20,
+    "confirmed": 354,
+    "implemented": 344,
+    "tested": 345,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 331,
-    "unhealthy": [
+    "unhealthy": [],
+    "exempt_ids": [
       {
         "id": "ARCH-BUGS-078",
-        "status": "draft",
-        "why": [
-          "not confirmed"
+        "keys": [
+          "lint_exempt"
         ]
       },
-      {
-        "id": "ARCH-MAPSTAMP-079",
-        "status": "draft",
-        "why": [
-          "not confirmed",
-          "not implemented",
-          "not tested"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1116",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1117",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1118",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1119",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1120",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1126",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1127",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1128",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1129",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-BUGS-1131",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CHECK-1133",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CHECK-1135",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-CUSTOMTRACE-1138",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-MAPSTAMP-1124",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-MAPSTAMP-1125",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-RETIRE-1130",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-SCAN-1136",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      },
-      {
-        "id": "REQ-VIEWER-1145",
-        "status": "draft",
-        "why": [
-          "not confirmed"
-        ]
-      }
-    ],
-    "exempt_ids": [
       {
         "id": "ARCH-VIEWER-007",
         "keys": [
@@ -31770,6 +31803,18 @@
       },
       {
         "id": "REQ-AUDITRUN-1108",
+        "keys": [
+          "lint_exempt"
+        ]
+      },
+      {
+        "id": "REQ-CHECK-1133",
+        "keys": [
+          "lint_exempt"
+        ]
+      },
+      {
+        "id": "REQ-VIEWER-1145",
         "keys": [
           "lint_exempt"
         ]
@@ -31783,22 +31828,6 @@
       "Release"
     ],
     "bars": [
-      {
-        "title": "MCP server: expose reqmap as a tool",
-        "start": "2026-09-16",
-        "end": "2026-11-14",
-        "lane": "Feature",
-        "req": "ARCH-MCP-073",
-        "progress": 100
-      },
-      {
-        "title": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
-        "start": "2026-09-28",
-        "end": "2026-12-31",
-        "lane": "Feature",
-        "req": "SYS-SSOT-001",
-        "progress": 0
-      },
       {
         "title": "Words match the engine",
         "start": "2026-11-27",
@@ -31816,14 +31845,6 @@
         "req": "ARCH-SELFGATE-039"
       },
       {
-        "title": "The plan keeps only what is open",
-        "start": "2026-12-02",
-        "end": "2026-12-02",
-        "lane": "Feature",
-        "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays",
-        "req": "ARCH-RELEASE-072"
-      },
-      {
         "title": "Read the clause-without-case questions, family by family",
         "start": "2026-12-02",
         "end": "2026-12-04",
@@ -31838,86 +31859,6 @@
         "lane": "Feature",
         "roadmap": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements",
         "req": "ARCH-PROMOTE-011"
-      },
-      {
-        "title": "The skill's engine copy has a requirement",
-        "start": "2026-11-27",
-        "end": "2026-11-27",
-        "lane": "Feature",
-        "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file",
-        "req": "ARCH-SELFGATE-039"
-      },
-      {
-        "title": "JSON list contract: title from its first item",
-        "start": "2026-11-23",
-        "end": "2026-11-23",
-        "lane": "Feature",
-        "roadmap": "A JSON source row whose contract is a list and has no title takes the list's first item as its title. Done when: `sourcerows.blocks` titles such a row with its first clause (today it gets the list's Python text, `['A refund goes to the card.', ...]`), a test proves it, and REQ-CUSTOMTRACE-1138 is read again and confirmed",
-        "req": "REQ-CUSTOMTRACE-1138",
-        "progress": 0
-      },
-      {
-        "title": "retire: string literals in JS/TS",
-        "start": "2026-11-24",
-        "end": "2026-11-26",
-        "lane": "Feature",
-        "roadmap": "`retire --delete` and its requirement agree on string literals. Done when: the maintainer picks one: the clause says Python strings only, or the scanner blanks JS/TS strings as it does Python's; it lands with a test on a `.ts` member, and REQ-RETIRE-1130 is read again and confirmed",
-        "req": "REQ-RETIRE-1130",
-        "progress": 0
-      },
-      {
-        "title": "Bugs drafts: @unit tests (RM010)",
-        "start": "2026-11-30",
-        "end": "2026-12-04",
-        "lane": "Feature",
-        "roadmap": "The bug-file drafts tested only `@integration` gain a `@unit` test. Done when: REQ-BUGS-1117, 1118, 1119, 1120, 1126, 1127, 1128, 1129 and 1131 each have a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed",
-        "req": "ARCH-BUGS-078",
-        "progress": 0
-      },
-      {
-        "title": "Other drafts: @unit tests (RM010)",
-        "start": "2026-12-07",
-        "end": "2026-12-08",
-        "lane": "Feature",
-        "roadmap": "REQ-CHECK-1135, REQ-MAPSTAMP-1124, REQ-MAPSTAMP-1125 and REQ-SCAN-1136 gain a `@unit` test. Done when: each has a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed",
-        "req": "ARCH-MAPSTAMP-079",
-        "progress": 0
-      },
-      {
-        "title": "Split drafts over 7 cases",
-        "start": "2026-12-08",
-        "end": "2026-12-09",
-        "lane": "Feature",
-        "roadmap": "Drafts with more than 7 cases are split. Done when: REQ-BUGS-1116 (10 cases), REQ-BUGS-1119 (8) and REQ-BUGS-1127 (8) hold 7 or fewer, each criterion moved to the requirement that owns it",
-        "req": "ARCH-BUGS-078",
-        "progress": 0
-      },
-      {
-        "title": "Drafts under 3 cases",
-        "start": "2026-12-09",
-        "end": "2026-12-10",
-        "lane": "Feature",
-        "roadmap": "Drafts with fewer than 3 cases gain the missing ones. Done when: REQ-CHECK-1135 (2 cases) and ARCH-MAPSTAMP-079 (1) reach 3, each with its test",
-        "req": "ARCH-CHECK-006",
-        "progress": 0
-      },
-      {
-        "title": "file-spread: keep or split",
-        "start": "2026-12-10",
-        "end": "2026-12-11",
-        "lane": "Feature",
-        "roadmap": "Code spread over 3 or more directories is kept as one capability or split. Done when: ARCH-BUGS-078, REQ-CHECK-1133 and REQ-VIEWER-1145 are each either split or exempted from `file-spread` with the reason in their Context",
-        "req": "REQ-VIEWER-1145",
-        "progress": 0
-      },
-      {
-        "title": "ARCH-MAPSTAMP-079: code or aggregate",
-        "start": "2026-12-11",
-        "end": "2026-12-11",
-        "lane": "Feature",
-        "roadmap": "ARCH-MAPSTAMP-079 gets code and a test of its own, or becomes an aggregate. Done when: RM006 and RM007 no longer fire for it once it is confirmed",
-        "req": "ARCH-MAPSTAMP-079",
-        "progress": 0
       },
       {
         "title": "Bugs tab: cases the read found missing",
@@ -31963,6 +31904,20 @@
         "roadmap": "The German viewer text is read by a native reader. Done when: each correction lands in `app/src/lib/i18n.de.js`, and the smoke check that every language translates the same strings still passes",
         "req": "REQ-VIEWER-943",
         "progress": 0
+      },
+      {
+        "title": "sync --release --apply ticks the shipped ROADMAP items",
+        "start": "2026-12-21",
+        "end": "2026-12-22",
+        "lane": "Feature",
+        "req": "ARCH-RELEASE-072"
+      },
+      {
+        "title": "gate --strict fails a stale plan",
+        "start": "2026-12-22",
+        "end": "2026-12-23",
+        "lane": "Feature",
+        "req": "ARCH-RELEASE-072"
       }
     ],
     "cadence": {
@@ -31972,16 +31927,6 @@
       "until": "2026-12-31"
     },
     "releases": [
-      "2026-09-18",
-      "2026-09-25",
-      "2026-10-02",
-      "2026-10-09",
-      "2026-10-16",
-      "2026-10-23",
-      "2026-10-30",
-      "2026-11-06",
-      "2026-11-13",
-      "2026-11-20",
       "2026-11-27",
       "2026-12-04",
       "2026-12-11",
@@ -31991,10 +31936,10 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 192,
-      "tagged_files": 185,
-      "production_files": 168,
-      "drift_files": 102
+      "code_files": 193,
+      "tagged_files": 188,
+      "production_files": 169,
+      "drift_files": 104
     },
     "suggestions": {},
     "hygiene": {

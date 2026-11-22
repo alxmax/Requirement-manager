@@ -1,6 +1,6 @@
 ---
 id: ARCH-MAPSTAMP-079
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -25,12 +25,22 @@ CASE-1 — an old map can be told from a new one
   When   `sync` writes `_map.html`
   Then   the page carries the engine version, that branch and the time
 
+CASE-2 — the map opens in the repository's language
+  Given  a repository whose `_config.json` sets `MAP_LANGUAGE` to `ro`
+  When   `sync` writes the map
+  Then   `_map.json` carries `language: ro`
+
+CASE-3 — a language the page cannot show is refused
+  Given  `MAP_LANGUAGE` set to a value outside `en`, `ro` and `de`
+  When   `sync` writes the map
+  Then   the value is reported and the map carries no `language`
+
 --------------------
 
 
 ---
 id: REQ-MAPSTAMP-1124
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -68,7 +78,7 @@ CASE-3 — the footer shows what it was given
 
 ---
 id: REQ-MAPSTAMP-1125
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

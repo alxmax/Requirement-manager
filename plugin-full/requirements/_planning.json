@@ -22,22 +22,6 @@
   },
   "bars": [
     {
-      "title": "MCP server: expose reqmap as a tool",
-      "lane": "Feature",
-      "start": "2026-09-16",
-      "end": "2026-11-14",
-      "req": "ARCH-MCP-073",
-      "progress": 100
-    },
-    {
-      "title": "An outside evaluator, on their own repo, with no help at the gate. Done when: they have `uses: alxmax/requirement-manager/check@v8` on a tree you do not commit to",
-      "lane": "Feature",
-      "start": "2026-09-28",
-      "end": "2026-12-31",
-      "req": "SYS-SSOT-001",
-      "progress": 0
-    },
-    {
       "title": "Words match the engine",
       "lane": "Feature",
       "start": "2026-11-27",
@@ -54,14 +38,6 @@
       "roadmap": "A release waits for the published-action smoke test. Done when: `release` does not go ahead while `dogfood.yml` is red"
     },
     {
-      "title": "The plan keeps only what is open",
-      "lane": "Feature",
-      "start": "2026-12-02",
-      "end": "2026-12-02",
-      "req": "ARCH-RELEASE-072",
-      "roadmap": "The plan keeps only what is open. Done when: the bar for the shipped MCP server and the one for the archived consumer repo, with that repo's ROADMAP item and the done licence line, are gone, and the outside-evaluator bar stays"
-    },
-    {
       "title": "Read the clause-without-case questions, family by family",
       "lane": "Feature",
       "start": "2026-12-02",
@@ -76,86 +52,6 @@
       "end": "2026-12-01",
       "req": "ARCH-PROMOTE-011",
       "roadmap": "`sync --accept-drift` does not report the drift it has just accepted. Done when: after `accepted drift on N confirmed contract(s)` and `lock updated.`, no RM018 line names those requirements"
-    },
-    {
-      "title": "The skill's engine copy has a requirement",
-      "lane": "Feature",
-      "start": "2026-11-27",
-      "end": "2026-11-27",
-      "req": "ARCH-SELFGATE-039",
-      "roadmap": "The skill's engine copy has a requirement. Done when: `scripts/bundle_skill_engine.py` and its test are tagged to a confirmed requirement and `gate --risk` lists no untagged file"
-    },
-    {
-      "title": "JSON list contract: title from its first item",
-      "roadmap": "A JSON source row whose contract is a list and has no title takes the list's first item as its title. Done when: `sourcerows.blocks` titles such a row with its first clause (today it gets the list's Python text, `['A refund goes to the card.', ...]`), a test proves it, and REQ-CUSTOMTRACE-1138 is read again and confirmed",
-      "lane": "Feature",
-      "start": "2026-11-23",
-      "end": "2026-11-23",
-      "req": "REQ-CUSTOMTRACE-1138",
-      "progress": 0
-    },
-    {
-      "title": "retire: string literals in JS/TS",
-      "roadmap": "`retire --delete` and its requirement agree on string literals. Done when: the maintainer picks one: the clause says Python strings only, or the scanner blanks JS/TS strings as it does Python's; it lands with a test on a `.ts` member, and REQ-RETIRE-1130 is read again and confirmed",
-      "lane": "Feature",
-      "start": "2026-11-24",
-      "end": "2026-11-26",
-      "req": "REQ-RETIRE-1130",
-      "progress": 0
-    },
-    {
-      "title": "Bugs drafts: @unit tests (RM010)",
-      "roadmap": "The bug-file drafts tested only `@integration` gain a `@unit` test. Done when: REQ-BUGS-1117, 1118, 1119, 1120, 1126, 1127, 1128, 1129 and 1131 each have a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed",
-      "lane": "Feature",
-      "start": "2026-11-30",
-      "end": "2026-12-04",
-      "req": "ARCH-BUGS-078",
-      "progress": 0
-    },
-    {
-      "title": "Other drafts: @unit tests (RM010)",
-      "roadmap": "REQ-CHECK-1135, REQ-MAPSTAMP-1124, REQ-MAPSTAMP-1125 and REQ-SCAN-1136 gain a `@unit` test. Done when: each has a `@unit` `tested-by:` and `gate --full --strict` reports no RM010 for them once they are confirmed",
-      "lane": "Feature",
-      "start": "2026-12-07",
-      "end": "2026-12-08",
-      "req": "ARCH-MAPSTAMP-079",
-      "progress": 0
-    },
-    {
-      "title": "Split drafts over 7 cases",
-      "roadmap": "Drafts with more than 7 cases are split. Done when: REQ-BUGS-1116 (10 cases), REQ-BUGS-1119 (8) and REQ-BUGS-1127 (8) hold 7 or fewer, each criterion moved to the requirement that owns it",
-      "lane": "Feature",
-      "start": "2026-12-08",
-      "end": "2026-12-09",
-      "req": "ARCH-BUGS-078",
-      "progress": 0
-    },
-    {
-      "title": "Drafts under 3 cases",
-      "roadmap": "Drafts with fewer than 3 cases gain the missing ones. Done when: REQ-CHECK-1135 (2 cases) and ARCH-MAPSTAMP-079 (1) reach 3, each with its test",
-      "lane": "Feature",
-      "start": "2026-12-09",
-      "end": "2026-12-10",
-      "req": "ARCH-CHECK-006",
-      "progress": 0
-    },
-    {
-      "title": "file-spread: keep or split",
-      "roadmap": "Code spread over 3 or more directories is kept as one capability or split. Done when: ARCH-BUGS-078, REQ-CHECK-1133 and REQ-VIEWER-1145 are each either split or exempted from `file-spread` with the reason in their Context",
-      "lane": "Feature",
-      "start": "2026-12-10",
-      "end": "2026-12-11",
-      "req": "REQ-VIEWER-1145",
-      "progress": 0
-    },
-    {
-      "title": "ARCH-MAPSTAMP-079: code or aggregate",
-      "roadmap": "ARCH-MAPSTAMP-079 gets code and a test of its own, or becomes an aggregate. Done when: RM006 and RM007 no longer fire for it once it is confirmed",
-      "lane": "Feature",
-      "start": "2026-12-11",
-      "end": "2026-12-11",
-      "req": "ARCH-MAPSTAMP-079",
-      "progress": 0
     },
     {
       "title": "Bugs tab: cases the read found missing",
@@ -201,6 +97,20 @@
       "end": "2026-12-18",
       "req": "REQ-VIEWER-943",
       "progress": 0
+    },
+    {
+      "title": "sync --release --apply ticks the shipped ROADMAP items",
+      "lane": "Feature",
+      "start": "2026-12-21",
+      "end": "2026-12-22",
+      "req": "ARCH-RELEASE-072"
+    },
+    {
+      "title": "gate --strict fails a stale plan",
+      "lane": "Feature",
+      "start": "2026-12-22",
+      "end": "2026-12-23",
+      "req": "ARCH-RELEASE-072"
     }
   ],
   "milestones": {}

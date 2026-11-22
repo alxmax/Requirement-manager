@@ -251,7 +251,7 @@ CASE-4 — a single id is unchanged
 
 ---
 id: REQ-RETIRE-1130
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -277,7 +277,8 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — a string literal survives
-  Given  a member line `s = "# implements: X"  # implements: X`
+  Given  a member line `s = "# implements: X"  # implements: X`, and the same in a `.ts`
+         member written `const s = 'implements: X';  // implements: X`
   When   `retire --delete --apply` retires X
   Then   the literal keeps its text and only the comment tag goes
 

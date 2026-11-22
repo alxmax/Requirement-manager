@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+**Every draft is confirmed; requirement health 100/100.**
+
+- The 20 drafts left after the 2026-11-21 read are confirmed, and `gate --full --strict` passes with them: `gate --risk` now reads `Nothing pending`.
+- Thirteen code-level requirements tested only `@integration` (RM010) gain a `@unit` link: the tests that already call the engine directly are tagged as such, and REQ-BUGS-1118, 1120, 1128, 1129, 1149, REQ-CHECK-1135, REQ-MAPSTAMP-1124 and 1125 gain unit tests. REQ-SCAN-1136's tests call `scan_members` directly and are relabelled `@unit`.
+- Three requirements with more than 7 cases are split, each moved criterion going to the child that owns it: REQ-BUGS-1116 → REQ-BUGS-1148 (a file's heading and skipped sections), REQ-BUGS-1119 → REQ-BUGS-1149 (`sync --bug` refusals), REQ-BUGS-1127 → REQ-BUGS-1150 (`sync --fix` refusals). The tests' `verifies:` tags follow their cases.
+- ARCH-MAPSTAMP-079 gains its code, its tests and two cases; REQ-CHECK-1135 gains a third case.
+- ARCH-BUGS-078, REQ-CHECK-1133 and REQ-VIEWER-1145 keep one capability across several directories, exempted from `file-spread` with the reason in their Context.
+- `scripts/bundle_skill_engine.py` and its test are tagged to ARCH-SELFGATE-039; `docs/copilot-audit.md` joins the prose pages the scan skips.
+- The plan keeps only what is open: the shipped MCP-server bar, the done licence line and the shipped CSV/JSON item go, and so does the outside-evaluator item, by the maintainer's decision. The two Next items with no bar get dates.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.3` (tags only).
+
+**JS and TS strings are not tags (ADR-0094).**
+
+- The scan blanks the content of quoted strings, template literals and regex literals in `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs` and `.cjs` files, as it already did for Python strings; `//` and `/* */` comments are read as before. `retire --delete` no longer cuts a tag's text out of a JS/TS string. A template literal is blanked to the end of its line only, so a backtick in a regex literal cannot hide the tags below it. On this repository the member set is unchanged. REQ-SCAN-992 REQ-RETIRE-1130
+- A JSON source row whose contract is a list and has no title takes the list's first item as its title; it used to take the list's Python text (`['A refund goes to the card.', ...]`). REQ-CUSTOMTRACE-1138
+- The three determinism tests (binding hash, `review`, `clarify`) compare two interpreters with different `PYTHONHASHSEED` values instead of one call with itself, which `gate --risk` named as tests that cannot fail.
+- `TOTAL_LINE_CEILING` moves from 21,000 to 23,000 by the maintainer's decision.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.2`. The core rises to 7,139 logical lines (ADR-0094).
+
 ## plugin `v8.27.0` — 2026-11-22
 
 **Release v8.27.0.**

@@ -104,6 +104,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0091](0091-report-reads-an-audit.md) | The Report reads an audit, and the map carries the trace's reach | Accepted |
 | [0092](0092-tests-that-cannot-fail.md) | The worklist and the map name tagged tests that cannot fail | Accepted |
 | [0093](0093-cpp-tests-that-cannot-fail.md) | C and C++ tests that cannot fail are named too | Accepted |
+| [0094](0094-js-and-ts-strings-are-not-tags.md) | JS and TS strings are not tags, and the line ceiling moves to 23,000 | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

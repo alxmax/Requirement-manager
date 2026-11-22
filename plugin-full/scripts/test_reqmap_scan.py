@@ -1558,6 +1558,17 @@ class FencedTagsAreExamples(unittest.TestCase):  # tested-by: ARCH-SCAN-002  # t
         R._extract_coverage("t.py", "t.py", src.splitlines(True), ac, {})
         self.assertEqual(ac, {"REQ-CODE-1": {"CASE-1": [("t.py", 5)]}})
 
+    def test_a_js_string_is_masked_and_a_comment_is_not(self):  # verifies: REQ-SCAN-992#CASE-6
+        src = ('const s = "' + v_tag("REQ-STR-1", "CASE-1") + '";\n'
+               "const t = `" + v_tag("REQ-TPL-1", "CASE-1") + "`;\n"
+               "s.replace(/[`'\\/]/g, '') // " + v_tag("REQ-AFTER-REGEX-1", "CASE-1")[2:] + "\n"
+               "const r = a / b; /* " + v_tag("REQ-BLOCK-1", "CASE-1")[2:] + "\n"
+               "   still the comment */\n"
+               "// " + v_tag("REQ-CODE-1", "CASE-1")[2:] + "\n")
+        ac = {}
+        R._extract_coverage("t.ts", "t.ts", src.splitlines(True), ac, {})
+        self.assertEqual({"REQ-AFTER-REGEX-1", "REQ-BLOCK-1", "REQ-CODE-1"}, set(ac))
+
     def test_an_indented_fence_marker_opens_no_fence(self):  # verifies: REQ-SCAN-992#CASE-4
         md = ("# doc\n"
               "    ```\n"
@@ -1921,7 +1932,7 @@ class StringMaskEdges(unittest.TestCase):  # tested-by: ARCH-SCAN-002
             self.assertEqual(R.tags._strip_py_strings(line), want, line)
 
 
-class VendoredEngineIsNotScanned(unittest.TestCase):  # tested-by: REQ-SCAN-1136 @integration
+class VendoredEngineIsNotScanned(unittest.TestCase):  # tested-by: REQ-SCAN-1136 @unit
     """A copy of the engine, with the skill or beside a repository's own scripts,
     carries this repository's tags; scanning it reported hundreds of dangling tags."""
 
