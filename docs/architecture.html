@@ -422,6 +422,7 @@ footer a:hover{color:var(--fg)}
       <a class="opt" href="#uses">What it's for</a>
       <a class="opt" href="#how">How it works</a>
       <a class="opt" href="#gate">The gate</a>
+      <a class="opt" href="#video">Video</a>
       <a class="opt" href="#install">Install</a>
       <!--##REQMAP:NAV##-->
 <nav class="nav-links"><a href="https://github.com/alxmax/Requirement-manager" target="_blank" rel="noopener">GitHub ↗</a></nav>
@@ -434,7 +435,7 @@ footer a:hover{color:var(--fg)}
 
 <div class="hero">
   <div class="wrap">
-    <div class="eyebrow">Claude Code plugin · Python stdlib · any assistant</div>
+    <div class="eyebrow">Claude Code plugin · GitHub Copilot skill · Python stdlib · any assistant</div>
     <h1>Write down what the code should do. <span>Then keep it true.</span></h1>
     <p class="lead">
       One Markdown file per capability says what it must do. The code points back to it with a
@@ -443,10 +444,28 @@ footer a:hover{color:var(--fg)}
     </p>
     <div class="actions">
       <a class="btn btn-primary" href="./map.html">Open the live map →</a>
+      <a class="btn btn-secondary" href="#video">Watch the presentation</a>
       <a class="btn btn-secondary" href="#install">Install in 2 minutes</a>
     </div>
   </div>
 </div>
+
+<!-- VIDEO -->
+<section id="video">
+  <div class="wrap">
+    <div class="kicker">The presentation</div>
+    <h2>Checking a repository with GitHub Copilot</h2>
+    <p class="intro">
+      A recorded walkthrough of Requirement Manager at work with GitHub Copilot.
+    </p>
+    <video controls preload="metadata" playsinline
+      style="display:block;width:100%;max-width:960px;border:1px solid var(--border);border-radius:var(--r);background:#000">
+      <source src="./RequirementManager_Copilot_Audit_Presentation.mp4" type="video/mp4">
+      <a href="./RequirementManager_Copilot_Audit_Presentation.mp4">Download the presentation (MP4, 14.5 MB)</a>
+    </video>
+    <p class="more"><a href="./RequirementManager_Copilot_Audit_Presentation.mp4">Open the video on its own (MP4, 14.5 MB) →</a></p>
+  </div>
+</section>
 
 <!-- WHAT IT'S FOR -->
 <section id="uses">
@@ -497,7 +516,8 @@ footer a:hover{color:var(--fg)}
         <h3>Prove each promise with a test</h3>
         <p>A test tags the case it proves, <code># verifies: ID#CASE-2</code>. Coverage is then
           measured per clause, not per line, and <code>gate --risk</code> names what is untested
-          and what to do next.</p>
+          and what to do next, including a tagged test that cannot fail: one that asserts
+          nothing, only a constant, or a value against itself.</p>
         <span class="ask">gate --risk</span>
       </div>
       <div class="card">
@@ -658,10 +678,13 @@ CASE-2 — an unknown email is not revealed
     </p>
     <div class="views">
       <div class="view"><b>Explorer</b><span>Each requirement as a readable page: intent, clauses, cases, the files behind it, coverage.</span></div>
-      <div class="view"><b>Problems</b><span>Every open error, warning and question, each one a click from its spec.</span></div>
+      <div class="view"><b>Problems</b><span>Every open error, warning and question, each one a click from its spec, and the repository's known bugs by module.</span></div>
       <div class="view"><b>Roadmap</b><span>The plan as a calendar, versions in their own lane, what shipped read from the changelog.</span></div>
       <div class="view"><b>Commands</b><span>The CLI reference, generated from the engine's own command registry.</span></div>
+      <div class="view"><b>Questions</b><span>What each requirement has not answered yet, by priority, beside the text it is about.</span></div>
+      <div class="view"><b>Report</b><span>One page of what is open, with the numbers and what to do next; prints as PDF, downloads as Markdown.</span></div>
     </div>
+    <p class="intro">The map reads in English, Romanian or German.</p>
     <a class="btn btn-secondary" href="./map.html">Open this repository's map →</a>
   </div>
 </section>
@@ -678,10 +701,16 @@ CASE-2 — an unknown email is not revealed
           Python 3.9+, standard library only, nothing else to install. Then wire the gate into
           your pre-commit hook and CI.
         </p>
+        <p>
+          With GitHub Copilot, APM installs the same skill with its engine, and <code>init</code>
+          writes <code>.vscode/mcp.json</code>, so Copilot calls the gate as read-only tools.
+        </p>
       </div>
       <div class="cmds">
         <div class="cmd"><i>/</i>plugin marketplace add alxmax/requirement-manager</div>
         <div class="cmd"><i>/</i>plugin install requirement-manager-full@requirement-manager</div>
+        <div class="cmd"><i>$</i>apm install alxmax/requirement-manager/plugin
+          <small>GitHub Copilot: the skill, with its engine</small></div>
         <div class="cmd"><i>$</i>python scripts/reqmap.py init</div>
         <div class="cmd"><i>ci</i>uses: alxmax/requirement-manager/check@v8
           <small>GitHub Action: the same gate, in CI</small></div>
