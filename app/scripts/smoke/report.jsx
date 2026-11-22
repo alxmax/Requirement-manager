@@ -1,6 +1,7 @@
 // implements: ARCH-VIEWER-007
 // tested-by: REQ-VIEWER-1139
 // tested-by: REQ-VIEWER-1145
+// tested-by: REQ-TESTGAPS-1146
 /* The Report page: one place for the counts of bugs, questions and missing
  * tags, the ten most important questions and what to do next. Each check
  * adopts its own fixture and the real export is put back at the end. */
@@ -157,5 +158,18 @@ test("report: the Markdown export carries the same numbers",
     .every((h) => md.includes(h))
     && md.includes("| Open bugs | 0 |") && md.includes("brake_test.c")
     && md.includes("2/4 (50%)"));
+
+// verifies: REQ-TESTGAPS-1146#CASE-5
+adoptMapExport({ nodes: [node("R-1", { members: [IMPL, TEST] })],
+  trace: { ...TRACE, vacuous: [{ file: "test_a.py", line: 7, test: "test_same",
+    kind: "compares a value with itself", cases: ["R-1#CASE-2"] }] } });
+const cv = computeReport();
+const page3 = renderToString(<ReportView openSpec={noop} />);
+test("report: a test that cannot fail is counted, listed and has a fix",
+  cv.vacuous.length === 1 && page3.includes("Tests that cannot fail")
+    && problemRows(cv).some(([l, list]) => l === "Tests that cannot fail"
+      && list[0].includes("test_a.py:7 test_same"))
+    && cv.recommendations.some((r) => /cannot fail/.test(r.text))
+    && c3b.vacuous === null);
 
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });

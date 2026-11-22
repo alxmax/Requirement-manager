@@ -27,6 +27,7 @@ Every bullet below is binding.
 - With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]
 - `next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]
 - `next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]
+- `next` names each tagged test that cannot fail, the sync'd map carries the same list, and the viewer's Report counts it. [[REQ-TESTGAPS-1146]]
 
 ## Cases
 CASE-1
@@ -567,3 +568,72 @@ CASE-4 — a test gap alone is not "nothing pending"
 - `distinct_from: REQ-ACVERIFY-822` - `REQ-ACVERIFY-822` warns in the gate about a requirement's untagged cases once it has adopted per-case tagging; this names, outside the gate, the requirements that never adopted it.
 - Measured on 2026-09-28 across four corpora: 27, 21 and 97 confirmed requirements had
   a `tested-by` file and no case tagged, and one corpus carried 17 empty exemption keys.
+
+---
+id: REQ-TESTGAPS-1146
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-NEXT-013]
+---
+
+# The worklist names the tagged tests that cannot fail
+
+## Description
+> A `# verifies:` tag closes a case however the test under it is written. A test that
+> asserts nothing, asserts only a constant, or compares an expression with itself proves
+> the case on paper and checks nothing, and every count downstream calls the case tested.
+> The tag cannot tell; the test's own code can.
+
+Every bullet below is binding.
+- `next` prints a `Tests that cannot fail` bucket naming each Python function whose name
+  starts with `test`, that a `# verifies:` tag sits in or directly above, and whose body
+  makes no assertion, makes only assertions on a constant, or makes only
+  `assertEqual`/`assertIs` calls whose two arguments are the same expression; each row gives
+  the file, the line, the test, which of the three it is and the cases it closes.
+- An assertion is an `assert` statement, a call whose name starts with `assert`, `fail`,
+  `raises`, `check`, `expect` or `verify`, or a call to a function of the same file that
+  itself asserts.
+- A function not named `test*` and a test in any other language are not judged.
+- `sync` writes the same list under `trace.vacuous` in `_map.json`, outside the freshness
+  comparison like the rest of `trace`; the viewer's Report counts it in its numbers, lists
+  it under Problem types and recommends a fix when it is not empty.
+- The bucket truncates like every other bucket and is never a gate finding.
+
+## Cases
+CASE-1 — a test with no assertion is named
+  Given  a `test_*` function tagged `# verifies: REQ-A-001#CASE-1` whose body only calls the code
+  When   the tagged tests are read
+  Then   it is named as `no assertion`, closing `REQ-A-001#CASE-1`
+
+CASE-2 — a constant or a self-comparison is named, a real assertion is not
+  Given  one tagged test asserting `assertTrue(True)`, one asserting `assertEqual(f(x), f(x))`
+         and one asserting `assertEqual(f(x), 3)`
+  When   the tagged tests are read
+  Then   the first is `constant assertion`, the second `compares a value with itself`, and the
+         third is not named
+
+CASE-3 — what cannot be read is not judged
+  Given  a tagged function named `main` with no assertion, a tagged test that calls a helper of
+         the same file that asserts, and a tagged test in a `.js` file
+  When   the tagged tests are read
+  Then   none of the three is named
+
+CASE-4 — the worklist and the map carry the list
+  Given  a corpus with one tagged test that asserts nothing
+  When   `next` runs and `sync` writes the map
+  Then   `next` prints `Tests that cannot fail (1)` and `_map.json` carries the test under
+         `trace.vacuous`
+
+CASE-5 — the Report shows it
+  Given  a map whose `trace.vacuous` names one test
+  When   the viewer's Report renders
+  Then   its numbers count 1 test that cannot fail and Problem types lists the test
+
+## Context
+**Notes**
+- Measured on 2026-11-22 on this repository: 3 of the tagged tests compare a value with
+  itself, all three determinism checks run in one process; a script whose failure is its exit
+  code was the only false positive of a first draft, and is why only `test*` functions are
+  judged.

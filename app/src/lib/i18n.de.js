@@ -230,6 +230,7 @@ export const DE = {
   "Requirements with a High question": "Anforderungen mit einer Frage hoher Priorität",
   "Code, no tested-by": "Mit Code, ohne tested-by",
   "Cases with no verifies": "Fälle ohne verifies",
+  "Tests that cannot fail": "Tests, die nicht fehlschlagen können",
   "Health {s}/100: {a} of {b} requirements green.":
     "Zustand {s}/100: {a} von {b} Anforderungen sind grün.",
   "{a} of {b} live requirements are confirmed.":
@@ -361,6 +362,8 @@ export const DE = {
     "Anforderungen haben Code, aber keinen Test: tagge den Test mit `# tested-by: ID` oder schreibe einen",
   "audit findings say a test cannot fail when the code is wrong: strengthen those tests first":
     "Audit-Befunde sagen, dass ein Test nicht fehlschlagen kann, wenn der Code falsch ist: verstärke zuerst diese Tests",
+  "tagged tests cannot fail: they assert nothing, a constant, or a value against itself; assert the behaviour, or drop the `# verifies:` tag":
+    "getaggte Tests können nicht fehlschlagen: sie prüfen nichts, eine Konstante oder einen Wert gegen sich selbst; prüfe das Verhalten oder entferne den `# verifies:`-Tag",
   "requirements repeat another's text word for word: merge or retire one of each pair":
     "Anforderungen wiederholen wörtlich den Text einer anderen: führe jedes Paar zusammen oder lege eine davon still",
   "confirmed requirements have a title and no clause: write the clause or set them back to draft":

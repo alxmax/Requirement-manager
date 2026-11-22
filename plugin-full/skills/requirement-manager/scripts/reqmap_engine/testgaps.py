@@ -4,8 +4,9 @@ RM013 checks a confirmed requirement's cases only once one of them carries a
 `# verifies:` tag, so a requirement with none passes in silence: a corpus
 measured at 3% of its cases tagged showed a green gate. A `tested-by` line on
 a file counts that file as the test of every requirement it names, however
-many. And an exemption key left empty exempts nothing yet reads like one.
-All three are advice, never a gate finding; the module loads only for
+many. An exemption key left empty exempts nothing yet reads like one. And a
+tagged test that cannot fail closes its case unchecked (ADR-0092).
+All four are advice, never a gate finding; the module loads only for
 `gate --risk`.
 """
 from .acceptance import _automatable_acs
@@ -13,6 +14,7 @@ from .healthrows import EXEMPT_KEYS
 from .model import _impl_exempt
 from .scan import scan_ac_verifies
 from .text import _req_file
+from .vacuoustests import vacuous_tests
 
 # A test file that names this many requirements with no case tagged is one
 # test standing in for several contracts.
@@ -58,7 +60,7 @@ def empty_exemptions(reqs):  # implements: REQ-TESTGAPS-1088
 
 def gap_lines(ws, show_all=False, top_n=3):
     # implements: REQ-TESTGAPS-1088
-    """The three buckets as printable lines, or [] when all are empty."""
+    """The four buckets as printable lines, or [] when all are empty."""
     cover = ws.ac_cover if ws.ac_cover is not None else (scan_ac_verifies(
         ws.code_root, ws.reqs_dir) if ws.code_root else {})
     cut = (lambda xs: xs) if show_all else (lambda xs: xs[:top_n])
@@ -83,6 +85,15 @@ def gap_lines(ws, show_all=False, top_n=3):
         out += more(shared) + [
             "  -> One file stands as the test of several contracts. Tag each "
             "test with the case it checks.", ""]
+    vacuous = vacuous_tests(ws.code_root, cover) if ws.code_root else []
+    if vacuous:  # implements: REQ-TESTGAPS-1146
+        out.append("Tests that cannot fail ({})".format(len(vacuous)))
+        out += ["  {}:{}   {}   {}   closes {}".format(
+            v["file"], v["line"], v["test"], v["kind"], ", ".join(v["cases"]))
+            for v in cut(vacuous)]
+        out += more(vacuous) + [
+            "  -> The tag closes the case, the test checks nothing. Assert "
+            "the behaviour the case names, or drop the `# verifies:` tag.", ""]
     empty = empty_exemptions(ws.reqs)
     if empty:
         out.append("Empty exemptions ({})".format(len(empty)))

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-21.8",
+  "engine_version": "2026-11-22",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -5056,11 +5056,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5683"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5749"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6270"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6336"
         },
         {
           "role": "implements",
@@ -5139,7 +5139,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6379"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6445"
         },
         {
           "role": "implements",
@@ -5491,7 +5491,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5683"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5749"
         },
         {
           "role": "implements",
@@ -6844,15 +6844,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5981"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6047"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6100"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6166"
         },
         {
           "role": "implements",
@@ -6911,7 +6911,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "implements",
@@ -7005,7 +7005,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "implements",
@@ -7091,7 +7091,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "implements",
@@ -7154,7 +7154,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "implements",
@@ -7218,7 +7218,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5981"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6047"
         },
         {
           "role": "implements",
@@ -7290,7 +7290,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5719"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5785"
         },
         {
           "role": "implements",
@@ -7367,7 +7367,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5982"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6048"
         },
         {
           "role": "implements",
@@ -7547,7 +7547,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6100"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6166"
         },
         {
           "role": "implements",
@@ -10175,7 +10175,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6226"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6292"
         },
         {
           "role": "implements",
@@ -12107,7 +12107,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6334"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6400"
         },
         {
           "role": "implements",
@@ -12217,7 +12217,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6334"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6400"
         },
         {
           "role": "implements",
@@ -12690,27 +12690,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:27"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:28"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:54"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:55"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:78"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:79"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:114"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:115"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:136"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:137"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:162"
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:164"
         }
       ],
       "test_exempt": null,
@@ -12878,7 +12878,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6334"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6400"
         },
         {
           "role": "implements",
@@ -13281,11 +13281,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:555"
+          "loc": "app/src/lib/i18n.jsx:559"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:568"
+          "loc": "app/src/lib/i18n.jsx:572"
         },
         {
           "role": "tested-by",
@@ -14210,7 +14210,8 @@
         "By default `next` shows at most the top few items of a bucket, truncating each independently with a `... N more` line; `--all` lists everything. [[REQ-NEXT-886]]",
         "With no requirements at all, `next` prints a distinct message pointing at `init`/`new`; otherwise it prints the all-clear line when nothing is open. Either way it writes no file and always exits 0. [[REQ-NEXT-887]]",
         "`next` closes with the plan's own gaps — the horizon work `ROADMAP.md` leaves open and `_planning.json` does not schedule — and the health record counts the same gaps. [[REQ-PLANGAPS-1033]]",
-        "`next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]"
+        "`next` names the tests the gate cannot see missing: confirmed cases with no `# verifies:` tag, test files standing for several requirements with no case tagged, and exemption keys left empty. [[REQ-TESTGAPS-1088]]",
+        "`next` names each tagged test that cannot fail, the sync'd map carries the same list, and the viewer's Report counts it. [[REQ-TESTGAPS-1146]]"
       ],
       "verify": [],
       "notes": [
@@ -14250,7 +14251,8 @@
         "REQ-NEXT-886",
         "REQ-NEXT-887",
         "REQ-PLANGAPS-1033",
-        "REQ-TESTGAPS-1088"
+        "REQ-TESTGAPS-1088",
+        "REQ-TESTGAPS-1146"
       ],
       "members": [
         {
@@ -14886,19 +14888,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:22"
+          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:38"
+          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:40"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:53"
+          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:55"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:60"
+          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:62"
         }
       ],
       "test_exempt": null,
@@ -14918,6 +14920,83 @@
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
+    },
+    {
+      "id": "REQ-TESTGAPS-1146",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "The worklist names the tagged tests that cannot fail",
+      "intent": "A `# verifies:` tag closes a case however the test under it is written. A test that asserts nothing, asserts only a constant, or compares an expression with itself proves the case on paper and checks nothing, and every count downstream calls the case tested. The tag cannot tell; the test's own code can.",
+      "contract": [
+        "`next` prints a `Tests that cannot fail` bucket naming each Python function whose name starts with `test`, that a `# verifies:` tag sits in or directly above, and whose body makes no assertion, makes only assertions on a constant, or makes only `assertEqual`/`assertIs` calls whose two arguments are the same expression; each row gives the file, the line, the test, which of the three it is and the cases it closes.",
+        "An assertion is an `assert` statement, a call whose name starts with `assert`, `fail`, `raises`, `check`, `expect` or `verify`, or a call to a function of the same file that itself asserts.",
+        "A function not named `test*` and a test in any other language are not judged.",
+        "`sync` writes the same list under `trace.vacuous` in `_map.json`, outside the freshness comparison like the rest of `trace`; the viewer's Report counts it in its numbers, lists it under Problem types and recommends a fix when it is not empty.",
+        "The bucket truncates like every other bucket and is never a gate finding."
+      ],
+      "verify": [],
+      "notes": [
+        "Measured on 2026-11-22 on this repository: 3 of the tagged tests compare a value with itself, all three determinism checks run in one process; a script whose failure is its exit code was the only false positive of a first draft, and is why only `test*` functions are judged."
+      ],
+      "current_impl": [],
+      "accept": "CASE-1 — a test with no assertion is named\n  Given  a `test_*` function tagged `# verifies: REQ-A-001#CASE-1` whose body only calls the code\n  When   the tagged tests are read\n  Then   it is named as `no assertion`, closing `REQ-A-001#CASE-1`\n\nCASE-2 — a constant or a self-comparison is named, a real assertion is not\n  Given  one tagged test asserting `assertTrue(True)`, one asserting `assertEqual(f(x), f(x))`\n         and one asserting `assertEqual(f(x), 3)`\n  When   the tagged tests are read\n  Then   the first is `constant assertion`, the second `compares a value with itself`, and the\n         third is not named\n\nCASE-3 — what cannot be read is not judged\n  Given  a tagged function named `main` with no assertion, a tagged test that calls a helper of\n         the same file that asserts, and a tagged test in a `.js` file\n  When   the tagged tests are read\n  Then   none of the three is named\n\nCASE-4 — the worklist and the map carry the list\n  Given  a corpus with one tagged test that asserts nothing\n  When   `next` runs and `sync` writes the map\n  Then   `next` prints `Tests that cannot fail (1)` and `_map.json` carries the test under\n         `trace.vacuous`\n\nCASE-5 — the Report shows it\n  Given  a map whose `trace.vacuous` names one test\n  When   the viewer's Report renders\n  Then   its numbers count 1 test that cannot fail and Problem types lists the test",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-NEXT-013"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/report.jsx:4"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/report.js:247"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5683"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/testgaps.py:89"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/tracecover.py:171"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:10"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:47"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:78"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "ARCH-ORPHANCODE-034",
@@ -23302,7 +23381,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:521"
+          "loc": "app/src/lib/i18n.jsx:525"
         },
         {
           "role": "implements",
@@ -23314,7 +23393,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6429"
         },
         {
           "role": "implements",
@@ -24172,11 +24251,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:510"
+          "loc": "app/src/lib/i18n.jsx:514"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:564"
+          "loc": "app/src/lib/i18n.jsx:568"
         }
       ],
       "test_exempt": null,
@@ -24354,15 +24433,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.de.js:373"
+          "loc": "app/src/lib/i18n.de.js:376"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:471"
+          "loc": "app/src/lib/i18n.jsx:475"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:586"
+          "loc": "app/src/lib/i18n.jsx:590"
         },
         {
           "role": "implements",
@@ -27942,6 +28021,10 @@
       "ARCH-NEXT-013"
     ],
     [
+      "REQ-TESTGAPS-1146",
+      "ARCH-NEXT-013"
+    ],
+    [
       "ARCH-ORPHANCODE-034",
       "SYS-DRIFT-109"
     ],
@@ -31230,15 +31313,15 @@
     }
   ],
   "design": {
-    "files": 151,
-    "clean_files": 133,
+    "files": 152,
+    "clean_files": 134,
     "score": 88,
     "candidates": {
       "encapsulation": 10,
       "abstraction": 9,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 5
+      "standards": 6
     },
     "findings": [
       {
@@ -31255,7 +31338,7 @@
         "file": "app/src/lib/i18n.de.js",
         "line": 15,
         "name": "i18n.de.js",
-        "detail": "16 line(s) wider than 120 columns, first at line 15"
+        "detail": "18 line(s) wider than 120 columns, first at line 15"
       },
       {
         "pillar": "standards",
@@ -31263,15 +31346,15 @@
         "file": "app/src/lib/i18n.jsx",
         "line": 1,
         "name": "i18n.jsx",
-        "detail": "593 lines (over 500)"
+        "detail": "597 lines (over 500)"
       },
       {
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/lib/i18n.jsx",
-        "line": 388,
+        "line": 389,
         "name": "i18n.jsx",
-        "detail": "2 line(s) wider than 120 columns, first at line 388"
+        "detail": "3 line(s) wider than 120 columns, first at line 389"
       },
       {
         "pillar": "encapsulation",
@@ -31280,6 +31363,14 @@
         "line": 143,
         "name": "QuestionPanel",
         "detail": "`QuestionPanel` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "app/src/views/ReportView.jsx",
+        "line": 1,
+        "name": "ReportView.jsx",
+        "detail": "504 lines (over 500)"
       },
       {
         "pillar": "encapsulation",
@@ -31445,15 +31536,15 @@
   },
   "health": {
     "score": 94,
-    "total": 371,
-    "scored": 349,
+    "total": 372,
+    "scored": 350,
     "healthy": 329,
     "exempt": 2,
     "deprecated": 22,
     "confirmed": 329,
-    "implemented": 338,
-    "tested": 339,
-    "drafts": 20,
+    "implemented": 339,
+    "tested": 340,
+    "drafts": 21,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -31593,6 +31684,13 @@
       },
       {
         "id": "REQ-SCAN-1136",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-TESTGAPS-1146",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -31836,16 +31934,47 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 190,
-      "tagged_files": 183,
-      "production_files": 166,
-      "drift_files": 100
+      "code_files": 191,
+      "tagged_files": 184,
+      "production_files": 167,
+      "drift_files": 101
     },
     "suggestions": {},
     "hygiene": {
       "duplicates": [],
       "title_only_confirmed": [],
       "structural": 0
-    }
+    },
+    "vacuous": [
+      {
+        "file": "plugin-full/scripts/test_reqmap_author.py",
+        "line": 1514,
+        "test": "test_review_is_byte_deterministic",
+        "kind": "compares a value with itself",
+        "cases": [
+          "ARCH-REVIEW-022#CASE-3",
+          "REQ-REVIEW-906#CASE-1",
+          "REQ-REVIEW-906#CASE-4"
+        ]
+      },
+      {
+        "file": "plugin-full/scripts/test_reqmap_author.py",
+        "line": 2633,
+        "test": "test_questions_are_deterministic",
+        "kind": "compares a value with itself",
+        "cases": [
+          "ARCH-CLARIFY-062#CASE-2"
+        ]
+      },
+      {
+        "file": "plugin-full/scripts/test_reqmap_gate.py",
+        "line": 2595,
+        "test": "test_binding_hash_deterministic_across_calls",
+        "kind": "compares a value with itself",
+        "cases": [
+          "REQ-DRIFT-841#CASE-4"
+        ]
+      }
+    ]
   }
 }

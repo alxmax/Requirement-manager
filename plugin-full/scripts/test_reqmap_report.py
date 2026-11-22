@@ -5680,6 +5680,72 @@ class TestGapBuckets(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1088
         self.assertIn("REQ-ONE-001   1/3 case(s)", out)
 
 
+class TestsThatCannotFail(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1146
+    """A tagged test that asserts nothing, a constant, or f(x) against itself."""
+    TAG = "# " + "verif" + "ies: "  # spelled apart so this file's scan sees no tag
+
+    def _read(self, files):
+        """vacuous_tests over `files` {rel: source}, the cover read from their tags."""
+        from reqmap_engine.vacuoustests import vacuous_tests
+        with tempfile.TemporaryDirectory() as d:
+            cover = {}
+            for rel, src in files.items():
+                _write(os.path.join(d, rel), src)
+                for i, line in enumerate(src.splitlines(), 1):
+                    for rid, case in re.findall(r"ies: ([A-Z0-9-]+)#(CASE-\d+)", line):
+                        cover.setdefault(rid, {}).setdefault(case, []).append((rel, i))
+            return vacuous_tests(d, cover), cover
+
+    def test_a_test_with_no_assertion_is_named(self):  # verifies: REQ-TESTGAPS-1146#CASE-1
+        src = ("def test_runs():  " + self.TAG + "REQ-A-001#CASE-1\n"
+               "    run(1)\n")
+        found, _ = self._read({"test_a.py": src})
+        self.assertEqual([("test_runs", "no assertion", ["REQ-A-001#CASE-1"])],
+                         [(v["test"], v["kind"], v["cases"]) for v in found])
+
+    def test_a_constant_or_a_self_comparison_is_named(self):  # verifies: REQ-TESTGAPS-1146#CASE-2
+        src = ("class T:\n"
+               "    def test_const(self):  " + self.TAG + "REQ-A-001#CASE-1\n"
+               "        self.assertTrue(True)\n"
+               "    def test_self(self):  " + self.TAG + "REQ-A-001#CASE-2\n"
+               "        self.assertEqual(f(1), f(1))\n"
+               "    def test_real(self):  " + self.TAG + "REQ-A-001#CASE-3\n"
+               "        self.assertEqual(f(1), 3)\n")
+        found, _ = self._read({"test_a.py": src})
+        self.assertEqual([("test_const", "constant assertion"),
+                          ("test_self", "compares a value with itself")],
+                         [(v["test"], v["kind"]) for v in found])
+
+    def test_what_cannot_be_read_is_not_judged(self):  # verifies: REQ-TESTGAPS-1146#CASE-3
+        py = ("def _expect_three(x):\n"
+              "    assert x == 3\n"
+              "def main():  " + self.TAG + "REQ-A-001#CASE-1\n"
+              "    return run()\n"
+              "def test_helper():\n"
+              "    " + self.TAG + "REQ-A-001#CASE-2\n"
+              "    _expect_three(f())\n")
+        js = "test('x', () => run());  // " + self.TAG[2:] + "REQ-A-001#CASE-3\n"
+        found, cover = self._read({"test_a.py": py, "a.test.js": js})
+        self.assertEqual(3, len(cover["REQ-A-001"]))
+        self.assertEqual([], found)
+
+    def test_the_worklist_and_the_map_carry_the_list(self):  # verifies: REQ-TESTGAPS-1146#CASE-4
+        from reqmap_engine.tracecover import trace_block
+        src = "def test_runs():  " + self.TAG + "REQ-A-001#CASE-1\n    run(1)\n"
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-A-001.md"), _spec("REQ-A-001", ["A works."]))
+            _write(os.path.join(d, "test_a.py"), src)
+            ws = R.Workspace.load(rd, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_next(ws)
+            block = trace_block(d, rd, ws.reqs, ws.members, ws.ac_cover)
+        self.assertIn("Tests that cannot fail (1)", buf.getvalue())
+        self.assertIn("test_a.py:1   test_runs   no assertion", buf.getvalue())
+        self.assertEqual(["test_runs"], [v["test"] for v in block["vacuous"]])
+
+
 class RemovedInV820(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: ARCH-CONFIG-060
     """ADR-0047: the i18n detector left the engine; its flag stays one release, doing
     nothing but saying so."""

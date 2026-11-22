@@ -18,6 +18,7 @@ from .scan import _walk_code
 from .sections import binding_hash, CONTRACT_LABELS, _from_any
 from .tags import PROSE_EXTS, _is_test_path
 from .text import _bullets
+from .vacuoustests import vacuous_tests
 
 _MAX_LIST = 200
 _MAX_HITS = 50
@@ -159,13 +160,15 @@ def _rules(files):  # implements: REQ-MAP-1144
     return out, problems
 
 
-def trace_block(code_root, reqs_dir, reqs, members):  # implements: REQ-MAP-1144
+def trace_block(code_root, reqs_dir, reqs, members, ac_cover=None):
+    # implements: REQ-MAP-1144
     """What `sync` writes under `trace` in `_map.json`."""
     files = _code_files(code_root, reqs_dir)
     rules, problems = _rules(files)
     block = {"coverage": _coverage(files, members, reqs_dir),
              "suggestions": _suggestions(reqs, members, files, code_root, reqs_dir),
-             "hygiene": _hygiene(reqs)}
+             "hygiene": _hygiene(reqs),
+             "vacuous": vacuous_tests(code_root, ac_cover)}  # implements: REQ-TESTGAPS-1146
     if rules or problems:
         block["rules"], block["problems"] = rules, problems
     return block
