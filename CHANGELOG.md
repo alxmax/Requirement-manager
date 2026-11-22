@@ -2,11 +2,15 @@
 
 ## [Unreleased]
 
+## plugin `v8.27.0` — 2026-11-22
+
+**Release v8.27.0.**
+
 **C and C++ tests that cannot fail are named too (ADR-0093).**
 
 - The `Tests that cannot fail` bucket, `trace.vacuous` and the Report now read C and C++ tests as well as Python: a GoogleTest (`TEST`, `TEST_F`, `TEST_P`, `TYPED_TEST*`), Catch2 (`TEST_CASE`, `SCENARIO`), CppUTest (`TEST`) or Unity (`test*`) test that a `// verifies:` tag sits in or directly above is named when it asserts nothing, only a constant (`EXPECT_TRUE(true)`), or only an `EQ`/`EQUAL` macro whose two arguments are the same (`EXPECT_EQ(f(x), f(x))`). A same-file helper that asserts, or a call named `check_*`/`expect_*`/`verify_*`, counts as an assertion; comments and strings are blanked first. REQ-TESTGAPS-1147
 - The bodies come from the C/C++ brace reader of ADR-0089, loaded only when a tag sits outside Python; a file whose braces do not balance is skipped.
-- The requirement is a draft until it is read.
+- Confirmed after a clause-by-clause read against the code and tests.
 - Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.1`. The core rises to 7,132 logical lines (ADR-0093); 20,995 physical lines in 89 files, 5 under the ceiling.
 
 **The worklist and the map name tagged tests that cannot fail (ADR-0092).**
@@ -14,7 +18,7 @@
 - A `# verifies:` tag closed its case whatever the test under it did. `next` (`gate --risk`) now prints a `Tests that cannot fail` bucket: each Python `test*` function a tag sits in or directly above that asserts nothing, asserts only a constant, or only compares an expression with itself, with its file, line and the cases it closes. A call to a same-file helper that asserts counts as an assertion; a function not named `test*` and other languages are not judged. Here it names 3 tests, each an `assertEqual(f(x), f(x))` determinism check. REQ-TESTGAPS-1146
 - `sync` writes the same list as `trace.vacuous` in `_map.json`, outside the freshness comparison. The Report counts it in Results in numbers, lists it under Problem types, recommends a fix, and exports it in the Markdown. A map without it reads `not measured`. REQ-TESTGAPS-1146
 - A requirement with no negative case was measured and left out: read from the shape of the assertions it went from 58 to 15 requirements after one rule changed, and still named a test that feeds a broken corpus. ADR-0092 records why.
-- The requirement is a draft until it is read.
+- Confirmed after a clause-by-clause read against the code and tests.
 - Engine change: `MAP_ENGINE_VERSION` is `2026-11-22`. The core rises to 7,129 logical lines (ADR-0092); 20,897 physical lines in 88 files.
 
 **The trace block counts the same files on every checkout.**
