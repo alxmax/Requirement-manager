@@ -398,8 +398,9 @@ ClarifyRow({ row: pickRow, keep: () => true, pick: (id) => picks.push(id) })
   .props.onClick();
 ProblemRow({ p: pickQs.person[0], openSpec: (id) => opened.push(id),
   t: (s) => s, onPick: (id) => picks.push(id) }).props.onClick();
-const panelEl = QuestionPanel({ id: "Q-PICK-001", tab: questionTabs(pickQs)[0],
-  keep: () => true, qs: pickQs, openSpec: (id) => opened.push("open:" + id),
+const panelEl = QuestionPanel({ id: "Q-PICK-001",
+  questions: { tab: questionTabs(pickQs)[0], keep: () => true, qs: pickQs },
+  openSpec: (id) => opened.push("open:" + id),
   close: noop, t: (s) => s });
 const openBtn = findEl(panelEl, (e) => e.type === "button"
   && String(e.props.className).includes("btn-secondary"));

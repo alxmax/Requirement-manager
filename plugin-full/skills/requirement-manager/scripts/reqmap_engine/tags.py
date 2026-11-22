@@ -218,8 +218,9 @@ def _visible_lines(fp, lines):
     code — those lines are not yielded at all. `<!-- implements: X -->` outside
     any such zone is a valid tag position and is yielded. PY: a triple-quoted
     string (state carried across lines) and single-line string literals are
-    blanked. JS/TS: quoted strings and template literals are blanked to the end of
-    their line; a block comment's state is carried. Comments are kept — `code()  # implements: X` is a real tag.
+    blanked. JS/TS: quoted strings, template and regex literals are blanked to
+    the end of their line; a block comment's state is carried. Comments are
+    kept — `code()  # implements: X` is a real tag.
     Anything else: yielded unchanged.
     
     Backtick spans are deliberately NOT stripped here. The callers disagree on

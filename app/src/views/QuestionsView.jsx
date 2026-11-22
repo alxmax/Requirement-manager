@@ -140,7 +140,8 @@ export function ClarifyRow({ row, keep, pick, picked }) {
 /** The chosen requirement's questions on this tab, beside the text they are
  * about: its Description clauses and its Cases. Opening the requirement is
  * a button, never the click that chose it. */
-export function QuestionPanel({ id, tab, keep, qs, openSpec, close, t }) {
+export function QuestionPanel({ id, questions, openSpec, close, t }) {
+  const { tab, keep, qs } = questions;
   const r = REQUIREMENTS.find((x) => x.id === id);
   if (!r) return null;
   const asked = (tab.verify || []).flatMap((o) =>
@@ -253,7 +254,7 @@ export function QuestionsView({ openSpec, initialTab = "all",
         )}
       </div>
       {pick && (
-        <QuestionPanel id={pick} tab={tab} keep={keep} qs={qs}
+        <QuestionPanel id={pick} questions={{ tab, keep, qs }}
           openSpec={openSpec} close={() => setPick(null)} t={t} />
       )}
       </div>

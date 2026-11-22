@@ -3,6 +3,7 @@
  * month is selected. */
 import { useRef } from "react";
 import { EntryBody } from "./EntryBody.jsx";
+import { useI18n } from "../../lib/i18n.jsx";
 
 /** ROADMAP.md keeps a note under an item as an HTML comment, which is how
  *  a plan file hides it from a Markdown reader — the markers are
@@ -252,8 +253,9 @@ function VersionTodos({ items, t }) {
  *  on it and the open `TODO.md` items filed under it.
  *  implements: REQ-PLANCADENCE-1000 */
 export function VersionNote(
-  { version, bars, todos = [], t, openSpec, onClose, onPickBar },
+  { version, bars, todos = [], openSpec, onClose, onPickBar },
 ) {
+  const { t } = useI18n();
   const planned = bars.filter((b) => b.milestone === version.ms);
   const open = todos.filter((x) => x && !x.done && x.milestone === version.ms);
   const meta = `${version.due}${version.label ? ` · ${version.label}` : ""}`;
@@ -310,9 +312,8 @@ function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
 }
 
 /** Whichever note the selection is: a shipped month, a version, or a bar. */
-export function PickedNote(
-  { picked, lay, roadmap, todos, t, openSpec, onPick },
-) {
+export function PickedNote({ picked, lay, roadmap, todos, openSpec, onPick }) {
+  const { t } = useI18n();
   const close = () => onPick(null);
   if (picked.kind === "release") {
     return <ReleaseNote release={picked} t={t} onClose={close} />;
@@ -322,7 +323,7 @@ export function PickedNote(
                         onClose={close} />;
   }
   if (picked.kind === "version") {
-    return <VersionNote version={picked} bars={lay.bars} todos={todos} t={t}
+    return <VersionNote version={picked} bars={lay.bars} todos={todos}
                         openSpec={openSpec}
                         onClose={close} onPickBar={onPick} />;
   }

@@ -139,15 +139,13 @@ export function ProblemsView({
 
   return (
     <div className="main">
-      <ProblemTabBar filter={filter} setFilter={setFilter} counts={counts}
-                     designCount={design.length}
-                     bugCount={BUGS.length + addedBugs.length}
-                     healthCount={health
-                       ? healthRows.length
-                         + (health.exempt_ids || []).length
-                         + gateRows.length
-                       : null}
-                     gateMsg={gateMsg} />
+      <ProblemTabBar filter={filter} setFilter={setFilter} gateMsg={gateMsg}
+                     counts={{ ...counts, design: design.length,
+                       bugs: BUGS.length + addedBugs.length,
+                       health: health
+                         ? healthRows.length + (health.exempt_ids || []).length
+                           + gateRows.length
+                         : null }} />
       <div className="problems">
         {filter === "DESIGN"
           && <DesignProblemsPanel byPillar={byPillar} advice={advice} />}

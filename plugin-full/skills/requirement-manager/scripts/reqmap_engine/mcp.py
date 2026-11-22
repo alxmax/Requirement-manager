@@ -25,17 +25,19 @@ CALL_TIMEOUT = 600         # seconds; a full `sync` on a large repo stays
 _JSON = ("--json",)
 
 
-def _param(name, kind, help_text, flag=None, required=False, bare=False,
-           check=None, expects=""):
+def _param(name, kind, help_text, flag=None, **opts):
     # implements: REQ-MCPTOOLS-1028
     """One tool parameter. `flag` is the CLI flag it becomes; None makes it
-    the positional argument that follows the verb. `bare` passes the flag
-    alone when the value is omitted, for a flag whose value is optional
-    (`--release [VERSION]`). `check` is a predicate a value must satisfy,
-    and `expects` says in words what it asks for."""
+    the positional argument that follows the verb. The options: `required`;
+    `bare` passes the flag alone when the value is omitted, for a flag whose
+    value is optional (`--release [VERSION]`); `check` is a predicate a value
+    must satisfy, and `expects` says in words what it asks for."""
+    unknown = set(opts) - {"required", "bare", "check", "expects"}
+    if unknown:
+        raise TypeError("unknown _param option(s): " + ", ".join(sorted(unknown)))
     return {"name": name, "type": kind, "help": help_text, "flag": flag,
-            "required": required, "bare": bare, "check": check,
-            "expects": expects}
+            "required": opts.get("required", False), "bare": opts.get("bare", False),
+            "check": opts.get("check"), "expects": opts.get("expects", "")}
 
 
 _ID = "A requirement id, e.g. ARCH-PARSE-001."

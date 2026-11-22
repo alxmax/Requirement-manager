@@ -94,7 +94,9 @@ PACKAGE = "reqmap_engine"
 # which stays lazy.
 # Raised to 7,139 by ADR-0094: the JS/TS branch of the masking pass (jsmask.py
 # stays lazy) and the list-contract title in sourcerows.py.
-CORE_LOGICAL_BUDGET = 7139
+# Raised to 7,168 by ADR-0095: the 25 design candidates cleared by naming their
+# steps; each named step costs its def, docstring and return.
+CORE_LOGICAL_BUDGET = 7168
 # An alarm, not a target (ADR-0053): the maintainer's line in the sand for
 # the whole vendored engine, in physical lines. It moves only by decision.
 # Moved to 21,000 by the maintainer's decision, recorded in ADR-0086.

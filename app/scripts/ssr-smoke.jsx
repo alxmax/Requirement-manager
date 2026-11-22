@@ -11,6 +11,7 @@ import "./smoke/views.jsx";
 import "./smoke/explorer.jsx";
 import "./smoke/rail.jsx";
 import "./smoke/plan.jsx";
+import "./smoke/plan-notes.jsx";
 import "./smoke/history.jsx";
 import "./smoke/audit.jsx";
 import "./smoke/report.jsx";

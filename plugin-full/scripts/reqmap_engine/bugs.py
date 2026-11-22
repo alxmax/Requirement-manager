@@ -127,28 +127,40 @@ def _parse(text, ctx, problems):
     somebody else's: a contents page, a list of questions. So is every table
     under a `##` heading `BUG_SKIP_SECTIONS` matches."""
     bugs, seen = [], set()
-    lines = re.split(r"\r?\n", text)
-    index, skip, skipped = None, ctx.get("skip"), False
+    rows = _bug_table_rows(re.split(r"\r?\n", text), ctx.get("skip"))
+    for line_no, cells, index in rows:
+        bug = _row(cells, index, ctx, line_no, problems)
+        if not bug:
+            continue
+        if bug["id"] in seen:
+            problems.append("{}:{}: {} appears twice".format(
+                ctx["file"], line_no, bug["ref"]))
+            continue
+        seen.add(bug["id"])
+        bugs.append(bug)
+    return bugs
+
+
+def _bug_table_rows(lines, skip):
+    # implements: REQ-BUGS-1116  # implements: REQ-BUGS-1148
+    """(line number, cells, column index) for each data row of a bug table,
+    outside a `##` section `skip` matches."""
+    index, skipped = None, False
     for n, line in enumerate(lines):
         section = re.match(r"##\s+(.+)", line)
         if section:
             skipped = bool(skip and skip.search(section.group(1)))
         if not line.startswith("|"):
             index = None
-        elif skipped:
             continue
-        elif index is None:
-            if n + 1 < len(lines) and _is_separator(lines[n + 1]):
-                index = _column_index(_cells(line)) or False
-        elif index and not _is_separator(line):
-            bug = _row(_cells(line), index, ctx, n + 1, problems)
-            if bug and bug["id"] in seen:
-                problems.append("{}:{}: {} appears twice".format(
-                    ctx["file"], n + 1, bug["ref"]))
-            elif bug:
-                seen.add(bug["id"])
-                bugs.append(bug)
-    return bugs
+        if skipped:
+            continue
+        if index is None:
+            header = n + 1 < len(lines) and _is_separator(lines[n + 1])
+            index = (_column_index(_cells(line)) or False) if header else None
+            continue
+        if index and not _is_separator(line):
+            yield n + 1, _cells(line), index
 
 
 def _read_file(path, root, problems, skip=None):

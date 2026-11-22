@@ -2,15 +2,12 @@
 command (data only).
 """
 
-
-
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
 # Each entry describes one user-facing command: its summary, the positional
 # argument it accepts (or None), and the flags it owns (subset of the shared
 # argparse flag pool; global flags --root/--reqs/--code/--cache are omitted).
-# Later tasks will derive argparse choices, tool_definition.json, and a
-# markdown command table from this registry — do NOT add behaviour here.
+# The parser, tool_definition.json and the command table derive from it.
 # ---------------------------------------------------------------------------
 # implements: ARCH-CMDREGISTRY-033  # implements: REQ-NEWGONE-1034
 # implements: REQ-SURFACE-1095
@@ -492,12 +489,11 @@ COMMAND_GROUPS = (
 )
 
 
-# Tiers, read off the automated callers rather than chosen by taste.
-# CORE-path: what `.githooks/pre-commit` and CI's `gate-and-tests` job run
-# (`gate --full`; the global --root/--code are not registry flags), bare
-# `sync` (the write path the hook's failure message sends the author to)
-# and bare `init` (the bootstrap). Every other verb or flag is OPTIONAL and
-# carries a `"consumer"`: where a real use is written down (a workflow, a
-# hook, the shipped skill, a config, a named repo), or "none recorded".
-# `consumer` is registry-only: no generated artifact reads it.
+# Tiers, read off the automated callers rather than chosen by taste. CORE-path:
+# what `.githooks/pre-commit` and CI's `gate-and-tests` job run (`gate --full`;
+# the global --root/--code are not registry flags), bare `sync` (the write path
+# the hook's failure message sends the author to) and bare `init`. Every other
+# verb or flag is OPTIONAL and carries a `"consumer"`: where a real use is
+# written down (a workflow, a hook, the shipped skill, a config, a named repo),
+# or "none recorded". `consumer` is registry-only: no generated artifact reads it.
 CORE_PATH = {"init": (), "gate": ("--full",), "sync": ()}
