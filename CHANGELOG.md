@@ -7,7 +7,7 @@
 - The 25 design candidates `sync` named (88% of files clean) are cleared by naming steps, not by exemptions: long functions give up their steps, deep nesting becomes an early `continue` or a generator, a long parameter list becomes the object its values already form, and a long file is split where it already divides. `gate --risk` reads `Design pass-rate: 100%`.
 - In the viewer: the Report's tables move to `views/report/ReportSections.jsx` and its sections take one `ctx`; the Romanian tables move to `i18n.ro.js`, as German already had its own file; every translation line fits 120 columns; the plan's smoke checks split into `plan.jsx` and `plan-notes.jsx`; `BugsPanel`, `ShippedBand`, `QuestionPanel`, `ProblemTabBar`, `VersionNote` and `PickedNote` are shortened. Nothing a reader sees changes.
 - In the engine: `reqmap.py`'s `main` and `_dispatch_sync` lose their steps, and what a passing `sync` rebuilds moves to `reqmap_engine/synctail.py`; `apply_config`, `bugs._parse`, `bracedefs._blocks`, `customtrace.validate_sources`, `draftquestions._py_signals`, `candidates._build_candidates` and `mcp._param` are split or flattened. Output and flags are unchanged.
-- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.4`. The core rises to 7,168 logical lines (ADR-0095).
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-22.4`. The core is 7,168 logical lines; `CORE_LOGICAL_BUDGET` moves to 7,500 by the maintainer's decision (ADR-0095).
 
 **Every draft is confirmed; requirement health 100/100.**
 

@@ -25,8 +25,10 @@
 
 ## Consequences
 
-- `CORE_LOGICAL_BUDGET` rises from 7,139 to 7,168: a named step costs its `def`, its docstring and
-  its `return`. The physical total is 21,154 lines against the 23,000 ceiling.
+- `CORE_LOGICAL_BUDGET` moves from 7,139 to 7,500 by the maintainer's decision. The measured
+  core is 7,168 (a named step costs its `def`, its docstring and its `return`), so the budget
+  leaves 332 logical lines of room instead of tracking the core line for line. The physical
+  total is 21,154 lines against the 23,000 ceiling.
 - The design record is advice and stays advice: a new candidate does not fail the gate.
 
 ## Revisit when
