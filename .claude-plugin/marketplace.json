@@ -1,6 +1,6 @@
 {
   "name": "requirement-manager",
-  "version": "8.28.0",
+  "version": "8.29.0",
   "description": "Requirement manager: a single source of truth between intent and code, with a drift gate and a navigable requirement map. Works with any AI assistant.",
   "owner": {
     "name": "Schipor Alexandru"
@@ -8,12 +8,12 @@
   "plugins": [
     {
       "name": "requirement-manager",
-      "version": "8.28.0",
+      "version": "8.29.0",
       "source": "./plugin"
     },
     {
       "name": "requirement-manager-full",
-      "version": "8.28.0",
+      "version": "8.29.0",
       "source": "./plugin-full"
     }
   ]

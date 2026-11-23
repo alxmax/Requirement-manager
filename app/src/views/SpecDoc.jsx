@@ -125,7 +125,9 @@ function Eyebrow({ label, extra, translated }) {
   );
 }
 
-export function SpecDoc({ r, onNav, head = null, lead = null, after = null }) {
+export function SpecDoc({
+  r, onNav, head = null, lead = null, after = null, actions = null,
+}) {
   const { t, locale } = useI18n();
   if (!r) return null;
   const questions = openQuestions(r);
@@ -142,6 +144,7 @@ export function SpecDoc({ r, onNav, head = null, lead = null, after = null }) {
           <Pill kind={statusKind(r.status)}>{r.status}</Pill>
           <Pill kind={r.layer}>{r.layer}</Pill>
           {r.priority && <PriorityBadge priority={r.priority} />}
+          {actions && <span className="head-actions">{actions}</span>}
         </div>
         <h1>{title.text}{title.isTranslated && <TranslatedBadge />}</h1>
         {lead}

@@ -2,6 +2,8 @@
 // implements: REQ-VIEWER-1101
 // implements: REQ-VIEWER-1114
 // implements: REQ-VIEWER-1145
+// implements: REQ-VIEWER-1151
+// implements: REQ-VIEWER-1152
 import { useState } from "react";
 import { REQUIREMENTS } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
@@ -13,6 +15,10 @@ import {
   openQuestions, isObserved, isAuditFinding, clarifyQuestions,
 } from "../lib/tree.js";
 import { ChipRow, ProblemRow } from "./problems/ProblemsPanels.jsx";
+import {
+  PrintDoc, usePrinting, downloadXlsx, exportName,
+} from "../lib/exportDoc.jsx";
+import { questionRows } from "../lib/exportRows.js";
 
 const ANSWER_FIX = "Answer it: fold the answer into the Description and "
   + "delete the bullet, or keep it under the question as "
@@ -182,6 +188,66 @@ export function QuestionPanel({ id, questions, openSpec, close, t }) {
   );
 }
 
+/** The rows of one tab: the person's and the code's questions it shows,
+ * then each requirement's `clarify` questions it keeps. */
+function QuestionList({ qs, tab, keep, openSpec, pick, setPick }) {
+  const { t } = useI18n();
+  return (
+    <>
+      {(tab.verify || []).flatMap((o) => qs[o].map((p) => (
+        <ProblemRow key={o + p.id} p={p} openSpec={openSpec} t={t}
+          onPick={setPick} picked={pick === p.id} />
+      )))}
+      {qs.clarify.map((r) => (
+        <ClarifyRow key={r.id} row={r} keep={keep} pick={setPick}
+          picked={pick === r.id} />
+      ))}
+    </>
+  );
+}
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** The tab's questions as a spreadsheet: priority, requirement, question,
+ * answer options. */
+export function questionSheet(qs, tab, keep, t) {
+  return {
+    name: t("Questions"),
+    header: [t("Priority"), t("Requirement"), t("Question"), t("Answer options")],
+    rows: questionRows(qs, { keep, verify: tab.verify || [], priorityOf })
+      .map(([p, ...rest]) => [cap(t(p)), ...rest]),
+    widths: [10, 22, 70, 60],
+  };
+}
+
+/** The tab bar's right end: how many High questions are open, and the two
+ * exports of the tab. */
+function QuestionsLegend({ high, empty, t, pdf, xlsx }) {
+  return (
+    <div className="tab-legend">
+      {high > 0
+        ? <>
+            <Icon name="triangle-alert" size={14}
+              style={{ color: "var(--status-error)" }} />
+            {" "}{t("{n} high priority open", { n: high })}
+          </>
+        : <>
+            <Icon name="shield-check" size={14}
+              style={{ color: "var(--status-confirmed)" }} />
+            {" "}{t("no high priority question")}
+          </>}
+      <button type="button" className="btn btn-ghost" disabled={empty}
+        onClick={pdf}>
+        <Icon name="file-text" size={14} /> {t("Export PDF")}
+      </button>
+      <button type="button" className="btn btn-ghost" disabled={empty}
+        onClick={xlsx}>
+        {t("Export XLSX")}
+      </button>
+    </div>
+  );
+}
+
 const OPTIONAL_NOTE = "A word on a list matched. Often not a real gap; read "
   + "it when you have time.";
 
@@ -194,6 +260,7 @@ export function QuestionsView({ openSpec, initialTab = "all",
     tabs.some((tab) => tab.key === initialTab) ? initialTab : "all");
   const [rule, setRule] = useState(null);
   const [pick, setPick] = useState(initialPick);
+  const [printing, setPrinting] = usePrinting();
   const tab = tabs.find((x) => x.key === key);
   const high = (tabs.find((x) => x.key === "high") || {}).n || 0;
   const keep = (q) => tab.keep(q) && (!rule || q.rule === rule);
@@ -212,19 +279,10 @@ export function QuestionsView({ openSpec, initialTab = "all",
             {t(x.label)}<span style={COUNT}>{x.n}</span>
           </button>
         ))}
-        <div className="tab-legend">
-          {high > 0
-            ? <>
-                <Icon name="triangle-alert" size={14}
-                  style={{ color: "var(--status-error)" }} />
-                {" "}{t("{n} high priority open", { n: high })}
-              </>
-            : <>
-                <Icon name="shield-check" size={14}
-                  style={{ color: "var(--status-confirmed)" }} />
-                {" "}{t("no high priority question")}
-              </>}
-        </div>
+        <QuestionsLegend high={high} empty={tab.n === 0} t={t}
+          pdf={() => setPrinting(true)}
+          xlsx={() => downloadXlsx(exportName("questions", "xlsx"),
+            questionSheet(qs, tab, keep, t))} />
       </div>
       <div className={pick ? "q-split" : undefined}>
       <div className="problems">
@@ -237,14 +295,8 @@ export function QuestionsView({ openSpec, initialTab = "all",
               setValue={setRule} label={(k) => k} />
           </>
         )}
-        {(tab.verify || []).flatMap((o) => qs[o].map((p) => (
-          <ProblemRow key={o + p.id} p={p} openSpec={openSpec} t={t}
-            onPick={setPick} picked={pick === p.id} />
-        )))}
-        {qs.clarify.map((r) => (
-          <ClarifyRow key={r.id} row={r} keep={keep} pick={setPick}
-            picked={pick === r.id} />
-        ))}
+        <QuestionList qs={qs} tab={tab} keep={keep} openSpec={openSpec}
+          pick={pick} setPick={setPick} />
         {tab.n === 0 && (
           <div className="prob-empty">
             <Icon name="shield-check" size={26}
@@ -258,6 +310,15 @@ export function QuestionsView({ openSpec, initialTab = "all",
           openSpec={openSpec} close={() => setPick(null)} t={t} />
       )}
       </div>
+      {printing && (
+        <PrintDoc title={t("Open questions")}
+          meta={[t(tab.label), rule, t("{n} questions", { n: tab.n })]}>
+          <div className="problems">
+            <QuestionList qs={qs} tab={tab} keep={keep} openSpec={() => {}}
+              pick={() => {}} setPick={() => {}} />
+          </div>
+        </PrintDoc>
+      )}
     </div>
   );
 }

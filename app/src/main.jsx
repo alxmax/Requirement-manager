@@ -6,6 +6,7 @@ import { NoMap } from "./components/NoMap.jsx";
 import { I18nProvider } from "./lib/i18n.jsx";
 import { loadData } from "./lib/loadData.js";
 import "./styles/app.css";
+import "./styles/print.css";
 
 // Try the engine's _map.json export before first paint; with none, say so
 // rather than render an empty registry.

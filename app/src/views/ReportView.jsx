@@ -12,6 +12,7 @@ import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { computeReport } from "../lib/report.js";
 import { reportMarkdown } from "../lib/reportMarkdown.js";
+import { PrintDoc, usePrinting, downloadBlob } from "../lib/exportDoc.jsx";
 import {
   Deliverables, Numbers, Recs, Top, Types, chipper, pct, problemRows, questionIds,
 } from "./report/ReportSections.jsx";
@@ -228,26 +229,12 @@ function Toc({ t }) {
   );
 }
 
-function download(name, text) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/markdown" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+const download = (name, text) => downloadBlob(name, text, "text/markdown");
 
 export function ReportView({ openSpec }) {
   const { t } = useI18n();
   const c = computeReport();
-  const [printing, setPrinting] = useState(false);
-  useEffect(() => {
-    if (!printing) return undefined;
-    const done = () => setPrinting(false);
-    window.addEventListener("afterprint", done);
-    window.print();
-    return () => window.removeEventListener("afterprint", done);
-  }, [printing]);
+  const [printing, setPrinting] = usePrinting();
   return (
     <div className="main">
       <div className="tabbar">
@@ -279,11 +266,12 @@ export function ReportView({ openSpec }) {
           <ReportBody c={c} openSpec={openSpec} />
         </div>
       </div>
-      {printing && createPortal(
-        <div className="bug-report rep-print">
-          <h1>{REPO ? `${REPO}: ` : ""}{t("Report")}</h1>
-          <ReportBody c={c} full />
-        </div>, document.body)}
+      {printing && (
+        <PrintDoc title={`${REPO ? `${REPO}: ` : ""}${t("Report")}`}
+          meta={[c.method.branch, c.method.engine, c.audit && c.audit.band]}>
+          <div className="rep-page problems"><ReportBody c={c} full /></div>
+        </PrintDoc>
+      )}
     </div>
   );
 }

@@ -4,8 +4,10 @@
  * requirement's runs and decision, the counters, and every rate as k/n with
  * its Wilson 95% interval. Everything shown is what `sync` copied from
  * requirements/_audit.json; the view computes nothing the engine did not. */
+// implements: REQ-VIEWER-1151
 import { AUDIT } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
+import { PrintDoc, usePrinting } from "../lib/exportDoc.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 
 const STATE_TONE = {
@@ -79,7 +81,71 @@ export function AuditView({ openSpec }) {
       </div></div>
     );
   }
+  return <AuditPage openSpec={openSpec} />;
+}
+
+/** The audit's band, rates, counters and table: the page, and its PDF. */
+function AuditBody({ openSpec }) {
+  const { t } = useI18n();
   const { plan, reviewed, counters, rates, band, problems } = AUDIT;
+  return (
+    <div className="problems">
+      <div style={ROW}>
+        <div style={CARD}>
+          <div style={{ color: "var(--fg-muted)", fontSize: 12 }}>{t("Band")}</div>
+          <div className="audit-band"
+            style={{ fontSize: 18, fontWeight: 600,
+              color: BAND_TONE[band] || "var(--fg-muted)" }}>{band}</div>
+          <div style={MONO}>
+            {t("reviewed {a} of {b}", { a: reviewed.total,
+              b: plan.ranked + plan.random })}
+          </div>
+        </div>
+        {RATES.map(([key, label, how]) => (
+          <RateCard key={key} rate={rates[key]} label={label} how={how} t={t} />
+        ))}
+      </div>
+      <div style={{ ...ROW, ...MONO }} className="audit-counters">
+        {COUNTER_ORDER.map((c) => (
+          <span key={c}>{c} <b>{counters[c] ?? 0}</b></span>
+        ))}
+      </div>
+      {problems.length > 0 && (
+        <div className="prob-chip" style={{ cursor: "default" }}>
+          <Icon name="triangle-alert" size={14}
+            style={{ color: "var(--status-error)" }} />
+          {" "}{t("{n} entries in _audit.json are not counted",
+            { n: problems.length })}
+        </div>
+      )}
+      <table className="audit-table" style={{ width: "100%", fontSize: 13 }}>
+        <thead><tr>
+          <th align="left">{t("Requirement")}</th><th align="left">{t("Set")}</th>
+          <th align="left">{t("State")}</th><th align="left">{t("Runs")}</th>
+          <th align="left">{t("Findings")}</th>
+        </tr></thead>
+        <tbody>
+          {AUDIT.requirements.map((row) => (
+            <tr key={row.id} className="audit-row">
+              <td><a className="prob-id" style={{ cursor: "pointer" }}
+                onClick={() => openSpec(row.id)}>{row.id}</a></td>
+              <td>{row.set}</td>
+              <td className={"audit-state"}
+                style={{ color: STATE_TONE[row.state] }}>{row.state}</td>
+              <td style={MONO}>{row.runs}</td>
+              <td><FindingCell findings={row.findings} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function AuditPage({ openSpec }) {
+  const { t } = useI18n();
+  const { plan } = AUDIT;
+  const [printing, setPrinting] = usePrinting();
   return (
     <div className="main">
       <div className="tabbar">
@@ -87,58 +153,20 @@ export function AuditView({ openSpec }) {
         <div className="tab-legend" style={MONO}>
           {t("plan {d} · seed {s} · {r} ranked + {n} random",
             { d: plan.date, s: plan.seed, r: plan.ranked, n: plan.random })}
+          <button type="button" className="btn btn-ghost"
+            onClick={() => setPrinting(true)}>
+            <Icon name="file-text" size={14} /> {t("Export PDF")}
+          </button>
         </div>
       </div>
-      <div className="problems">
-        <div style={ROW}>
-          <div style={CARD}>
-            <div style={{ color: "var(--fg-muted)", fontSize: 12 }}>{t("Band")}</div>
-            <div className="audit-band"
-              style={{ fontSize: 18, fontWeight: 600,
-                color: BAND_TONE[band] || "var(--fg-muted)" }}>{band}</div>
-            <div style={MONO}>
-              {t("reviewed {a} of {b}", { a: reviewed.total,
-                b: plan.ranked + plan.random })}
-            </div>
-          </div>
-          {RATES.map(([key, label, how]) => (
-            <RateCard key={key} rate={rates[key]} label={label} how={how} t={t} />
-          ))}
-        </div>
-        <div style={{ ...ROW, ...MONO }} className="audit-counters">
-          {COUNTER_ORDER.map((c) => (
-            <span key={c}>{c} <b>{counters[c] ?? 0}</b></span>
-          ))}
-        </div>
-        {problems.length > 0 && (
-          <div className="prob-chip" style={{ cursor: "default" }}>
-            <Icon name="triangle-alert" size={14}
-              style={{ color: "var(--status-error)" }} />
-            {" "}{t("{n} entries in _audit.json are not counted",
-              { n: problems.length })}
-          </div>
-        )}
-        <table className="audit-table" style={{ width: "100%", fontSize: 13 }}>
-          <thead><tr>
-            <th align="left">{t("Requirement")}</th><th align="left">{t("Set")}</th>
-            <th align="left">{t("State")}</th><th align="left">{t("Runs")}</th>
-            <th align="left">{t("Findings")}</th>
-          </tr></thead>
-          <tbody>
-            {AUDIT.requirements.map((row) => (
-              <tr key={row.id} className="audit-row">
-                <td><a className="prob-id" style={{ cursor: "pointer" }}
-                  onClick={() => openSpec(row.id)}>{row.id}</a></td>
-                <td>{row.set}</td>
-                <td className={"audit-state"}
-                  style={{ color: STATE_TONE[row.state] }}>{row.state}</td>
-                <td style={MONO}>{row.runs}</td>
-                <td><FindingCell findings={row.findings} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AuditBody openSpec={openSpec} />
+      {printing && (
+        <PrintDoc title={t("Audit session")}
+          meta={[t("plan {d} · seed {s} · {r} ranked + {n} random",
+            { d: plan.date, s: plan.seed, r: plan.ranked, n: plan.random })]}>
+          <AuditBody openSpec={() => {}} />
+        </PrintDoc>
+      )}
     </div>
   );
 }

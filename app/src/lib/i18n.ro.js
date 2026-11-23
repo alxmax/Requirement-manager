@@ -424,6 +424,15 @@ export const RO = {  // implements: REQ-VIEWER-943
   "progress": "în lucru",
   "draft": "schiță",
   "planned": "planificat",
+  // exports (REQ-VIEWER-1151, REQ-VIEWER-1152)
+  "Export XLSX": "Exportă XLSX",
+  "Requirement": "Cerință",
+  "Question": "Întrebare",
+  "Answer options": "Variante de răspuns",
+  "Open questions": "Întrebări deschise",
+  "{n} questions": "{n} întrebări",
+  "Design": "Design",
+  "{n} findings": "{n} constatări",
 };
 
 /* The CLI's own description of itself is chrome, not an artifact under

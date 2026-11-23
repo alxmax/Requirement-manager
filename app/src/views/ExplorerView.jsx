@@ -1,5 +1,6 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-945
+// implements: REQ-VIEWER-1151
 import { useEffect, useMemo, useRef, useState } from "react";
 import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
 import { SpecDoc, ENFORCED } from "./SpecDoc.jsx";
@@ -11,6 +12,7 @@ import {
 } from "../lib/tree.js";
 import { ExplorerFilters } from "./explorer/ExplorerFilters.jsx";
 import { Neighborhood } from "./explorer/Neighborhood.jsx";
+import { PrintDoc, usePrinting } from "../lib/exportDoc.jsx";
 
 function isOrphan(r) {
   return !!ENFORCED[r.status] && r.layer !== "need" && r.layer !== "aggregate"
@@ -224,6 +226,13 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
     return next;
   });
   const head = <Breadcrumb h={h} sel={sel} setSelId={setSelId} />;
+  const [printing, setPrinting] = usePrinting();
+  const exportPdf = (
+    <button type="button" className="btn btn-ghost spec-export"
+      title={t("Export PDF")} onClick={() => setPrinting(true)}>
+      <Icon name="file-text" size={13} /> PDF
+    </button>
+  );
   return (
     <div className="main explorer">
       <div className="ex-pane">
@@ -243,7 +252,7 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
       </div>
       <div className="ex-detail">
         {sel
-          ? <SpecDoc r={sel} onNav={setSelId} head={head}
+          ? <SpecDoc r={sel} onNav={setSelId} head={head} actions={exportPdf}
               after={
                 <>
                   <Neighborhood sel={sel} onNav={setSelId} />
@@ -252,6 +261,13 @@ export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
               } />
           : <div className="ex-none">{t("No requirement selected.")}</div>}
       </div>
+      {printing && sel && (
+        <PrintDoc title={`${sel.id} · ${sel.title}`}
+          meta={[sel.status, sel.layer, sel.level]}>
+          <SpecDoc r={sel} onNav={() => {}} head={head} after={
+            <ExplorerLinks sel={sel} h={h} setSelId={() => {}} t={t} />} />
+        </PrintDoc>
+      )}
     </div>
   );
 }

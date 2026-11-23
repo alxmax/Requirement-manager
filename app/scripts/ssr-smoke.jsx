@@ -15,6 +15,7 @@ import "./smoke/plan-notes.jsx";
 import "./smoke/history.jsx";
 import "./smoke/audit.jsx";
 import "./smoke/report.jsx";
+import "./smoke/exports.jsx";
 import { bugFileChecks } from "./smoke/bugs.jsx";
 
 // The one async part: `saveBug` awaits its folder handle.
