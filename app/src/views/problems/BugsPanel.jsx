@@ -386,11 +386,20 @@ function BugGroups({ filtered, total, ui, narrowed }) {
   ));
 }
 
+/** A priority as the sheet writes it: the code, then its name ("P2 - Medium"),
+ * the estimate's star kept on the code. */
+export function prioLabel(prio, t) {
+  const code = prio.replace(/\*$/, "");
+  const name = PRIO_NAME[code] && t(PRIO_NAME[code]);
+  return name ? `${prio} - ${name.charAt(0).toUpperCase()}${name.slice(1)}` : prio;
+}
+
 /** The bugs as a spreadsheet: priority, requirement, description. */
 export function bugSheet(bugs, t) {
   return { name: t("Bugs"),
     header: [t("Priority"), t("Requirement"), t("Description")],
-    rows: bugRows(bugs), widths: [10, 22, 80] };
+    rows: bugRows(bugs).map(([p, ...rest]) => [prioLabel(p, t), ...rest]),
+    widths: [14, 22, 80] };
 }
 
 /** Search, Add bug and the two exports of what the filter shows. */

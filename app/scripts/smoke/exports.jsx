@@ -14,7 +14,7 @@ import { AuditView } from "../../src/views/AuditView.jsx";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import { QuestionsView, priorityOf } from "../../src/views/QuestionsView.jsx";
-import { BugReport, BugsPanel } from "../../src/views/problems/BugsPanel.jsx";
+import { BugReport, BugsPanel, bugSheet } from "../../src/views/problems/BugsPanel.jsx";
 import { json, noop, test } from "./harness.jsx";
 
 const en = (el) => renderToString(<I18nProvider initialLocale="en">{el}</I18nProvider>);
@@ -63,6 +63,8 @@ const after = root.getAttribute("data-theme");
 
 const rows = bugRows([bug("B2", "P2", { why: "Money is lost", source: "PAY-002" }),
   bug("B1", "P1", { source: "PAY-001" })]);
+const named = bugSheet([bug("B2", "P2"), bug("B1", "P1"), bug("B3", "P3", { estimated: true })],
+  (k) => k).rows.map((r) => r[0]);
 const person = { id: "Q-ONE-001", questions: ["Who signs this off?"] };
 const code = { id: "Q-TWO-002", questions: ["Observed: retries 3 times"] };
 const clarify = { id: "Q-THREE-003", questions: [{ rule: "vague-term", basis: "wording",
@@ -96,9 +98,10 @@ const checks = [
   ["exports: a dark screen prints on paper and gets its theme back",
     during === null && after === "dark"],
   // verifies: REQ-VIEWER-1152#CASE-1
-  ["exports: bug rows come highest priority first, the why under the title",
+  ["exports: bug rows come highest priority first, each priority named, the why under the title",
     rows[0][0] === "P1" && rows[0][1] === "PAY-001" && rows[0][2] === "Title B1"
-      && rows[1][2] === "Title B2\nMoney is lost" && rows.every((r) => r.length === 3)],
+      && rows[1][2] === "Title B2\nMoney is lost" && rows.every((r) => r.length === 3)
+      && named.join(",") === "P1 - High,P2 - Medium,P3* - Low"],
   // verifies: REQ-VIEWER-1152#CASE-2
   ["exports: question rows keep their page's priority; clarify's suggestion is the answer",
     qrows.map((r) => r[0]).join(",") === "high,medium,low"

@@ -1575,7 +1575,8 @@ Every bullet below is binding.
 - The Bugs tab and the Questions page each carry an `Export XLSX` button, disabled when the
   tab lists nothing.
 - A bug sheet has the columns Priority, Requirement and Description, one row per bug the tab
-  lists, highest priority first; the Description is the title, then the why on its own line.
+  lists, highest priority first; the Priority names its level after the code (`P2 - Medium`),
+  and the Description is the title, then the why on its own line.
 - A question sheet has the columns Priority, Requirement, Question and Answer options, one row
   per question the tab shows: a person's question is High, an observed one Medium, and a
   `clarify` question keeps its own priority, with its suggestion as the answer options.
@@ -1588,8 +1589,9 @@ Every bullet below is binding.
 CASE-1 — bugs come out highest priority first
   Given  a P2 bug with a why and a P1 bug, each naming a requirement
   When   the bug rows are built
-  Then   the P1 row comes first, each row holds priority, requirement and description, and
-         the P2 description is its title, a line break, then its why
+  Then   the P1 row comes first, each row holds priority, requirement and description, the
+         priorities read `P1 - High` and `P2 - Medium`, and the P2 description is its title,
+         a line break, then its why
 
 CASE-2 — each question keeps the priority its page gives it
   Given  a person's question, an observed question and a `clarify` question of basis
