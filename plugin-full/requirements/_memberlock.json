@@ -138,7 +138,7 @@
       "app/scripts/run-ssr-smoke.mjs": "189b80bff7f50c386c85eeab72ffdeed6c952757d16ff219e0b721e38542a975",
       "app/scripts/smoke/harness.jsx": "92734d8ed8475d0f3b722df99fca0d57cd2a9127f906f446e064364fba4541b7",
       "app/scripts/smoke/report.jsx": "e666defde0935c951aad9725d0c60f104475aba8906457170daa45235ca14235",
-      "app/scripts/ssr-smoke.jsx": "2a503d8a0e862628b01bf8063c70299d8e5d000abf57ab1e4c3b25f966a19e3a",
+      "app/scripts/ssr-smoke.jsx": "d87f117be20224a57a4a74d94916771892592ea2e34169a9561d961673825ab0",
       "app/scripts/sync-data.mjs": "eaef4ef11c4424cbf56affc9d6d98aacde31c0c30080a1fd5a5b69cb1f82e2b9",
       "app/src/components/NoMap.jsx": "31d7031f75c1e0b4c32f804530ca7d73a8d1db3b89d67e38fd412458b5bc034a",
       "app/src/components/TopBar.jsx": "6a0459427011e8304fefc4d83d5ce703a51588fe6acf352cd1ffe1d3af140a9f",
@@ -146,7 +146,7 @@
       "app/src/lib/icons.jsx": "347fdca440675921bd3b11c19fd8a2c2db3fbe87a3a7504e616bc910eb062281",
       "app/src/lib/planBars.js": "0dfac6e6ea08cc74e31bcced7ab05324863649558ee5c5ea8ba9823ac58c37ad",
       "app/src/lib/useDragPan.js": "c1da172c305dd56ff9a39d52e567dfcd76b8626691490478e333c11e50ba96ab",
-      "app/src/main.jsx": "d7f9a44913e84c7a1b2b5d6af42ff1d4d5e2f225d798b7c3ba38ea864a2331ab",
+      "app/src/main.jsx": "e61f2ff0aa65f0671ab09d6232fc97890cc36664961cc315b47332bed46658fa",
       "app/src/styles/colors_and_type.css": "2c7196581730f0851a2b5257e9b1a5b1789d77e01193f16dcf4c428fb646131b",
       "app/src/views/commands/CommandGroup.jsx": "b9425b46532df218e5f3c4f86a89a61b18dda082226a9894b783a4eb89e390a3",
       "app/src/views/explorer/ExplorerFilters.jsx": "56828b07ed43f0930eadee08493ffefbf65d147c4522377f24f498bce9eaa912",
@@ -584,7 +584,7 @@
       "plugin-full/scripts/reqmap_engine/similar.py#_test_suite_pairs": "d126a0b2084b3d99d483cd4110d3c08bc3803485662749d304f0cdab69828cbd"
     },
     "REQ-SURFACE-1095": {
-      "pyproject.toml": "d1e1729af998992b3e93af3ca7e3952bc10b81f69c6e654d7f85eb035a1f70fc"
+      "pyproject.toml": "cc64e7a45fdf933b7b28422b2053b7e3450134820dbc479b17a59ebd321a5602"
     },
     "REQ-TESTGAPS-1088": {
       "plugin-full/scripts/reqmap_engine/testgaps.py#case_gaps": "5dc6f710dde83112c1b7ea4f7eaaa3ea4a820ca9a9d396a77c5367b8880ac963",
@@ -614,6 +614,14 @@
     },
     "REQ-VERSIONFILES-1014": {
       "plugin-full/scripts/reqmap_engine/versions.py#read_version_file": "990df1e440371e7820767dde4276d62c5ccb92047f1daccd38a5405466ce462b"
+    },
+    "REQ-VIEWER-1151": {
+      "app/src/lib/exportDoc.jsx": "3a9f256b88c0cdcae5cd025c28d0ad18f83d3fb12a6b93ef75a89518cc7fe917",
+      "app/src/styles/print.css": "be1b95c76dee9593da3189b7fec7ebaac7e2740b0c70842acb03c0540aec2f3f"
+    },
+    "REQ-VIEWER-1152": {
+      "app/src/lib/exportRows.js": "3b5d970c1e437dc7afd0145ebb4d3157224bb3a2af079a6cbb05f41a710785b0",
+      "app/src/lib/xlsx.js": "17d53f70aa21975d208e40c17249920e3f8e41af6b35b3199f53821309366c6d"
     },
     "REQ-VLEVEL-944": {
       "plugin-full/scripts/reqmap_engine/tags.py#_findall_tags": "f60247da7f4d4403486ad2b03a08bf636ec8e595260f0b09ac7095ab384c1c63"

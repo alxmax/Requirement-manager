@@ -40,6 +40,8 @@ Every bullet below is binding.
 - Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]
 - Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]
 - Selecting a version on the plan lists the open `TODO.md` items filed under it, each with its description folded beneath. [[REQ-VERSIONTODOS-1097]]
+- Every page that lists findings, and each requirement, prints as a PDF that looks like the page, on the paper theme whatever the screen's theme. [[REQ-VIEWER-1151]]
+- The Bugs tab and the Questions page export what they list as a spreadsheet, one row per bug or question, highest priority first. [[REQ-VIEWER-1152]]
 
 ## Cases
 CASE-1
@@ -1505,3 +1507,112 @@ CASE-7 — a build stamp the map lacks is left out
 ## Context
 **Notes**
 - `lint_exempt: file-spread` — the Report page is one view whose numbers live in `lib/`, whose layout lives in `views/` and whose print styles live in `styles/`: the viewer's own split, not several capabilities.
+
+---
+id: REQ-VIEWER-1151
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# A PDF of a page looks like the page
+
+## Description
+> A list printed as plain black text loses what the page uses to say what matters: the
+> priority badges, the cards, the colour of a state. A reviewer who gets a PDF should read the
+> same page the author saw, so the export prints the page's own components, on paper.
+
+Every bullet below is binding.
+- The Questions, Audit, Health and Design pages each carry an `Export PDF` button, and a
+  requirement's page carries one beside its status and layer badges.
+- An export prints the components the page shows, in the viewer's own styles, under a header
+  naming the tool, the repository, the page and the date; the buttons are left out.
+- The Bugs tab and the Report print the same way: a bug is a card with its priority badge.
+- A dark or high-contrast screen prints on the paper theme, and closing the print dialog puts
+  the screen's theme back.
+- A row, a card or a table line is kept on one sheet.
+
+## Cases
+CASE-1 — every list page and every requirement has the button
+  Given  the map export with an audit session
+  When   the Questions, Audit, Health and Design pages and a requirement's page are rendered
+  Then   each holds an `Export PDF` button, the requirement's beside its badges
+
+CASE-2 — the printed sheet names what it is
+  Given  a printed sheet titled `Open questions` with the facts `All` and `3 questions`
+  When   it is rendered for a repository `acme/pay`
+  Then   it shows the tool, `acme/pay`, the title, today's date and both facts, in that order
+
+CASE-3 — a printed bug is a card with its badge
+  Given  a P1 bug in the module Payments
+  When   the bug report is printed
+  Then   the bug is a card with the `P1` badge in the colour the tab gives it
+
+CASE-4 — a dark screen prints on paper
+  Given  the page in the dark theme
+  When   printing starts, then the print dialog closes
+  Then   the page has no theme while printing, and the dark theme again after
+
+---
+id: REQ-VIEWER-1152
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Bugs and questions export as a spreadsheet
+
+## Description
+> A PDF is for reading. Someone who triages, assigns or tracks wants the list in a
+> spreadsheet: one row each, columns to sort and filter, and room for their own columns. The
+> viewer is one HTML file that fetches nothing, so it writes the workbook itself.
+
+Every bullet below is binding.
+- The Bugs tab and the Questions page each carry an `Export XLSX` button, disabled when the
+  tab lists nothing.
+- A bug sheet has the columns Priority, Requirement and Description, one row per bug the tab
+  lists, highest priority first; the Priority names its level after the code (`P2 - Medium`),
+  and the Description is the title, then the why on its own line.
+- A question sheet has the columns Priority, Requirement, Question and Answer options, one row
+  per question the tab shows: a person's question is High, an observed one Medium, and a
+  `clarify` question keeps its own priority, with its suggestion as the answer options.
+- A question that lists options after `Options:`, `Choices:` or `Answer options:`, or as
+  `(a) … (b) …`, has them as its answer options; any other has none.
+- The file is a valid `.xlsx` with a bold, frozen header row and a filter on every column,
+  written in the browser with no library and nothing fetched.
+
+## Cases
+CASE-1 — bugs come out highest priority first
+  Given  a P2 bug with a why and a P1 bug, each naming a requirement
+  When   the bug rows are built
+  Then   the P1 row comes first, each row holds priority, requirement and description, the
+         priorities read `P1 - High` and `P2 - Medium`, and the P2 description is its title,
+         a line break, then its why
+
+CASE-2 — each question keeps the priority its page gives it
+  Given  a person's question, an observed question and a `clarify` question of basis
+         `wording` with a suggestion
+  When   the question rows are built
+  Then   they are High, Medium and Low in that order, and the `clarify` row's answer options
+         are its suggestion
+
+CASE-3 — answer options are read only where the question writes them
+  Given  a question ending `Options: 100 ms / 300 ms`, one written `(a) lock (b) unlock`, and
+         one with neither
+  When   their answer options are read
+  Then   they are `100 ms / 300 ms`, `(a) lock (b) unlock` and empty
+
+CASE-4 — the workbook is a valid zip of a one-sheet spreadsheet
+  Given  a header and two rows, one holding `&` and `<`
+  When   the workbook is written
+  Then   it starts with the zip signature, its CRC of `123456789` is `cbf43926`, the sheet
+         holds the header bold and frozen with a filter, and the text is escaped
+
+CASE-5 — the buttons are there, and idle when nothing is listed
+  Given  the Bugs tab with and without bugs, and the Questions page
+  When   they are rendered
+  Then   each holds `Export XLSX`, disabled on the empty Bugs tab

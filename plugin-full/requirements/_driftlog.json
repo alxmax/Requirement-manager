@@ -166,8 +166,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "80ee0596527c",
-      "reason": "ARCH-MAP-007 and ARCH-VIEWER-007 gain their trace and audit-report obligations (ADR-0091)"
+      "hash": "aa2d068a2a3a",
+      "reason": "ARCH-VIEWER-007 lists two new children: REQ-VIEWER-1151 (PDF exports) and REQ-VIEWER-1152 (XLSX exports)"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",

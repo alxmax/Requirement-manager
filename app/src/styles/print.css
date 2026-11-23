@@ -1,0 +1,78 @@
+/* implements: REQ-VIEWER-1151 */
+/* Every PDF the viewer exports: a .print-doc mounted on <body> while the
+   print dialog is open. On paper it keeps the app's own look (the paper
+   theme, the badges, the cards, the colours), so a PDF reads like the page;
+   on screen it never shows. The sheet itself is white: the page margins
+   print white whatever the theme, so a tinted sheet would sit in a frame. */
+.print-doc { display: none; }
+
+/* the export button beside a requirement's status badges */
+.spec .head-row .head-actions { margin-left: auto; display: flex; gap: 6px; }
+.spec-export { padding: 3px 10px; font-size: 12px; }
+
+@media print {
+  @page { size: A4; margin: 14mm 13mm 16mm; }
+  html:has(> body > .print-doc), body:has(> .print-doc) {
+    height: auto; overflow: visible; background: #fff;
+  }
+  body:has(> .print-doc) > :not(.print-doc) { display: none !important; }
+  .print-doc, .print-doc * {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .print-doc {
+    display: block; color: var(--fg); font: 13px/1.5 var(--font-sans);
+    background: #fff;
+  }
+
+  /* the header: brand line, title, facts */
+  .print-head { padding: 0 0 12px; margin: 0 0 16px; border-bottom: 2px solid var(--accent); }
+  .print-brand { display: flex; justify-content: space-between; gap: 12px;
+    font: 600 10px/1.4 var(--font-sans); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--accent); }
+  .print-brand span:last-child { font-family: var(--font-mono); text-transform: none;
+    letter-spacing: 0; color: var(--fg-muted); }
+  .print-head h1 { font: 700 22px/1.25 var(--font-sans); color: var(--fg); margin: 6px 0 4px; }
+  .print-meta { font: 12px/1.5 var(--font-sans); color: var(--fg-muted); }
+
+  /* what the screen lays out to scroll lies flat on paper */
+  .print-doc .problems, .print-doc .main, .print-doc .spec {
+    max-width: none; height: auto; overflow: visible; padding: 0; background: none;
+  }
+  .print-doc .spec-sheet { max-width: none; box-shadow: none; padding: 20px 24px; }
+  .print-doc .rep-page.problems { max-width: none; padding: 0; border: 0; box-shadow: none;
+    background: none; }
+  .print-doc .prob-row { cursor: default; box-shadow: none; }
+
+  /* nothing that only works on screen */
+  .print-doc button.btn, .print-doc .print-hide, .print-doc .bug-toggle-all,
+  .print-doc .q-panel-actions { display: none !important; }
+
+  /* keep a row, a card, a table line on one page */
+  .print-doc .prob-row, .print-doc .rep-num, .print-doc tr, .print-doc .members-box,
+  .print-doc .gwt, .print-doc li, .print-doc .bug-print-row, .print-doc .audit-card {
+    break-inside: avoid;
+  }
+  .print-doc h2, .print-doc h3, .print-doc .eyebrow { break-after: avoid; }
+
+  /* the bug report: one card per bug, grouped by module */
+  .print-doc .bug-report h2 { font: 600 16px/1.3 var(--font-sans); margin: 18px 0 2px; }
+  .print-doc .bug-report > section > p { color: var(--fg-muted); margin: 0 0 8px; }
+  .print-doc .bug-print-row { display: grid; grid-template-columns: 64px 1fr; gap: 12px;
+    padding: 10px 12px; margin: 0 0 6px; border: 1px solid var(--border-soft);
+    border-radius: var(--radius-2); background: var(--surface); }
+  .print-doc .bug-print-row .prob-sev { align-self: start; text-align: center; }
+  .print-doc .bug-print-title { font-weight: 600; }
+  .print-doc .bug-print-title .ref { font-family: var(--font-mono); color: var(--fg-muted);
+    font-weight: 500; margin-right: 6px; }
+  .print-doc code { font-family: var(--font-mono); font-size: 11.5px; overflow-wrap: anywhere; }
+
+  /* the report keeps its section rules and number cards */
+  .print-doc .rep-sec { break-inside: auto; }
+  .print-doc .rep-num b { font-size: 22px; }
+
+  /* the audit table and the counters */
+  .print-doc .audit-table th { text-align: left; color: var(--fg-muted); font-weight: 600;
+    border-bottom: 1px solid var(--border); padding: 6px 8px; }
+  .print-doc .audit-table td { border-bottom: 1px solid var(--border-soft); padding: 6px 8px;
+    vertical-align: top; }
+}

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## plugin `v8.29.0` — 2026-11-23
+
+**Release v8.29.0.**
+
+**Every list page prints, and Bugs and Questions export a spreadsheet.**
+
+- Questions, Audit, Health and Design gain Export PDF, as Bugs had; a requirement in the Explorer has a PDF button beside its status and layer badges. The printed sheet keeps the page's own look (badges, cards, colours) under a header naming the tool, the repository, the title, the date and the page's facts, and prints on the Paper theme whatever the screen shows, putting the screen's theme back afterwards. The Bugs report becomes a card per bug with its priority badge. REQ-VIEWER-1151
+- Bugs and Questions gain Export XLSX: Bugs as priority (`P2 - Medium`), requirement, description (the title, then why); Questions as priority, requirement, question, answer options. A `clarify` question's answer column is its suggested fix; a Verify-intent question's is read from an `Options:` list or `(a) … (b) …` in its text, else left empty. The workbook is written in the browser with no library: one sheet, bold frozen header, filter on. REQ-VIEWER-1152
+- Viewer only: the engine is unchanged. The two requirements are drafts under ARCH-VIEWER-007.
+
 ## plugin `v8.28.0` — 2026-11-22
 
 **Release v8.28.0.**

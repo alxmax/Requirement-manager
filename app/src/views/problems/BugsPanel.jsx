@@ -3,7 +3,9 @@
 // implements: REQ-BUGS-1122
 // implements: REQ-BUGS-1123
 // implements: REQ-BUGS-1129
-import { useEffect, useMemo, useState } from "react";
+// implements: REQ-VIEWER-1151
+// implements: REQ-VIEWER-1152
+import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   BUGS, BUGS_FIXED, FORGE, REPO, REQUIREMENTS,
@@ -17,6 +19,10 @@ import {
   bugCommand, canWrite, moduleFile, saveBug,
 } from "../../lib/bugFile.js";
 import { ChipRow } from "./ProblemsPanels.jsx";
+import {
+  PrintSheet, usePrinting, downloadXlsx, exportName,
+} from "../../lib/exportDoc.jsx";
+import { bugRows } from "../../lib/exportRows.js";
 
 const PAGE_SIZE = 25;
 const PRIOS = ["P0", "P1", "P2", "P3", "P4"];
@@ -232,20 +238,24 @@ export function BugReport({ groups, keys, scope, fixed = [] }) {
   const total = keys.reduce((n, k) => n + groups[k].length, 0);
   const head = [t("{n} bugs", { n: total }), today(), scope];
   return (
-    <div className="bug-report">
-      <h1>{REPO ? `${REPO}: ` : ""}{t("Known bugs")}</h1>
-      <p>{head.filter(Boolean).join(" · ")}</p>
+    <PrintSheet className="bug-report" dated={false}
+      title={`${REPO ? `${REPO}: ` : ""}${t("Known bugs")}`} meta={head}>
       {keys.map((k) => (
         <section key={k}>
           <h2>{k}</h2>
           <p>{prioMix(groups[k]).map(([p, n]) => `${p} ${n}`).join(" · ")}</p>
           {inOrder(groups[k]).map((b) => (
-            <div className="bug-report-row" key={b.id}>
+            <div className="bug-print-row" key={b.id}>
+              <span className={"prob-sev sev-" + SEV[b.prio]}>
+                {b.prio}{b.estimated ? "*" : ""}
+              </span>
               <div>
-                <b>{b.prio}{b.estimated ? "*" : ""} {b.ref}</b>
-                {b.date ? ` · ${shortDate(b.date)}` : ""} · {b.title}
+                <div className="bug-print-title">
+                  <span className="ref">{b.ref}</span>{b.title}
+                  {b.date ? ` · ${shortDate(b.date)}` : ""}
+                </div>
+                <BugFields b={b} />
               </div>
-              <BugFields b={b} />
             </div>
           ))}
         </section>
@@ -256,7 +266,7 @@ export function BugReport({ groups, keys, scope, fixed = [] }) {
           {fixed.map((r) => <FixedLine key={r.id} row={r} />)}
         </section>
       )}
-    </div>
+    </PrintSheet>
   );
 }
 
@@ -323,19 +333,6 @@ function filterBugs(all, query, prio) {
   return { q, found, counts, groups, keys };
 }
 
-/** `[printing, setPrinting]`: true opens the browser's print dialog once. */
-function usePrinting() {
-  const [printing, setPrinting] = useState(false);
-  useEffect(() => {
-    if (!printing) return undefined;
-    const done = () => setPrinting(false);
-    window.addEventListener("afterprint", done);
-    window.print();
-    return () => window.removeEventListener("afterprint", done);
-  }, [printing]);
-  return [printing, setPrinting];
-}
-
 /** Open / Fixed, shown only when the register holds a row. */
 function ViewToggle({ view, setView, openCount }) {
   const { t } = useI18n();
@@ -389,6 +386,42 @@ function BugGroups({ filtered, total, ui, narrowed }) {
   ));
 }
 
+/** A priority as the sheet writes it: the code, then its name ("P2 - Medium"),
+ * the estimate's star kept on the code. */
+export function prioLabel(prio, t) {
+  const code = prio.replace(/\*$/, "");
+  const name = PRIO_NAME[code] && t(PRIO_NAME[code]);
+  return name ? `${prio} - ${name.charAt(0).toUpperCase()}${name.slice(1)}` : prio;
+}
+
+/** The bugs as a spreadsheet: priority, requirement, description. */
+export function bugSheet(bugs, t) {
+  return { name: t("Bugs"),
+    header: [t("Priority"), t("Requirement"), t("Description")],
+    rows: bugRows(bugs).map(([p, ...rest]) => [prioLabel(p, t), ...rest]),
+    widths: [14, 22, 80] };
+}
+
+/** Search, Add bug and the two exports of what the filter shows. */
+function BugBar({ query, setQuery, empty, add, pdf, xlsx }) {
+  const { t } = useI18n();
+  return (
+    <div className="bug-bar">
+      <input className="bug-search" placeholder={t("Search bugs")}
+        value={query} onChange={(e) => setQuery(e.target.value)} />
+      <button className="btn btn-secondary" onClick={add}>
+        <Icon name="plus" size={13} /> {t("Add bug")}
+      </button>
+      <button className="btn btn-ghost bug-export" disabled={empty} onClick={pdf}>
+        {t("Export PDF")}
+      </button>
+      <button className="btn btn-ghost" disabled={empty} onClick={xlsx}>
+        {t("Export XLSX")}
+      </button>
+    </div>
+  );
+}
+
 /** Known bugs by module, the only grouping. `added` holds what this page
  * wrote, which the map cannot carry until the next `sync`. */
 export function BugsPanel({ added, setAdded }) {
@@ -429,18 +462,10 @@ export function BugsPanel({ added, setAdded }) {
   const { q, found, counts, groups, keys } = filtered;
   return (
     <>
-      <div className="bug-bar">
-        <input className="bug-search" placeholder={t("Search bugs")}
-          value={query} onChange={(e) => setQuery(e.target.value)} />
-        <button className="btn btn-secondary"
-          onClick={() => setAdding(!adding)}>
-          <Icon name="plus" size={13} /> {t("Add bug")}
-        </button>
-        <button className="btn btn-ghost bug-export" disabled={keys.length === 0}
-          onClick={() => setPrinting(true)}>
-          {t("Export PDF")}
-        </button>
-      </div>
+      <BugBar query={query} setQuery={setQuery} empty={keys.length === 0}
+        add={() => setAdding(!adding)} pdf={() => setPrinting(true)}
+        xlsx={() => downloadXlsx(exportName("bugs", "xlsx"),
+          bugSheet(keys.flatMap((k) => groups[k]), t))} />
       <ViewToggle view={view} setView={setView} openCount={all.length} />
       {view === "fixed" && <BugHistory open={all} fixed={BUGS_FIXED}
         query={query} />}

@@ -3,6 +3,7 @@
 // implements: REQ-VIEWER-1084
 // implements: REQ-BUGS-1121
 // implements: REQ-CHECK-1133
+// implements: REQ-VIEWER-1151
 import { useState } from "react";
 import {
   REQUIREMENTS, coverageOf, DESIGN, HEALTH, BUGS,
@@ -14,6 +15,19 @@ import {
   ProblemTabBar, DesignProblemsPanel, HealthPanel, ProblemRow,
   ProblemsEmpty, onlyUnconfirmed, gateRowsForHealth,
 } from "./problems/ProblemsPanels.jsx";
+import { PrintDoc, usePrinting } from "../lib/exportDoc.jsx";
+
+/** The Export PDF line above the Health and Design panels. */
+function PanelExport({ setPrinting, t }) {
+  return (
+    <div className="bug-bar">
+      <button type="button" className="btn btn-ghost bug-export"
+        onClick={() => setPrinting(true)}>
+        <Icon name="file-text" size={14} /> {t("Export PDF")}
+      </button>
+    </div>
+  );
+}
 
 const SEV = {
   unimplemented: {
@@ -107,6 +121,7 @@ export function ProblemsView({
   const { t } = useI18n();
   const [filter, setFilter] = useState(initialFilter);
   const [addedBugs, setAddedBugs] = useState([]);
+  const [printing, setPrinting] = usePrinting();
   const all = (problems || computeProblems()).filter((p) => p.sev !== "DESIGN");
   const counts = all.reduce((a, p) => {
     a[p.sev] = (a[p.sev] || 0) + 1;
@@ -147,6 +162,8 @@ export function ProblemsView({
                            + gateRows.length
                          : null }} />
       <div className="problems">
+        {(filter === "DESIGN" || (filter === "HEALTH" && health))
+          && <PanelExport setPrinting={setPrinting} t={t} />}
         {filter === "DESIGN"
           && <DesignProblemsPanel byPillar={byPillar} advice={advice} />}
         {filter === "HEALTH" && health
@@ -160,6 +177,21 @@ export function ProblemsView({
         {!PANELS.has(filter) && shown.length === 0
           && <ProblemsEmpty filter={filter} t={t} />}
       </div>
+      {printing && filter === "DESIGN" && (
+        <PrintDoc title={t("Design")}
+          meta={[t("{n} findings", { n: design.length })]}>
+          <div className="problems">
+            <DesignProblemsPanel byPillar={byPillar} advice={advice} />
+          </div>
+        </PrintDoc>
+      )}
+      {printing && filter === "HEALTH" && health && (
+        <PrintDoc title={t("Health")}>
+          <div className="problems">
+            <HealthPanel health={health} openSpec={() => {}} gateRows={gateRows} />
+          </div>
+        </PrintDoc>
+      )}
     </div>
   );
 }

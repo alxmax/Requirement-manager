@@ -1,6 +1,6 @@
 {
   "engine_version": "2026-11-22.5",
-  "repo": "alxmax/Requirement-manager",
+  "repo": "alxmax/requirement-manager",
   "nodes": [
     {
       "id": "ARCH-ACVERIFY-019",
@@ -1816,7 +1816,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/AuditView.jsx:38"
+          "loc": "app/src/views/AuditView.jsx:40"
         },
         {
           "role": "tested-by",
@@ -2601,15 +2601,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:96"
+          "loc": "app/src/views/problems/BugsPanel.jsx:102"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:105"
+          "loc": "app/src/views/problems/BugsPanel.jsx:111"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:405"
+          "loc": "app/src/views/problems/BugsPanel.jsx:438"
         }
       ],
       "test_exempt": null,
@@ -24129,7 +24129,9 @@
         "The plan chart draws every bar where no neighbour covers it, keeps the lane names in place while it scrolls sideways, and ties each bar to its days with guides. [[REQ-PLANSTACK-1012]]",
         "Under the week row, the plan chart labels every day with its `day/month`. [[REQ-PLANDAYS-1021]]",
         "Milestones due close together all stay visible on the plan chart. [[REQ-VIEWER-1087]]",
-        "Selecting a version on the plan lists the open `TODO.md` items filed under it, each with its description folded beneath. [[REQ-VERSIONTODOS-1097]]"
+        "Selecting a version on the plan lists the open `TODO.md` items filed under it, each with its description folded beneath. [[REQ-VERSIONTODOS-1097]]",
+        "Every page that lists findings, and each requirement, prints as a PDF that looks like the page, on the paper theme whatever the screen's theme. [[REQ-VIEWER-1151]]",
+        "The Bugs tab and the Questions page export what they list as a spreadsheet, one row per bug or question, highest priority first. [[REQ-VIEWER-1152]]"
       ],
       "verify": [],
       "notes": [
@@ -24191,7 +24193,9 @@
         "REQ-VIEWER-1101",
         "REQ-VIEWER-1114",
         "REQ-VIEWER-1139",
-        "REQ-VIEWER-1145"
+        "REQ-VIEWER-1145",
+        "REQ-VIEWER-1151",
+        "REQ-VIEWER-1152"
       ],
       "members": [
         {
@@ -24719,7 +24723,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.de.js:389"
+          "loc": "app/src/lib/i18n.de.js:398"
         },
         {
           "role": "implements",
@@ -24731,7 +24735,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.ro.js:433"
+          "loc": "app/src/lib/i18n.ro.js:442"
         },
         {
           "role": "implements",
@@ -25809,7 +25813,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:533"
+          "loc": "app/src/styles/app.css:519"
         },
         {
           "role": "implements",
@@ -25890,7 +25894,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:570"
+          "loc": "app/src/styles/app.css:556"
         },
         {
           "role": "implements",
@@ -25922,6 +25926,154 @@
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
+    },
+    {
+      "id": "REQ-VIEWER-1151",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A PDF of a page looks like the page",
+      "intent": "A list printed as plain black text loses what the page uses to say what matters: the priority badges, the cards, the colour of a state. A reviewer who gets a PDF should read the same page the author saw, so the export prints the page's own components, on paper.",
+      "contract": [
+        "The Questions, Audit, Health and Design pages each carry an `Export PDF` button, and a requirement's page carries one beside its status and layer badges.",
+        "An export prints the components the page shows, in the viewer's own styles, under a header naming the tool, the repository, the page and the date; the buttons are left out.",
+        "The Bugs tab and the Report print the same way: a bug is a card with its priority badge.",
+        "A dark or high-contrast screen prints on the paper theme, and closing the print dialog puts the screen's theme back.",
+        "A row, a card or a table line is kept on one sheet."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — every list page and every requirement has the button\n  Given  the map export with an audit session\n  When   the Questions, Audit, Health and Design pages and a requirement's page are rendered\n  Then   each holds an `Export PDF` button, the requirement's beside its badges\n\nCASE-2 — the printed sheet names what it is\n  Given  a printed sheet titled `Open questions` with the facts `All` and `3 questions`\n  When   it is rendered for a repository `acme/pay`\n  Then   it shows the tool, `acme/pay`, the title, today's date and both facts, in that order\n\nCASE-3 — a printed bug is a card with its badge\n  Given  a P1 bug in the module Payments\n  When   the bug report is printed\n  Then   the bug is a card with the `P1` badge in the colour the tab gives it\n\nCASE-4 — a dark screen prints on paper\n  Given  the page in the dark theme\n  When   printing starts, then the print dialog closes\n  Then   the page has no theme while printing, and the dark theme again after",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/exports.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/exportDoc.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/styles/print.css:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/AuditView.jsx:7"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ExplorerView.jsx:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ProblemsView.jsx:6"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/QuestionsView.jsx:5"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:6"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
+    },
+    {
+      "id": "REQ-VIEWER-1152",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "Bugs and questions export as a spreadsheet",
+      "intent": "A PDF is for reading. Someone who triages, assigns or tracks wants the list in a spreadsheet: one row each, columns to sort and filter, and room for their own columns. The viewer is one HTML file that fetches nothing, so it writes the workbook itself.",
+      "contract": [
+        "The Bugs tab and the Questions page each carry an `Export XLSX` button, disabled when the tab lists nothing.",
+        "A bug sheet has the columns Priority, Requirement and Description, one row per bug the tab lists, highest priority first; the Priority names its level after the code (`P2 - Medium`), and the Description is the title, then the why on its own line.",
+        "A question sheet has the columns Priority, Requirement, Question and Answer options, one row per question the tab shows: a person's question is High, an observed one Medium, and a `clarify` question keeps its own priority, with its suggestion as the answer options.",
+        "A question that lists options after `Options:`, `Choices:` or `Answer options:`, or as `(a) … (b) …`, has them as its answer options; any other has none.",
+        "The file is a valid `.xlsx` with a bold, frozen header row and a filter on every column, written in the browser with no library and nothing fetched."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — bugs come out highest priority first\n  Given  a P2 bug with a why and a P1 bug, each naming a requirement\n  When   the bug rows are built\n  Then   the P1 row comes first, each row holds priority, requirement and description, the\n         priorities read `P1 - High` and `P2 - Medium`, and the P2 description is its title,\n         a line break, then its why\n\nCASE-2 — each question keeps the priority its page gives it\n  Given  a person's question, an observed question and a `clarify` question of basis\n         `wording` with a suggestion\n  When   the question rows are built\n  Then   they are High, Medium and Low in that order, and the `clarify` row's answer options\n         are its suggestion\n\nCASE-3 — answer options are read only where the question writes them\n  Given  a question ending `Options: 100 ms / 300 ms`, one written `(a) lock (b) unlock`, and\n         one with neither\n  When   their answer options are read\n  Then   they are `100 ms / 300 ms`, `(a) lock (b) unlock` and empty\n\nCASE-4 — the workbook is a valid zip of a one-sheet spreadsheet\n  Given  a header and two rows, one holding `&` and `<`\n  When   the workbook is written\n  Then   it starts with the zip signature, its CRC of `123456789` is `cbf43926`, the sheet\n         holds the header bold and frozen with a filter, and the text is escaped\n\nCASE-5 — the buttons are there, and idle when nothing is listed\n  Given  the Bugs tab with and without bugs, and the Questions page\n  When   they are rendered\n  Then   each holds `Export XLSX`, disabled on the empty Bugs tab",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/exports.jsx:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/exportRows.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/xlsx.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/QuestionsView.jsx:6"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugsPanel.jsx:7"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "ARCH-VIEWERFILE-074",
@@ -28940,6 +29092,14 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-VIEWER-1151",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-VIEWER-1152",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "ARCH-VIEWERFILE-074",
       "SYS-VISUAL-106"
     ],
@@ -31248,20 +31408,29 @@
     },
     {
       "month": "2026-11",
-      "count": 6,
+      "count": 7,
       "first": "2026-11-14",
-      "last": "2026-11-22",
+      "last": "2026-11-23",
       "versions": [
         "v8.24.7",
         "v8.24.8",
         "v8.25.0",
         "v8.26.0",
         "v8.27.0",
-        "v8.28.0"
+        "v8.28.0",
+        "v8.29.0"
       ],
-      "landmark": "v8.28.0",
-      "headline": "Release v8.28.0",
+      "landmark": "v8.29.0",
+      "headline": "Release v8.29.0",
       "entries": [
+        {
+          "version": "v8.29.0",
+          "date": "2026-11-23",
+          "headline": "Release v8.29.0",
+          "body": "**Release v8.29.0.**\n\n**Every list page prints, and Bugs and Questions export a spreadsheet.**\n\n- Questions, Audit, Health and Design gain Export PDF, as Bugs had; a requirement in the Explorer has a PDF button beside its status and layer badges. The printed sheet keeps the page's own look (badges, cards, colours) under a header naming the tool, the repository, the title, the date and the page's facts, and prints on the Paper theme whatever the screen shows, putting the screen's theme back afterwards. The Bugs report becomes a card per bug with its priority badge. REQ-VIEWER-1151\n- Bugs and Questions gain Export XLSX: Bugs as priority (`P2 - Medium`), requirement, description (the title, then why); Questions as priority, requirement, question, answer options. A `clarify` question's answer column is its suggested fix; a Verify-intent question's is read from an `Options:` list or `(a) … (b) …` in its text, else left empty. The workbook is written in the browser with no library: one sheet, bold frozen header, filter on. REQ-VIEWER-1152\n- Viewer only: the engine is unchanged. The two requirements are drafts under ARCH-VIEWER-007.",
+          "first_commit": "2026-11-23",
+          "last_commit": "2026-11-23"
+        },
         {
           "version": "v8.28.0",
           "date": "2026-11-22",
@@ -31612,8 +31781,8 @@
     }
   ],
   "design": {
-    "files": 158,
-    "clean_files": 158,
+    "files": 162,
+    "clean_files": 162,
     "score": 100,
     "candidates": {
       "encapsulation": 0,
@@ -31626,23 +31795,40 @@
     "advice": {}
   },
   "health": {
-    "score": 100,
-    "total": 376,
-    "scored": 354,
+    "score": 99,
+    "total": 378,
+    "scored": 356,
     "healthy": 354,
     "exempt": 5,
     "deprecated": 22,
     "confirmed": 354,
-    "implemented": 344,
-    "tested": 345,
-    "drafts": 0,
+    "implemented": 346,
+    "tested": 347,
+    "drafts": 2,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
-    "unhealthy": [],
+    "reviewed_score": 100,
+    "reviewed_total": 354,
+    "unhealthy": [
+      {
+        "id": "REQ-VIEWER-1151",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-VIEWER-1152",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      }
+    ],
     "exempt_ids": [
       {
         "id": "ARCH-BUGS-078",
@@ -31791,10 +31977,10 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 197,
-      "tagged_files": 192,
-      "production_files": 173,
-      "drift_files": 104
+      "code_files": 202,
+      "tagged_files": 197,
+      "production_files": 178,
+      "drift_files": 108
     },
     "suggestions": {},
     "hygiene": {

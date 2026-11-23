@@ -1,9 +1,9 @@
 ---
-generated: 2026-11-22
+generated: 2026-11-23
 engine: 2026-11-22.5
-nodes: 376
+nodes: 378
 edges: 130
-design pass-rate: 100% (158/158 source files without a design candidate)
+design pass-rate: 100% (162/162 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -377,6 +377,8 @@ graph LR
     REQ_VIEWER_1114["Choosing a question shows it beside the list<br><small>REQ-VIEWER-1114</small>"]
     REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small>"]
     REQ_VIEWER_1145["The Report reads an audit<br><small>REQ-VIEWER-1145</small>"]
+    REQ_VIEWER_1151["A PDF of a page looks like the page<br><small>REQ-VIEWER-1151</small>"]
+    REQ_VIEWER_1152["Bugs and questions export as a spreadsheet<br><small>REQ-VIEWER-1152</small>"]
     REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
     REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
@@ -1229,7 +1231,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>294 caps</small>"]
+  a_REQ["REQ<br><small>296 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH
@@ -1243,5 +1245,17 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  ok["No risk signals detected"]
+  subgraph sg_REQ["REQ"]
+    REQ_VIEWER_1151["A PDF of a page looks like the page<br><small>REQ-VIEWER-1151</small><br>unreviewed"]
+    REQ_VIEWER_1152["Bugs and questions export as a spreadsheet<br><small>REQ-VIEWER-1152</small><br>unreviewed"]
+  end
+  style REQ_VIEWER_1151 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_VIEWER_1152 fill:#fff3cd,stroke:#a66,color:#630
 ```
+
+### Risk Table
+
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| REQ-VIEWER-1151 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
+| REQ-VIEWER-1152 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

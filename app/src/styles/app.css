@@ -515,21 +515,7 @@ h1 .i18n-badge { font-size: 12px; }
 .bug-fixed-facts { color: var(--fg-muted); font-size: 12px; }
 .bug-own { font: var(--text-caption); font-size: 10.5px; color: var(--accent); }
 /* implements: REQ-BUGS-1123 */
-.bug-report { display: none; }
-@media print {
-  html:has(> body > .bug-report), body:has(> .bug-report) { height: auto; overflow: visible; background: #fff; }
-  body:has(> .bug-report) > :not(.bug-report) { display: none; }
-  .bug-report { display: block; color: #000; font: 10.5pt/1.4 var(--font-sans, sans-serif); }
-  .bug-report h1 { font-size: 16pt; margin: 0 0 2pt; }
-  .bug-report h2 { font-size: 12pt; margin: 12pt 0 0; break-after: avoid; }
-  .bug-report p { margin: 0 0 3pt; }
-  .bug-report code { font-family: var(--font-mono, monospace); font-size: 9.5pt; overflow-wrap: anywhere; }
-  .bug-report-row { padding: 5pt 0; border-bottom: .5pt solid #999; break-inside: avoid; }
-  .rep-print .rep-sec { break-inside: auto; }
-  .rep-print .rep-num b { font-size: 13pt; }
-  .rep-print .dep-link { color: #000; }
-  .rep-print .rep-table td { border-bottom: .5pt solid #999; }
-}
+/* printed bug report: styles in print.css */
 /* implements: REQ-VIEWER-1139 */
 /* The Report reads as a document: a grey desk, a white page, a contents rail. */
 .rep-layout { display: flex; align-items: flex-start; gap: 28px; padding: 24px 28px 56px 0; background: var(--bg); min-height: 100%; }

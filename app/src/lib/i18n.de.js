@@ -383,6 +383,15 @@ export const DE = {
     + "setze sie zurück auf Entwurf",
   "places break the repository's own design rules: see each rule's list under Problem types":
     "Stellen verletzen die eigenen Designregeln des Repositorys: siehe die Liste jeder Regel unter Problemarten",
+  // exports (REQ-VIEWER-1151, REQ-VIEWER-1152)
+  "Export XLSX": "Als XLSX exportieren",
+  "Requirement": "Anforderung",
+  "Question": "Frage",
+  "Answer options": "Antwortmöglichkeiten",
+  "Open questions": "Offene Fragen",
+  "{n} questions": "{n} Fragen",
+  "Design": "Design",
+  "{n} findings": "{n} Befunde",
 };
 
 /* The CLI's description of itself, as in COMMAND_RO. Flags stay literal. */
