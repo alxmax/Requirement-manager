@@ -103,6 +103,16 @@ The action runs `reqmap.py gate` — also the readability lint and the map-fresh
 and warns when the engine you vendored is older than the one it ships. Inputs, pinning and
 the plain `- run:` alternative: [docs/integrations.md](docs/integrations.md).
 
+## How an audit runs
+
+[![How an audit runs in Requirement Manager](docs/requirement-manager-audit-engine.png)](docs/requirement-manager-audit-engine.png)
+
+The engine reads, links and checks a component, plans the audit and writes the report: a Python
+script, offline, no AI tokens. Copilot reviews each planned requirement twice; a person decides
+every finding. **▶ [Watch the walkthrough](https://alxmax.github.io/Requirement-manager/architecture.html#video)**
+· slides: [how the engine audits](docs/RequirementManager_How_The_Engine_Audits.pdf),
+[how to read the map](docs/RequirementManager_How_To_Read_The_Map.pdf)
+
 ## Read more
 
 | | |
