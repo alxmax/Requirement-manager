@@ -423,6 +423,7 @@ footer a:hover{color:var(--fg)}
       <a class="opt" href="#how">How it works</a>
       <a class="opt" href="#gate">The gate</a>
       <a class="opt" href="#video">Video</a>
+      <a class="opt" href="#audit">Audit</a>
       <a class="opt" href="#install">Install</a>
       <!--##REQMAP:NAV##-->
 <nav class="nav-links"><a href="https://github.com/alxmax/Requirement-manager" target="_blank" rel="noopener">GitHub ↗</a></nav>
@@ -454,16 +455,46 @@ footer a:hover{color:var(--fg)}
 <section id="video">
   <div class="wrap">
     <div class="kicker">The presentation</div>
-    <h2>Checking a repository with GitHub Copilot</h2>
+    <h2>Auditing a component</h2>
     <p class="intro">
-      A recorded walkthrough of Requirement Manager at work with GitHub Copilot.
+      Audit mode, start to end: how the engine reads a component, what GitHub Copilot reviews,
+      what a person decides, and how to read the map. No CI and no hooks: the tool only reads the
+      requirements, the code and the tests. Every screen is from a real run on a small demo repository.
     </p>
-    <video controls preload="metadata" playsinline
+    <video controls preload="metadata" playsinline controlsList="nodownload" disablePictureInPicture
+      oncontextmenu="return false"
+      style="display:block;width:100%;max-width:960px;border:1px solid var(--border);border-radius:var(--r);background:#000">
+      <source src="./RequirementManager_Audit_Mode.mp4" type="video/mp4">
+    </video>
+    <p class="more">The slides, as PDF:
+      <a href="./RequirementManager_How_The_Engine_Audits.pdf" target="_blank" rel="noopener">How the engine works in an audit</a> ·
+      <a href="./RequirementManager_How_To_Read_The_Map.pdf" target="_blank" rel="noopener">How to read the map</a></p>
+
+    <h3 style="margin-top:2.5rem">The first walkthrough</h3>
+    <p class="intro">Checking a repository with GitHub Copilot: the problems it finds, and who finds each one.</p>
+    <video controls preload="metadata" playsinline controlsList="nodownload" disablePictureInPicture
+      oncontextmenu="return false"
       style="display:block;width:100%;max-width:960px;border:1px solid var(--border);border-radius:var(--r);background:#000">
       <source src="./RequirementManager_Copilot_Audit_Presentation.mp4" type="video/mp4">
-      <a href="./RequirementManager_Copilot_Audit_Presentation.mp4">Download the presentation (MP4, 14.5 MB)</a>
     </video>
-    <p class="more"><a href="./RequirementManager_Copilot_Audit_Presentation.mp4">Open the video on its own (MP4, 14.5 MB) →</a></p>
+  </div>
+</section>
+
+<!-- AUDIT FLOW -->
+<section id="audit">
+  <div class="wrap">
+    <div class="kicker">How an audit runs</div>
+    <h2>Seven steps, three actors</h2>
+    <p class="intro">
+      Left to right, then down. The engine reads, links and checks the component, plans the audit
+      and writes the report: a Python script, offline, no AI tokens. Copilot reviews each planned
+      requirement twice, read only. A person decides every finding.
+    </p>
+    <a href="./requirement-manager-audit-engine.png" target="_blank" rel="noopener">
+      <img src="./requirement-manager-audit-engine.png" width="2000" height="1347" loading="lazy"
+        alt="How an audit runs in Requirement Manager: the engine reads, links and checks a component, plans the audit into _audit.json, Copilot adds findings, an engineer adds decisions, and the report counts them."
+        style="display:block;width:100%;height:auto;border:1px solid var(--border);border-radius:var(--r);background:#fff">
+    </a>
   </div>
 </section>
 
