@@ -617,7 +617,7 @@
     },
     "REQ-VIEWER-1151": {
       "app/src/lib/exportDoc.jsx": "3a9f256b88c0cdcae5cd025c28d0ad18f83d3fb12a6b93ef75a89518cc7fe917",
-      "app/src/styles/print.css": "73b9e6a9328cea90752cf50a21918cbbb499c51fd11368fe2ca9613f1d931bd3"
+      "app/src/styles/print.css": "be1b95c76dee9593da3189b7fec7ebaac7e2740b0c70842acb03c0540aec2f3f"
     },
     "REQ-VIEWER-1152": {
       "app/src/lib/exportRows.js": "3b5d970c1e437dc7afd0145ebb4d3157224bb3a2af079a6cbb05f41a710785b0",
