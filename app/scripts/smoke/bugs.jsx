@@ -23,7 +23,8 @@ import {
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
   BugForm, BugHistory, BugReport, BugsPanel, moduleChoices,
-  nextOpenAll, toggleAllLabel, groupOpen,
+  nextOpenAll, toggleAllLabel, groupOpen, BugRow, filterBugs, reportScope,
+  addOutcome,
 } from "../../src/views/problems/BugsPanel.jsx";
 import { json, noop, specOf, test } from "./harness.jsx";
 import { bugsNaming } from "../../src/views/spec/SpecParts.jsx";
@@ -65,6 +66,12 @@ const report = renderToString(
     <BugReport keys={["Payments"]} scope="P1"
       groups={{ Payments: [bug("B2", "Payments", "P2"), reported] }} />
   </I18nProvider>);
+const narrowed = filterBugs([...BUGS_FIXTURE, reported], "", "P1");
+const narrowedReport = renderToString(
+  <I18nProvider initialLocale="en">
+    <BugReport keys={narrowed.keys} groups={narrowed.groups}
+      scope={reportScope("P1", "  ")} />
+  </I18nProvider>).replace(/<!-- -->/g, "");
 
 const closed = { id: "Billing:B1", title: "Refund", module: "Billing", prio: "P1",
   date: "2026-10-05", fixed: "2026-10-15", version: "1.2.3", commit: "abc1234" };
@@ -183,7 +190,10 @@ const bugChecks = [
       && !report.includes("<details")],
   // verifies: REQ-BUGS-1123#CASE-2
   ["bugs: the report states its filter and total",
-    /2 bugs ·.*· P1</.test(report.replace(/<!-- -->/g, ""))],
+    /2 bugs ·.*· P1</.test(narrowedReport)
+      && narrowedReport.includes("Title B1") && !narrowedReport.includes("Title B2")
+      && !narrowedReport.includes("Title B3")
+      && reportScope("P1", " refund ") === "P1 · refund"],
   // verifies: REQ-BUGS-1123#CASE-3
   ["bugs: the export button needs something to export",
     /<button[^>]*disabled=""[^>]*>Export PDF/.test(emptyPanel)
@@ -251,6 +261,44 @@ const bugChecks = [
 ];
 for (const [label, ok] of bugChecks) test(label, ok);
 
+{
+  // An opened row, and the chips and search that narrow the list.
+  // SSR cannot click: BugRow is called inside a render and its handler run.
+  let tree = null;
+  const Probe = () => { tree = BugRow({ b: reported, open: true, toggle: noop });
+    return null; };
+  renderToString(<I18nProvider initialLocale="en"><Probe /></I18nProvider>);
+  const find = (el, ok) => {
+    if (Array.isArray(el)) {
+      for (const c of el) { const f = find(c, ok); if (f) return f; }
+      return null;
+    }
+    if (!el || typeof el !== "object" || !el.props) return null;
+    return ok(el) ? el : find(el.props.children, ok);
+  };
+  let stopped = 0;
+  find(tree, (e) => e.props.className === "bug-more").props.onClick(
+    { stopPropagation: () => { stopped++; } });
+  const openRow = renderToString(<I18nProvider initialLocale="en">
+    <BugRow b={reported} open toggle={noop} /></I18nProvider>)
+    .replace(/<!-- -->/g, "");
+  // verifies: REQ-BUGS-1121#CASE-2
+  test("bugs: an opened row shows why, where, source and file, and stays open",
+    ["Why it matters:</b> Money", "`p.py:3`", "Source:</b> ticket",
+      "bugs/Payments.md:5"].every((s) => openRow.includes(s))
+      && stopped === 1);
+  const all = BUGS_FIXTURE;
+  const byPrio = filterBugs(all, "", "P3");
+  const bySearch = filterBugs(all, "title b2", null);
+  // verifies: REQ-BUGS-1121#CASE-7
+  test("bugs: a chip or a search narrows the list and opens its groups",
+    byPrio.keys.join() === "Search" && byPrio.groups.Search.length === 1
+      && byPrio.counts.P1 === 1 && byPrio.found.length === 3
+      && bySearch.keys.join() === "Payments"
+      && bySearch.groups.Payments.map((b) => b.ref).join() === "B2"
+      && groupOpen(null, false) === false && groupOpen(null, true) === true);
+}
+
 /** `saveBug` over a fake folder. It caches the folder it was given, so the
  * refusal runs first: a refused folder is never cached. */
 export async function bugFileChecks() {
@@ -274,6 +322,30 @@ export async function bugFileChecks() {
   test("bugs: a folder with no _map.json is refused",
     refused.includes("requirements folder")
       && Object.keys(refusedFiles).length === 0);
+  const draft = { module: "Core", title: "Mine", prio: "P2" };
+  const savedOut = await addOutcome(draft, true,
+    async () => ({ ref: "B4", file: "requirements/bugs/Core.md" }));
+  adoptMapExport({ bugs: BUGS_FIXTURE });
+  const withSaved = renderToString(
+    <I18nProvider initialLocale="en">
+      <ProblemsView openSpec={noop} problems={[]} initialFilter="BUGS"
+        initialAddedBugs={[savedOut.row]} />
+    </I18nProvider>);
+  adoptMapExport({ bugs: [] });
+  // verifies: REQ-BUGS-1122#CASE-6
+  test("bugs: a saved bug shows at once, waiting for sync, and is counted",
+    savedOut.close && savedOut.row.added && savedOut.row.ref === "B4"
+      && withSaved.includes("added, run sync") && />Bugs<span[^>]*>4</.test(withSaved));
+  const abort = Object.assign(new Error("cancelled"), { name: "AbortError" });
+  const cancelled = await addOutcome(draft, true, async () => { throw abort; });
+  const failed = await addOutcome(draft, true, async () => {
+    throw new Error("disk full"); });
+  const noApi = await addOutcome(draft, false, null);
+  // verifies: REQ-BUGS-1122#CASE-7
+  test("bugs: cancelling the folder picker keeps the form, with no error",
+    cancelled.close === false && cancelled.error === null && !cancelled.row
+      && failed.close === false && failed.error === "disk full"
+      && noApi.close === true && noApi.command.includes("sync --bug"));
 }
 
 {

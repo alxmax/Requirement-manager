@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## plugin `v8.29.4` — 2026-11-26
+
+**Release v8.29.4.**
+
+**The Bugs family's `clause-without-case` questions, read one by one (ADR-0075).**
+
+- All 8 on ARCH-BUGS-078's requirements were read against their cases: 3 were real gaps, 4 had a clause only partly proven, 1 (REQ-BUGS-1129) was a false alarm and is unchanged.
+- New cases, each with a check: `sync --bug`'s defaults and the columns its flags name (REQ-BUGS-1119 CASE-6); a chip or a search narrows the Bugs list and opens its groups (REQ-BUGS-1121 CASE-7); a saved bug shows at once and is counted (REQ-BUGS-1122 CASE-6); cancelling the folder picker keeps the form (REQ-BUGS-1122 CASE-7).
+- Partly proven clauses gained an assertion in an existing case: headers read without regard to case and two modules each holding a `B1` (REQ-BUGS-1116); an opened row's fields (REQ-BUGS-1121); `BUG_SKIP_SECTIONS`, the register never chosen as a target and `bug_format` in the map (REQ-BUGS-1126); `--version`/`--commit` and their `—` fallbacks (REQ-BUGS-1127).
+- REQ-BUGS-1123 CASE-2's check now filters the list and prints its report, instead of passing the filter's label by hand.
+- The Bugs panel's add path moves into `addOutcome`, and the report's filter label into `reportScope`, so both can be checked without a browser. Behaviour is unchanged.
+- This repository's root `.reqmapignore` now excludes `.claude/worktrees/**`, as the one `init` seeds for consumers already did. With agent worktrees present, a local `sync --code ..` read each as a second copy of the repository: 13,052 members and three dangling-tag errors.
+
 ## plugin `v8.29.3` — 2026-11-26
 
 **Release v8.29.3.**

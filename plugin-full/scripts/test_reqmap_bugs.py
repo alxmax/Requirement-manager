@@ -84,6 +84,13 @@ class BugFile(unittest.TestCase):  # tested-by: REQ-BUGS-1116 @unit
             (got["id"], got["ref"], got["module"], got["title"], got["prio"],
              got["date"], got["where"], got["why"], got["source"],
              got["estimated"]))
+        # headers compare without case, and a second module has its own B1
+        other = _bug_file(self.d, "Billing.md", "# Bugs — Billing\n\n"
+                          + HEAD.replace("Priority", "PRIORITY").replace("Bug", "bug")
+                          + "| B1 | Late | P2 | | | | |\n")
+        got2 = _read(self.d, other)[0]
+        self.assertEqual(("Billing:B1", "Late", "P2"),
+                         (got2["id"], got2["title"], got2["prio"]))
 
     def test_a_repository_names_its_own_columns(self):
         # verifies: REQ-BUGS-1116#CASE-2
@@ -367,6 +374,21 @@ class AddABug(unittest.TestCase):  # tested-by: REQ-BUGS-1119 @integration
                                  "--prio", "p2*").returncode)
         got = json.loads(_run(d, "ask", "--bugs", "--json").stdout)["bugs"][0]
         self.assertEqual(("P2", True), (got["prio"], got["estimated"]))
+
+    def test_the_defaults_and_the_named_columns(self):
+        # verifies: REQ-BUGS-1119#CASE-6
+        import datetime
+        d = _repo(self)
+        done = _run(d, "sync", "--bug", "T", "--module", "Core", "--where",
+                    "`a.py:3`", "--why", "Money", "--source", "ticket 9")
+        self.assertEqual(0, done.returncode, done.stderr)
+        self.assertIn("requirements/bugs/Core.md", done.stdout.replace("\\", "/"))
+        got = json.loads(_run(d, "ask", "--bugs", "--json").stdout)["bugs"][0]
+        self.assertEqual(
+            ("P2", False, datetime.date.today().isoformat(), "`a.py:3`", "Money",
+             "ticket 9"),
+            (got["prio"], got["estimated"], got["date"], got["where"], got["why"],
+             got["source"]))
 
     def test_the_engine_and_the_viewer_write_the_same_bytes(self):
         # tested-by: REQ-BUGS-1119 @unit

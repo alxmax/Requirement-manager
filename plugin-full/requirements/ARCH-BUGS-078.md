@@ -84,9 +84,11 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — a canonical file reads back whole
-  Given  a file `# Bugs — Payments` with one row in every canonical column
-  When   the file is read
-  Then   the bug has module `Payments` and every field, with id `Payments:B1`
+  Given  a file `# Bugs — Payments` with one row in every canonical column, and a file
+         `# Bugs — Billing` whose headers are in other letter case, also holding a `B1`
+  When   the files are read
+  Then   the bug has module `Payments` and every field, with id `Payments:B1`, and the
+         other reads as `Billing:B1` with its title and priority
 
 CASE-2 — a repository's own columns are read
   Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two
@@ -327,6 +329,13 @@ CASE-5 — an estimate stays an estimate
   When   it is read back
   Then   its priority is `P2` and it is marked estimated
 
+CASE-6 — the defaults, and the columns the flags name
+  Given  a bug added with no `--prio` and no `--date`, and with `--where`, `--why` and
+         `--source`
+  When   it is added and read back
+  Then   the command prints the file it wrote, and the bug is `P2`, not estimated, dated
+         today, with those three values in their columns
+
 --------------------
 
 
@@ -450,9 +459,12 @@ CASE-1 — the tab counts the bugs
   Then   the tab reads `Bugs` with 3
 
 CASE-2 — bugs group by module with the date on the row
-  Given  bugs in two modules, one dated 2026-03-15
-  When   the panel renders
-  Then   each module is one group, and `15.03.2026` follows that bug's priority
+  Given  bugs in two modules, one dated 2026-03-15, and a bug with why, where, source and
+         file
+  When   the panel renders, and that bug's row is opened and its text clicked
+  Then   each module is one group, and `15.03.2026` follows that bug's priority; the opened
+         row shows why it matters, where, the source and the file with its line, and the
+         click does not reach the row, so it stays open
 
 CASE-3 — the label follows the language
   Given  the same map in Romanian
@@ -475,6 +487,12 @@ CASE-6 — a legend says what each priority means
   When   the panel renders
   Then   under the chip row, P0 to P4 appear in order with critical, high, medium, low and
          minor, each in its rows' colour, and `*` is explained as an estimate
+
+CASE-7 — a chip or a search narrows the list and opens its groups
+  Given  bugs at P1 and P2 in one module and a P3 in another
+  When   the P3 chip is chosen, then the text of one title is searched
+  Then   each keeps only the matching bugs, grouped by module, the chip counts still count
+         every priority the search found, and a narrowed list opens its groups
 
 --------------------
 
@@ -528,6 +546,17 @@ CASE-5 — the form renders its fields
   When   it renders
   Then   it has six fields, and the module field names its suggestions
 
+CASE-6 — a saved bug shows at once
+  Given  a bug the folder accepted as `B4`, beside three known bugs
+  When   the tab renders
+  Then   the row shows, marked as waiting for `sync`, and the tab counts 4
+
+CASE-7 — cancelling the folder picker keeps the form
+  Given  a bug being saved
+  When   the folder picker is cancelled, and when the write fails
+  Then   a cancel keeps the form open with no error and adds no row, a failure keeps it
+         open with the error, and without the API the form closes on the command
+
 --------------------
 
 
@@ -559,9 +588,9 @@ CASE-1 — the report holds every field of what is shown
   Then   it holds that module's count per priority and each field, with nothing left closed
 
 CASE-2 — the report states its filter
-  Given  a report narrowed to P1
-  When   it renders
-  Then   its header names P1 and the total shown
+  Given  a list of bugs at P1, P2 and P3, narrowed to P1
+  When   its report renders
+  Then   its header names P1 and the total shown, and it holds only the P1 bugs
 
 CASE-3 — nothing to export
   Given  an empty list
@@ -606,9 +635,10 @@ CASE-2 — a new module in a numbered folder
   Then   the file is `05_<module>.md`
 
 CASE-3 — a section that does not match
-  Given  sections for `P0-P1` and `P2`
-  When   a `P4` bug is added
-  Then   it joins the first table
+  Given  sections for `P0-P1` and `P2`, and a file whose `P2` section `BUG_SKIP_SECTIONS`
+         matches
+  When   a `P4` bug is added to the first, and a `P2` bug to the second
+  Then   each joins the first table
 
 CASE-4 — a likely duplicate
   Given  a module holding a bug with nearly the same title
@@ -616,9 +646,11 @@ CASE-4 — a likely duplicate
   Then   the first exits 2 and writes nothing, and the second adds the row
 
 CASE-5 — the engine and the viewer agree
-  Given  the shared fixture of texts, formats and file lists
-  When   each side runs
-  Then   each returns the fixture's expected text and file
+  Given  the shared fixture of texts, formats and file lists, and a folder holding the
+         register beside a module file
+  When   each side runs, and the files a row may go to are listed
+  Then   each returns the fixture's expected text and file, the register is not listed,
+         and `bug_format` is empty for the default format and carries a repository's own
 
 --------------------
 
@@ -649,8 +681,10 @@ Every bullet below is binding.
 ## Cases
 CASE-1 — a fix moves the row
   Given  an open bug and a version file
-  When   `sync --fix` runs
-  Then   `ask --bugs` no longer lists it and the register row has every field
+  When   `sync --fix` runs, then with `--version` and `--commit`, then in a repository
+         with neither a version file nor git
+  Then   `ask --bugs` no longer lists it and the register row has every field; the flags'
+         values win, and with neither the version and the commit read `—`
 
 CASE-2 — a number is never given twice
   Given  the highest bug closed

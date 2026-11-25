@@ -3,7 +3,7 @@ generated: 2026-11-26
 engine: 2026-11-25.1
 nodes: 379
 edges: 130
-design pass-rate: 99% (161/163 source files without a design candidate)
+design pass-rate: 98% (160/163 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -776,8 +776,8 @@ graph LR
   ARCH_MAPSTAMP_079["A map says which build it is and how it opens<br><small>ARCH-MAPSTAMP-079</small>"]
   f_app_src_components_Rail_jsx_4["app/src/components/Rail.jsx:4"]
   ARCH_MAPSTAMP_079 -->|implements| f_app_src_components_Rail_jsx_4
-  f_plugin_full_scripts_test_reqmap_bugs_py_434_469["plugin-full/scripts/test_reqmap_bugs.py:434-469"]
-  ARCH_MAPSTAMP_079 -->|tested-by| f_plugin_full_scripts_test_reqmap_bugs_py_434_469
+  f_plugin_full_scripts_test_reqmap_bugs_py_456_491["plugin-full/scripts/test_reqmap_bugs.py:456-491"]
+  ARCH_MAPSTAMP_079 -->|tested-by| f_plugin_full_scripts_test_reqmap_bugs_py_456_491
   f_plugin_full_scripts_reqmap_engine_mapjson_py_126["plugin-full/scripts/reqmap_engine/mapjson.py:126"]
   ARCH_MAPSTAMP_079 -->|implements| f_plugin_full_scripts_reqmap_engine_mapjson_py_126
   ARCH_MCP_073["Serving the engine over MCP<br><small>ARCH-MCP-073</small>"]

@@ -38,6 +38,8 @@ docs/superpowers/**
 # this the local gate and CI disagree — exactly the divergence the gate exists to
 # prevent, and it would bake .worktrees/ paths into a locally regenerated map.
 .worktrees/**
+# The same copies, where Claude Code puts an isolated agent's worktree.
+.claude/worktrees/**
 
 # Consilium deliberation artifacts (gitignored, .gitignore:3). Same class as the
 # worktrees above, and it bites harder: .consilium/FEEDBACK.html carries a real

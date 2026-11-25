@@ -89,6 +89,13 @@ class OwnShape(unittest.TestCase):  # tested-by: REQ-BUGS-1126 @integration
                 "## P2\n\n" + table + "| B2 | b | P2 |\n")
         out = B.append_bug(text, {"module": "M", "title": "c", "prio": "P4"})[0]
         self.assertLess(out.index("| B3 | c | P4 |"), out.index("## P2"))
+        # a section the skip pattern matches is passed over, even for its priority
+        fmt = {"columns": B.cfg.BUG_COLUMNS, "skip": "(?i)fixed"}
+        skipped = ("# Bugs - M\n\n## Open\n\n" + table + "| B1 | a | P1 |\n\n"
+                   "## P2 fixed\n\n" + table + "| B2 | b | P2 |\n")
+        out = B.append_bug(skipped, {"module": "M", "title": "c", "prio": "P2"},
+                           0, fmt)[0]
+        self.assertLess(out.index("| B3 | c | P2 |"), out.index("## P2 fixed"))
 
     def test_a_likely_duplicate_needs_force(self):
         # verifies: REQ-BUGS-1126#CASE-4
@@ -116,6 +123,16 @@ class OwnShape(unittest.TestCase):  # tested-by: REQ-BUGS-1126 @integration
             self.assertEqual(
                 (case["expected"], case["ref"]),
                 B.append_bug(text, case["bug"], case["floor"], case["format"]))
+        # the register is never a file a row may go to
+        d = _repo(self)
+        _bug_file(d, "Billing.md", OPEN)
+        _bug_file(d, "_fixed.md", "# Fixed\n")
+        self.assertEqual(["Billing.md"], [n for n, _t in B._folder_files(
+            os.path.join(d, "requirements", "bugs"))])
+        # the map carries a repository's own format, and nothing for the default
+        self.assertEqual({}, B.format_block())
+        with mock.patch.object(B.cfg, "BUG_SKIP_SECTIONS", "(?i)fixed"):
+            self.assertEqual("(?i)fixed", B.format_block()["skip"])
 
 
 class AuditedEdges(unittest.TestCase):  # tested-by: REQ-BUGS-1118 @integration
@@ -166,6 +183,19 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
                          (row["id"], row["title"], row["module"], row["prio"],
                           row["date"], row["version"], row["commit"]))
         self.assertRegex(row["fixed"], r"^\d{4}-\d{2}-\d{2}$")
+
+    def test_the_version_and_commit_fall_back(self):
+        # verifies: REQ-BUGS-1127#CASE-1
+        d = _gitrepo(self)
+        self.assertEqual(0, _run(d, "sync", "--fix", "Billing:B1", "--version",
+                                 "9.9.9", "--commit", "abc1234").returncode)
+        row = _register(d)[0]
+        self.assertEqual(("9.9.9", "abc1234"), (row["version"], row["commit"]))
+        bare = _repo(self)
+        _bug_file(bare, "Billing.md", OPEN)
+        self.assertEqual(0, _run(bare, "sync", "--fix", "Billing B2").returncode)
+        row = _register(bare)[0]
+        self.assertEqual(("—", "—"), (row["version"], row["commit"]))
 
     def test_a_number_is_never_given_twice(self):
         # verifies: REQ-BUGS-1127#CASE-2

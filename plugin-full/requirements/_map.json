@@ -2058,7 +2058,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column\n  When   the file is read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-4 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-5 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\nCASE-6 — a row says where it came from\n  Given  a bug on line 5 of a file\n  When   the file is read\n  Then   the bug carries that file and line\n\n--------------------",
+      "accept": "CASE-1 — a canonical file reads back whole\n  Given  a file `# Bugs — Payments` with one row in every canonical column, and a file\n         `# Bugs — Billing` whose headers are in other letter case, also holding a `B1`\n  When   the files are read\n  Then   the bug has module `Payments` and every field, with id `Payments:B1`, and the\n         other reads as `Billing:B1` with its title and priority\n\nCASE-2 — a repository's own columns are read\n  Given  a table headed `#`, `Issue`, `Sev`, with `BUG_COLUMNS` naming the last two\n  When   the file is read\n  Then   its rows are bugs, and a canonical table in another file still reads\n\nCASE-3 — another table is not a bug table\n  Given  a file with a contents table and a bug table\n  When   the file is read\n  Then   only the bug table's rows are bugs, and no problem is reported\n\nCASE-4 — a bad row does not cost the others\n  Given  a table with a row with no priority, a repeated id and a date of `31.13.2026`\n  When   the file is read\n  Then   each gives one problem line naming its file and line, and the good rows are bugs\n\nCASE-5 — an estimated priority is kept apart\n  Given  a row whose id is `B2*` and a row whose priority is `P2 (audit), P1`\n  When   the file is read\n  Then   the first is `B2`, estimated, and the second is `P2`\n\nCASE-6 — a row says where it came from\n  Given  a bug on line 5 of a file\n  When   the file is read\n  Then   the bug carries that file and line\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2165,7 +2165,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:100"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:107"
         },
         {
           "role": "implements",
@@ -2224,15 +2224,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:181"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:188"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:223"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:230"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:241"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:248"
         },
         {
           "role": "implements",
@@ -2304,15 +2304,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:121"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:138"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:270"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:277"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:499"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:521"
         },
         {
           "role": "implements",
@@ -2346,7 +2346,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the first bug creates the file\n  Given  a repository with no bug folder\n  When   `sync --bug \"Refund is applied twice\" --module \"Payments API\" --prio P1` runs\n  Then   `requirements/bugs/Payments-API.md` holds its heading and a row with id `B1`\n\nCASE-2 — the next bug takes the next id\n  Given  a file holding `B1` and `B7`\n  When   `sync --bug` adds to that module\n  Then   the new row is the last of the table, with id `B8`, and no other line changes\n\nCASE-3 — a value cannot break the row\n  Given  a why of `a|b` over two lines\n  When   the bug is added\n  Then   it reads back with that text on one line and the row has seven cells\n\nCASE-4 — the engine and the viewer write the same bytes\n  Given  the shared fixture of a text and a bug\n  When   `append_bug` and `appendBug` each run\n  Then   each returns the fixture's expected text\n\nCASE-5 — an estimate stays an estimate\n  Given  a bug added with `--prio P2*`\n  When   it is read back\n  Then   its priority is `P2` and it is marked estimated\n\n--------------------",
+      "accept": "CASE-1 — the first bug creates the file\n  Given  a repository with no bug folder\n  When   `sync --bug \"Refund is applied twice\" --module \"Payments API\" --prio P1` runs\n  Then   `requirements/bugs/Payments-API.md` holds its heading and a row with id `B1`\n\nCASE-2 — the next bug takes the next id\n  Given  a file holding `B1` and `B7`\n  When   `sync --bug` adds to that module\n  Then   the new row is the last of the table, with id `B8`, and no other line changes\n\nCASE-3 — a value cannot break the row\n  Given  a why of `a|b` over two lines\n  When   the bug is added\n  Then   it reads back with that text on one line and the row has seven cells\n\nCASE-4 — the engine and the viewer write the same bytes\n  Given  the shared fixture of a text and a bug\n  When   `append_bug` and `appendBug` each run\n  Then   each returns the fixture's expected text\n\nCASE-5 — an estimate stays an estimate\n  Given  a bug added with `--prio P2*`\n  When   it is read back\n  Then   its priority is `P2` and it is marked estimated\n\nCASE-6 — the defaults, and the columns the flags name\n  Given  a bug added with no `--prio` and no `--date`, and with `--where`, `--why` and\n         `--source`\n  When   it is added and read back\n  Then   the command prints the file it wrote, and the bug is `P2`, not estimated, dated\n         today, with those three values in their columns\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2363,19 +2363,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:309"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:316"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:324"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:331"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:337"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:344"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:372"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:394"
         },
         {
           "role": "implements",
@@ -2402,19 +2402,9 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clauses": 6,
+      "covered": 6,
+      "clarify": []
     },
     {
       "id": "REQ-BUGS-1149",
@@ -2445,15 +2435,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:146"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:163"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:347"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:354"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:519"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:541"
         },
         {
           "role": "implements",
@@ -2506,11 +2496,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:382"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:404"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:499"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:521"
         },
         {
           "role": "implements",
@@ -2568,7 +2558,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15\n  When   the panel renders\n  Then   each module is one group, and `15.03.2026` follows that bug's priority\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\nCASE-5 — one button opens or closes every group\n  Given  bugs in two modules, both groups closed\n  When   `Expand all` is pressed, then the button again\n  Then   both groups are open and the button reads `Collapse all`; then both are closed\n         and it reads `Expand all`\n\nCASE-6 — a legend says what each priority means\n  Given  bugs in two modules\n  When   the panel renders\n  Then   under the chip row, P0 to P4 appear in order with critical, high, medium, low and\n         minor, each in its rows' colour, and `*` is explained as an estimate\n\n--------------------",
+      "accept": "CASE-1 — the tab counts the bugs\n  Given  a map with three bugs\n  When   Problems renders\n  Then   the tab reads `Bugs` with 3\n\nCASE-2 — bugs group by module with the date on the row\n  Given  bugs in two modules, one dated 2026-03-15, and a bug with why, where, source and\n         file\n  When   the panel renders, and that bug's row is opened and its text clicked\n  Then   each module is one group, and `15.03.2026` follows that bug's priority; the opened\n         row shows why it matters, where, the source and the file with its line, and the\n         click does not reach the row, so it stays open\n\nCASE-3 — the label follows the language\n  Given  the same map in Romanian\n  When   Problems renders\n  Then   the tab reads `Buguri` and the search placeholder is Romanian\n\nCASE-4 — a repository with no bugs still has the tab\n  Given  a map with no `bugs` key\n  When   the panel renders\n  Then   the tab reads 0 and the panel offers `Add bug`\n\nCASE-5 — one button opens or closes every group\n  Given  bugs in two modules, both groups closed\n  When   `Expand all` is pressed, then the button again\n  Then   both groups are open and the button reads `Collapse all`; then both are closed\n         and it reads `Expand all`\n\nCASE-6 — a legend says what each priority means\n  Given  bugs in two modules\n  When   the panel renders\n  Then   under the chip row, P0 to P4 appear in order with critical, high, medium, low and\n         minor, each in its rows' colour, and `*` is explained as an estimate\n\nCASE-7 — a chip or a search narrows the list and opens its groups\n  Given  bugs at P1 and P2 in one module and a P3 in another\n  When   the P3 chip is chosen, then the text of one title is searched\n  Then   each keeps only the matching bugs, grouped by module, the chip counts still count\n         every priority the search found, and a narrowed list opens its groups\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2609,15 +2599,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:438"
+          "loc": "app/src/views/problems/BugsPanel.jsx:456"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -2625,7 +2615,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -2649,7 +2639,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a saved row keeps what the file already holds\n  Given  a folder handle whose module file changed after the map was built\n  When   `saveBug` runs\n  Then   the file holds the newer rows and the new one, with the next id\n\nCASE-2 — the wrong folder is refused\n  Given  a picked folder with no `_map.json`\n  When   `saveBug` runs\n  Then   it throws the message naming the folder, and no file is written\n\nCASE-3 — no API, a command\n  Given  a bug with a quote in its title\n  When   `bugCommand` runs\n  Then   the command is `sync --bug` with the quote escaped and each value flagged\n\nCASE-4 — a new repository has suggestions\n  Given  no bugs and one architecture requirement\n  When   `moduleChoices` runs\n  Then   it returns that requirement's title\n\nCASE-5 — the form renders its fields\n  Given  the form open\n  When   it renders\n  Then   it has six fields, and the module field names its suggestions\n\n--------------------",
+      "accept": "CASE-1 — a saved row keeps what the file already holds\n  Given  a folder handle whose module file changed after the map was built\n  When   `saveBug` runs\n  Then   the file holds the newer rows and the new one, with the next id\n\nCASE-2 — the wrong folder is refused\n  Given  a picked folder with no `_map.json`\n  When   `saveBug` runs\n  Then   it throws the message naming the folder, and no file is written\n\nCASE-3 — no API, a command\n  Given  a bug with a quote in its title\n  When   `bugCommand` runs\n  Then   the command is `sync --bug` with the quote escaped and each value flagged\n\nCASE-4 — a new repository has suggestions\n  Given  no bugs and one architecture requirement\n  When   `moduleChoices` runs\n  Then   it returns that requirement's title\n\nCASE-5 — the form renders its fields\n  Given  the form open\n  When   it renders\n  Then   it has six fields, and the module field names its suggestions\n\nCASE-6 — a saved bug shows at once\n  Given  a bug the folder accepted as `B4`, beside three known bugs\n  When   the tab renders\n  Then   the row shows, marked as waiting for `sync`, and the tab counts 4\n\nCASE-7 — cancelling the folder picker keeps the form\n  Given  a bug being saved\n  When   the folder picker is cancelled, and when the write fails\n  Then   a cancel keeps the form open with no error and adds no row, a failure keeps it\n         open with the error, and without the API the form closes on the command\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2677,19 +2667,9 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clauses": 7,
+      "covered": 7,
+      "clarify": []
     },
     {
       "id": "REQ-BUGS-1123",
@@ -2708,7 +2688,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the report holds every field of what is shown\n  Given  a filtered list of two bugs in one module, one with why, where and source\n  When   the report renders\n  Then   it holds that module's count per priority and each field, with nothing left closed\n\nCASE-2 — the report states its filter\n  Given  a report narrowed to P1\n  When   it renders\n  Then   its header names P1 and the total shown\n\nCASE-3 — nothing to export\n  Given  an empty list\n  When   the panel renders\n  Then   the button is disabled\n\n--------------------",
+      "accept": "CASE-1 — the report holds every field of what is shown\n  Given  a filtered list of two bugs in one module, one with why, where and source\n  When   the report renders\n  Then   it holds that module's count per priority and each field, with nothing left closed\n\nCASE-2 — the report states its filter\n  Given  a list of bugs at P1, P2 and P3, narrowed to P1\n  When   its report renders\n  Then   its header names P1 and the total shown, and it holds only the P1 bugs\n\nCASE-3 — nothing to export\n  Given  an empty list\n  When   the panel renders\n  Then   the button is disabled\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2769,7 +2749,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an existing numbered file with its own columns\n  Given  `04_Billing.md` with a localized header and a table under `## P2`\n  When   `sync --bug \"x\" --module Billing --prio P2` runs\n  Then   the row is in that table, in those columns, and no `Billing.md` exists\n\nCASE-2 — a new module in a numbered folder\n  Given  `04_Billing.md`\n  When   `sync --bug` names a module with no file\n  Then   the file is `05_<module>.md`\n\nCASE-3 — a section that does not match\n  Given  sections for `P0-P1` and `P2`\n  When   a `P4` bug is added\n  Then   it joins the first table\n\nCASE-4 — a likely duplicate\n  Given  a module holding a bug with nearly the same title\n  When   `sync --bug` runs without and then with `--force`\n  Then   the first exits 2 and writes nothing, and the second adds the row\n\nCASE-5 — the engine and the viewer agree\n  Given  the shared fixture of texts, formats and file lists\n  When   each side runs\n  Then   each returns the fixture's expected text and file\n\n--------------------",
+      "accept": "CASE-1 — an existing numbered file with its own columns\n  Given  `04_Billing.md` with a localized header and a table under `## P2`\n  When   `sync --bug \"x\" --module Billing --prio P2` runs\n  Then   the row is in that table, in those columns, and no `Billing.md` exists\n\nCASE-2 — a new module in a numbered folder\n  Given  `04_Billing.md`\n  When   `sync --bug` names a module with no file\n  Then   the file is `05_<module>.md`\n\nCASE-3 — a section that does not match\n  Given  sections for `P0-P1` and `P2`, and a file whose `P2` section `BUG_SKIP_SECTIONS`\n         matches\n  When   a `P4` bug is added to the first, and a `P2` bug to the second\n  Then   each joins the first table\n\nCASE-4 — a likely duplicate\n  Given  a module holding a bug with nearly the same title\n  When   `sync --bug` runs without and then with `--force`\n  Then   the first exits 2 and writes nothing, and the second adds the row\n\nCASE-5 — the engine and the viewer agree\n  Given  the shared fixture of texts, formats and file lists, and a folder holding the\n         register beside a module file\n  When   each side runs, and the files a row may go to are listed\n  Then   each returns the fixture's expected text and file, the register is not listed,\n         and `bug_format` is empty for the default format and carries a repository's own\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2798,7 +2778,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:108"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:115"
         },
         {
           "role": "implements",
@@ -2870,7 +2850,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a fix moves the row\n  Given  an open bug and a version file\n  When   `sync --fix` runs\n  Then   `ask --bugs` no longer lists it and the register row has every field\n\nCASE-2 — a number is never given twice\n  Given  the highest bug closed\n  When   `sync --bug` adds to that file\n  Then   the new row takes the next number\n\nCASE-3 — a dismissal\n  Given  an open bug\n  When   `sync --fix ID --note \"works as designed\"` runs\n  Then   the register says `not a bug` and keeps the note\n\nCASE-4 — a repository's own register\n  Given  a register with localized columns and no module column\n  When   a bug is closed\n  Then   the row fits those columns\n\nCASE-5 — a glob over the folder\n  Given  `BUG_SOURCES` matching the bugs folder\n  When   the list is read\n  Then   the register's rows are not listed\n\n--------------------",
+      "accept": "CASE-1 — a fix moves the row\n  Given  an open bug and a version file\n  When   `sync --fix` runs, then with `--version` and `--commit`, then in a repository\n         with neither a version file nor git\n  Then   `ask --bugs` no longer lists it and the register row has every field; the flags'\n         values win, and with neither the version and the commit read `—`\n\nCASE-2 — a number is never given twice\n  Given  the highest bug closed\n  When   `sync --bug` adds to that file\n  Then   the new row takes the next number\n\nCASE-3 — a dismissal\n  Given  an open bug\n  When   `sync --fix ID --note \"works as designed\"` runs\n  Then   the register says `not a bug` and keeps the note\n\nCASE-4 — a repository's own register\n  Given  a register with localized columns and no module column\n  When   a bug is closed\n  Then   the row fits those columns\n\nCASE-5 — a glob over the folder\n  Given  `BUG_SOURCES` matching the bugs folder\n  When   the list is read\n  Then   the register's rows are not listed\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2887,15 +2867,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:156"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:173"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:238"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:268"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:243"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:273"
         },
         {
           "role": "implements",
@@ -3000,11 +2980,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:187"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:217"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:214"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:244"
         },
         {
           "role": "implements",
@@ -3067,11 +3047,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:266"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:296"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:363"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
         },
         {
           "role": "implements",
@@ -3144,11 +3124,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:329"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:359"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:363"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
         },
         {
           "role": "implements",
@@ -13384,11 +13364,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:434"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:456"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:469"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:491"
         },
         {
           "role": "implements",
@@ -13443,11 +13423,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:434"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:456"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:500"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:522"
         },
         {
           "role": "implements",
@@ -13508,11 +13488,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:469"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:491"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:500"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:522"
         },
         {
           "role": "implements",
@@ -29378,7 +29358,7 @@
       "horizon": "next",
       "req": "REQ-BUGS-1122",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Drafts left after the 2026-11-21 read",
       "context": "",
       "section_date": null
@@ -31431,7 +31411,7 @@
     },
     {
       "month": "2026-11",
-      "count": 10,
+      "count": 11,
       "first": "2026-11-14",
       "last": "2026-11-26",
       "versions": [
@@ -31444,11 +31424,20 @@
         "v8.29.0",
         "v8.29.1",
         "v8.29.2",
-        "v8.29.3"
+        "v8.29.3",
+        "v8.29.4"
       ],
       "landmark": "v8.29.0",
       "headline": "Release v8.29.0",
       "entries": [
+        {
+          "version": "v8.29.4",
+          "date": "2026-11-26",
+          "headline": "Release v8.29.4",
+          "body": "**Release v8.29.4.**\n\n**The Bugs family's `clause-without-case` questions, read one by one (ADR-0075).**\n\n- All 8 on ARCH-BUGS-078's requirements were read against their cases: 3 were real gaps, 4 had a clause only partly proven, 1 (REQ-BUGS-1129) was a false alarm and is unchanged.\n- New cases, each with a check: `sync --bug`'s defaults and the columns its flags name (REQ-BUGS-1119 CASE-6); a chip or a search narrows the Bugs list and opens its groups (REQ-BUGS-1121 CASE-7); a saved bug shows at once and is counted (REQ-BUGS-1122 CASE-6); cancelling the folder picker keeps the form (REQ-BUGS-1122 CASE-7).\n- Partly proven clauses gained an assertion in an existing case: headers read without regard to case and two modules each holding a `B1` (REQ-BUGS-1116); an opened row's fields (REQ-BUGS-1121); `BUG_SKIP_SECTIONS`, the register never chosen as a target and `bug_format` in the map (REQ-BUGS-1126); `--version`/`--commit` and their `—` fallbacks (REQ-BUGS-1127).\n- REQ-BUGS-1123 CASE-2's check now filters the list and prints its report, instead of passing the filter's label by hand.\n- The Bugs panel's add path moves into `addOutcome`, and the report's filter label into `reportScope`, so both can be checked without a browser. Behaviour is unchanged.\n- This repository's root `.reqmapignore` now excludes `.claude/worktrees/**`, as the one `init` seeds for consumers already did. With agent worktrees present, a local `sync --code ..` read each as a second copy of the repository: 13,052 members and three dangling-tag errors.",
+          "first_commit": "2026-11-26",
+          "last_commit": "2026-11-26"
+        },
         {
           "version": "v8.29.3",
           "date": "2026-11-26",
@@ -31832,14 +31821,14 @@
   ],
   "design": {
     "files": 163,
-    "clean_files": 161,
-    "score": 99,
+    "clean_files": 160,
+    "score": 98,
     "candidates": {
       "encapsulation": 0,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 2
+      "standards": 3
     },
     "findings": [
       {
@@ -31857,6 +31846,14 @@
         "line": 1,
         "name": "views.jsx",
         "detail": "516 lines (over 500)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "app/src/views/problems/BugsPanel.jsx",
+        "line": 1,
+        "name": "BugsPanel.jsx",
+        "detail": "505 lines (over 500)"
       }
     ],
     "advice": {

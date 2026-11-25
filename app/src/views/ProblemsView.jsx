@@ -116,11 +116,11 @@ export function computeProblems() {
 const PANELS = new Set(["DESIGN", "HEALTH", "BUGS"]);
 
 export function ProblemsView({
-  openSpec, problems, initialFilter = "ALL",
+  openSpec, problems, initialFilter = "ALL", initialAddedBugs = [],
 }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState(initialFilter);
-  const [addedBugs, setAddedBugs] = useState([]);
+  const [addedBugs, setAddedBugs] = useState(initialAddedBugs);
   const [printing, setPrinting] = usePrinting();
   const all = (problems || computeProblems()).filter((p) => p.sev !== "DESIGN");
   const counts = all.reduce((a, p) => {
