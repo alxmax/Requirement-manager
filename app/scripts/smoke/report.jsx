@@ -1,6 +1,7 @@
 // implements: ARCH-VIEWER-007
 // tested-by: REQ-VIEWER-1139
 // tested-by: REQ-VIEWER-1145
+// tested-by: REQ-VIEWER-1153
 // tested-by: REQ-TESTGAPS-1146
 /* The Report page: one place for the counts of bugs, questions and missing
  * tags, the ten most important questions and what to do next. Each check
@@ -9,9 +10,10 @@ import { renderToString } from "react-dom/server";
 import { adoptMapExport } from "../../src/lib/data.js";
 import { adaptNode } from "../../src/lib/loadData.js";
 import { computeReport } from "../../src/lib/report.js";
-import { ReportView, problemRows } from "../../src/views/ReportView.jsx";
+import { ReportView, ReportBody, problemRows } from "../../src/views/ReportView.jsx";
 import { reportMarkdown } from "../../src/lib/reportMarkdown.js";
 import { verifyRows } from "../../src/views/QuestionsView.jsx";
+import { Ids } from "../../src/views/report/ReportSections.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
 import { test, json, noop } from "./harness.jsx";
 
@@ -159,6 +161,23 @@ test("report: the Markdown export carries the same numbers",
     && md.includes("| Open bugs | 0 |") && md.includes("brake_test.c")
     && md.includes("2/4 (50%)"));
 
+// verifies: REQ-VIEWER-1145#CASE-3
+adoptMapExport({ nodes: [node("R-1", { members: [IMPL, TEST] }),
+  node("R-3", { members: [IMPL, TEST] })],
+  trace: { ...TRACE, suggestions: {},
+    hygiene: { duplicates: [["R-1", "R-3"]], title_only_confirmed: ["R-3"],
+      structural: 0 },
+    rules: [{ id: "no-print", why: "use the logger", count: 1,
+      hits: [{ file: "a.py", line: 2 }] }] } });
+const ch = computeReport();
+const hyRows = problemRows(ch).map(([l]) => l);
+test("report: duplicates, empty confirmed requirements and design hits are listed",
+  hyRows.includes("Same text under two ids")
+    && hyRows.includes("Confirmed with a title and no clause")
+    && hyRows.includes("Design rule: no-print (use the logger)")
+    && ["word for word", "a title and no clause", "design rules"]
+      .every((w) => ch.recommendations.some((r) => r.text.includes(w))));
+
 // verifies: REQ-TESTGAPS-1146#CASE-5
 adoptMapExport({ nodes: [node("R-1", { members: [IMPL, TEST] })],
   trace: { ...TRACE, vacuous: [{ file: "test_a.py", line: 7, test: "test_same",
@@ -172,4 +191,52 @@ test("report: a test that cannot fail is counted, listed and has a fix",
     && cv.recommendations.some((r) => /cannot fail/.test(r.text))
     && c3b.vacuous === null);
 
-adoptMapExport({ nodes: json.nodes.map(adaptNode) });
+// ---- what each Report section holds (REQ-VIEWER-1153) ----------------------
+adoptMapExport({ engine_version: "2026-01-01", branch: "main",
+  generated_at: "2026-11-26 10:00",
+  health: { score: 80, healthy: 4, total: 5,
+    gate_error_lines: ["a.py:3: RM001 tag names no requirement NOPE-1"],
+    unhealthy: [{ id: "R-NOCODE-001", why: ["drift"] }] },
+  nodes: [node("R-NOCODE-001"), node("R-Q-002", { members: [IMPL, TEST],
+    clarify: [CQ("no-cases", "structure")] })],
+  bugs: [{ id: "b1", ref: "B-1", prio: "P1", module: "m", title: "one" }] });
+const c6 = computeReport();
+const opened6 = [];
+const page6 = renderToString(<ReportView openSpec={(id) => opened6.push(id)} />);
+const sec = (title) => page6.slice(page6.indexOf(`>${title}</h2>`),
+  page6.indexOf("</section>", page6.indexOf(`>${title}</h2>`)));
+// verifies: REQ-VIEWER-1153#CASE-1
+test("report: the summary names the health, the confirmed share, the largest count",
+  /class="rep-summary">Health 80\/100[^<]*2 live requirements are confirmed[^<]*largest open item: [^<]*\(1\)/
+    .test(page6));
+// verifies: REQ-VIEWER-1153#CASE-2
+test("report: how it was checked names the stamp and each check once",
+  ["2026-01-01", "main", "2026-11-26 10:00", "2 requirements and 2 tagged files read"]
+    .every((s) => sec("How it was checked").includes(s))
+    && ["Gate link sync", "Drift lock", "Test links", "questions read from each",
+      "Bug files"].every((s) => sec("How it was checked").split(s).length === 2));
+// verifies: REQ-VIEWER-1153#CASE-3
+const types6 = problemRows(c6);
+const row6 = (l) => types6.find(([label]) => label === l);
+test("report: problem types carry the dangling tags, drift and each clarify rule",
+  row6("Dangling tags (RM001)")[1].length === 1
+    && row6("Drift")[1].join() === "R-NOCODE-001"
+    && row6("no-cases")[3] === 1 && row6("no-cases")[1].join() === "R-Q-002");
+// verifies: REQ-VIEWER-1153#CASE-4
+test("report: deliverables are paths with what each holds",
+  ["report.md", "_map.json", "bugs/"].every((p) =>
+    new RegExp(`>${p.replace(".", "\.")}</td><td colSpan="2">[^<]+<`, "i")
+      .test(sec("Deliverables"))));
+// verifies: REQ-VIEWER-1153#CASE-5
+const idsEl = Ids({ rows: ["R-NOCODE-001"], ctx: { t: (s) => s, full: true,
+  openSpec: (id) => opened6.push(id) } });
+idsEl.props.children[0].props.onClick();
+test("report: a listed requirement opens its document",
+  opened6.join() === "R-NOCODE-001");
+// verifies: REQ-VIEWER-1153#CASE-6
+const printed6 = renderToString(<ReportBody c={c6} full />);
+test("report: the PDF prints every list out in full",
+  page6.includes("Export PDF") && page6.includes("<details")
+    && !printed6.includes("<details") && printed6.includes("R-NOCODE-001"));
+
+adoptMapExport({ nodes: json.nodes.map(adaptNode), branch: null });

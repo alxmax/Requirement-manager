@@ -4,6 +4,7 @@
 import { useRef } from "react";
 import { EntryBody } from "./EntryBody.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
+import { REQ_BY_ID } from "../../lib/data.js";
 
 /** ROADMAP.md keeps a note under an item as an HTML comment, which is how
  *  a plan file hides it from a Markdown reader — the markers are
@@ -290,7 +291,8 @@ function BarNote({ bar, bars, roadmap, t, openSpec, onClose }) {
   const meta =
     `${bar.start} → ${bar.end}${bar.milestone ? ` · ${bar.milestone}` : ""}`
     + `${item?.horizon ? ` · ${item.horizon}` : ""}`;
-  const reqLine = openSpec
+  // an id the registry does not hold opens nothing, so it is not a button
+  const reqLine = openSpec && REQ_BY_ID[req]
     ? <button type="button" onClick={() => openSpec(req)} style={REQ_LINK}>
         {req}
       </button>

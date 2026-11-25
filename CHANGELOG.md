@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## plugin `v8.29.3` — 2026-11-26
+
+**Release v8.29.3.**
+
+**The viewer's `clause-without-case` questions, read one by one (ADR-0075).**
+
+- All 11 on ARCH-VIEWER-007's requirements were read against their cases: 6 were real gaps, 4 had a clause only partly proven, 1 (REQ-VERSIONTODOS-1097) was a false alarm and is unchanged.
+- New cases, each with a smoke check: the outline's tally row and active chip clear a slice (REQ-VIEWER-945 CASE-4); the Design tab groups by pillar, gives each kind's advice once and says it is advisory (REQ-VIEWER-977 CASE-4); the plan's track fills the room the lanes leave and keeps a long plan's scale (REQ-PLANSTACK-1012 CASE-7); a printed row, card or table line avoids a page break (REQ-VIEWER-1151 CASE-5).
+- A bar's panel showed a requirement id the registry does not hold as a button that opened nothing. It is now plain text, as REQ-VIEWER-999 said; CASE-7 proves both sides and fails on the old code.
+- Partly proven clauses gained an assertion in an existing case: Enter and Space open a cross-reference (REQ-VIEWER-944), the Low tab's rule chips (REQ-VIEWER-1101), the panel's close button (REQ-VIEWER-1114), and the trace block's duplicates, empty confirmed requirements and design rule hits (REQ-VIEWER-1145).
+- REQ-VIEWER-1139 had five clauses with no case and room for one more. The section contents (Summary, How it was checked, Problem types, Deliverables, a listed requirement opening, the full-length PDF) move verbatim to a new REQ-VIEWER-1153 with a case and a check each.
+
 ## plugin `v8.29.2` — 2026-11-25
 
 **Release v8.29.2.**

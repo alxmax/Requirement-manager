@@ -21,6 +21,7 @@ import {
 import {
   PlanGantt, noteText, matchItem, ShippedNote, VersionNote,
 } from "../../src/views/roadmap/PlanGantt.jsx";
+import { PickedNote } from "../../src/views/roadmap/PlanNotes.jsx";
 import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
@@ -135,6 +136,25 @@ const designChecks = [
     && computeProblems().every(p => p.signal !== "design")],
 ];
 for (const [label, ok] of designChecks) test(label, ok);
+{
+  const two = [...DESIGN_WITH.findings, { pillar: "encapsulation",
+    kind: "long-parameter-list", file: "src/other.py", line: 3, name: "make",
+    detail: "`make` takes 8 parameters (over 6)" }];
+  const byPillar = two.reduce((a, f) => {
+    (a[f.pillar] = a[f.pillar] || []).push(f);
+    return a;
+  }, {});
+  const panel = renderToString(<DesignProblemsPanel byPillar={byPillar}
+    advice={DESIGN_WITH.advice} />);
+  const enc = panel.slice(panel.indexOf("<b>encapsulation</b>"));
+  // verifies: REQ-VIEWER-977#CASE-4
+  test("design: candidates are grouped by pillar, advice once, marked advisory",
+    panel.indexOf("<b>abstraction</b>") < panel.indexOf("<b>encapsulation</b>")
+      && ["long-parameter-list", "make", "`make` takes 8", "src/other.py<!-- -->:<!-- -->3"]
+        .every((s) => enc.includes(s))
+      && enc.split("an object waiting to be named").length === 2
+      && panel.includes("never enters the gate"));
+}
 
 // restore the real dataset for anything after this point
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
@@ -258,6 +278,39 @@ const barNoteChecks = [
     })()],
 ];
 for (const [label, ok] of barNoteChecks) test(label, ok);
+{
+  const known = json.nodes[0].id;
+  const asked = [];
+  const bar = (req) => ({ key: req, title: "a bar", start: "2026-01-01",
+    end: "2026-01-02", reqId: req });
+  const noteOf = (req) => {
+    let tree = null;
+    const Probe = () => {
+      const el = PickedNote({ picked: bar(req), lay: { bars: [bar(req)] },
+        roadmap: [], todos: [], openSpec: (id) => asked.push(id), onPick: noop });
+      tree = el.type(el.props);
+      return null;
+    };
+    renderToString(<Probe />);
+    return tree;
+  };
+  const find = (el, ok) => {
+    if (Array.isArray(el)) {
+      for (const c of el) { const f = find(c, ok); if (f) return f; }
+      return null;
+    }
+    if (!el || typeof el !== "object" || !el.props) return null;
+    return ok(el) ? el : find(el.props.children, ok);
+  };
+  const isReq = (id) => (e) => [].concat(e.props.children).includes(id);
+  const knownEl = find(noteOf(known), isReq(known));
+  const unknownEl = find(noteOf("NOPE-X-999"), isReq("NOPE-X-999"));
+  knownEl.props.onClick();
+  // verifies: REQ-VIEWER-999#CASE-7
+  test("roadmap: a bar's requirement opens when the registry has it, else is text",
+    knownEl.type === "button" && asked.join() === known
+      && unknownEl.type === "span");
+}
 
 // ---- a registry tally row requests its slice (REQ-VIEWER-1082) ------------
 // tested-by: REQ-VIEWER-1082

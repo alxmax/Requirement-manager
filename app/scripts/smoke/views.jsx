@@ -38,6 +38,7 @@ import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { ProblemRow } from "../../src/views/problems/ProblemsPanels.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
+import { reqLinkProps } from "../../src/lib/ui.jsx";
 import { CommandsView } from "../../src/views/CommandsView.jsx";
 
 import {
@@ -192,6 +193,22 @@ const linkChecks = [
     !linkSpec.includes("owner")],
 ];
 for (const [label, ok] of linkChecks) test(label, ok);
+{
+  // the delegate the document hangs on its prose: Enter and Space on a link
+  // open it as a click does, and a key on plain text opens nothing
+  const opened = [];
+  const props = reqLinkProps((id) => opened.push(id));
+  const on = (key) => ({ key, target: { dataset: { req: "LINK-DST-002" } },
+    stopPropagation: () => {}, preventDefault: () => {} });
+  props.onClick(on());
+  props.onKeyDown(on("Enter"));
+  props.onKeyDown(on(" "));
+  props.onKeyDown(on("a"));
+  props.onKeyDown({ key: "Enter", target: { dataset: {} } });
+  // verifies: REQ-VIEWER-944#CASE-1
+  test("links: Enter and Space on a cross-reference open it as a click does",
+    opened.join() === "LINK-DST-002,LINK-DST-002,LINK-DST-002");
+}
 
 // ---- the depends-on list wraps between items, never before a comma ---------
 // Each id was a button (an atomic inline) preceded by a bare ", " text node,

@@ -314,6 +314,23 @@ test("gantt: the lane column sticks while the chart scrolls sideways",
       && !box.includes("overflow");
   })());
 
+// verifies: REQ-PLANSTACK-1012#CASE-7
+test("gantt: the track fills the room the lanes leave and keeps a long plan's scale",
+  (() => {
+    const track = (end) => {
+      const html = renderToString(<PlanGantt planning={{ lanes: ["Feature"],
+        bars: [{ title: "a bar", lane: "Feature", start: "2026-09-01", end }] }}
+        history={[]} locale="en" t={(x) => x} zoom={100} />);
+      const m = /position:relative;min-width:(\d+)px;flex:1/.exec(html);
+      return { w: m ? Number(m[1]) : 0,
+        outer: html.includes("width:max-content;min-width:100%") };
+    };
+    // 22px a day (ganttLayout's PX): 302 days from 2026-09-01 to 2027-06-30
+    const short = track("2026-09-10"), long = track("2027-06-30");
+    return short.w > 0 && short.outer && long.outer && long.w >= 302 * 22
+      && long.w > short.w;
+  })());
+
 export const cadencePlan = {
   lanes: ["Engine"],
   bars: [

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reqmap"
-version = "8.29.2"
+version = "8.29.3"
 description = "Drift gate between a written requirement and the code that implements it."
 requires-python = ">=3.9"
 readme = "README.md"

@@ -29,6 +29,7 @@ Every bullet below is binding.
 - The viewer gives open questions a page of their own, each marked High, Medium or Low priority, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]
 - Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]
 - A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]
+- Each Report section between the counts and the recommendations holds what its title says: the summary, how the map was checked, the problem types and the deliverables. [[REQ-VIEWER-1153]]
 - The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
@@ -301,7 +302,8 @@ Every bullet below is binding.
 CASE-1 — a resolvable cross-reference becomes a control
   Given  a clause containing `[[ID]]` and a registry holding that id
   When   the requirement's document is rendered
-  Then   the id appears as an activatable link carrying that id, and the brackets are gone
+  Then   the id appears as an activatable link carrying that id, the brackets are gone,
+         and Enter or Space on it opens the requirement as a click does
 
 CASE-2 — a dangling cross-reference is marked, not linked
   Given  a clause containing `[[ID]]` and a registry that does not hold that id
@@ -360,6 +362,12 @@ CASE-3 — the applied scope is visible and clearable
   Given  the outline rendered with a slice requested
   When   its filter row is drawn
   Then   the chip naming that slice is drawn active
+
+CASE-4 — the same row, or the active chip, clears the slice
+  Given  the `draft` slice requested from the tally
+  When   the `draft` tally row is clicked again, and the active `draft` chip is clicked
+  Then   the row asks for no slice, the chip clears the requested slice and turns itself
+         off, and the status chips read `confirmed`, `draft`, `deprecated` and `orphan`
 
 
 ---
@@ -564,6 +572,13 @@ CASE-3 — the candidates are counted, and listed only in their tab
   When   the open signals are computed and the `All` tab renders
   Then   exactly two computed signals carry the `design` signal at their own severity, each with its `file:line`; neither is rendered in `All`; and a map with no candidates adds none
 
+CASE-4 — the tab groups by pillar, gives each kind's advice once, and says it is advisory
+  Given  two candidates of one kind under one pillar and one under another
+  When   the `Design` tab's list renders
+  Then   each pillar heads its own group, every candidate shows its kind, name, detail and
+         `file:line`, the kind's advice appears once in its group, and the tab says a
+         candidate never enters the gate
+
 ## Context
 **Notes**
 - `distinct_from: REQ-DESIGN-954` - `REQ-DESIGN-954` is the design data the engine writes into the map; this is the viewer tab that draws it.
@@ -704,6 +719,12 @@ CASE-6 — a bar's `roadmap:` opens its item whatever its title says
   When   the bar is matched with `roadmap: v1.2 bugs`, then without it
   Then   the first opens `v1.2 bugs` and the second `v1.2 bugs (70)`
 
+CASE-7 — the panel opens a requirement the registry has, and only that
+  Given  one bar carrying a `req` the registry holds and one carrying an id it does not
+  When   each bar's panel renders and its requirement is chosen
+  Then   the first names the requirement and opens it, and the second shows the id as plain
+         text with nothing to open
+
 ## Context
 **Notes**
 - `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` is an engine line counting unscheduled items; this is the viewer panel for one selected bar.
@@ -786,6 +807,12 @@ CASE-6 — a title too long for its bar runs beside it, and is packed
   When   the Plan lays them out
   Then   each one-day bar keeps its date width and carries its whole title beside it, no two
          on one row meet, and the two-week bar still wraps its title inside itself
+
+CASE-7 — the track fills the room the lanes leave, and a long plan keeps its scale
+  Given  one plan ten days long and one four months long
+  When   each Plan renders
+  Then   the track grows into the width the lane column leaves, and the longer plan's
+         track is at least as wide as its days drawn at scale, wider than the viewport
 
 ---
 id: REQ-PLANDAYS-1021
@@ -1264,7 +1291,8 @@ CASE-3 — clarify questions are listed by priority, Low on its own tab
          question
   When   the page's questions are computed and the Low tab is rendered
   Then   they are kept in the order structure, count, wording, and the Low tab shows the
-         `wording` one marked grey and labelled `low`, and not the `structure` one
+         `wording` one marked grey and labelled `low`, and not the `structure` one; it
+         offers a chip per rule it holds, and a chosen rule keeps only that rule's questions
 
 CASE-4 — the rail counts High and Medium, leaving Low out
   Given  one person's question, one observed question, and one `structure`, one
@@ -1334,9 +1362,10 @@ CASE-2 — nothing chosen, no panel
 
 CASE-3 — the panel opens the requirement only when asked
   Given  the panel for a chosen requirement
-  When   its open button is used, and the panel's layout is read
-  Then   the requirement opens, choosing a row never opens it, the buttons precede the
-         questions, and the narrow layout pins the panel to the bottom of the screen
+  When   its open button is used, then its close button, and the panel's layout is read
+  Then   the requirement opens, choosing a row never opens it, the close button closes the
+         panel, both buttons precede the questions, and the narrow layout pins the panel to
+         the bottom of the screen
 
 ---
 id: REQ-VIEWER-1139
@@ -1359,20 +1388,12 @@ Every bullet below is binding.
 - The viewer's Workspace rail lists Report last, and selecting it opens one page in seven
   sections, in this order: Summary, How it was checked, Results in numbers, Problem types,
   Top 10 questions, Recommendations and Deliverables.
-- Summary: one paragraph built from the counts below, naming the health score, the
-  confirmed share, and the largest open count of bugs, High questions and missing tags.
-- How it was checked: the engine version, the branch and the time the map was written,
-  each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers
-  (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.
 - Results in numbers: open bugs in total and per priority, and the number fixed; open
   questions by High, Medium and Low as the Questions page counts them; and, over
   requirements that are neither deprecated, `need` nor `aggregate` (and not
   `test_exempt` for tests), those with no `implements:` member, split into confirmed and
   draft, those with code but no `tested-by:` member, and the cases no `# verifies:` tag
   proves, summed from the engine's `clauses` and `covered`, never estimated.
-- Problem types: every kind found, each with its count and the requirements behind it:
-  missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's
-  dangling tags (RM001 lines) and drift, as the map's health record gives them.
 - Top 10 questions: the ten most important open questions, High before Medium before
   Low, then a confirmed requirement before a draft, then the requirement more others
   depend on first, then by id; each with its requirement, rule or origin and text.
@@ -1380,10 +1401,7 @@ Every bullet below is binding.
   confirmed with no code, drift, High questions, missing tests, unproven cases, open P0
   and P1 bugs, Medium questions), each naming the count and the command or edit that
   closes it. With nothing open it says so.
-- Deliverables: the files the report and the audit leave behind, each with its path in the
-  repository and what it holds.
-- Every listed requirement opens its document.
-- `Export PDF` prints the page through the browser's print dialog, every list out in full.
+- What each section holds is [[REQ-VIEWER-1153]]'s.
 - A count the map does not carry is shown as not measured, not as zero, and adds no
   recommendation.
 
@@ -1481,7 +1499,8 @@ CASE-3 — suggestions are listed by tier with their test
   Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3
   When   the Report is rendered
   Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the
-         tier A count
+         tier A count; a trace naming a duplicate pair, a confirmed requirement with no clause
+         and a design rule hit adds a problem row and a recommendation for each
 
 CASE-4 — the Markdown export carries the same numbers
   Given  the Report of CASE-2
@@ -1507,6 +1526,74 @@ CASE-7 — a build stamp the map lacks is left out
 ## Context
 **Notes**
 - `lint_exempt: file-spread` — the Report page is one view whose numbers live in `lib/`, whose layout lives in `views/` and whose print styles live in `styles/`: the viewer's own split, not several capabilities.
+
+---
+id: REQ-VIEWER-1153
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# What each Report section holds
+
+## Description
+> The Report's order, its counts and its recommendations are [[REQ-VIEWER-1139]]'s. The
+> sections in between were clauses there with no case to prove them, and that requirement
+> had room for one more case, not five; they are split out here so each has its own.
+
+Every bullet below is binding.
+- Summary: one paragraph built from the counts below, naming the health score, the
+  confirmed share, and the largest open count of bugs, High questions and missing tags.
+- How it was checked: the engine version, the branch and the time the map was written,
+  each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers
+  (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.
+- Problem types: every kind found, each with its count and the requirements behind it:
+  missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's
+  dangling tags (RM001 lines) and drift, as the map's health record gives them.
+- Deliverables: the files the report and the audit leave behind, each with its path in the
+  repository and what it holds.
+- Every listed requirement opens its document.
+- `Export PDF` prints the page through the browser's print dialog, every list out in full.
+
+## Cases
+CASE-1 — the summary names the health, the confirmed share and the largest open count
+  Given  a map with health 80/100 over 5 requirements, one confirmed requirement with no code
+         and one open bug
+  When   the Report is rendered
+  Then   its summary paragraph says `Health 80/100`, how many live requirements are
+         confirmed, and names the largest open count
+
+CASE-2 — how it was checked names the stamp and each check once
+  Given  a map carrying its engine version, branch and write time
+  When   the Report is rendered
+  Then   the section names all three, the number of requirements and files read, and each
+         of the five checks exactly once
+
+CASE-3 — problem types carry the gate's dangling tags and drift
+  Given  a health record with one RM001 line and one drifted requirement, and a
+         `structure` `clarify` question
+  When   the problem types are computed
+  Then   there is a row for dangling tags, one for drift naming the requirement, and one for
+         the `clarify` rule, each with its count
+
+CASE-4 — deliverables are paths with what they hold
+  Given  a map with open bugs
+  When   the Report is rendered
+  Then   the Deliverables table lists `report.md`, `_map.json` and `bugs/`, each with what it
+         holds
+
+CASE-5 — a listed requirement opens its document
+  Given  a requirement listed under a problem type
+  When   its entry is used
+  Then   that requirement opens
+
+CASE-6 — the PDF prints every list out in full
+  Given  the Report
+  When   it is rendered, and rendered for print
+  Then   the page offers `Export PDF`, and the printed body holds every list open, with no
+         folded chip
 
 ---
 id: REQ-VIEWER-1151
@@ -1554,6 +1641,12 @@ CASE-4 — a dark screen prints on paper
   Given  the page in the dark theme
   When   printing starts, then the print dialog closes
   Then   the page has no theme while printing, and the dark theme again after
+
+CASE-5 — a row, a card or a table line is not split across sheets
+  Given  the print styles and a printed bug report
+  When   the page is printed
+  Then   a problem row, a bug card, an audit card, a table line and a list item each avoid a
+         break inside them, and the printed bug carries the class that rule names
 
 ---
 id: REQ-VIEWER-1152
