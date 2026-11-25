@@ -270,7 +270,7 @@ export function BugReport({ groups, keys, scope, fixed = [] }) {
   );
 }
 
-function BugRow({ b, open, toggle }) {
+export function BugRow({ b, open, toggle }) {
   const { t } = useI18n();
   return (
     <div className={"prob-row bug-row" + (open ? " picked" : "")}
@@ -319,7 +319,7 @@ function BugGroup({ label, rows, defaultOpen, pick, setPick }) {
 
 /** The bugs a search and a priority keep, counted per priority before the
  * priority filter and grouped by module in natural order. */
-function filterBugs(all, query, prio) {
+export function filterBugs(all, query, prio) {
   const q = query.trim().toLowerCase();
   const hay = (b) => `${b.ref} ${b.title} ${b.where || ""}`.toLowerCase();
   const found = all.filter((b) => !q || hay(b).includes(q));
@@ -422,6 +422,24 @@ function BugBar({ query, setQuery, empty, add, pdf, xlsx }) {
   );
 }
 
+/** The filter in force, as the printed report's header names it. */
+export const reportScope = (prio, query) =>
+  [prio, query.trim()].filter(Boolean).join(" · ");
+
+/** What adding a bug leads to: without the File System Access API the
+ * `sync --bug` command; with it, the saved row marked as waiting for `sync`,
+ * or the error. A cancelled folder picker is no error and keeps the form. */
+export async function addOutcome(bug, write, save) {
+  if (!write) return { command: bugCommand(bug), close: true };
+  try {
+    const { ref, file } = await save(bug);
+    return { row: { ...bug, id: `new:${file}:${ref}`, ref, file, added: true },
+      close: true };
+  } catch (e) {
+    return { error: e.name === "AbortError" ? null : e.message, close: false };
+  }
+}
+
 /** Known bugs by module, the only grouping. `added` holds what this page
  * wrote, which the map cannot carry until the next `sync`. */
 export function BugsPanel({ added, setAdded }) {
@@ -444,19 +462,11 @@ export function BugsPanel({ added, setAdded }) {
     () => moduleChoices(all, REQUIREMENTS), [all]);
   const add = async (bug) => {
     setError(null);
-    if (!canWrite()) {
-      setCommand(bugCommand(bug));
-      setAdding(false);
-      return;
-    }
-    try {
-      const { ref, file } = await saveBug(bug);
-      setAdded([{ ...bug, id: `new:${file}:${ref}`, ref, file, added: true },
-        ...added]);
-      setAdding(false);
-    } catch (e) {
-      if (e.name !== "AbortError") setError(e.message);
-    }
+    const out = await addOutcome(bug, canWrite(), saveBug);
+    if (out.command) setCommand(out.command);
+    if (out.row) setAdded([out.row, ...added]);
+    if (out.error) setError(out.error);
+    if (out.close) setAdding(false);
   };
   const filtered = filterBugs(all, query, prio);
   const { q, found, counts, groups, keys } = filtered;
@@ -487,7 +497,7 @@ export function BugsPanel({ added, setAdded }) {
       {printing && createPortal(
         <BugReport groups={groups} keys={keys}
           fixed={fixedSince(BUGS_FIXED, today())}
-          scope={[prio, query.trim()].filter(Boolean).join(" · ")} />,
+          scope={reportScope(prio, query)} />,
         document.body)}
     </>
   );

@@ -206,20 +206,32 @@
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
     "REQ-BUGS-1116": {
-      "hash": "e36baba21bad",
-      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+      "hash": "454d79b84dab",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
     "REQ-BUGS-1119": {
-      "hash": "cafbde37a412",
-      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+      "hash": "72ec83660388",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
     "REQ-BUGS-1121": {
-      "hash": "f5201edaa12e",
-      "reason": "Bugs tab: a priority legend under the chips"
+      "hash": "76b32c7d6786",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
+    },
+    "REQ-BUGS-1122": {
+      "hash": "27a32fd13ce9",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
+    },
+    "REQ-BUGS-1123": {
+      "hash": "6d21854d5c70",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
+    },
+    "REQ-BUGS-1126": {
+      "hash": "9a03568b7eac",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
     "REQ-BUGS-1127": {
-      "hash": "972d59ffa9f1",
-      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+      "hash": "9d0b723cf102",
+      "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
     "REQ-CANDIDATES-826": {
       "hash": "000ec6c8296f",
