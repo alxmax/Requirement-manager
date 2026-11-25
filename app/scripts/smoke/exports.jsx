@@ -4,6 +4,8 @@
  * page needs, checks the buttons, the printed sheet and the workbook bytes,
  * then adopts the real export again with no audit and no bugs. */
 import { renderToString } from "react-dom/server";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { adoptMapExport, REQUIREMENTS } from "../../src/lib/data.js";
 import { I18nProvider } from "../../src/lib/i18n.jsx";
@@ -130,3 +132,18 @@ const checks = [
       && /Export XLSX/.test(questions)],
 ];
 for (const [label, ok] of checks) test(label, ok);
+{
+  // A page break is the printer's, not the server's: this asserts the rule
+  // the printer obeys, on the classes the printed rows, cards and lines carry.
+  const css = readFileSync(resolve(process.cwd(), "src/styles/print.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const rule = /([^{}]*)\{\s*break-inside:\s*avoid;\s*\}/.exec(css);
+  const sel = rule ? rule[1].split(",").map((s) => s.trim()) : [];
+  // verifies: REQ-VIEWER-1151#CASE-5
+  test("exports: a printed row, card or table line is kept on one sheet",
+    /@media print/.test(css)
+      && [".print-doc .prob-row", ".print-doc .bug-print-row",
+        ".print-doc .audit-card", ".print-doc tr", ".print-doc li"]
+        .every((s) => sel.includes(s))
+      && printedBug.includes('class="bug-print-row"'));
+}

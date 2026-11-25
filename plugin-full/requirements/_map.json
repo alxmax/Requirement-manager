@@ -4658,7 +4658,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:463"
+          "loc": "app/scripts/smoke/explorer.jsx:522"
         },
         {
           "role": "implements",
@@ -12652,7 +12652,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:254"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:255"
         },
         {
           "role": "implements",
@@ -15164,7 +15164,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/report.jsx:4"
+          "loc": "app/scripts/smoke/report.jsx:5"
         },
         {
           "role": "implements",
@@ -18782,7 +18782,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:248"
+          "loc": "app/scripts/smoke/rail.jsx:268"
         },
         {
           "role": "tested-by",
@@ -20299,7 +20299,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:132"
+          "loc": "app/scripts/smoke/views.jsx:133"
         },
         {
           "role": "implements",
@@ -23766,7 +23766,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/views.jsx:72"
+          "loc": "app/scripts/smoke/views.jsx:73"
         }
       ],
       "test_exempt": null,
@@ -23807,7 +23807,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:434"
+          "loc": "app/scripts/smoke/explorer.jsx:493"
         },
         {
           "role": "implements",
@@ -24128,6 +24128,7 @@
         "The viewer gives open questions a page of their own, each marked High, Medium or Low priority, and keeps them out of the Problems inbox. [[REQ-VIEWER-1101]]",
         "Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]",
         "A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]",
+        "Each Report section between the counts and the recommendations holds what its title says: the summary, how the map was checked, the problem types and the deliverables. [[REQ-VIEWER-1153]]",
         "The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]",
@@ -24203,6 +24204,7 @@
         "REQ-VIEWER-1114",
         "REQ-VIEWER-1139",
         "REQ-VIEWER-1145",
+        "REQ-VIEWER-1153",
         "REQ-VIEWER-1151",
         "REQ-VIEWER-1152"
       ],
@@ -24583,7 +24585,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a resolvable cross-reference becomes a control\n  Given  a clause containing `[[ID]]` and a registry holding that id\n  When   the requirement's document is rendered\n  Then   the id appears as an activatable link carrying that id, and the brackets are gone\n\nCASE-2 — a dangling cross-reference is marked, not linked\n  Given  a clause containing `[[ID]]` and a registry that does not hold that id\n  When   the requirement's document is rendered\n  Then   the id appears as marked text with no link control\n\nCASE-3 — escaping still wins over both transforms\n  Given  a clause containing HTML markup alongside a cross-reference\n  When   the requirement's document is rendered\n  Then   the markup appears escaped and only the cross-reference is a control\n\nCASE-4 — the header invents no field\n  Given  a requirement rendered from an engine export, which carries no `owner`\n  When   its document header is rendered\n  Then   no owner is shown",
+      "accept": "CASE-1 — a resolvable cross-reference becomes a control\n  Given  a clause containing `[[ID]]` and a registry holding that id\n  When   the requirement's document is rendered\n  Then   the id appears as an activatable link carrying that id, the brackets are gone,\n         and Enter or Space on it opens the requirement as a click does\n\nCASE-2 — a dangling cross-reference is marked, not linked\n  Given  a clause containing `[[ID]]` and a registry that does not hold that id\n  When   the requirement's document is rendered\n  Then   the id appears as marked text with no link control\n\nCASE-3 — escaping still wins over both transforms\n  Given  a clause containing HTML markup alongside a cross-reference\n  When   the requirement's document is rendered\n  Then   the markup appears escaped and only the cross-reference is a control\n\nCASE-4 — the header invents no field\n  Given  a requirement rendered from an engine export, which carries no `owner`\n  When   its document header is rendered\n  Then   no owner is shown",
       "input": "",
       "output": "",
       "desc": "",
@@ -24632,15 +24634,7 @@
           "question": "3 of 4 Given lines open on the same word (\"clause\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
-      ],
-      "i18n": {
-        "ro": {
-          "title": "Referințe încrucișate și câmpuri de antet într-un spec randat",
-          "intent": "Autorii scriu `[[REQ-CHECK-828]]` într-o clauză pentru a indica cerința care o detaliază. Randat literal, asta este o pereche de paranteze care nu duce nicăieri — pe acest corpus fiecare cerință de arhitectură poartă mai multe. Același document obișnuia de asemenea să afișeze un bloc frontmatter incluzând `owner:`, un câmp pe care motorul nu l-a exportat niciodată, astfel fiecare repo în afară de cel din care a fost hard-codat citea numele altcuiva.",
-          "contract": "> Autorii scriu `[[REQ-CHECK-828]]` într-o clauză pentru a indica cerința care o detaliază.\n> Randat literal, asta este o pereche de paranteze care nu duce nicăieri — pe acest corpus\n> fiecare cerință de arhitectură poartă mai multe. Același document obișnuia de asemenea să\n> afișeze un bloc frontmatter incluzând `owner:`, un câmp pe care motorul nu l-a exportat\n> niciodată, astfel fiecare repo în afară de cel din care a fost hard-codat citea numele\n> altcuiva.\n\nFiecare punct de mai jos este obligatoriu.\n- O referință încrucișată `[[ID]]` în proza cerinței se randează ca id-ul gol, fără parantezele lui.\n- Când map-ul încărcat deține acel id, referința este un control activabil care deschide acea\n  cerință; activarea de la tastatură face același lucru ca un clic.\n- Când map-ul încărcat nu îl deține, id-ul se randează ca text marcat care nu navighează nicăieri —\n  o referință suspendată este raportată, nu ascunsă.\n- Proza cerinței este escapată HTML înainte ca oricare dintre transformări să ruleze, astfel niciun text redactat nu poate ajunge\n  în DOM ca markup.\n- Un document randat afirmă doar câmpurile de antet pe care le poartă export-ul; un câmp pe care motorul nu-l\n  emite este absent în loc de inventat.",
-          "acceptance": "CASE-1 — o referință încrucișată rezolvabilă devine un control\n  Given  o clauză conținând `[[ID]]` și un registru deținând acel id\n  When   documentul cerinței este randat\n  Then   id-ul apare ca un link activabil purtând acel id, iar parantezele au dispărut\n\nCASE-2 — o referință încrucișată suspendată este marcată, nu legată\n  Given  o clauză conținând `[[ID]]` și un registru care nu deține acel id\n  When   documentul cerinței este randat\n  Then   id-ul apare ca text marcat fără niciun control de link\n\nCASE-3 — escaparea încă domină ambele transformări\n  Given  o clauză conținând markup HTML alături de o referință încrucișată\n  When   documentul cerinței este randat\n  Then   markup-ul apare escapat, și doar referința încrucișată este un control\n\nCASE-4 — antetul nu inventează niciun câmp\n  Given  o cerință randată dintr-un export al motorului, care nu poartă niciun `owner`\n  When   antetul documentului ei este randat\n  Then   niciun owner nu este afișat"
-        }
-      }
+      ]
     },
     {
       "id": "REQ-VIEWER-945",
@@ -24660,7 +24654,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a tally row narrows the outline\n  Given  the outline rendered with the `draft` slice requested\n  When   its rows are counted\n  Then   fewer rows are shown than with no slice requested\n\nCASE-2 — the orphan row scopes to the gate's condition, not a status\n  Given  a registry in which every enforced requirement has an `implements:` member\n  When   the outline is rendered with the `orphan` slice requested\n  Then   no row matches, and the empty state says so\n\nCASE-3 — the applied scope is visible and clearable\n  Given  the outline rendered with a slice requested\n  When   its filter row is drawn\n  Then   the chip naming that slice is drawn active",
+      "accept": "CASE-1 — a tally row narrows the outline\n  Given  the outline rendered with the `draft` slice requested\n  When   its rows are counted\n  Then   fewer rows are shown than with no slice requested\n\nCASE-2 — the orphan row scopes to the gate's condition, not a status\n  Given  a registry in which every enforced requirement has an `implements:` member\n  When   the outline is rendered with the `orphan` slice requested\n  Then   no row matches, and the empty state says so\n\nCASE-3 — the applied scope is visible and clearable\n  Given  the outline rendered with a slice requested\n  When   its filter row is drawn\n  Then   the chip naming that slice is drawn active\n\nCASE-4 — the same row, or the active chip, clears the slice\n  Given  the `draft` slice requested from the tally\n  When   the `draft` tally row is clicked again, and the active `draft` chip is clicked\n  Then   the row asks for no slice, the chip clears the requested slice and turns itself\n         off, and the status chips read `confirmed`, `draft`, `deprecated` and `orphan`",
       "input": "",
       "output": "",
       "desc": "",
@@ -24684,8 +24678,8 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
+      "clauses": 4,
+      "covered": 4,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -24693,7 +24687,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -24885,7 +24879,7 @@
         "-------------------"
       ],
       "current_impl": [],
-      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the candidates are counted, and listed only in their tab\n  Given  a map carrying both corpus signals and two design candidates\n  When   the open signals are computed and the `All` tab renders\n  Then   exactly two computed signals carry the `design` signal at their own severity, each with its `file:line`; neither is rendered in `All`; and a map with no candidates adds none",
+      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the candidates are counted, and listed only in their tab\n  Given  a map carrying both corpus signals and two design candidates\n  When   the open signals are computed and the `All` tab renders\n  Then   exactly two computed signals carry the `design` signal at their own severity, each with its `file:line`; neither is rendered in `All`; and a map with no candidates adds none\n\nCASE-4 — the tab groups by pillar, gives each kind's advice once, and says it is advisory\n  Given  two candidates of one kind under one pillar and one under another\n  When   the `Design` tab's list renders\n  Then   each pillar heads its own group, every candidate shows its kind, name, detail and\n         `file:line`, the kind's advice appears once in its group, and the tab says a\n         candidate never enters the gate",
       "input": "",
       "output": "",
       "desc": "",
@@ -24909,8 +24903,8 @@
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
+      "clauses": 4,
+      "covered": 4,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -24918,7 +24912,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 5 clauses and 3 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         },
         {
@@ -24927,7 +24921,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "3 of 3 Given lines open on the same word (\"map\"). Do the cases cover the other kinds of input a caller can supply?",
+          "question": "3 of 4 Given lines open on the same word (\"map\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
         }
       ]
@@ -25017,7 +25011,7 @@
         "`distinct_from: ARCH-ROADMAP-038` - `ARCH-ROADMAP-038` is the engine's roadmap capability; this is its viewer side."
       ],
       "current_impl": [],
-      "accept": "CASE-1 — selecting a bar shows the note written under its roadmap item\n  Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose\n         context reads `two sentences of why`\n  When   the reader selects that bar\n  Then   a panel below the chart shows the bar's title and `two sentences of why`\n\nCASE-2 — a bar with no matching item still opens, with no note\n  Given  a bar carrying no `req`, and a roadmap list that does not mention it\n  When   the reader selects that bar\n  Then   the panel shows its title, milestone and dates, and no note section\n\nCASE-3 — an HTML-comment context renders as text\n  Given  a roadmap item whose context is `<!-- the reason -->`\n  When   its bar is selected\n  Then   the panel shows `the reason` and neither comment marker\n\nCASE-4 — Horizons and Versions are both gone\n  Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item\n  When   the Roadmap tab renders\n  Then   the Plan is shown, and neither a Versions control nor a Now/Next/Later column\n         exists\n\nCASE-5 — two bars sharing a `req:` open their own notes, not the first one's\n  Given  two bars carrying `req: AREA-A-001`, one titled like a roadmap item, and two roadmap\n         items carrying that `req:`\n  When   the reader selects each bar\n  Then   the titled bar opens the item named like it, and the other opens no note\n\nCASE-6 — a bar's `roadmap:` opens its item whatever its title says\n  Given  items `v1.2 bugs` and `v1.2 bugs (70)`, and a bar titled `v1.2 bugs (70)`\n  When   the bar is matched with `roadmap: v1.2 bugs`, then without it\n  Then   the first opens `v1.2 bugs` and the second `v1.2 bugs (70)`",
+      "accept": "CASE-1 — selecting a bar shows the note written under its roadmap item\n  Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose\n         context reads `two sentences of why`\n  When   the reader selects that bar\n  Then   a panel below the chart shows the bar's title and `two sentences of why`\n\nCASE-2 — a bar with no matching item still opens, with no note\n  Given  a bar carrying no `req`, and a roadmap list that does not mention it\n  When   the reader selects that bar\n  Then   the panel shows its title, milestone and dates, and no note section\n\nCASE-3 — an HTML-comment context renders as text\n  Given  a roadmap item whose context is `<!-- the reason -->`\n  When   its bar is selected\n  Then   the panel shows `the reason` and neither comment marker\n\nCASE-4 — Horizons and Versions are both gone\n  Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item\n  When   the Roadmap tab renders\n  Then   the Plan is shown, and neither a Versions control nor a Now/Next/Later column\n         exists\n\nCASE-5 — two bars sharing a `req:` open their own notes, not the first one's\n  Given  two bars carrying `req: AREA-A-001`, one titled like a roadmap item, and two roadmap\n         items carrying that `req:`\n  When   the reader selects each bar\n  Then   the titled bar opens the item named like it, and the other opens no note\n\nCASE-6 — a bar's `roadmap:` opens its item whatever its title says\n  Given  items `v1.2 bugs` and `v1.2 bugs (70)`, and a bar titled `v1.2 bugs (70)`\n  When   the bar is matched with `roadmap: v1.2 bugs`, then without it\n  Then   the first opens `v1.2 bugs` and the second `v1.2 bugs (70)`\n\nCASE-7 — the panel opens a requirement the registry has, and only that\n  Given  one bar carrying a `req` the registry holds and one carrying an id it does not\n  When   each bar's panel renders and its requirement is chosen\n  Then   the first names the requirement and opens it, and the second shows the id as plain\n         text with nothing to open",
       "input": "",
       "output": "",
       "desc": "",
@@ -25038,34 +25032,24 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:12"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:13"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:29"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:30"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:285"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:286"
         }
       ],
       "test_exempt": null,
       "milestone": "v7.7",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 7 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clauses": 7,
+      "covered": 7,
+      "clarify": []
     },
     {
       "id": "REQ-PLANSTACK-1012",
@@ -25090,7 +25074,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — two one-day bars on consecutive days take separate rows\n  Given  two one-day bars a day apart, each floored to the minimum bar width\n  When   the Plan renders\n  Then   they carry different sub-rows, and stacking them by date alone would not\n\nCASE-2 — a week-long pair a week apart shares one row\n  Given  two seven-day bars starting seven days apart\n  When   the Plan renders\n  Then   one row holds both, because neither is floored and they never touch\n\nCASE-4 — the lane column survives a sideways scroll\n  Given  a plan wide enough to scroll\n  When   the reader scrolls the chart sideways\n  Then   the lane names stay in place, as the note panel does\n\nCASE-3 — the guides mark the work, not the dates\n  Given  a plan carrying a bar and a milestone due date\n  When   the Plan renders\n  Then   the milestone keeps its header pill and no dashed full-height rule is drawn\n\nCASE-5 — the guides are dotted and drawn under the bars\n  Given  a plan carrying a bar\n  When   the Plan renders\n  Then   every guide is dotted and comes before the first bar in paint order, with no z-index,\n         and every bar's background ends on the chart's opaque surface\n\nCASE-6 — a title too long for its bar runs beside it, and is packed\n  Given  four one-day bars on consecutive days titled `v1.0.N · Export`, and a two-week bar with a long title\n  When   the Plan lays them out\n  Then   each one-day bar keeps its date width and carries its whole title beside it, no two\n         on one row meet, and the two-week bar still wraps its title inside itself",
+      "accept": "CASE-1 — two one-day bars on consecutive days take separate rows\n  Given  two one-day bars a day apart, each floored to the minimum bar width\n  When   the Plan renders\n  Then   they carry different sub-rows, and stacking them by date alone would not\n\nCASE-2 — a week-long pair a week apart shares one row\n  Given  two seven-day bars starting seven days apart\n  When   the Plan renders\n  Then   one row holds both, because neither is floored and they never touch\n\nCASE-4 — the lane column survives a sideways scroll\n  Given  a plan wide enough to scroll\n  When   the reader scrolls the chart sideways\n  Then   the lane names stay in place, as the note panel does\n\nCASE-3 — the guides mark the work, not the dates\n  Given  a plan carrying a bar and a milestone due date\n  When   the Plan renders\n  Then   the milestone keeps its header pill and no dashed full-height rule is drawn\n\nCASE-5 — the guides are dotted and drawn under the bars\n  Given  a plan carrying a bar\n  When   the Plan renders\n  Then   every guide is dotted and comes before the first bar in paint order, with no z-index,\n         and every bar's background ends on the chart's opaque surface\n\nCASE-6 — a title too long for its bar runs beside it, and is packed\n  Given  four one-day bars on consecutive days titled `v1.0.N · Export`, and a two-week bar with a long title\n  When   the Plan lays them out\n  Then   each one-day bar keeps its date width and carries its whole title beside it, no two\n         on one row meet, and the two-week bar still wraps its title inside itself\n\nCASE-7 — the track fills the room the lanes leave, and a long plan keeps its scale\n  Given  one plan ten days long and one four months long\n  When   each Plan renders\n  Then   the track grows into the width the lane column leaves, and the longer plan's\n         track is at least as wide as its days drawn at scale, wider than the viewport",
       "input": "",
       "output": "",
       "desc": "",
@@ -25130,8 +25114,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -25139,7 +25123,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 10 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 10 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -25172,7 +25156,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/plan.jsx:369"
+          "loc": "app/scripts/smoke/plan.jsx:386"
         },
         {
           "role": "implements",
@@ -25253,7 +25237,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:126"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:127"
         },
         {
           "role": "implements",
@@ -25313,7 +25297,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:263"
+          "loc": "app/scripts/smoke/rail.jsx:316"
         },
         {
           "role": "implements",
@@ -25377,7 +25361,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:314"
+          "loc": "app/scripts/smoke/rail.jsx:367"
         },
         {
           "role": "implements",
@@ -25436,7 +25420,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/rail.jsx:294"
+          "loc": "app/scripts/smoke/rail.jsx:347"
         },
         {
           "role": "implements",
@@ -25556,7 +25540,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanNotes.jsx:228"
+          "loc": "app/src/views/roadmap/PlanNotes.jsx:229"
         }
       ],
       "test_exempt": null,
@@ -25671,7 +25655,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a person's question is High, an observed one Medium\n  Given  a requirement whose Verify intent holds one question a person wrote, and another\n         whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed and its tabs are rendered\n  Then   High lists only the first, with the question's text; Medium lists only the\n         second\n\nCASE-2 — a placeholder and a deprecated requirement ask nothing\n  Given  a requirement whose Verify intent holds only the authored placeholder, and a\n         deprecated requirement holding a question and a `clarify` question\n  When   the Questions page is computed\n  Then   neither appears on any tab, and the deprecated one adds nothing to the rail's count\n\nCASE-3 — clarify questions are listed by priority, Low on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Low tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Low tab shows the\n         `wording` one marked grey and labelled `low`, and not the `structure` one\n\nCASE-4 — the rail counts High and Medium, leaving Low out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-5 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-6 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-7 — All holds every question, and the bar names the four priorities\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and labelled\n         `high` and the `wording` one labelled `low`; the bar offers High, Medium and\n         Low, and says two High questions are open, the person's and the\n         `structure` one",
+      "accept": "CASE-1 — a person's question is High, an observed one Medium\n  Given  a requirement whose Verify intent holds one question a person wrote, and another\n         whose Verify intent holds a bullet starting `Observed at`\n  When   the Questions page is computed and its tabs are rendered\n  Then   High lists only the first, with the question's text; Medium lists only the\n         second\n\nCASE-2 — a placeholder and a deprecated requirement ask nothing\n  Given  a requirement whose Verify intent holds only the authored placeholder, and a\n         deprecated requirement holding a question and a `clarify` question\n  When   the Questions page is computed\n  Then   neither appears on any tab, and the deprecated one adds nothing to the rail's count\n\nCASE-3 — clarify questions are listed by priority, Low on its own tab\n  Given  a requirement whose map node carries a `count`, a `wording` and a `structure`\n         question\n  When   the page's questions are computed and the Low tab is rendered\n  Then   they are kept in the order structure, count, wording, and the Low tab shows the\n         `wording` one marked grey and labelled `low`, and not the `structure` one; it\n         offers a chip per rule it holds, and a chosen rule keeps only that rule's questions\n\nCASE-4 — the rail counts High and Medium, leaving Low out\n  Given  one person's question, one observed question, and one `structure`, one\n         `count` and one `wording` `clarify` question\n  When   the rail is rendered\n  Then   the Questions entry shows 4\n\nCASE-5 — Problems no longer holds questions\n  Given  a registry holding questions of every origin\n  When   the Problems inbox is rendered\n  Then   it offers no Questions tab and holds no question row\n\nCASE-6 — the page sits below Commands in the rail\n  Given  the rail rendered over any registry\n  When   its Workspace entries are read in order\n  Then   Questions comes after Commands\n\nCASE-7 — All holds every question, and the bar names the four priorities\n  Given  questions of every origin, with a `structure`, a `count` and a `wording`\n         `clarify` question\n  When   the page first opens\n  Then   it is on All, which shows the `structure` question marked red and labelled\n         `high` and the `wording` one labelled `low`; the bar offers High, Medium and\n         Low, and says two High questions are open, the person's and the\n         `structure` one",
       "input": "",
       "output": "",
       "desc": "",
@@ -25684,7 +25668,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:265"
+          "loc": "app/scripts/smoke/explorer.jsx:308"
         },
         {
           "role": "tested-by",
@@ -25735,7 +25719,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — choosing a question shows it beside the list\n  Given  a requirement with a person's decision question and a `clarify` question\n  When   the Questions page is rendered with that requirement chosen\n  Then   a panel beside the list holds the decision question with each option on its\n         own line, the `clarify` question with its suggestion, the clauses and the cases,\n         and the chosen row is marked\n\nCASE-2 — nothing chosen, no panel\n  Given  the same registry\n  When   the Questions page first opens\n  Then   no panel is shown and no row is marked\n\nCASE-3 — the panel opens the requirement only when asked\n  Given  the panel for a chosen requirement\n  When   its open button is used, and the panel's layout is read\n  Then   the requirement opens, choosing a row never opens it, the buttons precede the\n         questions, and the narrow layout pins the panel to the bottom of the screen",
+      "accept": "CASE-1 — choosing a question shows it beside the list\n  Given  a requirement with a person's decision question and a `clarify` question\n  When   the Questions page is rendered with that requirement chosen\n  Then   a panel beside the list holds the decision question with each option on its\n         own line, the `clarify` question with its suggestion, the clauses and the cases,\n         and the chosen row is marked\n\nCASE-2 — nothing chosen, no panel\n  Given  the same registry\n  When   the Questions page first opens\n  Then   no panel is shown and no row is marked\n\nCASE-3 — the panel opens the requirement only when asked\n  Given  the panel for a chosen requirement\n  When   its open button is used, then its close button, and the panel's layout is read\n  Then   the requirement opens, choosing a row never opens it, the close button closes the\n         panel, both buttons precede the questions, and the narrow layout pins the panel to\n         the bottom of the screen",
       "input": "",
       "output": "",
       "desc": "",
@@ -25748,7 +25732,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/explorer.jsx:364"
+          "loc": "app/scripts/smoke/explorer.jsx:415"
         },
         {
           "role": "implements",
@@ -25783,15 +25767,10 @@
       "intent": "Bugs, questions and missing tags each live on their own page, so the answer to \"how much is left?\" took four clicks and some adding up. One page counts them, lists what is behind each count, and prints, so the state of a repository can be handed to someone who does not open the map.",
       "contract": [
         "The viewer's Workspace rail lists Report last, and selecting it opens one page in seven sections, in this order: Summary, How it was checked, Results in numbers, Problem types, Top 10 questions, Recommendations and Deliverables.",
-        "Summary: one paragraph built from the counts below, naming the health score, the confirmed share, and the largest open count of bugs, High questions and missing tags.",
-        "How it was checked: the engine version, the branch and the time the map was written, each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
         "Results in numbers: open bugs in total and per priority, and the number fixed; open questions by High, Medium and Low as the Questions page counts them; and, over requirements that are neither deprecated, `need` nor `aggregate` (and not `test_exempt` for tests), those with no `implements:` member, split into confirmed and draft, those with code but no `tested-by:` member, and the cases no `# verifies:` tag proves, summed from the engine's `clauses` and `covered`, never estimated.",
-        "Problem types: every kind found, each with its count and the requirements behind it: missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's dangling tags (RM001 lines) and drift, as the map's health record gives them.",
         "Top 10 questions: the ten most important open questions, High before Medium before Low, then a confirmed requirement before a draft, then the requirement more others depend on first, then by id; each with its requirement, rule or origin and text.",
         "Recommendations: one per non-zero problem type, most severe first (dangling tags, confirmed with no code, drift, High questions, missing tests, unproven cases, open P0 and P1 bugs, Medium questions), each naming the count and the command or edit that closes it. With nothing open it says so.",
-        "Deliverables: the files the report and the audit leave behind, each with its path in the repository and what it holds.",
-        "Every listed requirement opens its document.",
-        "`Export PDF` prints the page through the browser's print dialog, every list out in full.",
+        "What each section holds is [[REQ-VIEWER-1153]]'s.",
         "A count the map does not carry is shown as not measured, not as zero, and adds no recommendation."
       ],
       "verify": [],
@@ -25839,17 +25818,7 @@
       "risks": [],
       "clauses": 6,
       "covered": 6,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 11 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clarify": []
     },
     {
       "id": "REQ-VIEWER-1145",
@@ -25874,7 +25843,7 @@
         "`lint_exempt: file-spread` — the Report page is one view whose numbers live in `lib/`, whose layout lives in `views/` and whose print styles live in `styles/`: the viewer's own split, not several capabilities."
       ],
       "current_impl": [],
-      "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the seven sections, the open bug count and every problem row\n\nCASE-5 — a contents list names the seven sections\n  Given  any registry\n  When   the Report is rendered\n  Then   the seven sections come in order, and the contents list holds one entry for each\n\nCASE-6 — each question priority opens its requirements\n  Given  one High, one Medium and one Low question, each on its own requirement\n  When   the Report is computed\n  Then   each priority lists one requirement behind its chip\n\nCASE-7 — a build stamp the map lacks is left out\n  Given  a map with no `generated_at`\n  When   the Report and its Markdown are produced\n  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured\n         for it",
+      "accept": "CASE-1 — an audit finding is not a question\n  Given  a requirement whose Verify intent holds `Observed (audit, bug) ...` and a question a\n         person wrote\n  When   the Questions page and the Report are computed\n  Then   the page lists only the person's question, and the Report counts one `bug` finding\n\nCASE-2 — the audit session and the trace reach are shown\n  Given  a map with an audit that read 3 of 4 planned requirements and a trace block with 2 of\n         4 code files tagged\n  When   the Report is rendered\n  Then   it shows 75% read, 3/4, and 50% of code files with a tag, 2/4\n\nCASE-3 — suggestions are listed by tier with their test\n  Given  a trace block suggesting tier A for R-1 with `brake_test.c` and tier C for R-3\n  When   the Report is rendered\n  Then   tier A lists R-1 with `brake_test.c`, tier C lists R-3, and a recommendation names the\n         tier A count; a trace naming a duplicate pair, a confirmed requirement with no clause\n         and a design rule hit adds a problem row and a recommendation for each\n\nCASE-4 — the Markdown export carries the same numbers\n  Given  the Report of CASE-2\n  When   its Markdown is produced\n  Then   it holds the seven sections, the open bug count and every problem row\n\nCASE-5 — a contents list names the seven sections\n  Given  any registry\n  When   the Report is rendered\n  Then   the seven sections come in order, and the contents list holds one entry for each\n\nCASE-6 — each question priority opens its requirements\n  Given  one High, one Medium and one Low question, each on its own requirement\n  When   the Report is computed\n  Then   each priority lists one requirement behind its chip\n\nCASE-7 — a build stamp the map lacks is left out\n  Given  a map with no `generated_at`\n  When   the Report and its Markdown are produced\n  Then   neither says `Map written` nor shows a `Date` field, and neither says not measured\n         for it",
       "input": "",
       "output": "",
       "desc": "",
@@ -25911,11 +25880,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/ReportView.jsx:3"
+          "loc": "app/src/views/ReportView.jsx:4"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/report/ReportSections.jsx:3"
+          "loc": "app/src/views/report/ReportSections.jsx:4"
         }
       ],
       "test_exempt": null,
@@ -25937,6 +25906,57 @@
       ]
     },
     {
+      "id": "REQ-VIEWER-1153",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "What each Report section holds",
+      "intent": "The Report's order, its counts and its recommendations are [[REQ-VIEWER-1139]]'s. The sections in between were clauses there with no case to prove them, and that requirement had room for one more case, not five; they are split out here so each has its own.",
+      "contract": [
+        "Summary: one paragraph built from the counts below, naming the health score, the confirmed share, and the largest open count of bugs, High questions and missing tags.",
+        "How it was checked: the engine version, the branch and the time the map was written, each only when the map carries it, the number of requirements and member files read, and the checks behind the numbers (gate link sync, drift lock, test links, `clarify`, the bug files), each named once.",
+        "Problem types: every kind found, each with its count and the requirements behind it: missing implements, missing tested-by, unproven cases, each `clarify` rule, the gate's dangling tags (RM001 lines) and drift, as the map's health record gives them.",
+        "Deliverables: the files the report and the audit leave behind, each with its path in the repository and what it holds.",
+        "Every listed requirement opens its document.",
+        "`Export PDF` prints the page through the browser's print dialog, every list out in full."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — the summary names the health, the confirmed share and the largest open count\n  Given  a map with health 80/100 over 5 requirements, one confirmed requirement with no code\n         and one open bug\n  When   the Report is rendered\n  Then   its summary paragraph says `Health 80/100`, how many live requirements are\n         confirmed, and names the largest open count\n\nCASE-2 — how it was checked names the stamp and each check once\n  Given  a map carrying its engine version, branch and write time\n  When   the Report is rendered\n  Then   the section names all three, the number of requirements and files read, and each\n         of the five checks exactly once\n\nCASE-3 — problem types carry the gate's dangling tags and drift\n  Given  a health record with one RM001 line and one drifted requirement, and a\n         `structure` `clarify` question\n  When   the problem types are computed\n  Then   there is a row for dangling tags, one for drift naming the requirement, and one for\n         the `clarify` rule, each with its count\n\nCASE-4 — deliverables are paths with what they hold\n  Given  a map with open bugs\n  When   the Report is rendered\n  Then   the Deliverables table lists `report.md`, `_map.json` and `bugs/`, each with what it\n         holds\n\nCASE-5 — a listed requirement opens its document\n  Given  a requirement listed under a problem type\n  When   its entry is used\n  Then   that requirement opens\n\nCASE-6 — the PDF prints every list out in full\n  Given  the Report\n  When   it is rendered, and rendered for print\n  Then   the page offers `Export PDF`, and the printed body holds every list open, with no\n         folded chip",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/report.jsx:4"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ReportView.jsx:3"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/report/ReportSections.jsx:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 6,
+      "covered": 6,
+      "clarify": []
+    },
+    {
       "id": "REQ-VIEWER-1151",
       "layer": "feature",
       "level": "code",
@@ -25954,7 +25974,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — every list page and every requirement has the button\n  Given  the map export with an audit session\n  When   the Questions, Audit, Health and Design pages and a requirement's page are rendered\n  Then   each holds an `Export PDF` button, the requirement's beside its badges\n\nCASE-2 — the printed sheet names what it is\n  Given  a printed sheet titled `Open questions` with the facts `All` and `3 questions`\n  When   it is rendered for a repository `acme/pay`\n  Then   it shows the tool, `acme/pay`, the title, today's date and both facts, in that order\n\nCASE-3 — a printed bug is a card with its badge\n  Given  a P1 bug in the module Payments\n  When   the bug report is printed\n  Then   the bug is a card with the `P1` badge in the colour the tab gives it\n\nCASE-4 — a dark screen prints on paper\n  Given  the page in the dark theme\n  When   printing starts, then the print dialog closes\n  Then   the page has no theme while printing, and the dark theme again after",
+      "accept": "CASE-1 — every list page and every requirement has the button\n  Given  the map export with an audit session\n  When   the Questions, Audit, Health and Design pages and a requirement's page are rendered\n  Then   each holds an `Export PDF` button, the requirement's beside its badges\n\nCASE-2 — the printed sheet names what it is\n  Given  a printed sheet titled `Open questions` with the facts `All` and `3 questions`\n  When   it is rendered for a repository `acme/pay`\n  Then   it shows the tool, `acme/pay`, the title, today's date and both facts, in that order\n\nCASE-3 — a printed bug is a card with its badge\n  Given  a P1 bug in the module Payments\n  When   the bug report is printed\n  Then   the bug is a card with the `P1` badge in the colour the tab gives it\n\nCASE-4 — a dark screen prints on paper\n  Given  the page in the dark theme\n  When   printing starts, then the print dialog closes\n  Then   the page has no theme while printing, and the dark theme again after\n\nCASE-5 — a row, a card or a table line is not split across sheets\n  Given  the print styles and a printed bug report\n  When   the page is printed\n  Then   a problem row, a bug card, an audit card, a table line and a list item each avoid a\n         break inside them, and the printed bug carries the class that rule names",
       "input": "",
       "output": "",
       "desc": "",
@@ -26007,19 +26027,9 @@
           "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
         }
       ],
-      "clauses": 4,
-      "covered": 4,
-      "clarify": [
-        {
-          "rule": "clause-without-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
-          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
-        }
-      ]
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "REQ-VIEWER-1152",
@@ -29101,6 +29111,10 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-VIEWER-1153",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "REQ-VIEWER-1151",
       "ARCH-VIEWER-007"
     ],
@@ -31417,9 +31431,9 @@
     },
     {
       "month": "2026-11",
-      "count": 9,
+      "count": 10,
       "first": "2026-11-14",
-      "last": "2026-11-25",
+      "last": "2026-11-26",
       "versions": [
         "v8.24.7",
         "v8.24.8",
@@ -31429,17 +31443,26 @@
         "v8.28.0",
         "v8.29.0",
         "v8.29.1",
-        "v8.29.2"
+        "v8.29.2",
+        "v8.29.3"
       ],
       "landmark": "v8.29.0",
       "headline": "Release v8.29.0",
       "entries": [
         {
+          "version": "v8.29.3",
+          "date": "2026-11-26",
+          "headline": "Release v8.29.3",
+          "body": "**Release v8.29.3.**\n\n**The viewer's `clause-without-case` questions, read one by one (ADR-0075).**\n\n- All 11 on ARCH-VIEWER-007's requirements were read against their cases: 6 were real gaps, 4 had a clause only partly proven, 1 (REQ-VERSIONTODOS-1097) was a false alarm and is unchanged.\n- New cases, each with a smoke check: the outline's tally row and active chip clear a slice (REQ-VIEWER-945 CASE-4); the Design tab groups by pillar, gives each kind's advice once and says it is advisory (REQ-VIEWER-977 CASE-4); the plan's track fills the room the lanes leave and keeps a long plan's scale (REQ-PLANSTACK-1012 CASE-7); a printed row, card or table line avoids a page break (REQ-VIEWER-1151 CASE-5).\n- A bar's panel showed a requirement id the registry does not hold as a button that opened nothing. It is now plain text, as REQ-VIEWER-999 said; CASE-7 proves both sides and fails on the old code.\n- Partly proven clauses gained an assertion in an existing case: Enter and Space open a cross-reference (REQ-VIEWER-944), the Low tab's rule chips (REQ-VIEWER-1101), the panel's close button (REQ-VIEWER-1114), and the trace block's duplicates, empty confirmed requirements and design rule hits (REQ-VIEWER-1145).\n- REQ-VIEWER-1139 had five clauses with no case and room for one more. The section contents (Summary, How it was checked, Problem types, Deliverables, a listed requirement opening, the full-length PDF) move verbatim to a new REQ-VIEWER-1153 with a case and a check each.",
+          "first_commit": "2026-11-26",
+          "last_commit": "2026-11-26"
+        },
+        {
           "version": "v8.29.2",
           "date": "2026-11-25",
           "headline": "Release v8.29.2",
           "body": "**Release v8.29.2.**\n\n**`sync --accept-drift` no longer reports the drift it has just accepted.**\n\n- The gate rules ran against the old lock, so after `accepted drift on N confirmed contract(s)` and `lock updated.` the same run still printed RM018 for those requirements. A contract the run re-baselined (accepted, or re-baselined because only the engine's hash changed) is now dropped from that run's RM018 findings. REQ-PROMOTE-974 CASE-3 says so and its test fails without the fix. Engine change: `MAP_ENGINE_VERSION` is `2026-11-25.1`.\n- The same run printed RM019 for every member drift the member lock it was writing had just cleared. That sync now prints `member drift re-baselined: ID (file)` instead, so the change stays visible to someone who runs only `sync`, and a gate after it is quiet. REQ-MEMBERDRIFT-880 CASE-5.\n\n**A release waits for the published-action smoke test.**\n\n- The Action smoke test (`published-action`, running this repository's gate through `./check`) moves from its own `dogfood.yml` workflow into `ci.yml`, and `release` now needs it: a workflow cannot wait on a job in another workflow, so a red smoke test could still be tagged. REQ-SELFGATE-916 CASE-4.\n\n**The words about `sync` match what it does.**\n\n- `docs/commands.md` and the `reqmap_sync` MCP description said `sync` refuses an edited confirmed contract; it demotes it to draft. `app/scripts/sync-data.mjs` pointed at `reqmap.py export`, which no longer exists; it now names `sync --code ..`.",
-          "first_commit": "2026-11-25",
+          "first_commit": "2026-11-23",
           "last_commit": "2026-11-25"
         },
         {
@@ -31809,28 +31832,47 @@
   ],
   "design": {
     "files": 163,
-    "clean_files": 163,
-    "score": 100,
+    "clean_files": 161,
+    "score": 99,
     "candidates": {
       "encapsulation": 0,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 0
+      "standards": 2
     },
-    "findings": [],
-    "advice": {}
+    "findings": [
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "app/scripts/smoke/explorer.jsx",
+        "line": 1,
+        "name": "explorer.jsx",
+        "detail": "555 lines (over 500)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "app/scripts/smoke/views.jsx",
+        "line": 1,
+        "name": "views.jsx",
+        "detail": "516 lines (over 500)"
+      }
+    ],
+    "advice": {
+      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows"
+    }
   },
   "health": {
     "score": 99,
-    "total": 378,
-    "scored": 356,
-    "healthy": 354,
+    "total": 379,
+    "scored": 357,
+    "healthy": 355,
     "exempt": 5,
     "deprecated": 22,
-    "confirmed": 354,
-    "implemented": 346,
-    "tested": 347,
+    "confirmed": 355,
+    "implemented": 347,
+    "tested": 348,
     "drafts": 2,
     "orphans": 0,
     "untested": 0,
@@ -31839,7 +31881,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 354,
+    "reviewed_total": 355,
     "unhealthy": [
       {
         "id": "REQ-VIEWER-1151",

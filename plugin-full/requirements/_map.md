@@ -1,9 +1,9 @@
 ---
-generated: 2026-11-25
+generated: 2026-11-26
 engine: 2026-11-25.1
-nodes: 378
+nodes: 379
 edges: 130
-design pass-rate: 100% (163/163 source files without a design candidate)
+design pass-rate: 99% (161/163 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -377,6 +377,7 @@ graph LR
     REQ_VIEWER_1114["Choosing a question shows it beside the list<br><small>REQ-VIEWER-1114</small>"]
     REQ_VIEWER_1139["One page reports what is open<br><small>REQ-VIEWER-1139</small>"]
     REQ_VIEWER_1145["The Report reads an audit<br><small>REQ-VIEWER-1145</small>"]
+    REQ_VIEWER_1153["What each Report section holds<br><small>REQ-VIEWER-1153</small>"]
     REQ_VIEWER_1151["A PDF of a page looks like the page<br><small>REQ-VIEWER-1151</small>"]
     REQ_VIEWER_1152["Bugs and questions export as a spreadsheet<br><small>REQ-VIEWER-1152</small>"]
     REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
@@ -1233,7 +1234,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>72 caps</small>"]
-  a_REQ["REQ<br><small>296 caps</small>"]
+  a_REQ["REQ<br><small>297 caps</small>"]
   a_SYS["SYS<br><small>10 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

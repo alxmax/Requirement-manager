@@ -166,8 +166,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "aa2d068a2a3a",
-      "reason": "ARCH-VIEWER-007 lists two new children: REQ-VIEWER-1151 (PDF exports) and REQ-VIEWER-1152 (XLSX exports)"
+      "hash": "e4e95b74b730",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -494,8 +494,8 @@
       "reason": null
     },
     "REQ-PLANSTACK-1012": {
-      "hash": "93c7507ec09a",
-      "reason": "ADR-0064: neutral examples in the new cases"
+      "hash": "53e6ef508a28",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-PLANSTALE-1013": {
       "hash": "428616bf0fd7",
@@ -674,16 +674,20 @@
       "reason": null
     },
     "REQ-VIEWER-1101": {
-      "hash": "422b0979e9c5",
-      "reason": "Questions get High/Medium/Low priority and the Report page is added, at the maintainer's request"
+      "hash": "acae7a453e26",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-VIEWER-1114": {
-      "hash": "d2e43f99cec6",
-      "reason": null
+      "hash": "1ec1d8b2ffb8",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-VIEWER-1139": {
-      "hash": "9bfcc73b9b09",
-      "reason": "Report: seven sections with Deliverables; the stamp shows only what the map carries"
+      "hash": "d19e246ddd80",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
+    },
+    "REQ-VIEWER-1145": {
+      "hash": "439e34713182",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-VIEWER-940": {
       "hash": "77e9d38ebfb9",
@@ -697,25 +701,29 @@
       "hash": "716a3b7ac859",
       "reason": "German locale: a new bundled language and its cases"
     },
+    "REQ-VIEWER-944": {
+      "hash": "282503e05477",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
+    },
     "REQ-VIEWER-945": {
-      "hash": "f4badc80b394",
-      "reason": null
+      "hash": "f0a73a13873d",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-VIEWER-969": {
       "hash": "ad8abe212939",
       "reason": "the design ring and tab left the viewer: REQ-VIEWER-969 is the health ring alone, REQ-VIEWER-977 retired"
     },
     "REQ-VIEWER-977": {
-      "hash": "8c401c2200b5",
-      "reason": null
+      "hash": "6955d3d0f953",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-VIEWER-984": {
       "hash": "f7b58aa218cc",
       "reason": null
     },
     "REQ-VIEWER-999": {
-      "hash": "6488ed81b2f7",
-      "reason": "a release block keeps the CHANGELOG entry, and a span still stops at a date inside it"
+      "hash": "0ca4009039fb",
+      "reason": "cases added after reading the viewer's clause-without-case questions"
     },
     "REQ-WATCH-1092": {
       "hash": "3324bb4fecc9",

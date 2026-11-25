@@ -1,5 +1,6 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-1139
+// implements: REQ-VIEWER-1153
 // implements: REQ-VIEWER-1145
 /* The Report's tables: the numbers, the problem types, the top questions,
  * the recommendations and the deliverables. Every section takes one `ctx`

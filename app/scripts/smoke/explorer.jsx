@@ -27,6 +27,7 @@ import { stackBars, buildDayBands } from "../../src/lib/timeline.js";
 import { SpecDoc } from "../../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../../src/lib/data.js";
 import { ExplorerView } from "../../src/views/ExplorerView.jsx";
+import { ExplorerFilters } from "../../src/views/explorer/ExplorerFilters.jsx";
 import { CommandsView } from "../../src/views/CommandsView.jsx";
 
 import { I18nProvider, translate } from "../../src/lib/i18n.jsx";
@@ -183,6 +184,48 @@ const focusChecks = [
       && scopedOrphan.includes("No requirement matches these filters.")],
 ];
 for (const [label, ok] of focusChecks) test(label, ok);
+{
+  // SSR cannot click: each component is called inside a render, where its
+  // hooks are valid, and the handlers on what it returns are called directly.
+  const inRender = (fn) => {
+    let out = null;
+    const Probe = () => { out = fn(); return null; };
+    renderToString(<Probe />);
+    return out;
+  };
+  const all = (el, ok, acc = []) => {
+    if (Array.isArray(el)) { el.forEach((c) => all(c, ok, acc)); return acc; }
+    if (!el || typeof el !== "object" || !el.props) return acc;
+    if (ok(el)) acc.push(el);
+    all(el.props.children, ok, acc);
+    return acc;
+  };
+  const text = (el) => [].concat(el.props.children).filter(
+    (c) => typeof c === "string").join("");
+  const asked = [];
+  const statsEl = all(Rail({ view: "explorer", setView: noop, focus: "draft",
+    setFocus: (k) => asked.push(k), problems: [], openProblems: noop }),
+  (e) => e.props.setFocus && e.props.focus === "draft")[0];
+  const rows = all(inRender(() => statsEl.type(statsEl.props)),
+    (e) => e.type === "button" && String(e.props.className).startsWith("stat-row"));
+  rows.find((b) => text(b) === "draft").props.onClick();
+  const calls = [];
+  const filters = { level: {}, status: { draft: true }, onlyQuestions: false,
+    onlyOrphans: false, setOnlyQuestions: noop,
+    setOnlyOrphans: () => calls.push("orphan"),
+    clearFocus: () => calls.push("clear"), flipLevel: noop,
+    flipStatus: (s) => calls.push("flip:" + s) };
+  const chips = all(inRender(() => ExplorerFilters({ filters, tree: { shown: 1,
+    total: 2, onExpandAll: noop, onCollapseAll: noop } })),
+  (e) => e.type && e.type.name === "Chip");
+  const statusChips = chips.slice(-5, -1);
+  statusChips.find((c) => text(c) === "draft").props.onClick();
+  // verifies: REQ-VIEWER-945#CASE-4
+  test("focus: the same tally row, or the active chip, clears the slice",
+    asked.length === 1 && asked[0] === null && calls.join() === "clear,flip:draft"
+      && statusChips.map((c) => text(c).trim()).join()
+        === "confirmed,draft,deprecated,orphan");
+}
 
 // ---- the command reference (REQ-VIEWER-964) --------------------------------
 const CLI_FIXTURE = [
@@ -331,6 +374,14 @@ const mergeChecks = [
       && pageHtml("low").includes("basis-wording")
       && pageHtml("low").includes(">low</span>")
       && !pageHtml("low").includes("the no-cases question")],
+  // verifies: REQ-VIEWER-1101#CASE-3
+  ["questions: the Low tab offers a chip per rule, and a rule keeps only its own",
+    /class="ex-chip"[^>]*>vague-term<span[^>]*>1</.test(pageHtml("low"))
+      && !pageHtml("high").includes('class="ex-chip"')
+      && renderToString(<ClarifyRow row={asked.clarify[0]} pick={noop}
+        keep={(q) => q.rule === "vague-term"} />).includes("the vague-term question")
+      && !renderToString(<ClarifyRow row={asked.clarify[0]} pick={noop}
+        keep={(q) => q.rule === "vague-term"} />).includes("the no-cases question")],
   // verifies: REQ-VIEWER-1101#CASE-4
   ["questions: the rail counts High and Medium, leaving Low out",
     questionCount(asked) === 4 && railHtml.includes(">4<")],
@@ -406,6 +457,12 @@ const openBtn = findEl(panelEl, (e) => e.type === "button"
   && String(e.props.className).includes("btn-secondary"));
 const beforeOpen = opened.length;
 openBtn.props.onClick();
+let closed = 0;
+const closeBtn = findEl(QuestionPanel({ id: "Q-PICK-001",
+  questions: { tab: questionTabs(pickQs)[0], keep: () => true, qs: pickQs },
+  openSpec: noop, close: () => { closed++; }, t: (s) => s }),
+(e) => e.type === "button" && String(e.props.className).includes("btn-ghost"));
+closeBtn.props.onClick();
 const pickChecks = [
   // verifies: REQ-VIEWER-1114#CASE-1
   ["questions: a chosen question opens a panel beside the list",
@@ -425,6 +482,8 @@ const pickChecks = [
       && picks.join() === "Q-PICK-001,Q-PICK-001" && beforeOpen === 0
       && opened.join() === "open:Q-PICK-001"
       && panel.indexOf("Open requirement") < panel.indexOf("Should the panel stay open?")
+      && panel.indexOf(">Close<") < panel.indexOf("Should the panel stay open?")
+      && closed === 1
       && /@media \(max-width: 820px\) \{[^@]*\.q-panel \{ position: fixed;[^}]*bottom: 0/
         .test(APP_CSS)],
 ];
