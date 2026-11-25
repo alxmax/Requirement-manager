@@ -106,6 +106,10 @@ jobs:
         run: python -X utf8 scripts/test_check_directory_edition.py
       - name: Directory edition holds only accepted files  # implements: REQ-SELFGATE-1130
         run: python -X utf8 scripts/check_directory_edition.py
+      - name: Directory-edition sync tests
+        run: python -X utf8 scripts/test_sync_directory_edition.py
+      - name: Directory edition copies equal plugin-full's
+        run: python -X utf8 scripts/sync_directory_edition.py --check
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
       # One verdict since v4.0.0: link sync + drift + test links, requirement

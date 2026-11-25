@@ -1,9 +1,9 @@
 ---
-generated: 2026-11-23
-engine: 2026-11-22.5
+generated: 2026-11-25
+engine: 2026-11-25
 nodes: 378
 edges: 130
-design pass-rate: 100% (162/162 source files without a design candidate)
+design pass-rate: 100% (163/163 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -558,8 +558,8 @@ graph LR
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_full_scripts_reqmap_py_83["plugin-full/scripts/reqmap.py:83"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_full_scripts_reqmap_py_83
-  f_plugin_full_scripts_test_reqmap_report_py_1967_6359["plugin-full/scripts/test_reqmap_report.py:1967-6359"]
-  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_1967_6359
+  f_plugin_full_scripts_test_reqmap_report_py_1967_6369["plugin-full/scripts/test_reqmap_report.py:1967-6369"]
+  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_1967_6369
   f_plugin_full_scripts_reqmap_engine_cliflags_py_18_54["plugin-full/scripts/reqmap_engine/cliflags.py:18-54"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_full_scripts_reqmap_engine_cliflags_py_18_54
   f_plugin_full_scripts_reqmap_engine_commands_py_12["plugin-full/scripts/reqmap_engine/commands.py:12"]
@@ -569,8 +569,8 @@ graph LR
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
   f_plugin_full_scripts_reqmap_py_337["plugin-full/scripts/reqmap.py:337"]
   ARCH_CONFIG_060 -->|implements| f_plugin_full_scripts_reqmap_py_337
-  f_plugin_full_scripts_test_reqmap_report_py_3244_5772["plugin-full/scripts/test_reqmap_report.py:3244-5772"]
-  ARCH_CONFIG_060 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_3244_5772
+  f_plugin_full_scripts_test_reqmap_report_py_3244_5782["plugin-full/scripts/test_reqmap_report.py:3244-5782"]
+  ARCH_CONFIG_060 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_3244_5782
   f_plugin_full_scripts_reqmap_engine_config_py_309_410["plugin-full/scripts/reqmap_engine/config.py:309-410"]
   ARCH_CONFIG_060 -->|implements| f_plugin_full_scripts_reqmap_engine_config_py_309_410
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
@@ -608,8 +608,8 @@ graph LR
   f_plugin_full_scripts_reqmap_engine_lintrules_py_18["plugin-full/scripts/reqmap_engine/lintrules.py:18"]
   ARCH_DECOMPOSE_050 -->|implements| f_plugin_full_scripts_reqmap_engine_lintrules_py_18
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_full_scripts_test_reqmap_report_py_5808_6189["plugin-full/scripts/test_reqmap_report.py:5808-6189"]
-  ARCH_DESIGN_061 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_5808_6189
+  f_plugin_full_scripts_test_reqmap_report_py_5818_6199["plugin-full/scripts/test_reqmap_report.py:5818-6199"]
+  ARCH_DESIGN_061 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_5818_6199
   f_plugin_full_scripts_reqmap_engine_design_py_58["plugin-full/scripts/reqmap_engine/design.py:58"]
   ARCH_DESIGN_061 -->|implements| f_plugin_full_scripts_reqmap_engine_design_py_58
   f_plugin_full_scripts_reqmap_engine_design_report_py_16_94["plugin-full/scripts/reqmap_engine/design_report.py:16-94"]
@@ -975,6 +975,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
   f_scripts_gen_tokens_py_2["scripts/gen_tokens.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_gen_tokens_py_2
+  f_scripts_sync_directory_edition_py_2["scripts/sync_directory_edition.py:2"]
+  ARCH_SELFGATE_039 -->|implements| f_scripts_sync_directory_edition_py_2
   f_scripts_test_bundle_skill_engine_py_30["scripts/test_bundle_skill_engine.py:30"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_bundle_skill_engine_py_30
   f_scripts_test_changelog_notes_py_2["scripts/test_changelog_notes.py:2"]
@@ -993,6 +995,8 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_124_131
   f_scripts_test_pipeline_wiring_py_66["scripts/test_pipeline_wiring.py:66"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_pipeline_wiring_py_66
+  f_scripts_test_sync_directory_edition_py_25["scripts/test_sync_directory_edition.py:25"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_sync_directory_edition_py_25
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]
   f_plugin_full_scripts_test_reqmap_report_py_1188_3941["plugin-full/scripts/test_reqmap_report.py:1188-3941"]
   ARCH_SHOW_015 -->|tested-by| f_plugin_full_scripts_test_reqmap_report_py_1188_3941

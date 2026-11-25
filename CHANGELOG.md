@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## plugin `v8.29.1` — 2026-11-25
+
+**Release v8.29.1.**
+
+**`sync` no longer crashes on a plain pytest `assert` (ADR-0092).**
+
+- A consumer repo with plain pytest tests crashed `sync` with `AttributeError: 'Assert' object has no attribute 'func'`. `_assertions` returns `ast.Assert` and `ast.Call` nodes and `_constant` handles both, but `_self_equal` read `.func` off every node; it was reached whenever a tagged test's assertions were all bare `assert` and not all constants. `_self_equal` now returns False for anything that is not a call. A regression test (`assert f(1) == 2` is judged, `assert True` is named) failed with that traceback before the fix. Engine change: `MAP_ENGINE_VERSION` is `2026-11-25`.
+
+**The directory edition stops drifting from `plugin-full/`.**
+
+- `plugin-full/.../references/bugs.md` lacked the bullet telling a reporter to write the broken requirement's id in `--source` or `--why` (ADR-0083, commit `dbaf283`); it had landed only in `plugin/` before the engine moved to `plugin-full/`. Restored.
+- `plugin/.../references/assistant-steps.md` lacked `plugin-full`'s paragraph for assistants with no question tool (lettered `a)`-`d)` options, `(default)` marker, never applied unanswered). Refreshed.
+- New `scripts/sync_directory_edition.py [--check]` keeps the five copied pages (`ci.md`, `triage.md`, `prose-buckets.md`, `assistant-steps.md`, `bugs.md`) byte-equal; `workflow.md`, the quality-review `SKILL.md` and `manual-mode.md` differ by design and are never touched. `check_versions.py` compared only the version field, so nothing caught either gap above. Wired into the `gate-and-tests` CI job (with `test_sync_directory_edition.py`) and `.githooks/pre-commit`; `plugin/README.md` names the command.
+
 ## plugin `v8.29.0` — 2026-11-23
 
 **Release v8.29.0.**

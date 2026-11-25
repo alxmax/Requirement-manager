@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin-full/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin-full/scripts/reqmap_engine/__init__.py": "2d802c63c76170714743c24e2e0cf111516ce90574b595f6871e3ceac87ea3f3",
+      "plugin-full/scripts/reqmap_engine/__init__.py": "0cd4be757fa8afdf09f8627b622ec36d26c74fc741eed049fb01f3e94182c010",
       "plugin-full/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin-full/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin-full/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -100,7 +100,8 @@
       "scripts/check_engine_bump.py": "932755e793aa6382a307ec5a6778e3c6151645fe335641aefc7945f792c1c8c4",
       "scripts/check_engine_perf.py": "e40efe01de81aa0125be1134afd5463d29631329012baf5505947995de00089f",
       "scripts/check_versions.py": "d03219ba846c71ec634cdaa5c2542d16edc849d8bea6a2e42cfaec227c8cfb84",
-      "scripts/gen_tokens.py": "fde5727612c854c70c58243181a6868c1391299193ab1edd2ec167dbfb515c85"
+      "scripts/gen_tokens.py": "fde5727612c854c70c58243181a6868c1391299193ab1edd2ec167dbfb515c85",
+      "scripts/sync_directory_edition.py": "e292314e552c52844ba3708908392347f40267fce962e4cdcf05bf8c746d992c"
     },
     "ARCH-SIMILAR-016": {
       "plugin-full/scripts/reqmap_engine/similar.py#_placeholder_contract": "8da20d58cf3045618e116dcfb06a7c62b6fbfb5803df3bca8e253708db2df17e",
@@ -565,7 +566,7 @@
       "plugin-full/scripts/reqmap_engine/search.py#_text_matches": "b815d123c6815d2a8f0b3b78b64a99c525e6d8409490685704d6bc6b3b51e24f"
     },
     "REQ-SELFGATE-1070": {
-      ".githooks/pre-commit": "ec15a976966192ea9710c4d164c14bdf2b43445863969bea22ad3f428a4629c9",
+      ".githooks/pre-commit": "de4265d5fa3c76eb4bd17b7da80d61d5aabba88f80d18e8df0bc6203b43ab900",
       ".githooks/pre-push": "9e60b94d18741cc33ca28832a3efcac42e01521be4b926b79bd1c15ea37562c4"
     },
     "REQ-SELFGATE-1072": {
@@ -584,7 +585,7 @@
       "plugin-full/scripts/reqmap_engine/similar.py#_test_suite_pairs": "d126a0b2084b3d99d483cd4110d3c08bc3803485662749d304f0cdab69828cbd"
     },
     "REQ-SURFACE-1095": {
-      "pyproject.toml": "cc64e7a45fdf933b7b28422b2053b7e3450134820dbc479b17a59ebd321a5602"
+      "pyproject.toml": "4543413c0ab9f27bd2a0b3a4f0b23eef950ac3c8ee3bfa21ba2b45b240db5b1d"
     },
     "REQ-TESTGAPS-1088": {
       "plugin-full/scripts/reqmap_engine/testgaps.py#case_gaps": "5dc6f710dde83112c1b7ea4f7eaaa3ea4a820ca9a9d396a77c5367b8880ac963",
@@ -592,7 +593,7 @@
       "plugin-full/scripts/reqmap_engine/testgaps.py#shared_test_files": "83e8bc7933764cfc777de0cbfd2405057a9f2b1c935d102425e3bf2e3995ef83"
     },
     "REQ-TESTGAPS-1146": {
-      "plugin-full/scripts/reqmap_engine/vacuoustests.py": "7b596a14bd7107e01ac7eb9b56f42eca4acb94e169ca4153337f77b496fd394d",
+      "plugin-full/scripts/reqmap_engine/vacuoustests.py": "05e214629d22f2d76111a79de79e773c3563fdb37fa801f1004d108111d9d870",
       "plugin-full/scripts/reqmap_engine/vacuoustests.py#_kind": "ff917e1460dbbb9cd9dfc31d7f5fbdd1165bfd697cad397e36bd8eeb310990fa",
       "plugin-full/scripts/reqmap_engine/vacuoustests.py#vacuous_tests": "b37191ed3be257978384d54fd0373b6b5089fe51e3602b56a736466bcf8f7818"
     },
