@@ -1,7 +1,7 @@
 // implements: ARCH-VIEWER-007
 /* Copy the engine's registry export into the app so it ships with live data.
  *
- *   1. python ../plugin-full/scripts/reqmap.py export
+ *   1. python ../plugin-full/scripts/reqmap.py sync --code ..
  *      (writes requirements/_map.json)
  *   2. npm run sync
  *      (this script → public/data.json)

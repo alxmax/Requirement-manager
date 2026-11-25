@@ -1857,6 +1857,31 @@ class CheckSince(unittest.TestCase):
                 "since+update-lock dropped unchanged members' baselines: {}".format(
                     full_keys - after_keys))
 
+    def test_sync_reports_member_drift_as_rebaselined(self):  # verifies: REQ-MEMBERDRIFT-880#CASE-5
+        """The sync that re-baselines a drifted member says so instead of printing an
+        RM019 warning for drift it has just cleared."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            src = os.path.join(d, "src_a.py")
+            _write(src, "# {}: REQ-A-001\n".format("impl" + "ements"))
+
+            def run(update_lock):
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    R.cmd_check(R.Workspace(R.load_requirements(rdir),
+                                            R.scan_members(d, rdir), rdir, d), update_lock)
+                return buf.getvalue()
+            run(True)
+            _write(src, "# {}: REQ-A-001\nX = 1\n".format("impl" + "ements"))
+            self.assertIn("RM019 REQ-A-001", run(False))   # the gate still warns
+            out = run(True)
+            self.assertNotIn("RM019", out)
+            self.assertIn("member drift re-baselined: REQ-A-001 (src_a.py)", out)
+            self.assertNotIn("RM019", run(False))           # and it is cleared
+
     def test_since_keeps_tagged_doc_bundle_unwarned(self):  # bug: since-docbundle-false-flag
         """A tagged, unchanged docs/ bundle must not be flagged 'untagged' under
         --since just because its file fell out of the --since-filtered member set."""

@@ -240,11 +240,13 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
                       % (len(same), sha))
                 confirmed_drift = [rid for rid in confirmed_drift
                                    if rid not in same]
+                ctx.accepted_drift.update(same)
         if confirmed_drift and accept_drift:
             record_accepted_drift(reqs_dir, confirmed_drift, new_lock,
                                   drift_reason, set(new_lock))
             print("  accepted drift on %d confirmed contract(s), reason: %s"
                   % (len(confirmed_drift), drift_reason or "(none given)"))
+            ctx.accepted_drift.update(confirmed_drift)
     except DriftlogUnusable as e:   # implements: REQ-DRIFT-1104
         print("  ERROR: %s; the baseline was not advanced." % e)
         return str(e)
@@ -293,6 +295,19 @@ def _stale_integration_artifacts():
                                     "plugin.json")):
         return _check_integration_fresh(plugin_root)
     return []
+
+
+def _report_rebaselined_members(errors, warns):
+    # implements: REQ-MEMBERDRIFT-880
+    """(errors, warns) without RM019: this sync has just re-baselined the member
+    lock, so the drift is gone. Each one is printed as re-baselined instead, so
+    the change stays visible to someone who runs only `sync`."""
+    for f in errors + warns:
+        if f["rule"] == "RM019":
+            rel = str(f).split(" — ", 1)[1].split(" changed since lock", 1)[0]
+            print("  member drift re-baselined: %s (%s)" % (f["rid"], rel))
+    return ([f for f in found if f["rule"] != "RM019"]
+            for found in (errors, warns))
 
 
 def _drift_acceptance(accept_drift):
@@ -394,10 +409,18 @@ def cmd_check(ws, update_lock, strict=False, accept_drift=False, mode=None,
     warns = pre_warns + warns
 
     if update_lock and not getattr(reqs, "problems", ()):
+        ctx.accepted_drift = set()
         refused = _advance_lock_and_report(ctx,
                                            *_drift_acceptance(accept_drift))
         if refused:
             errors.append(Finding("INPUT:driftlog", "error", None, refused))
+        # implements: REQ-PROMOTE-974 — the rules ran against the old lock; a
+        # contract this run re-baselined is no longer drift, so it is not reported
+        errors, warns = ([f for f in found if not (
+            f["rule"] == "RM018" and f["rid"] in ctx.accepted_drift)]
+            for found in (errors, warns))
+        if not refused:
+            errors, warns = _report_rebaselined_members(errors, warns)
 
     # Integration-artifact freshness must run BEFORE the as_json early-return so
     # --json also exits non-zero on it.

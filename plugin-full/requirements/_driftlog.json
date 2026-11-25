@@ -445,6 +445,10 @@
       "hash": "f18d400d4a3f",
       "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
     },
+    "REQ-MEMBERDRIFT-880": {
+      "hash": "a9a0742a3c79",
+      "reason": "sync names member drift it re-baselined instead of RM019"
+    },
     "REQ-MODULEFILE-056": {
       "hash": "f5c9407f0cfe",
       "reason": "fence semantics and unclosed-fence fallback amend REQ-SECTIONS-994 and REQ-MODULEFILE-056 (v8.14.0)"
@@ -506,8 +510,8 @@
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
     },
     "REQ-PROMOTE-974": {
-      "hash": "865b34bad038",
-      "reason": "Lint rewording of confirmed clauses (no behaviour change); cases merged or renumbered on newly confirmed requirements"
+      "hash": "0e7f14a2b8b5",
+      "reason": "accept-drift reports no RM018 for what it accepted"
     },
     "REQ-PROSE-900": {
       "hash": "880304bce879",
@@ -586,8 +590,8 @@
       "reason": "REQ-SELFGATE-1130 covers every rule in the directory refusal text, not only file types"
     },
     "REQ-SELFGATE-916": {
-      "hash": "838e42afeaa5",
-      "reason": "plugin/ -> plugin-full/ move for the directory submission; the full edition's statements now name plugin-full/ and requirement-manager-full"
+      "hash": "c94e09a4bd93",
+      "reason": "release waits for the published-action smoke test"
     },
     "REQ-SELFGATE-990": {
       "hash": "2093d3ab4d57",

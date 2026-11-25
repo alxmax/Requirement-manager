@@ -168,7 +168,8 @@ Every bullet below is binding.
   on the next sync rather than nagged on first sight.
 - The check is warn-only by default and is promoted to an error under
   `--strict` (it joins the same strict set as contract drift).
-- `--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`.
+- `--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`, and that run
+  prints each member drift it cleared as re-baselined instead of an RM019 warning.
 
 ## Cases
 CASE-1 — the gate warns only when the member drifted and the contract did not
@@ -196,7 +197,7 @@ CASE-5 — --update-lock re-baselines both lock files together
   Given  a dedicated member edited since the last sidecar baseline
   When   `sync --update-lock` runs
   Then   `_memberlock.json`'s hash for that file matches its current content, alongside
-         `_reqlock.json`'s refresh
+         `_reqlock.json`'s refresh, and the run names the member as re-baselined, not as RM019
 
 ---
 id: REQ-MEMBERDRIFT-982

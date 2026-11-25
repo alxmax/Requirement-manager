@@ -157,7 +157,7 @@ Every bullet below is binding.
 - After demoting, the lock and the member lock advance in the same run. The next run is
   clean, so the demotion happens once, not on every sync.
 - `--accept-drift` skips the demotion entirely: the status stays and the baseline
-  advances.
+  advances, and the run reports no RM018 for a contract it has just accepted.
 - **An unchanged file is not an edit.** A drifted requirement whose file is identical to its
   copy in the commit that last wrote the lock keeps its status when the map committed beside
   that lock names another engine than the one running: its hash moved because a newer
@@ -183,7 +183,7 @@ CASE-2 — a new requirement is not demoted
 CASE-3 — accept-drift keeps the status
   Given  a `confirmed` requirement whose contract was edited
   When   `sync --accept-drift` runs
-  Then   the status stays `confirmed` and the lock advances
+  Then   the status stays `confirmed`, the lock advances, and no RM018 line names it
 
 CASE-4 — a new hash on unchanged text keeps the confirmation
   Given  a committed lock holding another hash for a `confirmed` requirement whose file is

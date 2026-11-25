@@ -95,6 +95,8 @@ Every bullet below is binding.
 - Its `release` job force-moves the action's major-alias tag — the `@vN` named by the
   `uses:` reference in `check/action.yml` — onto the commit the current `plugin.json` version
   is tagged at, on every push to `main`.
+- Its `published-action` job runs this repository's gate through `./check`, the Action at
+  this commit, and the `release` job needs it, so a red smoke test never becomes a tag.
 
 ## Cases
 CASE-1 — the CI job runs the one verdict on both triggers
@@ -115,6 +117,11 @@ CASE-3 — the release job moves the action's major-alias tag on every push to m
   When   `ci.yml`'s `release` job's alias step runs
   Then   the `@vN` tag named in `check/action.yml`'s `uses:` reference is force-moved onto the
          commit tagged with that file's current version
+
+CASE-4 — a red published-action smoke test holds the release
+  Given  `ci.yml`'s `published-action` job, which runs the gate through `./check`
+  When   the `release` job's `needs:` list is read
+  Then   it names `published-action`, so `release` does not run while that job is red
 
 
 ---

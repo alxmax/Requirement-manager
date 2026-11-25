@@ -2995,6 +2995,9 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             out = self._sync(d, accept=True)
             self.assertNotIn("demoted:", out)
             self.assertEqual(self._status(rq), "status: confirmed")
+            # the drift it has just accepted is not reported back as drift
+            self.assertIn("accepted drift on 1", out)
+            self.assertNotIn("RM018", out)
 
 
     def _commit_with_older_hash(self, d, rq, engine="2025-01-01"):
