@@ -235,6 +235,29 @@ jobs:
             exit 1
           fi
 
+  # The repository's own gate run through the Action consumers pin, so a change
+  # that breaks the Action fails here before `check@v8` is moved onto it. It uses
+  # `./check`, the Action at this commit: the release job force-moves `@v8` onto
+  # every released commit of `main`, so on `main` the two are the same code, and
+  # `release` needs this job so a red smoke test never becomes a tag.
+  # `code: ..` widens the scan to the repo root, as gate-and-tests' `gate --code ..`
+  # does; without it every requirement whose members live outside plugin-full/
+  # fails RM006.
+  # implements: REQ-SELFGATE-916
+  published-action:
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the map's release spans come from tags, and a
+      # shallow clone rebuilds them as points, so gate reports the map stale.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./check
+        with:
+          reqmap-path: scripts/reqmap.py
+          working-directory: plugin-full
+          code: ..
+
   # Two numbers about the engine that nothing published before: how much of it the
   # suite actually executes, and what a linter makes of it. Both land in the run's job
   # summary rather than scrolling past in a log.
@@ -363,11 +386,12 @@ jobs:
   # CHANGELOG.md section (scripts/changelog_notes.py), the same heading the
   # version-bump gate already requires, so notes never drift from the changelog.
   release:
-    # Also gated on the matrix and on artifact reproducibility: a version that fails
-    # on Windows, on the declared floor, or ships a viewer that no longer matches
+    # Also gated on the matrix, on artifact reproducibility and on the published-action
+    # smoke test: a version that fails on Windows, on the declared floor, through the
+    # Action, or ships a viewer that no longer matches
     # app/ must not become a tag consumers install. deploy-map stays on the gate
     # alone — it republishes docs/, which the gate already drift-checks.
-    needs: [gate-and-tests, tests, artifacts]  # implements: REQ-REPRO-905
+    needs: [gate-and-tests, tests, artifacts, published-action]  # implements: REQ-REPRO-905
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

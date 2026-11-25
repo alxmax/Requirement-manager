@@ -126,9 +126,9 @@ MCP_TOOLS = (
                        "--release", bare=True, **_VERSION_ARGS)]},
     {"name": "reqmap_sync", "argv": ["sync"], "writes": True,
      "description": "Rebuild everything derived: the drift lock, the "
-                    "map, the findings and the site regions. Refuses "
-                    "when a confirmed contract changed, unless "
-                    "`accept_drift` gives the reason.",
+                    "map, the findings and the site regions. A "
+                    "confirmed contract that changed is demoted to "
+                    "draft, unless `accept_drift` gives the reason.",
      "params": [_param("accept_drift", "str",
                        "Why the changed contracts are accepted.",
                        "--accept-drift")]},

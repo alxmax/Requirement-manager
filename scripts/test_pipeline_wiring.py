@@ -109,6 +109,14 @@ class CiWorkflow(unittest.TestCase):  # tested-by: REQ-SELFGATE-916 @unit
         self.assertIn('git tag -f "$ALIAS" "$TARGET"', alias)
         self.assertIn('git push --force origin "refs/tags/$ALIAS"', alias)
 
+    def test_release_waits_for_action(self):  # verifies: REQ-SELFGATE-916#CASE-4
+        jobs = _jobs(_read(CI))
+        steps = _steps(jobs["published-action"], 6)
+        self.assertIn("working-directory: plugin-full", steps[_find(steps, "uses: ./check")])
+        needs = re.search(r"^    needs: \[(.*?)\]", jobs["release"], flags=re.M)
+        self.assertIn("published-action",
+                      {n.strip() for n in needs.group(1).split(",")})
+
 
 class DevHooks(unittest.TestCase):  # tested-by: REQ-SELFGATE-1070 @unit
     CHECKS = ("check_versions.py", "check_engine_bump.py",
@@ -272,7 +280,8 @@ class ArtifactsJob(unittest.TestCase):
         needs = re.search(r"^    needs: \[(.*?)\]", release, flags=re.M)
         self.assertIsNotNone(needs)
         names = {n.strip() for n in needs.group(1).split(",")}
-        self.assertEqual({"artifacts", "gate-and-tests", "tests"}, names)
+        self.assertEqual({"artifacts", "gate-and-tests", "tests",
+                          "published-action"}, names)
 
 
 if __name__ == "__main__":

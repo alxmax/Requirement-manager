@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## plugin `v8.29.2` — 2026-11-25
+
+**Release v8.29.2.**
+
+**`sync --accept-drift` no longer reports the drift it has just accepted.**
+
+- The gate rules ran against the old lock, so after `accepted drift on N confirmed contract(s)` and `lock updated.` the same run still printed RM018 for those requirements. A contract the run re-baselined (accepted, or re-baselined because only the engine's hash changed) is now dropped from that run's RM018 findings. REQ-PROMOTE-974 CASE-3 says so and its test fails without the fix. Engine change: `MAP_ENGINE_VERSION` is `2026-11-25.1`.
+- The same run printed RM019 for every member drift the member lock it was writing had just cleared. That sync now prints `member drift re-baselined: ID (file)` instead, so the change stays visible to someone who runs only `sync`, and a gate after it is quiet. REQ-MEMBERDRIFT-880 CASE-5.
+
+**A release waits for the published-action smoke test.**
+
+- The Action smoke test (`published-action`, running this repository's gate through `./check`) moves from its own `dogfood.yml` workflow into `ci.yml`, and `release` now needs it: a workflow cannot wait on a job in another workflow, so a red smoke test could still be tagged. REQ-SELFGATE-916 CASE-4.
+
+**The words about `sync` match what it does.**
+
+- `docs/commands.md` and the `reqmap_sync` MCP description said `sync` refuses an edited confirmed contract; it demotes it to draft. `app/scripts/sync-data.mjs` pointed at `reqmap.py export`, which no longer exists; it now names `sync --code ..`.
+
 ## plugin `v8.29.1` — 2026-11-25
 
 **Release v8.29.1.**
