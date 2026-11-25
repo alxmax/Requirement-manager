@@ -5752,6 +5752,16 @@ class TestsThatCannotFail(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1146
         self.assertEqual(3, len(cover["REQ-A-001"]))
         self.assertEqual([], found)
 
+    def test_a_plain_pytest_assert_is_judged_not_crashed_on(self):
+        """`_self_equal` once read `.func` off an ast.Assert and sync died."""
+        src = ("def test_real():  " + self.TAG + "REQ-A-001#CASE-1\n"
+               "    assert f(1) == 2\n"
+               "def test_const():  " + self.TAG + "REQ-A-001#CASE-2\n"
+               "    assert True\n")
+        found, _ = self._read({"test_a.py": src})
+        self.assertEqual([("test_const", "constant assertion")],
+                         [(v["test"], v["kind"]) for v in found])
+
     def test_the_worklist_and_the_map_carry_the_list(self):  # verifies: REQ-TESTGAPS-1146#CASE-4
         from reqmap_engine.tracecover import trace_block
         src = "def test_runs():  " + self.TAG + "REQ-A-001#CASE-1\n    run(1)\n"

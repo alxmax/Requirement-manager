@@ -1,6 +1,6 @@
 {
-  "engine_version": "2026-11-22.5",
-  "repo": "alxmax/requirement-manager",
+  "engine_version": "2026-11-25",
+  "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
       "id": "ARCH-ACVERIFY-019",
@@ -5251,11 +5251,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5772"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5782"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6359"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6369"
         },
         {
           "role": "implements",
@@ -5334,7 +5334,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6468"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6478"
         },
         {
           "role": "implements",
@@ -5686,7 +5686,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5772"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5782"
         },
         {
           "role": "implements",
@@ -7054,15 +7054,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6070"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6080"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6189"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6199"
         },
         {
           "role": "implements",
@@ -7121,7 +7121,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "implements",
@@ -7215,7 +7215,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "implements",
@@ -7301,7 +7301,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "implements",
@@ -7364,7 +7364,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "implements",
@@ -7428,7 +7428,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6070"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6080"
         },
         {
           "role": "implements",
@@ -7500,7 +7500,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5808"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5818"
         },
         {
           "role": "implements",
@@ -7577,7 +7577,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6071"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6081"
         },
         {
           "role": "implements",
@@ -7757,7 +7757,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6189"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6199"
         },
         {
           "role": "implements",
@@ -10393,7 +10393,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6315"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6325"
         },
         {
           "role": "implements",
@@ -12325,7 +12325,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6423"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6433"
         },
         {
           "role": "implements",
@@ -12435,7 +12435,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6423"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6433"
         },
         {
           "role": "implements",
@@ -13096,7 +13096,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6423"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6433"
         },
         {
           "role": "implements",
@@ -15192,11 +15192,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:48"
+          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:50"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:79"
+          "loc": "plugin-full/scripts/reqmap_engine/vacuoustests.py:81"
         }
       ],
       "test_exempt": null,
@@ -16817,7 +16817,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:139"
+          "loc": ".github/workflows/ci.yml:143"
         },
         {
           "role": "implements",
@@ -17779,11 +17779,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:220"
-        },
-        {
-          "role": "implements",
-          "loc": ".github/workflows/ci.yml:223"
+          "loc": ".github/workflows/ci.yml:224"
         },
         {
           "role": "implements",
@@ -17791,7 +17787,11 @@
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:366"
+          "loc": ".github/workflows/ci.yml:231"
+        },
+        {
+          "role": "implements",
+          "loc": ".github/workflows/ci.yml:370"
         },
         {
           "role": "tested-by",
@@ -20918,6 +20918,10 @@
           "loc": "scripts/gen_tokens.py:2"
         },
         {
+          "role": "implements",
+          "loc": "scripts/sync_directory_edition.py:2"
+        },
+        {
           "role": "tested-by",
           "loc": "scripts/test_bundle_skill_engine.py:30"
         },
@@ -20956,6 +20960,10 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_pipeline_wiring.py:66"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_sync_directory_edition.py:25"
         }
       ],
       "test_exempt": null,
@@ -23667,7 +23675,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6452"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6462"
         },
         {
           "role": "implements",
@@ -31408,9 +31416,9 @@
     },
     {
       "month": "2026-11",
-      "count": 7,
+      "count": 8,
       "first": "2026-11-14",
-      "last": "2026-11-23",
+      "last": "2026-11-25",
       "versions": [
         "v8.24.7",
         "v8.24.8",
@@ -31418,11 +31426,20 @@
         "v8.26.0",
         "v8.27.0",
         "v8.28.0",
-        "v8.29.0"
+        "v8.29.0",
+        "v8.29.1"
       ],
       "landmark": "v8.29.0",
       "headline": "Release v8.29.0",
       "entries": [
+        {
+          "version": "v8.29.1",
+          "date": "2026-11-25",
+          "headline": "Release v8.29.1",
+          "body": "**Release v8.29.1.**\n\n**`sync` no longer crashes on a plain pytest `assert` (ADR-0092).**\n\n- A consumer repo with plain pytest tests crashed `sync` with `AttributeError: 'Assert' object has no attribute 'func'`. `_assertions` returns `ast.Assert` and `ast.Call` nodes and `_constant` handles both, but `_self_equal` read `.func` off every node; it was reached whenever a tagged test's assertions were all bare `assert` and not all constants. `_self_equal` now returns False for anything that is not a call. A regression test (`assert f(1) == 2` is judged, `assert True` is named) failed with that traceback before the fix. Engine change: `MAP_ENGINE_VERSION` is `2026-11-25`.\n\n**The directory edition stops drifting from `plugin-full/`.**\n\n- `plugin-full/.../references/bugs.md` lacked the bullet telling a reporter to write the broken requirement's id in `--source` or `--why` (ADR-0083, commit `dbaf283`); it had landed only in `plugin/` before the engine moved to `plugin-full/`. Restored.\n- `plugin/.../references/assistant-steps.md` lacked `plugin-full`'s paragraph for assistants with no question tool (lettered `a)`-`d)` options, `(default)` marker, never applied unanswered). Refreshed.\n- New `scripts/sync_directory_edition.py [--check]` keeps the five copied pages (`ci.md`, `triage.md`, `prose-buckets.md`, `assistant-steps.md`, `bugs.md`) byte-equal; `workflow.md`, the quality-review `SKILL.md` and `manual-mode.md` differ by design and are never touched. `check_versions.py` compared only the version field, so nothing caught either gap above. Wired into the `gate-and-tests` CI job (with `test_sync_directory_edition.py`) and `.githooks/pre-commit`; `plugin/README.md` names the command.",
+          "first_commit": "2026-11-25",
+          "last_commit": "2026-11-25"
+        },
         {
           "version": "v8.29.0",
           "date": "2026-11-23",
@@ -31781,8 +31798,8 @@
     }
   ],
   "design": {
-    "files": 162,
-    "clean_files": 162,
+    "files": 163,
+    "clean_files": 163,
     "score": 100,
     "candidates": {
       "encapsulation": 0,
@@ -31977,10 +31994,10 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 202,
-      "tagged_files": 197,
-      "production_files": 178,
-      "drift_files": 108
+      "code_files": 204,
+      "tagged_files": 199,
+      "production_files": 179,
+      "drift_files": 109
     },
     "suggestions": {},
     "hygiene": {

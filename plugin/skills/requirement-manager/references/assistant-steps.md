@@ -28,7 +28,10 @@ relay the engine's wording. It reads the requirement, then answers in two parts:
    already proves it" — never a restatement of the question and never "clarify this".
    Say what each option changes and what it gives up, in the reader's words, and put
    your recommendation first. If you genuinely cannot see two defensible resolutions, ask the plain
-   question instead of padding the list to two.
+   question instead of padding the list to two. Without a question tool (Copilot and most
+   other assistants), write the options as a lettered list, `a)` to `d)`, mark the
+   recommended one `(default)`, and say that answering `default` takes it. The choice is the
+   person's: never apply the default when they have not answered.
 3. **Written for whoever answers it.** When the question goes into `## Verify intent`,
    use the form of workflow rule 7. The `<!-- audience: … -->` marker picks the
    vocabulary: none means a non-developer, and `client` or `legal` means no technical

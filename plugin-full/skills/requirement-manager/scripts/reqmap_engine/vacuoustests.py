@@ -40,7 +40,9 @@ def _constant(node):
 
 def _self_equal(node):
     """`assertEqual(f(x), f(x))`: in one process, true of almost any f."""
-    args = getattr(node, "args", [])
+    if not isinstance(node, ast.Call):
+        return False
+    args = node.args
     return (_name(node) in ("assertEqual", "assertIs") and len(args) >= 2
             and ast.dump(args[0]) == ast.dump(args[1]))
 

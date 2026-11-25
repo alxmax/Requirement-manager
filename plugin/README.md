@@ -31,11 +31,11 @@ from the same marketplace as `requirement-manager-full`:
 
 ## Keeping it in step
 
-These files are hand-maintained copies. `references/workflow.md`, `assistant-steps.md`,
-`triage.md`, `prose-buckets.md`, `bugs.md` and `ci.md` come from
-`plugin-full/skills/requirement-manager/references/`; `workflow.md` differs only in its
-opening note, the `update-engine` row and its ADR links. When the originals change,
-copy them again. The version in `.claude-plugin/plugin.json` follows `plugin-full/`'s, and
+`assistant-steps.md`, `triage.md`, `prose-buckets.md`, `bugs.md` and `ci.md` are copies of
+`plugin-full/skills/requirement-manager/references/`; `workflow.md` is the same page with a
+different opening note, `update-engine` row and ADR links, and `manual-mode.md` exists only
+here. When the originals change, run `python scripts/sync_directory_edition.py` (CI and the
+dev pre-commit run it with `--check`). The version in `.claude-plugin/plugin.json` follows `plugin-full/`'s, and
 `scripts/check_versions.py` fails the build when it does not.
 Only Markdown, JSON and images may live here: anything else gets the submission refused,
 and `scripts/check_directory_edition.py` fails CI first.
