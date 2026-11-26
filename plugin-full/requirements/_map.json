@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-26",
+  "engine_version": "2026-11-26.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1923,7 +1923,7 @@
       "id": "ARCH-BUGS-078",
       "layer": "feature",
       "level": "architecture",
-      "status": "confirmed",
+      "status": "draft",
       "area": "ARCH",
       "title": "Known bugs are listed by module",
       "intent": "A repository's known bugs sat in documents nothing could read, so the map showed what was traced and said nothing about what was broken. Each repository now lists them by module, whether it already keeps them in files or adds them one at a time. See [ADR-0080](../../docs/adr/0080-known-bugs-are-listed-by-module.md).",
@@ -1944,6 +1944,7 @@
         "`sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]",
         "The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]",
         "Fixed draws what was fixed against what is still open, week by week. [[REQ-BUGS-1154]]",
+        "A fix that never had a row reaches the register, and a duplicate closes as one. [[REQ-BUGS-1156]]",
         "A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]"
       ],
       "verify": [],
@@ -1982,7 +1983,8 @@
         "REQ-BUGS-1128",
         "REQ-BUGS-1129",
         "REQ-BUGS-1131",
-        "REQ-BUGS-1154"
+        "REQ-BUGS-1154",
+        "REQ-BUGS-1156"
       ],
       "members": [
         {
@@ -1999,11 +2001,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:174"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:229"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
         },
         {
           "role": "implements",
@@ -2025,7 +2027,12 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [],
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
       "clauses": 3,
       "covered": 3,
       "clarify": [
@@ -2882,51 +2889,55 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:26"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:28"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:34"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:36"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:39"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:41"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:55"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:71"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:73"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:79"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:81"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:89"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:91"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:102"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:104"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:130"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:151"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:138"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:160"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:159"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:174"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:168"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
         },
         {
           "role": "implements",
@@ -2991,19 +3002,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:70"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:72"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:101"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:103"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:150"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:173"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:277"
         }
       ],
       "test_exempt": null,
@@ -3050,23 +3061,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:296"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:364"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:130"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:138"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:208"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:325"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:229"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
         }
       ],
       "test_exempt": null,
@@ -3127,19 +3138,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:359"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:427"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:265"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:382"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:275"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:392"
         },
         {
           "role": "implements",
@@ -3278,7 +3289,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — two lines under the table\n  Given  a register with twelve weeks of activity\n  When   Fixed renders\n  Then   the chart follows the table and draws two lines of twelve points, with `Show total`\n         unticked\n\nCASE-2 — the last point is what is still open\n  Given  the same register\n  When   the weeks are computed\n  Then   the last week's still open and fixes so far equal the open and fixed rows, and the\n         line above the chart names the peak and its first week\n\nCASE-3 — end labels do not overlap\n  Given  label positions 100, 105 and 40\n  When   they are spread\n  Then   they read 100, 114 and 40\n\nCASE-4 — translated\n  Given  the same register\n  When   Fixed renders in Romanian and in German\n  Then   the title, the checkbox, the line above and the week labels are translated and no\n         English string of the chart shows",
+      "accept": "CASE-1 — two lines under the table\n  Given  a register with twelve weeks of activity\n  When   Fixed renders\n  Then   the chart follows the table and draws two lines of twelve points, with `Show total`\n         unticked\n\nCASE-2 — the last point is what is still open\n  Given  the same register\n  When   the weeks are computed\n  Then   the last week's still open and fixes so far equal the open and fixed rows, and the\n         line above the chart names the peak and its first week\n\nCASE-3 — end labels do not overlap\n  Given  label positions 100, 105 and 40\n  When   they are spread\n  Then   they read 100, 114 and 40\n\nCASE-4 — translated\n  Given  the same register\n  When   Fixed renders in Romanian and in German\n  Then   the title, the checkbox, the line above and the week labels are translated and no\n         English string of the chart shows\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3336,6 +3347,112 @@
           "quote": "",
           "question": "3 of 4 Given lines open on the same word (\"register\"). Do the cases cover the other kinds of input a caller can supply?",
           "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1156",
+      "layer": "feature",
+      "level": "code",
+      "status": "draft",
+      "area": "REQ",
+      "title": "A fix never listed, and a duplicate",
+      "intent": "A bug found and fixed before anyone listed it left no row, so the register undercounted the fixes; a duplicate could only close as `not a bug`, which said something else.",
+      "contract": [
+        "`sync --fix TITLE --new --module M` writes one register row and leaves the module's file as it was.",
+        "The row's id is the module file's next `B<n>`, past every open row and every register row of that file.",
+        "Its found date is `--date`, else the day of the commit `--commit` names, else today, and its note is `--note` or `fixed before it was listed`.",
+        "`sync --fix ID --duplicate-of OTHER` closes the row with version `duplicate` and the note `duplicate of OTHER`, and `ask --bugs` names it under OTHER.",
+        "A duplicate, like a dismissal, counts in neither the fixes nor the time to fix.",
+        "An OTHER that is the same bug or no known bug, `--new` with `--duplicate-of`, and `--new` with no module or a bad priority exit 2 and write nothing."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a fix that was never listed\n  Given  a module file holding B1 and B2\n  When   `sync --fix \"Refund rounds down\" --new --module Billing --date 2026-10-03` runs, then\n         again with another title\n  Then   the register holds `Billing:B3` found on 2026-10-03 with the default note, then\n         `Billing:B4`, the module file is unchanged, and the next `sync --bug` gives B5\n\nCASE-2 — the found day is the commit's\n  Given  a commit dated 2026-09-14\n  When   `sync --fix TITLE --new --module Billing --commit SHA` runs, then once with no commit\n  Then   the first row is found on 2026-09-14 with that commit, and the second on the day it was\n         fixed\n\nCASE-3 — a duplicate is closed and named\n  Given  open bugs Billing:B1 and Billing:B2\n  When   `sync --fix Billing:B2 --duplicate-of \"Billing B1\"` runs\n  Then   the register row reads `duplicate`, `—` and `duplicate of Billing:B1`, and `ask --bugs`\n         prints `closed as its duplicate: Billing:B2` under B1\n\nCASE-4 — a duplicate is no fix\n  Given  a register with a duplicate and a fix closed the same week\n  When   the weeks and medians are computed\n  Then   the week counts one fix and the median counts only the fix\n\nCASE-5 — refusals write nothing\n  Given  the same module file and no register\n  When   `--duplicate-of` names an unknown bug or the bug itself, `--new` comes with\n         `--duplicate-of`, with no `--module`, or with `--prio high`\n  Then   each exits 2, the module file is unchanged and no register is written",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:8"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/bugStats.js:7"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:297"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:119"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:182"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:193"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:203"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:216"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:263"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:283"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:306"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:477"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:101"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
     },
@@ -5553,11 +5670,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:114"
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:117"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:128"
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:131"
         }
       ],
       "test_exempt": null,
@@ -13494,7 +13611,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/bugs.jsx:8"
+          "loc": "app/scripts/smoke/bugs.jsx:9"
         },
         {
           "role": "implements",
@@ -13555,7 +13672,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/bugs.jsx:9"
+          "loc": "app/scripts/smoke/bugs.jsx:10"
         },
         {
           "role": "implements",
@@ -27994,6 +28111,10 @@
       "ARCH-BUGS-078"
     ],
     [
+      "REQ-BUGS-1156",
+      "ARCH-BUGS-078"
+    ],
+    [
       "ARCH-CANDIDATES-009",
       "SYS-READ-103"
     ],
@@ -31606,7 +31727,7 @@
           "version": "v8.30.0",
           "date": "2026-11-26",
           "headline": "Release v8.30.0",
-          "body": "**Release v8.30.0.**\n\n**Bugs and questions drawn in the Bugs tab and the Report, and two answers that read as something else.**\n\n- Bugs → Fixed draws a line chart under the weekly table: what was fixed so far (green) against what is still open (red), on one axis from 0, with the total found behind a `Show total` checkbox. Each line has a legend entry, a label at its last point and a tooltip, so none is named by colour alone; the two colours are new tokens (`chart-fixed`, `chart-open`) chosen to stay apart under deuteranopia and protanopia, which the status pair does not. A week chosen in the chart is the week chosen in the table. Romanian and German translate every string (REQ-BUGS-1154, draft).\n- The Report's Results in numbers carry the same bug chart and a questions chart: a bar per priority (High, Medium, Low), split into questions on confirmed requirements and on drafts. Each chart has a priority filter, P0–P4 (only the priorities the register holds) and High/Medium/Low, and the PDF prints them as filtered. The map has no date for a question, so its chart shows now, not a trend (REQ-VIEWER-1155, draft).\n- `sync` ends with one line when it demoted anything: `Demoted N confirmed -> draft (contract changed): <ids>`. The per-requirement lines scrolled past among the rest of the output, and a drop in the confirmed count was found only by comparing file lists (REQ-PROMOTE-974 CASE-7).\n- `ask --bugs --module X` where no module's name contains X now says `no module named 'X'` and lists the modules, instead of `no known bugs match`, which read as \"no bugs recorded\" to someone asking about an area filed under another module (REQ-BUGS-1120 CASE-6).",
+          "body": "**Release v8.30.0.**\n\n**Bugs and questions drawn in the Bugs tab and the Report, and two answers that read as something else.**\n\n- Bugs → Fixed draws a line chart under the weekly table: what was fixed so far (green) against what is still open (red), on one axis from 0, with the total found behind a `Show total` checkbox. Each line has a legend entry, a label at its last point and a tooltip, so none is named by colour alone; the two colours are new tokens (`chart-fixed`, `chart-open`) chosen to stay apart under deuteranopia and protanopia, which the status pair does not. A week chosen in the chart is the week chosen in the table. Romanian and German translate every string (REQ-BUGS-1154, draft).\n- The Report's Results in numbers carry the same bug chart and a questions chart: a bar per priority (High, Medium, Low), split into questions on confirmed requirements and on drafts. Each chart has a priority filter, P0–P4 (only the priorities the register holds) and High/Medium/Low, and the PDF prints them as filtered. The map has no date for a question, so its chart shows now, not a trend (REQ-VIEWER-1155, draft).\n- `sync` ends with one line when it demoted anything: `Demoted N confirmed -> draft (contract changed): <ids>`. The per-requirement lines scrolled past among the rest of the output, and a drop in the confirmed count was found only by comparing file lists (REQ-PROMOTE-974 CASE-7).\n- `ask --bugs --module X` where no module's name contains X now says `no module named 'X'` and lists the modules, instead of `no known bugs match`, which read as \"no bugs recorded\" to someone asking about an area filed under another module (REQ-BUGS-1120 CASE-6).\n- `sync --fix \"TITLE\" --new --module M` records a fix that never had a row: it goes straight to the register under the module's next free number, found on `--date`, else the day of the `--commit`, else today. The module's file is untouched. Fixes made before the register existed, or found and fixed in one commit, were left out of its counts (REQ-BUGS-1156, draft).\n- `sync --fix ID --duplicate-of OTHER` closes a row as a duplicate: version `duplicate`, note `duplicate of OTHER`, and `ask --bugs` prints `closed as its duplicate: …` under the kept bug. A duplicate counts as no fix in the chart, the weekly table and the median, as a dismissal already did; before, the only way to close one was `--note`, which recorded `not a bug`.",
           "first_commit": "2026-11-26",
           "last_commit": "2026-11-26"
         },
@@ -31959,6 +32080,14 @@
         {
           "flag": "--note",
           "help": "With --fix: close without a fix, and say why."
+        },
+        {
+          "flag": "--new",
+          "help": "With --fix: the argument is a TITLE, not an id. Record a fix that never had a row, under --module's next free number, found on --date (default: the --commit's day, else today). The module's file is not written."
+        },
+        {
+          "flag": "--duplicate-of",
+          "help": "With --fix: close the bug as a duplicate of this `FILE:REF`. It is no fix, and `ask --bugs` names it under the bug it duplicates."
         }
       ]
     },
@@ -32001,14 +32130,14 @@
   ],
   "design": {
     "files": 166,
-    "clean_files": 159,
-    "score": 96,
+    "clean_files": 157,
+    "score": 95,
     "candidates": {
-      "encapsulation": 2,
+      "encapsulation": 3,
       "abstraction": 1,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 5
+      "standards": 6
     },
     "findings": [
       {
@@ -32069,6 +32198,22 @@
       },
       {
         "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin-full/scripts/reqmap_engine/bugclose.py",
+        "line": 215,
+        "name": "_fix_new",
+        "detail": "a, reqs_dir, root travel together through 3 functions: _duplicate_meta, _fix_new, cmd_bug_fix"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "plugin-full/scripts/reqmap_engine/commands.py",
+        "line": 1,
+        "name": "commands.py",
+        "detail": "513 lines (over 500)"
+      },
+      {
+        "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "plugin-full/scripts/reqmap_engine/gate.py",
         "line": 377,
@@ -32077,6 +32222,7 @@
       }
     ],
     "advice": {
+      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
       "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
@@ -32084,16 +32230,16 @@
     }
   },
   "health": {
-    "score": 99,
-    "total": 381,
-    "scored": 359,
-    "healthy": 355,
+    "score": 98,
+    "total": 382,
+    "scored": 360,
+    "healthy": 354,
     "exempt": 5,
     "deprecated": 22,
-    "confirmed": 355,
-    "implemented": 349,
-    "tested": 350,
-    "drafts": 4,
+    "confirmed": 354,
+    "implemented": 350,
+    "tested": 351,
+    "drafts": 6,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
@@ -32101,10 +32247,24 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 355,
+    "reviewed_total": 354,
     "unhealthy": [
       {
+        "id": "ARCH-BUGS-078",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
         "id": "REQ-BUGS-1154",
+        "status": "draft",
+        "why": [
+          "not confirmed"
+        ]
+      },
+      {
+        "id": "REQ-BUGS-1156",
         "status": "draft",
         "why": [
           "not confirmed"
@@ -32283,7 +32443,7 @@
       "code_files": 206,
       "tagged_files": 201,
       "production_files": 181,
-      "drift_files": 111
+      "drift_files": 110
     },
     "suggestions": {},
     "hygiene": {

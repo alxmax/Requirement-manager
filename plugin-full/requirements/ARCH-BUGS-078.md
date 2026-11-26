@@ -1,6 +1,6 @@
 ---
 id: ARCH-BUGS-078
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -34,6 +34,7 @@ Every bullet below is binding.
 - `sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]
 - The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]
 - Fixed draws what was fixed against what is still open, week by week. [[REQ-BUGS-1154]]
+- A fix that never had a row reaches the register, and a duplicate closes as one. [[REQ-BUGS-1156]]
 - A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]
 
 ## Cases
@@ -985,3 +986,60 @@ CASE-4 — translated
   When   Fixed renders in Romanian and in German
   Then   the title, the checkbox, the line above and the week labels are translated and no
          English string of the chart shows
+
+--------------------
+
+
+---
+id: REQ-BUGS-1156
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# A fix never listed, and a duplicate
+
+## Description
+> A bug found and fixed before anyone listed it left no row, so the register undercounted the
+> fixes; a duplicate could only close as `not a bug`, which said something else.
+
+Every bullet below is binding.
+- `sync --fix TITLE --new --module M` writes one register row and leaves the module's file as it was.
+- The row's id is the module file's next `B<n>`, past every open row and every register row of that file.
+- Its found date is `--date`, else the day of the commit `--commit` names, else today, and its note is `--note` or `fixed before it was listed`.
+- `sync --fix ID --duplicate-of OTHER` closes the row with version `duplicate` and the note `duplicate of OTHER`, and `ask --bugs` names it under OTHER.
+- A duplicate, like a dismissal, counts in neither the fixes nor the time to fix.
+- An OTHER that is the same bug or no known bug, `--new` with `--duplicate-of`, and `--new` with no module or a bad priority exit 2 and write nothing.
+
+## Cases
+CASE-1 — a fix that was never listed
+  Given  a module file holding B1 and B2
+  When   `sync --fix "Refund rounds down" --new --module Billing --date 2026-10-03` runs, then
+         again with another title
+  Then   the register holds `Billing:B3` found on 2026-10-03 with the default note, then
+         `Billing:B4`, the module file is unchanged, and the next `sync --bug` gives B5
+
+CASE-2 — the found day is the commit's
+  Given  a commit dated 2026-09-14
+  When   `sync --fix TITLE --new --module Billing --commit SHA` runs, then once with no commit
+  Then   the first row is found on 2026-09-14 with that commit, and the second on the day it was
+         fixed
+
+CASE-3 — a duplicate is closed and named
+  Given  open bugs Billing:B1 and Billing:B2
+  When   `sync --fix Billing:B2 --duplicate-of "Billing B1"` runs
+  Then   the register row reads `duplicate`, `—` and `duplicate of Billing:B1`, and `ask --bugs`
+         prints `closed as its duplicate: Billing:B2` under B1
+
+CASE-4 — a duplicate is no fix
+  Given  a register with a duplicate and a fix closed the same week
+  When   the weeks and medians are computed
+  Then   the week counts one fix and the median counts only the fix
+
+CASE-5 — refusals write nothing
+  Given  the same module file and no register
+  When   `--duplicate-of` names an unknown bug or the bug itself, `--new` comes with
+         `--duplicate-of`, with no `--module`, or with `--prio high`
+  Then   each exits 2, the module file is unchanged and no register is written

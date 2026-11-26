@@ -98,6 +98,9 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--commit", default=None)
     ap.add_argument("--version", dest="bug_version", default=None)
     ap.add_argument("--note", default=None)
+    # implements: REQ-BUGS-1156
+    ap.add_argument("--new", dest="fix_new", action="store_true")
+    ap.add_argument("--duplicate-of", dest="duplicate_of", default=None)
 
 
 # The flags every verb accepts: where the workspace is, and whether to

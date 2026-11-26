@@ -12,6 +12,8 @@
 - The Report's Results in numbers carry the same bug chart and a questions chart: a bar per priority (High, Medium, Low), split into questions on confirmed requirements and on drafts. Each chart has a priority filter, P0–P4 (only the priorities the register holds) and High/Medium/Low, and the PDF prints them as filtered. The map has no date for a question, so its chart shows now, not a trend (REQ-VIEWER-1155, draft).
 - `sync` ends with one line when it demoted anything: `Demoted N confirmed -> draft (contract changed): <ids>`. The per-requirement lines scrolled past among the rest of the output, and a drop in the confirmed count was found only by comparing file lists (REQ-PROMOTE-974 CASE-7).
 - `ask --bugs --module X` where no module's name contains X now says `no module named 'X'` and lists the modules, instead of `no known bugs match`, which read as "no bugs recorded" to someone asking about an area filed under another module (REQ-BUGS-1120 CASE-6).
+- `sync --fix "TITLE" --new --module M` records a fix that never had a row: it goes straight to the register under the module's next free number, found on `--date`, else the day of the `--commit`, else today. The module's file is untouched. Fixes made before the register existed, or found and fixed in one commit, were left out of its counts (REQ-BUGS-1156, draft).
+- `sync --fix ID --duplicate-of OTHER` closes a row as a duplicate: version `duplicate`, note `duplicate of OTHER`, and `ask --bugs` prints `closed as its duplicate: …` under the kept bug. A duplicate counts as no fix in the chart, the weekly table and the median, as a dismissal already did; before, the only way to close one was `--note`, which recorded `not a bug`.
 
 ## plugin `v8.29.4` — 2026-11-26
 

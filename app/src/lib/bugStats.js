@@ -1,10 +1,12 @@
 // implements: REQ-BUGS-1129
 /* What the register says over time. Everything here follows from the dates a
- * row already holds; a dismissal ("not a bug") leaves the open list but is not
- * a fix, so it counts in neither the fixes nor the time to fix. */
+ * row already holds; a dismissal ("not a bug") or a duplicate leaves the open
+ * list but is not a fix, so it counts in neither the fixes nor the time to
+ * fix. */
 
-const NOT_A_BUG = "not a bug";
-export const isFix = (row) => row.version !== NOT_A_BUG;
+// implements: REQ-BUGS-1156 - a duplicate is closed, not fixed
+const NOT_FIXES = ["not a bug", "duplicate"];
+export const isFix = (row) => !NOT_FIXES.includes(row.version);
 const DAY = 86400000;
 const stamp = (date) => Date.parse(`${date}T00:00:00Z`);
 

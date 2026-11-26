@@ -12,7 +12,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin-full/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin-full/scripts/reqmap_engine/__init__.py": "98890b6989168c98ecb5477daf35123d003e6b8546368f0cc463f3dc0736b51a",
+      "plugin-full/scripts/reqmap_engine/__init__.py": "fe2d7d335a187215383cc94056a7f892661918269b7ba3bb29ae2a34319d2b9f",
       "plugin-full/scripts/reqmap_engine/gate.py#GateMode": "869959219fa60aaf121e26917cbd7ca59dd300d1c3b487337ea333755da00aae",
       "plugin-full/scripts/reqmap_engine/locks.py#_ver_key": "1745e23093550073e8bdbd40a822ad8b9214051794bb0a5ad8b4204644fba3a3",
       "plugin-full/scripts/reqmap_engine/locks.py#warn_if_stale": "1045ccd7c5f4e3c632331332afd0babde7e72d27b803844b12a0e902419a2a44",
@@ -240,7 +240,6 @@
       "plugin-full/scripts/reqmap_engine/bugclose.py#fix_trailers": "08844289df417dfe5bfa1c7bed1ea2deb8ebb47fae3013dd7959f6503a2ccd89"
     },
     "REQ-BUGS-1129": {
-      "app/src/lib/bugStats.js": "8ad45335d18abc8a87c15a3221f8ca344d75782996eafd8c0c31739d705075e2",
       "plugin-full/scripts/reqmap_engine/bugclose.py#fixed_block": "64577934453a3144938949ffa0d7516c72709ade26532a0572bd0a4516356c8e",
       "plugin-full/scripts/reqmap_engine/bugclose.py#forge_of": "35ba9f7973ef675ff6c68eb5491dd18e666cbb85375e2cb377ccbd24559a4b9b"
     },
@@ -251,6 +250,13 @@
     },
     "REQ-BUGS-1154": {
       "app/src/views/problems/BugChart.jsx": "1279bc2520bdfd75d32eeb4fb25a1259e59cdfffe17c1f2cc5eb5f46a92d7374"
+    },
+    "REQ-BUGS-1156": {
+      "plugin-full/scripts/reqmap_engine/bugclose.py#_duplicate_meta": "de4a6be8fa01e5e9b6ee704c2e6fba81611518b6c3cb8ec78e0a7095e3a8a027",
+      "plugin-full/scripts/reqmap_engine/bugclose.py#_fix_new": "6e183c4de29982913079531c0de2337addb5156a7999b1204cf683559ea7f5fd",
+      "plugin-full/scripts/reqmap_engine/bugclose.py#_found_on": "ecac4aa2efe92d2cb84f679f187fd69b652d13cb49529b918937b0004189872c",
+      "plugin-full/scripts/reqmap_engine/bugclose.py#_next_ref": "38ea81a048c855ffeeb2524160fa1d412f300911d56dbe81de56e58f584a64fc",
+      "plugin-full/scripts/reqmap_engine/bugclose.py#duplicates_of": "721bf3d07973d8d86554b7490b23cbfcc8f7bd06a3e3eda1b1db2fdfc63a5a52"
     },
     "REQ-CANDIDATES-1141": {
       "plugin-full/scripts/reqmap_engine/candidates.py#_tested_stem": "b4d647c0d9af84ee27f8f6ac86c8a2489ea1b4e1215bbdd815be27fcfe8b8a1a",

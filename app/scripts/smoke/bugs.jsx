@@ -5,6 +5,7 @@
 // tested-by: REQ-BUGS-1129
 // tested-by: REQ-BUGS-1131
 // tested-by: REQ-BUGS-1154
+// tested-by: REQ-BUGS-1156
 // tested-by: REQ-MAPSTAMP-1124
 // tested-by: REQ-MAPSTAMP-1125
 /* Render smoke test, part: the Bugs tab and the file it writes. Adopts a list
@@ -19,7 +20,7 @@ import {
   appendBug, bugCommand, bugFile, moduleFile, saveBug,
 } from "../../src/lib/bugFile.js";
 import {
-  fixedIn, fixedSince, medianDays, openPeak, pageOf, spreadLabels, weekly,
+  fixedIn, fixedSince, isFix, medianDays, openPeak, pageOf, spreadLabels, weekly,
 } from "../../src/lib/bugStats.js";
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
@@ -422,4 +423,15 @@ export async function bugFileChecks() {
       && de.includes("Behoben und noch offen") && de.includes("Gesamt anzeigen")
       && ["Fixed and still open", "Show total", "still open", "peaked", "Up to"]
         .every((s) => !ro.includes(s) && !de.includes(s)));
+}
+
+{
+  // verifies: REQ-BUGS-1156#CASE-4
+  const dup = { id: "Core:B2", module: "Core", prio: "P2", date: "2026-10-05",
+    fixed: "2026-10-06", version: "duplicate", note: "duplicate of Core:B1" };
+  const real = { ...dup, id: "Core:B3", version: "1.0.0", note: "" };
+  test("bugs: a duplicate leaves the open count and is no fix",
+    !isFix(dup) && isFix(real)
+      && weekly([], [dup, real]).map((w) => `${w.fixed} ${w.open}`).join() === "1 0"
+      && medianDays([dup, real], "prio").join() === "P2,1,1");
 }

@@ -18,6 +18,8 @@ COLUMNS = ("ID", "Bug", "Module", "Priority", "Found", "Fixed", "Version",
 _KEYS = ("id", "title", "module", "prio", "date", "fixed", "version", "commit",
          "note")
 NOT_A_BUG = "not a bug"
+DUPLICATE = "duplicate"
+_DUP_RE = re.compile(r"duplicate of (\S+)")
 _NOTHING = "—"
 _ID_RE = re.compile(r"(.+)[:\s]\s*(\S+)")
 
@@ -110,7 +112,13 @@ def close_bug(module_text, register_text, bug, meta):  # implements: REQ-BUGS-11
         raise ValueError("{} is not on line {} of {}".format(
             bug["ref"], bug["line"], bug["file"]))
     del kept[at]
-    values = dict(bug, **meta)
+    return "".join(kept), register_row(register_text, dict(bug, **meta))
+
+
+def register_row(register_text, values):
+    # implements: REQ-BUGS-1127  # implements: REQ-BUGS-1156
+    """The register text with one more row, `values` in its own columns,
+    creating the table when there is none. Pure."""
     text = register_text.lstrip("\ufeff").replace("\r\n", "\n")
     lines = text.rstrip("\n").split("\n") if text.strip() else ["# Fixed bugs"]
     table = _table(lines)
@@ -123,7 +131,7 @@ def close_bug(module_text, register_text, bug, meta):  # implements: REQ-BUGS-11
     for key, column in index.items():
         cells[column] = _escape(values.get(key))
     lines.insert(end, "| " + " | ".join(cells) + " |")
-    return "".join(kept), "\n".join(lines) + "\n"
+    return "\n".join(lines) + "\n"
 
 
 def version_at(root, reqs_dir, sha=None):
@@ -170,10 +178,113 @@ def _close(root, reqs_dir, bug, meta):
         f.write(module_text)
 
 
+def duplicates_of(reqs_dir):
+    # implements: REQ-BUGS-1156
+    """{kept id: [ids closed as its duplicate]}, read from the register."""
+    out = {}
+    for row in fixed_rows(reqs_dir):
+        m = _DUP_RE.search(row["note"] or "")
+        if row["version"] == DUPLICATE and m:
+            out.setdefault(bug_id(m.group(1)), []).append(bug_id(row["id"]))
+    return out
+
+
+def _found_on(root, a):
+    # implements: REQ-BUGS-1156
+    """The day a bug never listed was found: `--date`, else the day of the
+    commit `--commit` names, else today."""
+    if a.date:
+        return iso_date(a.date)
+    day = a.commit and _git(["-C", root, "log", "-1", "--format=%cs", a.commit])
+    return (day or "").strip() or datetime.date.today().isoformat()
+
+
+def _next_ref(root, reqs_dir, files, name):
+    # implements: REQ-BUGS-1156
+    """The next `B<n>` of module file `name`: past every open row and every
+    row the register holds for it, so a number is never given twice."""
+    from .bugs import _REF_RE
+    listed = [int(n) for n in _REF_RE.findall(dict(files).get(name, ""))]
+    listed += [int(b["ref"][1:]) for b in load_bugs(root, reqs_dir)[0]
+               if os.path.basename(b["file"]) == name
+               and re.fullmatch(r"B\d+", b["ref"])]
+    return "B{}".format(1 + max(
+        listed + [highest_closed(reqs_dir, name[:-len(".md")])]))
+
+
+def _fix_new(root, reqs_dir, title, a):
+    # implements: REQ-BUGS-1156
+    """`sync --fix TITLE --new --module M`: a fix that never had a row goes
+    straight to the register under the module's next free number, so the
+    register counts it. The module's file is not written."""
+    from .bugs import _folder_files, bug_file, module_file
+    if not " ".join((title or "").split()) or not module_file(a.module):
+        print("usage: reqmap sync --fix \"TITLE\" --new --module MODULE "
+              "[--prio P0-P4] [--date FOUND] [--commit SHA] [--version V] "
+              "[--note TEXT]")
+        return 2
+    prio = (a.prio or "P2").upper()
+    found = _found_on(root, a)
+    if not re.fullmatch(r"P[0-4]\*?", prio) or not found:
+        print("sync --fix --new: --prio is P0 to P4 and --date YYYY-MM-DD")
+        return 2
+    folder = os.path.join(reqs_dir, cfg.BUGS_DIR)
+    try:
+        files = _folder_files(folder)
+    except (OSError, UnicodeDecodeError) as exc:
+        print("sync --fix --new: a file in {} cannot be read: {}".format(
+            folder, exc))
+        return 2
+    name = bug_file(files, a.module)
+    head = _git(["-C", root, "rev-parse", "--short", "HEAD"])
+    values = {"id": "{}:{}".format(name[:-len(".md")],
+                                   _next_ref(root, reqs_dir, files, name)),
+              "title": title, "module": a.module, "prio": prio, "date": found,
+              "fixed": datetime.date.today().isoformat(),
+              "version": a.bug_version or version_at(root, reqs_dir) or _NOTHING,
+              "commit": a.commit or (head or "").strip() or _NOTHING,
+              "note": a.note or "fixed before it was listed"}
+    try:
+        register = register_row(_read(_register_path(reqs_dir)), values)
+        os.makedirs(folder, exist_ok=True)
+        with open(_register_path(reqs_dir), "w", encoding="utf-8",
+                  newline="\n") as f:
+            f.write(register)
+    except (OSError, UnicodeDecodeError) as exc:
+        print("sync --fix --new: nothing written: {}".format(exc))
+        return 2
+    print("bug {} recorded as fixed in {}. Run `sync` to update the map."
+          .format(values["id"], os.path.relpath(
+              _register_path(reqs_dir)).replace(os.sep, "/")))
+    return 0
+
+
+def _duplicate_meta(root, reqs_dir, wanted, a):
+    # implements: REQ-BUGS-1156
+    """(meta, None) closing `wanted` as a duplicate of `--duplicate-of`, or
+    (None, why) when that names no other bug the repository knows."""
+    kept = bug_id(a.duplicate_of)
+    known = ({b["id"] for b in load_bugs(root, reqs_dir)[0]}
+             | {bug_id(r["id"]) for r in fixed_rows(reqs_dir)})
+    if not kept or kept == wanted or kept not in known:
+        return None, "--duplicate-of {!r} names no other known bug".format(
+            a.duplicate_of)
+    note = "duplicate of {}".format(kept) + (
+        " — {}".format(a.note) if a.note else "")
+    return {"version": DUPLICATE, "commit": _NOTHING, "note": note}, None
+
+
 def cmd_bug_fix(root, reqs_dir, target, a):  # implements: REQ-BUGS-1150
     # implements: ARCH-BUGS-078  # implements: REQ-BUGS-1127
     """`sync --fix ID`: one row to the register. Exit 2, writing nothing, for
-    an id that is unknown, closed already, or in a file this never writes."""
+    an id that is unknown, closed already, or in a file this never writes.
+    `--new` records a fix that never had a row; `--duplicate-of` closes a
+    row as another's duplicate."""
+    if getattr(a, "fix_new", False):  # implements: REQ-BUGS-1156
+        if getattr(a, "duplicate_of", None):
+            print("sync --fix: --new and --duplicate-of do not go together")
+            return 2
+        return _fix_new(root, reqs_dir, target, a)
     wanted = bug_id(target)
     if wanted in {bug_id(r["id"]) for r in fixed_rows(reqs_dir)}:
         print("sync --fix: {} is already in the register".format(wanted))
@@ -192,7 +303,13 @@ def cmd_bug_fix(root, reqs_dir, target, a):  # implements: REQ-BUGS-1150
     meta = {"id": wanted, "fixed": datetime.date.today().isoformat(),
             "version": a.bug_version or version_at(root, reqs_dir) or _NOTHING,
             "commit": a.commit or (head or "").strip() or _NOTHING}
-    if a.note:
+    if getattr(a, "duplicate_of", None):  # implements: REQ-BUGS-1156
+        dup, why = _duplicate_meta(root, reqs_dir, wanted, a)
+        if why:
+            print("sync --fix: nothing written: " + why)
+            return 2
+        meta.update(dup)
+    elif a.note:
         meta.update(version=NOT_A_BUG, commit=_NOTHING, note=a.note)
     try:
         _close(root, reqs_dir, bug, meta)
