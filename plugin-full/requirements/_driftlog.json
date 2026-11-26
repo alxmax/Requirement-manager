@@ -237,6 +237,10 @@
       "hash": "9d0b723cf102",
       "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
+    "REQ-BUGS-1129": {
+      "hash": "ff2069f9e8e4",
+      "reason": "estimated-priority clause folded into CASE-1; read and confirmed by owner"
+    },
     "REQ-CANDIDATES-826": {
       "hash": "000ec6c8296f",
       "reason": null

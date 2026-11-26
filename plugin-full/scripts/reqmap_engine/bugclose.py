@@ -8,8 +8,8 @@ import shutil
 import tempfile
 
 from . import config as cfg
-from .bugs import (_cells, _escape, _is_separator, iso_date, load_bugs,
-                   named_columns, register_name)
+from .bugs import (_PRIO_RE, _cells, _escape, _is_separator, iso_date,
+                   load_bugs, named_columns, register_name)
 from .git import _git, _git_remote_web_url
 from .versions import read_version_file, version_files
 
@@ -380,10 +380,15 @@ def close_from_commits(root, reqs_dir):
 
 def fixed_block(reqs_dir):
     # implements: REQ-BUGS-1129
-    """The `bugs_fixed` list `_map.json` carries."""
+    """The `bugs_fixed` list `_map.json` carries. A priority is split as an
+    open bug's is, `P4*` into `P4` and `estimated`, so a filter on P0-P4
+    keeps the estimated rows."""
     rows = []
     for row in fixed_rows(reqs_dir):
         row.update(date=iso_date(row["date"]), fixed=iso_date(row["fixed"]))
+        prio = _PRIO_RE.search(row["prio"])
+        if prio:
+            row.update(prio="P" + prio.group(1), estimated="*" in row["prio"])
         rows.append({k: v for k, v in row.items() if v and v != _NOTHING})
     return rows
 

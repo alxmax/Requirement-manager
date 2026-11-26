@@ -434,6 +434,21 @@ class FixedOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1129 @integration
         self.assertEqual(["Billing:B1"], [r["id"] for r in data["bugs_fixed"]])
         self.assertEqual(["Billing:B2"], [b["id"] for b in data["bugs"]])
 
+    def test_an_estimated_priority_is_split(self):
+        # verifies: REQ-BUGS-1129#CASE-1
+        d = _repo(self)
+        reqs = os.path.join(d, "requirements")
+        _write(C._register_path(reqs),
+               "| " + " | ".join(C.COLUMNS) + " |\n"
+               + "|---" * len(C.COLUMNS) + "|\n"
+               "| Billing:B1 | one | Billing | P4* | 2026-10-01 | 2026-10-02"
+               " | v1 | abc1234 | — |\n"
+               "| Billing:B2 | two | Billing | P1 | 2026-10-01 | 2026-10-03"
+               " | v1 | abc1235 | — |\n")
+        got = [(r["prio"], r.get("estimated", False))
+               for r in C.fixed_block(reqs)]
+        self.assertEqual([("P4", True), ("P1", False)], got)
+
     def test_an_empty_register_adds_no_key(self):
         # verifies: REQ-BUGS-1129#CASE-1
         d = _gitrepo(self)

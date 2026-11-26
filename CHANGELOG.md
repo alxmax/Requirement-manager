@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## plugin `v8.30.1` — 2026-11-26
+
+**Release v8.30.1.**
+
+**A fixed bug with an estimated priority is counted in the Report's chart.**
+
+- `_map.json`'s `bugs_fixed` now splits a register row's priority as it splits an open bug's: `P4*` reaches the map as `prio: P4` with `estimated: true`. The row kept the raw `P4*`, so every viewer filter on P0–P4 dropped it: the Report's bug chart, and the per-priority mix and median in Bugs → Fixed, while the weekly table, which does not filter, counted it. A register where most priorities are still estimated drew a chart far below its table (REQ-BUGS-1129 CASE-1).
+
 ## plugin `v8.30.0` — 2026-11-26
 
 **Release v8.30.0.**
