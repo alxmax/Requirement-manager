@@ -3,6 +3,7 @@
 // tested-by: REQ-VIEWER-1145
 // tested-by: REQ-VIEWER-1153
 // tested-by: REQ-TESTGAPS-1146
+// tested-by: REQ-VIEWER-1155
 /* The Report page: one place for the counts of bugs, questions and missing
  * tags, the ten most important questions and what to do next. Each check
  * adopts its own fixture and the real export is put back at the end. */
@@ -15,6 +16,12 @@ import { reportMarkdown } from "../../src/lib/reportMarkdown.js";
 import { verifyRows } from "../../src/views/QuestionsView.jsx";
 import { Ids } from "../../src/views/report/ReportSections.jsx";
 import { Rail } from "../../src/components/Rail.jsx";
+import { I18nProvider } from "../../src/lib/i18n.jsx";
+import {
+  ReportCharts, bugWeeksOf, toggled,
+} from "../../src/views/report/ReportCharts.jsx";
+import { BugChart } from "../../src/views/problems/BugChart.jsx";
+import { QuestionChart } from "../../src/views/report/QuestionChart.jsx";
 import { test, json, noop } from "./harness.jsx";
 
 const node = (id, extra = {}) => adaptNode({ id, title: id, area: "R",
@@ -238,5 +245,57 @@ const printed6 = renderToString(<ReportBody c={c6} full />);
 test("report: the PDF prints every list out in full",
   page6.includes("Export PDF") && page6.includes("<details")
     && !printed6.includes("<details") && printed6.includes("R-NOCODE-001"));
+
+{
+  // A register with P0 and P2 only, and questions on a confirmed and a draft.
+  const dated = (id, prio, date, extra = {}) => ({ id, ref: id, prio, module: "m",
+    title: id, date, ...extra });
+  adoptMapExport({
+    nodes: [
+      node("R-C-001", { members: [IMPL, TEST], clarify: [
+        CQ("no-cases", "structure"), CQ("vague-term", "wording")] }),
+      node("R-D-002", { status: "draft", members: [IMPL, TEST], clarify: [
+        CQ("no-cases", "structure")] }),
+    ],
+    bugs: [dated("b1", "P0", "2026-10-05"), dated("b2", "P2", "2026-10-06")],
+    bugs_fixed: [dated("b3", "P2", "2026-10-05",
+      { fixed: "2026-10-14", version: "1.0" })],
+  });
+  const c = computeReport();
+  const charts = (locale) => renderToString(
+    <I18nProvider initialLocale={locale}><ReportCharts c={c} /></I18nProvider>)
+    .replace(/<!-- -->/g, "");
+  const en = charts("en");
+  const ro = charts("ro");
+  const body = renderToString(<ReportBody c={c} />);
+  // verifies: REQ-VIEWER-1155#CASE-1
+  test("report: the numbers carry a bug chart and a questions chart",
+    body.indexOf("rep-kv") < body.indexOf("rep-charts")
+      && (en.match(/<polyline/g) || []).length === 2
+      && en.includes("Open questions by priority"));
+  // verifies: REQ-VIEWER-1155#CASE-2
+  test("report: the bug filter offers only the priorities the register holds",
+    />P0</.test(en) && />P2</.test(en) && !/>P1</.test(en) && !/>P4</.test(en)
+      && bugWeeksOf(c.bugs.open, c.bugs.fixedRows, ["P0"]).at(-1).open === 1
+      && bugWeeksOf(c.bugs.open, c.bugs.fixedRows, ["P0", "P2"]).at(-1).open === 2
+      && toggled(["P0"], "P0").join() === "P0"
+      && toggled(["P0", "P2"], "P0").join() === "P2");
+  // verifies: REQ-VIEWER-1155#CASE-3
+  test("report: questions are counted by priority, on confirmed and on drafts",
+    c.questionSplit.map((x) => `${x.prio} ${x.confirmed} ${x.other}`).join()
+      === "high 1 1,medium 0 0,low 1 0"
+      && en.includes("2 (1 on confirmed)"));
+  // verifies: REQ-VIEWER-1155#CASE-2
+  test("report: a filter that leaves nothing to draw keeps its buttons",
+    renderToString(<BugChart weeks={[]} dateOf={String}
+      filter={<span>FILTER</span>} />).includes("FILTER")
+      && renderToString(<QuestionChart split={[{ prio: "medium", confirmed: 0,
+        other: 0 }]} filter={<span>FILTER</span>} />).includes("FILTER"));
+  // verifies: REQ-VIEWER-1155#CASE-4
+  test("report: the charts and their filters are translated",
+    ro.includes("Întrebări deschise, pe prioritate") && ro.includes("Ridicată")
+      && ro.includes("Priorități buguri")
+      && !ro.includes("Open questions") && !ro.includes("on confirmed"));
+}
 
 adoptMapExport({ nodes: json.nodes.map(adaptNode), branch: null });

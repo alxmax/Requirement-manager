@@ -15,8 +15,10 @@ export function weekOf(date) {
   return at.toISOString().slice(0, 10);
 }
 
-/** [{week, found, fixed, open}] oldest first, for the last `limit` weeks with
- * any activity. `open` counts every bug found and not closed by that week. */
+/** [{week, found, fixed, open, foundSoFar, fixedSoFar}] oldest first, for the
+ * last `limit` weeks with any activity. `open` counts every bug found and not
+ * closed by that week; the two `SoFar` sums run from the first week, not from
+ * the first one shown. */
 export function weekly(open, fixed, limit = 12) {
   const weeks = {};
   const row = (week) => (weeks[week] = weeks[week]
@@ -30,12 +32,34 @@ export function weekly(open, fixed, limit = 12) {
     if (isFix(b)) week.fixed += 1;
   });
   let running = 0;
+  let foundSoFar = 0;
+  let fixedSoFar = 0;
   const all = Object.values(weeks).sort((a, b) => a.week.localeCompare(b.week))
     .map(({ week, found, fixed: fixes, closed }) => {
       running += found - closed;
-      return { week, found, fixed: fixes, open: Math.max(0, running) };
+      foundSoFar += found;
+      fixedSoFar += fixes;
+      return { week, found, fixed: fixes, open: Math.max(0, running),
+        foundSoFar, fixedSoFar };
     });
   return all.slice(-limit);
+}
+
+/** The highest `open` among `weeks` and the first week it was reached. */
+export function openPeak(weeks) {
+  return weeks.reduce((best, w) => (w.open > best.value
+    ? { value: w.open, week: w.week } : best), { value: 0, week: null });
+}
+
+/** `ys` pushed down so no two are closer than `gap`, in their own order: the
+ * labels at the end of the lines must not sit on each other. */
+export function spreadLabels(ys, gap = 14) {
+  const out = [...ys];
+  const order = ys.map((_, i) => i).sort((a, b) => ys[a] - ys[b]);
+  order.forEach((i, k) => {
+    if (k) out[i] = Math.max(out[i], out[order[k - 1]] + gap);
+  });
+  return out;
 }
 
 const median = (values) => {

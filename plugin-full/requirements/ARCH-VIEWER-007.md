@@ -30,6 +30,7 @@ Every bullet below is binding.
 - Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]
 - A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]
 - Each Report section between the counts and the recommendations holds what its title says: the summary, how the map was checked, the problem types and the deliverables. [[REQ-VIEWER-1153]]
+- The Report's numbers carry a bug chart and a questions chart, each filtered by priority. [[REQ-VIEWER-1155]]
 - The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]
@@ -1709,3 +1710,54 @@ CASE-5 — the buttons are there, and idle when nothing is listed
   Given  the Bugs tab with and without bugs, and the Questions page
   When   they are rendered
   Then   each holds `Export XLSX`, disabled on the empty Bugs tab
+
+--------------------
+
+
+---
+id: REQ-VIEWER-1155
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# The Report draws bugs and questions
+
+## Description
+> A reader of the Report, often on paper, sees the counts as a table; the charts show
+> whether fixes keep up with what is found and where the open questions sit. The map holds
+> no date for a question, so its chart is a picture of now, not a trend.
+
+Every bullet below is binding.
+- Under the table of numbers, the Report draws the Bugs tab's fixed and still-open chart when the register holds a row, and a bar per question priority, High, Medium and Low, split into questions on confirmed requirements and on drafts.
+- The bug chart has a filter of the priorities P0 to P4 the open and fixed bugs hold, and draws only the bugs it keeps.
+- The questions chart has a filter of High, Medium and Low, and draws only the priorities it keeps.
+- A filter starts with every option on, never turns its last option off, and stays on screen when what it keeps has nothing to draw.
+- The PDF prints the charts as filtered, and every string of the charts and filters is translated where the Report is.
+
+## Cases
+CASE-1 — both charts follow the numbers
+  Given  a map with open and fixed bugs and open questions
+  When   the Report renders
+  Then   the bug chart and the questions chart follow the table of numbers
+
+CASE-2 — the bug filter
+  Given  open bugs at P0 and P2 and a fixed P2
+  When   the charts render
+  Then   the filter offers P0 and P2 only, P0 alone counts one still open, both count two,
+         and the last option on cannot be turned off
+
+CASE-3 — the questions are split
+  Given  two High questions, one on a confirmed requirement and one on a draft, and a Low on
+         the confirmed one
+  When   the report is computed
+  Then   High reads 1 and 1, Medium 0 and 0, Low 1 and 0, and the High bar is labelled
+         `2 (1 on confirmed)`
+
+CASE-4 — translated
+  Given  the same map
+  When   the charts render in Romanian
+  Then   the title, the priorities and the filter labels are Romanian and no English string
+         of the charts shows

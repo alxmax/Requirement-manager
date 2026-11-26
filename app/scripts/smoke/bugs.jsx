@@ -4,6 +4,7 @@
 // tested-by: REQ-BUGS-1126
 // tested-by: REQ-BUGS-1129
 // tested-by: REQ-BUGS-1131
+// tested-by: REQ-BUGS-1154
 // tested-by: REQ-MAPSTAMP-1124
 // tested-by: REQ-MAPSTAMP-1125
 /* Render smoke test, part: the Bugs tab and the file it writes. Adopts a list
@@ -18,7 +19,7 @@ import {
   appendBug, bugCommand, bugFile, moduleFile, saveBug,
 } from "../../src/lib/bugFile.js";
 import {
-  fixedIn, fixedSince, medianDays, pageOf, weekly,
+  fixedIn, fixedSince, medianDays, openPeak, pageOf, spreadLabels, weekly,
 } from "../../src/lib/bugStats.js";
 import { ProblemsView } from "../../src/views/ProblemsView.jsx";
 import {
@@ -26,6 +27,7 @@ import {
   nextOpenAll, toggleAllLabel, groupOpen, BugRow, filterBugs, reportScope,
   addOutcome,
 } from "../../src/views/problems/BugsPanel.jsx";
+import { BugChart, niceTicks } from "../../src/views/problems/BugChart.jsx";
 import { json, noop, specOf, test } from "./harness.jsx";
 import { bugsNaming } from "../../src/views/spec/SpecParts.jsx";
 import fixture from "./bugfile.fixture.json";
@@ -367,4 +369,57 @@ export async function bugFileChecks() {
       && !en.includes("Core:B8") && ro.includes("Buguri deschise")
       && !none.includes("Open bugs")
       && bugsNaming(id, [other, named]).length === 1);
+}
+
+{
+  // Twelve weeks of a register: two found and one fixed each week.
+  const day = (n) => new Date(Date.UTC(2026, 0, 5 + 7 * n)).toISOString().slice(0, 10);
+  const found = Array.from({ length: 24 }, (_, n) => ({
+    id: `Core:B${n}`, title: `T${n}`, module: "Core", prio: "P2",
+    date: day(Math.floor(n / 2)) }));
+  const fixedRows = found.filter((_, n) => n % 2 === 0)
+    .map((b, n) => ({ ...b, fixed: day(n), version: "1.0.0" }));
+  const stillOpen = found.filter((_, n) => n % 2 === 1);
+  const chartOf = (locale) => renderToString(
+    <I18nProvider initialLocale={locale}>
+      <BugHistory open={stillOpen} fixed={fixedRows} query="" />
+    </I18nProvider>).replace(/<!-- -->/g, "");
+  const en = chartOf("en");
+  const ro = chartOf("ro");
+  const de = chartOf("de");
+  const weeks = weekly(stillOpen, fixedRows);
+  const last = weeks[weeks.length - 1];
+  // verifies: REQ-BUGS-1154#CASE-1
+  test("bugs: the chart draws two lines of twelve points under the table",
+    en.indexOf("bug-weeks") < en.indexOf("bug-chart")
+      && (en.match(/<polyline/g) || []).length === 2
+      && en.match(/points="([^"]*)"/)[1].split(" ").length === 12
+      && (en.match(/class="bug-chart-hit"/g) || []).length === 12
+      && en.includes("Show total") && !en.includes("12 total"));
+  // verifies: REQ-BUGS-1154#CASE-2
+  test("bugs: the chart's last point is what is still open",
+    last.open === stillOpen.length && last.fixedSoFar === fixedRows.length
+      && last.foundSoFar === found.length
+      && en.includes(`${last.open} still open`) && en.includes(`${last.fixedSoFar} fixed`)
+      && openPeak([{ week: "a", open: 3 }, { week: "b", open: 5 },
+        { week: "c", open: 5 }]).week === "b"
+      && en.includes("Open peaked at 12 on 23.03.")
+      && niceTicks(349).join() === "0,100,200,300,400"
+      && niceTicks(12).join() === "0,5,10,15"
+      && niceTicks(0).join() === "0,1"
+      && renderToString(<BugChart dateOf={(d) => d} dayOf={(d) => d} weeks={[
+        { week: "a", open: 5, fixedSoFar: 0, foundSoFar: 5 },
+        { week: "b", open: 3, fixedSoFar: 2, foundSoFar: 5 }]} />)
+        .replace(/<!-- -->/g, "").includes("Open peaked at 5 on a and has come down since."));
+  // verifies: REQ-BUGS-1154#CASE-3
+  test("bugs: end labels closer than 14px are pushed apart",
+    spreadLabels([100, 105, 40]).join() === "100,114,40"
+      && spreadLabels([10, 50]).join() === "10,50");
+  // verifies: REQ-BUGS-1154#CASE-4
+  test("bugs: every chart string is translated",
+    ro.includes("Rezolvate și încă deschise") && ro.includes("Arată totalul")
+      && ro.includes("Până la 05.01.2026: 1 rezolvate, 1 încă deschise")
+      && de.includes("Behoben und noch offen") && de.includes("Gesamt anzeigen")
+      && ["Fixed and still open", "Show total", "still open", "peaked", "Up to"]
+        .every((s) => !ro.includes(s) && !de.includes(s)));
 }

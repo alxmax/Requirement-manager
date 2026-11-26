@@ -33,6 +33,7 @@ Every bullet below is binding.
 - `sync --fix` refuses an unknown or closed id, a declared source, a moved row and an unreadable register, writing nothing. [[REQ-BUGS-1150]]
 - `sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]
 - The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]
+- Fixed draws what was fixed against what is still open, week by week. [[REQ-BUGS-1154]]
 - A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]
 
 ## Cases
@@ -396,6 +397,7 @@ Every bullet below is binding.
 - `ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first, and last a total with the count per priority.
 - `--module TEXT` keeps modules whose name contains the text, ignoring case, diacritics and punctuation, and `--prio` keeps one priority or a comma-separated list.
 - `--json` prints `{bugs, problems}`.
+- A `--module` that no module's name contains says so and lists the modules there are, rather than that no bug matches.
 - It writes nothing and exits 0, with or without bugs.
 
 ## Cases
@@ -423,6 +425,12 @@ CASE-5 — a list of priorities, and a total
   Given  bugs at P1, P2 and P3
   When   `ask --bugs --prio p1,P3` runs
   Then   the P2 is left out and the last line reads `2 bugs: P1 1, P3 1`
+
+CASE-6 — a module that does not exist is named
+  Given  modules Payments and Search
+  When   `ask --bugs --module refunds` runs
+  Then   it prints `no module named 'refunds'` with both module names, exits 0, and a
+         module that exists with no bug at that priority still reads `no known bugs match`
 
 --------------------
 
@@ -927,3 +935,53 @@ CASE-6 — the page lists them
   When   the requirement's page renders
   Then   it lists `Open bugs` with the bug that names it and its where, not the other, in
          Romanian as `Buguri deschise`, and nothing when no bug names it
+
+--------------------
+
+
+---
+id: REQ-BUGS-1154
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-BUGS-078]
+---
+
+# Fixed draws the trend
+
+## Description
+> The weekly table holds the numbers; a line shows whether what is still open goes down as
+> the fixes go up, which a column of numbers does not.
+
+Every bullet below is binding.
+- Under the weekly table, Fixed draws one line chart on one axis from 0, one point per row of the table: the fixes so far and what is still open, and the total found only when `Show total` is ticked.
+- The last point of still open is the table's last still-open count, and the fixes and the total so far count from the first week, not the first one shown.
+- A line is never named by colour alone: a legend, a label at its last point, pushed apart when two are closer than 14 px, and a tooltip on hover or focus.
+- A line above the chart gives the fixes, what is still open, and the highest still-open count with its first week.
+- Choosing a week in the chart is the same choice as in the table.
+- Every string the chart shows is translated where the tab is.
+
+## Cases
+CASE-1 — two lines under the table
+  Given  a register with twelve weeks of activity
+  When   Fixed renders
+  Then   the chart follows the table and draws two lines of twelve points, with `Show total`
+         unticked
+
+CASE-2 — the last point is what is still open
+  Given  the same register
+  When   the weeks are computed
+  Then   the last week's still open and fixes so far equal the open and fixed rows, and the
+         line above the chart names the peak and its first week
+
+CASE-3 — end labels do not overlap
+  Given  label positions 100, 105 and 40
+  When   they are spread
+  Then   they read 100, 114 and 40
+
+CASE-4 — translated
+  Given  the same register
+  When   Fixed renders in Romanian and in German
+  Then   the title, the checkbox, the line above and the week labels are translated and no
+         English string of the chart shows

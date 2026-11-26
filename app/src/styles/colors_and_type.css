@@ -86,6 +86,10 @@
   --cov-untested:         var(--coral-600);  /* no live test, or stale ref */
   --cov-exempt:           var(--ink-3);  /* deprecated — skipped */
 
+  /* ---- CHART · the bug register's fixed / still-open pair -------------- */
+  --chart-fixed:          #008a17;  /* fixed so far — stays apart from chart-open under deuteranopia / protanopia (ΔE 8.3 light, 10.8 dark) */
+  --chart-open:           #ec4647;  /* still open — the status red and green fail that check at ΔE 4 */
+
   /* ---- SEMANTIC SURFACES ----------------------------------------------- */
   --bg:                   var(--paper-0);
   --bg-raised:            var(--paper-1);
@@ -216,6 +220,8 @@
   --cov-partial:          var(--amber-700);
   --cov-untested:         var(--coral-600);
   --cov-exempt:           var(--ink-3);
+  --chart-fixed:          #2ab847;
+  --chart-open:           #cc3a3b;
   --border-control:       #726b5c;
   --on-accent:            #0f1a26;
   --chrome-glass:         rgba(25,22,16,0.78);
