@@ -942,7 +942,7 @@ CASE-6 — the page lists them
 
 ---
 id: REQ-BUGS-1154
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -992,7 +992,7 @@ CASE-4 — translated
 
 ---
 id: REQ-BUGS-1156
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -459,7 +459,19 @@ class FixedOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1129 @integration
 
 class BugCloseInIsolation(unittest.TestCase):
     # tested-by: REQ-BUGS-1128 @unit  # tested-by: REQ-BUGS-1129 @unit
+    # tested-by: REQ-BUGS-1156 @unit
     """Reading the trailers, the forge and the register, with git stubbed."""
+
+    def test_a_register_row_names_what_it_duplicates(self):
+        # verifies: REQ-BUGS-1156#CASE-3
+        text = C.register_row("", {"id": "Core:B2", "title": "t", "fixed": "2026-10-06",
+                                   "version": C.DUPLICATE, "commit": "—",
+                                   "note": "duplicate of Core:B1 — same stack"})
+        text = C.register_row(text, {"id": "Core:B3", "title": "u",
+                                     "fixed": "2026-10-07", "version": "1.0",
+                                     "note": "duplicate of Core:B1"})
+        with mock.patch.object(C, "fixed_rows", return_value=C.parse_fixed(text)):
+            self.assertEqual({"Core:B1": ["Core:B2"]}, C.duplicates_of("unused"))
 
     def test_a_trailer_is_read_whatever_its_case(self):
         log = ("a" * 40 + "\x1fabc1234\x1f2026-11-20\x1fFix it\n\nfixes-BUG: Billing:B1\n\x1e"

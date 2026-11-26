@@ -1716,7 +1716,7 @@ CASE-5 — the buttons are there, and idle when nothing is listed
 
 ---
 id: REQ-VIEWER-1155
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

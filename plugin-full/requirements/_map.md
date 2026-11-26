@@ -1252,25 +1252,16 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 ```mermaid
 graph LR
   subgraph sg_REQ["REQ"]
-    REQ_BUGS_1154["Fixed draws the trend<br><small>REQ-BUGS-1154</small><br>unreviewed"]
-    REQ_BUGS_1156["A fix never listed, and a duplicate<br><small>REQ-BUGS-1156</small><br>unreviewed"]
     REQ_VIEWER_1151["A PDF of a page looks like the page<br><small>REQ-VIEWER-1151</small><br>unreviewed"]
     REQ_VIEWER_1152["Bugs and questions export as a spreadsheet<br><small>REQ-VIEWER-1152</small><br>unreviewed"]
-    REQ_VIEWER_1155["The Report draws bugs and questions<br><small>REQ-VIEWER-1155</small><br>unreviewed"]
   end
-  style REQ_BUGS_1154 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_BUGS_1156 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VIEWER_1151 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VIEWER_1152 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_1155 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
 ### Risk Table
 
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
-| REQ-BUGS-1154 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-BUGS-1156 | draft | 13 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VIEWER-1151 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VIEWER-1152 | draft | 5 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-1155 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
