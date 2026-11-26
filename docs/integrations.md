@@ -52,7 +52,7 @@ conventions by hand. Install `requirement-manager-full` for the engine, MCP and 
 detects (Copilot, Claude, Cursor, Codex, Gemini and others):
 
 ```bash
-apm install alxmax/requirement-manager/plugin
+apm install alxmax/requirement-manager/plugin-full
 ```
 
 APM copies each `skills/<name>/` directory into the agent's skills directory and
@@ -111,7 +111,7 @@ has been run against this engine yet.
 | Visual Studio | `.claude/skills`, `.github/skills` | `.mcp.json`, `.vs/mcp.json` or `.vscode/mcp.json`; resources listed | `.github/copilot-instructions.md` | your pre-commit hook, CI |
 | Chat on github.com, chat in JetBrains | (JetBrains: preview) | (JetBrains: moving to the CLI's) | `.github/copilot-instructions.md` only | CI |
 
-- **The skill.** `apm install alxmax/requirement-manager/plugin` puts it, with its engine, in
+- **The skill.** `apm install alxmax/requirement-manager/plugin-full` puts it, with its engine, in
   `.agents/skills/requirement-manager/` for Copilot (APM 0.36; older releases used
   `.github/skills/`). The skill runs its own `scripts/reqmap.py` there.
 - **The rules.** A surface that loads no skill learns the workflow from
