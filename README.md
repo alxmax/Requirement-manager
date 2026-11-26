@@ -25,6 +25,13 @@ The copy stays the offline install. See [docs/stability.md](docs/stability.md).
 The two skills also install into Copilot, Cursor, Codex, Gemini and others with
 [APM](docs/integrations.md#apm-agent-package-manager).
 
+The marketplace lists two editions of the plugin:
+
+- `requirement-manager` is the directory edition, for Claude Code only: the two skills as
+  Markdown and nothing that runs.
+- `requirement-manager-full` adds the engine, its MCP server and the pre-commit hook. The
+  engine runs under Claude, Copilot, Cursor, Codex, Gemini or in CI.
+
 **▶ [Live requirement map](https://alxmax.github.io/Requirement-manager/map.html)** —
 this repo's own requirement graph, republished on every push to `main`.
 
