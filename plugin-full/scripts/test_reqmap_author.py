@@ -3068,6 +3068,25 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             self.assertEqual(self._status(rq), "status: draft")
             self.assertFalse(os.path.exists(os.path.join(rq, "_driftlog.json")))
 
+    def test_sync_ends_with_one_line_naming_what_it_demoted(self):  # verifies: REQ-PROMOTE-974#CASE-7
+        engine = os.path.join(os.path.dirname(os.path.abspath(R.__file__)), "reqmap.py")
+
+        def sync(d):
+            return subprocess.run(
+                [sys.executable, "-X", "utf8", engine, "sync", "--root", d, "--code", d],
+                capture_output=True, text=True, encoding="utf-8", timeout=300,
+                env=dict(os.environ, CLAUDE_PROJECT_DIR="")).stdout
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            sync(d)
+            self._edit(rq)
+            last = sync(d).strip().splitlines()[-1]
+            self.assertTrue(last.startswith(
+                "Demoted 1 confirmed -> draft (contract changed): AREA-E-001"), last)
+            self.assertIn("--accept-drift", last)
+            self.assertNotIn("Demoted", sync(d))
+        self.assertIsNone(R.demotion_summary([]))
+
 
 class BaselineInputs(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: REQ-DRIFT-1103  # tested-by: REQ-DRIFT-1104
     """A baseline that exists and cannot be used is said so, and a drift log this engine

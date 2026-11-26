@@ -24,7 +24,12 @@ bug is worth, so a priority an assistant chose stays marked as an estimate.
 
 When you fix a listed bug, put `Fixes-bug: FILE REF` in the commit message, one per line. The
 next `sync` moves the row to the register. To close one with no commit, run
-`sync --fix "FILE REF"`, with `--note "why"` when it was not a bug. Never delete the row by hand.
+`sync --fix "FILE REF"`, with `--note "why"` when it was not a bug, or
+`--duplicate-of "FILE REF"` when another row already holds it. Never delete the row by hand.
+
+A fix for a bug that was never listed still belongs in the register, or its counts fall short:
+`sync --fix "What was broken" --new --module Payments --commit <sha>` records it under the
+module's next number, found on the commit's day unless `--date` says otherwise.
 
 Do not fix the bug in the same step unless you were asked to. Never write to a file
 `BUG_SOURCES` names: those belong to the repository, so add to `requirements/bugs/` instead.

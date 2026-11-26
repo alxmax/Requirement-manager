@@ -159,6 +159,17 @@ def _demote_drifted_confirmed(reqs, confirmed_drift, full_members):
     return kept
 
 
+def demotion_summary(demoted):  # implements: REQ-PROMOTE-974
+    """The one line `sync` ends with when it demoted anything, or None. The
+    per-requirement lines scroll past among the rest of the output; this is
+    the count a reader compares before and after."""
+    if not demoted:
+        return None
+    return ("Demoted %d confirmed -> draft (contract changed): %s — re-confirm "
+            "after review, or re-run with --accept-drift \"<reason>\""
+            % (len(demoted), ", ".join(demoted)))
+
+
 def _unchanged_since_lock(reqs, reqs_dir, rids):  # implements: REQ-PROMOTE-974
     """(the ids among `rids` whose requirement file is byte-identical to its
     copy in the commit that last wrote the lock, that commit's short sha).
@@ -252,8 +263,9 @@ def _advance_lock_and_report(ctx, accept_drift, drift_reason):
         return str(e)
     if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
         # implements: REQ-CHECK-1135 — not demoted, so its old baseline stays
-        new_lock.update({rid: lock[rid] for rid in _demote_drifted_confirmed(
-            reqs, confirmed_drift, full_members) if rid in lock})
+        kept = _demote_drifted_confirmed(reqs, confirmed_drift, full_members)
+        new_lock.update({rid: lock[rid] for rid in kept if rid in lock})
+        ctx.demoted.extend(rid for rid in confirmed_drift if rid not in kept)
     save_lock(reqs_dir, new_lock)
     save_memberlock(reqs_dir, full_member_hashes
                      if full_member_hashes is not None
@@ -363,7 +375,7 @@ def _print_gate_verdict(as_json, errors, warns, _stale, reqs, members):
 
 
 def cmd_check(ws, update_lock, strict=False, accept_drift=False, mode=None,
-              findings=None):
+              findings=None, demoted=None):
     # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059
     # implements: REQ-CHECK-832  # implements: REQ-CHECK-833
     # implements: REQ-RULES-948
@@ -373,7 +385,8 @@ def cmd_check(ws, update_lock, strict=False, accept_drift=False, mode=None,
     `accept_drift` is True, False, or the reason string the flag carried; see
     `_drift_acceptance` for why an empty reason still accepts. `mode` is a
     `GateMode`; its `quiet` runs only DEFAULT_RULES — the bare `gate` verb;
-    `sync`, `init` and `audit` never set it."""
+    `sync`, `init` and `audit` never set it. `demoted`, when given, collects
+    the ids this run set back to draft."""
     mode = mode or GateMode()
     as_json, since, quiet = mode.as_json, mode.since, mode.quiet
     reqs, members, reqs_dir, code_root = (
@@ -410,6 +423,7 @@ def cmd_check(ws, update_lock, strict=False, accept_drift=False, mode=None,
 
     if update_lock and not getattr(reqs, "problems", ()):
         ctx.accepted_drift = set()
+        ctx.demoted = demoted if demoted is not None else []
         refused = _advance_lock_and_report(ctx,
                                            *_drift_acceptance(accept_drift))
         if refused:

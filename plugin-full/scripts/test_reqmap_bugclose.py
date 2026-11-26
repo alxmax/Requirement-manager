@@ -293,6 +293,74 @@ class FixByHand(unittest.TestCase):  # tested-by: REQ-BUGS-1127 @integration
         self.assertEqual(["Billing:B2"], _listed(d))
 
 
+class FixUnlistedOrDuplicate(unittest.TestCase):
+    # tested-by: REQ-BUGS-1156 @integration
+    def test_a_fix_that_was_never_listed(self):
+        # verifies: REQ-BUGS-1156#CASE-1
+        d = _gitrepo(self)
+        module = os.path.join(d, "requirements", "bugs", "Billing.md")
+        before = _bytes(module)
+        self.assertEqual(0, _run(d, "sync", "--fix", "Refund rounds down", "--new",
+                                 "--module", "Billing", "--prio", "P1",
+                                 "--date", "2026-10-03").returncode)
+        row = _register(d)[0]
+        self.assertEqual(("Billing:B3", "Refund rounds down", "P1", "2026-10-03",
+                          "1.2.3", "fixed before it was listed"),
+                         (row["id"], row["title"], row["prio"], row["date"],
+                          row["version"], row["note"]))
+        self.assertEqual(before, _bytes(module))
+        _run(d, "sync", "--fix", "Second", "--new", "--module", "Billing")
+        self.assertEqual("Billing:B4", _register(d)[1]["id"])
+        self.assertIn("bug B5 added", _run(d, "sync", "--bug", "Next", "--module",
+                                           "Billing").stdout)
+
+    def test_the_found_day_is_the_commits(self):
+        # verifies: REQ-BUGS-1156#CASE-2
+        d = _gitrepo(self)
+        env = dict(os.environ, GIT_COMMITTER_DATE="2026-09-14T10:00:00",
+                   GIT_AUTHOR_DATE="2026-09-14T10:00:00")
+        subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.com",
+                        "-c", "commit.gpgsign=false", "-c", "core.hooksPath=",
+                        "commit", "--allow-empty", "-q", "-m", "old fix"],
+                       cwd=d, env=env, check=True, timeout=60)
+        sha = _git(d, "rev-parse", "--short", "HEAD")
+        _run(d, "sync", "--fix", "Old", "--new", "--module", "Billing",
+             "--commit", sha)
+        row = _register(d)[0]
+        self.assertEqual(("2026-09-14", sha), (row["date"], row["commit"]))
+        _run(d, "sync", "--fix", "Today", "--new", "--module", "Billing")
+        self.assertEqual(_register(d)[1]["fixed"], _register(d)[1]["date"])
+
+    def test_a_duplicate_is_closed_and_named(self):
+        # verifies: REQ-BUGS-1156#CASE-3
+        d = _gitrepo(self)
+        self.assertEqual(0, _run(d, "sync", "--fix", "Billing:B2",
+                                 "--duplicate-of", "Billing B1").returncode)
+        row = _register(d)[0]
+        self.assertEqual(("duplicate", "—", "duplicate of Billing:B1"),
+                         (row["version"], row["commit"], row["note"]))
+        out = _run(d, "ask", "--bugs").stdout
+        self.assertIn("closed as its duplicate: Billing:B2", out)
+        self.assertEqual({"Billing:B1": ["Billing:B2"]},
+                         C.duplicates_of(os.path.join(d, "requirements")))
+
+    def test_refusals_write_nothing(self):
+        # verifies: REQ-BUGS-1156#CASE-5
+        d = _gitrepo(self)
+        module = os.path.join(d, "requirements", "bugs", "Billing.md")
+        before = _bytes(module)
+        for args in (("Billing:B2", "--duplicate-of", "Billing:B9"),
+                     ("Billing:B2", "--duplicate-of", "Billing:B2"),
+                     ("T", "--new", "--module", "Billing", "--duplicate-of",
+                      "Billing:B1"),
+                     ("T", "--new"),
+                     ("T", "--new", "--module", "Billing", "--prio", "high")):
+            self.assertEqual(2, _run(d, "sync", "--fix", *args).returncode, args)
+        self.assertEqual(before, _bytes(module))
+        self.assertFalse(os.path.exists(os.path.join(
+            d, "requirements", "bugs", "_fixed.md")))
+
+
 class FixByCommit(unittest.TestCase):  # tested-by: REQ-BUGS-1128 @integration
     def test_a_commit_closes_a_bug(self):
         # verifies: REQ-BUGS-1128#CASE-1
@@ -391,7 +459,19 @@ class FixedOnTheMap(unittest.TestCase):  # tested-by: REQ-BUGS-1129 @integration
 
 class BugCloseInIsolation(unittest.TestCase):
     # tested-by: REQ-BUGS-1128 @unit  # tested-by: REQ-BUGS-1129 @unit
+    # tested-by: REQ-BUGS-1156 @unit
     """Reading the trailers, the forge and the register, with git stubbed."""
+
+    def test_a_register_row_names_what_it_duplicates(self):
+        # verifies: REQ-BUGS-1156#CASE-3
+        text = C.register_row("", {"id": "Core:B2", "title": "t", "fixed": "2026-10-06",
+                                   "version": C.DUPLICATE, "commit": "—",
+                                   "note": "duplicate of Core:B1 — same stack"})
+        text = C.register_row(text, {"id": "Core:B3", "title": "u",
+                                     "fixed": "2026-10-07", "version": "1.0",
+                                     "note": "duplicate of Core:B1"})
+        with mock.patch.object(C, "fixed_rows", return_value=C.parse_fixed(text)):
+            self.assertEqual({"Core:B1": ["Core:B2"]}, C.duplicates_of("unused"))
 
     def test_a_trailer_is_read_whatever_its_case(self):
         log = ("a" * 40 + "\x1fabc1234\x1f2026-11-20\x1fFix it\n\nfixes-BUG: Billing:B1\n\x1e"

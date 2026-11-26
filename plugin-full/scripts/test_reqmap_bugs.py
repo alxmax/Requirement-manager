@@ -445,6 +445,17 @@ class ListBugs(unittest.TestCase):  # tested-by: REQ-BUGS-1120 @integration
                               "--module", "PAY").stdout)
         self.assertEqual(2, len(doc["bugs"]))
 
+    def test_a_module_that_does_not_exist_is_named(self):
+        # verifies: REQ-BUGS-1120#CASE-6
+        d = self._two_modules()
+        done = _run(d, "ask", "--bugs", "--module", "refunds")
+        self.assertEqual(0, done.returncode)
+        self.assertIn("no module named 'refunds'", done.stdout)
+        self.assertIn("modules: Payments, Search", done.stdout)
+        self.assertNotIn("no known bugs match", done.stdout)
+        out = _run(d, "ask", "--bugs", "--module", "search", "--prio", "P1").stdout
+        self.assertIn("no known bugs match", out)
+
     def test_no_bugs_is_an_answer(self):
         # verifies: REQ-BUGS-1120#CASE-4
         done = _run(_repo(self), "ask", "--bugs")

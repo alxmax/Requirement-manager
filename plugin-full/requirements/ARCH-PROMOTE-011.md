@@ -167,6 +167,8 @@ Every bullet below is binding.
   missing, unreadable or names this same engine, the requirement is demoted as before.
 - The in-memory status is updated too, so the same run's own summary counts the
   requirement as a draft rather than reporting a status it has just changed.
+- A `sync` that demoted anything ends with one line giving the count and every demoted id,
+  and how to re-confirm or accept the edit.
 
 ## Cases
 CASE-1 — an edited confirmed contract is demoted, and the lock advances
@@ -202,3 +204,9 @@ CASE-6 — init demotes an edited contract and records no waiver
   Given  a `confirmed` requirement, synced once, whose contract is then edited
   When   `init --minimal` runs over it
   Then   it is demoted to `draft` and no `_driftlog.json` is written
+
+CASE-7 — sync ends with what it demoted
+  Given  a `confirmed` requirement, synced once, whose contract is then edited
+  When   `sync` runs, then runs again
+  Then   the first run's last line reads `Demoted 1 confirmed -> draft (contract changed):`
+         with its id and `--accept-drift`, and the second run prints no such line

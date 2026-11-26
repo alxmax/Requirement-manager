@@ -186,7 +186,10 @@ Fixes-bug: Payments B12
 ```
 
 `sync --fix ID` does the same by hand (`--commit`, `--version`), and `--note "why"` closes
-without a fix, as `not a bug`. A number is never given twice, because the next one counts the
+without a fix, as `not a bug`, and `--duplicate-of OTHER` as a `duplicate` of another row, named
+under it by `ask --bugs`; neither counts as a fix. `sync --fix "TITLE" --new --module M` records
+a fix that never had a row, found on `--date` or the `--commit`'s day, without touching the
+module's file. A number is never given twice, because the next one counts the
 register. Since `sync` runs after the commit, the moved row lands in a later commit; a
 repository that wants it at merge runs `sync` in its release workflow. Reverting a fix leaves
 the bug closed, so add it again. Only files in `requirements/bugs/` are closed this way:

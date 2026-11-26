@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-25.1",
+  "engine_version": "2026-11-26.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -402,7 +402,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:357"
+          "loc": "plugin-full/scripts/reqmap.py:361"
         },
         {
           "role": "tested-by",
@@ -513,7 +513,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:357"
+          "loc": "plugin-full/scripts/reqmap.py:361"
         },
         {
           "role": "tested-by",
@@ -1943,6 +1943,8 @@
         "`sync --fix` refuses an unknown or closed id, a declared source, a moved row and an unreadable register, writing nothing. [[REQ-BUGS-1150]]",
         "`sync` closes the bugs a commit's `Fixes-bug:` trailer names. [[REQ-BUGS-1128]]",
         "The map carries the register, and the tab shows it over time. [[REQ-BUGS-1129]]",
+        "Fixed draws what was fixed against what is still open, week by week. [[REQ-BUGS-1154]]",
+        "A fix that never had a row reaches the register, and a duplicate closes as one. [[REQ-BUGS-1156]]",
         "A requirement's dossier and its page list the open bugs that name it, and the verdict does not move. [[REQ-BUGS-1131]]"
       ],
       "verify": [],
@@ -1980,7 +1982,9 @@
         "REQ-BUGS-1150",
         "REQ-BUGS-1128",
         "REQ-BUGS-1129",
-        "REQ-BUGS-1131"
+        "REQ-BUGS-1131",
+        "REQ-BUGS-1154",
+        "REQ-BUGS-1156"
       ],
       "members": [
         {
@@ -1997,11 +2001,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:174"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:229"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
         },
         {
           "role": "implements",
@@ -2312,7 +2316,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:521"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:532"
         },
         {
           "role": "implements",
@@ -2443,7 +2447,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:541"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:552"
         },
         {
           "role": "implements",
@@ -2474,12 +2478,13 @@
         "`ask --bugs` prints each module with its count, then its bugs with priority, id, date and title, highest priority first, and last a total with the count per priority.",
         "`--module TEXT` keeps modules whose name contains the text, ignoring case, diacritics and punctuation, and `--prio` keeps one priority or a comma-separated list.",
         "`--json` prints `{bugs, problems}`.",
+        "A `--module` that no module's name contains says so and lists the modules there are, rather than that no bug matches.",
         "It writes nothing and exits 0, with or without bugs."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — bugs print by module\n  Given  two modules with a P2 and a P1 in one of them\n  When   `ask --bugs` runs\n  Then   each module prints once, the P1 above the P2, and it exits 0\n\nCASE-2 — the filters narrow the list\n  Given  the same repository\n  When   `ask --bugs --module pay --prio P1` runs\n  Then   only that bug prints\n\nCASE-3 — JSON carries the problems\n  Given  a file with one good row and one bad row\n  When   `ask --bugs --json` runs\n  Then   the document holds one bug and one problem\n\nCASE-4 — no bugs is an answer\n  Given  a repository with no bug list\n  When   `ask --bugs` runs\n  Then   it prints that there are none and exits 0\n\nCASE-5 — a list of priorities, and a total\n  Given  bugs at P1, P2 and P3\n  When   `ask --bugs --prio p1,P3` runs\n  Then   the P2 is left out and the last line reads `2 bugs: P1 1, P3 1`\n\n--------------------",
+      "accept": "CASE-1 — bugs print by module\n  Given  two modules with a P2 and a P1 in one of them\n  When   `ask --bugs` runs\n  Then   each module prints once, the P1 above the P2, and it exits 0\n\nCASE-2 — the filters narrow the list\n  Given  the same repository\n  When   `ask --bugs --module pay --prio P1` runs\n  Then   only that bug prints\n\nCASE-3 — JSON carries the problems\n  Given  a file with one good row and one bad row\n  When   `ask --bugs --json` runs\n  Then   the document holds one bug and one problem\n\nCASE-4 — no bugs is an answer\n  Given  a repository with no bug list\n  When   `ask --bugs` runs\n  Then   it prints that there are none and exits 0\n\nCASE-5 — a list of priorities, and a total\n  Given  bugs at P1, P2 and P3\n  When   `ask --bugs --prio p1,P3` runs\n  Then   the P2 is left out and the last line reads `2 bugs: P1 1, P3 1`\n\nCASE-6 — a module that does not exist is named\n  Given  modules Payments and Search\n  When   `ask --bugs --module refunds` runs\n  Then   it prints `no module named 'refunds'` with both module names, exits 0, and a\n         module that exists with no bug at that priority still reads `no known bugs match`\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -2500,7 +2505,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:521"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:532"
         },
         {
           "role": "implements",
@@ -2523,14 +2528,14 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 6,
+      "covered": 6,
       "clarify": [
         {
           "rule": "ambiguous-actor",
           "severity": "advisory",
           "basis": "wording",
-          "where": "clause 4",
+          "where": "clause 5",
           "quote": "It writes nothing and exits 0, with or without bugs.",
           "question": "Who performs this -- which command or component?",
           "suggest": "Name the subject the title names, so the clause reads on its own."
@@ -2591,15 +2596,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:102"
+          "loc": "app/src/views/problems/BugsPanel.jsx:103"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:111"
+          "loc": "app/src/views/problems/BugsPanel.jsx:112"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/problems/BugsPanel.jsx:456"
+          "loc": "app/src/views/problems/BugsPanel.jsx:460"
         }
       ],
       "test_exempt": null,
@@ -2705,7 +2710,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:517"
+          "loc": "app/src/styles/app.css:535"
         },
         {
           "role": "implements",
@@ -2879,51 +2884,55 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:26"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:28"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:34"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:36"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:39"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:41"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:55"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:71"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:73"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:79"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:81"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:89"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:91"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:102"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:104"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:130"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:151"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:138"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:160"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:159"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:174"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:168"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
         },
         {
           "role": "implements",
@@ -2988,19 +2997,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:70"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:72"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:101"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:103"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:150"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:173"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:277"
         }
       ],
       "test_exempt": null,
@@ -3047,23 +3056,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:296"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:364"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:130"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:138"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:208"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:325"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:229"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
         }
       ],
       "test_exempt": null,
@@ -3124,19 +3133,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:359"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:427"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:393"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:265"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:382"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:275"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:392"
         },
         {
           "role": "implements",
@@ -3188,7 +3197,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the dossier lists the bugs that name it\n  Given  two open bugs, one whose source names the requirement\n  When   `gate --show ID` runs\n  Then   an `Open bugs (1)` section lists that bug's priority, id and title, and not the other\n\nCASE-2 — the record carries the list\n  Given  a repository with no bug list, then one with a bug that names the requirement, then\n         one with a bug that names nothing\n  When   `gate --show ID --json` runs on each\n  Then   the first record has no `bugs` key, the second lists the bug, the third an empty list\n\nCASE-3 — an id is named whole\n  Given  bugs writing `X-10 fails`, `X-1#CASE-2`, `[[X-1]]` and `x-1`\n  When   they are linked to `X-1` and `X-10`\n  Then   they name `X-10`, `X-1`, `X-1` and nothing\n\nCASE-4 — the map carries the ids, and a fixed bug leaves the dossier\n  Given  an open bug that names a requirement\n  When   `sync` runs, then `sync --fix` closes the bug\n  Then   the map's bug carries the id in `reqs`, and the dossier then lists no bug\n\nCASE-5 — the verdict does not move\n  Given  an open P0 that names a confirmed requirement\n  When   `gate --full --strict` runs\n  Then   it exits 0 and no line names the bug\n\nCASE-6 — the page lists them\n  Given  a map whose bugs name a requirement, one of them, and one that names nothing\n  When   the requirement's page renders\n  Then   it lists `Open bugs` with the bug that names it and its where, not the other, in\n         Romanian as `Buguri deschise`, and nothing when no bug names it",
+      "accept": "CASE-1 — the dossier lists the bugs that name it\n  Given  two open bugs, one whose source names the requirement\n  When   `gate --show ID` runs\n  Then   an `Open bugs (1)` section lists that bug's priority, id and title, and not the other\n\nCASE-2 — the record carries the list\n  Given  a repository with no bug list, then one with a bug that names the requirement, then\n         one with a bug that names nothing\n  When   `gate --show ID --json` runs on each\n  Then   the first record has no `bugs` key, the second lists the bug, the third an empty list\n\nCASE-3 — an id is named whole\n  Given  bugs writing `X-10 fails`, `X-1#CASE-2`, `[[X-1]]` and `x-1`\n  When   they are linked to `X-1` and `X-10`\n  Then   they name `X-10`, `X-1`, `X-1` and nothing\n\nCASE-4 — the map carries the ids, and a fixed bug leaves the dossier\n  Given  an open bug that names a requirement\n  When   `sync` runs, then `sync --fix` closes the bug\n  Then   the map's bug carries the id in `reqs`, and the dossier then lists no bug\n\nCASE-5 — the verdict does not move\n  Given  an open P0 that names a confirmed requirement\n  When   `gate --full --strict` runs\n  Then   it exits 0 and no line names the bug\n\nCASE-6 — the page lists them\n  Given  a map whose bugs name a requirement, one of them, and one that names nothing\n  When   the requirement's page renders\n  Then   it lists `Open bugs` with the bug that names it and its where, not the other, in\n         Romanian as `Buguri deschise`, and nothing when no bug names it\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3255,6 +3264,186 @@
       "clauses": 6,
       "covered": 6,
       "clarify": []
+    },
+    {
+      "id": "REQ-BUGS-1154",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Fixed draws the trend",
+      "intent": "The weekly table holds the numbers; a line shows whether what is still open goes down as the fixes go up, which a column of numbers does not.",
+      "contract": [
+        "Under the weekly table, Fixed draws one line chart on one axis from 0, one point per row of the table: the fixes so far and what is still open, and the total found only when `Show total` is ticked.",
+        "The last point of still open is the table's last still-open count, and the fixes and the total so far count from the first week, not the first one shown.",
+        "A line is never named by colour alone: a legend, a label at its last point, pushed apart when two are closer than 14 px, and a tooltip on hover or focus.",
+        "A line above the chart gives the fixes, what is still open, and the highest still-open count with its first week.",
+        "Choosing a week in the chart is the same choice as in the table.",
+        "Every string the chart shows is translated where the tab is."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — two lines under the table\n  Given  a register with twelve weeks of activity\n  When   Fixed renders\n  Then   the chart follows the table and draws two lines of twelve points, with `Show total`\n         unticked\n\nCASE-2 — the last point is what is still open\n  Given  the same register\n  When   the weeks are computed\n  Then   the last week's still open and fixes so far equal the open and fixed rows, and the\n         line above the chart names the peak and its first week\n\nCASE-3 — end labels do not overlap\n  Given  label positions 100, 105 and 40\n  When   they are spread\n  Then   they read 100, 114 and 40\n\nCASE-4 — translated\n  Given  the same register\n  When   Fixed renders in Romanian and in German\n  Then   the title, the checkbox, the line above and the week labels are translated and no\n         English string of the chart shows\n\n--------------------",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:7"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/problems/BugChart.jsx:1"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 6 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        },
+        {
+          "rule": "no-failure-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
+          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
+        },
+        {
+          "rule": "case-monoculture",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "3 of 4 Given lines open on the same word (\"register\"). Do the cases cover the other kinds of input a caller can supply?",
+          "suggest": "Read the Givens in context: a repeated word need not be a repeated kind of input. Add a case from the caller's side only if a kind is missing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-BUGS-1156",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A fix never listed, and a duplicate",
+      "intent": "A bug found and fixed before anyone listed it left no row, so the register undercounted the fixes; a duplicate could only close as `not a bug`, which said something else.",
+      "contract": [
+        "`sync --fix TITLE --new --module M` writes one register row and leaves the module's file as it was.",
+        "The row's id is the module file's next `B<n>`, past every open row and every register row of that file.",
+        "Its found date is `--date`, else the day of the commit `--commit` names, else today, and its note is `--note` or `fixed before it was listed`.",
+        "`sync --fix ID --duplicate-of OTHER` closes the row with version `duplicate` and the note `duplicate of OTHER`, and `ask --bugs` names it under OTHER.",
+        "A duplicate, like a dismissal, counts in neither the fixes nor the time to fix.",
+        "An OTHER that is the same bug or no known bug, `--new` with `--duplicate-of`, and `--new` with no module or a bad priority exit 2 and write nothing."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — a fix that was never listed\n  Given  a module file holding B1 and B2\n  When   `sync --fix \"Refund rounds down\" --new --module Billing --date 2026-10-03` runs, then\n         again with another title\n  Then   the register holds `Billing:B3` found on 2026-10-03 with the default note, then\n         `Billing:B4`, the module file is unchanged, and the next `sync --bug` gives B5\n\nCASE-2 — the found day is the commit's\n  Given  a commit dated 2026-09-14\n  When   `sync --fix TITLE --new --module Billing --commit SHA` runs, then once with no commit\n  Then   the first row is found on 2026-09-14 with that commit, and the second on the day it was\n         fixed\n\nCASE-3 — a duplicate is closed and named\n  Given  open bugs Billing:B1 and Billing:B2\n  When   `sync --fix Billing:B2 --duplicate-of \"Billing B1\"` runs\n  Then   the register row reads `duplicate`, `—` and `duplicate of Billing:B1`, and `ask --bugs`\n         prints `closed as its duplicate: Billing:B2` under B1\n\nCASE-4 — a duplicate is no fix\n  Given  a register with a duplicate and a fix closed the same week\n  When   the weeks and medians are computed\n  Then   the week counts one fix and the median counts only the fix\n\nCASE-5 — refusals write nothing\n  Given  the same module file and no register\n  When   `--duplicate-of` names an unknown bug or the bug itself, `--new` comes with\n         `--duplicate-of`, with no `--module`, or with `--prio high`\n  Then   each exits 2, the module file is unchanged and no register is written",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-BUGS-078"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/bugs.jsx:8"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/bugStats.js:7"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:297"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:462"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:119"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:182"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:193"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:203"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:216"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:263"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:283"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:306"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/bugs.py:477"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:101"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 6 clauses and 5 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-CANDIDATES-009",
@@ -3610,7 +3799,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3802"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
         },
         {
           "role": "implements",
@@ -3659,7 +3848,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3802"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
         },
         {
           "role": "implements",
@@ -3717,7 +3906,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3802"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
         },
         {
           "role": "implements",
@@ -3976,23 +4165,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:213"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:283"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:295"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:314"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:326"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:327"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:339"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:367"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:379"
         },
         {
           "role": "implements",
@@ -4380,19 +4569,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:214"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:284"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:296"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:328"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:340"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:368"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:380"
         }
       ],
       "test_exempt": null,
@@ -4454,19 +4643,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:203"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:214"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:284"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:296"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:328"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:340"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:368"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:380"
         }
       ],
       "test_exempt": null,
@@ -4654,11 +4843,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:264"
+          "loc": "plugin-full/scripts/reqmap.py:266"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:271"
+          "loc": "plugin-full/scripts/reqmap.py:273"
         },
         {
           "role": "tested-by",
@@ -4718,7 +4907,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:254"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:265"
         }
       ],
       "test_exempt": null,
@@ -4776,15 +4965,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3208"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3227"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3326"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3345"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3430"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3449"
         },
         {
           "role": "implements",
@@ -4856,7 +5045,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3430"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3449"
         },
         {
           "role": "implements",
@@ -4964,7 +5153,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3208"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3227"
         },
         {
           "role": "implements",
@@ -4972,7 +5161,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:266"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:278"
         },
         {
           "role": "implements",
@@ -5025,7 +5214,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3326"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3345"
         },
         {
           "role": "implements",
@@ -5140,7 +5329,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3381"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3400"
         },
         {
           "role": "implements",
@@ -5470,11 +5659,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:114"
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:117"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:128"
+          "loc": "plugin-full/scripts/reqmap_engine/cliflags.py:131"
         }
       ],
       "test_exempt": null,
@@ -5658,7 +5847,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:337"
+          "loc": "plugin-full/scripts/reqmap.py:341"
         },
         {
           "role": "tested-by",
@@ -6612,7 +6801,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3611"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3630"
         },
         {
           "role": "tested-by",
@@ -6897,7 +7086,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3611"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3630"
         },
         {
           "role": "implements",
@@ -8054,7 +8243,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3072"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
         },
         {
           "role": "tested-by",
@@ -8345,7 +8534,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3072"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
         },
         {
           "role": "implements",
@@ -8397,11 +8586,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3072"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:250"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:261"
         },
         {
           "role": "implements",
@@ -9058,7 +9247,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3932"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3951"
         },
         {
           "role": "implements",
@@ -10716,7 +10905,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4871"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4890"
         },
         {
           "role": "implements",
@@ -10762,7 +10951,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4127"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4146"
         },
         {
           "role": "implements",
@@ -13364,11 +13553,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:456"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:467"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:491"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:502"
         },
         {
           "role": "implements",
@@ -13411,7 +13600,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/bugs.jsx:7"
+          "loc": "app/scripts/smoke/bugs.jsx:9"
         },
         {
           "role": "implements",
@@ -13423,11 +13612,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:456"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:467"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:522"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:533"
         },
         {
           "role": "implements",
@@ -13472,7 +13661,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/smoke/bugs.jsx:8"
+          "loc": "app/scripts/smoke/bugs.jsx:10"
         },
         {
           "role": "implements",
@@ -13488,11 +13677,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:491"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:502"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugs.py:522"
+          "loc": "plugin-full/scripts/test_reqmap_bugs.py:533"
         },
         {
           "role": "implements",
@@ -14040,7 +14229,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:301"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:313"
         },
         {
           "role": "implements",
@@ -15148,7 +15337,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/report.js:247"
+          "loc": "app/src/lib/report.js:254"
         },
         {
           "role": "tested-by",
@@ -15843,11 +16032,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:383"
+          "loc": "plugin-full/scripts/reqmap.py:387"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:404"
+          "loc": "plugin-full/scripts/reqmap.py:408"
         },
         {
           "role": "tested-by",
@@ -15902,7 +16091,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:404"
+          "loc": "plugin-full/scripts/reqmap.py:408"
         },
         {
           "role": "tested-by",
@@ -16236,12 +16425,13 @@
         "`--accept-drift` skips the demotion entirely: the status stays and the baseline advances, and the run reports no RM018 for a contract it has just accepted.",
         "**An unchanged file is not an edit.** A drifted requirement whose file is identical to its copy in the commit that last wrote the lock keeps its status when the map committed beside that lock names another engine than the one running: its hash moved because a newer engine hashes differently. The run says so, and records the waiver in the drift log with that commit.",
         "Without git, with a lock never committed, a file git does not track, or a map that is missing, unreadable or names this same engine, the requirement is demoted as before.",
-        "The in-memory status is updated too, so the same run's own summary counts the requirement as a draft rather than reporting a status it has just changed."
+        "The in-memory status is updated too, so the same run's own summary counts the requirement as a draft rather than reporting a status it has just changed.",
+        "A `sync` that demoted anything ends with one line giving the count and every demoted id, and how to re-confirm or accept the edit."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — an edited confirmed contract is demoted, and the lock advances\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `sync` runs without `--accept-drift`\n  Then   the file reads `status: draft`, the output names it, and a second `sync` reports\n         no drift\n\nCASE-2 — a new requirement is not demoted\n  Given  a `confirmed` requirement that has never been in the lock\n  When   `sync` runs\n  Then   its status is unchanged and nothing is reported as demoted\n\nCASE-3 — accept-drift keeps the status\n  Given  a `confirmed` requirement whose contract was edited\n  When   `sync --accept-drift` runs\n  Then   the status stays `confirmed`, the lock advances, and no RM018 line names it\n\nCASE-4 — a new hash on unchanged text keeps the confirmation\n  Given  a committed lock holding another hash for a `confirmed` requirement whose file is\n         unchanged since that commit\n  When   `sync` runs\n  Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log\n         names the lock commit; had the file been edited after that commit, it is demoted\n\nCASE-5 — a lock written by this same engine is not an upgrade\n  Given  the same committed lock, once with a map naming the running engine and once with\n         no map at that commit\n  When   `sync` runs\n  Then   the requirement is demoted and nothing is re-baselined\n\nCASE-6 — init demotes an edited contract and records no waiver\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `init --minimal` runs over it\n  Then   it is demoted to `draft` and no `_driftlog.json` is written",
+      "accept": "CASE-1 — an edited confirmed contract is demoted, and the lock advances\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `sync` runs without `--accept-drift`\n  Then   the file reads `status: draft`, the output names it, and a second `sync` reports\n         no drift\n\nCASE-2 — a new requirement is not demoted\n  Given  a `confirmed` requirement that has never been in the lock\n  When   `sync` runs\n  Then   its status is unchanged and nothing is reported as demoted\n\nCASE-3 — accept-drift keeps the status\n  Given  a `confirmed` requirement whose contract was edited\n  When   `sync --accept-drift` runs\n  Then   the status stays `confirmed`, the lock advances, and no RM018 line names it\n\nCASE-4 — a new hash on unchanged text keeps the confirmation\n  Given  a committed lock holding another hash for a `confirmed` requirement whose file is\n         unchanged since that commit\n  When   `sync` runs\n  Then   the status stays `confirmed`, the output says it was re-baselined, and the drift log\n         names the lock commit; had the file been edited after that commit, it is demoted\n\nCASE-5 — a lock written by this same engine is not an upgrade\n  Given  the same committed lock, once with a map naming the running engine and once with\n         no map at that commit\n  When   `sync` runs\n  Then   the requirement is demoted and nothing is re-baselined\n\nCASE-6 — init demotes an edited contract and records no waiver\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `init --minimal` runs over it\n  Then   it is demoted to `draft` and no `_driftlog.json` is written\n\nCASE-7 — sync ends with what it demoted\n  Given  a `confirmed` requirement, synced once, whose contract is then edited\n  When   `sync` runs, then runs again\n  Then   the first run's last line reads `Demoted 1 confirmed -> draft (contract changed):`\n         with its id and `--accept-drift`, and the second run prints no such line",
       "input": "",
       "output": "",
       "desc": "",
@@ -16253,6 +16443,10 @@
       "satisfied_by": [],
       "members": [
         {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap.py:277"
+        },
+        {
           "role": "tested-by",
           "loc": "plugin-full/scripts/test_reqmap_author.py:2919"
         },
@@ -16262,27 +16456,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:229"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:173"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:253"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:314"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:264"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:417"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:326"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:431"
         }
       ],
       "test_exempt": null,
       "milestone": "v5.6",
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 6,
+      "clauses": 7,
+      "covered": 7,
       "clarify": [
         {
           "rule": "clause-without-case",
@@ -16290,7 +16488,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 8 clauses and 6 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -16809,7 +17007,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap.py:317"
+          "loc": "plugin-full/scripts/reqmap.py:321"
         },
         {
           "role": "tested-by",
@@ -17073,7 +17271,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4423"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4442"
         },
         {
           "role": "implements",
@@ -17164,7 +17362,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4040"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4059"
         },
         {
           "role": "implements",
@@ -17217,7 +17415,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4093"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4112"
         },
         {
           "role": "implements",
@@ -17272,7 +17470,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4172"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4191"
         },
         {
           "role": "implements",
@@ -17331,7 +17529,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4209"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4228"
         },
         {
           "role": "implements",
@@ -17393,7 +17591,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4231"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4250"
         },
         {
           "role": "implements",
@@ -17475,7 +17673,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4343"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4362"
         },
         {
           "role": "implements",
@@ -17534,7 +17732,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4231"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4250"
         },
         {
           "role": "implements",
@@ -17588,7 +17786,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4464"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4483"
         },
         {
           "role": "implements",
@@ -17659,7 +17857,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4579"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4598"
         },
         {
           "role": "implements",
@@ -17846,7 +18044,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3556"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3575"
         },
         {
           "role": "tested-by",
@@ -18090,7 +18288,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3556"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3575"
         },
         {
           "role": "implements",
@@ -18252,7 +18450,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3468"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3487"
         },
         {
           "role": "implements",
@@ -19083,7 +19281,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4579"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4598"
         },
         {
           "role": "implements",
@@ -19219,19 +19417,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:202"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:213"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:283"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:295"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:327"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:339"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:367"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:379"
         },
         {
           "role": "implements",
@@ -19389,19 +19587,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:204"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:215"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:285"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:297"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:329"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:341"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/gate.py:369"
+          "loc": "plugin-full/scripts/reqmap_engine/gate.py:381"
         },
         {
           "role": "implements",
@@ -22211,7 +22409,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4635"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4654"
         },
         {
           "role": "implements",
@@ -22326,7 +22524,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4638"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4657"
         },
         {
           "role": "implements",
@@ -24109,6 +24307,7 @@
         "Choosing a question on that page shows it in a panel beside the list, with the requirement's clauses and cases, instead of leaving the page. [[REQ-VIEWER-1114]]",
         "A Report page gives in one place the counts of open bugs, open questions by priority and missing trace tags, with the requirements behind each, and prints as a PDF. [[REQ-VIEWER-1139]]",
         "Each Report section between the counts and the recommendations holds what its title says: the summary, how the map was checked, the problem types and the deliverables. [[REQ-VIEWER-1153]]",
+        "The Report's numbers carry a bug chart and a questions chart, each filtered by priority. [[REQ-VIEWER-1155]]",
         "The Report page also reads an audit: its session, its findings by kind apart from the questions, the trace's reach and test suggestions, the corpus's defects, and downloads as Markdown. [[REQ-VIEWER-1145]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "Each rail reading opens the rows behind its number in Problems, filterable by the reason each row is there. [[REQ-VIEWER-1084]]",
@@ -24186,7 +24385,8 @@
         "REQ-VIEWER-1145",
         "REQ-VIEWER-1153",
         "REQ-VIEWER-1151",
-        "REQ-VIEWER-1152"
+        "REQ-VIEWER-1152",
+        "REQ-VIEWER-1155"
       ],
       "members": [
         {
@@ -24706,7 +24906,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.de.js:398"
+          "loc": "app/src/lib/i18n.de.js:419"
         },
         {
           "role": "implements",
@@ -24718,7 +24918,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.ro.js:442"
+          "loc": "app/src/lib/i18n.ro.js:463"
         },
         {
           "role": "implements",
@@ -25781,7 +25981,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:519"
+          "loc": "app/src/styles/app.css:537"
         },
         {
           "role": "implements",
@@ -25852,7 +26052,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/styles/app.css:556"
+          "loc": "app/src/styles/app.css:581"
         },
         {
           "role": "implements",
@@ -26029,7 +26229,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — bugs come out highest priority first\n  Given  a P2 bug with a why and a P1 bug, each naming a requirement\n  When   the bug rows are built\n  Then   the P1 row comes first, each row holds priority, requirement and description, the\n         priorities read `P1 - High` and `P2 - Medium`, and the P2 description is its title,\n         a line break, then its why\n\nCASE-2 — each question keeps the priority its page gives it\n  Given  a person's question, an observed question and a `clarify` question of basis\n         `wording` with a suggestion\n  When   the question rows are built\n  Then   they are High, Medium and Low in that order, and the `clarify` row's answer options\n         are its suggestion\n\nCASE-3 — answer options are read only where the question writes them\n  Given  a question ending `Options: 100 ms / 300 ms`, one written `(a) lock (b) unlock`, and\n         one with neither\n  When   their answer options are read\n  Then   they are `100 ms / 300 ms`, `(a) lock (b) unlock` and empty\n\nCASE-4 — the workbook is a valid zip of a one-sheet spreadsheet\n  Given  a header and two rows, one holding `&` and `<`\n  When   the workbook is written\n  Then   it starts with the zip signature, its CRC of `123456789` is `cbf43926`, the sheet\n         holds the header bold and frozen with a filter, and the text is escaped\n\nCASE-5 — the buttons are there, and idle when nothing is listed\n  Given  the Bugs tab with and without bugs, and the Questions page\n  When   they are rendered\n  Then   each holds `Export XLSX`, disabled on the empty Bugs tab",
+      "accept": "CASE-1 — bugs come out highest priority first\n  Given  a P2 bug with a why and a P1 bug, each naming a requirement\n  When   the bug rows are built\n  Then   the P1 row comes first, each row holds priority, requirement and description, the\n         priorities read `P1 - High` and `P2 - Medium`, and the P2 description is its title,\n         a line break, then its why\n\nCASE-2 — each question keeps the priority its page gives it\n  Given  a person's question, an observed question and a `clarify` question of basis\n         `wording` with a suggestion\n  When   the question rows are built\n  Then   they are High, Medium and Low in that order, and the `clarify` row's answer options\n         are its suggestion\n\nCASE-3 — answer options are read only where the question writes them\n  Given  a question ending `Options: 100 ms / 300 ms`, one written `(a) lock (b) unlock`, and\n         one with neither\n  When   their answer options are read\n  Then   they are `100 ms / 300 ms`, `(a) lock (b) unlock` and empty\n\nCASE-4 — the workbook is a valid zip of a one-sheet spreadsheet\n  Given  a header and two rows, one holding `&` and `<`\n  When   the workbook is written\n  Then   it starts with the zip signature, its CRC of `123456789` is `cbf43926`, the sheet\n         holds the header bold and frozen with a filter, and the text is escaped\n\nCASE-5 — the buttons are there, and idle when nothing is listed\n  Given  the Bugs tab with and without bugs, and the Questions page\n  When   they are rendered\n  Then   each holds `Export XLSX`, disabled on the empty Bugs tab\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -26073,6 +26273,70 @@
       "clauses": 5,
       "covered": 5,
       "clarify": []
+    },
+    {
+      "id": "REQ-VIEWER-1155",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The Report draws bugs and questions",
+      "intent": "A reader of the Report, often on paper, sees the counts as a table; the charts show whether fixes keep up with what is found and where the open questions sit. The map holds no date for a question, so its chart is a picture of now, not a trend.",
+      "contract": [
+        "Under the table of numbers, the Report draws the Bugs tab's fixed and still-open chart when the register holds a row, and a bar per question priority, High, Medium and Low, split into questions on confirmed requirements and on drafts.",
+        "The bug chart has a filter of the priorities P0 to P4 the open and fixed bugs hold, and draws only the bugs it keeps.",
+        "The questions chart has a filter of High, Medium and Low, and draws only the priorities it keeps.",
+        "A filter starts with every option on, never turns its last option off, and stays on screen when what it keeps has nothing to draw.",
+        "The PDF prints the charts as filtered, and every string of the charts and filters is translated where the Report is."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "accept": "CASE-1 — both charts follow the numbers\n  Given  a map with open and fixed bugs and open questions\n  When   the Report renders\n  Then   the bug chart and the questions chart follow the table of numbers\n\nCASE-2 — the bug filter\n  Given  open bugs at P0 and P2 and a fixed P2\n  When   the charts render\n  Then   the filter offers P0 and P2 only, P0 alone counts one still open, both count two,\n         and the last option on cannot be turned off\n\nCASE-3 — the questions are split\n  Given  two High questions, one on a confirmed requirement and one on a draft, and a Low on\n         the confirmed one\n  When   the report is computed\n  Then   High reads 1 and 1, Medium 0 and 0, Low 1 and 0, and the High bar is labelled\n         `2 (1 on confirmed)`\n\nCASE-4 — translated\n  Given  the same map\n  When   the charts render in Romanian\n  Then   the title, the priorities and the filter labels are Romanian and no English string\n         of the charts shows",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/smoke/report.jsx:6"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/report.js:233"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/report/QuestionChart.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/report/ReportCharts.jsx:1"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4,
+      "clarify": [
+        {
+          "rule": "clause-without-case",
+          "severity": "advisory",
+          "basis": "wording",
+          "where": "Cases",
+          "quote": "",
+          "question": "There are 5 clauses and 4 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
+        }
+      ]
     },
     {
       "id": "ARCH-VIEWERFILE-074",
@@ -27827,6 +28091,14 @@
       "ARCH-BUGS-078"
     ],
     [
+      "REQ-BUGS-1154",
+      "ARCH-BUGS-078"
+    ],
+    [
+      "REQ-BUGS-1156",
+      "ARCH-BUGS-078"
+    ],
+    [
       "ARCH-CANDIDATES-009",
       "SYS-READ-103"
     ],
@@ -29100,6 +29372,10 @@
     ],
     [
       "REQ-VIEWER-1152",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-VIEWER-1155",
       "ARCH-VIEWER-007"
     ],
     [
@@ -31411,7 +31687,7 @@
     },
     {
       "month": "2026-11",
-      "count": 11,
+      "count": 12,
       "first": "2026-11-14",
       "last": "2026-11-26",
       "versions": [
@@ -31425,11 +31701,20 @@
         "v8.29.1",
         "v8.29.2",
         "v8.29.3",
-        "v8.29.4"
+        "v8.29.4",
+        "v8.30.0"
       ],
-      "landmark": "v8.29.0",
-      "headline": "Release v8.29.0",
+      "landmark": "v8.30.0",
+      "headline": "Release v8.30.0",
       "entries": [
+        {
+          "version": "v8.30.0",
+          "date": "2026-11-26",
+          "headline": "Release v8.30.0",
+          "body": "**Release v8.30.0.**\n\n**Bugs and questions drawn in the Bugs tab and the Report, and two answers that read as something else.**\n\n- Bugs → Fixed draws a line chart under the weekly table: what was fixed so far (green) against what is still open (red), on one axis from 0, with the total found behind a `Show total` checkbox. Each line has a legend entry, a label at its last point and a tooltip, so none is named by colour alone; the two colours are new tokens (`chart-fixed`, `chart-open`) chosen to stay apart under deuteranopia and protanopia, which the status pair does not. A week chosen in the chart is the week chosen in the table. Romanian and German translate every string (REQ-BUGS-1154, draft).\n- The Report's Results in numbers carry the same bug chart and a questions chart: a bar per priority (High, Medium, Low), split into questions on confirmed requirements and on drafts. Each chart has a priority filter, P0–P4 (only the priorities the register holds) and High/Medium/Low, and the PDF prints them as filtered. The map has no date for a question, so its chart shows now, not a trend (REQ-VIEWER-1155, draft).\n- `sync` ends with one line when it demoted anything: `Demoted N confirmed -> draft (contract changed): <ids>`. The per-requirement lines scrolled past among the rest of the output, and a drop in the confirmed count was found only by comparing file lists (REQ-PROMOTE-974 CASE-7).\n- `ask --bugs --module X` where no module's name contains X now says `no module named 'X'` and lists the modules, instead of `no known bugs match`, which read as \"no bugs recorded\" to someone asking about an area filed under another module (REQ-BUGS-1120 CASE-6).\n- `sync --fix \"TITLE\" --new --module M` records a fix that never had a row: it goes straight to the register under the module's next free number, found on `--date`, else the day of the `--commit`, else today. The module's file is untouched. Fixes made before the register existed, or found and fixed in one commit, were left out of its counts (REQ-BUGS-1156, draft).\n- `sync --fix ID --duplicate-of OTHER` closes a row as a duplicate: version `duplicate`, note `duplicate of OTHER`, and `ask --bugs` prints `closed as its duplicate: …` under the kept bug. A duplicate counts as no fix in the chart, the weekly table and the median, as a dismissal already did; before, the only way to close one was `--note`, which recorded `not a bug`.",
+          "first_commit": "2026-11-26",
+          "last_commit": "2026-11-26"
+        },
         {
           "version": "v8.29.4",
           "date": "2026-11-26",
@@ -31779,6 +32064,14 @@
         {
           "flag": "--note",
           "help": "With --fix: close without a fix, and say why."
+        },
+        {
+          "flag": "--new",
+          "help": "With --fix: the argument is a TITLE, not an id. Record a fix that never had a row, under --module's next free number, found on --date (default: the --commit's day, else today). The module's file is not written."
+        },
+        {
+          "flag": "--duplicate-of",
+          "help": "With --fix: close the bug as a duplicate of this `FILE:REF`. It is no fix, and `ask --bugs` names it under the bug it duplicates."
         }
       ]
     },
@@ -31820,15 +32113,15 @@
     }
   ],
   "design": {
-    "files": 163,
-    "clean_files": 160,
-    "score": 98,
+    "files": 166,
+    "clean_files": 157,
+    "score": 95,
     "candidates": {
-      "encapsulation": 0,
-      "abstraction": 0,
+      "encapsulation": 3,
+      "abstraction": 1,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 3
+      "standards": 6
     },
     "findings": [
       {
@@ -31849,27 +32142,87 @@
       },
       {
         "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/i18n.de.js",
+        "line": 58,
+        "name": "i18n.de.js",
+        "detail": "2 line(s) wider than 120 columns, first at line 58"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/i18n.ro.js",
+        "line": 61,
+        "name": "i18n.ro.js",
+        "detail": "2 line(s) wider than 120 columns, first at line 61"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/problems/BugChart.jsx",
+        "line": 51,
+        "name": "BugChart",
+        "detail": "`BugChart` is 91 lines (over 80)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "app/src/views/problems/BugChart.jsx",
+        "line": 51,
+        "name": "BugChart",
+        "detail": "`BugChart` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "standards",
         "kind": "file-too-long",
         "file": "app/src/views/problems/BugsPanel.jsx",
         "line": 1,
         "name": "BugsPanel.jsx",
-        "detail": "505 lines (over 500)"
+        "detail": "509 lines (over 500)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin-full/scripts/reqmap_engine/bugclose.py",
+        "line": 215,
+        "name": "_fix_new",
+        "detail": "a, reqs_dir, root travel together through 3 functions: _duplicate_meta, _fix_new, cmd_bug_fix"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "plugin-full/scripts/reqmap_engine/commands.py",
+        "line": 1,
+        "name": "commands.py",
+        "detail": "513 lines (over 500)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin-full/scripts/reqmap_engine/gate.py",
+        "line": 377,
+        "name": "cmd_check",
+        "detail": "`cmd_check` takes 7 parameters (over 6)"
       }
     ],
     "advice": {
-      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows"
+      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
+      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
+      "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
+      "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
+      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together"
     }
   },
   "health": {
     "score": 99,
-    "total": 379,
-    "scored": 357,
-    "healthy": 355,
+    "total": 382,
+    "scored": 360,
+    "healthy": 358,
     "exempt": 5,
     "deprecated": 22,
-    "confirmed": 355,
-    "implemented": 347,
-    "tested": 348,
+    "confirmed": 358,
+    "implemented": 350,
+    "tested": 351,
     "drafts": 2,
     "orphans": 0,
     "untested": 0,
@@ -31878,7 +32231,7 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 355,
+    "reviewed_total": 358,
     "unhealthy": [
       {
         "id": "REQ-VIEWER-1151",
@@ -32043,10 +32396,10 @@
   },
   "trace": {
     "coverage": {
-      "code_files": 203,
-      "tagged_files": 198,
-      "production_files": 178,
-      "drift_files": 108
+      "code_files": 206,
+      "tagged_files": 201,
+      "production_files": 181,
+      "drift_files": 110
     },
     "suggestions": {},
     "hygiene": {

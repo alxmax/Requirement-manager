@@ -14,6 +14,7 @@ import {
   fixedIn, fixedSince, medianDays, pageOf, weekly, weekOf,
 } from "../../lib/bugStats.js";
 import { Icon } from "../../lib/icons.jsx";
+import { BugChart } from "./BugChart.jsx";
 import { useI18n } from "../../lib/i18n.jsx";
 import {
   bugCommand, canWrite, moduleFile, saveBug,
@@ -194,6 +195,7 @@ export function BugHistory({ open, fixed, query }) {
     (r) => `${r.id} ${r.title}`.toLowerCase().includes(q))
     : week ? fixedIn(fixed, week) : [];
   const at = pageOf([...chosen].reverse(), page, PAGE_SIZE);
+  const weeks = weekly(open, fixed);
   return (
     <>
       <table className="bug-weeks">
@@ -201,7 +203,7 @@ export function BugHistory({ open, fixed, query }) {
           <th>{t("Week")}</th><th>{t("Found")}</th><th>{t("Fixed")}</th>
           <th>{t("Still open")}</th>
         </tr></thead>
-        <tbody>{weekly(open, fixed).map((w) => (
+        <tbody>{weeks.map((w) => (
           <tr key={w.week}>
             <td>
               <button className="bug-week" aria-pressed={week === w.week}
@@ -214,6 +216,8 @@ export function BugHistory({ open, fixed, query }) {
           </tr>
         ))}</tbody>
       </table>
+      <BugChart weeks={weeks} chosen={week} pick={pick} dateOf={shortDate}
+        canPick={(w) => closing.has(w)} />
       <div className="bug-medians">
         <b>{t("Median days to fix")}</b>
         <div>{t("By priority")}: {medianDays(fixed, "prio")

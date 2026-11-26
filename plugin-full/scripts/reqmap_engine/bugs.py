@@ -463,17 +463,28 @@ def cmd_bugs(root, reqs_dir, module=None, prio=None, as_json=False):
         print(json.dumps({"bugs": shown, "problems": problems},
                          ensure_ascii=False, indent=2))
         return 0
-    if not shown:
+    names = sorted({b["module"] for b in bugs})
+    if module and bugs and not any(_matches(b, module, []) for b in bugs):
+        # "no bugs match" read as "no bugs recorded" to someone who meant the
+        # area, not the file name; say which question was answered.
+        print("no module named {!r} — --module matches the module name, not "
+              "the bug text; modules: {}".format(module, ", ".join(names)))
+    elif not shown:
         print("no known bugs" + (" match" if module or prio else ""))
     groups = {}
     for bug in shown:
         groups.setdefault(bug["module"], []).append(bug)
+    from .bugclose import duplicates_of  # implements: REQ-BUGS-1156
+    dups = duplicates_of(reqs_dir)
     for name in sorted(groups):
         print("{} ({})".format(name, len(groups[name])))
         for b in sorted(groups[name], key=lambda x: x["prio"]):
             print("  {}  {:<6} {:<10}  {}".format(
                 b["prio"] + ("*" if b["estimated"] else " "), b["ref"],
                 b["date"], b["title"]))
+            if dups.get(b["id"]):
+                print("          closed as its duplicate: "
+                      + ", ".join(dups[b["id"]]))
     if shown:
         print(_total_line(shown))
     for line in problems:

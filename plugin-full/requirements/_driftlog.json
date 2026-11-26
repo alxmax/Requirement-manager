@@ -18,8 +18,8 @@
       "reason": "Readability: stacked clauses split, one case added to ARCH-AUDITRUN-076; no change in behaviour"
     },
     "ARCH-BUGS-078": {
-      "hash": "8442bd10c77e",
-      "reason": "drafts read and confirmed; REQ-BUGS-1116/1119/1127 split into 1148/1149/1150 (over 7 cases); REQ-CHECK-1135 and ARCH-MAPSTAMP-079 gain cases"
+      "hash": "ae8af53bddb9",
+      "reason": "contract clauses added for the bug chart, the demotion summary and the --module answer"
     },
     "ARCH-CANDIDATES-009": {
       "hash": "9a3cce30b75b",
@@ -166,8 +166,8 @@
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
     "ARCH-VIEWER-007": {
-      "hash": "e4e95b74b730",
-      "reason": "cases added after reading the viewer's clause-without-case questions"
+      "hash": "b70adc430475",
+      "reason": "contract clauses added for the bug and question charts, the demotion summary and the --module answer"
     },
     "ARCH-VLEVEL-037": {
       "hash": "808bb64c07a9",
@@ -212,6 +212,10 @@
     "REQ-BUGS-1119": {
       "hash": "72ec83660388",
       "reason": "cases added after reading the Bugs family's clause-without-case questions"
+    },
+    "REQ-BUGS-1120": {
+      "hash": "baf7043c9edc",
+      "reason": "contract clauses added for the bug chart, the demotion summary and the --module answer"
     },
     "REQ-BUGS-1121": {
       "hash": "76b32c7d6786",
@@ -522,8 +526,8 @@
       "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
     },
     "REQ-PROMOTE-974": {
-      "hash": "0e7f14a2b8b5",
-      "reason": "accept-drift reports no RM018 for what it accepted"
+      "hash": "8d7b3383f38c",
+      "reason": "contract clauses added for the bug chart, the demotion summary and the --module answer"
     },
     "REQ-PROSE-900": {
       "hash": "880304bce879",

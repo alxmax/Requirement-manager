@@ -60,6 +60,7 @@ function bugCounts() {
     open: [...open].sort((a, b) => String(a.prio).localeCompare(b.prio)),
     byPrio,
     fixed: BUGS_FIXED.filter(isFix).length,
+    fixedRows: BUGS_FIXED,
     urgent: (byPrio.P0 || 0) + (byPrio.P1 || 0),
   };
 }
@@ -229,6 +230,12 @@ export function computeReport() {
     questionIds: Object.fromEntries(["high", "medium", "low"].map((p) =>
       [p, [...new Set(ranked.filter((q) => q.prio === p).map((q) => q.id))]
         .sort()])),
+    // implements: REQ-VIEWER-1155 - what the questions chart draws
+    questionSplit: ["high", "medium", "low"].map((prio) => {
+      const rows = ranked.filter((q) => q.prio === prio);
+      const confirmed = rows.filter((q) => ENFORCED[q.status]).length;
+      return { prio, confirmed, other: rows.length - confirmed };
+    }),
     trace: traceCounts(),
     dangling: HEALTH
       ? (HEALTH.gate_error_lines || []).filter((l) => /RM001/.test(l)) : null,

@@ -7,6 +7,8 @@
  * ({ c, t, openSpec, full }): the report, the translator, what opens a
  * requirement, and whether every list prints out in full. */
 
+import { ReportCharts } from "./ReportCharts.jsx";
+
 export const NOT_MEASURED = "not measured";
 const MONO = { fontFamily: "var(--font-mono)", fontSize: 12 };
 const PRIO_CLASS = { high: "structure", medium: "count", low: "wording" };
@@ -98,6 +100,7 @@ export function Numbers({ ctx }) {
       { s: c.health.score, a: c.health.healthy, b: c.health.scored })]] : []),
   ];
   return (
+    <>
     <table className="rep-table rep-kv">
       <tbody>
         {rows.map(([label, value, chips]) => (
@@ -112,6 +115,8 @@ export function Numbers({ ctx }) {
         ))}
       </tbody>
     </table>
+    <ReportCharts c={c} />
+    </>
   );
 }
 

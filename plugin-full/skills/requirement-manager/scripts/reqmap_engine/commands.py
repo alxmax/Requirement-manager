@@ -402,6 +402,19 @@ COMMANDS = {
              "consumer": "plugin-full/skills/requirement-manager/references/bugs.md",
              "type": "str",
              "help": "With --fix: close without a fix, and say why."},
+            {"name": "fix_new", "flag": "--new",
+             "consumer": "plugin-full/skills/requirement-manager/references/bugs.md",
+             "type": "bool",
+             "help": "With --fix: the argument is a TITLE, not an id. Record "
+                     "a fix that never had a row, under --module's next free "
+                     "number, found on --date (default: the --commit's day, "
+                     "else today). The module's file is not written."},
+            {"name": "duplicate_of", "flag": "--duplicate-of",
+             "consumer": "plugin-full/skills/requirement-manager/references/bugs.md",
+             "type": "str",
+             "help": "With --fix: close the bug as a duplicate of this "
+                     "`FILE:REF`. It is no fix, and `ask --bugs` names it "
+                     "under the bug it duplicates."},
         ],
     },
     "clarify": {

@@ -26,7 +26,7 @@ from reqmap_engine.cliflags import (
     _verb_scope
 )
 from reqmap_engine.config import apply_config, load_config
-from reqmap_engine.gate import GateMode, cmd_check
+from reqmap_engine.gate import GateMode, cmd_check, demotion_summary
 from reqmap_engine.model import Finding, GateResult
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
@@ -257,8 +257,10 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     # were already scanned above; cmd_check rewrites the lock unless confirmed
     # drift is detected without --accept-drift. `--accept-drift` alone yields
     # True, with a reason the string, absent False; cmd_check reads all three.
+    demoted = []
     rc = cmd_check(ws, True, strict=a.strict,
-                   accept_drift=getattr(a, "accept_drift", False))
+                   accept_drift=getattr(a, "accept_drift", False),
+                   demoted=demoted)
     # The map is written whatever the verdict: a first check of an existing
     # repository fails, and that is when its map is read. It carries the
     # gate's errors, and the exit code stays the gate's.  # implements: REQ-CHECK-1133
@@ -272,6 +274,8 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         print("sync: gate failed — the map was written with the errors above "
               "in it; fix them and re-run `sync` to rebuild the rest.",
               file=sys.stderr)
+    if demoted:  # implements: REQ-PROMOTE-974 — the last line, not lost above
+        print(demotion_summary(demoted))
     return rc
 def _force_utf8():
     """UTF-8 on stdout and stderr, whatever the console's codepage."""
