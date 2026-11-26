@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-26.1",
+  "engine_version": "2026-11-26.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -3060,7 +3060,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:476"
         },
         {
           "role": "implements",
@@ -3093,6 +3093,7 @@
       "intent": "The dates a closed bug keeps add up to a trend, with no new input from anyone.",
       "contract": [
         "`_map.json` carries the register under `bugs_fixed`, and has no such key when it is empty.",
+        "A row's priority reaches the map as an open bug's does: `P4*` is `prio: P4` with `estimated: true`.",
         "A row's commit links to the forge when the remote is GitHub. The forge reaches `_map.html` only, because it differs between a clone and a fork.",
         "When the register holds a row, the Bugs tab has an Open / Fixed toggle. Fixed shows found, fixed, version, commit and note.",
         "Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per priority.",
@@ -3104,7 +3105,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — the register reaches the map\n  Given  one closed bug\n  When   `sync` runs\n  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`\n\nCASE-2 — a GitHub remote\n  Given  a register row with a commit and a GitHub remote\n  When   `sync` runs\n  Then   the forge is named for the page and `_map.json` does not carry it\n\nCASE-3 — the toggle\n  Given  a map with a closed bug\n  When   the history renders\n  Then   it shows that bug's dates, version and commit\n\nCASE-4 — the numbers\n  Given  bugs found and fixed over two weeks, one dismissed\n  When   the weeks and medians are computed\n  Then   each week's counts and the median leave the dismissal out of the fixes\n\nCASE-5 — the export\n  Given  a bug fixed this month\n  When   the report renders\n  Then   it holds a section naming that bug\n\nCASE-6 — the rows wait for a choice\n  Given  a register with rows\n  When   Fixed renders with no week chosen and no search\n  Then   it shows no row and asks for a week, and a chosen week holds the rows closed in it\n\nCASE-7 — a long list\n  Given  30 open bugs in one module\n  When   the tab renders\n  Then   it shows 25 rows and says page 1 of 2, and a page past the end is the last page\n\n--------------------",
+      "accept": "CASE-1 — the register reaches the map\n  Given  one closed bug, its priority estimated as `P4*`\n  When   `sync` runs\n  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`, with `prio` `P4` and `estimated` true\n\nCASE-2 — a GitHub remote\n  Given  a register row with a commit and a GitHub remote\n  When   `sync` runs\n  Then   the forge is named for the page and `_map.json` does not carry it\n\nCASE-3 — the toggle\n  Given  a map with a closed bug\n  When   the history renders\n  Then   it shows that bug's dates, version and commit\n\nCASE-4 — the numbers\n  Given  bugs found and fixed over two weeks, one dismissed\n  When   the weeks and medians are computed\n  Then   each week's counts and the median leave the dismissal out of the fixes\n\nCASE-5 — the export\n  Given  a bug fixed this month\n  When   the report renders\n  Then   it holds a section naming that bug\n\nCASE-6 — the rows wait for a choice\n  Given  a register with rows\n  When   Fixed renders with no week chosen and no search\n  Then   it shows no row and asks for a week, and a chosen week holds the rows closed in it\n\nCASE-7 — a long list\n  Given  30 open bugs in one module\n  When   the tab renders\n  Then   it shows 25 rows and says page 1 of 2, and a page past the end is the last page\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3137,7 +3138,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:461"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:476"
         },
         {
           "role": "implements",
@@ -3145,7 +3146,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:392"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:397"
         },
         {
           "role": "implements",
@@ -3173,7 +3174,7 @@
           "basis": "wording",
           "where": "Cases",
           "quote": "",
-          "question": "There are 8 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
+          "question": "There are 9 clauses and 7 cases. Does each clause have a case that proves it? This check compares counts, not coverage: one case may prove two clauses, so it cannot say which clause, if any, is unproven.",
           "suggest": "Read the clauses against the cases. If an obligation is unproven, add or extend a case, or move the clause to the requirement that already carries its cases."
         }
       ]
@@ -3384,7 +3385,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:462"
+          "loc": "plugin-full/scripts/test_reqmap_bugclose.py:477"
         },
         {
           "role": "implements",
@@ -31687,7 +31688,7 @@
     },
     {
       "month": "2026-11",
-      "count": 12,
+      "count": 13,
       "first": "2026-11-14",
       "last": "2026-11-26",
       "versions": [
@@ -31702,11 +31703,20 @@
         "v8.29.2",
         "v8.29.3",
         "v8.29.4",
-        "v8.30.0"
+        "v8.30.0",
+        "v8.30.1"
       ],
       "landmark": "v8.30.0",
       "headline": "Release v8.30.0",
       "entries": [
+        {
+          "version": "v8.30.1",
+          "date": "2026-11-26",
+          "headline": "Release v8.30.1",
+          "body": "**Release v8.30.1.**\n\n**A fixed bug with an estimated priority is counted in the Report's chart.**\n\n- `_map.json`'s `bugs_fixed` now splits a register row's priority as it splits an open bug's: `P4*` reaches the map as `prio: P4` with `estimated: true`. The row kept the raw `P4*`, so every viewer filter on P0–P4 dropped it: the Report's bug chart, and the per-priority mix and median in Bugs → Fixed, while the weekly table, which does not filter, counted it. A register where most priorities are still estimated drew a chart far below its table (REQ-BUGS-1129 CASE-1).",
+          "first_commit": "2026-11-26",
+          "last_commit": "2026-11-26"
+        },
         {
           "version": "v8.30.0",
           "date": "2026-11-26",

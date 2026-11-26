@@ -829,6 +829,7 @@ satisfies: [ARCH-BUGS-078]
 
 Every bullet below is binding.
 - `_map.json` carries the register under `bugs_fixed`, and has no such key when it is empty.
+- A row's priority reaches the map as an open bug's does: `P4*` is `prio: P4` with `estimated: true`.
 - A row's commit links to the forge when the remote is GitHub. The forge reaches `_map.html` only, because it differs between a clone and a fork.
 - When the register holds a row, the Bugs tab has an Open / Fixed toggle. Fixed shows found, fixed, version, commit and note.
 - Fixed shows, by week, the bugs found, the bugs fixed and what was still open, and the median days to fix per priority.
@@ -839,9 +840,9 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — the register reaches the map
-  Given  one closed bug
+  Given  one closed bug, its priority estimated as `P4*`
   When   `sync` runs
-  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`
+  Then   `_map.json` carries it under `bugs_fixed` and not under `bugs`, with `prio` `P4` and `estimated` true
 
 CASE-2 — a GitHub remote
   Given  a register row with a commit and a GitHub remote
