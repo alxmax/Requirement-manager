@@ -1,6 +1,6 @@
 ---
 id: ARCH-BUGS-078
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
