@@ -29448,7 +29448,7 @@
       "horizon": "now",
       "req": "ARCH-CLARIFY-062",
       "unpark": null,
-      "done": false,
+      "done": true,
       "category": "Version 8.25",
       "context": "",
       "section_date": null
