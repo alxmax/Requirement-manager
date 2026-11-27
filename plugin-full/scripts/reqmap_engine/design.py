@@ -40,6 +40,8 @@ _DESIGN_ADVICE = {
                    "table: a dict of handlers, or a method per case",
     "file-too-long": "a file this long is several modules sharing a name: "
                      "split it along the prefix families it already shows",
+    "file-must-split": "a file this long is past the point of reading it whole: "
+                       "split it now, along the seams it already shows",
     "line-too-long": "lines wider than the limit hide their tail in every "
                      "diff and side-by-side view: wrap them",
 }
@@ -50,7 +52,8 @@ _DESIGN_PILLAR_OF = {
     "prefix-family": "abstraction",
     "shared-methods": "inheritance", "duplicate-method": "inheritance",
     "isinstance-chain": "polymorphism", "type-switch": "polymorphism",
-    "file-too-long": "standards", "line-too-long": "standards",
+    "file-too-long": "standards", "file-must-split": "standards",
+    "line-too-long": "standards",
 }
 
 
@@ -200,9 +203,11 @@ def writing_standards(rel, src):  # implements: REQ-DESIGN-953
     # a final newline ends the last line; it does not start another
     n_lines = len(lines) - (1 if src.endswith("\n") else 0)
     if n_lines > cfg.DESIGN_FILE_MAX_LINES:
-        detail = "{} lines (over {})".format(n_lines,
-                                             cfg.DESIGN_FILE_MAX_LINES)
-        out.append(finding_record("file-too-long", rel, 1, base, detail))
+        split = n_lines > cfg.DESIGN_FILE_SPLIT_LINES
+        limit = cfg.DESIGN_FILE_SPLIT_LINES if split else cfg.DESIGN_FILE_MAX_LINES
+        detail = "{} lines (over {})".format(n_lines, limit)
+        out.append(finding_record("file-must-split" if split else "file-too-long",
+                                  rel, 1, base, detail))
     wide = [i for i, ln in enumerate(lines, 1)
             if len(ln.rstrip("\r")) > cfg.DESIGN_LINE_MAX]
     if wide:

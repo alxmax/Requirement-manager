@@ -5207,6 +5207,29 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
                          "CLAUDE.md claims {} engine modules, the package has {}".format(
                              m.group(1), actual))
 
+    def test_the_engine_shape_claude_md_states_holds(self):  # verifies: REQ-SELFGATE-990#CASE-6
+        """CLAUDE.md stated 'no file over 500 lines' while commands.py had 512, and only the
+        advisory design review noticed."""
+        claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
+        m = re.search(r"no file over ([\d,]+) lines.*?no line over (\d+) columns", claude_md)
+        self.assertIsNotNone(m, "CLAUDE.md no longer states the engine's shape")
+        max_lines, max_cols = int(m.group(1).replace(",", "")), int(m.group(2))
+        scripts = os.path.join(self.root, "plugin-full", "scripts")
+        pkg = os.path.join(scripts, "reqmap_engine")
+        paths = [os.path.join(scripts, "reqmap.py")] + [
+            os.path.join(pkg, f) for f in sorted(os.listdir(pkg)) if f.endswith(".py")]
+        long_files, wide_lines = [], []
+        for path in paths:
+            with open(path, encoding="utf-8") as f:
+                lines = f.read().splitlines()
+            name = os.path.relpath(path, scripts).replace(os.sep, "/")
+            if len(lines) > max_lines:
+                long_files.append("{} ({} lines)".format(name, len(lines)))
+            wide_lines += ["{}:{}".format(name, i) for i, ln in enumerate(lines, 1)
+                           if len(ln) > max_cols]
+        self.assertEqual([], long_files, "over {} lines".format(max_lines))
+        self.assertEqual([], wide_lines, "over {} columns".format(max_cols))
+
     def test_the_corpus_counts_in_claude_md_are_current(self):  # verifies: REQ-SELFGATE-990#CASE-4
         """CLAUDE.md's corpus paragraph claimed 68 architecture requirements against 63,
         159 code against 191, 236 total against 263, and 197-in-71-files against 263-in-72.
@@ -5874,8 +5897,8 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
 
     _CASE1 = ("COUNT = 0\n"
               "def bump():\n    global COUNT\n    COUNT += 1\n"
-              "def wide(a, b, c, d, e, f, g):\n    return a\n"
-              "class K:\n    def six(self, a, b, c, d, e, f):\n        return a\n")
+              "def wide(a, b, c, d, e, f, g, h):\n    return a\n"
+              "class K:\n    def seven(self, a, b, c, d, e, f, g):\n        return a\n")
 
     def test_global_state_and_long_parameter_list(self):  # verifies: REQ-DESIGN-950#CASE-1
         f = R._design_file("m.py", self._CASE1)
@@ -5909,7 +5932,8 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertIn("long-function", self._kinds(long_src))
         deep = ("def deep(a):\n    if a:\n        for i in a:\n            while i:\n"
                 "                with a:\n                    if i:\n"
-                "                        pass\n")
+                "                        try:\n                            pass\n"
+                "                        finally:\n                            pass\n")
         self.assertIn("deep-nesting", self._kinds(deep))
         self.assertNotIn("deep-nesting", self._kinds("def ok(a):\n    if a:\n        return 1\n"))
 
@@ -6033,7 +6057,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertIn("long-parameter-list", self._kinds(src))
         thresholds = [k for k in dir(R.config) if k.startswith("DESIGN_")
                       and isinstance(getattr(R.config, k), int)]
-        self.assertEqual(len(thresholds), 11)
+        self.assertEqual(len(thresholds), 12)
         for key in thresholds:
             self.assertIn(key, R.config.CONFIG_KEYS)
 
@@ -6052,19 +6076,26 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual((data["files"], data["findings"]), (1, []))
 
     def test_file_length_and_line_width(self):  # verifies: REQ-DESIGN-953#CASE-1
-        src = ("".join("x{} = 1\n".format(i) for i in range(500))
+        src = ("".join("x{} = 1\n".format(i) for i in range(750))
                + "y = '" + "z" * 120 + "'\n")
         f = {x["kind"]: x for x in R._design_file("m.py", src)}
         self.assertIn("file-too-long", f)
-        self.assertEqual(f["line-too-long"]["line"], 501)
+        self.assertEqual(f["line-too-long"]["line"], 751)
         self.assertIn("1 line(s) wider than 120", f["line-too-long"]["detail"])
         self.assertEqual({x["pillar"] for x in f.values()}, {"standards"})
 
-    def test_the_defaults_are_500_lines_and_120_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
-        self.assertEqual((R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_LINE_MAX),
-                         (500, 120))
-        ok = "".join("x = '{}'\n".format("y" * 114) for _ in range(500))
+    def test_the_defaults_are_750_lines_and_120_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
+        self.assertEqual((R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_FILE_SPLIT_LINES,
+                          R.config.DESIGN_LINE_MAX), (750, 1000, 120))
+        ok = "".join("x = '{}'\n".format("y" * 114) for _ in range(750))
         self.assertEqual(R._design_file("m.py", ok), [])
+
+    def test_past_the_split_limit_the_file_is_told_to_split(self):  # verifies: REQ-DESIGN-953#CASE-5
+        def kinds(n):
+            src = "".join("x{} = 1\n".format(i) for i in range(n))
+            return [(x["kind"], x["detail"]) for x in R._design_file("m.py", src)]
+        self.assertEqual(kinds(1001), [("file-must-split", "1001 lines (over 1000)")])
+        self.assertEqual(kinds(1000), [("file-too-long", "1000 lines (over 750)")])
 
     def test_the_writing_rules_are_configurable(self):  # verifies: REQ-DESIGN-953#CASE-3
         self._set(DESIGN_FILE_MAX_LINES=500, DESIGN_LINE_MAX=120)
@@ -6088,7 +6119,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
     def test_javascript_functions_classes_and_switch(self):  # verifies: REQ-DESIGN-955#CASE-1  # verifies: ARCH-DESIGN-061#CASE-4
         src = (
             "// comment with { brace and 'quote\n"
-            "function wide(a, b, c, d, e, f, g) { return a; }\n"
+            "function wide(a, b, c, d, e, f, g, h) { return a; }\n"
             "const arrow = (x, y) => { return x + y; };\n"
             "class Store { load() { return 1; } save() { return 2; } close() { } }\n"
             "class Cache { load() { return 3; } save() { return 2; } close() { } }\n"
@@ -6146,7 +6177,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
     def test_brace_nesting_bases_and_control_keywords(self):  # verifies: REQ-DESIGN-955#CASE-5
         methods = " load() { return 1; } save() { return 2; } close() { } }\n"
         src = ("function deep(a) {\n"
-               "  if (a) { for (;;) { while (a) { if (a) { if (a) { a(); } } } } }\n"
+               "  if (a) { for (;;) { while (a) { if (a) { if (a) { if (a) { a(); } } } } } }\n"
                "}\n"
                "if (ready) { go(); }\n"
                "class A {" + methods + "class B extends A {" + methods)

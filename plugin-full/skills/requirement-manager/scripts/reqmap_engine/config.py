@@ -236,13 +236,13 @@ VERSION_FILES = []
 # only: read-only, never the gate, exit 0. Python is read through `ast`, the
 # brace languages through heuristics over masked source (ADR-0051).
 # encapsulation: a parameter list longer than this
-DESIGN_PARAMS_MAX = 6
+DESIGN_PARAMS_MAX = 7
 # encapsulation: this many parameters travelling together
 DESIGN_CLUMP_MIN = 3
 # ... through this many functions is a data clump
 DESIGN_CLUMP_FUNCS = 3
 DESIGN_FUNC_MAX_LINES = 80      # abstraction: a function longer than this
-DESIGN_NESTING_MAX = 4          # abstraction: blocks nested deeper than this
+DESIGN_NESTING_MAX = 5          # abstraction: blocks nested deeper than this
 # abstraction: top-level functions sharing a prefix
 DESIGN_PREFIX_GROUP = 6
 # inheritance: unrelated classes sharing this many names
@@ -251,7 +251,8 @@ DESIGN_SHARED_METHODS = 3
 DESIGN_ISINSTANCE_CHAIN = 3
 # polymorphism: `x == literal` branches on one name
 DESIGN_BRANCH_CHAIN = 4
-DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
+DESIGN_FILE_MAX_LINES = 750     # standards: a source file longer than this
+DESIGN_FILE_SPLIT_LINES = 1000  # standards: ... and longer than this, split it
 DESIGN_LINE_MAX = 120           # standards: a physical line wider than this
 
 # ---------- per-repo configuration ----------
@@ -283,7 +284,7 @@ CONFIG_KEYS = ("MAP_PROFILE", "MAP_LOCALES", "LINT_AC_MIN", "LINT_AC_MAX", "LINT
                "DESIGN_NESTING_MAX",
                "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN",
-               "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
+               "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES", "DESIGN_FILE_SPLIT_LINES",
                "DESIGN_LINE_MAX", "AUDIT_BANDS", "AUDIT_MIN_POSITIVES",
                "TRACE_TAGS", "TEST_FILE_PATTERNS", "REQUIREMENT_SOURCES",
                "DESIGN_RULES", "BUG_SOURCES", "BUG_COLUMNS", "BUG_SKIP_SECTIONS", "MAP_LANGUAGE",

@@ -259,13 +259,11 @@ def _fix_new(root, reqs_dir, title, a):
     return 0
 
 
-def _duplicate_meta(root, reqs_dir, wanted, a):
+def _duplicate_meta(known, wanted, a):
     # implements: REQ-BUGS-1156
     """(meta, None) closing `wanted` as a duplicate of `--duplicate-of`, or
-    (None, why) when that names no other bug the repository knows."""
+    (None, why) when that names none of the `known` ids, open or closed."""
     kept = bug_id(a.duplicate_of)
-    known = ({b["id"] for b in load_bugs(root, reqs_dir)[0]}
-             | {bug_id(r["id"]) for r in fixed_rows(reqs_dir)})
     if not kept or kept == wanted or kept not in known:
         return None, "--duplicate-of {!r} names no other known bug".format(
             a.duplicate_of)
@@ -286,11 +284,12 @@ def cmd_bug_fix(root, reqs_dir, target, a):  # implements: REQ-BUGS-1150
             return 2
         return _fix_new(root, reqs_dir, target, a)
     wanted = bug_id(target)
-    if wanted in {bug_id(r["id"]) for r in fixed_rows(reqs_dir)}:
+    closed = {bug_id(r["id"]) for r in fixed_rows(reqs_dir)}
+    if wanted in closed:
         print("sync --fix: {} is already in the register".format(wanted))
         return 2
-    bug = next((b for b in load_bugs(root, reqs_dir)[0]
-                if b["id"] == wanted), None)
+    listed = load_bugs(root, reqs_dir)[0]
+    bug = next((b for b in listed if b["id"] == wanted), None)
     if bug is None:
         print("sync --fix: no open bug {!r}; `ask --bugs --json` lists the "
               "ids".format(target))
@@ -304,7 +303,7 @@ def cmd_bug_fix(root, reqs_dir, target, a):  # implements: REQ-BUGS-1150
             "version": a.bug_version or version_at(root, reqs_dir) or _NOTHING,
             "commit": a.commit or (head or "").strip() or _NOTHING}
     if getattr(a, "duplicate_of", None):  # implements: REQ-BUGS-1156
-        dup, why = _duplicate_meta(root, reqs_dir, wanted, a)
+        dup, why = _duplicate_meta({b["id"] for b in listed} | closed, wanted, a)
         if why:
             print("sync --fix: nothing written: " + why)
             return 2

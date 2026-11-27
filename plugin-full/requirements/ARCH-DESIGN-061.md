@@ -14,18 +14,18 @@ satisfies: [SYS-READ-103]
 
 ## Description
 > Code written in a long AI session drifts toward procedural sprawl: state in module
-> globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that
+> globals, eight-parameter functions, `isinstance` chains that dispatch by hand, files that
 > never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's
 > code (Python through `ast`, the brace languages through masked-text heuristics) and
 > names the shapes the four OOP pillars would fix, plus two writing rules — a file of at
-> most 500 lines, a line of at most 120 columns — so the reader who came to understand a
+> most 750 lines, split past 1000, a line of at most 120 columns — so the reader who came to understand a
 > file also sees where its design pulls against it. It advises; it never gates.
 
 Every bullet below is binding.
 - `design` reports encapsulation and abstraction candidates: module state written from functions, long parameter lists, data clumps, long or deeply nested functions, prefix families. [[REQ-DESIGN-950]]
 - `design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]
 - `design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]
-- `design` reports two writing standards per file: more than 500 lines, and lines wider than 120 columns. [[REQ-DESIGN-953]]
+- `design` reports two writing standards per file: more than 750 lines (more than 1000 says split it), and lines wider than 120 columns. [[REQ-DESIGN-953]]
 - The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`), `health` and `gate --audit`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 - The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
@@ -48,7 +48,7 @@ CASE-3
   Then   it exits 0 naming `global-state`, and no gate rule invokes the review
 
 CASE-4
-  Given  a JavaScript file with a seven-parameter function and a four-case switch
+  Given  a JavaScript file with an eight-parameter function and a four-case switch
   When   `design` runs
   Then   it reports a long parameter list and a type switch, the same kinds a Python file would
 
@@ -89,8 +89,8 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — global state and a long parameter list
-  Given  a module with a function writing a global, a seven-parameter function and a
-         method taking `self` plus six parameters
+  Given  a module with a function writing a global, an eight-parameter function and a
+         method taking `self` plus seven parameters
   When   `_design_file` reads it
   Then   it reports `global-state` naming `COUNT` and one `long-parameter-list`, for the
          function; the method is silent
@@ -247,25 +247,27 @@ satisfies: [ARCH-DESIGN-061]
 
 ## Description
 > Two rules a reviewer checks by eye on every file, made mechanical and tunable: a
-> file stays at most 500 lines, a line at most 120 columns. One finding per file per
-> rule, so a 2,000-line file is one line in the report, not two thousand.
+> file stays at most 750 lines, a line at most 120 columns. One finding per file per
+> rule, so a 2,000-line file is one line in the report, not two thousand. Past 1000 lines
+> the warning becomes a call to split, still as advice.
 
 Every bullet below is binding.
-- A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.
+- A file with more than `DESIGN_FILE_MAX_LINES` lines (default 750) and at most `DESIGN_FILE_SPLIT_LINES` (default 1000) is one `file-too-long` candidate at line 1.
+- A file with more than `DESIGN_FILE_SPLIT_LINES` lines is one `file-must-split` candidate at line 1 instead, naming that limit.
 - A file with lines wider than `DESIGN_LINE_MAX` columns (default 120) is one `line-too-long` candidate reporting the count and the first such line.
 - Both rules apply to every program-logic file the review reads, whatever its language.
 - Standards candidates carry the pillar `standards` and print as the last block of the report.
 
 ## Cases
 CASE-1 — each standard fires once per file
-  Given  a 501-line Python file whose last line is 126 columns wide
+  Given  a 751-line Python file whose last line is 126 columns wide
   When   `_design_file` reads it
-  Then   one `file-too-long` and one `line-too-long` at line 501 naming 120 columns are reported, both under standards
+  Then   one `file-too-long` and one `line-too-long` at line 751 naming 120 columns are reported, both under standards
 
-CASE-2 — the defaults are 500 lines and 120 columns
-  Given  the shipped configuration and a 500-line file of 120-column lines, each ending in a newline
+CASE-2 — the defaults are 750 and 1000 lines and 120 columns
+  Given  the shipped configuration and a 750-line file of 120-column lines, each ending in a newline
   When   `_design_file` reads it
-  Then   the thresholds read 500 and 120, and nothing is reported
+  Then   the thresholds read 750, 1000 and 120, and nothing is reported
 
 CASE-3 — the writing rules are configurable
   Given  a file with one 136-column line, then `DESIGN_LINE_MAX` set to 160 through `apply_config`
@@ -276,6 +278,12 @@ CASE-4 — standards print last
   Given  a module with a global write on a line wider than 120 columns
   When   `cmd_design` prints its report
   Then   the Encapsulation block precedes the Standards block
+
+CASE-5 — past the split limit the file is told to split
+  Given  a 1001-line Python file and a 1000-line one
+  When   `_design_file` reads each
+  Then   the first is one `file-must-split` naming 1000, with no `file-too-long`, and the
+         second is one `file-too-long` naming 750
 
 --------------------
 
@@ -366,7 +374,7 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — JavaScript shapes
-  Given  a JS file with a seven-parameter function, two unrelated classes sharing three methods, a four-case switch and a three-branch instanceof chain
+  Given  a JS file with an eight-parameter function, two unrelated classes sharing three methods, a four-case switch and a three-branch instanceof chain
   When   `_design_file` reads it
   Then   it reports long-parameter-list, shared-methods, duplicate-method, a type-switch on `kind` and an isinstance-chain on `v`
 

@@ -54,8 +54,8 @@
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
     "ARCH-DESIGN-061": {
-      "hash": "dda7532467d4",
-      "reason": null
+      "hash": "e57759b30646",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
     },
     "ARCH-DOCCLAIMS-071": {
       "hash": "c26232330457",
@@ -245,6 +245,10 @@
       "hash": "000ec6c8296f",
       "reason": null
     },
+    "REQ-CANDIDATES-827": {
+      "hash": "7a90e268386b",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
+    },
     "REQ-CHECK-1035": {
       "hash": "708f2939a141",
       "reason": null
@@ -326,8 +330,8 @@
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
     "REQ-DESIGN-950": {
-      "hash": "30e066f6db47",
-      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+      "hash": "f7bb29d43df9",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
     },
     "REQ-DESIGN-951": {
       "hash": "e94a4b6f4c30",
@@ -338,16 +342,16 @@
       "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-DESIGN-953": {
-      "hash": "dedd18e9d8da",
-      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+      "hash": "df9d9cd48ce2",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
     },
     "REQ-DESIGN-954": {
       "hash": "703d8dd07277",
       "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-DESIGN-955": {
-      "hash": "ebfbf1a97de2",
-      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+      "hash": "6e7a04312c8b",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
     },
     "REQ-DESIGN-978": {
       "hash": "3bb3687f63b8",
@@ -630,8 +634,8 @@
       "reason": "release waits for the published-action smoke test"
     },
     "REQ-SELFGATE-990": {
-      "hash": "cb9f71859182",
-      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+      "hash": "abcdf5486407",
+      "reason": "design thresholds moved by ADR-0097; smoke/ is test code; engine shape checked by the suite"
     },
     "REQ-SHOW-918": {
       "hash": "b7130bc1c8dd",

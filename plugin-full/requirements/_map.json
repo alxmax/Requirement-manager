@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-11-27",
+  "engine_version": "2026-11-28",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -706,11 +706,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1715"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1717"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2191"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2193"
         },
         {
           "role": "implements",
@@ -770,11 +770,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1715"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1717"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2191"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2193"
         },
         {
           "role": "implements",
@@ -843,11 +843,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1715"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1717"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2191"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2193"
         },
         {
           "role": "implements",
@@ -930,7 +930,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5454"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5477"
         },
         {
           "role": "implements",
@@ -1131,7 +1131,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5454"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5477"
         },
         {
           "role": "implements",
@@ -2001,11 +2001,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:276"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:345"
         },
         {
           "role": "implements",
@@ -2256,7 +2256,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:326"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:327"
         },
         {
           "role": "implements",
@@ -2937,7 +2937,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:278"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:276"
         },
         {
           "role": "implements",
@@ -3014,7 +3014,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:277"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:275"
         }
       ],
       "test_exempt": null,
@@ -3073,11 +3073,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:325"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:324"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:346"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:345"
         }
       ],
       "test_exempt": null,
@@ -3147,11 +3147,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:382"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:381"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:397"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:396"
         },
         {
           "role": "implements",
@@ -3418,11 +3418,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:283"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:281"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:306"
+          "loc": "plugin-full/scripts/reqmap_engine/bugclose.py:305"
         },
         {
           "role": "implements",
@@ -3518,7 +3518,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2357"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2359"
         },
         {
           "role": "tested-by",
@@ -3703,7 +3703,7 @@
       "intent": "A candidate's fields are the raw material a human or an AI author turns into a real requirement: what files it groups, what it imports, how central it is, and whether someone already tagged it. `is_test`, `existing_req` and `importer_count` exist so the author does not have to re-derive them by hand from the files themselves.",
       "contract": [
         "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`.",
-        "`is_test` is true when every file of the candidate is test code by convention: a `tests/`-style directory segment, a `test_*` basename, or a `*_test`/`*.spec` suffix.",
+        "`is_test` is true when every file of the candidate is test code by convention: a `tests/`-style directory segment (`smoke/` among them), a `test_*` basename, or a `*_test`/`*.spec` suffix.",
         "`depends_on` is derived from imports resolved to other candidates.",
         "`suggested_layer` is `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.",
         "A file already carrying an `implements:` tag is reported via `existing_req`.",
@@ -3713,7 +3713,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — every candidate carries the full documented field set\n  Given  any file scanned by `draft --plan`\n  When   its candidate is built\n  Then   the candidate dict carries all of `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` and `is_test`\n\nCASE-2 — is_test follows test-file convention, not content\n  Given  a file at `tests/test_foo.py` alongside an ordinary module\n  When   `draft --plan` runs\n  Then   the test file's candidate carries `is_test: true` and the ordinary module's does not\n\nCASE-3 — an import edge becomes a depends_on edge\n  Given  file `a.py` importing local module `b.py`\n  When   `draft --plan` runs\n  Then   `a.py`'s candidate lists `b.py`'s candidate in `depends_on`\n\nCASE-4 — high fan-in earns a bus suggestion\n  Given  a module imported by at least `BUS_FANIN_THRESHOLD` other candidates\n  When   `draft --plan` runs\n  Then   that module's candidate carries `suggested_layer: \"bus\"`\n\nCASE-5 — an already-tagged file reports its existing requirement\n  Given  a file carrying `# implements: ARCH-EXAMPLE-001`\n  When   `draft --plan` runs\n  Then   that file's candidate carries `existing_req: \"ARCH-EXAMPLE-001\"`\n\nCASE-6 — _capmap.json groups files into one candidate\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `draft --plan` runs\n  Then   both files appear together as one candidate carrying the declared layer\n\nCASE-7 — no capmap means one candidate per file\n  Given  a codebase with no `requirements/_capmap.json`\n  When   `draft --plan` runs\n  Then   every file becomes its own separate candidate\n\n\n--------------------",
+      "accept": "CASE-1 — every candidate carries the full documented field set\n  Given  any file scanned by `draft --plan`\n  When   its candidate is built\n  Then   the candidate dict carries all of `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` and `is_test`\n\nCASE-2 — is_test follows test-file convention, not content\n  Given  a file at `tests/test_foo.py` and one under `scripts/smoke/`, alongside an ordinary\n         module\n  When   `draft --plan` runs\n  Then   both test files' candidates carry `is_test: true` and the ordinary module's does not\n\nCASE-3 — an import edge becomes a depends_on edge\n  Given  file `a.py` importing local module `b.py`\n  When   `draft --plan` runs\n  Then   `a.py`'s candidate lists `b.py`'s candidate in `depends_on`\n\nCASE-4 — high fan-in earns a bus suggestion\n  Given  a module imported by at least `BUS_FANIN_THRESHOLD` other candidates\n  When   `draft --plan` runs\n  Then   that module's candidate carries `suggested_layer: \"bus\"`\n\nCASE-5 — an already-tagged file reports its existing requirement\n  Given  a file carrying `# implements: ARCH-EXAMPLE-001`\n  When   `draft --plan` runs\n  Then   that file's candidate carries `existing_req: \"ARCH-EXAMPLE-001\"`\n\nCASE-6 — _capmap.json groups files into one candidate\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `draft --plan` runs\n  Then   both files appear together as one candidate carrying the declared layer\n\nCASE-7 — no capmap means one candidate per file\n  Given  a codebase with no `requirements/_capmap.json`\n  When   `draft --plan` runs\n  Then   every file becomes its own separate candidate\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3738,7 +3738,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2357"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2359"
         },
         {
           "role": "implements",
@@ -3805,7 +3805,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3823"
         },
         {
           "role": "implements",
@@ -3854,7 +3854,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3823"
         },
         {
           "role": "implements",
@@ -3912,7 +3912,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3821"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3823"
         },
         {
           "role": "implements",
@@ -4967,19 +4967,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2447"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2449"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3227"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3229"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3345"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3347"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3449"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3451"
         },
         {
           "role": "implements",
@@ -5047,11 +5047,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2447"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2449"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3449"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3451"
         },
         {
           "role": "implements",
@@ -5112,7 +5112,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2447"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2449"
         },
         {
           "role": "implements",
@@ -5159,7 +5159,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3227"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3229"
         },
         {
           "role": "implements",
@@ -5220,7 +5220,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3345"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3347"
         },
         {
           "role": "implements",
@@ -5278,7 +5278,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2447"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2449"
         },
         {
           "role": "implements",
@@ -5335,7 +5335,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3400"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3402"
         },
         {
           "role": "implements",
@@ -5422,15 +5422,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5249"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5272"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5827"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5850"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6517"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6548"
         },
         {
           "role": "implements",
@@ -5509,7 +5509,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6630"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6661"
         },
         {
           "role": "implements",
@@ -5584,7 +5584,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5249"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5272"
         },
         {
           "role": "implements",
@@ -5861,23 +5861,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5827"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5850"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:309"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:310"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:343"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:344"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:377"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:378"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:410"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:411"
         }
       ],
       "test_exempt": null,
@@ -5942,23 +5942,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:309"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:310"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:332"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:333"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:343"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:344"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:377"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:378"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:410"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:411"
         }
       ],
       "test_exempt": null,
@@ -6285,7 +6285,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5488"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5511"
         },
         {
           "role": "implements",
@@ -6360,7 +6360,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:399"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:400"
         },
         {
           "role": "implements",
@@ -6783,35 +6783,35 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1793"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1795"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1879"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1881"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1973"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1975"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2067"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2069"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2231"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2233"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2859"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2861"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3630"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3632"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "implements",
@@ -6899,11 +6899,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1793"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1795"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2231"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2233"
         },
         {
           "role": "implements",
@@ -6955,7 +6955,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1793"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1795"
         },
         {
           "role": "implements",
@@ -7025,15 +7025,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1793"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1795"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1879"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1881"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2859"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2861"
         },
         {
           "role": "implements",
@@ -7092,7 +7092,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3630"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3632"
         },
         {
           "role": "implements",
@@ -7180,12 +7180,12 @@
       "status": "confirmed",
       "area": "ARCH",
       "title": "Advisory design review",
-      "intent": "Code written in a long AI session drifts toward procedural sprawl: state in module globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's code (Python through `ast`, the brace languages through masked-text heuristics) and names the shapes the four OOP pillars would fix, plus two writing rules — a file of at most 500 lines, a line of at most 120 columns — so the reader who came to understand a file also sees where its design pulls against it. It advises; it never gates.",
+      "intent": "Code written in a long AI session drifts toward procedural sprawl: state in module globals, eight-parameter functions, `isinstance` chains that dispatch by hand, files that never stop growing, lines too wide to read in a diff. `ask --design` reads the repo's code (Python through `ast`, the brace languages through masked-text heuristics) and names the shapes the four OOP pillars would fix, plus two writing rules — a file of at most 750 lines, split past 1000, a line of at most 120 columns — so the reader who came to understand a file also sees where its design pulls against it. It advises; it never gates.",
       "contract": [
         "`design` reports encapsulation and abstraction candidates: module state written from functions, long parameter lists, data clumps, long or deeply nested functions, prefix families. [[REQ-DESIGN-950]]",
         "`design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]",
         "`design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]",
-        "`design` reports two writing standards per file: more than 500 lines, and lines wider than 120 columns. [[REQ-DESIGN-953]]",
+        "`design` reports two writing standards per file: more than 750 lines (more than 1000 says split it), and lines wider than 120 columns. [[REQ-DESIGN-953]]",
         "The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`), `health` and `gate --audit`. [[REQ-DESIGN-954]]",
         "JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]",
         "The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]",
@@ -7200,7 +7200,7 @@
         "-------------------"
       ],
       "current_impl": [],
-      "accept": "CASE-1\n  Given  a repo with one Python module writing a global from a function, and a test file doing the same\n  When   `design` runs\n  Then   the module's candidate is printed under Encapsulation, the test file is not mentioned, and the exit code is 0\n\nCASE-2\n  Given  a `requirements/_config.json` setting `DESIGN_PARAMS_MAX` to 2\n  When   `design` runs over a three-parameter function\n  Then   it reports a long parameter list\n\nCASE-3\n  Given  the gate rule registry and a repo with one module writing a global\n  When   `reqmap.py ask --design` runs and the registry is inspected\n  Then   it exits 0 naming `global-state`, and no gate rule invokes the review\n\nCASE-4\n  Given  a JavaScript file with a seven-parameter function and a four-case switch\n  When   `design` runs\n  Then   it reports a long parameter list and a type switch, the same kinds a Python file would",
+      "accept": "CASE-1\n  Given  a repo with one Python module writing a global from a function, and a test file doing the same\n  When   `design` runs\n  Then   the module's candidate is printed under Encapsulation, the test file is not mentioned, and the exit code is 0\n\nCASE-2\n  Given  a `requirements/_config.json` setting `DESIGN_PARAMS_MAX` to 2\n  When   `design` runs over a three-parameter function\n  Then   it reports a long parameter list\n\nCASE-3\n  Given  the gate rule registry and a repo with one module writing a global\n  When   `reqmap.py ask --design` runs and the registry is inspected\n  Then   it exits 0 naming `global-state`, and no gate rule invokes the review\n\nCASE-4\n  Given  a JavaScript file with an eight-parameter function and a four-case switch\n  When   `design` runs\n  Then   it reports a long parameter list and a type switch, the same kinds a Python file would",
       "input": "",
       "output": "",
       "desc": "",
@@ -7229,19 +7229,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6216"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6247"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6347"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6378"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:58"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:61"
         },
         {
           "role": "implements",
@@ -7283,7 +7283,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — global state and a long parameter list\n  Given  a module with a function writing a global, a seven-parameter function and a\n         method taking `self` plus six parameters\n  When   `_design_file` reads it\n  Then   it reports `global-state` naming `COUNT` and one `long-parameter-list`, for the\n         function; the method is silent\n\nCASE-2 — a data clump needs three carriers\n  Given  two functions sharing `host, port, user`, then a third\n  When   `_design_file` reads each version\n  Then   nothing is reported for two, one `data-clump` under encapsulation for three,\n         at `f`, the first carrier\n\nCASE-3 — long and deeply nested functions\n  Given  a 90-line function, a five-level nested function and a flat one\n  When   `_design_file` reads them\n  Then   `long-function` and `deep-nesting` are reported and the flat one is silent\n\nCASE-4 — a prefix family\n  Given  six top-level functions named `_scan_0` to `_scan_5`\n  When   `_design_file` reads them\n  Then   one `prefix-family` candidate named `scan` is reported under abstraction\n\nCASE-5 — every candidate is a full record\n  Given  the module of CASE-1\n  When   `_design_file` reads it\n  Then   each candidate carries exactly `pillar`, `kind`, `file`, `line`, `name`,\n         `detail` and `advice`, the advice being `_DESIGN_ADVICE` for its kind\n\n--------------------",
+      "accept": "CASE-1 — global state and a long parameter list\n  Given  a module with a function writing a global, an eight-parameter function and a\n         method taking `self` plus seven parameters\n  When   `_design_file` reads it\n  Then   it reports `global-state` naming `COUNT` and one `long-parameter-list`, for the\n         function; the method is silent\n\nCASE-2 — a data clump needs three carriers\n  Given  two functions sharing `host, port, user`, then a third\n  When   `_design_file` reads each version\n  Then   nothing is reported for two, one `data-clump` under encapsulation for three,\n         at `f`, the first carrier\n\nCASE-3 — long and deeply nested functions\n  Given  a 90-line function, a five-level nested function and a flat one\n  When   `_design_file` reads them\n  Then   `long-function` and `deep-nesting` are reported and the flat one is silent\n\nCASE-4 — a prefix family\n  Given  six top-level functions named `_scan_0` to `_scan_5`\n  When   `_design_file` reads them\n  Then   one `prefix-family` candidate named `scan` is reported under abstraction\n\nCASE-5 — every candidate is a full record\n  Given  the module of CASE-1\n  When   `_design_file` reads it\n  Then   each candidate carries exactly `pillar`, `kind`, `file`, `line`, `name`,\n         `detail` and `advice`, the advice being `_DESIGN_ADVICE` for its kind\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -7296,23 +7296,23 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:80"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:83"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:100"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:103"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:123"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:126"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:172"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:175"
         },
         {
           "role": "implements",
@@ -7382,19 +7382,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:142"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:145"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:172"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:175"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:178"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:181"
         },
         {
           "role": "implements",
@@ -7460,7 +7460,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "implements",
@@ -7500,9 +7500,10 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Code-writing standards",
-      "intent": "Two rules a reviewer checks by eye on every file, made mechanical and tunable: a file stays at most 500 lines, a line at most 120 columns. One finding per file per rule, so a 2,000-line file is one line in the report, not two thousand.",
+      "intent": "Two rules a reviewer checks by eye on every file, made mechanical and tunable: a file stays at most 750 lines, a line at most 120 columns. One finding per file per rule, so a 2,000-line file is one line in the report, not two thousand. Past 1000 lines the warning becomes a call to split, still as advice.",
       "contract": [
-        "A file with more than `DESIGN_FILE_MAX_LINES` lines (default 500) is one `file-too-long` candidate at line 1.",
+        "A file with more than `DESIGN_FILE_MAX_LINES` lines (default 750) and at most `DESIGN_FILE_SPLIT_LINES` (default 1000) is one `file-too-long` candidate at line 1.",
+        "A file with more than `DESIGN_FILE_SPLIT_LINES` lines is one `file-must-split` candidate at line 1 instead, naming that limit.",
         "A file with lines wider than `DESIGN_LINE_MAX` columns (default 120) is one `line-too-long` candidate reporting the count and the first such line.",
         "Both rules apply to every program-logic file the review reads, whatever its language.",
         "Standards candidates carry the pillar `standards` and print as the last block of the report."
@@ -7510,7 +7511,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — each standard fires once per file\n  Given  a 501-line Python file whose last line is 126 columns wide\n  When   `_design_file` reads it\n  Then   one `file-too-long` and one `line-too-long` at line 501 naming 120 columns are reported, both under standards\n\nCASE-2 — the defaults are 500 lines and 120 columns\n  Given  the shipped configuration and a 500-line file of 120-column lines, each ending in a newline\n  When   `_design_file` reads it\n  Then   the thresholds read 500 and 120, and nothing is reported\n\nCASE-3 — the writing rules are configurable\n  Given  a file with one 136-column line, then `DESIGN_LINE_MAX` set to 160 through `apply_config`\n  When   `_design_file` reads it before and after\n  Then   `line-too-long` is reported before and nothing after\n\nCASE-4 — standards print last\n  Given  a module with a global write on a line wider than 120 columns\n  When   `cmd_design` prints its report\n  Then   the Encapsulation block precedes the Standards block\n\n--------------------",
+      "accept": "CASE-1 — each standard fires once per file\n  Given  a 751-line Python file whose last line is 126 columns wide\n  When   `_design_file` reads it\n  Then   one `file-too-long` and one `line-too-long` at line 751 naming 120 columns are reported, both under standards\n\nCASE-2 — the defaults are 750 and 1000 lines and 120 columns\n  Given  the shipped configuration and a 750-line file of 120-column lines, each ending in a newline\n  When   `_design_file` reads it\n  Then   the thresholds read 750, 1000 and 120, and nothing is reported\n\nCASE-3 — the writing rules are configurable\n  Given  a file with one 136-column line, then `DESIGN_LINE_MAX` set to 160 through `apply_config`\n  When   `_design_file` reads it before and after\n  Then   `line-too-long` is reported before and nothing after\n\nCASE-4 — standards print last\n  Given  a module with a global write on a line wider than 120 columns\n  When   `cmd_design` prints its report\n  Then   the Encapsulation block precedes the Standards block\n\nCASE-5 — past the split limit the file is told to split\n  Given  a 1001-line Python file and a 1000-line one\n  When   `_design_file` reads each\n  Then   the first is one `file-must-split` naming 1000, with no `file-too-long`, and the\n         second is one `file-too-long` naming 750\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -7523,11 +7524,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/design.py:195"
+          "loc": "plugin-full/scripts/reqmap_engine/design.py:198"
         },
         {
           "role": "implements",
@@ -7538,19 +7539,9 @@
       "milestone": "v4.2",
       "priority": "",
       "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "clarify": [
-        {
-          "rule": "no-failure-case",
-          "severity": "advisory",
-          "basis": "wording",
-          "where": "Cases",
-          "quote": "",
-          "question": "What happens on the failure path -- missing input, invalid value, nothing to do?",
-          "suggest": "Add one case for the way this can go wrong; it is the case implementations skip."
-        }
-      ]
+      "clauses": 5,
+      "covered": 5,
+      "clarify": []
     },
     {
       "id": "REQ-DESIGN-954",
@@ -7587,7 +7578,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6216"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6247"
         },
         {
           "role": "implements",
@@ -7646,7 +7637,7 @@
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — JavaScript shapes\n  Given  a JS file with a seven-parameter function, two unrelated classes sharing three methods, a four-case switch and a three-branch instanceof chain\n  When   `_design_file` reads it\n  Then   it reports long-parameter-list, shared-methods, duplicate-method, a type-switch on `kind` and an isinstance-chain on `v`\n\nCASE-2 — C++ shapes\n  Given  a C++ file with a 90-line function and a three-branch dynamic_cast chain\n  When   `_design_file` reads it\n  Then   it reports long-function for `compute` and an isinstance-chain\n\nCASE-3 — masking\n  Given  a JS function whose string literal and comment contain braces\n  When   `_design_mask` runs and the file is analysed\n  Then   the literal is gone from the masked text, the newline count is unchanged, and no length or nesting candidate is reported;\n         a `//` comment, a `/* */` comment, a char literal and a two-line template literal holding braces\n         are blanked too, and the masked text keeps the source's length\n\nCASE-4 — standards only elsewhere\n  Given  a Ruby file with one 120-column line\n  When   `_design_file` reads it\n  Then   only line-too-long is reported, and a clean Ruby file reports nothing\n\nCASE-5 — nesting, bases and control keywords\n  Given  a JS function nesting five blocks, an `if (...) {` block, and `class B extends A`\n         sharing three methods with `A`\n  When   `_design_file` reads it\n  Then   deep-nesting is reported for the function, no function is named `if`, and no\n         shared-methods candidate is reported\n\nCASE-6 — every type and equality test form\n  Given  three-branch chains of `typeof`, of `x is T` and of `instanceof`, and a\n         four-branch `if` chain of `n == 1` to `n == 4`\n  When   `_design_file` reads them\n  Then   each type chain is an isinstance-chain and the equality chain a type-switch on `n`",
+      "accept": "CASE-1 — JavaScript shapes\n  Given  a JS file with an eight-parameter function, two unrelated classes sharing three methods, a four-case switch and a three-branch instanceof chain\n  When   `_design_file` reads it\n  Then   it reports long-parameter-list, shared-methods, duplicate-method, a type-switch on `kind` and an isinstance-chain on `v`\n\nCASE-2 — C++ shapes\n  Given  a C++ file with a 90-line function and a three-branch dynamic_cast chain\n  When   `_design_file` reads it\n  Then   it reports long-function for `compute` and an isinstance-chain\n\nCASE-3 — masking\n  Given  a JS function whose string literal and comment contain braces\n  When   `_design_mask` runs and the file is analysed\n  Then   the literal is gone from the masked text, the newline count is unchanged, and no length or nesting candidate is reported;\n         a `//` comment, a `/* */` comment, a char literal and a two-line template literal holding braces\n         are blanked too, and the masked text keeps the source's length\n\nCASE-4 — standards only elsewhere\n  Given  a Ruby file with one 120-column line\n  When   `_design_file` reads it\n  Then   only line-too-long is reported, and a clean Ruby file reports nothing\n\nCASE-5 — nesting, bases and control keywords\n  Given  a JS function nesting five blocks, an `if (...) {` block, and `class B extends A`\n         sharing three methods with `A`\n  When   `_design_file` reads it\n  Then   deep-nesting is reported for the function, no function is named `if`, and no\n         shared-methods candidate is reported\n\nCASE-6 — every type and equality test form\n  Given  three-branch chains of `typeof`, of `x is T` and of `instanceof`, and a\n         four-branch `if` chain of `n == 1` to `n == 4`\n  When   `_design_file` reads them\n  Then   each type chain is an isinstance-chain and the equality chain a type-switch on `n`",
       "input": "",
       "output": "",
       "desc": "",
@@ -7659,7 +7650,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5863"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5886"
         },
         {
           "role": "implements",
@@ -7726,7 +7717,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6217"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6248"
         },
         {
           "role": "implements",
@@ -7906,7 +7897,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6347"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6378"
         },
         {
           "role": "implements",
@@ -8223,7 +8214,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3093"
         },
         {
           "role": "tested-by",
@@ -8514,7 +8505,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3093"
         },
         {
           "role": "implements",
@@ -8566,7 +8557,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3091"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3093"
         },
         {
           "role": "implements",
@@ -8792,15 +8783,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1599"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1601"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1693"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1695"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2243"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2245"
         },
         {
           "role": "tested-by",
@@ -8941,7 +8932,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2243"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2245"
         },
         {
           "role": "implements",
@@ -9017,7 +9008,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2243"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2245"
         },
         {
           "role": "implements",
@@ -9083,11 +9074,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1693"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1695"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2243"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2245"
         },
         {
           "role": "implements",
@@ -9139,7 +9130,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2105"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2107"
         },
         {
           "role": "implements",
@@ -9227,7 +9218,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3951"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3953"
         },
         {
           "role": "implements",
@@ -9290,7 +9281,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1599"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1601"
         },
         {
           "role": "implements",
@@ -9441,11 +9432,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1993"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1995"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2204"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2206"
         },
         {
           "role": "implements",
@@ -9507,11 +9498,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1993"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1995"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2204"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2206"
         },
         {
           "role": "implements",
@@ -10074,7 +10065,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "implements",
@@ -10542,7 +10533,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6473"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6504"
         },
         {
           "role": "implements",
@@ -10750,7 +10741,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "implements",
@@ -10826,7 +10817,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2413"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2415"
         },
         {
           "role": "implements",
@@ -10881,11 +10872,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2413"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2415"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4890"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4892"
         },
         {
           "role": "implements",
@@ -10931,7 +10922,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4146"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4148"
         },
         {
           "role": "implements",
@@ -11546,7 +11537,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2375"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2377"
         },
         {
           "role": "tested-by",
@@ -11642,7 +11633,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2375"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2377"
         },
         {
           "role": "implements",
@@ -12313,7 +12304,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "tested-by",
@@ -12474,7 +12465,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6581"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6612"
         },
         {
           "role": "implements",
@@ -12584,7 +12575,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6581"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6612"
         },
         {
           "role": "implements",
@@ -13031,7 +13022,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin-full/scripts/reqmap_engine/config.py:388"
+          "loc": "plugin-full/scripts/reqmap_engine/config.py:389"
         },
         {
           "role": "implements",
@@ -13225,7 +13216,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6581"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6612"
         },
         {
           "role": "implements",
@@ -14596,7 +14587,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:1879"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:1881"
         },
         {
           "role": "tested-by",
@@ -14632,7 +14623,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5583"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5606"
         },
         {
           "role": "implements",
@@ -15150,7 +15141,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5583"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5606"
         },
         {
           "role": "implements",
@@ -15219,7 +15210,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5694"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5717"
         },
         {
           "role": "implements",
@@ -15301,7 +15292,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5751"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5774"
         },
         {
           "role": "implements",
@@ -15588,7 +15579,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "tested-by",
@@ -16261,11 +16252,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2330"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2332"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2919"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2921"
         },
         {
           "role": "tested-by",
@@ -16331,7 +16322,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2330"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2332"
         },
         {
           "role": "implements",
@@ -16408,7 +16399,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2919"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2921"
         },
         {
           "role": "implements",
@@ -17231,7 +17222,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4442"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4444"
         },
         {
           "role": "implements",
@@ -17322,7 +17313,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4059"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4061"
         },
         {
           "role": "implements",
@@ -17375,7 +17366,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4112"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4114"
         },
         {
           "role": "implements",
@@ -17430,7 +17421,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4191"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4193"
         },
         {
           "role": "implements",
@@ -17489,7 +17480,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4228"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4230"
         },
         {
           "role": "implements",
@@ -17551,7 +17542,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4250"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4252"
         },
         {
           "role": "implements",
@@ -17633,7 +17624,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4362"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4364"
         },
         {
           "role": "implements",
@@ -17692,7 +17683,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4250"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4252"
         },
         {
           "role": "implements",
@@ -17746,7 +17737,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4483"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4485"
         },
         {
           "role": "implements",
@@ -17817,7 +17808,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4598"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4600"
         },
         {
           "role": "implements",
@@ -17996,19 +17987,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2067"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2069"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2651"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2653"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3575"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3577"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5363"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5386"
         },
         {
           "role": "implements",
@@ -18083,7 +18074,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2651"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2653"
         },
         {
           "role": "implements",
@@ -18152,7 +18143,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2651"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2653"
         },
         {
           "role": "implements",
@@ -18244,11 +18235,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2651"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2653"
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3575"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3577"
         },
         {
           "role": "implements",
@@ -18326,7 +18317,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:2651"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:2653"
         },
         {
           "role": "implements",
@@ -18410,7 +18401,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:3487"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:3489"
         },
         {
           "role": "implements",
@@ -19241,7 +19232,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4598"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4600"
         },
         {
           "role": "implements",
@@ -20363,7 +20354,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5284"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5307"
         },
         {
           "role": "implements",
@@ -20724,7 +20715,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:5284"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:5307"
         },
         {
           "role": "implements",
@@ -21342,12 +21333,13 @@
         "Every ADR file on disk has a row in the ADR index, and one that does not fails the suite.",
         "The ADR index states no decision count, because a hand-maintained total is one more claim to keep true; the index itself is the count.",
         "The engine module count and the marked corpus counts `CLAUDE.md` states are asserted against the package and the corpus, and a mismatch fails the suite naming both numbers.",
+        "The engine shape `CLAUDE.md` states — the most lines in a file and columns in a line of `reqmap.py` and `reqmap_engine/` — is read from that sentence and asserted, and a file or a line past it fails the suite naming it.",
         "These checks are skipped, not failed, when the suite runs from a seeded copy that has no repo root to read."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
-      "accept": "CASE-1 — a stale line count fails\n  Given  a README whose stated engine line count differs from the file\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-2 — an unindexed ADR fails\n  Given  an ADR file with no row in the index\n  When   the suite runs in the source repo\n  Then   it fails and names the file\n\nCASE-3 — the index carries no count to maintain\n  Given  the ADR index\n  When   its prose above the table is read\n  Then   it states no number of decisions\n\nCASE-4 — a stale count in CLAUDE.md fails\n  Given  `CLAUDE.md` stating a module count or a marked corpus count the repo no longer has\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-5 — a seeded copy skips the checks\n  Given  the suite running where no repo root with `docs/adr/` and `README.md` is found\n  When   these checks run\n  Then   each one is skipped, and none fails or errors\n\n--------------------",
+      "accept": "CASE-1 — a stale line count fails\n  Given  a README whose stated engine line count differs from the file\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-2 — an unindexed ADR fails\n  Given  an ADR file with no row in the index\n  When   the suite runs in the source repo\n  Then   it fails and names the file\n\nCASE-3 — the index carries no count to maintain\n  Given  the ADR index\n  When   its prose above the table is read\n  Then   it states no number of decisions\n\nCASE-4 — a stale count in CLAUDE.md fails\n  Given  `CLAUDE.md` stating a module count or a marked corpus count the repo no longer has\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-5 — a seeded copy skips the checks\n  Given  the suite running where no repo root with `docs/adr/` and `README.md` is found\n  When   these checks run\n  Then   each one is skipped, and none fails or errors\n\nCASE-6 — the engine shape CLAUDE.md states holds\n  Given  `CLAUDE.md` stating no file over N lines and no line over M columns\n  When   the suite runs in the source repo\n  Then   every file of `reqmap.py` and `reqmap_engine/` is within both, or the suite fails\n         naming each file or `file:line` past them\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -21371,8 +21363,8 @@
       "milestone": "v6.3",
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 5,
+      "clauses": 6,
+      "covered": 6,
       "clarify": []
     },
     {
@@ -22353,7 +22345,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4654"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4656"
         },
         {
           "role": "implements",
@@ -22468,7 +22460,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_author.py:4657"
+          "loc": "plugin-full/scripts/test_reqmap_author.py:4659"
         },
         {
           "role": "implements",
@@ -23798,7 +23790,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin-full/scripts/test_reqmap_report.py:6614"
+          "loc": "plugin-full/scripts/test_reqmap_report.py:6645"
         },
         {
           "role": "implements",
@@ -24850,7 +24842,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.de.js:419"
+          "loc": "app/src/lib/i18n.de.js:421"
         },
         {
           "role": "implements",
@@ -24862,7 +24854,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.ro.js:463"
+          "loc": "app/src/lib/i18n.ro.js:465"
         },
         {
           "role": "implements",
@@ -31631,9 +31623,9 @@
     },
     {
       "month": "2026-11",
-      "count": 14,
+      "count": 15,
       "first": "2026-11-14",
-      "last": "2026-11-27",
+      "last": "2026-11-28",
       "versions": [
         "v8.24.7",
         "v8.24.8",
@@ -31648,11 +31640,20 @@
         "v8.29.4",
         "v8.30.0",
         "v8.30.1",
-        "v8.30.2"
+        "v8.30.2",
+        "v8.31.0"
       ],
-      "landmark": "v8.30.0",
-      "headline": "Release v8.30.0",
+      "landmark": "v8.31.0",
+      "headline": "Release v8.31.0",
       "entries": [
+        {
+          "version": "v8.31.0",
+          "date": "2026-11-28",
+          "headline": "Release v8.31.0",
+          "body": "**Release v8.31.0.**\n\n**The design review's thresholds move to the looser end of common linters, and a file past 1000 lines is told to split (ADR-0097).**\n\n- `DESIGN_PARAMS_MAX` is 7 and `DESIGN_NESTING_MAX` is 5 (were 6 and 4).\n- `DESIGN_FILE_MAX_LINES` is 750 (was 500), and a new `DESIGN_FILE_SPLIT_LINES`, 1000, turns a longer file's `file-too-long` into one `file-must-split` naming that limit. Both stay advice and never enter the gate (REQ-DESIGN-953 CASE-5).\n- A `smoke/` directory is test code, like `tests/` and `e2e/`: the design review, `draft --plan` candidates and every other test-path reader skip it. A viewer's render checks under `app/scripts/smoke/` were reported as two overlong production files (REQ-CANDIDATES-827 CASE-2).\n- This repository's engine shape is checked by the suite: no file of `reqmap.py` or `reqmap_engine/` over the lines, and no line over the columns, that `CLAUDE.md` states (REQ-SELFGATE-990 CASE-6).\n- The candidates the review still named are fixed by naming a step: wide translation lines wrapped, `BugChart`'s legend and week targets as components, and `sync --fix --duplicate-of` checking against the ids it already read instead of reading them again. `ask --design` reads 0 candidates in this repository.\n- Engine change: `MAP_ENGINE_VERSION` is `2026-11-28`.",
+          "first_commit": "2026-11-28",
+          "last_commit": "2026-11-28"
+        },
         {
           "version": "v8.30.2",
           "date": "2026-11-27",
@@ -32075,105 +32076,18 @@
     }
   ],
   "design": {
-    "files": 166,
-    "clean_files": 157,
-    "score": 95,
+    "files": 155,
+    "clean_files": 155,
+    "score": 100,
     "candidates": {
-      "encapsulation": 3,
-      "abstraction": 1,
+      "encapsulation": 0,
+      "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
-      "standards": 6
+      "standards": 0
     },
-    "findings": [
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "app/scripts/smoke/explorer.jsx",
-        "line": 1,
-        "name": "explorer.jsx",
-        "detail": "554 lines (over 500)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "app/scripts/smoke/views.jsx",
-        "line": 1,
-        "name": "views.jsx",
-        "detail": "515 lines (over 500)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/i18n.de.js",
-        "line": 58,
-        "name": "i18n.de.js",
-        "detail": "2 line(s) wider than 120 columns, first at line 58"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/i18n.ro.js",
-        "line": 61,
-        "name": "i18n.ro.js",
-        "detail": "2 line(s) wider than 120 columns, first at line 61"
-      },
-      {
-        "pillar": "abstraction",
-        "kind": "long-function",
-        "file": "app/src/views/problems/BugChart.jsx",
-        "line": 51,
-        "name": "BugChart",
-        "detail": "`BugChart` is 91 lines (over 80)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "app/src/views/problems/BugChart.jsx",
-        "line": 51,
-        "name": "BugChart",
-        "detail": "`BugChart` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "app/src/views/problems/BugsPanel.jsx",
-        "line": 1,
-        "name": "BugsPanel.jsx",
-        "detail": "508 lines (over 500)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin-full/scripts/reqmap_engine/bugclose.py",
-        "line": 215,
-        "name": "_fix_new",
-        "detail": "a, reqs_dir, root travel together through 3 functions: _duplicate_meta, _fix_new, cmd_bug_fix"
-      },
-      {
-        "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "plugin-full/scripts/reqmap_engine/commands.py",
-        "line": 1,
-        "name": "commands.py",
-        "detail": "512 lines (over 500)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin-full/scripts/reqmap_engine/gate.py",
-        "line": 377,
-        "name": "cmd_check",
-        "detail": "`cmd_check` takes 7 parameters (over 6)"
-      }
-    ],
-    "advice": {
-      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
-      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
-      "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
-      "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
-      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together"
-    }
+    "findings": [],
+    "advice": {}
   },
   "health": {
     "score": 99,
@@ -32360,8 +32274,8 @@
     "coverage": {
       "code_files": 206,
       "tagged_files": 201,
-      "production_files": 181,
-      "drift_files": 110
+      "production_files": 170,
+      "drift_files": 108
     },
     "suggestions": {},
     "hygiene": {
