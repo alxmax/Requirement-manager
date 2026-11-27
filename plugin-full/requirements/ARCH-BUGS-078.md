@@ -630,6 +630,7 @@ Every bullet below is binding.
 - The row uses the columns of the table it joins, and the `BUG_COLUMNS` names count.
 - The row joins the table under the `##` section naming its priority, such as `P2` or `P3-P4`, else the file's first bug table. A section `BUG_SKIP_SECTIONS` matches is never used.
 - A title that reads like one already in that module prints the candidates and exits 2, writing nothing, unless `--force` is given.
+- A title that reads like a row in another module's file, or a `--where` equal to such a row's `Where`, prints that row as a warning, and the row is still written.
 - `bugFile` and `appendBug` in `app/src/lib/bugFile.js` choose the same file and write the same bytes, pinned by one fixture, and `_map.json` carries `bug_format` when a repository's format is not the default.
 
 ## Cases
@@ -653,6 +654,12 @@ CASE-4 — a likely duplicate
   Given  a module holding a bug with nearly the same title
   When   `sync --bug` runs without and then with `--force`
   Then   the first exits 2 and writes nothing, and the second adds the row
+
+CASE-6 — a likely duplicate in another module
+  Given  `Billing.md` holding a bug, and `Payments.md` with no bug like it
+  When   `sync --bug` adds to Payments a row with nearly the same title, then one with a
+         different title and the same `--where`
+  Then   each run warns with the Billing row, exits 0 and adds its row to Payments
 
 CASE-5 — the engine and the viewer agree
   Given  the shared fixture of texts, formats and file lists, and a folder holding the

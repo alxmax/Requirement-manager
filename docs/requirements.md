@@ -172,7 +172,8 @@ python scripts/reqmap.py sync --fix "Payments B12"        # closes it, see below
 `sync --bug` writes in the shape already there: the module's file by its heading or its name
 without an `NN_` prefix, the columns of its table, and the `##` section naming its priority,
 such as `## Bugs P3-P4`. A new module is numbered when the files are. A title that reads like
-one the module holds needs `--force`.
+one the module holds needs `--force`. One that reads like a row in another module's file, or
+names the same `--where`, prints that row as a warning and is still added.
 
 **A fixed bug leaves the list for a register**, `requirements/bugs/_fixed.md`, with the day it
 was found, the day it was closed, its version and its commit. A commit does it: put a trailer

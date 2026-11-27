@@ -164,7 +164,8 @@ CASE-6 — a hostile id or title round-trips as inert data
   Given  a requirement whose id contains `</script>` and whose title contains a raw quote
   When   `map` runs
   Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup
-         break-out; full and compact JSON decode to equal graphs, with compact using fewer bytes
+         break-out; full and compact JSON decode to equal graphs, with compact using fewer bytes;
+         `MAP_PROFILE: compact` writes the compact form and an unset profile writes the full one
 
 
 --------------------
@@ -243,13 +244,14 @@ CASE-4 — map derives the todos array from TODO.md
 CASE-5 — map --check fails on a genuinely stale committed map
   Given  a committed `_map.json` generated from one requirement title, then that title changed
   When   `map --check` runs
-  Then   it exits non-zero and reports the file as stale; formatting and advisory design
+  Then   it exits non-zero and reports `_map.json` as stale; formatting and advisory design
          alone never make full or compact JSON stale
 
 CASE-6 — the gate warns about a stale map without failing the commit
   Given  a committed `_map.json` that no longer matches a fresh render
   When   `gate` runs
-  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself
+  Then   it prints a staleness warning naming `_map.json`, exits 0, leaves the committed file
+         unchanged, and builds its fresh map without ever running the design review
 
 
 --------------------
@@ -354,6 +356,13 @@ CASE-4 — a requirement with no quote has an empty intent
   When   `_distinct_intent` runs
   Then   it returns "", and nothing is borrowed from the Contract to fill it
 
+CASE-5 — show prints a repeated intent once
+  Given  an atomic requirement whose quote is its single Contract clause, and a sectioned one
+         whose quote is rationale
+  When   `show` prints each
+  Then   the atomic one's sentence appears once, under Contract, and the sectioned one's
+         rationale is printed above its Contract
+
 --------------------
 
 
@@ -400,13 +409,16 @@ Every bullet below is binding.
 CASE-1 — a weekly cadence lands on its weekday across the plan's span
   Given  a plan whose bars run 2026-09-13 to 2026-09-30 and a `cadence` of `every: week`
   When   the planning sidecar is loaded
-  Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`
+  Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`;
+         the chart draws each emitted date as a ruler tick, even one no weekday rule would give,
+         draws a version's pill in the cadence lane, and an opened version shows its due date,
+         its label and the bars planned on it
 
 CASE-6 — a monthly cadence lands on each month's end
   Given  a plan whose bars run 2026-09-13 to 2026-12-05 and a `cadence` of `every: month`
   When   the planning sidecar is loaded
   Then   `releases` is the last day of September, October and November, and `cadence.on`
-         is `last`
+         is `last`; with `on: 15` instead, each release is the 15th of its month
 
 CASE-2 — no cadence block means no releases
   Given  a plan carrying bars and milestones and no `cadence` key
@@ -421,7 +433,9 @@ CASE-3 — an unimplemented period yields nothing rather than a guess
 CASE-4 — the weekday is chosen, and `from:` narrows the span
   Given  a `cadence` of `on: monday` with `from: 2026-09-21` on a plan ending 2026-10-05
   When   the planning sidecar is loaded
-  Then   every emitted date is a Monday and none is earlier than 2026-09-21
+  Then   every emitted date is a Monday and none is earlier than 2026-09-21; `until:` likewise
+         drops every date after it, and a span of more than `CADENCE_MAX` weeks emits exactly
+         `CADENCE_MAX` dates
 
 CASE-5 — a plan covering no dates still emits its calendar
   Given  a `cadence` block on a sidecar with no bars and no milestone due
@@ -498,7 +512,8 @@ CASE-3 — a colon-terminated bold run is a lead-in, not a headline
 CASE-4 — months group, and the landmark is the biggest step
   Given  one month holding `v2.0.0`, `v2.1.0` and `v2.1.1`
   When   the history is grouped
-  Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark
+  Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark,
+         whose headline is the month's; of two minors in one month, the newer is the landmark
 
 CASE-5 — a repo with no CHANGELOG yields nothing
   Given  a code root holding no `CHANGELOG.md`
@@ -632,4 +647,18 @@ CASE-5 — prose and ignored files do not count
          `src/local.c`, the last named in `.git/info/exclude`
   When   the trace block lists its files
   Then   it lists `src/a.c` alone
+
+CASE-6 — sync writes the trace block and the gate never builds it
+  Given  a corpus with one tagged code file
+  When   `map` writes `_map.json`, and the gate builds its fresh map
+  Then   `_map.json` carries `trace` with `coverage`, `suggestions` and `hygiene`; the gate's
+         map has no `trace` and never calls the trace builder; two maps that differ only in
+         `trace` compare as fresh
+
+CASE-7 — a bad design rule is reported, and hits are capped
+  Given  `DESIGN_RULES` holding one entry with no `pattern` and one banning `throw`, and a
+         production file with 60 `throw` lines
+  When   the trace block is computed
+  Then   the bad entry is named in `problems` and left out of `rules`; the good rule counts
+         60 hits and keeps 50
 

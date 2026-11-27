@@ -263,6 +263,13 @@ CASE-3 — a viewer template is refreshed only where one exists
   When   the script refreshes that repo
   Then   no viewer template is copied into it
 
+CASE-4 — an engine vendored off the documented path is found and refreshed in place
+  Given  a consumer repo whose `reqmap.py` is not at `scripts/reqmap.py`
+  When   the consumer loop locates it
+  Then   the known layouts are tried first and a bounded search after them, and
+         `reqmap.py` and the `reqmap_engine/` package without `__pycache__` are copied
+         into the directory where it was found
+
 
 ---
 id: REQ-SELFGATE-990
@@ -315,6 +322,11 @@ CASE-4 — a stale count in CLAUDE.md fails
   When   the suite runs in the source repo
   Then   it fails and names both numbers
 
+CASE-5 — a seeded copy skips the checks
+  Given  the suite running where no repo root with `docs/adr/` and `README.md` is found
+  When   these checks run
+  Then   each one is skipped, and none fails or errors
+
 --------------------
 
 
@@ -349,7 +361,9 @@ Every bullet below is binding.
   flat, so it accepts `gate --search` for as long as `ask --search` exists.
 - A retired name is reported only where a line instructs a reader to type it — an invocation
   inside backticks, inside a quoted string, or after `python`/`$PY` — so prose that merely
-  mentions the name is not a finding.
+  mentions the name is not a finding. A retired verb is also reported right after a bare
+  `reqmap` or `reqmap.py`, because only a verb already retired can match there; a flag is not,
+  because any `--word` in prose after "reqmap" would.
 - A line that states the name is gone is skipped whole, in English and in Romanian, because a
   migration note is the reason a reader stops calling the old name and reporting it would
   retract the retraction.
@@ -374,13 +388,15 @@ CASE-2 — an instruction to type a retired name is reported
          not accept, or to pass a moved flag to its old verb, in any of the delimited or bare
          invocation forms
   When   the guard scans it
-  Then   it reports the name with its file, line and kind, and the run exits 1
+  Then   it reports the name with its file, line number, kind and the line itself, and the
+         run exits 1
 
-CASE-3 — a live name and an unrelated word are not findings
-  Given  a line naming a verb the engine still has, and another naming a word that was never
-         a verb
+CASE-3 — a live name, an unrelated word and a prose mention are not findings
+  Given  a line naming a verb the engine still has, another naming a word that was never
+         a verb, and a third mentioning an unknown flag after `reqmap.py gate` with no
+         backtick, quote or `python` before the call
   When   the guard scans them
-  Then   neither is reported
+  Then   none is reported
 
 CASE-4 — a removal note retracts the instruction it describes
   Given  a line saying the name was folded, renamed or removed, written in English or in
@@ -399,6 +415,12 @@ CASE-6 — a guard that cannot read fails open, a missing root does not
          directory
   When   the guard runs
   Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass
+
+CASE-7 — an extra root is read against this repo's engine
+  Given  a consumer root whose instructions name a retired verb and a flag this engine's
+         parser does not accept, beside a vendored `scripts/reqmap.py` that still has both
+  When   the guard runs with that root as a positional argument
+  Then   both are reported under the consumer's path, and the vendored copy is not read
 
 --------------------
 
@@ -444,25 +466,26 @@ CASE-1 — a script dropped into the edition fails
   When   `scripts/check_directory_edition.py` runs
   Then   it exits 1 and names `scripts/reqmap.py` as a disallowed file type
 
-CASE-2 — a file that starts with `#!` fails whatever its name
-  Given  a `plugin/` tree holding `hooks/pre-commit.md` whose first line is `#!/bin/sh`
+CASE-2 — a file that starts with `#!`, holds a NUL or is not UTF-8 fails whatever its name
+  Given  a `plugin/` tree holding `hooks/pre-commit.md` whose first line is `#!/bin/sh`, and
+         separately an `a.md` holding a NUL byte and a `b.txt` that is not UTF-8
   When   `scripts/check_directory_edition.py` runs
-  Then   it exits 1 and names that file
+  Then   it exits 1 and names each file with the rule it breaks
 
 CASE-3 — runnable configuration fails
-  Given  a `plugin/` tree holding `.mcp.json`
+  Given  a `plugin/` tree holding `.mcp.json`, `hooks.json`, `.lsp.json` and `monitors.json`
   When   `scripts/check_directory_edition.py` runs
-  Then   it exits 1 and names `.mcp.json`
+  Then   it exits 1 and names each of them as runnable configuration
 
 CASE-4 — only the manifest and images live in `.claude-plugin/`
   Given  a `plugin/` tree whose `.claude-plugin/` holds `plugin.json`, `icon.png` and `notes.md`
   When   `scripts/check_directory_edition.py` runs
   Then   it exits 1 and names `notes.md` only
 
-CASE-5 — the committed edition passes
+CASE-5 — the committed edition passes, and CI checks it
   Given  this repository's `plugin/`
   When   `scripts/check_directory_edition.py` runs
-  Then   it exits 0
+  Then   it exits 0, and `ci.yml`'s `gate-and-tests` job has a step that runs it
 
 CASE-6 — package manager files and misplaced folders fail
   Given  a `plugin/` tree holding `package.json` and `output-styles/terse.md`

@@ -89,14 +89,17 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — global state and a long parameter list
-  Given  a module with a function writing a global and a seven-parameter function
+  Given  a module with a function writing a global, a seven-parameter function and a
+         method taking `self` plus six parameters
   When   `_design_file` reads it
-  Then   it reports `global-state` and `long-parameter-list`
+  Then   it reports `global-state` naming `COUNT` and one `long-parameter-list`, for the
+         function; the method is silent
 
 CASE-2 — a data clump needs three carriers
   Given  two functions sharing `host, port, user`, then a third
   When   `_design_file` reads each version
-  Then   nothing is reported for two, one `data-clump` under encapsulation for three
+  Then   nothing is reported for two, one `data-clump` under encapsulation for three,
+         at `f`, the first carrier
 
 CASE-3 — long and deeply nested functions
   Given  a 90-line function, a five-level nested function and a flat one
@@ -107,6 +110,12 @@ CASE-4 — a prefix family
   Given  six top-level functions named `_scan_0` to `_scan_5`
   When   `_design_file` reads them
   Then   one `prefix-family` candidate named `scan` is reported under abstraction
+
+CASE-5 — every candidate is a full record
+  Given  the module of CASE-1
+  When   `_design_file` reads it
+  Then   each candidate carries exactly `pillar`, `kind`, `file`, `line`, `name`,
+         `detail` and `advice`, the advice being `_DESIGN_ADVICE` for its kind
 
 --------------------
 
@@ -139,19 +148,22 @@ Every bullet below is binding.
 
 ## Cases
 CASE-1 — shared and duplicated methods
-  Given  classes `A` and `B` with no base sharing `load`, `save`, `close`, two bodies identical
+  Given  classes `A` and `B` with no base sharing `__init__`, `load`, `save`, `close`,
+         three bodies identical
   When   `_design_file` reads them
-  Then   one `shared-methods` and two `duplicate-method` candidates (`B.close`, `B.save`) are reported
+  Then   one `shared-methods` naming three methods and two `duplicate-method` candidates
+         (`B.close`, `B.save`) at `B`'s line are reported; `__init__` is counted by neither
 
 CASE-2 — related classes are silent
-  Given  `A(Base)` and `B(Base)` sharing three methods
-  When   `_design_file` reads them
+  Given  `A(Base)` and `B(Base)` sharing three methods, then `A` and `B(A)` sharing them
+  When   `_design_file` reads each version
   Then   no `shared-methods` candidate is reported
 
 CASE-3 — isinstance chain and type switch
   Given  a three-branch `isinstance` chain on `x` and a four-branch equality chain on `kind`
   When   `_design_file` reads them
-  Then   exactly one `isinstance-chain` (`x`) and one `type-switch` (`kind`) are reported, both under polymorphism
+  Then   exactly one `isinstance-chain` (`x`) and one `type-switch` (`kind`) are reported, both under polymorphism,
+         and a four-branch `isinstance` chain is still one candidate, its `elif` never a chain of its own
 
 CASE-4 — short chains are silent
   Given  a two-branch `isinstance` chain and a three-branch equality chain
@@ -191,12 +203,14 @@ Every bullet below is binding.
 CASE-1 — grouped report, tests skipped, exit 0
   Given  a module and a test file both writing a global
   When   `cmd_design` runs
-  Then   it returns 0, prints `Encapsulation (1)` with the module's line, omits the test file and ends with the advisory note
+  Then   it returns 0, prints `Encapsulation (1)` with the module's line and the `global-state` advice,
+         omits the test file and ends with the advisory note; with `--json` the findings are that one record
 
 CASE-2 — JSON and the clean case
   Given  a repo with one clean module
   When   `cmd_design` runs with and without `--json`
   Then   the JSON reads `files 1, findings []` and the text run says no candidates were found
+         in 1 source file
 
 CASE-3 — a syntax error is neither a finding nor clean
   Given  a repo with one clean module and one Python file that does not parse
@@ -208,7 +222,13 @@ CASE-3 — a syntax error is neither a finding nor clean
 CASE-4 — thresholds come from the config
   Given  `DESIGN_PARAMS_MAX` set to 2 through `apply_config`
   When   `_design_file` reads a three-parameter function
-  Then   it reports `long-parameter-list`
+  Then   it reports `long-parameter-list`, and every `DESIGN_*` threshold is a `CONFIG_KEYS` entry
+
+CASE-5 — ignored and non-logic files are not read
+  Given  a clean module, a module writing a global listed in `.reqmapignore`, and a
+         stylesheet and a Markdown file each with a 200-column line
+  When   `cmd_design` runs with `--json`
+  Then   it reads `files 1, findings []`
 
 --------------------
 
@@ -243,7 +263,7 @@ CASE-1 — each standard fires once per file
   Then   one `file-too-long` and one `line-too-long` at line 501 naming 120 columns are reported, both under standards
 
 CASE-2 — the defaults are 500 lines and 120 columns
-  Given  the shipped configuration and a 499-line file of 120-column lines
+  Given  the shipped configuration and a 500-line file of 120-column lines, each ending in a newline
   When   `_design_file` reads it
   Then   the thresholds read 500 and 120, and nothing is reported
 
@@ -304,6 +324,12 @@ CASE-3 — no program logic, no key
   When   the map data is assembled and `health --json` runs
   Then   neither `design` nor `design_score` is present
 
+CASE-4 — health text and the audit carry the record
+  Given  a corpus, one clean module and one writing a global
+  When   `health` and `gate --audit` run, as text and as JSON
+  Then   `health` prints the 50% design line, the audit prints a `Design pass-rate` row
+         reading 50% (1/2), and the audit JSON carries the record as `design`
+
 ## Context
 **Notes**
 - `distinct_from: REQ-HEALTH-968` - `REQ-HEALTH-968` carries the requirement health record in the map; this carries the code design record.
@@ -352,12 +378,27 @@ CASE-2 — C++ shapes
 CASE-3 — masking
   Given  a JS function whose string literal and comment contain braces
   When   `_design_mask` runs and the file is analysed
-  Then   the literal is gone from the masked text, the newline count is unchanged, and no length or nesting candidate is reported
+  Then   the literal is gone from the masked text, the newline count is unchanged, and no length or nesting candidate is reported;
+         a `//` comment, a `/* */` comment, a char literal and a two-line template literal holding braces
+         are blanked too, and the masked text keeps the source's length
 
 CASE-4 — standards only elsewhere
   Given  a Ruby file with one 120-column line
   When   `_design_file` reads it
   Then   only line-too-long is reported, and a clean Ruby file reports nothing
+
+CASE-5 — nesting, bases and control keywords
+  Given  a JS function nesting five blocks, an `if (...) {` block, and `class B extends A`
+         sharing three methods with `A`
+  When   `_design_file` reads it
+  Then   deep-nesting is reported for the function, no function is named `if`, and no
+         shared-methods candidate is reported
+
+CASE-6 — every type and equality test form
+  Given  three-branch chains of `typeof`, of `x is T` and of `instanceof`, and a
+         four-branch `if` chain of `n == 1` to `n == 4`
+  When   `_design_file` reads them
+  Then   each type chain is an isinstance-chain and the equality chain a type-switch on `n`
 
 ---
 id: REQ-DESIGN-976

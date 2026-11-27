@@ -197,8 +197,10 @@ def writing_standards(rel, src):  # implements: REQ-DESIGN-953
     out = []
     lines = src.split("\n")
     base = os.path.basename(rel)
-    if len(lines) > cfg.DESIGN_FILE_MAX_LINES:
-        detail = "{} lines (over {})".format(len(lines),
+    # a final newline ends the last line; it does not start another
+    n_lines = len(lines) - (1 if src.endswith("\n") else 0)
+    if n_lines > cfg.DESIGN_FILE_MAX_LINES:
+        detail = "{} lines (over {})".format(n_lines,
                                              cfg.DESIGN_FILE_MAX_LINES)
         out.append(finding_record("file-too-long", rel, 1, base, detail))
     wide = [i for i, ln in enumerate(lines, 1)
