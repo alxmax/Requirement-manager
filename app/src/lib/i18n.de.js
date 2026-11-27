@@ -55,7 +55,8 @@ export const DE = {
   "Pick a week to see its bugs.": "Wähle eine Woche, um ihre Bugs zu sehen.",
   // the fixed / still-open chart
   "Fixed and still open": "Behoben und noch offen",
-  "{fixed} fixed, {open} still open. Open peaked at {peak} on {date}.": "{fixed} behoben, {open} noch offen. Höchststand {peak} am {date}.",
+  "{fixed} fixed, {open} still open. Open peaked at {peak} on {date}.":
+    "{fixed} behoben, {open} noch offen. Höchststand {peak} am {date}.",
   "{fixed} fixed, {open} still open. Open peaked at {peak} on {date} and has come down since.":
     "{fixed} behoben, {open} noch offen. Höchststand {peak} am {date}, seitdem gesunken.",
   "Show total": "Gesamt anzeigen",
@@ -70,7 +71,8 @@ export const DE = {
   "Open questions by priority": "Offene Fragen nach Priorität",
   "On confirmed requirements": "Bei bestätigten Anforderungen",
   "On drafts": "Bei Entwürfen",
-  "Open questions by priority, on confirmed requirements and on drafts": "Offene Fragen nach Priorität, bei bestätigten Anforderungen und bei Entwürfen",
+  "Open questions by priority, on confirmed requirements and on drafts":
+    "Offene Fragen nach Priorität, bei bestätigten Anforderungen und bei Entwürfen",
   "{n} ({c} on confirmed)": "{n} ({c} bei bestätigten)",
   "Bug priorities": "Bug-Prioritäten",
   "Question priorities": "Fragen-Prioritäten",

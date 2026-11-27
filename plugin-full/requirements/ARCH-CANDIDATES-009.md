@@ -192,7 +192,8 @@ Every bullet below is binding.
   signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc,
   split_candidate, is_test}`.
 - `is_test` is true when every file of the candidate is test code by convention: a
-  `tests/`-style directory segment, a `test_*` basename, or a `*_test`/`*.spec` suffix.
+  `tests/`-style directory segment (`smoke/` among them), a `test_*` basename, or a
+  `*_test`/`*.spec` suffix.
 - `depends_on` is derived from imports resolved to other candidates.
 - `suggested_layer` is `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.
 - A file already carrying an `implements:` tag is reported via `existing_req`.
@@ -207,9 +208,10 @@ CASE-1 — every candidate carries the full documented field set
   Then   the candidate dict carries all of `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` and `is_test`
 
 CASE-2 — is_test follows test-file convention, not content
-  Given  a file at `tests/test_foo.py` alongside an ordinary module
+  Given  a file at `tests/test_foo.py` and one under `scripts/smoke/`, alongside an ordinary
+         module
   When   `draft --plan` runs
-  Then   the test file's candidate carries `is_test: true` and the ordinary module's does not
+  Then   both test files' candidates carry `is_test: true` and the ordinary module's does not
 
 CASE-3 — an import edge becomes a depends_on edge
   Given  file `a.py` importing local module `b.py`

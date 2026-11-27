@@ -40,6 +40,39 @@ function useWidth(ref, fallback) {
   return width;
 }
 
+/** One entry per line shown, then the box that adds the total. */
+function Legend({ shown, total, onTotal }) {
+  const { t } = useI18n();
+  return (
+    <div className="bug-chart-legend">
+      {shown.map((l) => (
+        <span key={l.key}><i style={{ background: l.color }} />{t(l.name)}</span>
+      ))}
+      <label className="bug-chart-total"><input type="checkbox" checked={total}
+        onChange={(e) => onTotal(e.target.checked)} />{t("Show total")}</label>
+    </div>
+  );
+}
+
+/** A full-height column per week: hover, focus and click target, and the
+ * week's accessible name. A button only when the week can be picked. */
+function WeekTargets({ weeks, colW, chosen, pickable, dateOf, onHover, onSelect }) {
+  const { t } = useI18n();
+  return weeks.map((w, i) => (
+    <rect key={w.week} className="bug-chart-hit" x={PAD.l + colW * i} y={0}
+      width={colW} height={H} tabIndex={0} role={pickable ? "button" : "img"}
+      aria-pressed={pickable ? chosen === w.week : undefined}
+      aria-label={t("Up to {date}: {fixed} fixed, {open} still open",
+        { date: dateOf(w.week), fixed: w.fixedSoFar, open: w.open })}
+      onMouseEnter={() => onHover(i)} onFocus={() => onHover(i)}
+      onMouseLeave={() => onHover(null)} onBlur={() => onHover(null)}
+      onClick={() => onSelect(w)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(w); }
+      }} />
+  ));
+}
+
 const SUMMARY = "{fixed} fixed, {open} still open. Open peaked at {peak} on {date}.";
 const SUMMARY_DOWN = "{fixed} fixed, {open} still open. Open peaked at {peak} on {date} "
   + "and has come down since.";
@@ -83,13 +116,7 @@ export function BugChart({ weeks, chosen, pick = null, canPick = () => false,
       <div className="bug-chart-sum">{t(down ? SUMMARY_DOWN : SUMMARY, {
         fixed: last.fixedSoFar, open: last.open, peak: peak.value,
         date: dayOf(peak.week) })}</div>
-      <div className="bug-chart-legend">
-        {shown.map((l) => (
-          <span key={l.key}><i style={{ background: l.color }} />{t(l.name)}</span>
-        ))}
-        <label className="bug-chart-total"><input type="checkbox" checked={total}
-          onChange={(e) => setTotal(e.target.checked)} />{t("Show total")}</label>
-      </div>
+      <Legend shown={shown} total={total} onTotal={setTotal} />
       <svg width={width} height={H} role="img"
         aria-label={t("Bugs fixed and still open, week by week")}>
         {weeks.map((w, i) => (chosen === w.week || hover === i)
@@ -117,19 +144,8 @@ export function BugChart({ weeks, chosen, pick = null, canPick = () => false,
               {t(l.end, { n: last[l.key] })}</text>
           </g>
         ))}
-        {weeks.map((w, i) => (
-          <rect key={w.week} className="bug-chart-hit" x={PAD.l + colW * i} y={0}
-            width={colW} height={H} tabIndex={0} role={pick ? "button" : "img"}
-            aria-pressed={pick ? chosen === w.week : undefined}
-            aria-label={t("Up to {date}: {fixed} fixed, {open} still open",
-              { date: dateOf(w.week), fixed: w.fixedSoFar, open: w.open })}
-            onMouseEnter={() => setHover(i)} onFocus={() => setHover(i)}
-            onMouseLeave={() => setHover(null)} onBlur={() => setHover(null)}
-            onClick={() => select(w)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(w); }
-            }} />
-        ))}
+        <WeekTargets weeks={weeks} colW={colW} chosen={chosen} pickable={!!pick}
+          dateOf={dateOf} onHover={setHover} onSelect={select} />
       </svg>
       {tip && (
         <div className="bug-chart-tip" style={{ left: x(hover) + 22 }}>

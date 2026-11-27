@@ -338,7 +338,7 @@ def classify_prose(rel):
         return "sync_only"
     # Bucket 3 — capability source (prompts/specs/modes and other prose .md).
     return "capability"
-_TEST_DIR_NAMES = {"test", "tests", "spec", "specs", "__tests__", "testing",
+_TEST_DIR_NAMES = {"test", "tests", "spec", "specs", "__tests__", "testing", "smoke",
                     "e2e", "unittest", "unittests", "unit_test", "unit_tests"}
 _TEST_FILE_SUFFIXES = (
     "_test.py", "_test.go", "_test.rs", "_spec.rb", ".test.ts", ".test.tsx",

@@ -107,6 +107,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0094](0094-js-and-ts-strings-are-not-tags.md) | JS and TS strings are not tags, and the line ceiling moves to 23,000 | Accepted |
 | [0095](0095-the-design-candidates-are-cleared.md) | The design candidates are cleared, and the core grows by the names it gained | Accepted |
 | [0096](0096-mcp-json-uses-relative-paths.md) | `.mcp.json` uses relative paths, with no client variable | Accepted |
+| [0097](0097-design-thresholds-move-to-industry-defaults.md) | The design thresholds move: seven parameters, five levels, a file warned at 750 and told to split at 1000 | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

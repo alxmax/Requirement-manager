@@ -1572,6 +1572,7 @@ class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-
             _write(os.path.join(d, "zlib.h"), "int deflate(int x);" + chr(10))
             _write(os.path.join(d, "Dockerfile"), "FROM scratch" + chr(10))
             _write(os.path.join(d, "tests", "test_x.py"), "def test_a():" + chr(10) + "    pass" + chr(10))
+            _write(os.path.join(d, "scripts", "smoke", "views.js"), "export function check() {}" + chr(10))
             _write(os.path.join(d, "lib.py"), '"""mod."""' + chr(10) + "def f(a):" + chr(10) + "    return a" + chr(10))
             plan = self._plan(d)
             by_file = {c["files"][0]: c for c in plan["candidates"]}
@@ -1579,6 +1580,7 @@ class PlanReach(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-
                 self.assertIn(f, by_file, f)
             self.assertEqual(by_file["main.go"]["signatures"], [])
             self.assertTrue(by_file["tests/test_x.py"]["is_test"])
+            self.assertTrue(by_file["scripts/smoke/views.js"]["is_test"])
             self.assertFalse(by_file["lib.py"]["is_test"])
             self.assertTrue(any(x.endswith("def f(a)") for x in by_file["lib.py"]["signatures"]))
 

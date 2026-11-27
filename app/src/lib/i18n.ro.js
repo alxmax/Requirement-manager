@@ -58,7 +58,8 @@ export const RO = {  // implements: REQ-VIEWER-943
   "Pick a week to see its bugs.": "Alege o săptămână ca să-i vezi bugurile.",
   // the fixed / still-open chart
   "Fixed and still open": "Rezolvate și încă deschise",
-  "{fixed} fixed, {open} still open. Open peaked at {peak} on {date}.": "{fixed} rezolvate, {open} încă deschise. Maximul a fost {peak}, pe {date}.",
+  "{fixed} fixed, {open} still open. Open peaked at {peak} on {date}.":
+    "{fixed} rezolvate, {open} încă deschise. Maximul a fost {peak}, pe {date}.",
   "{fixed} fixed, {open} still open. Open peaked at {peak} on {date} and has come down since.":
     "{fixed} rezolvate, {open} încă deschise. Maximul a fost {peak}, pe {date}, și de atunci a scăzut.",
   "Show total": "Arată totalul",
@@ -73,7 +74,8 @@ export const RO = {  // implements: REQ-VIEWER-943
   "Open questions by priority": "Întrebări deschise, pe prioritate",
   "On confirmed requirements": "Pe cerințe confirmate",
   "On drafts": "Pe schițe",
-  "Open questions by priority, on confirmed requirements and on drafts": "Întrebări deschise pe prioritate, pe cerințe confirmate și pe schițe",
+  "Open questions by priority, on confirmed requirements and on drafts":
+    "Întrebări deschise pe prioritate, pe cerințe confirmate și pe schițe",
   "{n} ({c} on confirmed)": "{n} ({c} pe confirmate)",
   "Bug priorities": "Priorități buguri",
   "Question priorities": "Priorități întrebări",

@@ -298,6 +298,9 @@ Every bullet below is binding.
   keep true; the index itself is the count.
 - The engine module count and the marked corpus counts `CLAUDE.md` states are asserted
   against the package and the corpus, and a mismatch fails the suite naming both numbers.
+- The engine shape `CLAUDE.md` states — the most lines in a file and columns in a line of
+  `reqmap.py` and `reqmap_engine/` — is read from that sentence and asserted, and a file or a
+  line past it fails the suite naming it.
 - These checks are skipped, not failed, when the suite runs from a seeded copy that has no
   repo root to read.
 
@@ -326,6 +329,12 @@ CASE-5 — a seeded copy skips the checks
   Given  the suite running where no repo root with `docs/adr/` and `README.md` is found
   When   these checks run
   Then   each one is skipped, and none fails or errors
+
+CASE-6 — the engine shape CLAUDE.md states holds
+  Given  `CLAUDE.md` stating no file over N lines and no line over M columns
+  When   the suite runs in the source repo
+  Then   every file of `reqmap.py` and `reqmap_engine/` is within both, or the suite fails
+         naming each file or `file:line` past them
 
 --------------------
 

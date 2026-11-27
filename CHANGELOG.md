@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## plugin `v8.31.0` — 2026-11-28
+
+**Release v8.31.0.**
+
+**The design review's thresholds move to the looser end of common linters, and a file past 1000 lines is told to split (ADR-0097).**
+
+- `DESIGN_PARAMS_MAX` is 7 and `DESIGN_NESTING_MAX` is 5 (were 6 and 4).
+- `DESIGN_FILE_MAX_LINES` is 750 (was 500), and a new `DESIGN_FILE_SPLIT_LINES`, 1000, turns a longer file's `file-too-long` into one `file-must-split` naming that limit. Both stay advice and never enter the gate (REQ-DESIGN-953 CASE-5).
+- A `smoke/` directory is test code, like `tests/` and `e2e/`: the design review, `draft --plan` candidates and every other test-path reader skip it. A viewer's render checks under `app/scripts/smoke/` were reported as two overlong production files (REQ-CANDIDATES-827 CASE-2).
+- This repository's engine shape is checked by the suite: no file of `reqmap.py` or `reqmap_engine/` over the lines, and no line over the columns, that `CLAUDE.md` states (REQ-SELFGATE-990 CASE-6).
+- The candidates the review still named are fixed by naming a step: wide translation lines wrapped, `BugChart`'s legend and week targets as components, and `sync --fix --duplicate-of` checking against the ids it already read instead of reading them again. `ask --design` reads 0 candidates in this repository.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-28`.
+
 ## plugin `v8.30.2` — 2026-11-27
 
 **Release v8.30.2.**
