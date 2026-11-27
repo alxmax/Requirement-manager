@@ -379,13 +379,15 @@ def _folder_files(folder):
     return files
 
 
-def _lookalikes(text, title):
+def _lookalikes(text, title, where=None):
     # implements: REQ-BUGS-1126
-    """The rows of one module whose title reads like `title`."""
-    wanted = " ".join(title.casefold().split())
+    """The rows of one module whose title reads like `title`, or whose
+    `Where` is `where`."""
+    wanted, where = " ".join(title.casefold().split()), (where or "").strip()
     return [b for b in _parse(text, {"file": "", "stem": "", "module": "",
                                      "date": ""}, [])
-            if difflib.SequenceMatcher(None, wanted, " ".join(
+            if (where and (b.get("where") or "").strip() == where)
+            or difflib.SequenceMatcher(None, wanted, " ".join(
                 b["title"].casefold().split())).ratio() >= SIMILAR_TITLE]
 
 
@@ -425,6 +427,10 @@ def cmd_bug_add(reqs_dir, title, a):  # implements: REQ-BUGS-1149
         for b in close:
             print("  {}  {}".format(b["ref"], b["title"]))
         return 2
+    for other, body in files:  # implements: REQ-BUGS-1126 - warn, still write
+        for b in (_lookalikes(body, title, a.where) if other != name else ()):
+            print("sync --bug: warning: {} {} may be the same bug: {}".format(
+                other, b["ref"], b["title"]))
     from .bugclose import highest_closed
     text, ref = append_bug(text, {
         "module": a.module, "title": title, "prio": prio, "date": date,

@@ -241,6 +241,19 @@ class SyncScript(unittest.TestCase):  # tested-by: REQ-SELFGATE-1072 @unit
         self.assertIn(copy, guard.group(1))
         self.assertEqual(loop.count('cp "$VIEWER_SRC"'), 1)
 
+    def test_engine_found_off_path(self):  # verifies: REQ-SELFGATE-1072#CASE-4
+        text = _read(SYNC)
+        find = text.split("find_engine() {", 1)[1].split("\n}\n", 1)[0]
+        self.assertIn("for p in scripts/reqmap.py requirements/reqmap.py reqmap.py; do",
+                      find)
+        self.assertLess(find.index("for p in"), find.index('find "$repo" -maxdepth 3'))
+        loop = self._loop()
+        self.assertIn('ENGINE_DIR=$(dirname "$REL")', loop)
+        for line in ('cp "$SRC" "$REPO/$REL"',
+                     'cp -r "$PKG_SRC" "$REPO/$ENGINE_DIR/reqmap_engine"',
+                     'rm -rf "$REPO/$ENGINE_DIR/reqmap_engine/__pycache__"'):
+            self.assertIn(line, loop)
+
 
 class ArtifactsJob(unittest.TestCase):
     # tested-by: ARCH-REPRO-041 @integration  # tested-by: REQ-REPRO-905 @unit

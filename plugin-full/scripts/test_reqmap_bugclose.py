@@ -111,6 +111,25 @@ class OwnShape(unittest.TestCase):  # tested-by: REQ-BUGS-1126 @integration
         self.assertEqual(0, _run(d, *(args + ("--force",))).returncode)
         self.assertIn(b"| B3 | Refund applied twice", _bytes(path))
 
+    def test_a_likely_duplicate_in_another_module_warns(self):
+        # verifies: REQ-BUGS-1126#CASE-6
+        d = _repo(self)
+        _bug_file(d, "Billing.md", OPEN.replace(
+            "| P3 |  |  |", "| P3 |  | src/pay.py:10 |"))
+        _bug_file(d, "Payments.md", "# Bugs — Payments\n\n" + HEAD)
+        path = os.path.join(d, "requirements", "bugs", "Payments.md")
+        got = _run(d, "sync", "--bug", "Refund applied twice", "--module", "Payments")
+        self.assertEqual(0, got.returncode)
+        self.assertIn("warning: Billing.md B1", got.stdout)
+        got = _run(d, "sync", "--bug", "Totals drift", "--module", "Payments",
+                   "--where", "src/pay.py:10")
+        self.assertEqual(0, got.returncode)
+        self.assertIn("warning: Billing.md B2", got.stdout)
+        self.assertNotIn("B1", got.stdout.split("added")[0])
+        text = _bytes(path)
+        self.assertIn(b"Refund applied twice", text)
+        self.assertIn(b"Totals drift", text)
+
     def test_the_engine_and_the_viewer_agree(self):
         # tested-by: REQ-BUGS-1126 @unit
         # verifies: REQ-BUGS-1126#CASE-5

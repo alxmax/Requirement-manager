@@ -13,6 +13,7 @@ only English for "this verb is gone".
 import io
 import os
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -61,6 +62,10 @@ class RetiredVerbs(unittest.TestCase):
         """Matching any word after `reqmap` would make every mention a finding."""
         self.assertEqual(scan("reqmap.py links code to requirements"), [])
 
+    def test_a_flag_in_prose_is_not_a_call(self):  # verifies: REQ-SELFGATE-1011#CASE-3
+        """No backtick, quote or `python` before the call: a mention, not an instruction."""
+        self.assertEqual(scan("the old reqmap.py gate --nope flag was dropped"), [])
+
 
 class RetiredFlags(unittest.TestCase):
     def test_a_flag_the_parser_does_not_accept_is_caught(self):  # verifies: REQ-SELFGATE-1011#CASE-2
@@ -108,6 +113,31 @@ class ThisRepo(unittest.TestCase):
             self.assertEqual(C.main([os.path.join(os.sep, "no", "such", "root")]), 2)
         finally:
             sys.stderr = stderr
+
+    def test_an_extra_root_is_read_against_this_engine(self):
+        # verifies: REQ-SELFGATE-1011#CASE-2  # verifies: REQ-SELFGATE-1011#CASE-7
+        line = "run `python scripts/reqmap.py map` then `python scripts/reqmap.py gate --nope`"
+        with tempfile.TemporaryDirectory() as d:
+            consumer = os.path.join(d, "consumer")
+            os.makedirs(os.path.join(consumer, "scripts"))
+            with io.open(os.path.join(consumer, "CLAUDE.md"), "w", encoding="utf-8") as f:
+                f.write("# notes\n" + line + "\n")
+            # A vendored engine that still has both names; THIS engine decides.
+            with io.open(os.path.join(consumer, "scripts", "reqmap.py"), "w",
+                         encoding="utf-8") as f:
+                f.write('COMMANDS = {\n    "map": {},\n}\n'
+                        'p.add_argument("--nope")\n# `python scripts/reqmap.py map`\n')
+            buf = io.StringIO()
+            stdout, sys.stdout = sys.stdout, buf
+            try:
+                rc = C.main([consumer])
+            finally:
+                sys.stdout = stdout
+        out = buf.getvalue()
+        self.assertEqual(rc, 1, out)
+        self.assertIn("consumer/CLAUDE.md:2  verb `map`  " + line, out)
+        self.assertIn("consumer/CLAUDE.md:2  flag `--nope`  " + line, out)
+        self.assertNotIn("consumer/scripts/reqmap.py", out)
 
 
 

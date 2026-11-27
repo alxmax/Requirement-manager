@@ -230,8 +230,8 @@
       "reason": "cases added after reading the Bugs family's clause-without-case questions"
     },
     "REQ-BUGS-1126": {
-      "hash": "9a03568b7eac",
-      "reason": "cases added after reading the Bugs family's clause-without-case questions"
+      "hash": "4d2fa37260ff",
+      "reason": "REQ-BUGS-1126: cross-module duplicate warning clause and CASE-6"
     },
     "REQ-BUGS-1127": {
       "hash": "9d0b723cf102",
@@ -325,17 +325,29 @@
       "hash": "3ae7bb5d2b90",
       "reason": "clarify --decompose copies into its children and never edits the parent; a bold label with a note after it is a group label (REQ-DECOMPOSE-994 CASE-2/6/7 rewritten)"
     },
+    "REQ-DESIGN-950": {
+      "hash": "30e066f6db47",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+    },
+    "REQ-DESIGN-951": {
+      "hash": "e94a4b6f4c30",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+    },
     "REQ-DESIGN-952": {
-      "hash": "23c36f22ca3b",
-      "reason": null
+      "hash": "f03abc229f7b",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-DESIGN-953": {
-      "hash": "5999a2f61f1b",
-      "reason": null
+      "hash": "dedd18e9d8da",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-DESIGN-954": {
-      "hash": "79d473bf523a",
-      "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
+      "hash": "703d8dd07277",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+    },
+    "REQ-DESIGN-955": {
+      "hash": "ebfbf1a97de2",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-DESIGN-978": {
       "hash": "3bb3687f63b8",
@@ -394,8 +406,8 @@
       "reason": "REQ-HEALTH-968: the score names its exemptions (CASE-4)"
     },
     "REQ-HISTORY-1003": {
-      "hash": "8b863e0c4f08",
-      "reason": "REQ-HISTORY-1003: spans read from the tags, not HEAD; folded into CASE-7 (AC limit 7); bugfix requested by the maintainer"
+      "hash": "90733682f8b0",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-HISTORY-1081": {
       "hash": "68ff32fee279",
@@ -437,17 +449,21 @@
       "hash": "0ecf01b2dc9e",
       "reason": "exemptions removed: cases moved to the children that own them, engine/viewer halves split, no code behaviour changed"
     },
+    "REQ-MAP-1144": {
+      "hash": "aa403982195a",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
+    },
     "REQ-MAP-870": {
-      "hash": "af329c57d766",
-      "reason": "Compact export contracts and cases"
+      "hash": "b91929d55029",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-MAP-871": {
-      "hash": "f3c1c9325a18",
-      "reason": null
+      "hash": "f01cc889b58d",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-MAP-873": {
-      "hash": "dbb338fc4401",
-      "reason": null
+      "hash": "6371c9dfc4a0",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-MAPDIAGRAMS-874": {
       "hash": "68d4a52da578",
@@ -498,8 +514,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANCADENCE-1000": {
-      "hash": "3f85229041a5",
-      "reason": null
+      "hash": "0f8bd0c87aec",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-PLANDATES-1022": {
       "hash": "a1ef90f57a63",
@@ -594,28 +610,28 @@
       "reason": "reword the fence bullets of REQ-SECTIONS-994 (v8.14.0)"
     },
     "REQ-SELFGATE-1011": {
-      "hash": "01428251f82d",
-      "reason": "ADR-0044: gate's question flags moved to the new ask verb; contracts and examples renamed, REQ-CMDREGISTRY-1031 added"
+      "hash": "97bfdaf25dcc",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-SELFGATE-1071": {
       "hash": "fd0724ff7b10",
       "reason": "Action code input"
     },
     "REQ-SELFGATE-1072": {
-      "hash": "e4723d3b9a38",
-      "reason": "plugin/ -> plugin-full/ move for the directory submission; the full edition's statements now name plugin-full/ and requirement-manager-full"
+      "hash": "0bbab67f2979",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-SELFGATE-1130": {
-      "hash": "97428dd557d6",
-      "reason": "REQ-SELFGATE-1130 covers every rule in the directory refusal text, not only file types"
+      "hash": "0af7dc5ef741",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-SELFGATE-916": {
       "hash": "c94e09a4bd93",
       "reason": "release waits for the published-action smoke test"
     },
     "REQ-SELFGATE-990": {
-      "hash": "2093d3ab4d57",
-      "reason": "REQ-SELFGATE-990 CASE-4 now covers CLAUDE.md counts; MCP tool set is thirteen (ADR-0047)"
+      "hash": "cb9f71859182",
+      "reason": "cases added after reading clause-without-case questions; REQ-SELFGATE-1011 clause aligned with the bare-invocation check"
     },
     "REQ-SHOW-918": {
       "hash": "b7130bc1c8dd",

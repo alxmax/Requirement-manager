@@ -1012,7 +1012,7 @@ class GateMapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-
         members = R.scan_members(d, d)
         buf = io.StringIO()
         with redirect_stdout(buf), redirect_stderr(io.StringIO()):
-            R.cmd_check(R.Workspace(reqs, members, d, d), False)
+            self.rc = R.cmd_check(R.Workspace(reqs, members, d, d), False)
         return buf.getvalue()
 
     def _seed(self, d):
@@ -1036,9 +1036,14 @@ class GateMapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-
                 R.cmd_map(R.Workspace(reqs, members, d), d)
             _write(os.path.join(d, "A-FOO-002.md"),      # registry changed, map not regenerated
                    "---\nid: A-FOO-002\nstatus: draft\nlayer: bus\n---\n\n" + _ac_body())
+            with open(os.path.join(d, "_map.json"), encoding="utf-8") as f:
+                before = f.read()
             out = self._gate(d)
             self.assertIn("committed map is stale", out)
             self.assertIn("_map.json", out)
+            self.assertEqual(0, self.rc)                 # a warning, not a failure
+            with open(os.path.join(d, "_map.json"), encoding="utf-8") as f:
+                self.assertEqual(before, f.read())       # the gate never rewrites it
 
     def test_absent_map_is_not_stale(self):
         with tempfile.TemporaryDirectory() as d:
@@ -3507,7 +3512,7 @@ class GateSkipsTheDesignReview(unittest.TestCase):  # tested-by: ARCH-MAP-007
                + tag("REQ-A-001") + "\n")
         return rq
 
-    def test_gate_full_never_calls_the_design_review(self):
+    def test_gate_full_never_calls_the_design_review(self):  # verifies: REQ-MAP-871#CASE-6
         with tempfile.TemporaryDirectory() as d:
             rq = self._repo(d)
             ws = R.Workspace.load(rq, d)

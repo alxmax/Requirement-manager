@@ -106,7 +106,7 @@ test("gantt: an opened version lists the work planned on it",
     const html = renderToString(<VersionNote version={version}
       bars={bars} t={(x) => x} onClose={noop} onPickBar={noop} />);
     return html.includes("on it") && !html.includes("elsewhere")
-      && html.includes("2026-09-25");
+      && html.includes("2026-09-25 · L");
   })());
 
 // tested-by: REQ-VERSIONTODOS-1097 @unit

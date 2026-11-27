@@ -358,6 +358,7 @@ class MapPayloadShape(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-b
             return R._build_map_data(R.load_requirements(rd), {})
 
     def test_node_carries_exactly_the_frozen_key_set(self):  # verifies: ARCH-MAP-007#CASE-1
+        # verifies: REQ-MAP-870#CASE-3
         node = self._node()["nodes"][0]
         got = set(node)
         self.assertEqual(
@@ -385,13 +386,16 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             rd = os.path.join(d, "requirements")
             _write(os.path.join(rd, "AREA-A-001.md"),
                    REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(rd, "AREA-B-002.md"),
+                   REQ.format(id="AREA-B-002", status="baseline", layer="feature",
+                              extra="depends_on: [AREA-A-001]\n", title="B"))
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_map(R.Workspace(R.load_requirements(rd), {}, rd), d)
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
             self.assertEqual(doc["engine_version"], R.MAP_ENGINE_VERSION)
-            self.assertEqual(len(doc["nodes"]), 1)
-            self.assertIn("edges", doc)
+            self.assertEqual(len(doc["nodes"]), 2)       # N requirements -> N nodes
+            self.assertEqual(len(doc["edges"]), 1)       # M depends_on links -> M edges
 
     def test_export_includes_parsed_todos(self):  # bug: export-drops-todos  # verifies: REQ-MAP-871#CASE-4
         with tempfile.TemporaryDirectory() as d:
@@ -479,7 +483,7 @@ class RepoName(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(R._repo_name(d), os.path.basename(os.path.abspath(d)))
 
-    def test_repo_excluded_from_freshness_diff(self):
+    def test_repo_excluded_from_freshness_diff(self):  # verifies: REQ-MAP-871#CASE-1
         # the git-derived repo line differs across forks -> map --check must ignore it
         a = R._build_json_text({"repo": "owner/a", "nodes": [], "edges": []})
         b = R._build_json_text({"repo": "fork/b", "nodes": [], "edges": []})
@@ -598,6 +602,24 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
     def test_no_quote_means_empty_intent(self):  # verifies: REQ-MAP-873#CASE-4
         body = "# T\n\n## Description\nEvery bullet below is binding.\n- `x` does y.\n"
         self.assertEqual(R._distinct_intent(body), "")
+
+    def test_show_prints_a_repeated_intent_once(self):  # verifies: REQ-MAP-873#CASE-5
+        sectioned = ("---\nid: REQ-B-002\nstatus: draft\nlayer: feature\n---\n\n# T\n\n"
+                     "## Description\n> Specs rot when nobody updates them.\n\n"
+                     "Every bullet below is binding.\n- `gate` reports a dangling tag.\n")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "REQ-A-001.md"), self._ATOMIC)
+            _write(os.path.join(d, "REQ-B-002.md"), sectioned)
+            ws = R.Workspace(R.load_requirements(d), {})
+            outs = []
+            for rid in ("REQ-A-001", "REQ-B-002"):
+                with redirect_stdout(io.StringIO()) as buf:
+                    R.cmd_show(ws, rid)
+                outs.append(buf.getvalue())
+        atomic, rationale = outs
+        self.assertEqual(1, atomic.count("is not git-tracked is a `WARN`"), atomic)
+        self.assertLess(atomic.index("Contract:"), atomic.index("is not git-tracked"))
+        self.assertLess(rationale.index("Specs rot"), rationale.index("Contract:"))
 
     def test_req_to_code_collapses_line_range(self):  # bug: mermaid-req-to-code-line-range-untested  # verifies: REQ-MAPDIAGRAMS-877#CASE-4
         out = R._mermaid_req_to_code({"nodes": [self._node(
@@ -1021,6 +1043,7 @@ class MapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: 
             code, out = self._map(d, check=True)    # built-fresh != on-disk
             self.assertEqual(code, 1)
             self.assertIn("stale", out)
+            self.assertIn("_map.json", out)         # names the stale file
 
     def test_timestamp_alone_is_not_stale(self):
         # _strip_generated must ignore the volatile timestamp line
@@ -2555,6 +2578,10 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
             bars=[{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-10-05"}],
             cadence={"every": "week", "on": "monday", "from": "2026-09-21"})
         self.assertEqual(["2026-09-21", "2026-09-28", "2026-10-05"], got["releases"])
+        got = self._load(
+            bars=[{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-10-05"}],
+            cadence={"every": "week", "on": "monday", "until": "2026-09-28"})
+        self.assertEqual(["2026-09-14", "2026-09-21", "2026-09-28"], got["releases"])
 
     def test_the_branch_reaches_the_export_and_is_not_gated(self):  # verifies: REQ-PLANBRANCH-1011#CASE-1  # verifies: REQ-PLANBRANCH-1011#CASE-2
         # Git-derived like `repo`: two checkouts of one corpus disagree about it, so
@@ -2599,14 +2626,14 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
         self.assertEqual("last", got["cadence"]["on"])
         self.assertEqual(["2026-09-30", "2026-10-31", "2026-11-30"], got["releases"])
 
-    def test_a_monthly_cadence_can_name_a_day(self):
+    def test_a_monthly_cadence_can_name_a_day(self):  # verifies: REQ-PLANCADENCE-1000#CASE-6
         # Capped at 28 on purpose: a plan pinned to the 30th silently skips February.
         got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-09-01",
                                 "end": "2026-11-10"}],
                          cadence={"every": "month", "on": 15})
         self.assertEqual(["2026-09-15", "2026-10-15"], got["releases"])
 
-    def test_a_long_span_truncates_rather_than_thinning(self):
+    def test_a_long_span_truncates_rather_than_thinning(self):  # verifies: REQ-PLANCADENCE-1000#CASE-4
         got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-01-01", "end": "2040-01-01"}],
                          cadence={"every": "week"})
         self.assertEqual(R.targets.CADENCE_MAX, len(got["releases"]))
@@ -2776,6 +2803,13 @@ class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by
         self.assertEqual(["v2.0.0", "v2.1.0", "v2.1.1"], row["versions"])
         # not the first by date and not the last — the biggest step
         self.assertEqual("v2.0.0", row["landmark"])
+        self.assertEqual("The breaking rename of every verb", row["headline"])
+        # of two minors the newer is the landmark, even though the older came first
+        two = R.history.by_month([
+            {"version": "v2.1.0", "date": "2026-07-02", "headline": "older"},
+            {"version": "v2.2.0", "date": "2026-07-09", "headline": "newer"},
+            {"version": "v2.2.1", "date": "2026-07-20", "headline": "patch"}])
+        self.assertEqual(("v2.2.0", "newer"), (two[0]["landmark"], two[0]["headline"]))
         self.assertEqual("2026-06-02", row["first"])
         self.assertEqual("2026-06-20", row["last"])
         # every release in the month, newest first, so selecting it shows what was done
@@ -5105,6 +5139,8 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
 
     def setUp(self):
         self.root = _repo_root()
+        if not self.root:
+            self.skipTest("not the source repo")
 
     def test_the_hello_drift_demo_shows_drift(self):
         """ROADMAP's first-contact demo: a gate run in examples/hello-drift prints DRIFT and
@@ -5118,7 +5154,7 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         self.assertIn("RM018 HELLO-GREET-001: DRIFT", r.stdout)
         self.assertIn("hello.py:1", r.stdout)
 
-    def test_every_engine_module_is_tracked_by_git(self):  # verifies: REQ-SELFGATE-990#CASE-2
+    def test_every_engine_module_is_tracked_by_git(self):  # tested-by: ARCH-SELFGATE-039 @integration
         """A module the package imports but git does not track ships a DEAD engine, and the
         author's machine structurally cannot see it: the working tree imports fine, and even
         `sync_reqmap.sh` propagates it, while a fresh checkout raises ModuleNotFoundError at
@@ -5134,8 +5170,6 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         self.assertEqual(sorted(on_disk - tracked), [],
                          "engine module(s) not tracked by git — a fresh checkout cannot "
                          "import the package")
-        if not self.root:
-            self.skipTest("not the source repo")
 
     def test_the_readme_engine_line_count_is_current(self):  # verifies: REQ-SELFGATE-990#CASE-1
         readme = open(os.path.join(self.root, "README.md"), encoding="utf-8").read()
@@ -5199,6 +5233,17 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         index = open(os.path.join(self.root, "docs", "adr", "README.md"), encoding="utf-8").read()
         head = index.split("| # |")[0]
         self.assertNotRegex(head, r"(?i)\b(twenty|thirty|forty|fourteen|\d+)\s+decisions\b")
+
+
+class DocsAreTrueInASeededCopy(unittest.TestCase):
+    def test_every_check_skips_without_a_repo_root(self):  # verifies: REQ-SELFGATE-990#CASE-5
+        module = sys.modules[DocsAreTrue.__module__]
+        suite = unittest.defaultTestLoader.loadTestsFromTestCase(DocsAreTrue)
+        result = unittest.TestResult()
+        with mock.patch.object(module, "_repo_root", return_value=None):
+            suite.run(result)
+        self.assertEqual([], result.errors + result.failures)
+        self.assertEqual(suite.countTestCases(), len(result.skipped))
 
 
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
@@ -5827,13 +5872,27 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
             self.addCleanup(setattr, R.config, k, getattr(R.config, k))
             setattr(R.config, k, v)
 
+    _CASE1 = ("COUNT = 0\n"
+              "def bump():\n    global COUNT\n    COUNT += 1\n"
+              "def wide(a, b, c, d, e, f, g):\n    return a\n"
+              "class K:\n    def six(self, a, b, c, d, e, f):\n        return a\n")
+
     def test_global_state_and_long_parameter_list(self):  # verifies: REQ-DESIGN-950#CASE-1
-        src = ("COUNT = 0\n"
-               "def bump():\n    global COUNT\n    COUNT += 1\n"
-               "def wide(a, b, c, d, e, f, g):\n    return a\n")
-        kinds = self._kinds(src)
-        self.assertIn("global-state", kinds)
-        self.assertIn("long-parameter-list", kinds)
+        f = R._design_file("m.py", self._CASE1)
+        glob = [x for x in f if x["kind"] == "global-state"]
+        self.assertEqual(len(glob), 1)
+        self.assertIn("COUNT", glob[0]["detail"])
+        self.assertEqual([x["name"] for x in f if x["kind"] == "long-parameter-list"],
+                         ["wide"])
+
+    def test_every_candidate_is_a_full_record(self):  # verifies: REQ-DESIGN-950#CASE-5
+        f = R._design_file("m.py", self._CASE1)
+        self.assertTrue(f)
+        for x in f:
+            self.assertEqual(sorted(x), ["advice", "detail", "file", "kind", "line",
+                                         "name", "pillar"])
+            self.assertEqual(x["advice"], R._DESIGN_ADVICE[x["kind"]])
+            self.assertEqual(x["file"], "m.py")
 
     def test_data_clump_needs_three_carriers(self):  # verifies: REQ-DESIGN-950#CASE-2
         two = "def f(host, port, user): pass\ndef g(host, port, user): pass\n"
@@ -5843,6 +5902,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual(len(f), 1)
         self.assertIn("host, port, user", f[0]["detail"])
         self.assertEqual(f[0]["pillar"], "encapsulation")
+        self.assertEqual((f[0]["name"], f[0]["line"]), ("f", 1))
 
     def test_long_function_and_deep_nesting(self):  # verifies: REQ-DESIGN-950#CASE-3
         long_src = "def big():\n" + "".join("    x = {}\n".format(i) for i in range(90))
@@ -5859,21 +5919,30 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual([(x["name"], x["pillar"]) for x in f], [("scan", "abstraction")])
 
     def test_shared_methods_and_duplicate_method(self):  # verifies: REQ-DESIGN-951#CASE-1
-        src = ("class A:\n    def load(self): return 1\n    def save(self): return 2\n"
+        src = ("class A:\n    def __init__(self): pass\n"
+               "    def load(self): return 1\n    def save(self): return 2\n"
                "    def close(self): pass\n"
-               "class B:\n    def load(self): return 3\n    def save(self): return 2\n"
+               "class B:\n    def __init__(self): pass\n"
+               "    def load(self): return 3\n    def save(self): return 2\n"
                "    def close(self): pass\n")
         f = R._design_file("m.py", src)
-        self.assertIn("shared-methods", [x["kind"] for x in f])
+        shared = [x for x in f if x["kind"] == "shared-methods"]
+        self.assertEqual(len(shared), 1)
+        self.assertIn("share 3 method names", shared[0]["detail"])
+        self.assertNotIn("__init__", shared[0]["detail"])
         dup = [x for x in f if x["kind"] == "duplicate-method"]
         self.assertEqual(sorted(x["name"] for x in dup), ["B.close", "B.save"])
         self.assertEqual({x["pillar"] for x in dup}, {"inheritance"})
+        self.assertEqual({x["line"] for x in dup}, {6})
 
     def test_related_classes_are_not_reported(self):  # verifies: REQ-DESIGN-951#CASE-2
         methods = ("    def load(self): pass\n    def save(self): pass\n"
                    "    def close(self): pass\n")
         src = "class Base:\n    pass\nclass A(Base):\n" + methods + "class B(Base):\n" + methods
         self.assertNotIn("shared-methods", self._kinds(src))
+        derived = "class A:\n" + methods + "class B(A):\n" + methods
+        self.assertNotIn("shared-methods", self._kinds(derived))
+        self.assertIn("shared-methods", self._kinds(derived.replace("B(A)", "B")))
 
     def test_isinstance_chain_and_type_switch(self):  # verifies: REQ-DESIGN-951#CASE-3
         src = ("def f(x, kind):\n"
@@ -5886,6 +5955,11 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual([x["kind"] for x in f], ["isinstance-chain", "type-switch"])
         self.assertEqual([x["name"] for x in f], ["x", "kind"])
         self.assertTrue(all(x["pillar"] == "polymorphism" for x in f))
+        four = ("def g(x):\n" + "".join(
+            "    {} isinstance(x, {}):\n        pass\n".format(kw, t)
+            for kw, t in (("if", "int"), ("elif", "str"), ("elif", "list"),
+                          ("elif", "dict"))))
+        self.assertEqual(self._kinds(four), ["isinstance-chain"])
 
     def test_short_chains_are_silent(self):  # verifies: REQ-DESIGN-951#CASE-4
         src = ("def f(x, kind):\n    if isinstance(x, int):\n        pass\n"
@@ -5903,11 +5977,18 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
             with redirect_stdout(buf):
                 code = R.cmd_design(d)
             out = buf.getvalue()
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
         self.assertEqual(code, 0)
         self.assertIn("Encapsulation (1)", out)
         self.assertIn("m.py:2  global-state", out)
+        self.assertIn("  -> " + R._DESIGN_ADVICE["global-state"], out)
         self.assertNotIn("test_m.py", out)
         self.assertIn("Advisory only", out)
+        self.assertEqual([(x["file"], x["kind"], x["line"]) for x in data["findings"]],
+                         [("m.py", "global-state", 2)])
 
     def test_json_output_and_clean_tree(self):  # verifies: REQ-DESIGN-952#CASE-2
         with tempfile.TemporaryDirectory() as d:
@@ -5920,7 +6001,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_design(d)
-            self.assertIn("No design candidates", buf.getvalue())
+            self.assertIn("No design candidates in 1 source file(s)", buf.getvalue())
 
     def test_syntax_error_leaves_the_score_and_is_named(self):  # verifies: REQ-DESIGN-952#CASE-3
         self.assertIsNone(R._design_file("m.py", "def (:\n" + "x" * 200 + "\n"))
@@ -5950,6 +6031,25 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual(self._kinds(src), [])
         R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
         self.assertIn("long-parameter-list", self._kinds(src))
+        thresholds = [k for k in dir(R.config) if k.startswith("DESIGN_")
+                      and isinstance(getattr(R.config, k), int)]
+        self.assertEqual(len(thresholds), 11)
+        for key in thresholds:
+            self.assertIn(key, R.config.CONFIG_KEYS)
+
+    def test_ignored_and_non_logic_files_are_not_read(self):  # verifies: REQ-DESIGN-952#CASE-5
+        wide = "x" * 200 + "\n"
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ok.py"), "def go():\n    return 1\n")
+            _write(os.path.join(d, "skip.py"), "def bump():\n    global C\n    C = 1\n")
+            _write(os.path.join(d, ".reqmapignore"), "skip.py\n")
+            _write(os.path.join(d, "site.css"), wide)
+            _write(os.path.join(d, "notes.md"), wide)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
+        self.assertEqual((data["files"], data["findings"]), (1, []))
 
     def test_file_length_and_line_width(self):  # verifies: REQ-DESIGN-953#CASE-1
         src = ("".join("x{} = 1\n".format(i) for i in range(500))
@@ -5963,7 +6063,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
     def test_the_defaults_are_500_lines_and_120_columns(self):  # verifies: REQ-DESIGN-953#CASE-2
         self.assertEqual((R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_LINE_MAX),
                          (500, 120))
-        ok = "".join("x = '{}'\n".format("y" * 114) for _ in range(499))
+        ok = "".join("x = '{}'\n".format("y" * 114) for _ in range(500))
         self.assertEqual(R._design_file("m.py", ok), [])
 
     def test_the_writing_rules_are_configurable(self):  # verifies: REQ-DESIGN-953#CASE-3
@@ -6029,11 +6129,47 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         masked = R._design_mask(src)
         self.assertNotIn('"{{{"', masked)
         self.assertEqual(masked.count("\n"), src.count("\n"))
+        text = ("let a = '{'; // { line\n"
+                "/* { block } */ let t = `{\n}`;\n"
+                "f();\n")
+        masked = R._design_mask(text)
+        self.assertEqual(len(masked), len(text))
+        self.assertEqual(masked.count("\n"), text.count("\n"))
+        self.assertEqual((masked.count("{"), masked.count("}")), (0, 0))
+        self.assertIn("f();", masked)
 
     def test_other_languages_get_standards_only(self):  # verifies: REQ-DESIGN-955#CASE-4
         src = "def a\n  1\nend\n" + "x = '" + "y" * 120 + "'\n"
         self.assertEqual([x["kind"] for x in R._design_file("m.rb", src)], ["line-too-long"])
         self.assertEqual(R._design_file("m.rb", "def a\n  1\nend\n"), [])
+
+    def test_brace_nesting_bases_and_control_keywords(self):  # verifies: REQ-DESIGN-955#CASE-5
+        methods = " load() { return 1; } save() { return 2; } close() { } }\n"
+        src = ("function deep(a) {\n"
+               "  if (a) { for (;;) { while (a) { if (a) { if (a) { a(); } } } } }\n"
+               "}\n"
+               "if (ready) { go(); }\n"
+               "class A {" + methods + "class B extends A {" + methods)
+        f = R._design_file("m.js", src)
+        self.assertEqual([x["name"] for x in f if x["kind"] == "deep-nesting"], ["deep"])
+        self.assertNotIn("if", [x["name"] for x in R._brace_fns(R._design_mask(src))])
+        self.assertNotIn("shared-methods", [x["kind"] for x in f])
+        unrelated = src.replace("class B extends A", "class B")
+        self.assertIn("shared-methods", [x["kind"] for x in R._design_file("m.js", unrelated)])
+
+    def test_brace_type_and_equality_test_forms(self):  # verifies: REQ-DESIGN-955#CASE-6
+        def chain(test):
+            return ("  if ({}) {{ }}\n".format(test.format(1))
+                    + "".join("  else if ({}) {{ }}\n".format(test.format(i))
+                              for i in range(2, 4)))
+        js = ("function f(v) {\n" + chain("typeof v === 't{}'") + "}\n"
+              "function g(w) {\n" + chain("w instanceof T{}") + "}\n"
+              "function h(n) {\n" + chain("n == {}") + "  else if (n == 4) { }\n}\n")
+        cs = "void k(object o) {\n" + chain("o is T{}") + "}\n"
+        f = R._design_file("m.js", js) + R._design_file("m.cs", cs)
+        self.assertEqual(sorted(x["name"] for x in f if x["kind"] == "isinstance-chain"),
+                         ["o", "v", "w"])
+        self.assertEqual([x["name"] for x in f if x["kind"] == "type-switch"], ["n"])
 
     def test_ask_design_runs_and_is_not_a_gate_rule(self):  # verifies: ARCH-DESIGN-061#CASE-3
         self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
@@ -6132,6 +6268,7 @@ class DesignSummary(unittest.TestCase):
         self.assertNotIn("design_score", out)
 
     def test_health_text_and_audit_carry_the_line(self):
+        # verifies: REQ-DESIGN-954#CASE-4
         with tempfile.TemporaryDirectory() as d:
             rq = os.path.join(d, "requirements")
             _one_req(rq)
@@ -6141,8 +6278,19 @@ class DesignSummary(unittest.TestCase):
             with redirect_stdout(buf):
                 R.cmd_health(ws)
             line = R.audittail._design_candidate_line(d, rq)
+            audit, audit_json = io.StringIO(), io.StringIO()
+            with redirect_stdout(audit), redirect_stderr(io.StringIO()):
+                R.cmd_audit(ws)
+            with redirect_stdout(audit_json), redirect_stderr(io.StringIO()):
+                R.cmd_audit(ws, as_json=True)
+            record = R._design_summary(d, rq)
         self.assertIn("design pass-rate (files w/o candidate): 50%",
                       buf.getvalue())
+        row = [ln for ln in audit.getvalue().splitlines()
+               if ln.lstrip().startswith("Design pass-rate")]
+        self.assertEqual(len(row), 1)
+        self.assertIn("50% (1/2 files with no candidate)", row[0])
+        self.assertEqual(json.loads(audit_json.getvalue())["design"], record)
         self.assertEqual(line, "design pass-rate 50% - 1 of 2 source "
                                "files carry a candidate")
 
@@ -6449,6 +6597,10 @@ class CompactExports(unittest.TestCase):
         changed['design'] = {'score': 5}
         self.assertEqual(R._strip_generated(compact),
                          R._strip_generated(json.dumps(changed)))
+        # MAP_PROFILE picks the form; unset, it is full
+        self.assertEqual(pretty, R._build_json_text(data))
+        with mock.patch.object(R.config, 'MAP_PROFILE', 'compact'):
+            self.assertEqual(compact, R._build_json_text(data))
 
     def test_compact_markdown_links_to_full_content(self):
         # verifies: REQ-MAPDIAGRAMS-874#CASE-4

@@ -258,6 +258,44 @@ class TraceBlock(unittest.TestCase):  # tested-by: REQ-MAP-1144 @unit
         files = R.tracecover._code_files(d, None)
         self.assertEqual(["src/a.c"], [rel.replace(os.sep, "/") for _a, rel, _t in files])
 
+    def test_sync_writes_the_block_and_the_gate_never_builds_it(self):  # verifies: REQ-MAP-1144#CASE-6
+        import json
+        from unittest import mock
+        d = _repo(self)
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "R-1.md"), _spec("R-1", ["`gate` writes the lock."]))
+        _write(os.path.join(d, "src", "a.c"), CTAG + "R-1\nint a(void) { return 1; }\n")
+        with redirect_stdout(io.StringIO()):
+            R.cmd_map(R.Workspace.load(rd, d), d)
+        with open(os.path.join(rd, "_map.json"), encoding="utf-8") as f:
+            written = f.read()
+        trace = json.loads(written)["trace"]
+        self.assertTrue({"coverage", "suggestions", "hygiene"} <= set(trace))
+        boom = mock.Mock(side_effect=AssertionError("trace ran"))
+        with mock.patch.object(R.tracecover, "trace_block", boom):
+            fresh = R.Workspace.load(rd, d).map_data(d, with_design=False)
+        self.assertNotIn("trace", fresh)
+        self.assertEqual(0, boom.call_count)
+        changed = json.loads(written)
+        changed["trace"] = {"coverage": {"code_files": 99}}
+        self.assertEqual(R._strip_generated(written),
+                         R._strip_generated(json.dumps(changed, indent=2, ensure_ascii=False)))
+
+    def test_a_bad_design_rule_is_reported_and_hits_are_capped(self):  # verifies: REQ-MAP-1144#CASE-7
+        d = _repo(self)
+        _write(os.path.join(d, "src", "a.cpp"),
+               "void f() {\n" + "  throw 1;\n" * 60 + "}\n")
+        old = R.config.DESIGN_RULES
+        R.config.DESIGN_RULES = [{"id": "no-pattern"},
+                                 {"id": "no-exceptions", "pattern": r"\bthrow\b"}]
+        self.addCleanup(setattr, R.config, "DESIGN_RULES", old)
+        rules, problems = R.tracecover._rules(R.tracecover._code_files(d, None))
+        self.assertEqual(1, len(problems))
+        self.assertIn("DESIGN_RULES[0]", problems[0])
+        self.assertEqual(["no-exceptions"], [r["id"] for r in rules])
+        self.assertEqual(60, rules[0]["count"])
+        self.assertEqual(50, len(rules[0]["hits"]))
+
 
 
 class CppTestsThatCannotFail(unittest.TestCase):  # tested-by: REQ-TESTGAPS-1147

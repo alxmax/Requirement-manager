@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## plugin `v8.30.2` — 2026-11-27
+
+**Release v8.30.2.**
+
+**The last three families' `clause-without-case` questions, read one by one (ADR-0075), and a 500-line file is no longer 501.**
+
+- A file of exactly 500 lines that ends in a newline is no longer reported as `file-too-long`: the final newline ends the last line instead of starting another (REQ-DESIGN-953 CASE-2 now uses 500 lines).
+- `sync --bug` warns when the new row reads like a row in another module's file, or names the same `--where`, and still adds it. One audit split per module had left the same bug in up to four files and inflated the P1 count; a row in the same module still needs `--force` (REQ-BUGS-1126 CASE-6).
+- ARCH-MAP-007: new cases REQ-MAP-873 CASE-5 (`show` prints a repeated intent once), REQ-MAP-1144 CASE-6 (`sync` writes the trace block; the gate never builds it) and CASE-7 (a bad design rule is reported, hits are capped at 50); cases that touched a clause without asserting it now assert it.
+- ARCH-DESIGN-061: REQ-DESIGN-950..955 gain new cases (950 CASE-5, 952 CASE-5, 954 CASE-4, 955 CASE-5 and CASE-6), and existing cases assert the clauses they only touched.
+- ARCH-SELFGATE-039: new cases REQ-SELFGATE-1072 CASE-4, REQ-SELFGATE-990 CASE-5 and REQ-SELFGATE-1011 CASE-7. REQ-SELFGATE-1011's clause now names what the guard already did: a retired verb right after a bare `reqmap.py` is reported too. `DocsAreTrue` is skipped in a seeded copy instead of erroring, and its git-tracking test is linked to ARCH-SELFGATE-039 instead of a REQ-SELFGATE-990 case no clause of 990 describes.
+- Engine change: `MAP_ENGINE_VERSION` is `2026-11-27`.
+
 ## plugin `v8.30.1` — 2026-11-26
 
 **Release v8.30.1.**
